@@ -12,6 +12,7 @@ namespace SAIN.Preset.GlobalSettings
         [Name("SAIN Toggle Options")]
         [Description("Enable or disable SAIN for specific bot types")]
         [DefaultDictionary(nameof(SAINEnabledTypesDefault))]
+        [Hidden]
         public List<Brain> EnabledBrains = new List<Brain>(BotBrains.AllBrainsList);
 
         [JsonIgnore]
