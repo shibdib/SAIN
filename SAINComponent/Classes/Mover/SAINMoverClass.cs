@@ -53,7 +53,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     Prone.SetProne(true);
                 }
-                BotOwner.DoorOpener.Update();
+                BotOwner.DoorOpener?.Update();
                 return true;
             }
             return false;
@@ -62,7 +62,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         public bool CanGoToPoint(Vector3 point, out Vector3 pointToGo, bool mustHaveCompletePath = false, float navSampleRange = 5f)
         {
             pointToGo = point;
-            if (NavMesh.SamplePosition(point, out var navHit, navSampleRange, -1))
+            if (NavMesh.SamplePosition(point, out NavMeshHit navHit, navSampleRange, -1))
             {
                 if (CurrentPath == null)
                 {
@@ -79,9 +79,6 @@ namespace SAIN.SAINComponent.Classes.Mover
                         return false;
                     }
                     pointToGo = navHit.position;
-
-                    //SAINVaultClass.FindVaultPoint(Player, Path, out SAINVaultPoint vaultPoint);
-
                     return true;
                 }
             }
