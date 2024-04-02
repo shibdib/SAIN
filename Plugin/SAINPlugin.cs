@@ -133,7 +133,7 @@ namespace SAIN
             SAINEditor.Update();
             GameWorldHandler.Update();
 
-            SAINVaultClass.DebugVaultPointCount();
+            //SAINVaultClass.DebugVaultPointCount();
 
             LoadedPreset.GlobalSettings.Personality.Update();
             BigBrainHandler.CheckLayers();
