@@ -61,9 +61,6 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return false;
             }
 
-            // Skip Experimental Vaultable checks
-            return false;
-
             int totalChecks = 0;
             Vector3[] corners = path.corners;
             int max = corners.Length - 1;
