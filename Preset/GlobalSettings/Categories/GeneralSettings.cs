@@ -23,18 +23,21 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [Default(24)]
         [MinMax(0, 100)]
+        [Hidden]
         public int SAINCombatSquadLayerPriority = 24;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
         [Default(22)]
         [MinMax(0, 100)]
+        [Hidden]
         public int SAINExtractLayerPriority = 22;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
         [Default(20)]
         [MinMax(0, 100)]
+        [Hidden]
         public int SAINCombatSoloLayerPriority = 20;
 
         [Name("Bot Grenades")]

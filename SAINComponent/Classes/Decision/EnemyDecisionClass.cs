@@ -2,6 +2,7 @@
 using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent;
 using System;
 using UnityEngine;
@@ -156,12 +157,13 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private static readonly float ShiftCoverChangeDecisionTime = 3f;
-        private static readonly float ShiftCoverTimeSinceSeen = 5f;
-        private static readonly float ShiftCoverTimeSinceEnemyCreated = 8f;
-        private static readonly float ShiftCoverNoEnemyResetTime = 6f;
-        private static readonly float ShiftCoverNewCoverTime = 10f;
-        private static readonly float ShiftCoverResetTime = 5f;
+        private CoverSettings CoverSettings => SAINPlugin.LoadedPreset.GlobalSettings.Cover;
+        private float ShiftCoverChangeDecisionTime => CoverSettings.ShiftCoverChangeDecisionTime;
+        private float ShiftCoverTimeSinceSeen => CoverSettings.ShiftCoverTimeSinceSeen;
+        private float ShiftCoverTimeSinceEnemyCreated => CoverSettings.ShiftCoverTimeSinceEnemyCreated;
+        private float ShiftCoverNoEnemyResetTime => CoverSettings.ShiftCoverNoEnemyResetTime;
+        private float ShiftCoverNewCoverTime => CoverSettings.ShiftCoverNewCoverTime;
+        private float ShiftCoverResetTime => CoverSettings.ShiftCoverResetTime;
 
         private bool StartShiftCover(SAINEnemyClass enemy)
         {
@@ -169,9 +171,15 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return true;
             }
+
+            if (SAIN.Suppression.IsSuppressed)
+            {
+                return false;
+            }
+
             var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
 
-            if (CurrentDecision == SoloDecision.HoldInCover)
+            if (CurrentDecision == SoloDecision.HoldInCover && SAIN.Info.Personality != IPersonality.Rat)
             {
                 if (SAIN.Decision.TimeSinceChangeDecision > ShiftCoverChangeDecisionTime && TimeForNewShift < Time.time)
                 {
@@ -205,6 +213,11 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool ContinueShiftCover()
         {
+            if (SAIN.Suppression.IsSuppressed)
+            {
+                return false;
+            }
+
             var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
             if (CurrentDecision == SoloDecision.ShiftCover)
             {
@@ -274,6 +287,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartMoveToEngage(SAINEnemyClass enemy)
         {
+            if (SAIN.Suppression.IsSuppressed)
+            {
+                return false;
+            }
             if (!enemy.Seen)
             {
                 return false;
@@ -362,6 +379,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartSearch(SAINEnemyClass enemy)
         {
+            if (SAIN.Suppression.IsSuppressed)
+            {
+                return false;
+            }
             if (enemy.IsVisible == true)
             {
                 return false;

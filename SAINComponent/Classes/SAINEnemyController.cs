@@ -47,6 +47,10 @@ namespace SAIN.SAINComponent.Classes
                 {
                     EnemyIDsToRemove.Add(id);
                 }
+                else
+                {
+                    enemy.UpdateHearStatus();
+                }
             }
 
             foreach (string idToRemove in EnemyIDsToRemove)
@@ -55,6 +59,11 @@ namespace SAIN.SAINComponent.Classes
             }
 
             EnemyIDsToRemove.Clear();
+        }
+
+        public void UpdateHeardEnemy(bool canHear, string id)
+        {
+
         }
 
         public void Update()
@@ -66,6 +75,15 @@ namespace SAIN.SAINComponent.Classes
         public void Dispose()
         {
             Enemies?.Clear();
+        }
+
+        public SAINEnemyClass GetEnemy(string id)
+        {
+            if (Enemies.ContainsKey(id))
+            {
+                return Enemies[id];
+            }
+            return null;
         }
 
         public bool HasEnemy => ActiveEnemy?.EnemyPerson?.IsActive == true;

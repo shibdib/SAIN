@@ -41,5 +41,9 @@ namespace SAIN.Editor
         [Name("Collect and Export Bot Layer and Brain Info")]
         [Default(false)]
         public bool CollectBotLayerBrainInfo = false;
+
+        [Name("Draw Debug Suppression Points")]
+        [Default(false)]
+        public bool DebugDrawProjectionPoints = false;
     }
 }

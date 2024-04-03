@@ -280,6 +280,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\LayerInfoClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BotBrainDefinition.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BotBrainDefinitionInfoClass.cs" />
+    <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
     <Compile Include="SAINComponent\Classes\Decision\DecisionWrapper.cs" />
     <Compile Include="Layers\Extract\LootingBotsIntegration.cs" />
@@ -335,6 +336,7 @@
     <Compile Include="Helpers\Reflection.cs" />
     <Compile Include="Helpers\MathHelpers.cs" />
     <Compile Include="Layers\Combat\Solo\MoveToEngageAction.cs" />
+    <Compile Include="SAINComponent\Classes\SAINBotSuppressClass.cs" />
     <Compile Include="SAINComponent\SubComponents\CoverFinder\ColliderFinder.cs" />
     <Compile Include="SAINComponent\SubComponents\CoverFinder\CoverAnalyzer.cs" />
     <Compile Include="SAINComponent\SubComponents\CoverFinder\SpottedCoverPoint.cs" />

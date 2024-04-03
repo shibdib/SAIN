@@ -74,6 +74,7 @@ namespace SAIN.SAINComponent
                 Vision = new SAINVisionClass(this);
                 Search = new SAINSearchClass(this);
                 Vault = new SAINVaultClass(this);
+                Suppression = new SAINBotSuppressClass(this);
             }
             catch (Exception ex)
             {
@@ -102,6 +103,7 @@ namespace SAIN.SAINComponent
             Grenade.Init();
             Steering.Init();
             Vault.Init();
+            Suppression.Init();
 
             return true;
         }
@@ -151,6 +153,7 @@ namespace SAIN.SAINComponent
                 Grenade.Update();
                 Steering.Update();
                 Vault.Update();
+                Suppression.Update();
                 BotOwner.DoorOpener.Update();
 
                 if (Enemy == null && BotOwner.BotLight?.IsEnable == false)
@@ -241,6 +244,7 @@ namespace SAIN.SAINComponent
                 Steering.Dispose();
                 Enemy?.Dispose();
                 Vault?.Dispose();
+                Suppression?.Dispose();
 
                 Destroy(this);
             }
@@ -289,6 +293,7 @@ namespace SAIN.SAINComponent
             }
         }
 
+        public SAINBotSuppressClass Suppression { get; private set; }
         public SAINVaultClass Vault { get; private set; }
         public SAINSearchClass Search { get; private set; }
         public SAINEnemyClass Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;

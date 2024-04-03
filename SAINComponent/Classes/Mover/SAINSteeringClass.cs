@@ -167,11 +167,12 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool LookToEnemyLastSeenPos()
         {
-            var enemy = SAIN.Enemy;
-            var LastSeenPosition = enemy?.LastSeenPosition;
+            SAINEnemyClass enemy = SAIN.Enemy;
+            Vector3? LastSeenPosition = enemy?.LastSeenPosition;
             if (LastSeenPosition != null && enemy?.IsVisible == false)
             {
-                Vector3 pos = LastSeenPosition.Value + Vector3.up * 1f;
+                Vector3 pos = LastSeenPosition.Value;
+                //  + Vector3.up * 1f
                 LookToPoint(pos);
                 return true;
             }
@@ -180,8 +181,21 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool LookToEnemyLastSeenClose()
         {
-            var enemy = SAIN.Enemy;
-            if (enemy?.LastSeenPosition != null && enemy.Path.EnemyDistanceFromLastSeen < 10f)
+            SAINEnemyClass enemy = SAIN.Enemy;
+            if (enemy?.LastSeenPosition != null)
+            //  && enemy.Path.EnemyDistanceFromLastSeen < 10f
+            {
+                LookToPoint(enemy.EnemyPosition);
+                return true;
+            }
+            return false;
+        }
+
+        public bool LookToEnemySeenRecentAndMoving()
+        {
+            SAINEnemyClass enemy = SAIN.Enemy;
+            if (enemy?.LastSeenPosition != null)
+            //  && enemy.Path.EnemyDistanceFromLastSeen < 10f
             {
                 LookToPoint(enemy.EnemyPosition);
                 return true;
