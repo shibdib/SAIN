@@ -167,14 +167,18 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartShiftCover(SAINEnemyClass enemy)
         {
-            if (ContinueShiftCover())
+            if (SAIN.Info.PersonalitySettings.CanShiftCoverPosition == false)
             {
-                return true;
+                return false;
             }
-
             if (SAIN.Suppression.IsSuppressed)
             {
                 return false;
+            }
+
+            if (ContinueShiftCover())
+            {
+                return true;
             }
 
             var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
@@ -213,11 +217,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool ContinueShiftCover()
         {
-            if (SAIN.Suppression.IsSuppressed)
-            {
-                return false;
-            }
-
             var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
             if (CurrentDecision == SoloDecision.ShiftCover)
             {
