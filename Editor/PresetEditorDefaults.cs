@@ -45,5 +45,14 @@ namespace SAIN.Editor
         [Name("Draw Debug Suppression Points")]
         [Default(false)]
         public bool DebugDrawProjectionPoints = false;
+
+        [Name("Path Safety Tester")]
+        [Default(false)]
+        public bool DebugEnablePathTester = false;
+
+        [Name("Draw Debug Path Safety Tester")]
+        [Default(false)]
+        public bool DebugDrawSafePaths = false;
+
     }
 }

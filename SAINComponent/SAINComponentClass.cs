@@ -108,12 +108,19 @@ namespace SAIN.SAINComponent
             return true;
         }
 
+        public bool SAINEnabled => Info?.FileSettings?.Core != null ? Info.FileSettings.Core.SAINEnabled : false;
+
         private void Update()
         {
             if (IsDead || Singleton<GameWorld>.Instance == null)
             {
                 Dispose();
                 return;
+            }
+
+            if (SAINEnabled)
+            {
+                //return;
             }
 
             if (GameIsEnding)

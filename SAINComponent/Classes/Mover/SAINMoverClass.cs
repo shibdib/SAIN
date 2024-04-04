@@ -74,6 +74,11 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
                 if (NavMesh.CalculatePath(SAIN.Transform.Position, navHit.position, -1, CurrentPath) && CurrentPath.corners.Length > 1)
                 {
+                    if (SAIN.HasEnemy)
+                    {
+                        SAINBotSpaceAwareness.CheckPathSafety(CurrentPath, SAIN.Enemy.EnemyHeadPosition);
+                    }
+                    
                     if (mustHaveCompletePath && CurrentPath.status != NavMeshPathStatus.PathComplete)
                     {
                         return false;

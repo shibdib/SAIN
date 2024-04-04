@@ -24,11 +24,11 @@ namespace SAIN.Preset
 
         static BotTypeDefinitions()
         {
-            ImportBotTypes();
+            BotTypesList = ImportBotTypes();
             for (int i = 0; i < BotTypesList.Count; i++)
             {
-                var botType = BotTypesList[i];
-                var wildSpawn = botType.WildSpawnType;
+                BotType botType = BotTypesList[i];
+                WildSpawnType wildSpawn = botType.WildSpawnType;
 
                 BotTypesNames.Add(botType.Name);
                 BotTypes.Add(wildSpawn, botType);
@@ -37,16 +37,40 @@ namespace SAIN.Preset
 
         private static readonly string FileName = "BotTypes";
 
-        public static void ImportBotTypes()
+        public static List<BotType> ImportBotTypes()
         {
-            if (JsonUtility.Load.LoadObject(out List<BotType> botTypes, FileName))
+            List<BotType> tempList = CreateBotTypes();
+
+            if (JsonUtility.Load.LoadObject(out List<BotType> importedList, FileName))
             {
-                BotTypesList = botTypes;
+                // Check that the imported list contains each entry created, to account for BotTypes being added with newer versions of EFT
+                CheckImportedList(importedList, tempList);
+                return importedList;
             }
             else
             {
-                BotTypesList = CreateBotTypes();
-                ExportBotTypes();
+                JsonUtility.SaveObjectToJson(tempList, FileName); 
+                return tempList;
+            }
+        }
+
+        private static void CheckImportedList(List<BotType> importedList, List<BotType> tempList)
+        {
+            for (int i = 0; i < tempList.Count; i++)
+            {
+                bool alreadyExists = false;
+                for (int j = 0; j < importedList.Count; j++)
+                {
+                    if (tempList[i].WildSpawnType == importedList[j].WildSpawnType)
+                    {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                if (!alreadyExists)
+                {
+                    importedList.Add(tempList[i]);
+                }
             }
         }
 
@@ -113,6 +137,10 @@ namespace SAIN.Preset
                 new BotType{ WildSpawnType = WildSpawnType.bossBoar,                Name = "Kaban",                    Section = "Bosses" ,      Description = "Streets Boss" },
                 new BotType{ WildSpawnType = WildSpawnType.followerBoar,            Name = "Kaban Guard",              Section = "Followers" ,   Description = "Streets Boss Follower" },
                 new BotType{ WildSpawnType = WildSpawnType.bossBoarSniper,          Name = "Kaban Sniper",             Section = "Followers" ,   Description = "Streets Boss Follower Sniper" },
+
+                new BotType{ WildSpawnType = WildSpawnType.bossKolontay,            Name = "Kolontay",                 Section = "Bosses" ,      Description = "" },
+                new BotType{ WildSpawnType = WildSpawnType.followerKolontayAssault, Name = "Kolontay Assault",         Section = "Followers" ,   Description = "" },
+                new BotType{ WildSpawnType = WildSpawnType.followerKolontaySecurity,Name = "Kolontay Security",        Section = "Followers" ,   Description = "" },
             };
         }
     }
