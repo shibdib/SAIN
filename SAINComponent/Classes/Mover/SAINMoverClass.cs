@@ -48,7 +48,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     reachDist = BotOwner.Settings.FileSettings.Move.REACH_DIST;
                 }
-                BotOwner.Mover?.GoToPoint(pointToGo, false, reachDist, false, false, false);
+                BotOwner.Mover?.GoToPoint(pointToGo, true, reachDist, false, false, false);
                 if (crawl)
                 {
                     Prone.SetProne(true);
@@ -78,7 +78,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     {
                         SAINBotSpaceAwareness.CheckPathSafety(CurrentPath, SAIN.Enemy.EnemyHeadPosition);
                     }
-                    
+
                     if (mustHaveCompletePath && CurrentPath.status != NavMeshPathStatus.PathComplete)
                     {
                         return false;

@@ -12,6 +12,7 @@ using System.Text;
 using UnityEngine;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SAIN.Layers.Combat.Solo;
+using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -49,7 +50,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         }
                         else
                         {
-                            RecalcPathTimer = Time.time + 2f;
+                            RecalcPathTimer = Time.time + 2f; 
                             MoveTo(DestinationPosition);
                         }
                     }
@@ -57,7 +58,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             }
             if (CoverDestination != null && RecalcPathTimer < Time.time)
             {
-                RecalcPathTimer = Time.time + 2f;
+                RecalcPathTimer = Time.time + 2f; 
                 MoveTo(DestinationPosition);
             }
 
@@ -97,7 +98,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private bool CanMoveTo(CoverPoint coverPoint, out Vector3 pointToGo)
         {
-            if (coverPoint != null && SAIN.Mover.CanGoToPoint(coverPoint.Position, out pointToGo))
+            if (coverPoint != null && SAIN.Mover.CanGoToPoint(coverPoint.Position, out pointToGo, true))
             {
                 return true;
             }

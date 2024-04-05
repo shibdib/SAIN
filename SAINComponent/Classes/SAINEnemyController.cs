@@ -100,6 +100,7 @@ namespace SAIN.SAINComponent.Classes
         {
             var goalEnemy = BotOwner.Memory.GoalEnemy;
             IPlayer IPlayer = goalEnemy?.Person;
+            
             bool addEnemy = true;
 
             if (goalEnemy == null || IPlayer == null)
@@ -146,47 +147,22 @@ namespace SAIN.SAINComponent.Classes
 
         private static SAINPersonClass GetSAINPerson(IPlayer IPlayer)
         {
-            SAINPersonClass enemySAINPerson = null;
-            BotOwner botOwner = IPlayer.AIData.BotOwner;
-            if (botOwner != null && botOwner.TryGetComponent(out SAINComponentClass enemySAIN))
+            Player player = Singleton<GameWorld>.Instance?.GetAlivePlayerByProfileID(IPlayer.ProfileId);
+
+            if (player == null)
             {
-                //Logger.LogWarning("SAINPerson Found for AI");
-                enemySAINPerson = enemySAIN.Person;
+                Logger.LogError("player Null!");
             }
-            else if (IPlayer.IsYourPlayer)
+
+            SAINPersonComponent _SAINPersonComponent = player?.gameObject.GetOrAddComponent<SAINPersonComponent>();
+            SAINPersonClass enemySAINPerson = _SAINPersonComponent?.SAINPerson;
+
+            if (enemySAINPerson == null)
             {
-                Player player = Singleton<GameWorld>.Instance?.MainPlayer;
-
-                if (player == null)
-                {
-                    //Logger.LogError("MainPlayer Null");
-                    return new SAINPersonClass(IPlayer);
-                }
-
-                SAINMainPlayerComponent mainPlayerComponent = player.GetComponent<SAINMainPlayerComponent>();
-
-                if (mainPlayerComponent == null)
-                {
-                    //Logger.LogError("mainPlayerComponent Null");
-                    return new SAINPersonClass(IPlayer);
-                }
-
-                if (mainPlayerComponent.SAINPerson != null)
-                {
-                    //Logger.LogWarning("SAINPerson Found for MAIN PLAYER");
-                    enemySAINPerson = mainPlayerComponent.SAINPerson;
-                }
-                else
-                {
-                    //Logger.LogError("SAINPerson Found for MAIN PLAYER but it is NULL");
-                    enemySAINPerson = new SAINPersonClass(IPlayer);
-                }
+                Logger.LogError("enemySAINPerson Null!");
+                return new SAINPersonClass(IPlayer);
             }
-            else
-            {
-                //Logger.LogWarning("No SAINPerson Found");
-                enemySAINPerson = new SAINPersonClass(IPlayer);
-            }
+
             return enemySAINPerson;
         }
 

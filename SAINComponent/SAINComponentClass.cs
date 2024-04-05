@@ -32,8 +32,20 @@ namespace SAIN.SAINComponent
                 // Create a new Component
                 component = gameObject.AddComponent<SAINComponentClass>();
 
+                // Try to get the Person Component instead of creating a new one.
+                SAINPersonComponent _SAINPersonComponent = player.gameObject?.GetOrAddComponent<SAINPersonComponent>();
+                SAINPersonClass personClass;
+                if (_SAINPersonComponent != null)
+                {
+                    personClass = _SAINPersonComponent.SAINPerson;
+                }
+                else
+                {
+                    personClass = new SAINPersonClass(player);
+                }
+
                 // Check is component is successfully initialized
-                if (component?.Init(new SAINPersonClass(player)) == true)
+                if (component?.Init(personClass) == true)
                 {
                     return true;
                 }
@@ -139,7 +151,7 @@ namespace SAIN.SAINComponent
                     BotOwner.PatrollingData?.Unpause();
                 }
 
-                Person.Update();
+                //Person.Update();
 
                 Search.Update();
                 Memory.Update();

@@ -8,6 +8,7 @@ using System.Text;
 using UnityEngine;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SAIN.Layers.Combat.Solo;
+using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {

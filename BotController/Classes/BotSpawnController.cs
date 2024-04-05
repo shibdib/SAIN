@@ -12,6 +12,7 @@ using SAIN.SAINComponent.SubComponents;
 using SAIN.Preset;
 using static EFT.SpeedTree.TreeWind;
 using SAIN.Preset.GlobalSettings.Categories;
+using SAIN.SAINComponent.BaseClasses;
 
 namespace SAIN.Components.BotController
 {
@@ -28,7 +29,9 @@ namespace SAIN.Components.BotController
         private static readonly WildSpawnType[] ExclusionList =
         {
             WildSpawnType.bossZryachiy,
-            WildSpawnType.followerZryachiy
+            WildSpawnType.followerZryachiy,
+            WildSpawnType.peacefullZryachiyEvent,
+            WildSpawnType.ravangeZryachiyEvent
         };
 
         public void Update()
@@ -72,10 +75,6 @@ namespace SAIN.Components.BotController
                 Logger.LogInfo($"Set {role} BaseBrain to {brain}");
                 BotTypeDefinitions.ExportBotTypes();
             }
-            else
-            {
-                Logger.LogError($"{role} BaseBrain is already set to {botType.BaseBrain}. Can't set it to {brain}");
-            }
         }
 
         public void AddBot(BotOwner botOwner)
@@ -90,16 +89,16 @@ namespace SAIN.Components.BotController
                         return;
                     }
 
+                    Player player = botOwner.GetPlayer;
+                    if (SAINPersonComponent.TryAddSAINPersonToBot(botOwner, out var personComponent) == false)
+                    {
+                        Logger.LogError("Could not add SAINPerson to bot");
+                    }
+
                     botOwner.LeaveData.OnLeave += RemoveBot;
                     SetBrainInfo(botOwner);
 
                     if (ExclusionList.Contains(settings.Role))
-                    {
-                        AddNoBushESP(botOwner);
-                        return;
-                    }
-
-                    if (!CheckIfSAINEnabled(botOwner))
                     {
                         AddNoBushESP(botOwner);
                         return;
@@ -147,6 +146,10 @@ namespace SAIN.Components.BotController
                     if (botOwner.TryGetComponent(out SAINNoBushESP noBush))
                     {
                         UnityEngine.Object.Destroy(noBush);
+                    }
+                    if (botOwner.GetPlayer?.gameObject?.TryGetComponent(out SAINPersonComponent person) == true)
+                    {
+                        UnityEngine.Object.Destroy(person);
                     }
                 }
                 else
