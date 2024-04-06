@@ -235,6 +235,14 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 Player.MovementContext.SetTilt(value);
             }
+            if (value == -5f)
+            {
+                Player.MovementContext.LeftStanceController.SetLeftStanceForce(true);
+            }
+            if (value == 5f)
+            {
+                Player.MovementContext.LeftStanceController.SetLeftStanceForce(false);
+            }
         }
 
         public bool CanJump => Player.MovementContext.CanJump;
