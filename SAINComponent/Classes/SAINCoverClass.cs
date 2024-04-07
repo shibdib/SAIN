@@ -129,7 +129,7 @@ namespace SAIN.SAINComponent.Classes
                 var move = SAIN.Mover;
                 var prone = move.Prone;
                 bool shallProne = prone.ShallProneHide();
-                if (shallProne)
+                if (shallProne && (SAIN.Decision.CurrentSelfDecision != SelfDecision.None || SAIN.Suppression.IsHeavySuppressed))
                 {
                     prone.SetProne(true);
                     return true;
@@ -138,7 +138,7 @@ namespace SAIN.SAINComponent.Classes
                 {
                     return true;
                 }
-                if (point.Collider.bounds.size.y < 1f)
+                if (shallProne && point.Collider.bounds.size.y < 1f)
                 {
                     prone.SetProne(true);
                     return true;

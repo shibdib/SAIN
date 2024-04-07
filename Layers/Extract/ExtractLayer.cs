@@ -1,5 +1,7 @@
 ﻿using EFT;
 using UnityEngine.UIElements;
+using LootingBots;
+using LootingBots.Patch.Components;
 
 namespace SAIN.Layers
 {
@@ -104,10 +106,63 @@ namespace SAIN.Layers
             return false;
         }
 
+        // Looting Bots Integration
         private bool ExtractFromLoot()
         {
+            if (!ModDetection.LootingBotsLoaded)
+            {
+                return false;
+            }
+
+            if (!FullOnLoot)
+            {
+                GetLootingBots(); 
+                CheckInventoryStatus();
+            }
+
+            if (FullOnLoot && HasActiveThreat() == false)
+            {
+                return true;
+            }
             return false;
         }
+
+        private bool HasActiveThreat()
+        {
+            if (SAIN.Enemy == null)
+            {
+                return false;
+            }
+            else if (SAIN.Enemy.TimeSinceSeen > 30f)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private void GetLootingBots()
+        {
+            if (LootingBrain == null && BotOwner?.GetPlayer?.TryGetComponent<LootingBrain>(out var component) == true)
+            {
+                //Logger.LogWarning("Found LootingBots Component");
+                LootingBrain = component;
+            }
+        }
+
+        private void CheckInventoryStatus()
+        {
+            if (LootingBrain != null && !LootingBrain.HasFreeSpace)
+            {
+                Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because because they are Full on loot");
+                FullOnLoot = true;
+            }
+        }
+
+        private LootingBrain LootingBrain;
+        private bool FullOnLoot;
 
         private bool ExtractFromExternal()
         {

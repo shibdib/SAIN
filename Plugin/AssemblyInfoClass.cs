@@ -29,7 +29,7 @@
         public const string BigBrainGUID = "xyz.drakia.bigbrain";
         public const string BigBrainVersion = "0.4.0";
 
-        public const string LootingBots = "me.skwizzy.lootingbots";
-        public const string Realism = "RealismMod";
+        public const string LootingBotsKey = "me.skwizzy.lootingbots";
+        public const string RealismModKey = "RealismMod";
     }
 }
