@@ -220,7 +220,6 @@ namespace SAIN.Components
         public static Vector3 FlashLightPoint { get; private set; }
         public static bool VisibleLight { get; private set; }
         public static bool IRLight { get; private set; }
-        public static SAINFlashLightComponent PlayerFlashComponent { get; private set; }
         protected static ManualLogSource Logger { get; private set; }
 
         private float SearchTime;
