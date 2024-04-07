@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using SAIN.Helpers;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Collections.Generic;
 using UnityEngine;
@@ -210,7 +211,8 @@ namespace SAIN.SAINComponent.Classes
                     return false;
                 }
                 var point = CoverInUse;
-                return point != null && (point.Position - BotOwner.Mover.CurPathLastPoint).sqrMagnitude < 1f;
+                var pathController = HelpersGClass.GetPathControllerClass(BotOwner.Mover);
+                return point != null && (point.Position - pathController.CurPath.LastCorner()).sqrMagnitude < 1f;
             }
         }
 

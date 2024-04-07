@@ -42,6 +42,7 @@ namespace SAIN.Helpers
             InventoryControllerProp = AccessTools.Field(typeof(Player), "_inventoryController");
             EFTBotSettingsProp = AccessTools.Property(typeof(BotDifficultySettingsClass), "FileSettings");
             RefreshSettingsMethod = AccessTools.Method(typeof(BotDifficultySettingsClass), "method_0");
+            PathControllerField = AccessTools.Field(typeof(BotMover), "_pathController");
         }
 
         public static void RefreshSettings(BotDifficultySettingsClass settings)
@@ -53,6 +54,7 @@ namespace SAIN.Helpers
 
         public static readonly PropertyInfo EFTBotSettingsProp;
         public static readonly FieldInfo InventoryControllerProp;
+        public static readonly FieldInfo PathControllerField;
 
         public static InventoryControllerClass GetInventoryController(Player player)
         {
@@ -62,6 +64,11 @@ namespace SAIN.Helpers
         public static BotSettingsComponents GetEFTSettings(WildSpawnType type, BotDifficulty difficulty)
         {
             return (BotSettingsComponents)SAINPlugin.LoadedPreset.BotSettings.GetEFTSettings(type, difficulty);
+        }
+
+        public static PathControllerClass GetPathControllerClass(BotMover botMover)
+        {
+            return (PathControllerClass)PathControllerField.GetValue(botMover);
         }
 
         public static DateTime UtcNow => EFTTime.UtcNow;
