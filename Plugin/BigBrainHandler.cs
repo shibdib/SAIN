@@ -95,23 +95,14 @@ namespace SAIN
         public static void Init()
         {
             var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
-            List<Brain> enabledBrains = settings.EnabledBrains;
+            List<Brain> brains = BotBrains.AllBrainsList;
 
             List<string> stringList = new List<string>();
 
-            for (int i = 0; i < enabledBrains.Count; i++)
+            for (int i = 0; i < brains.Count; i++)
             {
-                stringList.Add(enabledBrains[i].ToString());
+                stringList.Add(brains[i].ToString());
             }
-
-            foreach (var brain in BotBrains.AllBrains)
-            {
-                //stringList.Add(brain.ToString());
-            }
-
-            //Logger.LogInfo(stringList.Count);
-            //Logger.LogInfo(LayersToRemove.Count);
-            //Logger.LogInfo(SAINLayers.Count);
 
             BrainManager.AddCustomLayer(typeof(CombatSquadLayer), stringList, settings.SAINCombatSquadLayerPriority);
             BrainManager.AddCustomLayer(typeof(ExtractLayer), stringList, settings.SAINExtractLayerPriority);

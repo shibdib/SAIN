@@ -188,7 +188,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             points.OrderBy(p => p.PathLength);
             for (int i = 0; i < points.Count; i++)
             {
-                Logger.LogWarning($"{i} : {points[i].PathLength}");
+                //Logger.LogWarning($"{i} : {points[i].PathLength}");
             }
         }
 

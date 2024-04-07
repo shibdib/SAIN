@@ -129,7 +129,7 @@ namespace SAIN.Components.BotController
         private bool CheckIfSAINEnabled(BotOwner botOwner)
         {
             Brain brain = BotBrains.Parse(botOwner.Brain.BaseBrain.ShortName());
-            return SAINPlugin.LoadedPreset.GlobalSettings.General.EnabledBrains.Contains(brain);
+            return BotBrains.AllBrainsList.Contains(brain);
         }
 
         public void RemoveBot(BotOwner botOwner)

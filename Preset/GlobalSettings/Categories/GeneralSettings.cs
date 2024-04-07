@@ -9,11 +9,11 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class GeneralSettings
     {
-        [Name("SAIN Toggle Options")]
-        [Description("Enable or disable SAIN for specific bot types")]
-        [DefaultDictionary(nameof(SAINEnabledTypesDefault))]
-        [Hidden]
-        public List<Brain> EnabledBrains = new List<Brain>(BotBrains.AllBrainsList);
+        //[Name("SAIN Toggle Options")]
+        //[Description("Enable or disable SAIN for specific bot types")]
+        //[DefaultDictionary(nameof(SAINEnabledTypesDefault))]
+        //[Hidden]
+        //public List<Brain> EnabledBrains = new List<Brain>(BotBrains.AllBrainsList);
 
         [JsonIgnore]
         [Hidden]
