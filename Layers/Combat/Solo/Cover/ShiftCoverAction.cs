@@ -56,21 +56,29 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 var Points = SAIN.Cover.CoverFinder.CoverPoints;
                 for (int i = 0; i < Points.Count; i++)
                 {
-                    if (!UsedPoints.Contains(Points[i]))
+                    var point = Points[i];
+
+                    if (point.CoverHeight > cover.CoverHeight)
                     {
-                        for (int j = 0; j < UsedPoints.Count; j++)
+                        point.CheckPathSafety();
+                        if (point.IsSafePath && !UsedPoints.Contains(point))
                         {
-                            if ((UsedPoints[j].Position - Points[i].Position).sqrMagnitude > 9f)
+                            for (int j = 0; j < UsedPoints.Count; j++)
                             {
-                                Points[i].BotIsUsingThis = true;
-                                NewPoint = Points[i];
-                                SAIN.Mover.GoToPoint(NewPoint.Position);
-                                SAIN.Mover.SetTargetMoveSpeed(1f);
-                                SAIN.Mover.SetTargetPose(1f);
-                                return true;
+                                if ((UsedPoints[j].Position - point.Position).sqrMagnitude > 5f)
+                                {
+                                    point.BotIsUsingThis = true;
+                                    NewPoint = point;
+
+                                    SAIN.Mover.GoToPoint(NewPoint.Position);
+                                    SAIN.Mover.SetTargetMoveSpeed(1f);
+                                    SAIN.Mover.SetTargetPose(1f);
+                                    return true;
+                                }
                             }
                         }
                     }
+
                 }
                 if (NewPoint == null)
                 {

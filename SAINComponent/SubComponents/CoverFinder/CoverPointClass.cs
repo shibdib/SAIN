@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Components;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
@@ -9,19 +10,66 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
     public class CoverPoint
     {
-        public CoverPoint(SAINComponentClass sain, Vector3 point, Collider collider)
+        public CoverPoint(SAINComponentClass sain, Vector3 point, Collider collider, NavMeshPath pathToPoint)
         {
             SAIN = sain;
+
             Position = point;
             Collider = collider;
+            CoverHeight = collider.bounds.size.y;
+
             TimeCreated = Time.time;
             ReCheckStatusTimer = Time.time;
+
+            PathToPoint = pathToPoint;
+            PathLength = pathToPoint.CalculatePathLength();
+            LastPathCalcTimer = Time.time + 5f;
+            CheckPathSafetyTimer = Time.time + 1f;
+
             Id = Guid.NewGuid().ToString();
         }
 
         private readonly SAINComponentClass SAIN;
+
+        public NavMeshPath PathToPoint { get; private set; }
+
+        private float LastPathCalcTimer;
+
         public int HitInCoverUnknownCount { get; set; }
         public int HitInCoverCount { get; set; }
+
+        public bool IsSafePath { get; set; }
+
+        public float CoverHeight { get; private set; }
+
+        public bool CheckPathSafety()
+        {
+            if (CheckPathSafetyTimer < Time.time)
+            {
+                CheckPathSafetyTimer = Time.time + 1f;
+
+                Vector3 target;
+                if (SAIN.HasEnemy)
+                {
+                    target = SAIN.Enemy.EnemyHeadPosition;
+                }
+                else if (SAIN.CurrentTargetPosition != null)
+                {
+                    target = SAIN.CurrentTargetPosition.Value;
+                }
+                else
+                {
+                    IsSafePath = true;
+                    return true;
+                }
+
+                CalcPathLength();
+                IsSafePath = SAINBotSpaceAwareness.CheckPathSafety(PathToPoint, target);
+            }
+            return IsSafePath;
+        }
+
+        private float CheckPathSafetyTimer = 0;
 
         public string Id { get; set; }
 
@@ -54,7 +102,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 if (SAIN.Enemy != null)
                 {
                     Vector3 coverPos = Position;
-                    coverPos += Vector3.up * 0.3f;
+                    coverPos += Vector3.up * 0.5f;
                     Vector3 start = SAIN.Enemy.EnemyHeadPosition;
                     Vector3 direction = coverPos - start;
                     PointVis = !Physics.Raycast(start, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
@@ -68,18 +116,22 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public float CalcPathLength()
         {
-            NavMeshPath path = new NavMeshPath();
-            if (NavMesh.CalculatePath(BotOwner.Position, Position, -1, path))
+            if (LastPathCalcTimer < Time.time)
             {
-                return path.CalculatePathLength();
+                PathToPoint.ClearCorners();
+                if (NavMesh.CalculatePath(BotOwner.Position, Position, -1, PathToPoint))
+                {
+                    PathLength = PathToPoint.CalculatePathLength();
+                }
+                else
+                {
+                    PathLength = Mathf.Infinity;
+                }
             }
-            else
-            {
-                return Mathf.Infinity;
-            }
+            return PathLength;
         }
 
-        public float PathLengthAtCreation { get; private set; }
+        public float PathLength { get; private set; }
 
         public float Distance => (BotOwner.Position - Position).magnitude;
 

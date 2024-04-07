@@ -183,7 +183,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
 
-            if (CurrentDecision == SoloDecision.HoldInCover && SAIN.Info.Personality != IPersonality.Rat)
+            if (CurrentDecision == SoloDecision.HoldInCover && SAIN.Info.PersonalitySettings.CanShiftCoverPosition)
             {
                 if (SAIN.Decision.TimeSinceChangeDecision > ShiftCoverChangeDecisionTime && TimeForNewShift < Time.time)
                 {

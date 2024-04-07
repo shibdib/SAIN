@@ -2,6 +2,7 @@
 using EFT;
 
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -61,11 +62,12 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             // the closest edge to that farPoint
             if (NavMesh.SamplePosition(farPoint, out var hit, 1f, -1))
             {
-                if (CheckPath(hit.position))
+                if (CheckPosition(hit.position))
                 {
-                    if (CheckPosition(hit.position))
+                    if (CheckPath(hit.position, out bool isSafe, out NavMeshPath pathToPoint))
                     {
-                        newPoint = new CoverPoint(SAIN, hit.position, collider);
+                        newPoint = new CoverPoint(SAIN, hit.position, collider, pathToPoint);
+                        newPoint.IsSafePath = isSafe;
                     }
                 }
             }
@@ -93,13 +95,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
             if (dot <= 0.6f)
             {
-                return colliderDist < targetDist * 2f;
+                return colliderDist < targetDist * 0.75f;
             }
             if (dot <= 0.8f)
             {
-                return colliderDist < targetDist * 1.5f;
+                return colliderDist < targetDist * 0.5f;
             }
-            return colliderDist < targetDist;
+            return colliderDist < targetDist * 0.25f;
         }
 
         private float MinEnemyDist;
@@ -130,23 +132,40 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return false;
         }
 
-        private bool CheckPath(Vector3 position)
+        private bool CheckPath(Vector3 position, out bool isSafe, out NavMeshPath pathToPoint)
         {
-            Path.ClearCorners();
-            if (NavMesh.CalculatePath(OriginPoint, position, -1, Path) && Path.status == NavMeshPathStatus.PathComplete)
+            pathToPoint = new NavMeshPath();
+            if (NavMesh.CalculatePath(OriginPoint, position, -1, pathToPoint) && pathToPoint.status == NavMeshPathStatus.PathComplete)
             {
-                if (PathToEnemy(Path))
+                if (PathToEnemy(pathToPoint))
                 {
+                    isSafe = CheckPathSafety(pathToPoint);
                     return true;
                 }
             }
 
+            isSafe = false;
             return false;
+        }
+
+        private bool CheckPathSafety(NavMeshPath path)
+        {
+            Vector3 target;
+            if (SAIN.HasEnemy)
+            {
+                target = SAIN.Enemy.EnemyHeadPosition;
+            }
+            else
+            {
+                target = TargetPosition;
+            }
+            return SAINBotSpaceAwareness.CheckPathSafety(path, target);
         }
 
         private readonly NavMeshPath Path;
 
         static bool DebugCoverFinder => SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder;
+
         private bool PathToEnemy(NavMeshPath path)
         {
             for (int i = 1; i < path.corners.Length - 1; i++)
@@ -168,7 +187,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
                 if (i == 1)
                 {
-                    if (Vector3.Dot(botToCorner.normalized, botToTarget.normalized) > 0.75f)
+                    if (Vector3.Dot(botToCorner.normalized, botToTarget.normalized) > 0.5f)
                     {
                         if (DebugCoverFinder)
                         {
@@ -182,7 +201,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     Vector3 cornerB = path.corners[i + 1];
                     Vector3 directionToNextCorner = cornerB - corner;
 
-                    if (Vector3.Dot(cornerToTarget.normalized, directionToNextCorner.normalized) > 0.75f)
+                    if (Vector3.Dot(cornerToTarget.normalized, directionToNextCorner.normalized) > 0.5f)
                     {
                         if (directionToNextCorner.magnitude > cornerToTarget.magnitude)
                         {

@@ -158,16 +158,14 @@ namespace SAIN.Layers.Combat.Solo
                         SAIN.Steering.LookToPoint(point);
                     }
                 }
+                else if (SAIN.Steering.LookToEnemyLastSeenClose())
+                {
+                }
                 else
                 {
-                    SAIN.Steering.LookToEnemyLastSeenClose();
+                    SAIN.Steering.LookToRandomPosition();
                 }
             }
-        }
-
-        private void Steer2()
-        {
-
         }
 
         private bool CanSeeDangerOrCorner(out Vector3 point)

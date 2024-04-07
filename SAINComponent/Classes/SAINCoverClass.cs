@@ -1,4 +1,5 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Collections.Generic;
 using UnityEngine;
@@ -113,18 +114,6 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        public CoverPoint FarPointEnemy
-        {
-            get
-            {
-                if (CoverPoints.Count > 0)
-                {
-                    return CoverPoints[CoverPoints.Count - 1];
-                }
-                return null;
-            }
-        }
-
         private bool GetPointToHideFrom(out Vector3? target)
         {
             target = SAIN.Grenade.GrenadeDangerPoint ?? SAIN.CurrentTargetPosition;
@@ -138,18 +127,19 @@ namespace SAIN.SAINComponent.Classes
             {
                 var move = SAIN.Mover;
                 var prone = move.Prone;
-                if (SAIN.Suppression.IsHeavySuppressed)
-                {
-                    prone.SetProne(true);
-                    return true;
-                }
-                if (point.Collider.bounds.size.y < 0.7f && prone.ShallProneHide())
+                bool shallProne = prone.ShallProneHide();
+                if (shallProne)
                 {
                     prone.SetProne(true);
                     return true;
                 }
                 if (move.Pose.SetPoseToCover())
                 {
+                    return true;
+                }
+                if (point.Collider.bounds.size.y < 1f)
+                {
+                    prone.SetProne(true);
                     return true;
                 }
             }
@@ -228,9 +218,13 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
+                if (FallBackPoint != null && (FallBackPoint.BotIsUsingThis || BotIsAtCoverPoint(FallBackPoint)))
+                {
+                    return FallBackPoint;
+                }
                 foreach (var point in CoverPoints)
                 {
-                    if (point != null && point.BotIsUsingThis)
+                    if (point != null && (point.BotIsUsingThis || BotIsAtCoverPoint(FallBackPoint)))
                     {
                         return point;
                     }

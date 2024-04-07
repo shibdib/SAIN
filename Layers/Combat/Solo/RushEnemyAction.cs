@@ -94,10 +94,17 @@ namespace SAIN.Layers.Combat.Solo
                     }
                 }
                 */
-                BotOwner.BotRun.Run(Destination, false);
+                if (SAIN.Enemy.PathDistance > 5f)
+                {
+                    BotOwner.BotRun.Run(Destination, false);
+                }
+                else
+                {
+                    SAIN.Mover.GoToPoint(Destination);
+                }
             }
 
-            if (SAIN.Info.PersonalitySettings.CanJumpCorners && TryJumpTimer < Time.time)
+            if (SAIN.Info.PersonalitySettings.CanJumpCorners && TryJumpTimer < Time.time && SAIN.Enemy.PathDistance > 5f)
             {
                 var corner = SAIN.Enemy?.LastCornerToEnemy;
                 if (corner != null)

@@ -9,6 +9,7 @@ using SAIN.Helpers;
 using SAIN.Layers;
 using SAIN.Plugin;
 using SAIN.Preset;
+using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Mover;
 using System;
 using System.Collections.Generic;
@@ -132,6 +133,8 @@ namespace SAIN
             ModDetection.Update();
             SAINEditor.Update();
             GameWorldHandler.Update();
+
+            //SAINBotSpaceAwareness.Update();
 
             //SAINVaultClass.DebugVaultPointCount();
 

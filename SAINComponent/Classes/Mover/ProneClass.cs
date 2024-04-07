@@ -85,17 +85,24 @@ namespace SAIN.SAINComponent.Classes.Mover
             return false;
         }
 
-        public bool ShallProneHide(float mindist = 30f)
+        public bool ShallProneHide(float mindist = 10f)
         {
             if (Player.MovementContext.CanProne)
             {
-                var enemy = SAIN.Enemy;
-                if (enemy != null)
+                Vector3? targetPos = SAIN.CurrentTargetPosition;
+                if (targetPos != null)
                 {
-                    float distance = (enemy.EnemyPosition - SAIN.Transform.Position).magnitude;
+                    float distance = (targetPos.Value - SAIN.Transform.Position).magnitude;
                     if (distance > mindist)
                     {
-                        return !CanShootFromProne(enemy.EnemyPosition);
+                        if (SAIN.Decision.CurrentSelfDecision == SelfDecision.None && !SAIN.Suppression.IsHeavySuppressed)
+                        {
+                            return !CanShootFromProne(targetPos.Value);
+                        }
+                        else
+                        {
+                            return true;
+                        }
                     }
                 }
             }

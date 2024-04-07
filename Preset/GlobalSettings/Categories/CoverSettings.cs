@@ -34,15 +34,15 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         public float ShiftCoverResetTime = 10f;
 
-        [Default(0.75f)]
+        [Default(0.85f)]
         [MinMax(0.5f, 1.5f, 100f)]
         [Advanced]
-        public float CoverMinHeight = 0.75f;
+        public float CoverMinHeight = 0.85f;
 
-        [Default(8f)]
+        [Default(5f)]
         [MinMax(0f, 30f, 1f)]
         [Advanced]
-        public float CoverMinEnemyDistance = 8f;
+        public float CoverMinEnemyDistance = 5f;
 
         [Default(0.33f)]
         [MinMax(0.01f, 1f, 100f)]

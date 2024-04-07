@@ -6,6 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
+using System.Linq;
+using System;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
@@ -55,8 +57,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
             if (SAIN.Decision.CurrentSelfDecision == SelfDecision.RunAwayGrenade)
             {
-                MinObstacleHeight = 1.5f;
-                MinEnemyDist = 10f;
+                //MinObstacleHeight = 1.5f;
+                //MinEnemyDist = 10f;
+                MinObstacleHeight = CoverMinHeight;
+                MinEnemyDist = CoverMinEnemyDistance;
             }
             else
             {
@@ -147,7 +151,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     {
                         yield return null;
                     }
-                    if (CoverPoints.Count > 2)
+                    if (CoverPoints.Count > 4)
                     {
                         break;
                     }
@@ -155,6 +159,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
                 if (CoverPoints.Count > 0)
                 {
+                    if (CoverPoints.Count > 1)
+                    {
+                        OrderPointsByPathDist(CoverPoints);
+                    }
                     FindFallback();
 
                     if (DebugLogTimer < Time.time && DebugCoverFinder)
@@ -174,6 +182,17 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 yield return new WaitForSeconds(CoverUpdateFrequency);
             }
         }
+
+        private static void OrderPointsByPathDist(List<CoverPoint> points)
+        {
+            points.OrderBy(p => p.PathLength);
+            for (int i = 0; i < points.Count; i++)
+            {
+                Logger.LogWarning($"{i} : {points[i].PathLength}");
+            }
+        }
+
+        private static List<CoverPoint> _coverPoints = new List<CoverPoint>();
 
         static float CoverUpdateFrequency => SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverUpdateFrequency;
 

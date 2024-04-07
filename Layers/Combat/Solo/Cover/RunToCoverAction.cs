@@ -30,6 +30,10 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     RecalcTimer = Time.time + 2f;
                     BotOwner.BotRun.Run(CoverDestination.Position, false, 0.6f);
                 }
+                else if (SAIN.Mover.Prone.ShallProneHide())
+                {
+                    SAIN.Mover.Prone.SetProne(true);
+                }
                 else
                 {
                     RecalcTimer = Time.time + 0.5f;
@@ -68,9 +72,16 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private CoverPoint SelectPoint()
         {
             CoverPoint fallback = SAIN.Cover.FallBackPoint;
-            if (SAIN.Memory.Decisions.Main.Current == SoloDecision.Retreat && fallback != null)
+            SoloDecision currentDecision = SAIN.Memory.Decisions.Main.Current;
+            CoverPoint coverInUse = SAIN.Cover.CoverInUse;
+
+            if (currentDecision == SoloDecision.Retreat && fallback != null && fallback.CheckPathSafety())
             {
                 return fallback;
+            }
+            else if (coverInUse != null && !coverInUse.Spotted)
+            {
+                return coverInUse;
             }
             else
             {
@@ -90,7 +101,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (SAIN.Decision.CurrentSelfDecision == SelfDecision.RunAwayGrenade)
             {
-                SAIN.Talk.Say(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat);
+                SAIN.Talk.TalkAfterDelay(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat, 0.5f);
             }
         }
 

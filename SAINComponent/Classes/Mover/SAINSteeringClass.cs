@@ -208,15 +208,24 @@ namespace SAIN.SAINComponent.Classes.Mover
             BotOwner.Steering.LookToMovingDirection();
         }
 
-        public void LookToPoint(Vector3 point)
+        public void LookToPoint(Vector3 point, float rotateSpeed = -1)
         {
-            BotOwner.Steering.LookToPoint(point);
+            if (rotateSpeed < 0)
+            {
+                BotOwner.Steering.LookToPoint(point);
+            }
+            else
+            {
+                BotOwner.Steering.LookToPoint(point, rotateSpeed);
+            }
         }
 
-        public void LookToPoint(Vector3? point)
+        public void LookToPoint(Vector3? point, float rotateSpeed = -1)
         {
             if (point != null)
-                BotOwner.Steering.LookToPoint(point.Value);
+            {
+                LookToPoint(point.Value, rotateSpeed);
+            }
         }
 
         public void LookToDirection(Vector3 direction, bool flat)
@@ -263,8 +272,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void LookToEnemy()
         {
-            SAINEnemyClass enemy = SAIN.Enemy;
-            LookToEnemy(enemy);
+            LookToEnemy(SAIN.Enemy);
         }
 
         private bool LookToCloseEnemyHear()
@@ -337,11 +345,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (LastSoundHeardCorner != Vector3.zero)
             {
-                LookToPoint(LastSoundHeardCorner);
+                LookToPoint(LastSoundHeardCorner, 150f);
             }
             else
             {
-                LookToPoint(soundPos);
+                LookToPoint(soundPos, 150f);
             }
         }
 
@@ -410,7 +418,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                         pointToLook = SAIN.CurrentTargetPosition.Value;
                     }
                 }
-                LookToPoint(pointToLook);
+                LookToPoint(pointToLook, 100f);
             }
         }
 

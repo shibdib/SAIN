@@ -276,6 +276,10 @@ namespace SAIN.SAINComponent
             {
                 if (HasEnemy)
                 {
+                    if (Enemy.Seen && !Enemy.IsVisible && Enemy.TimeSinceSeen < 30f)
+                    {
+                        return Enemy.LastSeenPosition;
+                    }
                     return Enemy.EnemyPosition;
                 }
                 var Target = BotOwner.Memory.GoalTarget;
