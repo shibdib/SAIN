@@ -11,6 +11,7 @@ using EFT.Interactive;
 using System.Linq;
 using SAIN.Components.BotController;
 using UnityEngine.AI;
+using SAIN.Helpers;
 
 namespace SAIN.Layers
 {
@@ -132,7 +133,8 @@ namespace SAIN.Layers
                 ReCalcPathTimer = Time.time + 4f;
 
                 NavMeshPathStatus pathStatus = BotOwner.Mover.GoToPoint(point, true, 0.5f, false, false);
-                float distanceToEndOfPath = Vector3.Distance(BotOwner.Position, BotOwner.Mover.CurPathLastPoint);
+                var pathController = HelpersGClass.GetPathControllerClass(BotOwner.Mover);
+                float distanceToEndOfPath = Vector3.Distance(BotOwner.Position, pathController.CurPath.LastCorner());
                 bool reachedEndOfIncompletePath = (pathStatus == NavMeshPathStatus.PathPartial) && (distanceToEndOfPath < BotExtractManager.MinDistanceToExtract);
 
                 // If the path to the extract is invalid or the path is incomplete and the bot reached the end of it, select a new extract
