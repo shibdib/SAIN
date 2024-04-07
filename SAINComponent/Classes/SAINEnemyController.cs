@@ -5,6 +5,7 @@ using SAIN.Components;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.BaseClasses;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
@@ -143,6 +144,30 @@ namespace SAIN.SAINComponent.Classes
             {
                 ActiveEnemy = null;
             }
+        }
+
+        public bool IsMainPlayerActiveEnemy()
+        {
+            return ActiveEnemy != null && ActiveEnemy.EnemyIPlayer != null && ActiveEnemy.EnemyIPlayer.IsYourPlayer;
+        }
+
+        public bool IsMainPlayerAnEnemy()
+        {
+            Player mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (mainPlayer != null)
+            {
+                string profileID = mainPlayer.ProfileId;
+                if (IsPlayerAnEnemy(profileID))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool IsPlayerAnEnemy(string profileID)
+        {
+            return Enemies.ContainsKey(profileID) && Enemies[profileID] != null;
         }
 
         private static SAINPersonClass GetSAINPerson(IPlayer IPlayer)

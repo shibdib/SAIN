@@ -330,7 +330,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return StartRunCoverTimer < Time.time && BotOwner.CanSprintPlayer;
         }
 
-        private static readonly float RunToCoverTime = 3f;
+        private static readonly float RunToCoverTime = 2f;
         private static readonly float RunToCoverTimeRandomMin = 0.66f;
         private static readonly float RunToCoverTimeRandomMax = 1.33f;
 

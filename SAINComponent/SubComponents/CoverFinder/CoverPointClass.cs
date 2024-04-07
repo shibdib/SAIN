@@ -140,11 +140,12 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             get
             {
                 ReCheckStatusTimer += Time.deltaTime;
-                if (ReCheckStatusTimer < 0.33f)
+                if (ReCheckStatusTimer < 0.1f)
                 {
                     return OldStatus;
                 }
                 ReCheckStatusTimer = 0f;
+
                 float distance = Distance;
 
                 CoverStatus status;
@@ -178,7 +179,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public float TimeCreated { get; private set; }
 
         private const float InCoverDist = 0.75f;
-        private const float CloseCoverDist = 10f;
-        private const float MidCoverDist = 25f;
+        private const float CloseCoverDist = 8f;
+        private const float MidCoverDist = 20f;
     }
 }

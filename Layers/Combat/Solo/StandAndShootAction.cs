@@ -20,7 +20,7 @@ namespace SAIN.Layers.Combat.Solo
         {
             SAIN.Steering.SteerByPriority();
 
-            if (!Stopped && Time.time - StartTime > 1f || SAIN.Cover.CheckLimbsForCover())
+            if (!Stopped && (Time.time - StartTime > 0.5f || SAIN.Cover.CheckLimbsForCover()))
             {
                 Stopped = true;
                 BotOwner.StopMove();

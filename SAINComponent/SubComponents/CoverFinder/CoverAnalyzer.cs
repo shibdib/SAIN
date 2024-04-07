@@ -5,6 +5,7 @@ using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
@@ -62,17 +63,47 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             // the closest edge to that farPoint
             if (NavMesh.SamplePosition(farPoint, out var hit, 1f, -1))
             {
-                if (CheckPosition(hit.position))
+                Vector3 point = hit.position;
+                if (CheckPosition(point) && CheckMainPlayer(point))
                 {
-                    if (CheckPath(hit.position, out bool isSafe, out NavMeshPath pathToPoint))
+                    if (CheckPath(point, out bool isSafe, out NavMeshPath pathToPoint))
                     {
-                        newPoint = new CoverPoint(SAIN, hit.position, collider, pathToPoint);
+                        newPoint = new CoverPoint(SAIN, point, collider, pathToPoint);
                         newPoint.IsSafePath = isSafe;
                     }
                 }
             }
 
             return newPoint != null;
+        }
+
+        private bool CheckMainPlayer(Vector3 point)
+        {
+            if (SAIN.EnemyController.IsMainPlayerActiveEnemy() == false && SAIN.EnemyController.IsMainPlayerAnEnemy() == true && GameWorldHandler.SAINMainPlayer?.SAINPerson?.Transform != null)
+            {
+                Vector3 testPoint = point + (Vector3.up * 0.65f);
+
+                Vector3 headPos = GameWorldHandler.SAINMainPlayer.SAINPerson.Transform.Head;
+
+                bool VisibleCheckPass = (VisibilityCheck(testPoint, headPos));
+
+                if (SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder)
+                {
+                    if (VisibleCheckPass)
+                    {
+                        // Main Player does not have vision on coverpoint position
+                        Logger.LogWarning("PASS");
+                    }
+                    else
+                    {
+                        // Main Player has vision
+                        Logger.LogWarning("FAIL");
+                    }
+                }
+
+                return VisibleCheckPass;
+            }
+            return true;
         }
 
         private bool ColliderDirection(Collider collider)
