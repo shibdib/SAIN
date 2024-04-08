@@ -212,6 +212,10 @@ namespace SAIN.SAINComponent.Classes
                 }
                 var point = CoverInUse;
                 var pathController = HelpersGClass.GetPathControllerClass(BotOwner.Mover);
+                if (pathController?.CurPath == null)
+                {
+                    return false;
+                }
                 return point != null && (point.Position - pathController.CurPath.LastCorner()).sqrMagnitude < 1f;
             }
         }

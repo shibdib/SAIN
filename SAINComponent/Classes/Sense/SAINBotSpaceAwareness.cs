@@ -289,36 +289,61 @@ namespace SAIN.SAINComponent.Classes
             return true;
         }
 
+        public static float GetSegmentLength(int segmentCount, Vector3 direction, float minLength, float maxLength, out float dirMagnitude, out int countResult, int maxIterations = 10)
+        {
+            dirMagnitude = direction.magnitude;
+            countResult = 0;
+            if (dirMagnitude < minLength)
+            {
+                return 0f;
+            }
+
+            float segmentLength = 0f;
+            for (int i = 0; i < maxIterations; i++)
+            {
+                if (segmentCount > 0)
+                {
+                    segmentLength = dirMagnitude / segmentCount;
+                }
+                if (segmentLength > maxLength)
+                {
+                    segmentCount++;
+                }
+                if (segmentLength < minLength)
+                {
+                    segmentCount--;
+                }
+                if (segmentLength <= maxLength && segmentLength >= minLength)
+                {
+                    Logger.LogInfo(segmentLength);
+                    break;
+                }
+                if (segmentCount <= 0)
+                {
+                    break;
+                }
+            }
+            countResult = segmentCount;
+            return segmentLength;
+        }
+
         private static float RaycastAlongDirection(Vector3 pointA, Vector3 pointB, Vector3 rayOrigin, int SegmentCount = 5)
         {
             const float RayHeight = 1.1f;
             const float debugExpireTime = 12f;
             const float MinSegLength = 1f;
+            const float MaxSegLength = 5f;
 
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
 
             Vector3 direction = pointB - pointA;
-            float dirMagnitude = direction.magnitude;
-            if (dirMagnitude < MinSegLength)
-            {
-                return 1f;
-            }
 
             // Make sure we aren't raycasting too often, set to MinSegLength for each raycast along a path
-            float segmentLength = 0f;
-            int testCount = 0;
-            for (int l = 0; l < SegmentCount; l++)
+            float segmentLength = GetSegmentLength(SegmentCount, direction, MinSegLength, MaxSegLength, out float dirMagnitude, out int testCount);
+
+            if (segmentLength <= 0 || testCount <= 0)
             {
-                testCount = SegmentCount - l;
-                segmentLength = dirMagnitude / testCount;
-                if (segmentLength < MinSegLength)
-                {
-                    continue;
-                }
-                else
-                {
-                    break;
-                }
+                return 1f;
             }
 
             Vector3 dirNormal = direction.normalized;

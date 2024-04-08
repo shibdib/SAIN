@@ -77,6 +77,7 @@ namespace SAIN.Attributes
         {
             Hidden = Get<HiddenAttribute>() != null;
             Advanced = Get<AdvancedAttribute>() != null;
+            Debug = Get<DebugAttribute>() != null;
             CopyValue = Get<CopyValueAttribute>() != null;
 
             if (Hidden)
@@ -127,10 +128,11 @@ namespace SAIN.Attributes
         public bool Hidden { get; private set; }
 
         public bool Advanced { get; private set; }
+        public bool Debug { get; private set; }
 
         public bool CopyValue { get; private set; }
 
-        public bool DoNotShowGUI => Hidden || Advanced && !SAINEditor.AdvancedBotConfigs;
+        public bool DoNotShowGUI => Hidden || (Advanced && !SAINEditor.AdvancedBotConfigs) || (Debug && !SAINPlugin.DebugMode);
 
         public EListType EListType { get; private set; } = EListType.None;
         public Type ListType { get; private set; }

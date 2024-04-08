@@ -266,7 +266,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (enemy != null)
             {
-                LookToPoint(enemy.EnemyPosition + Vector3.up * 0.85f);
+                LookToPoint(enemy.EnemyPosition + (Vector3.up * 0.85f));
             }
         }
 

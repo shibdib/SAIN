@@ -79,6 +79,8 @@ namespace SAIN.SAINComponent.Classes.Mover
                         //SAINBotSpaceAwareness.CheckPathSafety(CurrentPath, SAIN.Enemy.EnemyHeadPosition);
                     }
 
+                    MovementPlan = new SAINMovementPlan(CurrentPath, pointToGo);
+
                     if (mustHaveCompletePath && CurrentPath.status != NavMeshPathStatus.PathComplete)
                     {
                         return false;
@@ -89,6 +91,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             return false;
         }
+
+        public SAINMovementPlan MovementPlan { get; private set; }
 
         public bool GoToPointNew(Vector3 point, float reachDist = -1f, bool crawl = false, bool mustHaveCompletePath = false, float navSampleRange = 3f)
         {

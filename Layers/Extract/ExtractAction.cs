@@ -134,17 +134,20 @@ namespace SAIN.Layers
 
                 NavMeshPathStatus pathStatus = BotOwner.Mover.GoToPoint(point, true, 0.5f, false, false);
                 var pathController = HelpersGClass.GetPathControllerClass(BotOwner.Mover);
-                float distanceToEndOfPath = Vector3.Distance(BotOwner.Position, pathController.CurPath.LastCorner());
-                bool reachedEndOfIncompletePath = (pathStatus == NavMeshPathStatus.PathPartial) && (distanceToEndOfPath < BotExtractManager.MinDistanceToExtract);
-
-                // If the path to the extract is invalid or the path is incomplete and the bot reached the end of it, select a new extract
-                if ((pathStatus == NavMeshPathStatus.PathInvalid) || reachedEndOfIncompletePath)
+                if (pathController?.CurPath != null)
                 {
-                    // Need to reset the search timer to prevent the bot from immediately selecting (possibly) the same extract
-                    BotController.BotExtractManager.ResetExfilSearchTime(SAIN);
+                    float distanceToEndOfPath = Vector3.Distance(BotOwner.Position, pathController.CurPath.LastCorner());
+                    bool reachedEndOfIncompletePath = (pathStatus == NavMeshPathStatus.PathPartial) && (distanceToEndOfPath < BotExtractManager.MinDistanceToExtract);
 
-                    SAIN.Memory.ExfilPoint = null;
-                    SAIN.Memory.ExfilPosition = null;
+                    // If the path to the extract is invalid or the path is incomplete and the bot reached the end of it, select a new extract
+                    if ((pathStatus == NavMeshPathStatus.PathInvalid) || reachedEndOfIncompletePath)
+                    {
+                        // Need to reset the search timer to prevent the bot from immediately selecting (possibly) the same extract
+                        BotController.BotExtractManager.ResetExfilSearchTime(SAIN);
+
+                        SAIN.Memory.ExfilPoint = null;
+                        SAIN.Memory.ExfilPosition = null;
+                    }
                 }
             }
         }
