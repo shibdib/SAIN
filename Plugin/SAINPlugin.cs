@@ -72,6 +72,7 @@ namespace SAIN
             var patches = new List<Type>() {
                 // Patch does nothing, commenting out
                 //typeof(UpdateEFTSettingsPatch),
+                typeof(Patches.Generic.HeadShotProtectionPatch),
                 typeof(Patches.Generic.KickPatch),
                 typeof(Patches.Generic.GetBotController),
                 typeof(Patches.Generic.GetBotSpawner),

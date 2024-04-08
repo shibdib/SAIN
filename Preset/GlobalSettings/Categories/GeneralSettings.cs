@@ -136,6 +136,17 @@ namespace SAIN.Preset.GlobalSettings
         [Default(false)]
         public bool HeadShotProtection = false;
 
+        [Name("HeadShot Damage Redirection")]
+        [Description("Experimental, if the player is shot in the head, redirect all or some of the damage into other body parts")]
+        [Default(false)]
+        public bool HeadShotDamageRedirection = false;
+
+        [Name("HeadShot Damage Redirection Percentage")]
+        [Description("Experimental, what percentage of the damage to the head to redirect.")]
+        [Default(50f)]
+        [MinMax(0f, 100f, 1f)]
+        public float HeadShotDamageRedirectionPercent = 50f;
+
         [Name("Disable Talking Patches")]
         [Description("Disable all SAIN based handling of bot talking. No more squad chatter, no more quiet bots, completely disables SAIN's handling of bot voices")]
         [Default(false)]
