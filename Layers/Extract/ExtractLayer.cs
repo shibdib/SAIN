@@ -154,9 +154,9 @@ namespace SAIN.Layers
 
         private void CheckInventoryStatus()
         {
-            if (LootingBrain != null && !LootingBrain.HasFreeSpace)
+            if (LootingBrain != null && !LootingBrain.HasFreeSpace && LootingBrain.Stats.NetLootValue > 50000)
             {
-                Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because because they are Full on loot");
+                Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because because they are Full on loot. Net Loot Value: {LootingBrain.Stats.NetLootValue}");
                 FullOnLoot = true;
             }
         }
