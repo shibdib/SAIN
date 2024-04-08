@@ -88,45 +88,24 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         }
 
         private readonly Collider[] SinglePointColliders = new Collider[50];
-        public CoverPoint SinglePoint { get; private set; }
 
         public bool FindSinglePoint(Vector3 origin, Vector3 target, out CoverPoint coverpoint)
         {
-            if (SinglePointFinder == null)
-            {
-                SinglePoint = null;
-                SinglePointFinder = StartCoroutine(FindSingle(origin, target));
-            }
-            coverpoint = SinglePoint;
-            bool found = coverpoint != null;
-            if (found && SinglePointFinder != null)
-            {
-                StopCoroutine(SinglePointFinder);
-                SinglePointFinder = null;
-            }
+            coverpoint = FindSingle(origin, target);
             return coverpoint != null;
         }
 
-        private Coroutine SinglePointFinder;
-
-        private IEnumerator FindSingle(Vector3 origin, Vector3 target)
+        private CoverPoint FindSingle(Vector3 origin, Vector3 target)
         {
-            var Counter = new FrameCounter(5);
             ColliderFinder.GetNewColliders(out int hits, origin, target, SinglePointColliders, 15f, 10f);
             for (int i = 0; i < hits; i++)
             {
                 if (CoverAnalyzer.CheckCollider(SinglePointColliders[i], out var newPoint, 0.66f, origin, target, 10f))
                 {
-                    SinglePoint = newPoint;
-                    break;
-                }
-
-                // Every X colliders checked, wait until the next frame before continuing.
-                if (Counter.FrameWait)
-                {
-                    yield return null;
+                    return newPoint;
                 }
             }
+            return null;
         }
 
         public CoverPoint FallBackPoint { get; private set; }
@@ -269,7 +248,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 for (int i = 0; i < CoverPoints.Count; i++)
                 {
                     var coverPoint = CoverPoints[i];
-                    if (coverPoint != null && Recheck(coverPoint))
+                    if (coverPoint != null && RecheckCoverPoint(coverPoint))
                     {
                         PointToSave = coverPoint;
                     }
@@ -282,7 +261,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
         }
 
-        private bool Recheck(CoverPoint coverPoint)
+        public bool RecheckCoverPoint(CoverPoint coverPoint)
         {
             if (!PointIsSpotted(coverPoint) && coverPoint.BotIsUsingThis && CheckPoint(coverPoint, out var newPoint))
             {

@@ -47,7 +47,7 @@ namespace SAIN.Patches.Hearing
             // Limits how many sounds are played from each player for the AI
             if (____nextShootTime < Time.time)
             {
-                ____nextShootTime = Time.time + 0.65f; // default 1f
+                ____nextShootTime = Time.time + 0.33f; // default 1f
                 AudioHelpers.TryPlayShootSound(getPlayer, soundType);
             }
             return false;

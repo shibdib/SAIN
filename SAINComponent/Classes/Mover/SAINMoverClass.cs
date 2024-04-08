@@ -79,7 +79,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                         //SAINBotSpaceAwareness.CheckPathSafety(CurrentPath, SAIN.Enemy.EnemyHeadPosition);
                     }
 
-                    MovementPlan = new SAINMovementPlan(CurrentPath, pointToGo);
+                    //MovementPlan = new SAINMovementPlan(SAIN, CurrentPath, pointToGo);
 
                     if (mustHaveCompletePath && CurrentPath.status != NavMeshPathStatus.PathComplete)
                     {

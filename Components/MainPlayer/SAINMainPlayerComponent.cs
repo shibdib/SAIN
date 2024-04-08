@@ -2,6 +2,7 @@
 using EFT;
 using SAIN.Helpers;
 using SAIN.SAINComponent.BaseClasses;
+using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Mover;
 using UnityEngine;
 

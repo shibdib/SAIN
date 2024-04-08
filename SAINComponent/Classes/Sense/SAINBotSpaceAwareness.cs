@@ -315,7 +315,6 @@ namespace SAIN.SAINComponent.Classes
                 }
                 if (segmentLength <= maxLength && segmentLength >= minLength)
                 {
-                    Logger.LogInfo(segmentLength);
                     break;
                 }
                 if (segmentCount <= 0)

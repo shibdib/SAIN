@@ -95,16 +95,16 @@ namespace SAIN.Preset.Personalities
                         CanRespondToVoice = true,
                         TauntFrequency = 8,
                         TauntMaxDistance = 50f,
-                        HoldGroundBaseTime = 2f,
+                        HoldGroundBaseTime = 1.25f,
                         HoldGroundMaxRandom = 1.5f,
                         HoldGroundMinRandom = 0.65f,
-                        SearchBaseTime = 0.65f,
-                        PowerLevelMin = 115f,
+                        SearchBaseTime = 8f,
+                        PowerLevelMin = 200f,
                         SprintWhileSearch = true,
                         FrequentSprintWhileSearch = true,
                         CanRushEnemyReloadHeal = true,
                         ConstantTaunt = true,
-                        AggressionMultiplier = 4f,
+                        AggressionMultiplier = 2f,
                         ShiftCoverTimeMultiplier = 0.5f
                     }
                 };
@@ -131,15 +131,15 @@ namespace SAIN.Preset.Personalities
                         CanRespondToVoice = true,
                         TauntFrequency = 10,
                         TauntMaxDistance = 40f,
-                        HoldGroundBaseTime = 1.5f,
+                        HoldGroundBaseTime = 1f,
                         HoldGroundMaxRandom = 1.5f,
                         HoldGroundMinRandom = 0.65f,
-                        SearchBaseTime = 4f,
-                        PowerLevelMin = 85f,
+                        SearchBaseTime = 30f,
+                        PowerLevelMin = 150f,
                         SprintWhileSearch = true,
                         CanRushEnemyReloadHeal = true,
                         FrequentTaunt = true,
-                        AggressionMultiplier = 2f,
+                        AggressionMultiplier = 1.5f,
                     }
                 };
 
@@ -160,7 +160,7 @@ namespace SAIN.Preset.Personalities
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 50,
                         RandomlyAssignedChance = 25,
-                        HoldGroundBaseTime = 1f,
+                        HoldGroundBaseTime = 0.75f,
                         SearchBaseTime = 180f,
                         PowerLevelMax = 50f,
                         AggressionMultiplier = 0.65f,
@@ -189,7 +189,7 @@ namespace SAIN.Preset.Personalities
                         RandomlyAssignedChance = 25,
                         PowerLevelMax = 40f,
                         MaxLevel = 10,
-                        HoldGroundBaseTime = 0.6f,
+                        HoldGroundBaseTime = 0.5f,
                         SearchBaseTime = 120f,
                         AggressionMultiplier = 0.75f,
                         BaseSearchMoveSpeed = 0.65f,
@@ -213,10 +213,10 @@ namespace SAIN.Preset.Personalities
                     {
                         Enabled = true,
                         RandomlyAssignedChance = 25,
-                        HoldGroundBaseTime = 0.33f,
-                        SearchBaseTime = 65f,
+                        HoldGroundBaseTime = 0.5f,
+                        SearchBaseTime = 90f,
                         AggressionMultiplier = 0.45f,
-                        BaseSearchMoveSpeed = 0.35f,
+                        BaseSearchMoveSpeed = 0.1f,
                         CanShiftCoverPosition = false
                     }
                 };
@@ -235,10 +235,10 @@ namespace SAIN.Preset.Personalities
                     Variables =
                     {
                         Enabled = true,
-                        HoldGroundBaseTime = 0.75f,
-                        SearchBaseTime = 30f,
+                        HoldGroundBaseTime = 0.65f,
+                        SearchBaseTime = 60f,
                         CanRespondToVoice = true,
-                        BaseSearchMoveSpeed = 0.8f,
+                        BaseSearchMoveSpeed = 0.6f,
                     }
                 };
 

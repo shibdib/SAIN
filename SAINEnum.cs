@@ -26,6 +26,7 @@ namespace SAIN
         UnstuckSearch,
         UnstuckMoveToCover,
         UnstuckDogFight,
+        DebugNoDecision
     }
 
     public enum SelfDecision

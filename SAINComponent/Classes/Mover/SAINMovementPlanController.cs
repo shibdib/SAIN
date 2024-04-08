@@ -36,8 +36,11 @@ namespace SAIN.SAINComponent.Classes.Mover
     {
         private static int PointCount = 0;
 
-        public SAINMovementPlan(NavMeshPath directPath, Vector3 endGoal)
+        public readonly SAINComponentClass SAIN;
+
+        public SAINMovementPlan(SAINComponentClass sain, NavMeshPath directPath, Vector3 endGoal)
         {
+            SAIN = sain;
             DirectPath = directPath;
             Goal = endGoal;
             TimeCreated = Time.time;
@@ -80,7 +83,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 Vector3 cornerB = corners[i + 1];
                 Vector3 direction = cornerA - cornerB;
                 // Break down a straight line from Point A to Point B into segments, to break up movement in a straight line.
-                float segmentLength = SAINBotSpaceAwareness.GetSegmentLength(3, direction, 5, 50, out float dirMagnitude, out int countResult);
+                float segmentLength = SAINBotSpaceAwareness.GetSegmentLength(3, direction, 10, 50, out float dirMagnitude, out int countResult);
 
                 if (segmentLength > 0)
                 {
@@ -109,16 +112,42 @@ namespace SAIN.SAINComponent.Classes.Mover
                     Vector3 pointA = Path[i].PathNodePosition;
                     Vector3 pointB = Path[i + 1].PathNodePosition;
 
-                    DebugGizmos.Sphere(pointA, 0.1f, Color.white, true, 10f);
-                    DebugGizmos.Ray(pointA, Vector3.up, Color.white, 1f, 0.025f, true, 10f);
-                    DebugGizmos.Line(pointA, pointB, 0.05f, 10f);
+                    CoverPoint coverPoint = Path[i].GetCoverPoint(Goal);
+                    if (coverPoint != null && CheckPositionVsOtherCover(coverPoint.Position))
+                    {
+                        CoverPositions.Add(coverPoint.Position);
+                        DebugGizmos.Sphere(coverPoint.Position, 0.1f, Color.red, true, 30f);
+                        DebugGizmos.Ray(coverPoint.Position, Vector3.up, Color.red, 1f, 0.1f, true, 30f);
+                        DebugGizmos.Line(pointA, coverPoint.Position, Color.red, 0.1f, true, 30f);
+                    }
+
+                    DebugGizmos.Sphere(pointA, 0.1f, Color.white, true, 30f);
+                    DebugGizmos.Ray(pointA, Vector3.up, Color.white, 1f, 0.025f, true, 30f);
+                    DebugGizmos.Line(pointA, pointB, Color.white, 0.05f, true, 30f);
                 }
             }
         }
 
+        private bool CheckPositionVsOtherCover(Vector3 pos)
+        {
+            for (int i = 0; i < CoverPositions.Count; i++)
+            {
+                if ((pos - CoverPositions[i]).sqrMagnitude < 3)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void MoveCoverToCover()
+        {
+
+        }
+
         private void AddPositionToPath(Vector3 point)
         {
-            Path.Add(new SAINMovementNode(point));
+            Path.Add(new SAINMovementNode(point, this));
         }
 
         private void CalcSecondPath()
@@ -132,6 +161,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         }
 
         public List<SAINMovementNode> Path { get; private set; } = new List<SAINMovementNode>();
+        public List<Vector3> CoverPositions { get; private set; } = new List<Vector3>();
+
         public readonly NavMeshPath DirectPath;
         private NavMeshPath SecondPath;
         public readonly Vector3 Goal;
@@ -141,12 +172,65 @@ namespace SAIN.SAINComponent.Classes.Mover
 
     public sealed class SAINMovementNode
     {
-        public SAINMovementNode(Vector3 pos)
+        public SAINMovementNode(Vector3 pos, SAINMovementPlan sAINMovementPlan)
         {
             PathNodePosition = pos;
+            SAINMovementPlan = sAINMovementPlan;
         }
 
-        public CoverPoint CoverPoint;
+        private readonly SAINMovementPlan SAINMovementPlan;
+
+        public CoverPoint GetCoverPoint(Vector3 endGoal)
+        {
+            Vector3 target;
+            if (SAINMovementPlan.SAIN.CurrentTargetPosition == null)
+            {
+                target = endGoal;
+            }
+            else
+            {
+                target = SAINMovementPlan.SAIN.CurrentTargetPosition.Value;
+            }
+
+            var coverFinder = SAINMovementPlan.SAIN.Cover.CoverFinder;
+            if (SavedCoverPoint != null && coverFinder.RecheckCoverPoint(SavedCoverPoint))
+            {
+                return SavedCoverPoint;
+            }
+            else if (SavedCoverPoint != null)
+            {
+                SavedCoverPoint = null;
+            }
+
+            if (coverFinder.FindSinglePoint(PathNodePosition, target, out CoverPoint result))
+            {
+                SavedCoverPoint = result;
+            }
+
+            return SavedCoverPoint;
+        }
+
+        public CoverPoint SavedCoverPoint { get; private set; }
+
         public readonly Vector3 PathNodePosition;
+
+        public bool Arrived()
+        {
+            if (HasArrived)
+            {
+                return true;
+            }
+            if (SavedCoverPoint != null)
+            {
+                HasArrived = SAINMovementPlan.SAIN.Cover.BotIsAtCoverPoint(SavedCoverPoint);
+            }
+            else
+            {
+                HasArrived = (SAINMovementPlan.SAIN.Position - PathNodePosition).sqrMagnitude < 1;
+            }
+            return HasArrived;
+        }
+
+        private bool HasArrived;
     }
 }

@@ -161,17 +161,17 @@ namespace SAIN.Preset.GlobalSettings
         [Hidden]
         public static readonly Dictionary<IWeaponClass, float> EngagementDistanceDefaults = new Dictionary<IWeaponClass, float>()
         {
-            { IWeaponClass.Default, 75f },
-            { IWeaponClass.assaultCarbine, 75f },
-            { IWeaponClass.assaultRifle, 100f },
-            { IWeaponClass.machinegun, 85f },
-            { IWeaponClass.smg, 40f },
-            { IWeaponClass.pistol, 25f },
-            { IWeaponClass.marksmanRifle, 110f },
-            { IWeaponClass.sniperRifle, 175f },
-            { IWeaponClass.shotgun, 25f },
-            { IWeaponClass.grenadeLauncher, 65f },
-            { IWeaponClass.specialWeapon, 50f },
+            { IWeaponClass.Default, 125f },
+            { IWeaponClass.assaultCarbine, 125f },
+            { IWeaponClass.assaultRifle, 150f },
+            { IWeaponClass.machinegun, 125f },
+            { IWeaponClass.smg, 70f },
+            { IWeaponClass.pistol, 50f },
+            { IWeaponClass.marksmanRifle, 175f },
+            { IWeaponClass.sniperRifle, 300f },
+            { IWeaponClass.shotgun, 50f },
+            { IWeaponClass.grenadeLauncher, 100f },
+            { IWeaponClass.specialWeapon, 100f },
         };
 
         [JsonIgnore]

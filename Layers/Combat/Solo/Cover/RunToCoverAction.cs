@@ -25,12 +25,22 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (RecalcTimer < Time.time)
             {
+                bool shallProne = SAIN.Mover.Prone.ShallProneHide();
                 if (FindTargetCover())
                 {
                     RecalcTimer = Time.time + 2f;
-                    BotOwner.BotRun.Run(CoverDestination.Position, false, 0.6f);
+                    if ((CoverDestination.Position - BotOwner.Position).sqrMagnitude > 4f)
+                    {
+                        BotOwner.BotRun.Run(CoverDestination.Position, false, 0.6f);
+                    }
+                    else
+                    {
+                        bool shallCrawl = SAIN.Decision.CurrentSelfDecision != SelfDecision.None && CoverDestination.CoverStatus == CoverStatus.FarFromCover && shallProne;
+                        SAIN.Mover.GoToPoint(CoverDestination.Position, -1, shallCrawl);
+                        SAIN.Steering.LookToMovingDirection();
+                    }
                 }
-                else if (SAIN.Mover.Prone.ShallProneHide())
+                else if (shallProne)
                 {
                     SAIN.Mover.Prone.SetProne(true);
                 }

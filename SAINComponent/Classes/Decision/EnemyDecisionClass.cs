@@ -77,10 +77,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 Decision = SoloDecision.ShiftCover;
             }
-            else if (StartHoldInCover())
-            {
-                Decision = SoloDecision.HoldInCover;
-            }
             else if (StartMoveToCover())
             {
                 Decision = SoloDecision.WalkToCover;
@@ -90,9 +86,13 @@ namespace SAIN.SAINComponent.Classes.Decision
                     Decision = SoloDecision.RunToCover;
                 }
             }
+            else if (StartHoldInCover())
+            {
+                Decision = SoloDecision.HoldInCover;
+            }
             else
             {
-                Decision = SoloDecision.DogFight;
+                Decision = SoloDecision.DebugNoDecision;
             }
 
             if (Decision != SoloDecision.WalkToCover && Decision != SoloDecision.RunToCover)
@@ -240,6 +240,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartDogFightAction(SAINEnemyClass enemy)
         {
+            if (SAIN.Decision.CurrentSelfDecision != SelfDecision.None)
+            {
+                return false;
+            }
             var currentSolo = SAIN.Decision.CurrentSoloDecision;
             if (Time.time - SAIN.Cover.LastHitTime < 2f 
                 && currentSolo != SoloDecision.RunAway 
@@ -249,39 +253,9 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return true;
             }
-                var pathStatus = enemy.CheckPathDistance();
+
+            var pathStatus = enemy.CheckPathDistance();
             return (pathStatus == EnemyPathDistance.VeryClose && SAIN.Enemy.IsVisible) || SAIN.Cover.CoverInUse?.Spotted == true;
-        }
-
-        private bool StartThrowNade(SAINEnemyClass enemy)
-        {
-            if (ContinueThrow())
-            {
-                return true;
-            }
-
-            var nade = BotOwner.WeaponManager.Grenades;
-
-            if (!nade.HaveGrenade)
-            {
-                return false;
-            }
-
-            if (enemy.IsVisible)
-            {
-                return false;
-            }
-
-            if (enemy.TimeSinceSeen > 3f && enemy.TimeSinceSeen < 15f && enemy.Seen)
-            {
-                //if (SAIN.Grenade.EFTBotGrenade.CanThrowGrenade(enemy.EnemyPosition))
-                //{
-                //    EndThrowTimer = Time.time;
-                //    return true;
-                //}
-            }
-
-            return false;
         }
 
         private bool StartMoveToEngage(SAINEnemyClass enemy)
