@@ -327,7 +327,10 @@ namespace SAIN.Components
             {
                 StopAllCoroutines();
 
-                Destroy(MainPlayerLight);
+                if (MainPlayerLight != null)
+                {
+                    Destroy(MainPlayerLight);
+                }
 
                 GameWorld.OnDispose -= Dispose;
 
