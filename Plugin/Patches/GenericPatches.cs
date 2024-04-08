@@ -33,12 +33,14 @@ namespace SAIN.Patches.Generic
                 float ratio = 1f - settings.HeadShotDamageRedirectionPercent / 100f;
                 float newDamage = oldDmg * ratio;
                 float amountReduced = oldDmg - newDamage;
-                damageInfo.Damage = newDamage;
 
                 EBodyPart newPart = BodyParts.PickRandom();
                 Logger.LogInfo($"Headshot Damage To Player! Original Damage: {oldDmg} New Damage: {newDamage} :: {amountReduced} damage redirected to {newPart}");
 
+                damageInfo.Damage = amountReduced;
                 __instance.ApplyShot(damageInfo, newPart, colliderType, armorPlateCollider, shotId);
+
+                damageInfo.Damage = newDamage;
             }
         }
 
