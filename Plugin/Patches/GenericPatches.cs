@@ -15,46 +15,6 @@ using EFT.HealthSystem;
 
 namespace SAIN.Patches.Generic
 {
-    internal class HeadShotProtectionPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod() => typeof(Player).GetMethod("ApplyShot");
-        [PatchPrefix]
-        public static void PatchPrefix(ref EBodyPart bodyPartType, ref DamageInfo damageInfo, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId, ref Player __instance)
-        {
-            var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
-            if (settings.HeadShotDamageRedirection == false)
-            {
-                return;
-            }
-
-            if (bodyPartType == EBodyPart.Head && __instance.IsYourPlayer)
-            {
-                float oldDmg = damageInfo.Damage;
-                float ratio = 1f - settings.HeadShotDamageRedirectionPercent / 100f;
-                float newDamage = oldDmg * ratio;
-                float amountReduced = oldDmg - newDamage;
-
-                EBodyPart newPart = BodyParts.PickRandom();
-                Logger.LogInfo($"Headshot Damage To Player! Original Damage: {oldDmg} New Damage: {newDamage} :: {amountReduced} damage redirected to {newPart}");
-
-                damageInfo.Damage = amountReduced;
-                __instance.ApplyShot(damageInfo, newPart, colliderType, armorPlateCollider, shotId);
-
-                damageInfo.Damage = newDamage;
-            }
-        }
-
-        private static List<EBodyPart> BodyParts = new List<EBodyPart> 
-        { 
-            EBodyPart.LeftLeg,
-            EBodyPart.RightLeg,
-            EBodyPart.LeftArm,
-            EBodyPart.RightArm,
-            EBodyPart.Chest, 
-            EBodyPart.Stomach
-        };
-    }
-
     internal class BotGroupAddEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(BotsGroup).GetMethod("AddEnemy");

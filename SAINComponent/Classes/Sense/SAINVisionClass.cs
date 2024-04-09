@@ -39,13 +39,13 @@ namespace SAIN.SAINComponent.Classes
             float speed = (player.MovementContext.ActualLinearVelocity.Round100() / 5f).Round100();
             if (player.MovementContext.IsSprintEnabled)
             {
-                result *= 1.5f;
+                result *= 1.33f;
             }
             else
             {
                 if (speed <= 0.2f)
                 {
-                    result *= 0.66f;
+                    result *= 0.75f;
                 }
                 switch (pose)
                 {
@@ -53,7 +53,7 @@ namespace SAIN.SAINComponent.Classes
                         result *= 1.1f;
                         break;
                     case EPlayerPose.Duck:
-                        result *= 0.85f;
+                        result *= 0.9f;
                         break;
                     case EPlayerPose.Prone:
                         result *= 0.6f;
