@@ -136,6 +136,11 @@ namespace SAIN.Editor
             return Toggle(value, new GUIContent(text, tooltip), sound, options);
         }
 
+        public static bool Toggle(bool value, string text, string tooltip, GUIStyle style, EUISoundType? sound = null, params GUILayoutOption[] options)
+        {
+            return Toggle(value, new GUIContent(text, tooltip), sound, options);
+        }
+
         public static bool Toggle(bool value, GUIContent content, EUISoundType? sound = null, params GUILayoutOption[] options)
         {
             return Toggle(value, content, GetStyle(Style.toggle), sound, options);

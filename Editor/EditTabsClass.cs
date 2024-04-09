@@ -19,13 +19,6 @@ namespace SAIN.Editor
                     }
                 },
                 {
-                    EEditorTab.GlobalSettings, new TabClass
-                    {
-                        Name = "Global Settings",
-                        ToolTip = "Modify settings that are the same between all bots.",
-                    }
-                },
-                {
                     EEditorTab.BotSettings, new TabClass
                     {
                         Name = "Bot Settings",
@@ -118,7 +111,6 @@ namespace SAIN.Editor
     public enum EEditorTab
     {
         Home,
-        GlobalSettings,
         BotSettings,
         Personalities,
         Advanced

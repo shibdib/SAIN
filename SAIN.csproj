@@ -256,10 +256,13 @@
     <Compile Include="Components\MainPlayer\SAINCamoClass.cs" />
     <Compile Include="Components\MainPlayer\SAINMainPlayerComponent.cs" />
     <Compile Include="Components\SAINGameworldComponent.cs" />
+    <Compile Include="Editor\Category.cs" />
     <Compile Include="Editor\EditTabsClass.cs" />
     <Compile Include="Editor\PresetEditorDefaults.cs" />
     <Compile Include="Editor\GUITabs.cs" />
     <Compile Include="Editor\IEditorCache.cs" />
+    <Compile Include="Editor\SettingsContainer.cs" />
+    <Compile Include="Editor\SettingsContainers.cs" />
     <Compile Include="Editor\Util\ModifyLists.cs" />
     <Compile Include="Helpers\ComponentHelpers.cs" />
     <Compile Include="Helpers\Extensions.cs" />

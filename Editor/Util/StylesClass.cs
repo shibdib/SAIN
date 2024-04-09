@@ -90,6 +90,7 @@ namespace SAIN.Editor
             GUIStyle LabelStyle =
                 new GUIStyle(GUI.skin.label)
                 {
+                    padding = new RectOffset(3, 3, 3, 3),
                     alignment = TextAnchor.MiddleLeft,
                     fontStyle = FontStyle.Bold
                 };
@@ -284,9 +285,9 @@ namespace SAIN.Editor
             GUIStyle selectGridStyle =
                 new GUIStyle(ToggleStyle)
                 {
-                    padding = new RectOffset(0, 0, 0, 0),
-                    border = new RectOffset(3, 3, 3, 3),
-                    margin = new RectOffset(0,0,0,0),
+                    //padding = new RectOffset(3, 3, 3, 3),
+                    //border = new RectOffset(3, 3, 3, 3),
+                    //margin = new RectOffset(0,0,0,0),
                     alignment = TextAnchor.MiddleCenter,
                     fontStyle = FontStyle.Bold,
                 };
@@ -304,8 +305,8 @@ namespace SAIN.Editor
             GUIStyle botTypeGridStyle =
                 new GUIStyle(ToggleStyle)
                 {
-                    padding = new RectOffset(5, 5, 5, 5),
-                    border = new RectOffset(3, 3, 3, 3),
+                    //padding = new RectOffset(5, 5, 5, 5),
+                    //border = new RectOffset(3, 3, 3, 3),
                     fontStyle = FontStyle.Normal,
                     alignment = TextAnchor.MiddleCenter
                 };
@@ -313,17 +314,18 @@ namespace SAIN.Editor
             GUIStyle SelectionListStyle =
                 new GUIStyle(ToggleStyle)
                 {
-                    padding = new RectOffset(5, 5, 5, 5),
-                    border = new RectOffset(3, 3, 3, 3),
+                    //margin = new RectOffset(20, 20, 0, 0),
+                    //padding = new RectOffset(2, 2, 2, 2),
+                    //border = new RectOffset(2, 2, 2, 2),
                     fontStyle = FontStyle.Normal,
-                    alignment = TextAnchor.MiddleCenter
+                    alignment = TextAnchor.MiddleLeft
                 };
 
             GUIStyle botTypeSectionStyle = new GUIStyle(ToggleStyle)
             {
                 alignment = TextAnchor.MiddleLeft,
-                margin = new RectOffset(5, 5, 0, 0),
-                border = new RectOffset(5, 5, 0, 0),
+                //margin = new RectOffset(5, 5, 0, 0),
+                //border = new RectOffset(5, 5, 0, 0),
                 fontStyle = FontStyle.Bold
             };
 

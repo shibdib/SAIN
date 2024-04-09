@@ -137,5 +137,7 @@ namespace SAIN.Attributes
         public EListType EListType { get; private set; } = EListType.None;
         public Type ListType { get; private set; }
         public Type SecondaryListType { get; private set; }
+
+        public bool MenuOpen;
     }
 }

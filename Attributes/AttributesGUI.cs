@@ -86,11 +86,6 @@ namespace SAIN.Attributes
                         ModifyLists.AddOrRemove(
                             value as List<WildSpawnType>, out wasEdited);
                     }
-                    else if (value is List<BotDifficulty>)
-                    {
-                        ModifyLists.AddOrRemove(
-                            value as List<BotDifficulty>, out wasEdited);
-                    }
                     else if (value is List<BotType>)
                     {
                         ModifyLists.AddOrRemove(
@@ -131,11 +126,6 @@ namespace SAIN.Attributes
                     ModifyLists.AddOrRemove(
                         value as List<WildSpawnType>, out wasEdited);
                 }
-                else if (value is List<BotDifficulty>)
-                {
-                    ModifyLists.AddOrRemove(
-                        value as List<BotDifficulty>, out wasEdited);
-                }
                 else if (value is List<BotType>)
                 {
                     ModifyLists.AddOrRemove(
@@ -167,7 +157,7 @@ namespace SAIN.Attributes
                 GUIStyle boxstyle = GetStyle(Style.box);
                 LabelStyle = new GUIStyle(GetStyle(Style.label))
                 {
-                    alignment = TextAnchor.MiddleCenter,
+                    alignment = TextAnchor.MiddleLeft,
                     margin = boxstyle.margin,
                     padding = boxstyle.padding
                 };

@@ -23,9 +23,6 @@ namespace SAIN.Editor
                 case EEditorTab.Home:
                     Home(); break;
 
-                case EEditorTab.GlobalSettings:
-                    GlobalSettings(); break;
-
                 case EEditorTab.BotSettings:
                     BotSettings(); break;
 
@@ -42,20 +39,17 @@ namespace SAIN.Editor
 
         public static void Home()
         {
-            ModDetection.ModDetectionGUI();
-            Space(15f);
+            Space(30f);
             PresetSelection.Menu();
-        }
+            Space(30f);
 
-        public static void GlobalSettings()
-        {
             BotSettingsEditor.ShowAllSettingsGUI(
-                SAINPlugin.LoadedPreset.GlobalSettings, 
+                SAINPlugin.LoadedPreset.GlobalSettings,
                 out bool newEdit,
-                "Global Settings", 
-                $"SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}", 
-                35f, 
-                GlobalSettingsWereEdited, 
+                "Global Settings",
+                $"SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}",
+                35f,
+                GlobalSettingsWereEdited,
                 out bool saved);
 
             if (newEdit)
@@ -72,9 +66,7 @@ namespace SAIN.Editor
 
         public static void BotSettings()
         {
-            //BeginArea(SAINEditor.OpenTabRect);
             BotSelectionClass.Menu();
-            //EndArea();
         }
 
         public static void Personality()
