@@ -117,8 +117,12 @@ namespace SAIN.SAINComponent
             Vault.Init();
             Suppression.Init();
 
+            TimeBotCreated = Time.time;
+
             return true;
         }
+
+        public float TimeBotCreated { get; private set; }
 
         public bool SAINEnabled => Info?.FileSettings?.Core != null ? Info.FileSettings.Core.SAINEnabled : false;
 

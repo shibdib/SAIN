@@ -33,11 +33,7 @@ namespace SAIN.Components
         {
             if (MainPlayer == null)
             {
-                Logger.LogError("MainPlayer Null");
-            }
-            if (SAINPerson == null)
-            {
-                Logger.LogError("SAINPerson Null");
+                Destroy(this);
             }
         }
 

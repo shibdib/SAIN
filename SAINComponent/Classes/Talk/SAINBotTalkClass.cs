@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
+using EFT.Utilities;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
@@ -21,16 +22,19 @@ namespace SAIN.SAINComponent.Classes.Talk
             PersonalPhraseDict = new Dictionary<EPhraseTrigger, PhraseInfo>(GlobalPhraseDictionary);
             GroupTalk = new GroupTalk(sain);
             EnemyTalk = new EnemyTalk(sain);
+            TimeUntilCanTalk = Time.time + UnityEngine.Random.Range(2f, 8f);
         }
 
         public void Init()
         {
         }
 
+        private float TimeUntilCanTalk;
+
         public void Update()
         {
             if (BotOwner == null || SAIN == null) return;
-            if (CanTalk)
+            if (CanTalk && TimeUntilCanTalk < Time.time)
             {
                 GroupTalk.Update();
 
