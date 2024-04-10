@@ -34,6 +34,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         public void Update()
         {
             if (BotOwner == null || SAIN == null) return;
+
             if (CanTalk && TimeUntilCanTalk < Time.time)
             {
                 GroupTalk.Update();
@@ -85,7 +86,10 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Say(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false)
         {
-            if (CanTalk || phrase == EPhraseTrigger.OnDeath || phrase == EPhraseTrigger.OnAgony || phrase == EPhraseTrigger.OnBeingHurt)
+            if ((CanTalk && TimeUntilCanTalk < Time.time) 
+                || phrase == EPhraseTrigger.OnDeath 
+                || phrase == EPhraseTrigger.OnAgony 
+                || phrase == EPhraseTrigger.OnBeingHurt)
             {
                 ETagStatus mask = SetETagMask(additionalMask);
                 CheckPhrase(phrase, mask);
@@ -95,13 +99,19 @@ namespace SAIN.SAINComponent.Classes.Talk
         private float TalkAfterDelayTimer = 0f;
         private BotTalkPackage TalkDelayPack;
 
-        public void TalkAfterDelay(EPhraseTrigger trigger, ETagStatus mask, float delay)
+        public void TalkAfterDelay(EPhraseTrigger phrase, ETagStatus mask, float delay)
         {
-            var talk = new BotTalkPackage(PersonalPhraseDict[trigger], mask);
-            TalkDelayPack = CheckPriority(talk, TalkDelayPack, out bool changeTalk);
-            if (changeTalk)
+            if ((CanTalk && TimeUntilCanTalk < Time.time)
+                || phrase == EPhraseTrigger.OnDeath
+                || phrase == EPhraseTrigger.OnAgony
+                || phrase == EPhraseTrigger.OnBeingHurt)
             {
-                TalkAfterDelayTimer = Time.time + delay;
+                var talk = new BotTalkPackage(PersonalPhraseDict[phrase], mask);
+                TalkDelayPack = CheckPriority(talk, TalkDelayPack, out bool changeTalk);
+                if (changeTalk)
+                {
+                    TalkAfterDelayTimer = Time.time + delay;
+                }
             }
         }
 
