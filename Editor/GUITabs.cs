@@ -39,9 +39,8 @@ namespace SAIN.Editor
 
         public static void Home()
         {
-            Space(30f);
             PresetSelection.Menu();
-            Space(30f);
+            Space(20f);
 
             BotSettingsEditor.ShowAllSettingsGUI(
                 SAINPlugin.LoadedPreset.GlobalSettings,

@@ -10,6 +10,7 @@ namespace SAIN.Preset
         public string Creator;
         public string SAINVersion;
         public string DateCreated;
+        public bool IsCustom = true;
 
         public SAINPresetDefinition Clone()
         {
@@ -31,7 +32,8 @@ namespace SAIN.Preset
                 Description = description ?? $"The Default {difficulty} SAIN Preset.",
                 Creator = "Solarint",
                 SAINVersion = AssemblyInfoClass.SAINPresetVersion,
-                DateCreated = DateTime.Now.ToString()
+                DateCreated = DateTime.Now.ToString(),
+                IsCustom = false
             };
             PresetHandler.SavePresetDefinition(preset);
             return new SAINPresetClass(preset);

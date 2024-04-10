@@ -1,7 +1,9 @@
 ﻿using EFT;
 using UnityEngine.UIElements;
-using LootingBots;
-using LootingBots.Patch.Components;
+using System;
+using System.Linq;
+using EFT.Interactive;
+using Comfort.Common;
 
 namespace SAIN.Layers
 {
@@ -109,23 +111,33 @@ namespace SAIN.Layers
         // Looting Bots Integration
         private bool ExtractFromLoot()
         {
-            if (!ModDetection.LootingBotsLoaded)
-            {
-                return false;
-            }
-
-            if (!FullOnLoot)
-            {
-                GetLootingBots(); 
-                CheckInventoryStatus();
-            }
-
-            if (FullOnLoot && HasActiveThreat() == false)
-            {
-                return true;
-            }
-            return false;
+            CheckForLootingBots();
+            SAINLootingBotsIntegration?.Update();
+            return FullOnLoot && HasActiveThreat() == false;
         }
+
+        private void CheckForLootingBots()
+        {
+            if (LootingBots.LootingBotsInterop.Init())
+            {
+                canUseLootingBotsInterop = true;
+            }
+            else
+            {
+                Logger.LogWarning("Looting Bots Interop not detected. Cannot instruct " + BotOwner.name + " to loot.");
+            }
+
+            if (canUseLootingBotsInterop && SAINLootingBotsIntegration == null)
+            {
+                SAINLootingBotsIntegration = new SAINLootingBotsIntegration(BotOwner, SAIN);
+            }
+        }
+
+        private bool FullOnLoot => SAINLootingBotsIntegration?.FullOnLoot == true;
+
+        private SAINLootingBotsIntegration SAINLootingBotsIntegration;
+
+        private bool canUseLootingBotsInterop = false;
 
         private bool HasActiveThreat()
         {
@@ -142,27 +154,6 @@ namespace SAIN.Layers
                 return true;
             }
         }
-
-        private void GetLootingBots()
-        {
-            if (LootingBrain == null && BotOwner?.GetPlayer?.TryGetComponent<LootingBrain>(out var component) == true)
-            {
-                //Logger.LogWarning("Found LootingBots Component");
-                LootingBrain = component;
-            }
-        }
-
-        private void CheckInventoryStatus()
-        {
-            if (LootingBrain != null && !LootingBrain.HasFreeSpace && LootingBrain.Stats.NetLootValue > 50000)
-            {
-                Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because because they are Full on loot. Net Loot Value: {LootingBrain.Stats.NetLootValue}");
-                FullOnLoot = true;
-            }
-        }
-
-        private LootingBrain LootingBrain;
-        private bool FullOnLoot;
 
         private bool ExtractFromExternal()
         {

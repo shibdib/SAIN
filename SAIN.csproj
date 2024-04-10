@@ -169,10 +169,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="skwizzy.LootingBots, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\BepInEx\Plugins\skwizzy.LootingBots.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -271,6 +267,8 @@
     <Compile Include="Helpers\NavMeshHelpers.cs" />
     <Compile Include="Helpers\UpdateSettingClass.cs" />
     <Compile Include="Layers\DebugOverlay.cs" />
+    <Compile Include="Layers\Extract\LootingBotsInterop.cs" />
+    <Compile Include="Layers\Extract\SAINLootingBotsIntegration.cs" />
     <Compile Include="Layers\SAINAction.cs" />
     <Compile Include="Layers\SAINLayer.cs" />
     <Compile Include="Plugin\AssemblyInfoClass.cs" />
@@ -285,8 +283,8 @@
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\DefaultBrainsClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\Layer.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\LayerInfoClass.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\BotBrainDefinition.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\BotBrainDefinitionInfoClass.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\NoBushESPSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\LootingBotsSettings.cs" />
     <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
     <Compile Include="SAINComponent\Classes\Decision\DecisionWrapper.cs" />

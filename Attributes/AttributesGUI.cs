@@ -183,8 +183,6 @@ namespace SAIN.Attributes
                     );
             }
 
-            Space(8);
-
             bool showResult = false;
             object originalValue = value;
             if (attributes.ValueType == typeof(bool))
@@ -204,16 +202,12 @@ namespace SAIN.Attributes
             }
             if (showResult && value != null)
             {
-                Space(8);
-
                 string dirtyString = TextField(value.ToString(), null, entryConfig.Result);
                 value = BuilderClass.CleanString(dirtyString, value);
                 if (attributes.ValueType != typeof(bool))
                 {
                     value = attributes.Clamp(value);
                 }
-
-                Space(5);
 
                 if (attributes.Default != null)
                 {

@@ -30,34 +30,40 @@ namespace SAIN.Preset.GlobalSettings
             return result;
         }
 
-        [Name("Global Aiming Settings")]
-        public AimSettings Aiming = new AimSettings();
-
-        [Name("Global Cover Settings")]
-        public CoverSettings Cover = new CoverSettings();
-
-        [Name("Global Extract Settings")]
-        public ExtractSettings Extract = new ExtractSettings();
-
-        [Name("Global Flashlight Settings")]
-        public FlashlightSettings Flashlight = new FlashlightSettings();
-
-        [Name("Global General Settings")]
+        [Name("General")]
         public GeneralSettings General = new GeneralSettings();
 
-        [Name("Global Personality Settings")]
-        public PersonalitySettings Personality = new PersonalitySettings();
+        [Name("Looting Bots")]
+        public LootingBotsSettings LootingBots = new LootingBotsSettings();
 
-        [Name("Global Mind Settings")]
-        public MindSettings Mind = new MindSettings();
+        [Name("No Bush ESP")]
+        public NoBushESPSettings NoBushESP = new NoBushESPSettings();
 
-        [Name("Global Hearing Settings")]
-        public HearingSettings Hearing = new HearingSettings();
+        [Name("Aiming")]
+        public AimSettings Aiming = new AimSettings();
 
-        [Name("Global Shoot Settings")]
+        [Name("Shoot")]
         public ShootSettings Shoot = new ShootSettings();
 
-        [Name("Global Look Settings")]
+        [Name("Cover")]
+        public CoverSettings Cover = new CoverSettings();
+
+        [Name("Extract")]
+        public ExtractSettings Extract = new ExtractSettings();
+
+        [Name("Flashlight")]
+        public FlashlightSettings Flashlight = new FlashlightSettings();
+
+        [Name("Personality")]
+        public PersonalitySettings Personality = new PersonalitySettings();
+
+        [Name("Mind")]
+        public MindSettings Mind = new MindSettings();
+
+        [Name("Hearing")]
+        public HearingSettings Hearing = new HearingSettings();
+
+        [Name("Look")]
         public LookSettings Look = new LookSettings();
 
         [Hidden]

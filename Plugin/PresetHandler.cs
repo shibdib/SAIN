@@ -44,6 +44,8 @@ namespace SAIN.Plugin
                 }
             }
             InitPresetFromDefinition(presetDefinition);
+
+            CheckForDefaultPresets();
         }
 
         public static bool LoadPresetDefinition(string presetKey, out SAINPresetDefinition definition)
@@ -129,6 +131,48 @@ namespace SAIN.Plugin
             }
         }
 
+        private static void CheckForDefaultPresets()
+        {
+            if (!CheckIfPresetLoaded(PresetNameEasy))
+            {
+                Logger.LogWarning("Default Easy Preset Missing, generating...");
+                CreateEasyPreset();
+            }
+            if (!CheckIfPresetLoaded(PresetNameNormal))
+            {
+                Logger.LogWarning("Default Normal Preset Missing, generating...");
+                CreateNormalPreset();
+            }
+            if (!CheckIfPresetLoaded(PresetNameHard))
+            {
+                Logger.LogWarning("Default Hard Preset Missing, generating...");
+                CreateHardPreset();
+            }
+            if (!CheckIfPresetLoaded(PresetNameVeryHard))
+            {
+                Logger.LogWarning("Default Very Hard Preset Missing, generating...");
+                CreateVeryHardPreset();
+            }
+            if (!CheckIfPresetLoaded(PresetNameImpossible))
+            {
+                Logger.LogWarning("Default Impossible Preset Missing, generating...");
+                CreateImpossiblePreset();
+            }
+        }
+
+        private static bool CheckIfPresetLoaded(string presetName)
+        {
+            for (int i = 0; i < PresetOptions.Count; i++)
+            {
+                var preset = PresetOptions[i];
+                if (preset.Name.Contains(presetName) || preset.Name == presetName)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private static SAINPresetClass CreateDefaultPresets()
         {
             CreateEasyPreset();
@@ -139,9 +183,15 @@ namespace SAIN.Plugin
             return hard;
         }
 
+        private static readonly string PresetNameEasy = "1. Baby Bots";
+        private static readonly string PresetNameNormal = "2. Less Difficult";
+        private static readonly string PresetNameHard = DefaultPreset;
+        private static readonly string PresetNameVeryHard = "4. I Like Pain";
+        private static readonly string PresetNameImpossible = "5. Death Wish";
+
         private static SAINPresetClass CreateEasyPreset()
         {
-            var preset = SAINPresetDefinition.CreateDefault("1. Baby Bots", "Bots react slowly and are incredibly inaccurate.");
+            var preset = SAINPresetDefinition.CreateDefault(PresetNameEasy, "Bots react slowly and are incredibly inaccurate.");
 
             var global = preset.GlobalSettings;
             global.Shoot.GlobalRecoilMultiplier = 2.5f;
@@ -168,7 +218,7 @@ namespace SAIN.Plugin
 
         private static SAINPresetClass CreateNormalPreset()
         {
-            var preset = SAINPresetDefinition.CreateDefault("2. Less Difficult", "Bots react more slowly, and are less accurate than usual.");
+            var preset = SAINPresetDefinition.CreateDefault(PresetNameNormal, "Bots react more slowly, and are less accurate than usual.");
 
             var global = preset.GlobalSettings;
             global.Shoot.GlobalRecoilMultiplier = 1.6f;
@@ -194,14 +244,14 @@ namespace SAIN.Plugin
 
         private static SAINPresetClass CreateHardPreset()
         {
-            var preset = SAINPresetDefinition.CreateDefault(DefaultPreset, DefaultPresetDescription);
+            var preset = SAINPresetDefinition.CreateDefault(PresetNameHard, DefaultPresetDescription);
             preset.ExportGlobalSettings();
             return preset;
         }
 
         private static SAINPresetClass CreateVeryHardPreset()
         {
-            var preset = SAINPresetDefinition.CreateDefault("4. I Like Pain", "Bots react faster, are more accurate, and can see further.");
+            var preset = SAINPresetDefinition.CreateDefault(PresetNameVeryHard, "Bots react faster, are more accurate, and can see further.");
 
             var global = preset.GlobalSettings;
             global.Shoot.GlobalRecoilMultiplier = 0.66f;
@@ -227,7 +277,7 @@ namespace SAIN.Plugin
 
         private static SAINPresetClass CreateImpossiblePreset()
         {
-            var preset = SAINPresetDefinition.CreateDefault("5. Death Wish", "Prepare To Die. Bots have almost no scatter, get less recoil from their weapon while shooting, are more accurate, and react deadly fast.");
+            var preset = SAINPresetDefinition.CreateDefault(PresetNameImpossible, "Prepare To Die. Bots have almost no scatter, get less recoil from their weapon while shooting, are more accurate, and react deadly fast.");
 
             var global = preset.GlobalSettings;
             global.Shoot.GlobalRecoilMultiplier = 0.25f;

@@ -14,43 +14,20 @@ namespace SAIN.Editor.GUISections
     {
         public static void ShowAllSettingsGUI(object settings, out bool wasEdited, string name, string savePath, float height, bool unsavedChanges, out bool Saved)
         {
-            const float spacing = 3f;
-
             BeginHorizontal();
 
-            Saved = Button(
-                "Save and Export",
-                $"Apply Values set below to {name}. Exports edited values to {savePath} folder", 
-                EUISoundType.InsuranceInsured,
-                Height(height));
+            Box(name, Height(height));
 
-            Space(spacing);
+            Space(10);
 
-            Box(
-                name,
-                Height(height));
+            Label("Search", Width(125f), Height(height));
 
-            var container = SettingsContainers.GetContainer(
-                settings.GetType(),
-                name
-                );
-
-            Space(spacing);
-
-            Label(
-                "Search", 
-                Width(125f), 
-                Height(height));
-
-            Space(spacing);
-
+            var container = SettingsContainers.GetContainer(settings.GetType(), name);
             container.SearchPattern = TextField(
                 container.SearchPattern, 
                 null, 
                 Width(250), 
                 Height(height));
-
-            Space(spacing);
 
             if (Button(
                 "Clear", 
@@ -61,7 +38,7 @@ namespace SAIN.Editor.GUISections
                 container.SearchPattern = string.Empty;
             }
 
-            EndHorizontal();
+            Space(10);
 
             if (unsavedChanges)
             {
@@ -74,6 +51,15 @@ namespace SAIN.Editor.GUISections
             {
                 BuilderClass.Alert(null, null, height, null);
             }
+
+            Saved = Button(
+                "Save and Export",
+                $"Apply Values set below. Exports edited values to {savePath} folder", 
+                EUISoundType.InsuranceInsured,
+                Height(height));
+
+            EndHorizontal();
+
 
             container.Scroll = BeginScrollView(container.Scroll);
 
@@ -133,7 +119,6 @@ namespace SAIN.Editor.GUISections
 
                 if (open)
                 {
-                    Space(3);
                     AttributesGUI.EditAllValuesInObj(categoryClass, categoryObject, out bool newEdit, search);
                     if (newEdit)
                     {

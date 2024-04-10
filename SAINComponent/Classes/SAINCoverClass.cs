@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes
             }
 
             // If the config option is enabled. Let a bot find cover all the time when they have a target or enemy if the enemy is the player.
-            if (GlobalSettings.General.EnhancedCoverFinding && SAIN.CurrentTargetPosition != null)
+            if (GlobalSettings.Cover.EnhancedCoverFinding && SAIN.CurrentTargetPosition != null)
             {
                 if (SAIN?.Enemy?.EnemyPlayer?.IsYourPlayer == true)
                 {
