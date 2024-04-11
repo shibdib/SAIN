@@ -28,11 +28,6 @@ namespace SAIN.Layers
 
         private void CheckStatus()
         {
-            if (SAINPlugin.LoadedPreset.GlobalSettings.LootingBots.ExtractFromLoot == false)
-            {
-                FullOnLoot = false;
-                return;
-            }
             if (!FullOnLoot && CanExtractFromLootValue())
             {
                 Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because because they are Full on loot. Net Loot Value: {NetLootValue}");
