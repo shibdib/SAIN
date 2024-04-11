@@ -111,33 +111,25 @@ namespace SAIN.Layers
         // Looting Bots Integration
         private bool ExtractFromLoot()
         {
-            CheckForLootingBots();
-            SAINLootingBotsIntegration?.Update();
-            return FullOnLoot && HasActiveThreat() == false;
-        }
-
-        private void CheckForLootingBots()
-        {
-            if (LootingBots.LootingBotsInterop.Init())
+            // If extract from loot is disabled, or no Looting Bots interop, not active
+            if (SAINPlugin.LoadedPreset.GlobalSettings.LootingBots.ExtractFromLoot == false  || !LootingBots.LootingBotsInterop.Init())
             {
-                canUseLootingBotsInterop = true;
-            }
-            else
-            {
-                Logger.LogWarning("Looting Bots Interop not detected. Cannot instruct " + BotOwner.name + " to loot.");
+                return false;
             }
 
-            if (canUseLootingBotsInterop && SAINLootingBotsIntegration == null)
+            // No integration setup yet, set it up
+            if (SAINLootingBotsIntegration == null)
             {
                 SAINLootingBotsIntegration = new SAINLootingBotsIntegration(BotOwner, SAIN);
             }
+
+            SAINLootingBotsIntegration?.Update();
+            return FullOnLoot && HasActiveThreat() == false;
         }
 
         private bool FullOnLoot => SAINLootingBotsIntegration?.FullOnLoot == true;
 
         private SAINLootingBotsIntegration SAINLootingBotsIntegration;
-
-        private bool canUseLootingBotsInterop = false;
 
         private bool HasActiveThreat()
         {
