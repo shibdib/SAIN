@@ -57,14 +57,29 @@ namespace SAIN.SAINComponent.Classes.Mover
                     break;
                 case SteerPriority.Enemy: 
                     break;
-                case SteerPriority.LastHit:
-                    LookToLastHitPos();
-                    break;
                 case SteerPriority.UnderFire:
                     LookToUnderFirePos();
                     break;
+                case SteerPriority.LastHit:
+                    LookToLastHitPos();
+                    break;
+                case SteerPriority.EnemyCloseMoving:
+                    if (SAIN.Enemy != null)
+                    {
+                        LookToHearPos(SAIN.Enemy.EnemyPosition);
+                    }
+                    else if (SAIN.CurrentTargetPosition != null)
+                    {
+                        LookToHearPos(SAIN.CurrentTargetPosition.Value);
+                    }
+                    else
+                    {
+                        LookToRandomPosition();
+                    }
+                    break;
                 case SteerPriority.LastSeenEnemy:
                     LookToEnemyLastSeenPos();
+
                     break;
                 case SteerPriority.Hear:
                     if (LastHeardSound != null)
@@ -109,7 +124,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         // How long a bot will look at where they last saw an enemy if they don't hear any other threats
         private readonly float Steer_TimeSinceSeen_Long = 12f;
         // How far a sound can be for them to react by looking toward it.
-        private readonly float Steer_HeardSound_Dist = 30f;
+        private readonly float Steer_HeardSound_Dist = 100f;
         // How old a sound can be, in seconds, for them to react by looking toward it.
         private readonly float Steer_HeardSound_Age = 2f;
 
@@ -124,19 +139,23 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return SteerPriority.Enemy;
             }
+            if (BotOwner.Memory.IsUnderFire)
+            {
+                return SteerPriority.UnderFire;
+            }
             if (Time.time - BotOwner.Memory.LastTimeHit < Steer_LastHitTime)
             {
                 return SteerPriority.LastHit;
             }
-            if (BotOwner.Memory.IsUnderFire)
+            if (LookToCloseEnemyHear())
             {
-                return SteerPriority.UnderFire;
+                return SteerPriority.EnemyCloseMoving;
             }
             if (SAIN.Enemy?.TimeSinceSeen < Steer_TimeSinceSeen_Short && SAIN.Enemy.Seen)
             {
                 return SteerPriority.LastSeenEnemy;
             }
-            LastHeardSound = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, Steer_HeardSound_Dist, Steer_HeardSound_Age);
+            LastHeardSound = BotOwner.BotsGroup.YoungestPlace(BotOwner, Steer_HeardSound_Dist, true);
             if (LastHeardSound != null)
             {
                 return SteerPriority.Hear;
@@ -173,7 +192,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 Vector3 pos = LastSeenPosition.Value;
                 //  + Vector3.up * 1f
-                LookToPoint(pos);
+                LookToPoint(pos, 80f);
                 return true;
             }
             return false;
@@ -182,22 +201,10 @@ namespace SAIN.SAINComponent.Classes.Mover
         public bool LookToEnemyLastSeenClose()
         {
             SAINEnemyClass enemy = SAIN.Enemy;
-            if (enemy?.LastSeenPosition != null)
-            //  && enemy.Path.EnemyDistanceFromLastSeen < 10f
+            if (enemy?.LastSeenPosition != null
+                && enemy.Path.EnemyDistanceFromLastSeen < 10f)
             {
-                LookToPoint(enemy.EnemyPosition);
-                return true;
-            }
-            return false;
-        }
-
-        public bool LookToEnemySeenRecentAndMoving()
-        {
-            SAINEnemyClass enemy = SAIN.Enemy;
-            if (enemy?.LastSeenPosition != null)
-            //  && enemy.Path.EnemyDistanceFromLastSeen < 10f
-            {
-                LookToPoint(enemy.EnemyPosition);
+                LookToPoint(enemy?.LastSeenPosition);
                 return true;
             }
             return false;
@@ -256,7 +263,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             SAINEnemyClass enemy = SAIN.Enemy;
             if (enemy != null && enemy.IsVisible)
             {
-                LookToEnemy(enemy);
                 return true;
             }
             return false;
@@ -266,7 +272,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (enemy != null)
             {
-                LookToPoint(enemy.EnemyPosition + (Vector3.up * 0.85f));
+                LookToPoint(enemy.EnemyPosition + (Vector3.up * 1.2f));
             }
         }
 
@@ -282,9 +288,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 var player = enemy.EnemyIPlayer as Player;
                 // Need to double check that ActualLinearSpeed and ActualLinearVelocity are the same, just renamed
-                if (enemy.RealDistance < 30f && player.MovementContext.ActualLinearVelocity > 0.33f)
+                if (enemy.RealDistance < 20f && player.MovementContext.ActualLinearVelocity > 1f)
                 {
-                    LookToEnemy(enemy);
                     return true;
                 }
             }
@@ -345,11 +350,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (LastSoundHeardCorner != Vector3.zero)
             {
-                LookToPoint(LastSoundHeardCorner, 150f);
+                LookToPoint(LastSoundHeardCorner, 100f);
             }
             else
             {
-                LookToPoint(soundPos, 150f);
+                LookToPoint(soundPos, 80f);
             }
         }
 
@@ -362,20 +367,22 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             var pos = BotOwner.Memory.LastHitPos;
             pos.y += 1f;
-            LookToPoint(pos);
+            LookToPoint(pos, 150f);
         }
 
         private bool LookRandom;
+        private bool LookRandom2;
 
         public void LookToRandomPosition()
         {
             if (RandomLookTimer < Time.time)
             {
-                RandomLookTimer = Time.time + 2f * Random.Range(0.66f, 1.33f);
+                RandomLookTimer = Time.time + 4f * Random.Range(0.66f, 1.33f);
                 Vector3 pointToLook = Vector3.zero;
+
+                LookRandom = !LookRandom;
                 if (LookRandom)
                 {
-                    LookRandom = false;
                     var Mask = LayerMaskClass.HighPolyWithTerrainMask;
                     var headPos = SAIN.Transform.Head;
                     float pointDistance = 0f;
@@ -383,7 +390,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     {
                         var random = Random.onUnitSphere * 5f;
                         random.y = 0f;
-                        if (!Physics.Raycast(headPos, random, out var hit, 15f, Mask))
+                        if (!Physics.Raycast(headPos, random, out var hit, 4f, Mask))
                         {
                             pointToLook = random + headPos;
                             break;
@@ -400,7 +407,12 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
                 else
                 {
-                    LookRandom = true;
+                    LookRandom2 = !LookRandom2;
+                    if (LookRandom2)
+                    {
+                        LookToMovingDirection();
+                        return;
+                    }
                     if (LookToPathToEnemy())
                     {
                         return;
@@ -418,7 +430,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                         pointToLook = SAIN.CurrentTargetPosition.Value;
                     }
                 }
-                LookToPoint(pointToLook, 100f);
+                LookToPoint(pointToLook, 80f);
             }
         }
 
@@ -433,7 +445,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     {
                         Vector3 pos = enemy.NavMeshPath.corners[1];
                         pos += Vector3.up * 1f;
-                        LookToPoint(pos);
+                        LookToPoint(pos, 80f);
                         return true;
                     }
                 }
@@ -515,6 +527,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         Random,
         LastHit,
         UnderFire,
-        MoveDirection
+        MoveDirection,
+        EnemyCloseMoving
     }
 }

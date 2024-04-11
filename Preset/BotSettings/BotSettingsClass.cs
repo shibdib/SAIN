@@ -92,7 +92,7 @@ namespace SAIN.Preset.BotSettings
                     {
                         // Get the multiplier of the EFT group Category
                         object ACatObject = ACatField.GetValue(A);
-                        // List the field names in that category
+                        // SoundList the field names in that category
                         List<string> AVariableNames = AccessTools.GetFieldNames(ACatObject);
 
                         foreach (FieldInfo BVariableField in BVariableFieldArray)

@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -135,8 +136,6 @@ namespace SAIN.BotController.Classes
         public Action<IPlayer, DamageInfo, float> MemberKilled { get; set; }
 
         public Action<SAINComponentClass, float> NewLeaderFound { get; set; }
-
-        public WildSpawnType BotType { get; private set; }
 
         public bool LeaderIsDeadorNull => LeaderComponent?.Player == null || LeaderComponent?.Player?.HealthController.IsAlive == false;
 

@@ -31,7 +31,7 @@ namespace SAIN.SAINComponent.Classes
             // If the config option is enabled. Let a bot find cover all the time when they have a target or enemy if the enemy is the player.
             if (GlobalSettings.Cover.EnhancedCoverFinding && SAIN.CurrentTargetPosition != null)
             {
-                if (SAIN?.Enemy?.EnemyPlayer?.IsYourPlayer == true)
+                if (SAIN.HasEnemy && SAIN.Enemy?.EnemyPlayer != null && SAIN.Enemy.EnemyPlayer.IsYourPlayer == true)
                 {
                     ActivateCoverFinder(true);
                     return;
@@ -45,11 +45,12 @@ namespace SAIN.SAINComponent.Classes
             }
 
             var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
+            var currentCover = CoverInUse;
             if (CurrentDecision == SoloDecision.UnstuckMoveToCover || CurrentDecision == SoloDecision.Retreat || CurrentDecision == SoloDecision.RunToCover || CurrentDecision == SoloDecision.WalkToCover)
             {
                 ActivateCoverFinder(true);
             }
-            else if (CurrentDecision == SoloDecision.HoldInCover && (CoverInUse == null || CoverInUse.Spotted == true || Time.time - CoverInUse.TimeCreated > 5f))
+            else if (CurrentDecision == SoloDecision.HoldInCover && (currentCover == null || currentCover.Spotted == true || Time.time - currentCover.TimeCreated > 5f))
             {
                 ActivateCoverFinder(true);
             }

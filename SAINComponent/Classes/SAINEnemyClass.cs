@@ -201,14 +201,15 @@ namespace SAIN.SAINComponent.Classes
                     TimeFirstSeen = Time.time;
                     Seen = true;
                 }
+                LastSeenPosition = EnemyPerson.Position;
             }
+
             if (!IsVisible)
             {
                 VisibleStartTime = -1f;
                 if (wasVisible)
                 {
                     TimeLastSeen = Time.time;
-                    LastSeenPosition = EnemyPerson.Position;
                 }
             }
 
@@ -265,8 +266,19 @@ namespace SAIN.SAINComponent.Classes
         {
             bool hasLastCorner = false;
             float pathDistance = Mathf.Infinity;
+
+            Vector3 enemyPosition;
+            if (Enemy.LastSeenPosition != null)
+            {
+                enemyPosition = Enemy.LastSeenPosition.Value;
+            }
+            else
+            {
+                enemyPosition = EnemyPosition;
+            }
+
             PathToEnemy.ClearCorners();
-            if (NavMesh.CalculatePath(SAIN.Position, EnemyPosition, -1, PathToEnemy))
+            if (NavMesh.CalculatePath(SAIN.Position, enemyPosition, -1, PathToEnemy))
             {
                 pathDistance = PathToEnemy.CalculatePathLength();
                 if (PathToEnemy.corners.Length > 2)
@@ -361,8 +373,12 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
-                Vector3 dirToEnemy = Vector.NormalizeFastSelf(BotOwner.LookSensor._headPoint - EnemyPosition);
-                return Vector.IsAngLessNormalized(dirToEnemy, EnemyPerson.Transform.LookDirection, 0.9659258f);
+                Vector3 dirEnemy = (SAIN.Position - EnemyPosition).normalized;
+                Vector3 dirBot = EnemyPerson.Transform.LookDirection.normalized;
+                float dot = Vector3.Dot(dirEnemy, dirBot);
+                return dot >= 0.9f;
+                //Vector3 dirToEnemy = Vector.NormalizeFastSelf(BotOwner.LookSensor._headPoint - EnemyPosition);
+                //return Vector.IsAngLessNormalized(dirToEnemy, EnemyPerson.Transform.LookDirection, 0.9659258f);
             }
         }
 

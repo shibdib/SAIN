@@ -118,7 +118,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 ClearOldPoints();
                 GetColliders(out int hits);
                 int totalChecked = 0;
-                var Counter = new FrameCounter(5);
+                int count = 0;
                 for (int i = 0; i < hits; i++)
                 {
                     totalChecked++;
@@ -126,14 +126,27 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     {
                         CoverPoints.Add(newPoint);
                     }
-                    if (Counter.FrameWait)
+                    if (SAINPlugin.LoadedPreset.GlobalSettings.Cover.EnhancedCoverFinding)
                     {
+                        if ((count >= 5
+                                && CoverPoints.Count > 0)
+                            || (count >= 15
+                                && CoverPoints.Count == 0))
+                        {
+                            count = 0;
+                            yield return null;
+                        }
+                    }
+                    else if (count >= 5)
+                    {
+                        count = 0;
                         yield return null;
                     }
                     if (CoverPoints.Count > 4)
                     {
                         break;
                     }
+                    count++;
                 }
 
                 if (CoverPoints.Count > 0)

@@ -68,5 +68,8 @@ namespace SAIN.Editor
         [Debug]
         public bool DebugMovementPlan = false;
 
+        [Default(false)]
+        [Debug]
+        public bool DebugHearing = false;
     }
 }

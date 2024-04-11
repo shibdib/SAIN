@@ -94,7 +94,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void EnemyDown(IPlayer person)
         {
-            if (!FriendIsClose)
+            if (!FriendIsClose || !PersonIsClose(person))
             {
                 return;
             }
@@ -106,6 +106,11 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 SAIN.Talk.Say(EPhraseTrigger.EnemyDown);
             }
+        }
+
+        private bool PersonIsClose(IPlayer player)
+        {
+            return player != null && BotOwner != null && (player.Position - BotOwner.Position).magnitude < 30f;
         }
 
         public bool FriendIsClose;
@@ -122,7 +127,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
-            if (!FriendIsClose)
+            if (!FriendIsClose || !PersonIsClose(player))
             {
                 return;
             }
@@ -187,7 +192,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 {
                     if (EFTMath.RandomBool(chance))
                     {
-                        member.Talk.TalkAfterDelay(trigger, mask, delay);
+                        member.Talk.TalkAfterDelay(trigger, mask, delay * UnityEngine.Random.Range(0.75f, 2f));
                     }
                 }
             }
@@ -208,7 +213,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                             CheckFriendliesTimer = Time.time + SAIN.Info.FileSettings.Mind.SquadLeadTalkFreq * 5f;
 
                             SAIN.Talk.Say(trigger);
-                            AllMembersSay(EPhraseTrigger.Roger, ETagStatus.Aware, Random.Range(0.5f, 1.5f), 40f);
+                            AllMembersSay(EPhraseTrigger.Roger, ETagStatus.Aware, Random.Range(1f, 3f), 50f);
                         }
                     }
                 }
@@ -293,15 +298,20 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             trigger = EPhraseTrigger.PhraseNone;
             mask = ETagStatus.Aware;
-            var hear = BotOwner.BotsGroup.YoungestPlace(BotOwner, 40f, true);
 
             if (SAIN.Enemy != null)
             {
                 return false;
             }
 
+            var hear = BotOwner.BotsGroup.YoungestPlace(BotOwner, 50f, true);
+
             if (hear != null)
             {
+                if (hear.CheckingPlayer != null && hear.CheckingPlayer.ProfileId != BotOwner.ProfileId)
+                {
+                    return false;
+                }
                 if (!hear.IsDanger)
                 {
                     if (hear.CreatedTime + 0.5f < Time.time && hear.CreatedTime + 1f > Time.time)
@@ -428,7 +438,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 var mask = ETagStatus.Aware;
 
                 var enemy = SAIN.Enemy;
-                if (SAIN.Enemy.IsVisible)
+                if (SAIN.Enemy.IsVisible && enemy.EnemyLookingAtMe)
                 {
                     if (enemy.EnemyLookingAtMe)
                     {

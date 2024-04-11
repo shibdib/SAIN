@@ -203,4 +203,15 @@ namespace SAIN
         focused,
         onFocused,
     }
+
+    public enum ESoundCleanupReason
+    {
+        None = 0,
+        PlayerNull = 1,
+        IPlayerNull = 2,
+        TooFar = 3,
+        TooOld = 4,
+        SoundNull = 5,
+        Forced = 6,
+    }
 }

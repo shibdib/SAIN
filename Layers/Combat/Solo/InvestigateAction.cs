@@ -61,7 +61,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
-            SearchPoint.Point = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, 200f, 60f);
+            SearchPoint.Point = BotOwner.BotsGroup.YoungestPlace(BotOwner, 200f, true);
         }
 
         public override void Stop()

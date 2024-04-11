@@ -3,8 +3,14 @@ using Comfort.Common;
 using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
+using System;
+using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
+using UnityEngine.AI;
+using static RootMotion.FinalIK.AimPoser;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -17,66 +23,140 @@ namespace SAIN.SAINComponent.Classes
         public void Init()
         {
             Singleton<BotEventHandler>.Instance.OnSoundPlayed += HearSound;
+            Singleton<BotEventHandler>.Instance.OnKill += CleanupKilledPlayer;
         }
 
         public void Update()
         {
         }
 
-        public void Dispose()
+        private float cleanupTimer;
+
+        private void CleanupKilledPlayer(IPlayer killer, IPlayer target)
         {
-            Singleton<BotEventHandler>.Instance.OnSoundPlayed -= HearSound;
+            if (target != null && SoundsHeardFromPlayer.ContainsKey(target.ProfileId))
+            {
+                var list = SoundsHeardFromPlayer[target.ProfileId].SoundList;
+                if (SAINPlugin.EditorDefaults.DebugHearing)
+                {
+                    Logger.LogDebug($"Cleaned up {list.Count} sounds from killed player: {target.Profile?.Nickname}");
+                }
+                list.Clear();
+                SoundsHeardFromPlayer.Remove(target.ProfileId);
+            }
         }
 
-        public void HearSound(IPlayer player, Vector3 position, float power, AISoundType type)
+        private void ManualCleanup(bool force = false)
         {
-            if (BotOwner == null || SAIN == null) return;
+            if (SoundsHeardFromPlayer.Count == 0)
+            {
+                return;
+            }
+            foreach (var kvp in SoundsHeardFromPlayer)
+            {
+                if (kvp.Value != null)
+                {
+                    kvp.Value.Cleanup(force);
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            ManualCleanup(true);
+            Singleton<BotEventHandler>.Instance.OnSoundPlayed -= HearSound;
+            Singleton<BotEventHandler>.Instance.OnKill -= CleanupKilledPlayer;
+        }
+
+        public void HearSound(IPlayer iPlayer, Vector3 position, float power, AISoundType type)
+        {
+            if (BotOwner == null || SAIN == null)
+            {
+                return;
+            }
+            if (iPlayer != null && BotOwner.ProfileId == iPlayer.ProfileId)
+            {
+                return;
+            }
+
+            const float freq = 1f;
+            if (cleanupTimer < Time.time)
+            {
+                cleanupTimer = Time.time + freq;
+                ManualCleanup();
+            }
 
             if (!SAIN.GameIsEnding)
             {
-                EnemySoundHeard(player, position, power, type);
+                EnemySoundHeard(iPlayer, position, power, type);
             }
         }
 
-        private void EnemySoundHeard(IPlayer player, Vector3 position, float power, AISoundType type)
+        private readonly Dictionary<string, SAINSoundCollection> SoundsHeardFromPlayer = new Dictionary<string, SAINSoundCollection>();
+
+        private void EnemySoundHeard(IPlayer iPlayer, Vector3 soundPosition, float power, AISoundType type)
         {
-            if (player != null)
+            if (iPlayer == null)
             {
-                if (BotOwner.ProfileId == player.ProfileId)
-                {
-                    return;
-                }
-
-                if (CheckSoundHeardAfterModifiers(player, position, power, type, out float distance))
-                {
-                    bool gunsound = type == AISoundType.gun || type == AISoundType.silencedGun;
-
-                    if (!BotOwner.BotsGroup.IsEnemy(player) && BotOwner.BotsGroup.Neutrals.ContainsKey(player))
-                    {
-                        //BotOwner.BotsGroup.LastSoundsController.AddNeutralSound(player, DrawPosition);
-                        return;
-                    }
-
-                    if (gunsound || IsSoundClose(distance))
-                    {
-                        if (distance < 15f)
-                        {
-                            try
-                            {
-                                // BotOwner.Memory.Spotted(false, null, null);
-                                BotOwner.WeaponManager?.Stationary?.Spotted();
-                            }
-                            catch { }
-                        }
-
-                        ReactToSound(player, position, distance, true, type);
-                    }
-                }
+                float rawDist = (BotOwner.Transform.position - soundPosition).magnitude;
+                ReactToSound(null, soundPosition, rawDist, rawDist < power, false, type);
+                return;
             }
-            else
+
+            bool wasHeard = CheckSoundHeardAfterModifiers(iPlayer, soundPosition, power, type, out float distance);
+
+            // Did the sound come from a non-enemy?
+            if (wasHeard && !BotOwner.BotsGroup.IsEnemy(iPlayer) && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
             {
-                float distance = (BotOwner.Transform.position - position).magnitude;
-                ReactToSound(null, position, distance, distance < power, type);
+                NeutralSound(iPlayer, soundPosition);
+                return;
+            }
+
+            // Double check that the source isn't from a member of the bot's group.
+            if (wasHeard && iPlayer.AIData.IsAI && BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
+            {
+                NeutralSound(iPlayer, soundPosition);
+                return;
+            }
+
+            bool bulletFelt = BulletFelt(iPlayer, type, soundPosition);
+
+            if (wasHeard || bulletFelt)
+            {
+                string profileID = iPlayer.ProfileId;
+
+                if (!SoundsHeardFromPlayer.ContainsKey(profileID))
+                {
+                    SoundsHeardFromPlayer.Add(profileID, new SAINSoundCollection(iPlayer));
+                }
+
+                SAINSound sainSound = new SAINSound
+                {
+                    Position = soundPosition,
+                    SourcePlayerProfileId = profileID,
+                    SoundPower = power,
+                    WasHeard = wasHeard,
+                    BulletFelt = bulletFelt,
+                    DistanceAtCreation = distance,
+                    AISoundType = type,
+                };
+
+                SAINSoundCollection collection = SoundsHeardFromPlayer[profileID];
+                collection.SoundList.Add(sainSound);
+
+                ReactToSound(iPlayer, soundPosition, distance, wasHeard, bulletFelt, type);
+            }
+        }
+
+        private void NeutralSound(IPlayer iPlayer, Vector3 soundPosition)
+        {
+            try
+            {
+                BotOwner.BotsGroup.LastSoundsController.AddNeutralSound(iPlayer, soundPosition);
+            }
+            catch
+            {
+                // empty because bsgs code is bad
             }
         }
 
@@ -142,112 +222,213 @@ namespace SAIN.SAINComponent.Classes
             return false;
         }
 
-        private void ReactToSound(IPlayer person, Vector3 pos, float power, bool wasHeard, AISoundType type)
+        private bool GetShotDirection(IPlayer person, out Vector3 result)
         {
-            if (person != null && person.AIData.IsAI && BotOwner.BotsGroup.Contains(person.AIData.BotOwner))
+            Player player = EFTInfo.GetPlayer(person);
+            if (player != null)
             {
-                return;
+                result = player.LookDirection;
+                return true;
+            }
+            result = Vector3.zero;
+            return false;
+        }
+
+        private bool BulletFelt(IPlayer person, AISoundType type, Vector3 pos)
+        {
+            const float bulletfeeldistance = 500f;
+            const float DotThreshold = 0.9f;
+
+            bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
+
+            Vector3 shooterDirectionToBot = BotOwner.Transform.position - pos;
+            float shooterDistance = shooterDirectionToBot.magnitude;
+
+            if (isGunSound && shooterDistance <= bulletfeeldistance && GetShotDirection(person, out Vector3 shotDirection))
+            {
+                Vector3 shotDirectionNormal = shotDirection.normalized;
+                Vector3 botDirectionNormal = shooterDirectionToBot.normalized;
+
+                float dot = Vector3.Dot(shotDirectionNormal, botDirectionNormal);
+
+                if (SAINPlugin.EditorDefaults.DebugHearing)
+                {
+                    Logger.LogInfo($"Got Shot Direction from [{person.Profile?.Nickname}] to [{BotOwner?.name}] : Dot Product Result: [{dot}]");
+
+                    Vector3 start = person.MainParts[BodyPartType.head].Position;
+                    DebugGizmos.Ray(start, shotDirectionNormal, Color.red, 3f, 0.05f, true, 3f);
+                    DebugGizmos.Ray(start, botDirectionNormal, Color.yellow, 3f, 0.05f, true, 3f);
+                }
+
+                if (dot >= DotThreshold)
+                {
+                    float rayLength = shooterDistance;
+                    if (shooterDistance > 50f)
+                    {
+                        rayLength -= 15f;
+                    }
+                    if (!Physics.Raycast(pos, shooterDirectionToBot, rayLength, LayerMaskClass.HighPolyWithTerrainMask))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private void ReactToSound(IPlayer person, Vector3 pos, float power, bool wasHeard, bool bulletFelt, AISoundType type)
+        {
+            bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
+            float shooterDistance = (BotOwner.Transform.position - pos).magnitude;
+
+            Vector3 vector = GetSoundDispersion(person, pos, type);
+
+            // Get a sampled position for better results in bot reaction.
+            if (NavMesh.SamplePosition(vector, out NavMeshHit hit, 20f, -1))
+            {
+                if (SAINPlugin.EditorDefaults.DebugHearing)
+                {
+                    Logger.LogDebug($"Distance from Sampled Position and Original: {(vector - hit.position).magnitude}");
+                }
+                vector = hit.position;
             }
 
-            float bulletfeeldistance = 500f;
-            Vector3 shooterDirection = BotOwner.Transform.position - pos;
-            float shooterDistance = shooterDirection.magnitude;
-            bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
-            bool bulletfelt = shooterDistance < bulletfeeldistance;
+            if ((wasHeard || bulletFelt) && shooterDistance < BotOwner.Settings.FileSettings.Hearing.RESET_TIMER_DIST)
+            {
+                BotOwner.LookData.ResetUpdateTime();
+            }
 
-            float dispersion = (type == AISoundType.gun) ? shooterDistance / 15f : shooterDistance / 10f;
-            float dispNum = EFTMath.Random(-dispersion, dispersion);
-            Vector3 vector = new Vector3(pos.x + dispNum, pos.y, pos.z + dispNum);
+            bool soundClose = false;
+            bool firedAtMe = false;
 
-            SAINEnemyClass enemy = SAIN.EnemyController?.GetEnemy(person.AccountId);
+            if (person != null && bulletFelt && isGunSound)
+            {
+                Vector3 to = vector + person.LookDirection;
+                soundClose = DidShotFlyByMe(out firedAtMe, vector, to, 10f);
+
+                if (firedAtMe)
+                {
+                    SAIN.Memory.UnderFireFromPosition = vector;
+                    SAIN?.Suppression?.AddSuppression();
+                    try
+                    {
+                        BotOwner.Memory.SetUnderFire(person);
+                    }
+                    catch { }
+
+                    if (shooterDistance > 100f)
+                    {
+                        SAIN.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.66f, 1.33f));
+                    }
+                    CheckCalcGoal();
+                }
+            }
 
             if (wasHeard)
             {
-                enemy?.SetHeardStatus(wasHeard, pos);
-
                 try
                 {
                     BotOwner.BotsGroup.AddPointToSearch(vector, power, BotOwner);
                 }
                 catch { }
 
-                if (shooterDistance < BotOwner.Settings.FileSettings.Hearing.RESET_TIMER_DIST)
-                {
-                    BotOwner.LookData.ResetUpdateTime();
-                }
-
                 if (person != null && isGunSound)
                 {
-                    Vector3 to = vector + person.LookDirection;
-                    bool soundclose = IsSoundClose(out var firedAtMe, vector, to, 10f);
-
-                    if (soundclose)
-                    {
-                        SAIN?.Suppression?.AddSuppression();
-                        if (firedAtMe)
-                        {
-                            try
-                            {
-                                SAIN.Memory.UnderFireFromPosition = vector;
-                                BotOwner.Memory.SetUnderFire(person);
-                            }
-                            catch (System.Exception) { }
-
-                            if (shooterDistance > 50f)
-                            {
-                                SAIN.Talk.Say(EPhraseTrigger.SniperPhrase);
-                            }
-                        }
-                    }
-
-                    if (!BotOwner.Memory.GoalTarget.HavePlaceTarget() && BotOwner.Memory.GoalEnemy == null)
-                    {
-                        try
-                        {
-                            BotOwner.BotsGroup.CalcGoalForBot(BotOwner);
-                        }
-                        catch { }
-                        return;
-                    }
+                    CheckCalcGoal();
                 }
-                else if (person != null && isGunSound && bulletfelt)
+            }
+            else if (isGunSound && bulletFelt && firedAtMe)
+            {
+                Vector3 estimate = GetEstimatedPoint(vector);
+
+                // Get a sampled position for better results in bot reaction.
+                if (NavMesh.SamplePosition(estimate, out NavMeshHit hit2, 10f, -1))
                 {
-                    Vector3 to = vector + person.LookDirection;
-                    bool soundclose = IsSoundClose(out var firedAtMe, vector, to, 10f);
-
-                    if (soundclose)
+                    if (SAINPlugin.EditorDefaults.DebugHearing)
                     {
-                        SAIN?.Suppression?.AddSuppression();
-
-                        if (firedAtMe)
-                        {
-                            Vector3 estimate = GetEstimatedPoint(vector);
-
-                            SAIN.Memory.UnderFireFromPosition = estimate;
-
-                            enemy?.SetHeardStatus(true, estimate);
-
-                            try
-                            {
-                                BotOwner.BotsGroup.AddPointToSearch(estimate, 50f, BotOwner);
-                            }
-                            catch (System.Exception) { }
-                        }
+                        Logger.LogDebug($"Distance from Sampled Position and Original: {(vector - hit2.position).magnitude}");
                     }
+                    estimate = hit2.position;
                 }
+
+                SAIN.Memory.UnderFireFromPosition = estimate;
+                try
+                {
+                    BotOwner.BotsGroup.AddPointToSearch(estimate, power, BotOwner);
+                }
+                catch { }
             }
         }
 
-        public LastHeardSound LastHeardSound { get; private set; }
+        private Vector3 GetSoundDispersion(IPlayer person, Vector3 pos, AISoundType soundType)
+        {
+            const float dispGun = 15f;
+            const float dispSuppGun = 10;
+            const float dispStep = 5;
+
+            Vector3 shooterDirectionToBot = BotOwner.Transform.position - pos;
+            float shooterDistance = shooterDirectionToBot.magnitude;
+
+            float dispersion;
+            if (soundType == AISoundType.gun)
+            {
+                dispersion = shooterDistance / dispGun;
+            }
+            else if (soundType == AISoundType.silencedGun)
+            {
+                dispersion = shooterDistance / dispSuppGun;
+            }
+            else
+            {
+                dispersion = shooterDistance / dispStep;
+            }
+
+            // If a bot is hearing multiple sounds from a iPlayer, they will now be more accurate at finding the source soundPosition based on how many sounds they have heard from this particular iPlayer
+            int soundCount = 0;
+            float finalDispersion = dispersion;
+            if (person != null && SoundsHeardFromPlayer.ContainsKey(person.ProfileId))
+            {
+                SAINSoundCollection collection = SoundsHeardFromPlayer[person.ProfileId];
+                if (collection != null)
+                {
+                    soundCount = collection.Count;
+                }
+            }
+            if (soundCount > 1)
+            {
+                finalDispersion = (dispersion / soundCount).Round100();
+            }
+
+            float dispersionRandomized = EFTMath.Random(-finalDispersion, finalDispersion);
+            Vector3 vector = new Vector3(pos.x + dispersionRandomized, pos.y + dispersionRandomized, pos.z + dispersionRandomized);
+
+            if (SAINPlugin.EditorDefaults.DebugHearing)
+            {
+                Logger.LogDebug($"Dispersion: [{(vector - pos).magnitude}] :: Distance: [{shooterDistance}] : Sounds Heard: [{soundCount}] : PreCount Dispersion Num: [{dispersion}] : PreRandomized Dispersion Result: [{finalDispersion}] : SoundType: [{soundType}]");
+            }
+            return vector;
+        }
+
+        private void CheckCalcGoal()
+        {
+            if (!BotOwner.Memory.GoalTarget.HavePlaceTarget() && BotOwner.Memory.GoalEnemy == null)
+            {
+                try
+                {
+                    BotOwner.BotsGroup.CalcGoalForBot(BotOwner);
+                }
+                catch { }
+            }
+        }
 
         private Vector3 GetEstimatedPoint(Vector3 source)
         {
-            Vector3 randomPoint = Random.onUnitSphere * (Vector3.Distance(source, BotOwner.Transform.position) / 5f);
+            Vector3 randomPoint = UnityEngine.Random.onUnitSphere * (Vector3.Distance(source, BotOwner.Transform.position) / 5f);
             randomPoint.y = Mathf.Clamp(randomPoint.y, -5f, 5f);
             return source + randomPoint;
         }
 
-        private bool IsSoundClose(out bool firedAtMe, Vector3 from, Vector3 to, float maxDist)
+        private bool DidShotFlyByMe(out bool firedAtMe, Vector3 from, Vector3 to, float maxDist)
         {
             var projectionPoint = GetProjectionPoint(BotOwner.Position + Vector3.up, from, to);
             bool closeSound = (projectionPoint - BotOwner.Position).magnitude < maxDist;
@@ -262,45 +443,37 @@ namespace SAIN.SAINComponent.Classes
                 DebugGizmos.Ray(projectionPoint, -direction, Color.red, 5f, 0.05f, true, 3f, true);
             }
 
-            return closeSound;
+            return closeSound && firedAtMe;
         }
 
         public static Vector3 GetProjectionPoint(Vector3 p, Vector3 p1, Vector3 p2)
         {
-            //CalculateRecoil the difference between the z-coordinates of points p1 and p2
             float num = p1.z - p2.z;
 
-            //If the difference is 0, return a vector with the x-coordinate of point p and the y and z-coordinates of point p1
             if (num == 0f)
             {
                 return new Vector3(p.x, p1.y, p1.z);
             }
 
-            //CalculateRecoil the difference between the x-coordinates of points p1 and p2
             float num2 = p2.x - p1.x;
 
-            //If the difference is 0, return a vector with the x-coordinate of point p1 and the y and z-coordinates of point p
             if (num2 == 0f)
             {
                 return new Vector3(p1.x, p1.y, p.z);
             }
 
-            //CalculateRecoil the values of num3, num4, and num5
             float num3 = p1.x * p2.z - p2.x * p1.z;
             float num4 = num2 * p.x - num * p.z;
             float num5 = -(num2 * num3 + num * num4) / (num2 * num2 + num * num);
 
-            //Return a vector with the calculated x-coordinate, the y-coordinate of point p1, and the calculated z-coordinate
             return new Vector3(-(num3 + num2 * num5) / num, p1.y, num5);
         }
 
-        private bool IsSoundClose(float d)
+        private bool CheckFootStepDetectChance(float d)
         {
-            //Modify the close hearing and far hearing variables
-            float closehearing = 10f;
+            float closehearing = 5f;
             float farhearing = SAIN.Info.FileSettings.Hearing.MaxFootstepAudioDistance;
 
-            //Check if the Distance is less than or equal to the close hearing
             if (d <= closehearing)
             {
                 return true;
@@ -312,44 +485,48 @@ namespace SAIN.SAINComponent.Classes
             }
 
             float num = farhearing - closehearing;
-
-            //CalculateRecoil the difference between the Distance and close hearing
             float num2 = d - closehearing;
-
-            //CalculateRecoil the ratio of the difference between the Distance and close hearing to the difference between the far hearing and close hearing
             float num3 = 1f - num2 / num;
 
             return EFTMath.Random(0f, 1f) < num3;
         }
 
-        public bool DoIHearSound(IPlayer enemy, Vector3 position, float power, AISoundType type, out float distance, bool withOcclusionCheck)
+        public bool DoIHearSound(IPlayer iPlayer, Vector3 position, float power, AISoundType type, out float soundDistance, bool withOcclusionCheck)
         {
-            distance = (BotOwner.Transform.position - position).magnitude;
+            soundDistance = (BotOwner.Transform.position - position).magnitude;
 
             // Is sound within hearing Distance at all?
-            if (distance < power)
+            if (soundDistance < power)
             {
                 if (!withOcclusionCheck)
                 {
-                    return distance < power;
+                    if (type == AISoundType.step)
+                    {
+                        return CheckFootStepDetectChance(soundDistance);
+                    }
+                    return true;
                 }
                 // if so, is sound blocked by obstacles?
-                if (OcclusionCheck(enemy, position, power, distance, type, out float occludedpower))
+                float occludedPower = GetOcclusion(iPlayer, position, power, type);
+                if (soundDistance < occludedPower)
                 {
-                    return distance < occludedpower;
+                    if (type == AISoundType.step)
+                    {
+                        return CheckFootStepDetectChance(soundDistance);
+                    }
+                    return true;
                 }
             }
 
             // Sound not heard
-            distance = 0f;
+            soundDistance = 0f;
             return false;
         }
 
-        private bool OcclusionCheck(IPlayer player, Vector3 position, float power, float distance, AISoundType type, out float occlusion)
+        private float GetOcclusion(IPlayer player, Vector3 position, float power, AISoundType type)
         {
-            // Raise up the vector3's to match head level
             Vector3 botheadpos = BotOwner.MyHead.position;
-            //botheadpos.y += 1.3f;
+
             if (type == AISoundType.step)
             {
                 position.y += 0.1f;
@@ -357,16 +534,12 @@ namespace SAIN.SAINComponent.Classes
 
             Vector3 direction = (botheadpos - position).normalized;
             float soundDistance = direction.magnitude;
-            bool PMC = SAIN.Info.Profile.IsPMC;
+
+            float result = power;
             // Checks if something is within line of sight
             if (Physics.Raycast(botheadpos, direction, power, LayerMaskClass.HighPolyWithTerrainNoGrassMask))
             {
-                if (soundDistance > 125f && !PMC)
-                {
-                    occlusion = 0f;
-                    return false;
-                }
-                // If the sound source is the player, raycast and find number of collisions
+                // If the sound source is the iPlayer, raycast and find number of collisions
                 if (player.IsYourPlayer)
                 {
                     // Check if the sound originates from an environment other than the BotOwner's
@@ -379,23 +552,15 @@ namespace SAIN.SAINComponent.Classes
                     if (type == AISoundType.gun) finalmodifier = Mathf.Sqrt(finalmodifier);
 
                     // Apply Modifier
-                    occlusion = power * finalmodifier;
-
-                    return distance < occlusion;
+                    result = power * finalmodifier;
                 }
                 else
                 {
                     // Only check environment for bots vs bots
-                    occlusion = power * EnvironmentCheck(player);
-                    return distance < occlusion;
+                    result = power * EnvironmentCheck(player);
                 }
             }
-            else
-            {
-                // Direct line of sight, no occlusion
-                occlusion = distance;
-                return false;
-            }
+            return result;
         }
 
         private float EnvironmentCheck(IPlayer enemy)
@@ -405,7 +570,7 @@ namespace SAIN.SAINComponent.Classes
             return botlocation == enemylocation ? 1f : 0.66f;
         }
 
-        public float RaycastCheck(Vector3 botpos, Vector3 enemypos, float environmentmodifier)
+        private float RaycastCheck(Vector3 botpos, Vector3 enemypos, float environmentmodifier)
         {
             if (raycasttimer < Time.time)
             {

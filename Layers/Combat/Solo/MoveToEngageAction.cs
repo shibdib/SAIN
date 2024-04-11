@@ -30,6 +30,7 @@ namespace SAIN.Layers.Combat.Solo
 
             if (CheckShoot(enemy))
             {
+                SAIN.Steering.SteerByPriority();
                 Shoot.Update();
                 return;
             }
@@ -61,7 +62,7 @@ namespace SAIN.Layers.Combat.Solo
             {
                 if (RecalcPathTimer < Time.time)
                 {
-                    RecalcPathTimer = Time.time + 2f;
+                    RecalcPathTimer = Time.time + 4f;
                     BotOwner.BotRun.Run(movePos, false);
                 }
             }
@@ -71,13 +72,14 @@ namespace SAIN.Layers.Combat.Solo
 
                 if (RecalcPathTimer < Time.time)
                 {
-                    RecalcPathTimer = Time.time + 2f;
+                    RecalcPathTimer = Time.time + 4f;
                     BotOwner.MoveToEnemyData.TryMoveToEnemy(movePos);
                 }
 
                 if (!SAIN.Steering.SteerByPriority(false))
                 {
-                    SAIN.Steering.LookToPoint(movePos + Vector3.up * 1f);
+                    SAIN.Steering.LookToMovingDirection();
+                    //SAIN.Steering.LookToPoint(movePos + Vector3.up * 1f);
                 }
             }
         }
