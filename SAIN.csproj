@@ -434,7 +434,6 @@
     <Compile Include="Plugin\Patches\MovementPatches.cs" />
     <Compile Include="Plugin\Patches\Shoot\RateofFirePatch.cs" />
     <Compile Include="Plugin\Patches\Shoot\RecoilPatch.cs" />
-    <Compile Include="Plugin\Patches\Audio\StepSoundPatch.cs" />
     <Compile Include="Plugin\Patches\TalkPatches.cs" />
     <Compile Include="Components\MainPlayer\SAINFlashLightComponent.cs" />
     <Compile Include="SAINComponent\Classes\Decision\SAINSelfActionClass.cs" />
@@ -453,7 +452,6 @@
     <Compile Include="Layers\Combat\Solo\SearchAction.cs" />
     <Compile Include="Layers\Combat\Solo\Cover\HoldinCoverAction.cs" />
     <Compile Include="Layers\Combat\Squad\SuppressAction.cs" />
-    <Compile Include="Plugin\Patches\Shoot\GrenadeSound.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotGrenadeClass.cs" />
     <Compile Include="SAINComponent\SAINComponentClass.cs" />
     <Compile Include="Layers\Combat\Solo\CombatSoloLayer.cs" />

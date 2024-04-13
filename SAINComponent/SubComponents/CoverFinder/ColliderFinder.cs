@@ -1,27 +1,61 @@
 ﻿using UnityEngine;
 using System;
 using EFT;
+using SAIN.Helpers;
+using System.Collections.Generic;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
     public class ColliderFinder
     {
-        private Vector3 OriginPoint;
-        private Vector3 TargetPoint;
-
-        public void GetNewColliders(out int hits, Vector3 origin, Vector3 target, Collider[] array, float boxWidth = 25f, float boxHeight = 3f)
+        public ColliderFinder(CoverFinderComponent component)
         {
-            OriginPoint = origin;
-            TargetPoint = target;
+            CoverFinderComponent = component;
+        }
+
+        private CoverFinderComponent CoverFinderComponent;
+        private Vector3 OriginPoint => CoverFinderComponent.OriginPoint;
+        private Vector3 TargetPoint => CoverFinderComponent.TargetPoint;
+
+        public void GetNewColliders(out int hits, Collider[] array, int iterationMax = 5, float startRadius = 5f, int hitThreshold = 50, LayerMask colliderMask = default)
+        {
+            const float StartCapsuleTop = 0.5f;
+            const float StartCapsuleBottom = 0.25f;
+            const float HeightIncreasePerIncrement = 1.5f;
+            const float HeightDecreasePerIncrement = 1.5f;
+            const float RadiusIncreasePerIncrement = 5f;
 
             ClearColliders(array);
 
-            var mask = LayerMaskClass.HighPolyWithTerrainMask;
-            var orientation = Quaternion.identity;
-            Vector3 box = new Vector3(boxWidth, boxHeight, boxWidth);
+            if (colliderMask == default)
+            {
+                colliderMask = LayerMaskClass.HighPolyWithTerrainMask;
+            }
 
-            hits = Physics.OverlapBoxNonAlloc(origin, box, array, orientation, mask);
-            hits = FilterColliders(array, hits);
+            // Lift the origin point off the ground slightly to avoid collecting random rubbish.
+            Vector3 bottomCapsule = OriginPoint + Vector3.up * StartCapsuleBottom;
+            Vector3 topCapsule = bottomCapsule + Vector3.up * StartCapsuleTop;
+            float capsuleRadius = startRadius;
+
+            hits = 0;
+            for (int i = 0; i < iterationMax; i++)
+            {
+                int rawHits = Physics.OverlapCapsuleNonAlloc(bottomCapsule, topCapsule, capsuleRadius, array, colliderMask);
+                hits = FilterColliders(array, rawHits);
+
+                if (hits > hitThreshold)
+                {
+                    DebugGizmos.Capsule(bottomCapsule, capsuleRadius, topCapsule.y, Color.red, 5f);
+                    return;
+                }
+                else
+                {
+                    DebugGizmos.Capsule(bottomCapsule, capsuleRadius, topCapsule.y, Color.white, 5f);
+                    topCapsule += Vector3.up * HeightIncreasePerIncrement;
+                    bottomCapsule += Vector3.down * HeightDecreasePerIncrement;
+                    capsuleRadius += RadiusIncreasePerIncrement;
+                }
+            }
         }
 
         private void ClearColliders(Collider[] array)
@@ -33,7 +67,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         }
 
         /// <summary>
-        /// Sorts an array of Colliders based on their Distance from bot's DrawPosition. 
+        /// Sorts an array of Colliders based on their Distance from bot's Position. 
         /// </summary>
         /// <param value="array">The array of Colliders to be sorted.</param>
         public void SortArrayBotDist(Collider[] array)
@@ -41,42 +75,37 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             Array.Sort(array, ColliderArrayBotDistComparer);
         }
 
-        /// <summary>
-        /// Sorts an array of Colliders based on their Distance to the enemy.
-        /// </summary>
-        /// <param value="array">The array of Colliders to be sorted.</param>
-        public void SortArrayEnemyDist(Collider[] array)
-        {
-            Array.Sort(array, ColliderArrayEnemyDistComparer);
-        }
-
-        /// <summary>
-        /// Sorts an array of Colliders by their transform optionHeight. 
-        /// </summary>
-        /// <param value="array">The array of Colliders to be sorted.</param>
-        public void SortArrayHeight(Collider[] array)
-        {
-            Array.Sort(array, ColliderArrayHeightComparer);
-        }
-
         private int FilterColliders(Collider[] array, int hits)
         {
+            float minHeight = CoverFinderComponent.CoverMinHeight;
+            const float minX = 0.1f;
+            const float minZ = 0.1f;
+
             int hitReduction = 0;
             for (int i = 0; i < hits; i++)
             {
-                if (array[i].bounds.size.y < 0.66)
-                {
-                    array[i] = null;
-                    hitReduction++;
-                }
-                else if (array[i].bounds.size.x < 0.1f && array[i].bounds.size.z < 0.1f)
+                Vector3 size = array[i].bounds.size;
+                if (size.y < CoverFinderComponent.CoverMinHeight
+                    || size.x < minX && size.z < minZ 
+                    || ColliderAlreadyUsed(array[i], CoverFinderComponent.CoverPoints))
                 {
                     array[i] = null;
                     hitReduction++;
                 }
             }
-            hits -= hitReduction;
-            return hits;
+            return hits - hitReduction;
+        }
+
+        private bool ColliderAlreadyUsed(Collider collider, List<CoverPoint> coverPoints)
+        {
+            for (int i = 0; i < coverPoints.Count;i++)
+            {
+                if (collider == coverPoints[i].Collider)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public int ColliderArrayBotDistComparer(Collider A, Collider B)
@@ -98,48 +127,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 float AMag = (OriginPoint - A.transform.position).sqrMagnitude;
                 float BMag = (OriginPoint - B.transform.position).sqrMagnitude;
                 return AMag.CompareTo(BMag);
-            }
-        }
-
-        public int ColliderArrayEnemyDistComparer(Collider A, Collider B)
-        {
-            if (A == null && B != null)
-            {
-                return 1;
-            }
-            else if (A != null && B == null)
-            {
-                return -1;
-            }
-            else if (A == null && B == null)
-            {
-                return 0;
-            }
-            else
-            {
-                float AMag = (TargetPoint - A.transform.position).sqrMagnitude;
-                float BMag = (TargetPoint - B.transform.position).sqrMagnitude;
-                return AMag.CompareTo(BMag);
-            }
-        }
-
-        public int ColliderArrayHeightComparer(Collider A, Collider B)
-        {
-            if (A == null && B != null)
-            {
-                return 1;
-            }
-            else if (A != null && B == null)
-            {
-                return -1;
-            }
-            else if (A == null && B == null)
-            {
-                return 0;
-            }
-            else
-            {
-                return A.transform.position.y.CompareTo(B.transform.position.y);
             }
         }
     }

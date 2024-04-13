@@ -15,6 +15,15 @@ using EFT.HealthSystem;
 
 namespace SAIN.Patches.Generic
 {
+    internal class LimitSteerSpeedPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod() => typeof(BotSteering).GetMethod("method_0");
+        [PatchPrefix]
+        public static void PatchPrefix(ref float rotateSpeed)
+        {
+            rotateSpeed = Mathf.Clamp(rotateSpeed, 0, SAINPlugin.LoadedPreset.GlobalSettings.Aiming.MaxBotTurnSpeed);
+        }
+    }
     internal class BotGroupAddEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(BotsGroup).GetMethod("AddEnemy");

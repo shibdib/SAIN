@@ -101,4 +101,36 @@ namespace SAIN.Patches.Shoot
             }
         }
     }
+    public class SemiAutoPatch2 : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(GClass396), "method_6");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(ref BotOwner ___botOwner_0, ref float __result)
+        {
+            if (SAINPlugin.BotController.GetBot(___botOwner_0.ProfileId, out var component))
+            {
+                __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
+            }
+        }
+    }
+    public class SemiAutoPatch3 : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(GClass396), "method_0");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(ref BotOwner ___botOwner_0, ref float __result)
+        {
+            if (SAINPlugin.BotController.GetBot(___botOwner_0.ProfileId, out var component))
+            {
+                __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
+            }
+        }
+    }
 }

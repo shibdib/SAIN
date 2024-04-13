@@ -280,7 +280,16 @@ namespace SAIN.SAINComponent
             {
                 if (HasEnemy)
                 {
-                    if (Enemy.Seen && !Enemy.IsVisible && Enemy.TimeSinceSeen < 30f)
+                    if (Enemy.IsVisible)
+                    {
+                        return Enemy.EnemyPosition;
+                    }
+                    if (Enemy.CanBeHeard)
+                    {
+                        return Enemy.LastHeardPosition;
+                    }
+
+                    if (Enemy.LastSeenPosition != null)
                     {
                         return Enemy.LastSeenPosition;
                     }
@@ -299,12 +308,13 @@ namespace SAIN.SAINComponent
                         return Target.Position;
                     }
                 }
-                var sound = BotOwner.BotsGroup.YoungestPlace(BotOwner, 200f, true);
-                if (sound != null && !sound.IsCome)
+
+                var placeForCheck = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, 200f, 60f);
+                if (placeForCheck != null && !placeForCheck.IsCome)
                 {
-                    if ((sound.Position - Position).sqrMagnitude < 2f)
+                    if ((placeForCheck.Position - Position).sqrMagnitude < 1f)
                     {
-                        sound.IsCome = true;
+                        BotOwner.BotsGroup.PlaceChecked(placeForCheck);
                         BotOwner.CalcGoal();
                     }
                     else
@@ -312,9 +322,15 @@ namespace SAIN.SAINComponent
                         return Target.Position;
                     }
                 }
-                if (Time.time - BotOwner.Memory.LastTimeHit < 3f)
+
+                if (Time.time - BotOwner.Memory.LastTimeHit < 30f)
                 {
                     return BotOwner.Memory.LastHitPos;
+                }
+
+                if (BotOwner.Memory.IsUnderFire)
+                {
+                    return Memory.UnderFireFromPosition;
                 }
                 return null;
             }

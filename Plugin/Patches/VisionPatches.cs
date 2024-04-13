@@ -12,6 +12,7 @@ using Comfort.Common;
 using SAIN.SAINComponent.Classes;
 using SAIN.Helpers;
 using System.Collections.Generic;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.Patches.Vision
 {
@@ -138,6 +139,18 @@ namespace SAIN.Patches.Vision
             {
                 float visibility = SAINVisionClass.GetVisibilityModifier(player);
                 __result /= visibility;
+                Vector3 botLookDir = __instance.Owner.LookDirection.normalized;
+                Vector3 enemyDir = (enemy.position - __instance.Owner.Position).normalized;
+
+                float elevationDifference = enemyDir.y - botLookDir.y;
+                if (elevationDifference > 0.5f)
+                {
+                    __result *= 1.2f;
+                }
+                if (elevationDifference < -0.5f)
+                {
+                    __result *= 0.85f;
+                }
             }
 
             // Not Looking Implementation
@@ -166,6 +179,8 @@ namespace SAIN.Patches.Vision
                 float visibility = SAINVisionClass.GetVisibilityModifier(player);
                 float defaultVisDist = __instance.Owner.LookSensor.VisibleDist;
                 float visionDist = (defaultVisDist * visibility) - defaultVisDist;
+
+                Vector3 botLookDir = __instance.Owner.LookDirection.normalized;
                 addVisibility = visionDist;
                 if (player.IsYourPlayer)
                 {

@@ -14,5 +14,9 @@ namespace SAIN.Preset.GlobalSettings
         [Description("if this toggle is disabled, all bots will have Faster CQB Reactions turned OFF, so their individual settings will be ignored.")]
         [Default(true)]
         public bool FasterCQBReactionsGlobal = true;
+
+        [Advanced]
+        [Default(175f)]
+        public float MaxBotTurnSpeed = 175f;
     }
 }

@@ -58,7 +58,11 @@ namespace SAIN.SAINComponent.Classes.Debug
                     if (JumpTimer < Time.time && TimeSinceStuck > 1f)
                     {
                         JumpTimer = Time.time + 1f;
-                        SAIN.Mover.TryJump();
+
+                        if (!Player.MovementContext.TryVaulting())
+                        {
+                            SAIN.Mover.TryJump();
+                        }
                     }
                 }
             }

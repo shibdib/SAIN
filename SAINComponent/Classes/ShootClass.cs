@@ -119,9 +119,15 @@ namespace SAIN.SAINComponent.Classes
             {
                 return;
             }
-            if (this.botOwner_0.ShootData.Shoot() && this.int_0 > this.botOwner_0.WeaponManager.Reload.BulletCount)
+            if (this.botOwner_0.ShootData.Shoot())
             {
+                if (this.int_0 > this.botOwner_0.WeaponManager.Reload.BulletCount)
+                {
+                    this.int_0 = this.botOwner_0.WeaponManager.Reload.BulletCount;
+                }
                 this.int_0 = this.botOwner_0.WeaponManager.Reload.BulletCount;
+
+                this.botOwner_0.Memory.GoalEnemy?.SetLastShootTime();
             }
         }
 

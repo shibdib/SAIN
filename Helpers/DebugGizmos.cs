@@ -20,6 +20,7 @@ namespace SAIN.Helpers
                         if (DrawnGizmos[i] != null)
                             Object.Destroy(DrawnGizmos[i]);
                     }
+                    DrawnGizmos.Clear();
                 }
             }
         }
@@ -36,7 +37,6 @@ namespace SAIN.Helpers
             }
             if (!SAINPlugin.DebugMode)
             {
-                Logger.LogWarning("Debug Gizmos are on, but Global Debug Mode is off");
                 return null;
             }
 
@@ -49,6 +49,34 @@ namespace SAIN.Helpers
             AddGizmo(sphere, expiretime);
 
             return sphere;
+        }
+
+        public static GameObject Capsule(Vector3 position, float radius, float height, Color color, float expiretime = -1f, float alpha = 0.25f)
+        {
+            if (!DrawGizmos)
+            {
+                return null;
+            }
+            if (!SAINPlugin.DebugMode)
+            {
+                return null;
+            }
+
+            var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+
+            var renderer = capsule.GetComponent<Renderer>();
+            renderer.material.color = color;
+            renderer.material.color.SetAlpha(alpha);
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+            capsule.GetComponent<Collider>().enabled = false;
+
+            capsule.transform.position = new Vector3(position.x, position.y, position.z); ;
+            capsule.transform.localScale = new Vector3(radius, height, radius);
+
+            AddGizmo(capsule, expiretime);
+
+            return capsule;
         }
 
         private static void AddGizmo(GameObject obj, float expireTime)
@@ -81,7 +109,6 @@ namespace SAIN.Helpers
             }
             if (!SAINPlugin.DebugMode)
             {
-                Logger.LogWarning("Debug Gizmos are on, but Global Debug Mode is off");
                 return null;
             }
 

@@ -1,4 +1,5 @@
 using BepInEx.Logging;
+using Comfort.Common;
 using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
@@ -176,7 +177,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             foreach (var member in SAIN.Squad.Members.Values)
             {
-                if (member.Player != null && member.Player.ProfileId != Player.ProfileId && member.BotIsAlive && (member.Position - BotOwner.Position).magnitude < 20f)
+                if (member.Player != null && member.Player.ProfileId != Player.ProfileId && member.BotIsAlive && (member.Position - BotOwner.Position).sqrMagnitude < (20f * 20f))
                 {
                     return true;
                 }

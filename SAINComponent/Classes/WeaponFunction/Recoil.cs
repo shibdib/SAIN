@@ -67,11 +67,13 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             var mode = SAIN.Info.WeaponInfo.CurrentWeapon.SelectedFireMode;
             if (mode == EFireMode.fullauto || mode == EFireMode.burst)
             {
-                rate = Time.time + (FullAutoTimePerShot / 3f);
+                rate = Time.time + FullAutoTimePerShot;
+                //rate = Time.time + (FullAutoTimePerShot / 3f);
             }
             else
             {
-                rate = Time.time + (SemiAutoTimePerShot / 3f);
+                rate = Time.time + SemiAutoTimePerShot;
+                //rate = Time.time + (SemiAutoTimePerShot / 3f);
             }
             return Vector3.Lerp(Vector3.zero, oldVector, SAINPlugin.LoadedPreset.GlobalSettings.Shoot.RecoilDecay);
         }
@@ -95,7 +97,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             get
             {
-                float roundspersecond = SingleFireRate / 60;
+                float roundspersecond = FullAutoFireRate / 60;
 
                 float secondsPerShot = 1f / roundspersecond;
 
@@ -112,7 +114,20 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 {
                     return template.SingleFireRate;
                 }
-                return 600f;
+                return 300f;
+            }
+        }
+
+        private float FullAutoFireRate
+        {
+            get
+            {
+                var template = SAIN.Info.WeaponInfo.CurrentWeapon?.Template;
+                if (template != null)
+                {
+                    return template.bFirerate;
+                }
+                return 800f;
             }
         }
 

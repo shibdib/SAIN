@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UIElements;
 
 namespace SAIN.BotController.Classes
@@ -107,6 +108,18 @@ namespace SAIN.BotController.Classes
         }
     }
 
+    public class PlaceForCheckSAIN
+    {
+        public PlaceForCheckSAIN(PlaceForCheck place, Vector3 originalPosition)
+        {
+            PlaceForCheck = place;
+            OriginalPosition = originalPosition;
+        }
+
+        public PlaceForCheck PlaceForCheck { get; private set; }
+        public Vector3 OriginalPosition { get; private set; }
+    }
+
     public class Squad
     {
         public Squad()
@@ -125,6 +138,78 @@ namespace SAIN.BotController.Classes
                 return Id;
             }
         }
+
+        public List<PlaceForCheck> PlacesForCheck => EFTBotGroup?.PlacesForCheck;
+
+        public bool IsPointTooCloseToLastPlaceForCheck(Vector3 position)
+        {
+            PlaceForCheck mostRecentPlace = null;
+            if (PlacesForCheck != null && PlacesForCheck.Count > 0)
+            {
+                mostRecentPlace = PlacesForCheck[PlacesForCheck.Count - 1];
+
+                if (mostRecentPlace != null && (position - mostRecentPlace.Position).sqrMagnitude < 2)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void AddPointToSearch(Vector3 position, float soundPower, BotOwner botOwner, AISoundType soundType, Vector3 originalPosition)
+        {
+            PlaceForCheck mostRecentPlace = null;
+            bool isDanger = soundType == AISoundType.step ? false : true;
+            PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
+
+            if (PlacesForCheck != null && PlacesForCheck.Count > 0)
+            {
+                mostRecentPlace = PlacesForCheck[PlacesForCheck.Count - 1];
+
+                if (mostRecentPlace != null && (position - mostRecentPlace.Position).sqrMagnitude < 2)
+                {
+                    if (mostRecentPlace.Type != PlaceForCheckType.danger && isDanger)
+                    {
+                        mostRecentPlace.Type = PlaceForCheckType.danger;
+                    }
+                    mostRecentPlace.BasePoint = Vector3.Lerp(mostRecentPlace.BasePoint, position, 0.5f);
+                    return;
+                }
+            }
+            // Get a sampled position for better results in bot reaction.
+            if (NavMesh.SamplePosition(position, out NavMeshHit hit, 10f, -1))
+            {
+                NavMeshPath path = new NavMeshPath();
+                if (NavMesh.CalculatePath(botOwner.Position, hit.position, -1, path))
+                {
+                    position = path.corners[path.corners.Length - 1];
+
+                    if (mostRecentPlace != null && (position - mostRecentPlace.Position).sqrMagnitude < 2)
+                    {
+                        if (mostRecentPlace.Type != PlaceForCheckType.danger && isDanger)
+                        {
+                            mostRecentPlace.Type = PlaceForCheckType.danger;
+                        }
+                        mostRecentPlace.BasePoint = Vector3.Lerp(mostRecentPlace.BasePoint, position, 0.5f);
+                        return;
+                    }
+
+                    try
+                    {
+                        PlaceForCheck placeForCheck = new PlaceForCheck(position, checkType);
+                        PlacesForCheck.Add(placeForCheck);
+
+                        if (!botOwner.Memory.GoalTarget.HavePlaceTarget() && botOwner.Memory.GoalEnemy == null)
+                        {
+                            botOwner.BotsGroup.CalcGoalForBot(botOwner);
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        private BotsGroup EFTBotGroup;
 
         public string Id { get; private set; } = string.Empty;
 
@@ -350,6 +435,7 @@ namespace SAIN.BotController.Classes
                     // If this is the first member, add their side to the start of their ID for easier identifcation during debug
                     if (Members.Count == 0)
                     {
+                        EFTBotGroup = sain.BotOwner.BotsGroup;
                         Id = sain.Player.Profile.Side.ToString() + "_" + GUID;
                     }
 

@@ -22,7 +22,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             PersonalPhraseDict = new Dictionary<EPhraseTrigger, PhraseInfo>(GlobalPhraseDictionary);
             GroupTalk = new GroupTalk(sain);
             EnemyTalk = new EnemyTalk(sain);
-            TimeUntilCanTalk = Time.time + UnityEngine.Random.Range(2f, 8f);
+            TimeUntilCanTalk = Time.time + UnityEngine.Random.Range(1f, 2f);
         }
 
         public void Init()

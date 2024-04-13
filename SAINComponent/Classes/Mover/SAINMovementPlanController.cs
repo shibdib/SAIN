@@ -202,10 +202,10 @@ namespace SAIN.SAINComponent.Classes.Mover
                 SavedCoverPoint = null;
             }
 
-            if (coverFinder.FindSinglePoint(PathNodePosition, target, out CoverPoint result))
-            {
-                SavedCoverPoint = result;
-            }
+            //if (coverFinder.FindSinglePoint(PathNodePosition, target, out CoverPoint result))
+            //{
+            //    SavedCoverPoint = result;
+            //}
 
             return SavedCoverPoint;
         }

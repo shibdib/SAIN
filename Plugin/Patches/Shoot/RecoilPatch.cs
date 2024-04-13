@@ -149,12 +149,7 @@ namespace SAIN.Patches.Shoot
                 {
                     return true;
                 }
-                // Repurposing remainRecoilTime as a recoil Reset timer
-                if (____remainRecoilTime < Time.time)
-                {
-                    ____recoilOffset = recoil.CalculateDecay(____recoilOffset, out float time);
-                    ____remainRecoilTime = time;
-                }
+                ____recoilOffset = recoil.CalculateDecay(____recoilOffset, out float time);
                 return false;
             }
             return true;
@@ -162,23 +157,6 @@ namespace SAIN.Patches.Shoot
     }
 
     public class EndRecoilPatch : ModulePatch
-    {
-        private static PropertyInfo _RecoilDataPI;
-
-        protected override MethodBase GetTargetMethod()
-        {
-            _RecoilDataPI = AccessTools.Property(typeof(BotOwner), "RecoilData");
-            return AccessTools.Method(_RecoilDataPI.PropertyType, "CheckEndRecoil");
-        }
-
-        [PatchPrefix]
-        public static bool PatchPrefix()
-        {
-            return false;
-        }
-    }
-
-    public class StartRecoilPatch : ModulePatch
     {
         private static PropertyInfo _RecoilDataPI;
 

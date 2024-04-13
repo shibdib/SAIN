@@ -155,7 +155,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return SteerPriority.LastSeenEnemy;
             }
-            LastHeardSound = BotOwner.BotsGroup.YoungestPlace(BotOwner, Steer_HeardSound_Dist, true);
+            LastHeardSound = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, Steer_HeardSound_Dist, 3f);
             if (LastHeardSound != null)
             {
                 return SteerPriority.Hear;
@@ -377,7 +377,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (RandomLookTimer < Time.time)
             {
-                RandomLookTimer = Time.time + 4f * Random.Range(0.66f, 1.33f);
+                RandomLookTimer = Time.time + 3f * Random.Range(0.66f, 1.33f);
                 Vector3 pointToLook = Vector3.zero;
 
                 LookRandom = !LookRandom;
@@ -408,21 +408,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                 else
                 {
                     LookRandom2 = !LookRandom2;
-                    if (LookRandom2)
+                    if (LookRandom2 && BotOwner.Memory.LastEnemy != null)
                     {
-                        LookToMovingDirection();
-                        return;
-                    }
-                    if (LookToPathToEnemy())
-                    {
-                        return;
-                    }
-                    if (LookToEnemyLastSeenPos())
-                    {
-                        return;
-                    }
-                    if (LookToEnemyLastSeenClose())
-                    {
+                        LookToPoint(BotOwner.Memory.LastEnemy.PersonalLastPos);
                         return;
                     }
                     if (SAIN.CurrentTargetPosition != null)
@@ -430,7 +418,10 @@ namespace SAIN.SAINComponent.Classes.Mover
                         pointToLook = SAIN.CurrentTargetPosition.Value;
                     }
                 }
-                LookToPoint(pointToLook, 80f);
+                if (pointToLook != Vector3.zero)
+                {
+                    LookToPoint(pointToLook, 80f);
+                }
             }
         }
 

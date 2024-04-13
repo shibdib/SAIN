@@ -165,6 +165,41 @@ namespace SAIN.SAINComponent.Classes
             return false;
         }
 
+        public bool IsMainPlayerLookAtMe()
+        {
+            if (GameWorldHandler.SAINMainPlayer != null)
+            {
+                var person = GameWorldHandler.SAINMainPlayer.SAINPerson;
+                Vector3 mainPlayerHeadPos = person.Transform.Head;
+
+                Vector3 lookDir = person.Transform.LookDirection;
+
+                Vector3 botChestPos = SAIN.Person.Transform.Chest;
+                Vector3 botDir = (botChestPos - mainPlayerHeadPos);
+
+                if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
+                {
+                    if (CheckMainPlayerVisionTimer < Time.time)
+                    {
+                        CheckMainPlayerVisionTimer = Time.time + 1f;
+                        MainPlayerWasLookAtMe = !Physics.Raycast(mainPlayerHeadPos, botDir, botDir.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
+                    }
+                }
+                else
+                {
+                    MainPlayerWasLookAtMe = false;
+                }
+            }
+            else
+            {
+                MainPlayerWasLookAtMe = false;
+            }
+            return MainPlayerWasLookAtMe;
+        }
+
+        private float CheckMainPlayerVisionTimer;
+        private bool MainPlayerWasLookAtMe;
+
         public bool IsPlayerAnEnemy(string profileID)
         {
             return Enemies.ContainsKey(profileID) && Enemies[profileID] != null;

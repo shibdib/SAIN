@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Components;
+using SAIN.Helpers;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using System;
@@ -16,17 +17,29 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
             Position = point;
             Collider = collider;
-            CoverHeight = collider.bounds.size.y;
+
+            Vector3 size = collider.bounds.size;
+            CoverHeight = size.y;
+            CoverValue = (size.x + size.y + size.z).Round1();
 
             TimeCreated = Time.time;
             ReCheckStatusTimer = Time.time;
 
-            PathToPoint = pathToPoint;
-            PathLength = pathToPoint.CalculatePathLength();
-            LastPathCalcTimer = Time.time + 5f;
-            CheckPathSafetyTimer = Time.time + 1f;
+            PathToPoint = pathToPoint; 
+            CalcPathInfoManual();
 
             Id = Guid.NewGuid().ToString();
+        }
+
+        public bool IsBad;
+
+        public float CoverValue { get; private set; }
+
+        public void CalcPathInfoManual()
+        {
+            PathLength = PathToPoint.CalculatePathLength();
+            LastPathCalcTimer = Time.time + 5f;
+            CheckPathSafetyTimer = Time.time + 1f;
         }
 
         private readonly SAINComponentClass SAIN;
@@ -46,7 +59,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         {
             if (CheckPathSafetyTimer < Time.time)
             {
-                CheckPathSafetyTimer = Time.time + 1f;
+                CheckPathSafetyTimer = Time.time + 3f;
 
                 Vector3 target;
                 if (SAIN.HasEnemy)
@@ -140,24 +153,24 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             get
             {
                 ReCheckStatusTimer += Time.deltaTime;
-                if (ReCheckStatusTimer < 0.1f)
+                if (ReCheckStatusTimer < 0.25f)
                 {
                     return OldStatus;
                 }
                 ReCheckStatusTimer = 0f;
 
-                float distance = Distance;
+                float sqrMagnitude = (BotOwner.Position - Position).sqrMagnitude;
 
                 CoverStatus status;
-                if (distance <= InCoverDist)
+                if (sqrMagnitude <= InCoverDist * InCoverDist)
                 {
                     status = CoverStatus.InCover;
                 }
-                else if (distance <= CloseCoverDist)
+                else if (sqrMagnitude <= CloseCoverDist * CloseCoverDist)
                 {
                     status = CoverStatus.CloseToCover;
                 }
-                else if (distance <= MidCoverDist)
+                else if (sqrMagnitude <= MidCoverDist * MidCoverDist)
                 {
                     status = CoverStatus.MidRangeToCover;
                 }

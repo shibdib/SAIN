@@ -50,20 +50,28 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
+        public float LastActiveTime;
+
         private readonly float TimeSinceHeardTimeAdd = 10f;
 
-        public void SetHeardStatus(bool value, Vector3 pos)
+        public void SetHeardStatus(bool canHear, Vector3 pos)
         {
-            CanBeHeard = value;
-            if (value)
+            CouldBeHeard = CanBeHeard;
+            CanBeHeard = canHear;
+            if (canHear)
             {
                 LastHeardPosition = pos;
-                TimeSinceHeard = Time.time + TimeSinceHeardTimeAdd;
+            }
+            if (canHear == false && CouldBeHeard == true)
+            {
+                TimeLastHeard = Time.time;
             }
         }
 
+        private bool CouldBeHeard;
         public bool CanBeHeard { get; set; }
         public float TimeSinceHeard { get; set; }
+        public float TimeLastHeard { get; private set; }
         public Vector3 LastHeardPosition { get; private set; }
 
         public void Dispose()

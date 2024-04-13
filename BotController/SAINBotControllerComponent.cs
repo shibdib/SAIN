@@ -191,6 +191,8 @@ namespace SAIN.Components
                 return;
             }
 
+            Singleton<BotEventHandler>.Instance?.PlaySound(player, player.Position, range, AISoundType.step);
+
             foreach (var bot in Bots.Values)
             {
                 if (player.ProfileId == bot.Player.ProfileId)
@@ -241,7 +243,7 @@ namespace SAIN.Components
 
             if (UpdatePositionTimer < Time.time)
             {
-                UpdatePositionTimer = Time.time + 1f;
+                UpdatePositionTimer = Time.time + 0.25f;
                 MainPlayerPosition = MainPlayer.Position;
             }
         }

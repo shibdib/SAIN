@@ -36,7 +36,7 @@ namespace SAIN.SAINComponent.Classes
                 return result;
             }
             var pose = player.Pose;
-            float speed = (player.MovementContext.ActualLinearVelocity.Round100() / 5f).Round100();
+            float speed = player.MovementContext.ClampedSpeed / player.MovementContext.MaxSpeed;
             if (player.MovementContext.IsSprintEnabled)
             {
                 result *= 1.33f;

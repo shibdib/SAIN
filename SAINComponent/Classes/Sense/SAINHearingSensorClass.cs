@@ -1,6 +1,8 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
+using Interpolation;
+using RootMotion.FinalIK;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
@@ -10,6 +12,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 using static RootMotion.FinalIK.AimPoser;
 
 namespace SAIN.SAINComponent.Classes
@@ -105,17 +108,39 @@ namespace SAIN.SAINComponent.Classes
 
             bool wasHeard = CheckSoundHeardAfterModifiers(iPlayer, soundPosition, power, type, out float distance);
 
-            // Did the sound come from a non-enemy?
-            if (wasHeard && !BotOwner.BotsGroup.IsEnemy(iPlayer) && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
+            // Checks if the player is not an active enemy and that they are a neutral party
+            if (wasHeard 
+                && !BotOwner.BotsGroup.IsPlayerEnemy(iPlayer) 
+                && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
             {
-                NeutralSound(iPlayer, soundPosition);
+                if (type != AISoundType.step)
+                {
+                    NeutralSound(iPlayer, soundPosition);
+                }
                 return;
             }
 
             // Double check that the source isn't from a member of the bot's group.
-            if (wasHeard && iPlayer.AIData.IsAI && BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
+            if (wasHeard 
+                && iPlayer.AIData.IsAI 
+                && BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
             {
-                NeutralSound(iPlayer, soundPosition);
+                if (type != AISoundType.step)
+                {
+                    NeutralSound(iPlayer, soundPosition);
+                }
+                return;
+            }
+
+            // Checks if the player is an enemy by their role.
+            if (wasHeard 
+                && iPlayer != null 
+                && !BotOwner.BotsGroup.IsPlayerEnemy(iPlayer))
+            {
+                if (type != AISoundType.step)
+                {
+                    NeutralSound(iPlayer, soundPosition);
+                }
                 return;
             }
 
@@ -283,16 +308,6 @@ namespace SAIN.SAINComponent.Classes
 
             Vector3 vector = GetSoundDispersion(person, pos, type);
 
-            // Get a sampled position for better results in bot reaction.
-            if (NavMesh.SamplePosition(vector, out NavMeshHit hit, 20f, -1))
-            {
-                if (SAINPlugin.EditorDefaults.DebugHearing)
-                {
-                    Logger.LogDebug($"Distance from Sampled Position and Original: {(vector - hit.position).magnitude}");
-                }
-                vector = hit.position;
-            }
-
             if ((wasHeard || bulletFelt) && shooterDistance < BotOwner.Settings.FileSettings.Hearing.RESET_TIMER_DIST)
             {
                 BotOwner.LookData.ResetUpdateTime();
@@ -308,8 +323,8 @@ namespace SAIN.SAINComponent.Classes
 
                 if (firedAtMe)
                 {
-                    SAIN.Memory.UnderFireFromPosition = vector;
                     SAIN?.Suppression?.AddSuppression();
+                    SAIN.Memory.UnderFireFromPosition = vector;
                     try
                     {
                         BotOwner.Memory.SetUnderFire(person);
@@ -328,35 +343,22 @@ namespace SAIN.SAINComponent.Classes
             {
                 try
                 {
-                    BotOwner.BotsGroup.AddPointToSearch(vector, power, BotOwner);
+                    SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, pos);
                 }
                 catch { }
-
-                if (person != null && isGunSound)
-                {
-                    CheckCalcGoal();
-                }
+                CheckCalcGoal();
             }
             else if (isGunSound && bulletFelt && firedAtMe)
             {
                 Vector3 estimate = GetEstimatedPoint(vector);
-
-                // Get a sampled position for better results in bot reaction.
-                if (NavMesh.SamplePosition(estimate, out NavMeshHit hit2, 10f, -1))
-                {
-                    if (SAINPlugin.EditorDefaults.DebugHearing)
-                    {
-                        Logger.LogDebug($"Distance from Sampled Position and Original: {(vector - hit2.position).magnitude}");
-                    }
-                    estimate = hit2.position;
-                }
-
                 SAIN.Memory.UnderFireFromPosition = estimate;
+
                 try
                 {
-                    BotOwner.BotsGroup.AddPointToSearch(estimate, power, BotOwner);
+                    SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, pos);
                 }
                 catch { }
+                CheckCalcGoal();
             }
         }
 
@@ -400,7 +402,7 @@ namespace SAIN.SAINComponent.Classes
             }
 
             float dispersionRandomized = EFTMath.Random(-finalDispersion, finalDispersion);
-            Vector3 vector = new Vector3(pos.x + dispersionRandomized, pos.y + dispersionRandomized, pos.z + dispersionRandomized);
+            Vector3 vector = new Vector3(pos.x + dispersionRandomized, pos.y, pos.z + dispersionRandomized);
 
             if (SAINPlugin.EditorDefaults.DebugHearing)
             {
@@ -423,7 +425,7 @@ namespace SAIN.SAINComponent.Classes
 
         private Vector3 GetEstimatedPoint(Vector3 source)
         {
-            Vector3 randomPoint = UnityEngine.Random.onUnitSphere * (Vector3.Distance(source, BotOwner.Transform.position) / 5f);
+            Vector3 randomPoint = UnityEngine.Random.onUnitSphere * (Vector3.Distance(source, BotOwner.Transform.position) / 10f);
             randomPoint.y = Mathf.Clamp(randomPoint.y, -5f, 5f);
             return source + randomPoint;
         }
@@ -471,7 +473,7 @@ namespace SAIN.SAINComponent.Classes
 
         private bool CheckFootStepDetectChance(float d)
         {
-            float closehearing = 5f;
+            float closehearing = 15f;
             float farhearing = SAIN.Info.FileSettings.Hearing.MaxFootstepAudioDistance;
 
             if (d <= closehearing)
@@ -593,12 +595,12 @@ namespace SAIN.SAINComponent.Classes
                     if (hitCount == 0)
                     {
                         // If the hitCount is 0, set the occlusionmodifier to 0.8f multiplied by the environmentmodifier
-                        occlusionmodifier *= 0.75f * environmentmodifier;
+                        occlusionmodifier *= 0.8f * environmentmodifier;
                     }
                     else
                     {
                         // If the hitCount is not 0, set the occlusionmodifier to 0.95f multiplied by the environmentmodifier
-                        occlusionmodifier *= 0.9f * environmentmodifier;
+                        occlusionmodifier *= 0.925f * environmentmodifier;
                     }
 
                     // Increment the hitCount

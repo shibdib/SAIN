@@ -7,6 +7,8 @@ using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
 using SAIN.Layers;
+using SAIN.Patches.Generic;
+using SAIN.Patches.Hearing;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.SAINComponent.Classes;
@@ -75,11 +77,15 @@ namespace SAIN
                 typeof(Patches.Generic.GetBotSpawner),
                 typeof(Patches.Generic.GrenadeThrownActionPatch),
                 typeof(Patches.Generic.GrenadeExplosionActionPatch),
+                typeof(Patches.Generic.LimitSteerSpeedPatch),
                 typeof(Patches.Generic.BotGroupAddEnemyPatch),
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
                 typeof(Patches.Hearing.HearingSensorPatch),
                 typeof(Patches.Hearing.BetterAudioPatch),
+                //typeof(Patches.Hearing.BetterAudioPatch2),
+                //typeof(Patches.Hearing.BetterAudioPatch3),
+                //typeof(Patches.Hearing.BetterAudioPatch4),
                 typeof(Patches.Talk.PlayerTalkPatch),
                 typeof(Patches.Talk.TalkDisablePatch1),
                 typeof(Patches.Talk.TalkDisablePatch2),
@@ -97,6 +103,8 @@ namespace SAIN
                 typeof(Patches.Shoot.EndRecoilPatch),
                 typeof(Patches.Shoot.FullAutoPatch),
                 typeof(Patches.Shoot.SemiAutoPatch),
+                typeof(Patches.Shoot.SemiAutoPatch2),
+                typeof(Patches.Shoot.SemiAutoPatch3),
                 typeof(Patches.Components.AddComponentPatch)
             };
 
