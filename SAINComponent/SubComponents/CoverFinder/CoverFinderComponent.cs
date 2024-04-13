@@ -31,7 +31,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public CoverAnalyzer CoverAnalyzer { get; private set; }
         public ColliderFinder ColliderFinder { get; private set; }
 
-        private Collider[] Colliders = new Collider[100];
+        private Collider[] Colliders = new Collider[200];
 
         private void Update()
         {
@@ -85,7 +85,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
                 //UpdateSpotted();
 
-                for (int i = CoverPoints.Count - 1 ; i > 0; i--)
+                for (int i = CoverPoints.Count - 1 ; i >= 0; i--)
                 {
                     var coverPoint = CoverPoints[i];
                     if (coverPoint == null || !RecheckCoverPoint(coverPoint) || coverPoint.Spotted)
@@ -186,8 +186,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             points.OrderBy(p => p.PathLength);
         }
 
-        private static List<CoverPoint> _coverPoints = new List<CoverPoint>();
-
         static float CoverUpdateFrequency => SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverUpdateFrequency;
 
         private static CoverPoint FindFallbackPoint(List<CoverPoint> points)
@@ -253,8 +251,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private Collider[] GetColliders(out int hits)
         {
-            const float CheckDistThresh = 10f * 10f;
-            const float ColliderSortDistThresh = 3f * 3f;
+            const float CheckDistThresh = 3f * 3f;
+            const float ColliderSortDistThresh = 2f * 2f;
 
             float distance = (LastCheckPos - OriginPoint).sqrMagnitude;
             if (distance > CheckDistThresh)
@@ -284,8 +282,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 Destroy(this); }
             catch { }
         }
-
-        private float MinObstacleHeight => SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverMinHeight;
 
         private Coroutine TakeCoverCoroutine;
 

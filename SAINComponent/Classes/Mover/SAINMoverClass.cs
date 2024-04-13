@@ -239,11 +239,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 Player.MovementContext.SetTilt(value);
             }
-            if (value == -5f)
+            if (value < 0)
             {
                 Player.MovementContext.LeftStanceController.SetLeftStanceForce(true);
             }
-            if (value == 5f)
+            else
             {
                 Player.MovementContext.LeftStanceController.SetLeftStanceForce(false);
             }

@@ -51,7 +51,7 @@ namespace SAIN.Helpers
             return sphere;
         }
 
-        public static GameObject Capsule(Vector3 position, float radius, float height, Color color, float expiretime = -1f, float alpha = 0.25f)
+        public static GameObject Box(Vector3 position, float length, float height, Color color, float expiretime = -1f)
         {
             if (!DrawGizmos)
             {
@@ -62,21 +62,15 @@ namespace SAIN.Helpers
                 return null;
             }
 
-            var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            var box = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-            var renderer = capsule.GetComponent<Renderer>();
-            renderer.material.color = color;
-            renderer.material.color.SetAlpha(alpha);
-            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            box.GetComponent<Renderer>().material.color = color;
+            box.GetComponent<Collider>().enabled = false;
+            box.transform.position = position;
+            box.transform.localScale = new Vector3(length * 2, height * 2, length * 2);
+            AddGizmo(box, expiretime);
 
-            capsule.GetComponent<Collider>().enabled = false;
-
-            capsule.transform.position = new Vector3(position.x, position.y, position.z); ;
-            capsule.transform.localScale = new Vector3(radius, height, radius);
-
-            AddGizmo(capsule, expiretime);
-
-            return capsule;
+            return box;
         }
 
         private static void AddGizmo(GameObject obj, float expireTime)

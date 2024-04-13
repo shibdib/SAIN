@@ -3,6 +3,8 @@ using System;
 using EFT;
 using SAIN.Helpers;
 using System.Collections.Generic;
+using static UnityEngine.UI.Image;
+using UnityEngine.UI;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
@@ -17,13 +19,12 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private Vector3 OriginPoint => CoverFinderComponent.OriginPoint;
         private Vector3 TargetPoint => CoverFinderComponent.TargetPoint;
 
-        public void GetNewColliders(out int hits, Collider[] array, int iterationMax = 5, float startRadius = 5f, int hitThreshold = 50, LayerMask colliderMask = default)
+        public void GetNewColliders(out int hits, Collider[] array, int iterationMax = 10, float startRadius = 2f, int hitThreshold = 100, LayerMask colliderMask = default)
         {
-            const float StartCapsuleTop = 0.5f;
-            const float StartCapsuleBottom = 0.25f;
-            const float HeightIncreasePerIncrement = 1.5f;
-            const float HeightDecreasePerIncrement = 1.5f;
-            const float RadiusIncreasePerIncrement = 5f;
+            const float StartBoxHeight = 0.25f;
+            const float HeightIncreasePerIncrement = 1f;
+            const float HeightDecreasePerIncrement = 1f;
+            const float LengthIncreasePerIncrement = 3f;
 
             ClearColliders(array);
 
@@ -32,31 +33,51 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 colliderMask = LayerMaskClass.HighPolyWithTerrainMask;
             }
 
-            // Lift the origin point off the ground slightly to avoid collecting random rubbish.
-            Vector3 bottomCapsule = OriginPoint + Vector3.up * StartCapsuleBottom;
-            Vector3 topCapsule = bottomCapsule + Vector3.up * StartCapsuleTop;
-            float capsuleRadius = startRadius;
+            float boxLength = startRadius;
+            float boxHeight = StartBoxHeight;
+
+            var orientation = Quaternion.identity;
+            Vector3 boxOrigin = OriginPoint + Vector3.up * StartBoxHeight;
+
+            for (int i = 0; i < debugObjects.Count; i++)
+            {
+                GameObject.Destroy(debugObjects[i]);
+            }
+            debugObjects.Clear();
 
             hits = 0;
             for (int i = 0; i < iterationMax; i++)
             {
-                int rawHits = Physics.OverlapCapsuleNonAlloc(bottomCapsule, topCapsule, capsuleRadius, array, colliderMask);
+                Vector3 box = new Vector3(boxLength, boxHeight, boxLength);
+                int rawHits = Physics.OverlapBoxNonAlloc(boxOrigin, box, array, orientation, colliderMask);
                 hits = FilterColliders(array, rawHits);
 
                 if (hits > hitThreshold)
                 {
-                    DebugGizmos.Capsule(bottomCapsule, capsuleRadius, topCapsule.y, Color.red, 5f);
-                    return;
+                    //debugObjects.Add(DebugGizmos.Box(boxOrigin, boxLength, boxHeight, Color.red));
+                    break;
                 }
                 else
                 {
-                    DebugGizmos.Capsule(bottomCapsule, capsuleRadius, topCapsule.y, Color.white, 5f);
-                    topCapsule += Vector3.up * HeightIncreasePerIncrement;
-                    bottomCapsule += Vector3.down * HeightDecreasePerIncrement;
-                    capsuleRadius += RadiusIncreasePerIncrement;
+                    //debugObjects.Add(DebugGizmos.Box(boxOrigin, boxLength, boxHeight, Color.white));
+                    boxOrigin += Vector3.down * HeightDecreasePerIncrement;
+                    boxHeight += HeightIncreasePerIncrement + HeightDecreasePerIncrement;
+                    boxLength += LengthIncreasePerIncrement;
+                    continue;
+                }
+            }
+
+            for (int i = 0; i < hits; i++)
+            {
+                Collider collider = array[i];
+                if (collider != null)
+                {
+                    //debugObjects.Add(DebugGizmos.Line(OriginPoint + Vector3.up, collider.transform.position, DebugGizmos.RandomColor, 0.01f, false, -1));
                 }
             }
         }
+
+        private List<GameObject> debugObjects = new List<GameObject>();
 
         private void ClearColliders(Collider[] array)
         {
