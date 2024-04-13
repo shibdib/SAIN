@@ -76,7 +76,7 @@ namespace SAIN.SAINComponent.Classes
             CoverPoint activePoint = CoverInUse;
             if (activePoint != null && activePoint.CoverStatus == CoverStatus.InCover)
             {
-                SAINEnemyClass enemy = SAIN.Enemy;
+                SAINEnemy enemy = SAIN.Enemy;
                 if (enemy != null && damage.Player != null && enemy.EnemyPlayer.ProfileId == damage.Player.iPlayer.ProfileId)
                 {
                     activePoint.HitInCoverCount++;
@@ -108,9 +108,23 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
-                if (CoverPoints.Count > 0)
+                foreach (var point in CoverPoints)
                 {
-                    return CoverPoints[0];
+                    point?.CalcPath();
+                }
+
+                CoverFinderComponent.OrderPointsByPathDist(CoverPoints);
+
+                for (int i = 0; i < CoverPoints.Count; i++)
+                {
+                    CoverPoint point = CoverPoints[i];
+                    if (point != null)
+                    {
+                        if (point != null && point.Spotted == false && point.IsBad == false)
+                        {
+                            return point;
+                        }
+                    }
                 }
                 return null;
             }
@@ -130,6 +144,7 @@ namespace SAIN.SAINComponent.Classes
                 var move = SAIN.Mover;
                 var prone = move.Prone;
                 bool shallProne = prone.ShallProneHide();
+
                 if (shallProne && (SAIN.Decision.CurrentSelfDecision != SelfDecision.None || SAIN.Suppression.IsHeavySuppressed))
                 {
                     prone.SetProne(true);
@@ -186,10 +201,10 @@ namespace SAIN.SAINComponent.Classes
             return Physics.Raycast(position, direction, dist, LayerMaskClass.HighPolyWithTerrainMask);
         }
 
-        public bool BotIsAtCoverPoint(out CoverPoint coverPoint)
+        public bool BotIsAtCoverInUse(out CoverPoint coverInUse)
         {
-            coverPoint = CoverInUse;
-            return BotIsAtCoverPoint(coverPoint);
+            coverInUse = CoverInUse;
+            return coverInUse != null && coverInUse.BotIsHere;
         }
 
         public bool BotIsAtCoverPoint(CoverPoint coverPoint)
@@ -197,28 +212,10 @@ namespace SAIN.SAINComponent.Classes
             return coverPoint != null && coverPoint.BotIsHere;
         }
 
-        public bool BotIsAtCoverPoint()
+        public bool BotIsAtCoverInUse()
         {
             var coverPoint = CoverInUse;
-            return BotIsAtCoverPoint(coverPoint);
-        }
-
-        public bool BotIsMovingToPoint
-        {
-            get
-            {
-                if (BotOwner?.Mover == null)
-                {
-                    return false;
-                }
-                var point = CoverInUse;
-                var pathController = HelpersGClass.GetPathControllerClass(BotOwner.Mover);
-                if (pathController?.CurPath == null)
-                {
-                    return false;
-                }
-                return point != null && (point.Position - pathController.CurPath.LastCorner()).sqrMagnitude < 1f;
-            }
+            return coverPoint != null && coverPoint.BotIsHere;
         }
 
         public CoverPoint CoverInUse
@@ -231,7 +228,7 @@ namespace SAIN.SAINComponent.Classes
                 }
                 foreach (var point in CoverPoints)
                 {
-                    if (point != null && (point.BotIsUsingThis || BotIsAtCoverPoint(FallBackPoint)))
+                    if (point != null && (point.BotIsUsingThis || BotIsAtCoverPoint(point)))
                     {
                         return point;
                     }

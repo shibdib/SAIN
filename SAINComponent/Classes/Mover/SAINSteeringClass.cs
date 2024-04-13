@@ -186,7 +186,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool LookToEnemyLastSeenPos()
         {
-            SAINEnemyClass enemy = SAIN.Enemy;
+            SAINEnemy enemy = SAIN.Enemy;
             Vector3? LastSeenPosition = enemy?.LastSeenPosition;
             if (LastSeenPosition != null && enemy?.IsVisible == false)
             {
@@ -200,7 +200,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool LookToEnemyLastSeenClose()
         {
-            SAINEnemyClass enemy = SAIN.Enemy;
+            SAINEnemy enemy = SAIN.Enemy;
             if (enemy?.LastSeenPosition != null
                 && enemy.Path.EnemyDistanceFromLastSeen < 10f)
             {
@@ -260,7 +260,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool EnemyVisible()
         {
-            SAINEnemyClass enemy = SAIN.Enemy;
+            SAINEnemy enemy = SAIN.Enemy;
             if (enemy != null && enemy.IsVisible)
             {
                 return true;
@@ -268,7 +268,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             return false;
         }
 
-        public void LookToEnemy(SAINEnemyClass enemy)
+        public void LookToEnemy(SAINEnemy enemy)
         {
             if (enemy != null)
             {
@@ -283,7 +283,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool LookToCloseEnemyHear()
         {
-            SAINEnemyClass enemy = SAIN.Enemy;
+            SAINEnemy enemy = SAIN.Enemy;
             if (enemy != null)
             {
                 var player = enemy.EnemyIPlayer as Player;

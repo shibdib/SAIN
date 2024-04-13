@@ -1,4 +1,5 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 
 namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
@@ -69,21 +70,27 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
     public partial class SAINMindSettings
     {
         [Hidden]
-        public readonly bool SURGE_KIT_ONLY_SAFE_CONTAINER = false;
+        [JsonIgnore]
+        public float PART_PERCENT_TO_HEAL = 0.9f;
 
         [Hidden]
-        public readonly float SEC_TO_MORE_DIST_TO_RUN = 0f;
+        [JsonIgnore]
+        public readonly bool SURGE_KIT_ONLY_SAFE_CONTAINER = true;
 
         [Hidden]
-        public readonly float DIST_TO_STOP_RUN_ENEMY = 0f;
-
-        [Hidden]
-        public readonly bool NO_RUN_AWAY_FOR_SAFE = true;
-
-        [Hidden]
+        [JsonIgnore]
         public readonly bool CAN_USE_MEDS = true;
 
         [Hidden]
+        [JsonIgnore]
         public readonly bool CAN_USE_FOOD_DRINK = true;
+
+        [Hidden]
+        [JsonIgnore]
+        public float MAX_AGGRO_BOT_DIST_UPPER_LIMIT = 500;
+
+        [Hidden]
+        [JsonIgnore]
+        public float MAX_AGGRO_BOT_DIST = 500;
     }
 }

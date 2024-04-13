@@ -30,7 +30,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool GetDecision(out SoloDecision Decision)
         {
-            SAINEnemyClass enemy = SAIN.Enemy;
+            SAINEnemy enemy = SAIN.Enemy;
             if (enemy == null)
             {
                 Decision = SoloDecision.None;
@@ -105,7 +105,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private static readonly float GrenadeMaxEnemyDistance = 100f;
 
-        private bool StartThrowGrenade(SAINEnemyClass enemy)
+        private bool StartThrowGrenade(SAINEnemy enemy)
         {
             if (!GlobalSettings.General.BotsUseGrenades)
             {
@@ -138,7 +138,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private static readonly float RushEnemyMaxPathDistance = 30f;
         private static readonly float RushEnemyLowAmmoRatio = 0.5f;
 
-        private bool StartRushEnemy(SAINEnemyClass enemy)
+        private bool StartRushEnemy(SAINEnemy enemy)
         {
             if (SAIN.Info.PersonalitySettings?.CanRushEnemyReloadHeal == true)
             {
@@ -165,7 +165,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private float ShiftCoverNewCoverTime => CoverSettings.ShiftCoverNewCoverTime;
         private float ShiftCoverResetTime => CoverSettings.ShiftCoverResetTime;
 
-        private bool StartShiftCover(SAINEnemyClass enemy)
+        private bool StartShiftCover(SAINEnemy enemy)
         {
             if (SAIN.Info.PersonalitySettings.CanShiftCoverPosition == false)
             {
@@ -238,7 +238,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private float ShiftResetTimer;
         public bool ShiftCoverComplete { get; set; }
 
-        private bool StartDogFightAction(SAINEnemyClass enemy)
+        private bool StartDogFightAction(SAINEnemy enemy)
         {
             if (SAIN.Decision.CurrentSelfDecision != SelfDecision.None)
             {
@@ -258,7 +258,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return (pathStatus == EnemyPathDistance.VeryClose && SAIN.Enemy.IsVisible) || SAIN.Cover.CoverInUse?.Spotted == true;
         }
 
-        private bool StartMoveToEngage(SAINEnemyClass enemy)
+        private bool StartMoveToEngage(SAINEnemy enemy)
         {
             if (SAIN.Suppression.IsSuppressed)
             {
@@ -310,7 +310,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartMoveToCover()
         {
-            bool inCover = SAIN.Cover.BotIsAtCoverPoint();
+            bool inCover = SAIN.Cover.BotIsAtCoverInUse();
 
             if (!inCover)
             {
@@ -350,7 +350,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private float AmbushCheckTimer;
 
-        private bool StartSearch(SAINEnemyClass enemy)
+        private bool StartSearch(SAINEnemy enemy)
         {
             if (SAIN.Suppression.IsSuppressed)
             {
@@ -389,7 +389,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private bool StartStandAndShoot(SAINEnemyClass enemy)
+        private bool StartStandAndShoot(SAINEnemy enemy)
         {
             if (enemy.IsVisible && enemy.CanShoot)
             {
@@ -408,7 +408,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
                 if (visibleFor < holdGround)
                 {
-                    if (visibleFor < holdGround / 2f)
+                    if (visibleFor < holdGround / 1.5f)
                     {
                         return true;
                     }

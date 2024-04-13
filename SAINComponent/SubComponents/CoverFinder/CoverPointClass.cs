@@ -25,8 +25,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             TimeCreated = Time.time;
             ReCheckStatusTimer = Time.time;
 
-            PathToPoint = pathToPoint; 
-            CalcPathInfoManual();
+            PathToPoint = pathToPoint;
+            PathLength = PathToPoint.CalculatePathLength();
+            LastPathCalcTimer = Time.time + 2f;
+            CheckPathSafetyTimer = Time.time + 1f;
 
             Id = Guid.NewGuid().ToString();
         }
@@ -34,13 +36,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public bool IsBad;
 
         public float CoverValue { get; private set; }
-
-        public void CalcPathInfoManual()
-        {
-            PathLength = PathToPoint.CalculatePathLength();
-            LastPathCalcTimer = Time.time + 5f;
-            CheckPathSafetyTimer = Time.time + 1f;
-        }
 
         private readonly SAINComponentClass SAIN;
 
@@ -76,7 +71,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     return true;
                 }
 
-                CalcPathLength();
+                CalcPath();
                 IsSafePath = SAINBotSpaceAwareness.CheckPathSafety(PathToPoint, target);
             }
             return IsSafePath;
@@ -127,10 +122,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private bool PointVis;
         private float VisTimer;
 
-        public float CalcPathLength()
+        public float CalcPath()
         {
             if (LastPathCalcTimer < Time.time)
             {
+                LastPathCalcTimer = Time.time + 2;
                 PathToPoint.ClearCorners();
                 if (NavMesh.CalculatePath(BotOwner.Position, Position, -1, PathToPoint))
                 {

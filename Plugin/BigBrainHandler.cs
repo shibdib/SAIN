@@ -27,6 +27,21 @@ namespace SAIN
             }
             return false;
         }
+        public static bool IsBotUsingSAINCombatLayer(BotOwner bot)
+        {
+            if (bot?.Brain?.Agent != null)
+            {
+                if (BrainManager.IsCustomLayerActive(bot))
+                {
+                    string layer = bot.Brain.ActiveLayerName();
+                    if (SAINCombatLayers.Contains(layer))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
         public static List<string> BotBrainList = new List<string>();
         public static List<string> BotLayerList = new List<string>();
@@ -114,6 +129,13 @@ namespace SAIN
         }
 
         public static readonly List<string> SAINLayers = new List<string>
+        {
+            CombatSquadLayer.Name,
+            ExtractLayer.Name,
+            CombatSoloLayer.Name,
+        };
+
+        public static readonly List<string> SAINCombatLayers = new List<string>
         {
             CombatSquadLayer.Name,
             ExtractLayer.Name,

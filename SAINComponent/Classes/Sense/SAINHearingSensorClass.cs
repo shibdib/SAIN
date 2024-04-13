@@ -339,6 +339,11 @@ namespace SAIN.SAINComponent.Classes
                 }
             }
 
+            if (wasHeard && isGunSound)
+            {
+
+            }
+
             if (wasHeard)
             {
                 try
@@ -473,7 +478,7 @@ namespace SAIN.SAINComponent.Classes
 
         private bool CheckFootStepDetectChance(float d)
         {
-            float closehearing = 15f;
+            float closehearing = 10f;
             float farhearing = SAIN.Info.FileSettings.Hearing.MaxFootstepAudioDistance;
 
             if (d <= closehearing)
@@ -569,7 +574,7 @@ namespace SAIN.SAINComponent.Classes
         {
             int botlocation = BotOwner.AIData.EnvironmentId;
             int enemylocation = enemy.AIData.EnvironmentId;
-            return botlocation == enemylocation ? 1f : 0.66f;
+            return botlocation == enemylocation ? 1f : 0.75f;
         }
 
         private float RaycastCheck(Vector3 botpos, Vector3 enemypos, float environmentmodifier)
@@ -595,12 +600,12 @@ namespace SAIN.SAINComponent.Classes
                     if (hitCount == 0)
                     {
                         // If the hitCount is 0, set the occlusionmodifier to 0.8f multiplied by the environmentmodifier
-                        occlusionmodifier *= 0.8f * environmentmodifier;
+                        occlusionmodifier *= 0.85f * environmentmodifier;
                     }
                     else
                     {
                         // If the hitCount is not 0, set the occlusionmodifier to 0.95f multiplied by the environmentmodifier
-                        occlusionmodifier *= 0.925f * environmentmodifier;
+                        occlusionmodifier *= 0.95f * environmentmodifier;
                     }
 
                     // Increment the hitCount

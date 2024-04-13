@@ -97,7 +97,7 @@ namespace SAIN.Layers.Combat.Solo
 
         private void CheckShouldSprint()
         {
-            if (Search.CurrentState == ESearchMove.MoveToEndPeak)
+            if (Search.CurrentState == ESearchMove.MoveToEndPeak || Search.CurrentState == ESearchMove.Wait || Search.CurrentState == ESearchMove.MoveToDangerPoint || Search.CurrentState == ESearchMove.DirectMovePeek)
             {
                 SprintEnabled = false;
                 return;

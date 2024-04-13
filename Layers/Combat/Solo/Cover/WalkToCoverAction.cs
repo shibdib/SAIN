@@ -13,6 +13,7 @@ using UnityEngine;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SAIN.Layers.Combat.Solo;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -28,6 +29,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 if (!SAIN.Cover.CoverPoints.Contains(CoverDestination) || CoverDestination.Spotted)
                 {
+                    CoverDestination.BotIsUsingThis = false;
                     CoverDestination = null;
                 }
             }
@@ -37,29 +39,22 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (CoverDestination == null)
             {
-                if (FindTargetCoverTimer < Time.time)
+                var coverPoint = SAIN.Cover.ClosestPoint;
+                if (coverPoint != null && !coverPoint.Spotted && SAIN.Mover.GoToPoint(coverPoint.Position))
                 {
-                    FindTargetCoverTimer = Time.time + 0.5f;
-
-                    if (FindTargetCover())
-                    {
-                        if (SAIN.Mover.Prone.ShallProne(CoverDestination, true) || SAIN.Mover.Prone.IsProne)
-                        {
-                            SAIN.Mover.Prone.SetProne(true);
-                            SAIN.Mover.StopMove();
-                        }
-                        else
-                        {
-                            RecalcPathTimer = Time.time + 2f; 
-                            MoveTo(DestinationPosition);
-                        }
-                    }
+                    CoverDestination = coverPoint;
+                    CoverDestination.BotIsUsingThis = true;
+                    RecalcPathTimer = Time.time + 2f;
+                    SAIN.Mover.SetTargetMoveSpeed(1f);
+                    SAIN.Mover.SetTargetPose(1f);
                 }
             }
             if (CoverDestination != null && RecalcPathTimer < Time.time)
             {
-                RecalcPathTimer = Time.time + 2f; 
-                MoveTo(DestinationPosition);
+                RecalcPathTimer = Time.time + 2f;
+                SAIN.Mover.GoToPoint(CoverDestination.Position);
+                SAIN.Mover.SetTargetMoveSpeed(1f);
+                SAIN.Mover.SetTargetPose(1f);
             }
 
             EngageEnemy();
@@ -73,17 +68,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
             var coverPoint = SAIN.Cover.ClosestPoint;
             if (coverPoint != null && !coverPoint.Spotted)
             {
-                if (CanMoveTo(coverPoint, out Vector3 pointToGo))
-                {
-                    coverPoint.BotIsUsingThis = true;
-                    CoverDestination = coverPoint;
-                    DestinationPosition = pointToGo;
-                    return true;
-                }
-                else
-                {
-                    coverPoint.BotIsUsingThis = false;
-                }
+                coverPoint.BotIsUsingThis = true;
+                CoverDestination = coverPoint;
+                DestinationPosition = coverPoint.Position;
             }
             return false;
         }
@@ -94,16 +81,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
             SAIN.Mover.GoToPoint(position);
             SAIN.Mover.SetTargetMoveSpeed(1f);
             SAIN.Mover.SetTargetPose(1f);
-        }
-
-        private bool CanMoveTo(CoverPoint coverPoint, out Vector3 pointToGo)
-        {
-            if (coverPoint != null && SAIN.Mover.CanGoToPoint(coverPoint.Position, out pointToGo, true))
-            {
-                return true;
-            }
-            pointToGo = Vector3.zero;
-            return false;
         }
 
         private CoverPoint CoverDestination;
@@ -141,7 +118,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
-            CoverDestination = null;
+            if (CoverDestination != null)
+            {
+                CoverDestination.BotIsUsingThis = false;
+                CoverDestination = null;
+            }
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)

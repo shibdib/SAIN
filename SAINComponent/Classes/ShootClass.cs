@@ -22,27 +22,50 @@ namespace SAIN.SAINComponent.Classes
 
         public override void Update()
         {
-            var enemy = SAIN.Enemy;
-            if (enemy != null && enemy.IsVisible && enemy.CanShoot)
+            if (SAIN.Player.IsSprintEnabled)
             {
-                Vector3? pointToShoot = GetPointToShoot();
-                if (pointToShoot != null)
-                {
-                    if (enemy.RealDistance < 30f)
-                    {
-                        BotOwner.BotLight?.TurnOn(true);
-                    }
-                    Target = pointToShoot.Value;
-                    if (BotOwner.AimingData.IsReady && !SAIN.NoBushESP.NoBushESPActive && FriendlyFire.ClearShot)
-                    {
-                        ReadyToShoot();
-                        Shoot.Update();
-                    }
-                }
+                return;
+            }
+
+            var enemy = SAIN.Enemy;
+
+            SoloDecision currentDecision = SAIN.Memory.Decisions.Main.Current;
+
+            if (currentDecision == SoloDecision.HoldInCover || currentDecision == SoloDecision.StandAndShoot)
+            {
+                BotOwner.WeaponManager.ShootController?.SetAim(true);
             }
             else
             {
-                BotOwner.BotLight?.TurnOff(false, false);
+                BotOwner.WeaponManager.ShootController?.SetAim(false);
+            }
+
+            if (enemy != null)
+            {
+                if (enemy.IsVisible)
+                {
+                    BotOwner.BotLight?.TurnOn(enemy.RealDistance < 30f);
+                }
+
+                if (enemy.IsVisible && enemy.CanShoot)
+                {
+                    Vector3? pointToShoot = GetPointToShoot();
+                    if (pointToShoot != null)
+                    {
+                        Target = pointToShoot.Value;
+                        if (BotOwner.AimingData.IsReady && !SAIN.NoBushESP.NoBushESPActive && FriendlyFire.ClearShot)
+                        {
+                            ReadyToShoot();
+                            Shoot.Update();
+                        }
+                    }
+                }
+            }
+            else if (SAIN.CurrentTargetPosition != null)
+            {
+                float lightOnVisDist = BotOwner.Settings.FileSettings.Look.LightOnVisionDistance;
+                float sqrMagnitude = (SAIN.Position - SAIN.CurrentTargetPosition.Value).sqrMagnitude;
+                BotOwner.BotLight?.TurnOn(sqrMagnitude < lightOnVisDist * lightOnVisDist);
             }
         }
 

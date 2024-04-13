@@ -28,7 +28,7 @@ namespace SAIN.SAINComponent.Classes.Sense
         }
 
 
-        public void CheckIfDazzleApplied(SAINEnemyClass enemy)
+        public void CheckIfDazzleApplied(SAINEnemy enemy)
         {
             var person = enemy.EnemyIPlayer;
             SAINFlashLightComponent flashlight;

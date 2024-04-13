@@ -181,7 +181,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
         }
 
-        private static void OrderPointsByPathDist(List<CoverPoint> points)
+        public static void OrderPointsByPathDist(List<CoverPoint> points)
         {
             points.OrderBy(p => p.PathLength);
         }

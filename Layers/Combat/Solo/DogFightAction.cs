@@ -22,7 +22,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINEnemyClass enemy = SAIN.Enemy;
+            SAINEnemy enemy = SAIN.Enemy;
             if (enemy == null)
             {
                 return;

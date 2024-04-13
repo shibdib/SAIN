@@ -77,7 +77,7 @@ namespace SAIN
                 typeof(Patches.Generic.GetBotSpawner),
                 typeof(Patches.Generic.GrenadeThrownActionPatch),
                 typeof(Patches.Generic.GrenadeExplosionActionPatch),
-                typeof(Patches.Generic.LimitSteerSpeedPatch),
+                typeof(Patches.Generic.AimRotateSpeedPatch),
                 typeof(Patches.Generic.BotGroupAddEnemyPatch),
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),

@@ -290,11 +290,15 @@
     <Compile Include="SAINComponent\Classes\Decision\DecisionWrapper.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="Editor\PresetSelection.cs" />
+    <Compile Include="SAINComponent\Classes\EnemyBase.cs" />
     <Compile Include="SAINComponent\Classes\ESearchMove.cs" />
     <Compile Include="Helpers\SealedClass\PointDirection.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINMovementPlanController.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINVaultClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotUnstuckClass.cs" />
+    <Compile Include="SAINComponent\Classes\SAINEnemyPath.cs" />
+    <Compile Include="SAINComponent\Classes\SAINEnemyStatus.cs" />
+    <Compile Include="SAINComponent\Classes\SAINEnemyVision.cs" />
     <Compile Include="SAINComponent\Classes\SAINNotLooking.cs" />
     <Compile Include="SAINComponent\Classes\SAINSearchClass.cs" />
     <Compile Include="SAINComponent\Classes\Sense\SAINConcealment.cs" />
@@ -444,7 +448,7 @@
     <Compile Include="SAINComponent\Classes\Talk\EnemyTalkObject.cs" />
     <Compile Include="SAINComponent\Classes\Talk\GroupTalk.cs" />
     <Compile Include="SAINComponent\Classes\Info\BotSquadClass.cs" />
-    <Compile Include="SAINComponent\Classes\SAINEnemyClass.cs" />
+    <Compile Include="SAINComponent\Classes\SAINEnemy.cs" />
     <Compile Include="SAINComponent\Classes\Info\SAINBotInfoClass.cs" />
     <Compile Include="SAINEnum.cs" />
     <Compile Include="SAINComponent\SubComponents\GrenadeTrackerComponent.cs" />

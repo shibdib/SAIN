@@ -16,7 +16,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            SAINEnemyClass enemy = SAIN.Enemy;
+            SAINEnemy enemy = SAIN.Enemy;
             if (enemy == null || !enemy.Seen || enemy.TimeSinceSeen > 10f || !BotOwner.WeaponManager.IsReady || !BotOwner.WeaponManager.HaveBullets || SAIN.Mover.IsSprinting || SAIN.Cover.CoverInUse == null)
             {
                 ResetBlindFire();

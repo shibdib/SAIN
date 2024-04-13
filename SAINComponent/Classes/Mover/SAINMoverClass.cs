@@ -48,13 +48,16 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     reachDist = BotOwner.Settings.FileSettings.Move.REACH_DIST;
                 }
-                BotOwner.Mover?.GoToPoint(pointToGo, true, reachDist, false, false, false);
-                if (crawl)
+                NavMeshPathStatus status = BotOwner.Mover.GoToPoint(pointToGo, true, reachDist, false, false, true);
+                if (status == NavMeshPathStatus.PathComplete)
                 {
-                    Prone.SetProne(true);
+                    if (crawl)
+                    {
+                        Prone.SetProne(true);
+                    }
+                    BotOwner.DoorOpener?.Update();
+                    return true;
                 }
-                BotOwner.DoorOpener?.Update();
-                return true;
             }
             return false;
         }
@@ -171,7 +174,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private void SetStamina()
         {
             var stamina = Player.Physical.Stamina;
-            if (SAIN.LayersActive && stamina.NormalValue < 0.1f)
+            if (SAIN.CombatLayersActive && stamina.NormalValue < 0.1f)
             {
                 Player.Physical.Stamina.UpdateStamina(stamina.TotalCapacity / 8f);
             }
@@ -191,6 +194,10 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             BotOwner.Mover?.Stop();
             if (IsSprinting)
+            {
+                Sprint(false);
+            }
+            else if (Player.IsSprintEnabled)
             {
                 Sprint(false);
             }

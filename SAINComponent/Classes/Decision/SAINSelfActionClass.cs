@@ -1,8 +1,10 @@
 ﻿using BepInEx.Logging;
 using EFT;
+using HarmonyLib;
 using SAIN.Components;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Decision
@@ -15,7 +17,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
-            BotOwner.Medecine.RefreshCurMeds();
+            RefreshMeds();
         }
 
         public void Update()
@@ -24,7 +26,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 if (WasUsingMeds)
                 {
-                    BotOwner.Medecine.RefreshCurMeds();
+                    RefreshMeds();
                 }
                 switch (SAIN.Memory.Decisions.Self.Current)
                 {
@@ -50,6 +52,33 @@ namespace SAIN.SAINComponent.Classes.Decision
                 WasUsingMeds = UsingMeds;
             }
         }
+
+        private void RefreshMeds()
+        {
+            // According to BSG bots should only be able to look either in the secure container or EVERYWHERE ELSE, so I'm setting the toggle both ways and calling RefreshMeds to get both. If I understand that right.
+            if (UseMedsOnlySafeContainerProp == null)
+            {
+                FirstAidField = AccessTools.Field(typeof(BotMedecine), "FirstAid");
+                UseMedsOnlySafeContainerProp = AccessTools.Field(FirstAidField.FieldType, "bool_2");
+            }
+
+            BotOwner.Medecine.RefreshCurMeds();
+
+            if (UseMedsOnlySafeContainerProp != null)
+            {
+                object value = UseMedsOnlySafeContainerProp.GetValue(BotOwner.Medecine.FirstAid);
+                if (value != null && value is bool useSafeContainer)
+                {
+                    useSafeContainer = !useSafeContainer;
+                    UseMedsOnlySafeContainerProp.SetValue(BotOwner.Medecine.FirstAid, useSafeContainer);
+
+                    BotOwner.Medecine.RefreshCurMeds();
+                }
+            }
+        }
+
+        private static FieldInfo FirstAidField;
+        private static FieldInfo UseMedsOnlySafeContainerProp;
 
         public void Dispose()
         {

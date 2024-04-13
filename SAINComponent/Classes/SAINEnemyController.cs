@@ -79,7 +79,7 @@ namespace SAIN.SAINComponent.Classes
             Enemies?.Clear();
         }
 
-        public SAINEnemyClass GetEnemy(string id)
+        public SAINEnemy GetEnemy(string id)
         {
             if (Enemies.ContainsKey(id))
             {
@@ -90,7 +90,7 @@ namespace SAIN.SAINComponent.Classes
 
         public bool HasEnemy => ActiveEnemy?.EnemyPerson?.IsActive == true;
 
-        public SAINEnemyClass ActiveEnemy { get; private set; }
+        public SAINEnemy ActiveEnemy { get; private set; }
 
         public void ClearEnemy()
         {
@@ -102,27 +102,8 @@ namespace SAIN.SAINComponent.Classes
             var goalEnemy = BotOwner.Memory.GoalEnemy;
             IPlayer IPlayer = goalEnemy?.Person;
             
-            bool addEnemy = true;
-
-            if (goalEnemy == null || IPlayer == null)
-            {
-                addEnemy = false;
-            }
-            else
-            {
-                if (IPlayer.IsAI && (IPlayer.AIData?.BotOwner == null || IPlayer.AIData.BotOwner.BotState != EBotState.Active))
-                {
-                    addEnemy = false;
-                }
-                if (IPlayer.ProfileId == SAIN.ProfileId)
-                {
-                    addEnemy = false;
-                }
-                if (!IPlayer.HealthController.IsAlive)
-                {
-                    addEnemy = false;
-                }
-            }
+            bool addEnemy = goalEnemy != null 
+                && CheckPlayerNull(goalEnemy.Person) == false;
 
             if (addEnemy)
             {
@@ -136,7 +117,7 @@ namespace SAIN.SAINComponent.Classes
                 else
                 {
                     SAINPersonClass enemySAINPerson = GetSAINPerson(IPlayer);
-                    ActiveEnemy = new SAINEnemyClass(SAIN, enemySAINPerson);
+                    ActiveEnemy = new SAINEnemy(SAIN, enemySAINPerson, goalEnemy);
                     Enemies.Add(id, ActiveEnemy);
                 }
             }
@@ -144,6 +125,50 @@ namespace SAIN.SAINComponent.Classes
             {
                 ActiveEnemy = null;
             }
+        }
+
+        public SAINEnemy CheckAddEnemy(IPlayer IPlayer)
+        {
+            if (CheckPlayerNull(IPlayer) == false)
+            {
+                string id = IPlayer.ProfileId;
+
+                if (!Enemies.ContainsKey(id) && BotOwner.EnemiesController.EnemyInfos.ContainsKey(IPlayer))
+                {
+                    EnemyInfo enemyInfo = BotOwner.EnemiesController.EnemyInfos[IPlayer];
+                    SAINPersonClass enemySAINPerson = GetSAINPerson(IPlayer);
+                    SAINEnemy enemy = new SAINEnemy(SAIN, enemySAINPerson, enemyInfo);
+                    Enemies.Add(id, enemy);
+                    return enemy;
+                }
+                if (Enemies.ContainsKey(id))
+                {
+                    return Enemies[id];
+                }
+            }
+            return null;
+        }
+
+        private bool CheckPlayerNull(IPlayer player)
+        {
+            bool isNull = false;
+            if (player == null)
+            {
+                isNull = true;
+            }
+            else if (player.IsAI && (player.AIData?.BotOwner == null || player.AIData.BotOwner.BotState != EBotState.Active))
+            {
+                isNull = true;
+            }
+            else if (player.ProfileId == SAIN.ProfileId)
+            {
+                isNull = true;
+            }
+            else if (!player.HealthController.IsAlive)
+            {
+                isNull = true;
+            }
+            return isNull;
         }
 
         public bool IsMainPlayerActiveEnemy()
@@ -226,7 +251,7 @@ namespace SAIN.SAINComponent.Classes
             return enemySAINPerson;
         }
 
-        public readonly Dictionary<string, SAINEnemyClass> Enemies = new Dictionary<string, SAINEnemyClass>();
+        public readonly Dictionary<string, SAINEnemy> Enemies = new Dictionary<string, SAINEnemy>();
         private readonly List<string> EnemyIDsToRemove = new List<string>();
     }
 }

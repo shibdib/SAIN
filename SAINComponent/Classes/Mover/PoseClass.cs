@@ -70,7 +70,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             targetPose = 1f;
             if (SAIN.CurrentTargetPosition != null)
             {
-                SAINEnemyClass enemy = SAIN.Enemy;
+                SAINEnemy enemy = SAIN.Enemy;
                 if (enemy != null)
                 {
                     if (useCollider)

@@ -223,6 +223,7 @@ namespace SAIN.SAINComponent
             {
                 if (RecheckTimer < Time.time)
                 {
+                    CombatLayersActive = BigBrainHandler.IsBotUsingSAINCombatLayer(BotOwner);
                     if (SAINActive)
                     {
                         RecheckTimer = Time.time + 0.5f;
@@ -237,6 +238,7 @@ namespace SAIN.SAINComponent
                 return Active;
             }
         }
+        public bool CombatLayersActive { get; private set; }
 
         private bool Active;
         private float RecheckTimer = 0f;
@@ -274,6 +276,27 @@ namespace SAIN.SAINComponent
             catch { }
         }
 
+        private void UpdateGoalTarget()
+        {
+            if (updateGoalTargetTimer < Time.time)
+            {
+                updateGoalTargetTimer = Time.time + 0.5f;
+                var Target = GoalTargetPosition;
+                if (Target != null)
+                {
+                    if ((Target.Value - Position).sqrMagnitude < 2f)
+                    {
+                        BotOwner.Memory.GoalTarget.Clear();
+                        BotOwner.CalcGoal();
+                    }
+                }
+            }
+        }
+
+        private float updateGoalTargetTimer;
+
+        public Vector3? GoalTargetPosition => BotOwner.Memory.GoalTarget.Position;
+
         public Vector3? CurrentTargetPosition
         {
             get
@@ -298,24 +321,11 @@ namespace SAIN.SAINComponent
                 var Target = BotOwner.Memory.GoalTarget;
                 if (Target != null && Target?.Position != null)
                 {
+                    return Target.Position;
                     if ((Target.Position.Value - BotOwner.Position).sqrMagnitude < 2f)
                     {
-                        Target.Clear();
-                        BotOwner.CalcGoal();
-                    }
-                    else
-                    {
-                        return Target.Position;
-                    }
-                }
-
-                var placeForCheck = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, 200f, 60f);
-                if (placeForCheck != null && !placeForCheck.IsCome)
-                {
-                    if ((placeForCheck.Position - Position).sqrMagnitude < 1f)
-                    {
-                        BotOwner.BotsGroup.PlaceChecked(placeForCheck);
-                        BotOwner.CalcGoal();
+                        //Target.Clear();
+                        //BotOwner.CalcGoal();
                     }
                     else
                     {
@@ -339,7 +349,7 @@ namespace SAIN.SAINComponent
         public SAINBotSuppressClass Suppression { get; private set; }
         public SAINVaultClass Vault { get; private set; }
         public SAINSearchClass Search { get; private set; }
-        public SAINEnemyClass Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;
+        public SAINEnemy Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;
         public SAINPersonTransformClass Transform => Person.Transform;
         public SAINMemoryClass Memory { get; private set; }
         public SAINEnemyController EnemyController { get; private set; }

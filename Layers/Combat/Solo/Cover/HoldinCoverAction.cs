@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SAIN.Layers.Combat.Solo;
+using SAIN.Helpers;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -37,41 +38,76 @@ namespace SAIN.Layers.Combat.Solo.Cover
             Shoot.Update();
             SAIN.Cover.DuckInCover();
 
-            var enemy = SAIN.Enemy;
-            if (enemy != null)
+            if (SAIN.Suppression.IsSuppressed)
             {
-                if (enemy.TimeSinceSeen > 5f)
+                ChangeLeanTimer = Time.time + 2f * Random.Range(0.66f, 1.33f);
+                SAIN.Mover.FastLean(LeanSetting.None);
+                CurrentLean = LeanSetting.None;
+            }
+            else
+            {
+                if (!ShallHoldLean() && ChangeLeanTimer < Time.time)
                 {
-                    if (ResetSideStepTimer < Time.time)
+                    ChangeLeanTimer = Time.time + 2f * Random.Range(0.66f, 1.33f);
+                    LeanSetting newLean;
+                    switch (CurrentLean)
                     {
-                        ResetSideStepTimer = Time.time + 1.5f;
-                        //SAIN.Lean.SideStepClass.SetSideStep(0f);
+                        case LeanSetting.Left:
+                        case LeanSetting.Right:
+                            newLean = LeanSetting.None;
+                            break;
+
+                        default:
+                            newLean = EFTMath.RandomBool() ? LeanSetting.Left : LeanSetting.Right;
+                            break;
                     }
-                    else if (NewSideStepTimer < Time.time)
-                    {
-                        NewSideStepTimer = Time.time + 3f;
-                        SideStepRight = !SideStepRight;
-                        if (SideStepRight)
-                        {
-                            //SAIN.Lean.SideStepClass.SetSideStep(1f);
-                        }
-                        else
-                        {
-                            //SAIN.Lean.SideStepClass.SetSideStep(-1f);
-                        }
-                    }
+                    CurrentLean = newLean;
+                    SAIN.Mover.FastLean(newLean);
                 }
             }
         }
 
-        private bool SideStepRight;
-        private float ResetSideStepTimer;
-        private float NewSideStepTimer;
+        private bool ShallHoldLean()
+        {
+            bool holdLean = false;
+
+            if (SAIN.Suppression.IsSuppressed)
+            {
+                return false;
+            }
+
+            if (SAIN.HasEnemy && SAIN.Enemy.IsVisible && SAIN.Enemy.CanShoot)
+            {
+                if (SAIN.Enemy.IsVisible && SAIN.Enemy.CanShoot)
+                {
+                    holdLean = true;
+                }
+                else if (SAIN.Enemy.TimeSinceSeen < 3f)
+                {
+                    holdLean = true;
+                }
+            }
+            return holdLean;
+        }
+
+        private void Lean(LeanSetting setting, bool holdLean)
+        {
+            if (holdLean)
+            {
+                return;
+            }
+            CurrentLean = setting;
+            SAIN.Mover.FastLean(setting);
+        }
+
+        private LeanSetting CurrentLean;
+        private float ChangeLeanTimer;
 
         private CoverPoint CoverInUse;
 
         public override void Start()
         {
+            ChangeLeanTimer = Time.time + 2f;
             CoverInUse = SAIN.Cover.CoverInUse;
         }
 

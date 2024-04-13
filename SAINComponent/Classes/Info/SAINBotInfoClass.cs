@@ -127,7 +127,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
             float min = settings.HoldGroundMinRandom;
             float max = settings.HoldGroundMaxRandom;
-            HoldGroundDelay = baseTime.Randomize(min, max).Round100();
+            HoldGroundDelay = 0.6f + baseTime.Randomize(min, max).Round100();
         }
 
         private float AggressionMultiplier => (FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.AggressionMultiplier).Round100();

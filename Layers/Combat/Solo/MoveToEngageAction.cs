@@ -19,7 +19,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINEnemyClass enemy = SAIN.Enemy;
+            SAINEnemy enemy = SAIN.Enemy;
             if (enemy == null)
             {
                 return;
@@ -84,7 +84,7 @@ namespace SAIN.Layers.Combat.Solo
             }
         }
 
-        private bool CheckShoot(SAINEnemyClass enemy)
+        private bool CheckShoot(SAINEnemy enemy)
         {
             float distance = enemy.RealDistance;
             bool enemyLookAtMe = enemy.EnemyLookingAtMe;

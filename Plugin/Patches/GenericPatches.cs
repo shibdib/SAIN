@@ -12,18 +12,35 @@ using UnityEngine.AI;
 using SAIN.Layers;
 using Comfort.Common;
 using EFT.HealthSystem;
+using Aki.Reflection.Utils;
+using System;
+using System.Linq;
 
 namespace SAIN.Patches.Generic
 {
-    internal class LimitSteerSpeedPatch : ModulePatch
+    public class AimRotateSpeedPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(BotSteering).GetMethod("method_0");
-        [PatchPrefix]
-        public static void PatchPrefix(ref float rotateSpeed)
+        private static Type _aimingDataType;
+        private static MethodInfo _aimingDataMethod11;
+
+        protected override MethodBase GetTargetMethod()
         {
-            rotateSpeed = Mathf.Clamp(rotateSpeed, 0, SAINPlugin.LoadedPreset.GlobalSettings.Aiming.MaxBotTurnSpeed);
+            //return AccessTools.Method(typeof(GClass544), "method_7");
+            _aimingDataType = PatchConstants.EftTypes.Single(x => x.GetProperty("LastSpreadCount") != null && x.GetProperty("LastAimTime") != null);
+            _aimingDataMethod11 = AccessTools.Method(_aimingDataType, "method_11");
+            return _aimingDataMethod11;
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref Vector3 ___vector3_2, ref Vector3 ___vector3_0, Vector3 dir)
+        {
+            ___vector3_2 = dir;
+            ___botOwner_0.Steering.LookToDirection(dir, 300);
+            ___botOwner_0.Steering.SetYByDir(___vector3_0);
+            return false;
         }
     }
+
     internal class BotGroupAddEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(BotsGroup).GetMethod("AddEnemy");

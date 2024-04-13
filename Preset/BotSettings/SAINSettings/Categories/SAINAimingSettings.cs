@@ -1,4 +1,5 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 using System.ComponentModel;
 using Description = SAIN.Attributes.DescriptionAttribute;
 
@@ -96,5 +97,13 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [MinMax(0f, 25f, 10f)]
         [Advanced]
         public float BASE_HIT_AFFECTION_MAX_ANG = 5f;
+
+        [Hidden]
+        [JsonIgnore]
+        public float FIRST_CONTACT_ADD_SEC = 0.5f;
+
+        [Hidden]
+        [JsonIgnore]
+        public float FIRST_CONTACT_ADD_CHANCE_100 = 100f;
     }
 }

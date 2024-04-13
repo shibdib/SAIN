@@ -25,35 +25,41 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (RecalcTimer < Time.time)
             {
+                MoveSuccess = false;
                 bool shallProne = SAIN.Mover.Prone.ShallProneHide();
                 if (FindTargetCover())
                 {
                     RecalcTimer = Time.time + 2f;
                     if ((CoverDestination.Position - BotOwner.Position).sqrMagnitude > 4f)
                     {
-                        BotOwner.BotRun.Run(CoverDestination.Position, false, 0.6f);
+                        MoveSuccess = BotOwner.BotRun.Run(CoverDestination.Position, false, 0.6f);
                     }
                     else
                     {
                         bool shallCrawl = SAIN.Decision.CurrentSelfDecision != SelfDecision.None && CoverDestination.CoverStatus == CoverStatus.FarFromCover && shallProne;
-                        SAIN.Mover.GoToPoint(CoverDestination.Position, -1, shallCrawl);
-                        SAIN.Steering.LookToMovingDirection();
+                        MoveSuccess = SAIN.Mover.GoToPoint(CoverDestination.Position, -1, shallCrawl);
                     }
                 }
-                else if (shallProne)
+                if (MoveSuccess)
                 {
-                    SAIN.Mover.Prone.SetProne(true);
+                    RecalcTimer = Time.time + 4f;
                 }
                 else
                 {
-                    RecalcTimer = Time.time + 0.5f;
+                    RecalcTimer = Time.time + 0.1f;
                 }
             }
-            if (CoverDestination == null || CoverDestination.BotIsHere)
+            if (MoveSuccess)
+            {
+                SAIN.Steering.LookToMovingDirection();
+            }
+            else
             {
                 EngageEnemy();
             }
         }
+
+        private bool MoveSuccess;
 
         private float RecalcTimer;
 
@@ -68,9 +74,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
             CoverPoint coverPoint = SelectPoint();
             if (coverPoint != null && !coverPoint.Spotted)
             {
-                if (SAIN.Mover.CanGoToPoint(coverPoint.Position, out Vector3 pointToGo))
+                if (SAIN.Mover.CanGoToPoint(coverPoint.Position, out Vector3 pointToGo, true, 1f))
                 {
-                    coverPoint.Position = pointToGo;
+                    //coverPoint.Position = pointToGo;
                     coverPoint.BotIsUsingThis = true;
                     CoverDestination = coverPoint;
                     return true;
