@@ -11,6 +11,11 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update(bool isCurrentEnemy)
         {
+            if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
+            {
+                return;
+            }
+
             float timeToAdd = isCurrentEnemy ? 0.1f : 1f;
 
             bool visible = false;
@@ -22,12 +27,12 @@ namespace SAIN.SAINComponent.Classes
                 InLineOfSight = CheckLineOfSight();
             }
 
-            var goalenemy = BotOwner.Memory.GoalEnemy;
-            if (goalenemy?.IsVisible == true && InLineOfSight)
+            var enemyInfo = EnemyInfo;
+            if (enemyInfo?.IsVisible == true && InLineOfSight)
             {
                 visible = true;
             }
-            if (goalenemy?.CanShoot == true)
+            if (enemyInfo?.CanShoot == true)
             {
                 canshoot = true;
             }
@@ -38,6 +43,10 @@ namespace SAIN.SAINComponent.Classes
 
         private bool CheckLineOfSight()
         {
+            if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
+            {
+                return false;
+            }
             if (Enemy.RealDistance <= BotOwner.Settings.Current.CurrentVisibleDistance)
             {
                 foreach (var part in EnemyPlayer.MainParts.Values)

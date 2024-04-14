@@ -130,6 +130,10 @@ namespace SAIN.Helpers
             core.PISTOL_POWER = 20f;
             core.SMG_POWER = 60f;
             core.SNIPE_POWER = 5f;
+            core.SOUND_DOOR_OPEN_METERS = 30f;
+            core.SOUND_DOOR_BREACH_METERS = 60f;
+            core.JUMP_SPREAD_DIST = 70f;
+            core.BASE_WALK_SPEREAD2 = 70f;
         }
 
         public static void UpdateArmorClassCoef(float coef)

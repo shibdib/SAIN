@@ -12,6 +12,7 @@ namespace SAIN.SAINComponent.Classes
         }
 
         public SAINComponentClass SAIN => Enemy.SAIN;
+        public EnemyInfo EnemyInfo => Enemy.EnemyInfo;
         public Player EnemyPlayer => Enemy.EnemyPlayer;
         public IPlayer EnemyIPlayer => Enemy.EnemyPerson.IPlayer;
         public BotOwner BotOwner => Enemy.BotOwner;

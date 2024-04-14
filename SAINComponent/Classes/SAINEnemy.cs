@@ -44,7 +44,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void UpdateHearStatus()
         {
-            if (CanBeHeard && TimeSinceHeard < Time.time)
+            if (CanBeHeard && TimeSinceHeard + TimeSinceHeardTimeAdd < Time.time)
             {
                 SetHeardStatus(false, Vector3.zero);
             }
