@@ -8,6 +8,7 @@ using UnityEngine;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Linq;
 using System;
+using System.Diagnostics;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
@@ -81,7 +82,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         {
             while (true)
             {
-                float timerToComplete = Time.time;
+                Stopwatch stopwatch = Stopwatch.StartNew();
 
                 //UpdateSpotted();
 
@@ -173,9 +174,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     OrderPointsByPathDist(CoverPoints);
                 }
 
+                stopwatch.Stop();
                 if (SAINPlugin.DebugMode)
                 {
-                    Logger.LogDebug($"Time to Complete Cover Finder Loop: [{Time.time - timerToComplete}]");
+                    Logger.LogDebug($"Time to Complete Cover Finder Loop: [{stopwatch.ElapsedMilliseconds}ms]");
                 }
                 yield return new WaitForSeconds(CoverUpdateFrequency);
             }
@@ -183,7 +185,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public static void OrderPointsByPathDist(List<CoverPoint> points)
         {
-            points.OrderBy(p => p.PathLength);
+            points.Sort((x, y) => x.PathLength.CompareTo(y.PathLength));
         }
 
         static float CoverUpdateFrequency => SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverUpdateFrequency;
