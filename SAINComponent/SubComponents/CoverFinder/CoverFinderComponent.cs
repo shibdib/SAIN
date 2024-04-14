@@ -48,6 +48,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 }
             }
         }
+
         static bool DebugCoverFinder => SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder;
 
         public void LookForCover(Vector3 targetPosition, Vector3 originPoint)
@@ -252,7 +253,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private Collider[] GetColliders(out int hits)
         {
             const float CheckDistThresh = 3f * 3f;
-            const float ColliderSortDistThresh = 2f * 2f;
+            const float ColliderSortDistThresh = 1f * 2f;
 
             float distance = (LastCheckPos - OriginPoint).sqrMagnitude;
             if (distance > CheckDistThresh)
@@ -263,10 +264,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
             if (distance > ColliderSortDistThresh)
             {
-                //ColliderFinder.SortArrayBotDist(Colliders);
+                ColliderFinder.SortArrayBotDist(Colliders);
             }
 
-            ColliderFinder.SortArrayBotDist(Colliders);
             hits = LastHitCount;
 
             return Colliders;

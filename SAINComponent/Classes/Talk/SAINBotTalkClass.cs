@@ -6,6 +6,7 @@ using UnityEngine;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
 using EFT.Utilities;
+using EFT.Ballistics;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
@@ -27,6 +28,20 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
+            if (Player != null)
+            {
+                Player.OnDamageReceived += GetHit;
+            }
+        }
+
+        private void GetHit(float damage, EBodyPart bodyPart, EDamageType type, float damageReducedByArmor, MaterialType special = MaterialType.None)
+        {
+            if (Player == null || BotOwner == null || SAIN == null)
+            {
+                return;
+            }
+            ETagStatus mask = ETagStatus.Combat | ETagStatus.Aware | ETagStatus.Unaware;
+            SendSayCommand(EPhraseTrigger.OnBeingHurt, mask);
         }
 
         private float TimeUntilCanTalk;
@@ -80,6 +95,10 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Dispose()
         {
+            if (Player != null)
+            {
+                Player.OnDamageReceived -= GetHit;
+            }
         }
 
         public bool CanTalk => SAIN.Info.FileSettings.Mind.CanTalk;

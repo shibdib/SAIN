@@ -12,6 +12,7 @@ namespace SAIN.SAINComponent.Classes
             TimeEnemyCreated = Time.time;
             EnemyPerson = person;
             EnemyInfo = enemyInfo;
+            IsAI = enemyInfo.Person?.IsAI == true;
 
             EnemyStatus = new SAINEnemyStatus(this);
             Vision = new SAINEnemyVision(this);
@@ -50,6 +51,8 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
+        public readonly bool IsAI;
+
         public float LastActiveTime;
 
         private readonly float TimeSinceHeardTimeAdd = 10f;
@@ -65,6 +68,17 @@ namespace SAIN.SAINComponent.Classes
             if (canHear == false && CouldBeHeard == true)
             {
                 TimeLastHeard = Time.time;
+            }
+        }
+
+        public bool IsSniper { get; private set; }
+
+        public void SetEnemyAsSniper(bool isSniper)
+        {
+            IsSniper = isSniper;
+            if (isSniper && SAIN.Squad.BotInGroup && SAIN.Talk.GroupTalk.FriendIsClose)
+            {
+                SAIN.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.5f, 1f));
             }
         }
 
@@ -112,8 +126,6 @@ namespace SAIN.SAINComponent.Classes
 
         // PathToEnemy Properties
         public bool ArrivedAtLastSeenPosition => Path.HasArrivedAtLastSeen;
-
-
         public float RealDistance => Path.EnemyDistance;
         public bool CanSeeLastCornerToEnemy => Path.CanSeeLastCornerToEnemy;
         public float PathDistance => Path.PathDistance;

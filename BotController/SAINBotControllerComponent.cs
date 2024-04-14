@@ -32,10 +32,6 @@ namespace SAIN.Components
         public WeatherVisionClass WeatherVision { get; private set; } = new WeatherVisionClass();
         public BotSpawnController BotSpawnController { get; private set; } = new BotSpawnController();
         public BotSquads BotSquads { get; private set; } = new BotSquads();
-
-        public Vector3 MainPlayerPosition { get; private set; }
-        private bool ComponentAdded { get; set; }
-        private float UpdatePositionTimer { get; set; }
         
         private void Awake()
         {
@@ -70,10 +66,10 @@ namespace SAIN.Components
             BotSquads.Update();
             BotSpawnController.Update();
             BotExtractManager.Update();
-            UpdateMainPlayer();
             TimeVision.Update();
             WeatherVision.Update();
             LineOfSightManager.Update();
+
             //CoverManager.Update();
             //PathManager.Update();
             //AddNavObstacles();
@@ -199,8 +195,9 @@ namespace SAIN.Components
                 {
                     continue;
                 }
-                var Enemy = bot.Enemy;
-                if (Enemy?.EnemyIPlayer != null && Enemy.EnemyIPlayer.ProfileId == player.ProfileId)
+                var Enemy = bot?.EnemyController?.GetEnemy(player.ProfileId);
+
+                if (Enemy?.EnemyIPlayer != null)
                 {
                     if (Enemy.RealDistance <= range)
                     {
@@ -222,51 +219,6 @@ namespace SAIN.Components
                     }
                 }
             }
-        }
-
-        public SAINFlashLightComponent MainPlayerLight { get; private set; }
-
-        private void UpdateMainPlayer()
-        {
-            if (MainPlayer == null)
-            {
-                ComponentAdded = false;
-                return;
-            }
-
-            // AddColor Components to main player
-            if (!ComponentAdded)
-            {
-                MainPlayerLight = MainPlayer.GetOrAddComponent<SAINFlashLightComponent>();
-                ComponentAdded = true;
-            }
-
-            if (UpdatePositionTimer < Time.time)
-            {
-                UpdatePositionTimer = Time.time + 0.25f;
-                MainPlayerPosition = MainPlayer.Position;
-            }
-        }
-
-        public float MainPlayerSqrMagnitude(Vector3 position)
-        {
-            return (position - MainPlayerPosition).sqrMagnitude;
-        }
-
-        public float MainPlayerMagnitude(Vector3 position)
-        {
-            return (position - MainPlayerPosition).magnitude;
-        }
-
-        public bool IsMainPlayerLookAtMe(Vector3 botPos, float dotProductMin = 0.75f, bool distRestriction = true, float sqrMagLimit = 160000)
-        {
-            if (distRestriction && MainPlayerSqrMagnitude(botPos) > sqrMagLimit)
-            {
-                return false;
-            }
-            Vector3 botDir = botPos - MainPlayerPosition;
-            float DotProd = Vector3.Dot(MainPlayer.LookDirection.normalized, botDir.normalized);
-            return DotProd > dotProductMin;
         }
 
         private void GrenadeExplosion(Vector3 explosionPosition, string playerProfileID, bool isSmoke, float smokeRadius, float smokeLifeTime)
@@ -328,11 +280,6 @@ namespace SAIN.Components
             try
             {
                 StopAllCoroutines();
-
-                if (MainPlayerLight != null)
-                {
-                    Destroy(MainPlayerLight);
-                }
 
                 GameWorld.OnDispose -= Dispose;
 

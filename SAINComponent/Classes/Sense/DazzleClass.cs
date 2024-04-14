@@ -30,19 +30,23 @@ namespace SAIN.SAINComponent.Classes.Sense
 
         public void CheckIfDazzleApplied(SAINEnemy enemy)
         {
+            if (enemy == null)
+            {
+                return;
+            }
             var person = enemy.EnemyIPlayer;
-            SAINFlashLightComponent flashlight;
+            SAINFlashLightComponent flashlight = null;
             if (enemy.EnemyPerson.IsSAINBot)
             {
-                flashlight = enemy.EnemyPerson.SAIN.FlashLight;
+                flashlight = enemy.EnemyPerson?.SAIN?.FlashLight;
             }
             else if (EFTInfo.IsEnemyMainPlayer(enemy))
             {
-                flashlight = SAINPlugin.BotController.MainPlayerLight;
+                flashlight = GameWorldHandler.SAINMainPlayer?.MainPlayerLight;
             }
             else
             {
-                return;
+                flashlight = enemy.EnemyPlayer?.GetComponent<SAINFlashLightComponent>();
             }
 
             if (flashlight != null)

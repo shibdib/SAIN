@@ -10,6 +10,7 @@ using SAIN.SAINComponent.Classes.Info;
 using SAIN.SAINComponent.Classes.Mover;
 using SAIN.SAINComponent.Classes.Talk;
 using System;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace SAIN.SAINComponent
@@ -146,16 +147,16 @@ namespace SAIN.SAINComponent
 
             if (BotActive)
             {
-                if (LayersActive)
-                {
-                    BotOwner.PatrollingData?.Pause();
-                }
-                else if (Enemy == null)
-                {
-                    BotOwner.PatrollingData?.Unpause();
-                }
+                Stopwatch.Restart();
 
-                //Person.Update();
+                HandlePatrolData();
+
+                if (LimitAI())
+                {
+                    Stopwatch.Stop();
+                    //ProfilePerformance(Stopwatch);
+                    return;
+                }
 
                 Search.Update();
                 Memory.Update();
@@ -177,13 +178,127 @@ namespace SAIN.SAINComponent
                 Steering.Update();
                 Vault.Update();
                 Suppression.Update();
-                BotOwner.DoorOpener.Update();
+                BotOwner.DoorOpener.Update(); 
+                UpdateGoalTarget();
 
                 if (Enemy == null && BotOwner.BotLight?.IsEnable == false)
                 {
                     BotOwner.BotLight?.TurnOn();
                 }
+
+                Stopwatch.Stop();
+                ProfilePerformance(Stopwatch);
             }
+
+            Stopwatch.Restart();
+        }
+
+        private Stopwatch Stopwatch = new Stopwatch();
+
+        private void LateUpdate()
+        {
+            if (SAINPlugin.DebugMode && LogTimer < Time.time)
+            {
+                LogTimer = Time.time + 5;
+                //Logger.LogDebug(TotalTime);
+            }
+            TotalTime = 0;
+        }
+
+        private static void ProfilePerformance(Stopwatch stopWatch)
+        {
+            TotalTime += stopWatch.Elapsed.Milliseconds;
+        }
+
+        private static double TotalTime;
+
+        private static float LogTimer;
+
+        private bool LimitAI()
+        {
+            CurrentAILimit = CheckLimitAI();
+
+            float timeToAdd = 0f;
+            switch (CurrentAILimit)
+            {
+                case AILimitSetting.Far:
+                    timeToAdd = 0.5f;
+                    break;
+
+                case AILimitSetting.VeryFar:
+                    timeToAdd = 1f;
+                    break;
+
+                case AILimitSetting.Narnia:
+                    timeToAdd = 2f;
+                    break;
+
+                default:
+                    break;
+            }
+
+            if (CurrentAILimit != AILimitSetting.Close && AILimitTimer + timeToAdd > Time.time)
+            {
+                return true;
+            }
+            AILimitTimer = Time.time;
+            return false;
+        }
+
+        private float AILimitTimer;
+
+        private void HandlePatrolData()
+        {
+            if (CurrentTargetPosition == null)
+            {
+                BotOwner.PatrollingData?.Unpause();
+            }
+            else
+            {
+                BotOwner.PatrollingData?.Pause();
+            }
+        }
+
+        public AILimitSetting CurrentAILimit { get; private set; }
+
+        private AILimitSetting CheckLimitAI()
+        {
+            const float NarniaDist = 600;
+            const float VeryFarDist = 300;
+            const float FarDist = 150f;
+
+            AILimitSetting result = AILimitSetting.Close;
+
+            var mainPlayer = GameWorldHandler.SAINMainPlayer?.SAINPerson;
+            if (mainPlayer != null)
+            {
+                bool isPlayerMainEnemy = HasEnemy && !Enemy.IsAI;
+                if (!isPlayerMainEnemy)
+                {
+                    float sqrMag = (mainPlayer.Position - Position).sqrMagnitude;
+                    if (sqrMag >= NarniaDist * NarniaDist)
+                    {
+                        result = AILimitSetting.Narnia;
+                    }
+                    else if (sqrMag >= VeryFarDist * VeryFarDist)
+                    {
+                        result = AILimitSetting.VeryFar;
+                    }
+                    else if (sqrMag >= FarDist * FarDist)
+                    {
+                        result = AILimitSetting.Far;
+                    }
+                }
+            }
+            return result;
+        }
+
+        public enum AILimitSetting
+        {
+            Close = 0,
+            Far = 1,
+            VeryFar = 2,
+            Narnia = 3,
         }
 
         public bool BotIsAlive => Player?.HealthController?.IsAlive == true;
@@ -200,7 +315,7 @@ namespace SAIN.SAINComponent
                 {
                     return BotOwner.Memory.GoalEnemy.Distance;
                 }
-                return 10f;
+                return 200f;
             }
         }
 
@@ -311,7 +426,6 @@ namespace SAIN.SAINComponent
                     {
                         return Enemy.LastHeardPosition;
                     }
-
                     if (Enemy.LastSeenPosition != null)
                     {
                         return Enemy.LastSeenPosition;
@@ -322,18 +436,9 @@ namespace SAIN.SAINComponent
                 if (Target != null && Target?.Position != null)
                 {
                     return Target.Position;
-                    if ((Target.Position.Value - BotOwner.Position).sqrMagnitude < 2f)
-                    {
-                        //Target.Clear();
-                        //BotOwner.CalcGoal();
-                    }
-                    else
-                    {
-                        return Target.Position;
-                    }
                 }
 
-                if (Time.time - BotOwner.Memory.LastTimeHit < 30f)
+                if (Time.time - BotOwner.Memory.LastTimeHit < 10f)
                 {
                     return BotOwner.Memory.LastHitPos;
                 }

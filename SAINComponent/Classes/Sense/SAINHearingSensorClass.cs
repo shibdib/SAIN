@@ -346,6 +346,11 @@ namespace SAIN.SAINComponent.Classes
                     {
                         SAIN.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.66f, 1.33f));
                     }
+                    SAINEnemy enemy = SAIN.EnemyController.CheckAddEnemy(person);
+                    if (enemy != null)
+                    {
+                        enemy.SetEnemyAsSniper(true);
+                    }
                     CheckCalcGoal();
                 }
             }

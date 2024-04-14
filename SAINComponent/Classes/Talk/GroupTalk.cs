@@ -1,6 +1,7 @@
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
+using EFT.Ballistics;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
@@ -45,7 +46,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             if (TalkTimer < Time.time)
             {
-                TalkTimer = Time.time + 0.2f;
+                TalkTimer = Time.time + 0.33f;
                 FriendIsClose = AreFriendsClose();
                 if (FriendIsClose)
                 {
@@ -65,6 +66,14 @@ namespace SAIN.SAINComponent.Classes.Talk
                         UpdateLeaderCommand();
                     }
                 }
+            }
+        }
+
+        public void TalkEnemySniper()
+        {
+            if (FriendIsClose)
+            {
+                SAIN.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.5f, 1f));
             }
         }
 
@@ -230,7 +239,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 var trigger = EPhraseTrigger.PhraseNone;
                 HurtTalkTimer = Time.time + SAIN.Info.FileSettings.Mind.SquadMemberTalkFreq * 5f * Random.Range(0.66f, 1.33f);
 
-                if (SAIN.HasEnemy && SAIN.Enemy.PathDistance < 10f)
+                if (SAIN.HasEnemy && SAIN.Enemy.RealDistance < 20f)
                 {
                     return false;
                 }
