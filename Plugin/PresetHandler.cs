@@ -127,7 +127,6 @@ namespace SAIN.Plugin
             if (SAINPlugin.BotController?.Bots != null && SAINPlugin.BotController.Bots.Count > 0)
             {
                 PresetsUpdated();
-                AudioHelpers.ClearCache();
             }
         }
 

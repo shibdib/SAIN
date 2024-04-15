@@ -83,6 +83,7 @@ namespace SAIN
                 typeof(Patches.Generic.SkipLookForCoverPatch),
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
+                typeof(Patches.Hearing.OnMakingShotPatch),
                 typeof(Patches.Hearing.HearingSensorPatch),
                 typeof(Patches.Hearing.BetterAudioPatch),
                 //typeof(Patches.Hearing.BetterAudioPatch2),

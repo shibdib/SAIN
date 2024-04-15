@@ -1,6 +1,7 @@
 ﻿using Aki.Reflection.Patching;
 using EFT;
 using HarmonyLib;
+using Interpolation;
 using SAIN.Components.Helpers;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
@@ -43,21 +44,23 @@ namespace SAIN.Patches.Hearing
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(AIData __instance, Player getPlayer, AISoundType soundType, ref float ____nextShootTime)
+        public static bool PatchPrefix(AIData __instance)
         {
             AIFlareEnabled.SetValue(__instance, true);
-
-            // Limits how many sounds are played from each player for the AI
-            if (____nextShootTime < Time.time)
-            {
-                ____nextShootTime = Time.time + 0.33f; // default 1f
-                AudioHelpers.TryPlayShootSound(getPlayer, soundType);
-                if (getPlayer == null)
-                {
-                    Logger.LogError("try play shoot sound player null!");
-                }
-            }
             return false;
+        }
+    }
+    public class OnMakingShotPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "OnMakingShot");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(Player __instance)
+        {
+            AudioHelpers.TryPlayShootSound(__instance);
         }
     }
 

@@ -213,18 +213,15 @@ namespace SAIN.SAINComponent.Classes
 
             bool wasHeard = DoIHearSound(player, position, range, type, out distance, true);
 
-            if (wasHeard)
+            if (wasHeard && isFootstep)
             {
-                if (isFootstep)
+                if (!SAIN.Equipment.HasEarPiece)
                 {
-                    if (!SAIN.Equipment.HasEarPiece)
-                    {
-                        range *= 0.6f;
-                    }
-                    if (SAIN.Equipment.HasHeavyHelmet)
-                    {
-                        range *= 0.75f;
-                    }
+                    range *= 0.6f;
+                }
+                if (SAIN.Equipment.HasHeavyHelmet)
+                {
+                    range *= 0.75f;
                 }
                 if (!SAIN.Equipment.HasEarPiece)
                 {
@@ -238,22 +235,9 @@ namespace SAIN.SAINComponent.Classes
                 {
                     range *= 0.75f;
                 }
-                if (isFootstep)
+                if (Player.IsSprintEnabled)
                 {
-                    var move = Player.MovementContext;
-                    float speed = move.ClampedSpeed / move.MaxSpeed;
-                    if (Player.IsSprintEnabled)
-                    {
-                        range *= 0.5f;
-                    }
-                    else if (speed > 0.66f)
-                    {
-                        range *= 0.8f;
-                    }
-                    else if (speed > 0.33f)
-                    {
-                        range *= 0.9f;
-                    }
+                    range *= 0.66f;
                 }
 
                 range *= SAIN.Info.FileSettings.Core.HearingSense;
@@ -356,7 +340,7 @@ namespace SAIN.SAINComponent.Classes
                 catch { }
                 CheckCalcGoal();
             }
-            else if (isGunSound && bulletFelt && firedAtMe)
+            else if (isGunSound && bulletFelt)
             {
                 Vector3 estimate = GetEstimatedPoint(vector);
                 SAIN.Memory.UnderFireFromPosition = estimate;
@@ -444,16 +428,23 @@ namespace SAIN.SAINComponent.Classes
             Vector3 direction = projectionPoint - from;
 
             bool firedAtMe = false;
-            if ((projectionPoint - BotOwner.Position).sqrMagnitude < maxDist * maxDist 
-                && Vector3.Dot(direction, SAIN.Position - from) > 0.75f)
+            if ((projectionPoint - BotOwner.Position).sqrMagnitude < maxDist * maxDist)
             {
                 firedAtMe = !Physics.Raycast(from, direction, direction.magnitude * 0.95f, LayerMaskClass.HighPolyWithTerrainMask);
             }
 
-            if (SAINPlugin.DebugMode && SAINPlugin.EditorDefaults.DebugDrawProjectionPoints && firedAtMe)
+            if (SAINPlugin.DebugMode && SAINPlugin.EditorDefaults.DebugDrawProjectionPoints)
             {
-                DebugGizmos.Sphere(projectionPoint, 0.1f, Color.red, true, 3f);
-                DebugGizmos.Ray(projectionPoint, -direction, Color.red, 5f, 0.05f, true, 3f, true);
+                if (firedAtMe)
+                {
+                    DebugGizmos.Sphere(projectionPoint, 0.1f, Color.red, true, 3f);
+                    DebugGizmos.Ray(projectionPoint, from - projectionPoint, Color.red, 5f, 0.05f, true, 3f, true);
+                }
+                else
+                {
+                    DebugGizmos.Sphere(projectionPoint, 0.1f, Color.white, true, 3f);
+                    DebugGizmos.Ray(projectionPoint, from - projectionPoint, Color.white, 5f, 0.05f, true, 3f, true);
+                }
             }
 
             return firedAtMe;

@@ -43,9 +43,9 @@ namespace SAIN.Patches.Generic
 
     internal class ForceNoHeadAimPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(BotCoversData).GetMethod("GetClosestPoint");
+        protected override MethodBase GetTargetMethod() => typeof(EnemyInfo).GetMethod("method_7");
         [PatchPrefix]
-        public static void PatchPrefix(bool withLegs, ref bool canBehead)
+        public static void PatchPrefix(ref bool withLegs, ref bool canBehead)
         {
             canBehead = false;
         }
@@ -53,7 +53,7 @@ namespace SAIN.Patches.Generic
 
     internal class SkipLookForCoverPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(EnemyInfo).GetMethod("method_7");
+        protected override MethodBase GetTargetMethod() => typeof(BotCoversData).GetMethod("GetClosestPoint");
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0)
         {
