@@ -67,11 +67,8 @@ namespace SAIN.BotController.Classes
                             EnemyInfo enemyInfo = member.Value?.BotOwner?.Memory?.GoalEnemy;
                             if (enemyInfo == null && enemy.EnemyInfo != null)
                             {
-                                enemyInfo.GroupInfo.EnemyLastPosition = position; 
-                                enemyInfo.GroupInfo.EnemyLastVisiblePosition = position;
+                                enemyInfo.SetVisible(true);
                                 member.Value.BotOwner.Memory.GoalEnemy = enemyInfo;
-                                member.Value.BotOwner.EnemiesController.SetSameEnemy(enemyInfo);
-                                Logger.LogWarning("Setting Goal Enemy to Heard Threat");
                             }
                         }
                     }
