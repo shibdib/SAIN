@@ -369,13 +369,15 @@ namespace SAIN.SAINComponent.Classes.Mover
                     }
                 }
             }
+
+            float speed = SAIN.HasEnemy ? 200f : 100f;
             if (LastSoundHeardCorner != Vector3.zero)
             {
-                LookToPoint(LastSoundHeardCorner, 100f);
+                LookToPoint(LastSoundHeardCorner, speed);
             }
             else
             {
-                LookToPoint(soundPos, 80f);
+                LookToPoint(soundPos, speed);
             }
         }
 

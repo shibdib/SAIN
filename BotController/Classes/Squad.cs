@@ -1,10 +1,14 @@
 ﻿using EFT;
+using Interpolation;
+using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
+using static GClass738;
 
 namespace SAIN.BotController.Classes
 {
@@ -46,35 +50,83 @@ namespace SAIN.BotController.Classes
 
         public void AddPointToSearch(Vector3 position, float soundPower, BotOwner botOwner, AISoundType soundType, Vector3 originalPosition, IPlayer player)
         {
+            if (EFTBotGroup == null)
+            {
+                EFTBotGroup = botOwner.BotsGroup;
+                Logger.LogError("Botsgroup null");
+            }
+            if (PlacesForCheck == null)
+            {
+                Logger.LogError("PlacesForCheck null");
+                return;
+            }
+            try
+            {
+                SetVisibleAndHeard(player, position);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e);
+            }
+
+            // Compare the most recent place for check with this new one we're adding.
+            // If they are close by, just update that one instead of creating a new instance
+            try
+            {
+                if (UpdateExistingPlaceForCheck(soundType, position))
+                {
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e);
+            }
+
+            bool isDanger = soundType == AISoundType.step ? false : true;
+            PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
+            AddNewPlaceForCheck(botOwner, position, checkType);
+        }
+
+        private void SetVisibleAndHeard(IPlayer player, Vector3 position)
+        {
             const float SoundAggroDist = 75f;
 
-            if (player != null)
+            if (player != null && Members != null)
             {
                 foreach (var member in Members)
                 {
-                    SAINEnemy enemy = member.Value?.EnemyController?.CheckAddEnemy(player);
-                    if (enemy == null)
+                    if (member.Value == null)
                     {
-                        // Logger.LogError("Enemy Null?");
+                        continue;
                     }
-                    enemy?.SetHeardStatus(true, position);
+                    SAINEnemy sainEnemy = member.Value?.EnemyController?.CheckAddEnemy(player);
+                    sainEnemy?.SetHeardStatus(true, position);
 
-                    if (member.Value?.Info.Profile.IsPMC == true)
+                    if (sainEnemy != null && member.Value?.Info?.Profile?.IsPMC == true)
                     {
                         float sqrMagnitude = (player.Position - position).sqrMagnitude;
                         if (sqrMagnitude < SoundAggroDist * SoundAggroDist)
                         {
-                            EnemyInfo enemyInfo = member.Value?.BotOwner?.Memory?.GoalEnemy;
-                            if (enemyInfo == null && enemy.EnemyInfo != null)
+                            BotOwner botOwner = member.Value.BotOwner;
+                            if (botOwner != null)
                             {
-                                enemyInfo.SetVisible(true);
-                                member.Value.BotOwner.Memory.GoalEnemy = enemyInfo;
+                                EnemyInfo goalEnemy = botOwner.Memory?.GoalEnemy;
+                                if (goalEnemy == null && sainEnemy.EnemyInfo != null)
+                                {
+                                    sainEnemy.EnemyInfo.SetVisible(true);
+                                    botOwner.Memory.GoalEnemy = goalEnemy;
+                                    sainEnemy.EnemyInfo.SetVisible(false);
+                                }
                             }
                         }
                     }
                 }
             }
+        }
 
+        private bool UpdateExistingPlaceForCheck(AISoundType soundType, Vector3 position)
+        {
             PlaceForCheck mostRecentPlace = null;
             bool isDanger = soundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
@@ -92,11 +144,14 @@ namespace SAIN.BotController.Classes
                         mostRecentPlace.Type = PlaceForCheckType.danger;
                     }
                     mostRecentPlace.BasePoint = position;
-                    return;
+                    return true;
                 }
             }
+            return false;
+        }
 
-
+        private void AddNewPlaceForCheck(BotOwner botOwner, Vector3 position, PlaceForCheckType checkType)
+        {
             if (NavMesh.SamplePosition(position, out NavMeshHit hit, 10f, -1))
             {
                 NavMeshPath path = new NavMeshPath();
@@ -114,7 +169,7 @@ namespace SAIN.BotController.Classes
                             botOwner.BotsGroup.CalcGoalForBot(botOwner);
                         }
                     }
-                    catch { }
+                    catch (Exception e) { Logger.LogError(e); }
                 }
             }
         }

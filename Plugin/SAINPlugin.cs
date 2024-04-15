@@ -80,6 +80,7 @@ namespace SAIN
                 typeof(Patches.Generic.AimRotateSpeedPatch),
                 typeof(Patches.Generic.BotGroupAddEnemyPatch),
                 typeof(Patches.Generic.ForceNoHeadAimPatch),
+                typeof(Patches.Generic.ShallKnowEnemyPatch),
                 typeof(Patches.Generic.SkipLookForCoverPatch),
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),

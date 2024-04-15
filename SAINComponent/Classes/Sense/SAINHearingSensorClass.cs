@@ -281,17 +281,16 @@ namespace SAIN.SAINComponent.Classes
 
                 float dot = Vector3.Dot(shotDirectionNormal, botDirectionNormal);
 
-                if (SAINPlugin.EditorDefaults.DebugHearing)
-                {
-                    Logger.LogInfo($"Got Shot Direction from [{person.Profile?.Nickname}] to [{BotOwner?.name}] : Dot Product Result: [{dot}]");
-
-                    Vector3 start = person.MainParts[BodyPartType.head].Position;
-                    DebugGizmos.Ray(start, shotDirectionNormal, Color.red, 3f, 0.05f, true, 3f);
-                    DebugGizmos.Ray(start, botDirectionNormal, Color.yellow, 3f, 0.05f, true, 3f);
-                }
-
                 if (dot >= DotThreshold)
                 {
+                    if (SAINPlugin.EditorDefaults.DebugHearing)
+                    {
+                        Logger.LogInfo($"Got Shot Direction from [{person.Profile?.Nickname}] to [{BotOwner?.name}] : Dot Product Result: [{dot}]");
+
+                        Vector3 start = person.MainParts[BodyPartType.head].Position;
+                        DebugGizmos.Ray(start, shotDirectionNormal, Color.red, 3f, 0.05f, true, 3f);
+                        DebugGizmos.Ray(start, botDirectionNormal, Color.yellow, 3f, 0.05f, true, 3f);
+                    }
                     return true;
                 }
             }
@@ -337,7 +336,10 @@ namespace SAIN.SAINComponent.Classes
                 {
                     SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, pos, person);
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Logger.LogError(e);
+                }
                 CheckCalcGoal();
             }
             else if (isGunSound && bulletFelt)
@@ -349,7 +351,10 @@ namespace SAIN.SAINComponent.Classes
                 {
                     SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, pos, person);
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Logger.LogError(e);
+                }
                 CheckCalcGoal();
             }
         }

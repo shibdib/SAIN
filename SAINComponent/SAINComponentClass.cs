@@ -467,9 +467,9 @@ namespace SAIN.SAINComponent
         public bool GameIsEnding => Singleton<IBotGame>.Instance == null || Singleton<IBotGame>.Instance.Status == GameStatus.Stopping;
 
         public Vector3 Position => Person.Position;
-        public BotOwner BotOwner => Person.BotOwner;
-        public string ProfileId => Person.ProfileId;
-        public Player Player => Person.Player;
+        public BotOwner BotOwner => Person?.BotOwner;
+        public string ProfileId => Person?.ProfileId;
+        public Player Player => Person?.Player;
         public bool HasEnemy => EnemyController.HasEnemy;
     }
 }

@@ -43,7 +43,7 @@ namespace SAIN.Components
             {
                 debugtimer = Time.time + 1f;
                 float speedRatio = MainPlayer.MovementContext.ClampedSpeed / MainPlayer.MovementContext.MaxSpeed;
-                Logger.LogDebug(speedRatio.Round100());
+                //Logger.LogDebug(speedRatio.Round100());
             }
         }
 

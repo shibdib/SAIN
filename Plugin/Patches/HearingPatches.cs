@@ -50,6 +50,7 @@ namespace SAIN.Patches.Hearing
             return false;
         }
     }
+
     public class OnMakingShotPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -87,6 +88,7 @@ namespace SAIN.Patches.Hearing
             }
         }
     }
+
     public class BetterAudioPatch2 : ModulePatch
     {
         private static MethodInfo _Player;

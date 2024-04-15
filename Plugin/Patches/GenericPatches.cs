@@ -15,6 +15,7 @@ using EFT.HealthSystem;
 using Aki.Reflection.Utils;
 using System;
 using System.Linq;
+using SAIN.SAINComponent.Classes;
 
 namespace SAIN.Patches.Generic
 {
@@ -48,6 +49,42 @@ namespace SAIN.Patches.Generic
         public static void PatchPrefix(ref bool withLegs, ref bool canBehead)
         {
             canBehead = false;
+        }
+    }
+
+    internal class ShallKnowEnemyPatch : ModulePatch
+    {
+        const float TimeToForgetEnemyNoSight = 30f;
+
+        private static PropertyInfo OwnerProp;
+
+        protected override MethodBase GetTargetMethod()
+        {
+            OwnerProp = AccessTools.Property(typeof(EnemyInfo), "Owner");
+            return AccessTools.Method(typeof(EnemyInfo), "ShallKnowEnemy");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
+        {
+            if (__result == false)
+            {
+                return;
+            }
+
+            BotOwner botOwner = OwnerProp.GetValue(__instance) as BotOwner;
+
+            if (botOwner != null && __instance.Person != null && SAINPlugin.BotController.GetBot(botOwner.ProfileId, out var component))
+            {
+                SAINEnemy enemy = component.EnemyController.GetEnemy(__instance.Person.ProfileId);
+                if (enemy != null && !enemy.Seen && enemy.Heard)
+                {
+                    if (enemy.TimeSinceHeard > TimeToForgetEnemyNoSight)
+                    {
+                        __result = false;
+                    }
+                }
+            }
         }
     }
 
