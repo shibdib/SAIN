@@ -52,6 +52,10 @@ namespace SAIN.Patches.Hearing
             {
                 ____nextShootTime = Time.time + 0.33f; // default 1f
                 AudioHelpers.TryPlayShootSound(getPlayer, soundType);
+                if (getPlayer == null)
+                {
+                    Logger.LogError("try play shoot sound player null!");
+                }
             }
             return false;
         }

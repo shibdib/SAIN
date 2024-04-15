@@ -64,6 +64,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             BotOwner.Medecine.RefreshCurMeds();
 
+            return;
+
             if (UseMedsOnlySafeContainerProp != null)
             {
                 object value = UseMedsOnlySafeContainerProp.GetValue(BotOwner.Medecine.FirstAid);

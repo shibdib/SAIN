@@ -18,16 +18,14 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (SteerPriorityUpdateTick >= SteerPriorityUpdateFreq)
+            if (updateSteerTimer < Time.time)
             {
-                SteerPriorityUpdateTick = 0;
-                //UpdateSteer();
+                updateSteerTimer = Time.time + 0.1f;
+                UpdateSteer();
             }
-            SteerPriorityUpdateTick++;
         }
 
-        private int SteerPriorityUpdateTick = 0;
-        private static int SteerPriorityUpdateFreq = 5;
+        private float updateSteerTimer;
 
         private SteerPriority UpdateSteer()
         {
@@ -46,37 +44,61 @@ namespace SAIN.SAINComponent.Classes.Mover
         public bool SteerByPriority(bool lookRandomifFalse = true)
         {
             SteerRandomToggle = lookRandomifFalse;
-            UpdateSteer();
             HeardSoundSanityCheck();
 
             switch (CurrentSteerPriority)
             {
                 case SteerPriority.None: 
+                    if (SAIN.HasEnemy && SAIN.Enemy.Path.LastCornerToEnemy != null)
+                    {
+                        LookToPathToEnemy();
+                    }
+                    else if (SAIN.EnemyController.ClosestHeardEnemy != null)
+                    {
+                        LookToPoint(SAIN.EnemyController.ClosestHeardEnemy.LastKnownLocation);
+                    }
                     break;
+
                 case SteerPriority.Shooting:
+                    // Steering is handled by aim code in eft manually, so do nothing here.
                     break;
-                case SteerPriority.Enemy: 
+
+                case SteerPriority.Enemy:
+                    LookToEnemy();
                     break;
+
                 case SteerPriority.UnderFire:
                     LookToUnderFirePos();
                     break;
+
                 case SteerPriority.LastHit:
                     LookToLastHitPos();
                     break;
-                case SteerPriority.EnemyCloseMoving:
-                    if (SAIN.Enemy != null)
+
+                case SteerPriority.ClosestHeardEnemy:
+                    var closestHeardEnemy = SAIN.EnemyController.ClosestHeardEnemy;
+                    if (closestHeardEnemy != null)
                     {
-                        LookToHearPos(SAIN.Enemy.EnemyPosition);
-                    }
-                    else if (SAIN.CurrentTargetPosition != null)
-                    {
-                        LookToHearPos(SAIN.CurrentTargetPosition.Value);
+                        LookToPoint(closestHeardEnemy.LastHeardPosition);
                     }
                     else
                     {
                         LookToRandomPosition();
                     }
                     break;
+
+                case SteerPriority.LastKnownLocation:
+                    var lastKnownPos = SAIN.Enemy?.LastKnownLocation;
+                    if (lastKnownPos != null)
+                    {
+                        LookToPoint(lastKnownPos);
+                    }
+                    else
+                    {
+                        LookToRandomPosition();
+                    }
+                    break;
+
                 case SteerPriority.LastSeenEnemy:
                     LookToEnemyLastSeenPos();
 
@@ -120,6 +142,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         // How long a bot will look in the direction they were shot from instead of other places
         private readonly float Steer_LastHitTime = 1f;
         // How long a bot will look at where they last saw an enemy instead of something they hear
+        private readonly float Steer_TimeSinceLocationKnown_Threshold = 8f;
+        // How long a bot will look at where they last saw an enemy instead of something they hear
         private readonly float Steer_TimeSinceSeen_Short = 2f;
         // How long a bot will look at where they last saw an enemy if they don't hear any other threats
         private readonly float Steer_TimeSinceSeen_Long = 12f;
@@ -147,9 +171,17 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return SteerPriority.LastHit;
             }
-            if (LookToCloseEnemyHear())
+            if (SAIN.EnemyController.FindClosestHeardEnemy() != null)
             {
-                return SteerPriority.EnemyCloseMoving;
+                return SteerPriority.ClosestHeardEnemy;
+            }
+            if (SAIN.Enemy?.LastKnownLocation != null && SAIN.Enemy.TimeSinceLastKnownUpdated < Steer_TimeSinceLocationKnown_Threshold)
+            {
+                SAIN.Enemy?.CheckIfSeenLastKnown();
+                if (!SAIN.Enemy.HasSeenLastKnownLocation)
+                {
+                    return SteerPriority.LastKnownLocation;
+                }
             }
             if (SAIN.Enemy?.TimeSinceSeen < Steer_TimeSinceSeen_Short && SAIN.Enemy.Seen)
             {
@@ -192,7 +224,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 Vector3 pos = LastSeenPosition.Value;
                 //  + Vector3.up * 1f
-                LookToPoint(pos, 80f);
+                LookToPoint(pos, 150f);
                 return true;
             }
             return false;
@@ -247,6 +279,10 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool LookToAimTarget()
         {
+            if (BotOwner.WeaponManager.Reload?.Reloading == true)
+            {
+                return false;
+            }
             if (SAIN.Enemy?.IsVisible == true && SAIN.Enemy?.CanShoot == true)
             {
                 return true;
@@ -279,21 +315,6 @@ namespace SAIN.SAINComponent.Classes.Mover
         public void LookToEnemy()
         {
             LookToEnemy(SAIN.Enemy);
-        }
-
-        private bool LookToCloseEnemyHear()
-        {
-            SAINEnemy enemy = SAIN.Enemy;
-            if (enemy != null)
-            {
-                var player = enemy.EnemyIPlayer as Player;
-                // Need to double check that ActualLinearSpeed and ActualLinearVelocity are the same, just renamed
-                if (enemy.RealDistance < 20f && player.MovementContext.ActualLinearVelocity > 1f)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         public void LookToUnderFirePos()
@@ -519,6 +540,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         LastHit,
         UnderFire,
         MoveDirection,
-        EnemyCloseMoving
+        LastKnownLocation,
+        ClosestHeardEnemy
     }
 }

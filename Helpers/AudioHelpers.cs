@@ -54,7 +54,11 @@ namespace SAIN.Helpers
                     }
                 }
             }
-            HelpersGClass.PlaySound(player, player.WeaponRoot.position, range, soundType);
+            if (player == null)
+            {
+                Logger.LogError("try play shoot sound player null!");
+            }
+            HelpersGClass.PlaySound(player as IPlayer, player.WeaponRoot.position, range, soundType);
         }
 
         public static void ClearCache()

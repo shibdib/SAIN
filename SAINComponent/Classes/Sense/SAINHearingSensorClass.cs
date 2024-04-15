@@ -99,13 +99,6 @@ namespace SAIN.SAINComponent.Classes
 
         private void EnemySoundHeard(IPlayer iPlayer, Vector3 soundPosition, float power, AISoundType type)
         {
-            if (iPlayer == null)
-            {
-                float rawDist = (BotOwner.Transform.position - soundPosition).magnitude;
-                ReactToSound(null, soundPosition, rawDist, rawDist < power, false, type);
-                return;
-            }
-
             bool wasHeard = ProcessSound(iPlayer, soundPosition, power, type, out float distance);
 
             // Checks if the player is not an active enemy and that they are a neutral party
@@ -132,6 +125,17 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
+            // Check that the source isn't an ally
+            if (wasHeard
+                && BotOwner.BotsGroup.Allies.Contains(iPlayer))
+            {
+                if (type != AISoundType.step)
+                {
+                    NeutralSound(iPlayer, soundPosition);
+                }
+                return;
+            }
+
             // Checks if the player is an enemy by their role.
             if (wasHeard 
                 && iPlayer != null 
@@ -145,6 +149,12 @@ namespace SAIN.SAINComponent.Classes
             }
 
             bool bulletFelt = BulletFelt(iPlayer, type, soundPosition);
+
+            if (iPlayer == null)
+            {
+                ReactToSound(null, soundPosition, power, wasHeard, bulletFelt, type);
+                return;
+            }
 
             if (wasHeard || bulletFelt)
             {
@@ -222,7 +232,7 @@ namespace SAIN.SAINComponent.Classes
                 }
                 if (SAIN.Equipment.HasHeavyHelmet)
                 {
-                    range *= 0.75f;
+                    range *= 0.8f;
                 }
                 if (SAIN.Memory.HealthStatus == ETagStatus.Dying)
                 {
@@ -273,7 +283,7 @@ namespace SAIN.SAINComponent.Classes
         private bool BulletFelt(IPlayer person, AISoundType type, Vector3 pos)
         {
             const float bulletfeeldistance = 500f;
-            const float DotThreshold = 0.9f;
+            const float DotThreshold = 0.85f;
 
             bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
 
@@ -298,15 +308,7 @@ namespace SAIN.SAINComponent.Classes
 
                 if (dot >= DotThreshold)
                 {
-                    float rayLength = shooterDistance;
-                    if (shooterDistance > 50f)
-                    {
-                        rayLength -= 15f;
-                    }
-                    if (!Physics.Raycast(pos, shooterDirectionToBot, rayLength, LayerMaskClass.HighPolyWithTerrainMask))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
             return false;
@@ -324,13 +326,12 @@ namespace SAIN.SAINComponent.Classes
                 BotOwner.LookData.ResetUpdateTime();
             }
 
-            bool soundClose = false;
             bool firedAtMe = false;
 
             if (person != null && bulletFelt && isGunSound)
             {
                 Vector3 to = vector + person.LookDirection;
-                soundClose = DidShotFlyByMe(out firedAtMe, vector, to, 10f);
+                firedAtMe = DidShotFlyByMe(vector, to, 10f);
 
                 if (firedAtMe)
                 {
@@ -342,16 +343,7 @@ namespace SAIN.SAINComponent.Classes
                     }
                     catch { }
 
-                    if (shooterDistance > 100f)
-                    {
-                        SAIN.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.66f, 1.33f));
-                    }
-                    SAINEnemy enemy = SAIN.EnemyController.CheckAddEnemy(person);
-                    if (enemy != null)
-                    {
-                        enemy.SetEnemyAsSniper(true);
-                    }
-                    CheckCalcGoal();
+                    SAIN.EnemyController.CheckAddEnemy(person)?.SetEnemyAsSniper(shooterDistance > 100f);
                 }
             }
 
@@ -371,7 +363,7 @@ namespace SAIN.SAINComponent.Classes
 
                 try
                 {
-                    SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, pos, null);
+                    SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, pos, person);
                 }
                 catch { }
                 CheckCalcGoal();
@@ -446,22 +438,25 @@ namespace SAIN.SAINComponent.Classes
             return source + randomPoint;
         }
 
-        private bool DidShotFlyByMe(out bool firedAtMe, Vector3 from, Vector3 to, float maxDist)
+        private bool DidShotFlyByMe(Vector3 from, Vector3 to, float maxDist)
         {
-            var projectionPoint = GetProjectionPoint(BotOwner.Position + Vector3.up, from, to);
-            bool closeSound = (projectionPoint - BotOwner.Position).magnitude < maxDist;
-            var direction = projectionPoint - from;
+            Vector3 projectionPoint = GetProjectionPoint(BotOwner.Position + Vector3.up, from, to);
+            Vector3 direction = projectionPoint - from;
 
-            firedAtMe = Vector3.Dot(direction, SAIN.Position - from) > 0.5f;
-            //firedAtMe = !Physics.Raycast(from, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
+            bool firedAtMe = false;
+            if ((projectionPoint - BotOwner.Position).sqrMagnitude < maxDist * maxDist 
+                && Vector3.Dot(direction, SAIN.Position - from) > 0.75f)
+            {
+                firedAtMe = !Physics.Raycast(from, direction, direction.magnitude * 0.95f, LayerMaskClass.HighPolyWithTerrainMask);
+            }
 
-            if (SAINPlugin.DebugMode && SAINPlugin.EditorDefaults.DebugDrawProjectionPoints && closeSound)
+            if (SAINPlugin.DebugMode && SAINPlugin.EditorDefaults.DebugDrawProjectionPoints && firedAtMe)
             {
                 DebugGizmos.Sphere(projectionPoint, 0.1f, Color.red, true, 3f);
                 DebugGizmos.Ray(projectionPoint, -direction, Color.red, 5f, 0.05f, true, 3f, true);
             }
 
-            return closeSound && firedAtMe;
+            return firedAtMe;
         }
 
         public static Vector3 GetProjectionPoint(Vector3 p, Vector3 p1, Vector3 p2)
@@ -557,8 +552,12 @@ namespace SAIN.SAINComponent.Classes
             // Checks if something is within line of sight
             if (Physics.Raycast(botheadpos, direction, power, LayerMaskClass.HighPolyWithTerrainNoGrassMask))
             {
+                if (player == null)
+                {
+                    result *= 0.8f;
+                }
                 // If the sound source is the iPlayer, raycast and find number of collisions
-                if (player.IsYourPlayer)
+                else if (player.IsYourPlayer)
                 {
                     // Check if the sound originates from an environment other than the BotOwner's
                     float environmentmodifier = EnvironmentCheck(player);

@@ -58,17 +58,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Default(true)]
         public bool EnableExtracts = true;
 
-        [Name("Middle Finger Chance")]
-        [Description("Chance this bot will flick you off when spotted")]
-        [Default(0f)]
-        [MinMax(0f, 100f)]
-        [Advanced]
+        [Hidden]
+        [JsonIgnore]
         public float CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
-    }
 
-    // Hidden Settings
-    public partial class SAINMindSettings
-    {
         [Hidden]
         [JsonIgnore]
         public float PART_PERCENT_TO_HEAL = 0.9f;
@@ -92,5 +85,9 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Hidden]
         [JsonIgnore]
         public float MAX_AGGRO_BOT_DIST = 500;
+
+        [Hidden]
+        [JsonIgnore]
+        public float MAX_DIST_TO_PERSUE_AXEMAN = 300f;
     }
 }

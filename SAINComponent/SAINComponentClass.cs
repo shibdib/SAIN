@@ -416,33 +416,19 @@ namespace SAIN.SAINComponent
         {
             get
             {
-                if (HasEnemy)
+                if (HasEnemy && Enemy.LastKnownLocation != null)
                 {
-                    if (Enemy.IsVisible)
-                    {
-                        return Enemy.EnemyPosition;
-                    }
-                    if (Enemy.CanBeHeard)
-                    {
-                        return Enemy.LastHeardPosition;
-                    }
-                    if (Enemy.LastSeenPosition != null)
-                    {
-                        return Enemy.LastSeenPosition;
-                    }
-                    return Enemy.EnemyPosition;
+                    return Enemy.LastKnownLocation;
                 }
                 var Target = BotOwner.Memory.GoalTarget;
                 if (Target != null && Target?.Position != null)
                 {
                     return Target.Position;
                 }
-
                 if (Time.time - BotOwner.Memory.LastTimeHit < 10f)
                 {
                     return BotOwner.Memory.LastHitPos;
                 }
-
                 if (BotOwner.Memory.IsUnderFire)
                 {
                     return Memory.UnderFireFromPosition;

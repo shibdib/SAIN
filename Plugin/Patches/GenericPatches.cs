@@ -41,6 +41,30 @@ namespace SAIN.Patches.Generic
         }
     }
 
+    internal class ForceNoHeadAimPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod() => typeof(BotCoversData).GetMethod("GetClosestPoint");
+        [PatchPrefix]
+        public static void PatchPrefix(bool withLegs, ref bool canBehead)
+        {
+            canBehead = false;
+        }
+    }
+
+    internal class SkipLookForCoverPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod() => typeof(EnemyInfo).GetMethod("method_7");
+        [PatchPrefix]
+        public static bool PatchPrefix(ref BotOwner ___botOwner_0)
+        {
+            if (___botOwner_0 != null && SAINPlugin.BotController.GetBot(___botOwner_0.ProfileId, out var component))
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
     internal class BotGroupAddEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(BotsGroup).GetMethod("AddEnemy");

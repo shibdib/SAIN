@@ -13,11 +13,11 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
         }
 
-        private static readonly float StartFirstAid_Injury_SeenRecentTime = 4f;
-        private static readonly float StartFirstAid_HeavyInjury_SeenRecentTime = 2f;
-        private static readonly float StartFirstAid_FatalInjury_SeenRecentTime = 1f;
+        private static readonly float StartFirstAid_Injury_SeenRecentTime = 8f;
+        private static readonly float StartFirstAid_HeavyInjury_SeenRecentTime = 5f;
+        private static readonly float StartFirstAid_FatalInjury_SeenRecentTime = 3f;
         private static readonly float StartReload_LowAmmo_SeenRecentTime = 3f;
-        private static readonly float StartSurgery_SeenRecentTime = 10f;
+        private static readonly float StartSurgery_SeenRecentTime = 60f;
 
         public void Init()
         {

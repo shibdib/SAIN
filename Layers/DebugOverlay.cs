@@ -70,12 +70,25 @@ namespace SAIN.Layers
                 stringBuilder.AppendLine($"Suppression Status: Num: [{sain.Suppression?.SuppressionNumber}] IsSuppressed: [{sain.Suppression?.IsSuppressed}] IsHeavySuppressed: [{sain.Suppression?.IsHeavySuppressed}] Stat Modifier: [{sain.Suppression?.SuppressionStatModifier}]");
 
                 stringBuilder.AppendLine();
-                stringBuilder.AppendLine("Decisions");
-                stringBuilder.AppendLabeledValue("Main Decision", $"Current: {decisions.Main.Current} Last: {decisions.Main.Last}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Squad Decision", $"Current: {decisions.Squad.Current} Last: {decisions.Squad.Last}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Self Decision", $"Current: {decisions.Self.Current} Last: {decisions.Self.Last}", Color.white, Color.yellow, true);
+
+                if (decisions.Main.Current != SoloDecision.None)
+                {
+                    stringBuilder.AppendLabeledValue("Main Decision", $"Current: {decisions.Main.Current} Last: {decisions.Main.Last}", Color.white, Color.yellow, true);
+                }
+                if (decisions.Squad.Current != SquadDecision.None)
+                {
+                    stringBuilder.AppendLabeledValue("Squad Decision", $"Current: {decisions.Squad.Current} Last: {decisions.Squad.Last}", Color.white, Color.yellow, true);
+                }
+                if (decisions.Self.Current != SelfDecision.None)
+                {
+                    stringBuilder.AppendLabeledValue("Self Decision", $"Current: {decisions.Self.Current} Last: {decisions.Self.Last}", Color.white, Color.yellow, true);
+                }
+
                 var state = sain.Search.CurrentState;
-                stringBuilder.AppendLabeledValue("SearchState", $"Current: {sain.Search.CurrentState} Next: {sain.Search.NextState} Last: {sain.Search.LastState}", Color.white, Color.yellow, true);
+                if (state != SAINComponent.Classes.ESearchMove.None)
+                {
+                    stringBuilder.AppendLabeledValue("Searching", $"Current State: {sain.Search.CurrentState} Next: {sain.Search.NextState} Last: {sain.Search.LastState}", Color.white, Color.yellow, true);
+                }
 
                 stringBuilder.AppendLine();
                 stringBuilder.AppendLine("SAIN Info");
@@ -84,111 +97,31 @@ namespace SAIN.Layers
                 stringBuilder.AppendLabeledValue("Start Search + Hold Ground Time", $"{info.TimeBeforeSearch} + {info.HoldGroundDelay}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Difficulty + Modifier", $"{info.Profile.BotDifficulty} + {info.Profile.DifficultyModifier}", Color.white, Color.yellow, true);
 
-                //stringBuilder.AppendLine();
-                //stringBuilder.AppendLine("Aim Info");
-                //stringBuilder.AppendLabeledValue("Shoot Modifier", $"{info.WeaponInfo.FinalModifier}", Color.white, Color.yellow, true);
-                //AddAimData(botOwner, stringBuilder);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex);
-            }
-        }
-
-        private static void OldShit(SAINComponentClass sain, BotOwner botOwner, StringBuilder stringBuilder)
-        {
-            if (SAINPlugin.NextDebugOverlay.Value.IsDown())
-            {
-                Selected++;
-            }
-            if (SAINPlugin.PreviousDebugOverlay.Value.IsDown())
-            {
-                Selected--;
-            }
-
-            if (Selected > OverlayCount)
-            {
-                Selected = 0;
-            }
-            if (Selected < 0)
-            {
-                Selected = OverlayCount;
-            }
-
-            try
-            {
-                var info = sain.Info;
-                var decisions = sain.Memory.Decisions;
-                switch (Selected)
+                if (sain.HasEnemy)
                 {
-                    case 0:
-                        stringBuilder.AppendLine("SAIN Info");
-                        stringBuilder.AppendLabeledValue("Personality and Type", $"{info.Personality} {info.Profile.WildSpawnType}", Color.white, Color.yellow, true);
-                        stringBuilder.AppendLabeledValue("Power of Equipment", $"{info.Profile.PowerLevel}", Color.white, Color.yellow, true);
-                        stringBuilder.AppendLabeledValue("Start Search + Hold Ground Time", $"{info.TimeBeforeSearch} + {info.HoldGroundDelay}", Color.white, Color.yellow, true);
-                        stringBuilder.AppendLabeledValue("Difficulty + Modifier", $"{info.Profile.BotDifficulty} + {info.Profile.DifficultyModifier}", Color.white, Color.yellow, true);
+                    var enemy = sain.Enemy;
+                    stringBuilder.AppendLine();
+                    stringBuilder.AppendLine("Enemy Info");
 
-                        stringBuilder.AppendLine("Aim Info");
-                        stringBuilder.AppendLabeledValue("Shoot Modifier", $"{info.WeaponInfo.FinalModifier}", Color.white, Color.yellow, true);
-                        AddAimData(botOwner, stringBuilder);
-                        break;
+                    stringBuilder.AppendLabeledValue("Name:", $"{enemy.EnemyPlayer?.Profile.Nickname}", Color.white, Color.red, true);
+                    stringBuilder.AppendLabeledValue("Power Level:", $"{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}", Color.white, Color.red, true);
 
-                    case 1:
-                        AddCoverInfo(sain, stringBuilder);
-                        break;
-
-                    case 2:
-                        stringBuilder.AppendLine(nameof(BotOwner.AimingData));
-                        DisplayPropertyAndFieldValues(botOwner.AimingData, stringBuilder);
-                        break;
-
-                    case 3:
-                        stringBuilder.AppendLine(nameof(BotOwner.ShootData));
-                        DisplayPropertyAndFieldValues(botOwner.ShootData, stringBuilder);
-                        break;
-
-                    case 4:
-                        stringBuilder.AppendLine(nameof(SAINComponentClass.Info.FileSettings.Aiming));
-                        DisplayPropertyAndFieldValues(sain.Info.FileSettings.Aiming, stringBuilder);
-                        break;
-
-                    case 5:
-                        stringBuilder.AppendLine(nameof(SAINComponentClass.Info.FileSettings.Shoot));
-                        DisplayPropertyAndFieldValues(sain.Info.FileSettings.Shoot, stringBuilder);
-                        break;
-
-                    case 6:
-                        stringBuilder.AppendLine(nameof(SAINComponentClass.Info.FileSettings.Mind));
-                        DisplayPropertyAndFieldValues(sain.Info.FileSettings.Mind, stringBuilder);
-                        break;
-
-                    case 7:
-                        stringBuilder.AppendLine(nameof(SAINComponentClass.Info.FileSettings.Core));
-                        DisplayPropertyAndFieldValues(sain.Info.FileSettings.Core, stringBuilder);
-                        break;
-
-                    case 8:
-                        stringBuilder.AppendLine(nameof(SAINComponentClass.Enemy));
-                        DisplayPropertyAndFieldValues(sain.Enemy, stringBuilder);
-                        break;
-
-                    case 9:
-                        stringBuilder.AppendLine(nameof(SAINComponentClass.Enemy.Path));
-                        DisplayPropertyAndFieldValues(sain.Enemy.Path, stringBuilder);
-                        break;
-
-                    case 10:
-                        stringBuilder.AppendLine(nameof(SAINComponentClass.Enemy.Vision));
-                        DisplayPropertyAndFieldValues(sain.Enemy.Vision, stringBuilder);
-                        break;
-
-                    case 11:
-                        stringBuilder.AppendLine(nameof(BotOwner.Memory.GoalEnemy));
-                        DisplayPropertyAndFieldValues(botOwner.Memory.GoalEnemy, stringBuilder);
-                        break;
-
-                    default: break;
+                    stringBuilder.AppendLabeledValue("Seen?", $"{enemy.Seen}", Color.white, enemy.Seen ? Color.red : Color.white, true);
+                    if (enemy.Seen)
+                    {
+                        stringBuilder.AppendLabeledValue("Time Since Seen", $"{enemy.TimeSinceSeen}", Color.white, Color.yellow, true);
+                    }
+                    stringBuilder.AppendLabeledValue("Heard?", $"{enemy.Heard}", Color.white, enemy.Seen ? Color.red : Color.white, true);
+                    if (enemy.Heard)
+                    {
+                        stringBuilder.AppendLabeledValue("Time Since Heard", $"{enemy.TimeSinceHeard}", Color.white, Color.yellow, true);
+                    }
+                    if (enemy.HeardRecently)
+                    {
+                        stringBuilder.AppendLabeledValue(null, $"Enemy Can Currently be Heard!", Color.red, Color.red, false);
+                    }
                 }
+
             }
             catch (Exception ex)
             {

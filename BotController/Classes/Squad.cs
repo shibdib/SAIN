@@ -46,6 +46,38 @@ namespace SAIN.BotController.Classes
 
         public void AddPointToSearch(Vector3 position, float soundPower, BotOwner botOwner, AISoundType soundType, Vector3 originalPosition, IPlayer player)
         {
+            const float SoundAggroDist = 75f;
+
+            if (player != null)
+            {
+                foreach (var member in Members)
+                {
+                    SAINEnemy enemy = member.Value?.EnemyController?.CheckAddEnemy(player);
+                    if (enemy == null)
+                    {
+                        // Logger.LogError("Enemy Null?");
+                    }
+                    enemy?.SetHeardStatus(true, position);
+
+                    if (member.Value?.Info.Profile.IsPMC == true)
+                    {
+                        float sqrMagnitude = (player.Position - position).sqrMagnitude;
+                        if (sqrMagnitude < SoundAggroDist * SoundAggroDist)
+                        {
+                            EnemyInfo enemyInfo = member.Value?.BotOwner?.Memory?.GoalEnemy;
+                            if (enemyInfo == null && enemy.EnemyInfo != null)
+                            {
+                                enemyInfo.GroupInfo.EnemyLastPosition = position; 
+                                enemyInfo.GroupInfo.EnemyLastVisiblePosition = position;
+                                member.Value.BotOwner.Memory.GoalEnemy = enemyInfo;
+                                member.Value.BotOwner.EnemiesController.SetSameEnemy(enemyInfo);
+                                Logger.LogWarning("Setting Goal Enemy to Heard Threat");
+                            }
+                        }
+                    }
+                }
+            }
+
             PlaceForCheck mostRecentPlace = null;
             bool isDanger = soundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
@@ -66,6 +98,8 @@ namespace SAIN.BotController.Classes
                     return;
                 }
             }
+
+
             if (NavMesh.SamplePosition(position, out NavMeshHit hit, 10f, -1))
             {
                 NavMeshPath path = new NavMeshPath();
@@ -84,15 +118,6 @@ namespace SAIN.BotController.Classes
                         }
                     }
                     catch { }
-                }
-
-                if (player != null)
-                {
-                    foreach (var member in Members)
-                    {
-                        SAINEnemy enemy = member.Value?.EnemyController?.CheckAddEnemy(player); 
-                        enemy?.SetHeardStatus(true, position);
-                    }
                 }
             }
         }
