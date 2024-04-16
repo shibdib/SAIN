@@ -24,7 +24,7 @@ namespace SAIN.SAINComponent.Classes
             if (CheckLosTimer < Time.time)
             {
                 CheckLosTimer = Time.time + timeToAdd;
-                InLineOfSight = CheckLineOfSight();
+                InLineOfSight = CheckLineOfSight(true);
             }
 
             var enemyInfo = EnemyInfo;
@@ -41,13 +41,13 @@ namespace SAIN.SAINComponent.Classes
             UpdateCanShoot(canshoot);
         }
 
-        private bool CheckLineOfSight()
+        private bool CheckLineOfSight(bool noDistRestrictions = false)
         {
             if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
             {
                 return false;
             }
-            if (Enemy.RealDistance <= BotOwner.Settings.Current.CurrentVisibleDistance)
+            if (noDistRestrictions || Enemy.RealDistance <= BotOwner.Settings.Current.CurrentVisibleDistance)
             {
                 foreach (var part in EnemyPlayer.MainParts.Values)
                 {

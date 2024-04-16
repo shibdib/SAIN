@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes;
 using System;
 using System.Reflection;
 using System.Text;
@@ -67,7 +68,8 @@ namespace SAIN.Layers
                 var decisions = sain.Memory.Decisions;
                 stringBuilder.AppendLine($"Name: [{sain.Person.Name}] Personality: [{info.Personality}] Type: [{info.Profile.WildSpawnType}]");
                 stringBuilder.AppendLine($"Steering: [{sain.Steering.CurrentSteerPriority}]");
-                stringBuilder.AppendLine($"Suppression Status: Num: [{sain.Suppression?.SuppressionNumber}] IsSuppressed: [{sain.Suppression?.IsSuppressed}] IsHeavySuppressed: [{sain.Suppression?.IsHeavySuppressed}] Stat Modifier: [{sain.Suppression?.SuppressionStatModifier}]");
+                stringBuilder.AppendLine($"Suppression Status: Num: [{sain.Suppression?.SuppressionNumber}] IsSuppressed: [{sain.Suppression?.IsSuppressed}] IsHeavySuppressed: [{sain.Suppression?.IsHeavySuppressed}]");
+                stringBuilder.AppendLine($"AI Limited: [{sain.CurrentAILimit}]");
 
                 stringBuilder.AppendLine();
 
@@ -99,33 +101,44 @@ namespace SAIN.Layers
 
                 if (sain.HasEnemy)
                 {
-                    var enemy = sain.Enemy;
-                    stringBuilder.AppendLine();
-                    stringBuilder.AppendLine("Enemy Info");
-
-                    stringBuilder.AppendLabeledValue("Name:", $"{enemy.EnemyPlayer?.Profile.Nickname}", Color.white, Color.red, true);
-                    stringBuilder.AppendLabeledValue("Power Level:", $"{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}", Color.white, Color.red, true);
-
-                    stringBuilder.AppendLabeledValue("Seen?", $"{enemy.Seen}", Color.white, enemy.Seen ? Color.red : Color.white, true);
-                    if (enemy.Seen)
-                    {
-                        stringBuilder.AppendLabeledValue("Time Since Seen", $"{enemy.TimeSinceSeen}", Color.white, Color.yellow, true);
-                    }
-                    stringBuilder.AppendLabeledValue("Heard?", $"{enemy.Heard}", Color.white, enemy.Seen ? Color.red : Color.white, true);
-                    if (enemy.Heard)
-                    {
-                        stringBuilder.AppendLabeledValue("Time Since Heard", $"{enemy.TimeSinceHeard}", Color.white, Color.yellow, true);
-                    }
-                    if (enemy.HeardRecently)
-                    {
-                        stringBuilder.AppendLabeledValue(null, $"Enemy Can Currently be Heard!", Color.red, Color.red, false);
-                    }
+                    stringBuilder.AppendLine("Active Enemy Info");
+                    CreateEnemyInfo(stringBuilder, sain.Enemy);
+                }
+                else if (sain.EnemyController.ClosestHeardEnemy != null)
+                {
+                    stringBuilder.AppendLine("Closest Heard Enemy Info");
+                    CreateEnemyInfo(stringBuilder, sain.EnemyController.ClosestHeardEnemy);
                 }
 
             }
             catch (Exception ex)
             {
                 Logger.LogError(ex);
+            }
+        }
+
+        private static void CreateEnemyInfo(StringBuilder stringBuilder, SAINEnemy enemy)
+        {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("Enemy Info");
+
+            stringBuilder.AppendLabeledValue("Name:", $"{enemy.EnemyPlayer?.Profile.Nickname}", Color.white, Color.red, true);
+            stringBuilder.AppendLabeledValue("Power Level:", $"{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}", Color.white, Color.red, true);
+
+            stringBuilder.AppendLabeledValue("Seen?", $"{enemy.Seen}", Color.white, enemy.Seen ? Color.red : Color.white, true);
+            if (enemy.Seen)
+            {
+                stringBuilder.AppendLabeledValue("Time Since Seen", $"{enemy.TimeSinceSeen}", Color.white, Color.yellow, true);
+            }
+            stringBuilder.AppendLabeledValue("Currently Visible:", $"{enemy.IsVisible}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Can Shoot:", $"{enemy.CanShoot}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("In Line of Sight:", $"{enemy.InLineOfSight}", Color.white, Color.yellow, true);
+
+            stringBuilder.AppendLabeledValue("Heard?", $"{enemy.Heard}", Color.white, enemy.Seen ? Color.red : Color.white, true);
+            if (enemy.Heard)
+            {
+                stringBuilder.AppendLabeledValue("Time Since Heard:", $"{enemy.TimeSinceHeard}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Heard Recently:", $"{enemy.HeardRecently}", Color.white, Color.yellow, true);
             }
         }
 

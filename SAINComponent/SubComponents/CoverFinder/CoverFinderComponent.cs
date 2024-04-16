@@ -194,6 +194,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private static CoverPoint FindFallbackPoint(List<CoverPoint> points)
         {
             CoverPoint result = null;
+            CoverPoint safestResult = null;
 
             for (int i = 0; i < points.Count; i++)
             {
@@ -202,10 +203,14 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 if (result == null
                     || point.Collider.bounds.size.y > result.Collider.bounds.size.y)
                 {
+                    if (point.IsSafePath)
+                    {
+                        safestResult = point;
+                    }
                     result = point;
                 }
             }
-            return result;
+            return safestResult ?? result;
         }
 
         static float FallBackPointResetDistance = 35;

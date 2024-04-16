@@ -1,6 +1,5 @@
 ﻿using BepInEx.Logging;
 using EFT;
-
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using UnityEngine;
@@ -65,7 +64,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
             if (GetPlaceToMove(collider, TargetPoint, BotOwner.Position, out place))
             {
-                if (CheckPosition(place) && CheckMainPlayer(place))
+                if (CheckPosition(place) && CheckHumanPlayerVisibility(place))
                 {
                     if (CheckPath(place, out isSafe, pathToPoint))
                     {
@@ -110,13 +109,14 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return false;
         }
 
-        private bool CheckMainPlayer(Vector3 point)
+        private bool CheckHumanPlayerVisibility(Vector3 point)
         {
-            if (SAIN.EnemyController.IsMainPlayerActiveEnemy() == false && SAIN.EnemyController.IsMainPlayerLookAtMe() == true && GameWorldHandler.SAINMainPlayer?.SAINPerson?.Transform != null)
+            Player closestPlayer = GameWorldHandler.SAINGameWorld?.FindClosestPlayer(out float sqrDist, point);
+            if (SAIN.EnemyController.IsHumanPlayerActiveEnemy() == false && SAIN.EnemyController.IsHumanPlayerLookAtMe(out Player lookingPlayer) == true && lookingPlayer != null)
             {
                 Vector3 testPoint = point + (Vector3.up * 0.5f);
 
-                bool VisibleCheckPass = (VisibilityCheck(testPoint, GameWorldHandler.SAINMainPlayer.SAINPerson.Transform.Head));
+                bool VisibleCheckPass = (VisibilityCheck(testPoint, lookingPlayer.MainParts[BodyPartType.head].Position));
 
                 if (SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder)
                 {

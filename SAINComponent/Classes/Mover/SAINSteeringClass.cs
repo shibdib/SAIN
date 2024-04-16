@@ -20,7 +20,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (updateSteerTimer < Time.time)
             {
-                updateSteerTimer = Time.time + 0.1f;
+                updateSteerTimer = Time.time + 0.05f;
                 UpdateSteer();
             }
         }
@@ -101,8 +101,8 @@ namespace SAIN.SAINComponent.Classes.Mover
 
                 case SteerPriority.LastSeenEnemy:
                     LookToEnemyLastSeenPos();
-
                     break;
+
                 case SteerPriority.Hear:
                     if (LastHeardSound != null)
                     {
@@ -113,12 +113,19 @@ namespace SAIN.SAINComponent.Classes.Mover
                         Logger.LogError("Cannot look toward null PlaceForCheck.");
                     }
                     break;
+
                 case SteerPriority.LastSeenEnemyLong:
                     LookToEnemyLastSeenPos();
                     break;
+
                 case SteerPriority.MoveDirection:
                     LookToMovingDirection();
                     break;
+
+                case SteerPriority.Search:
+                    // Search steering is handled in the Search Layer
+                    break;
+
                 case SteerPriority.Random:
                     LookToRandomPosition();
                     break;
@@ -163,6 +170,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return SteerPriority.Enemy;
             }
+            if (SAIN.Memory.Decisions.Main.Current == SoloDecision.Search)
+            {
+
+            }
             if (BotOwner.Memory.IsUnderFire)
             {
                 return SteerPriority.UnderFire;
@@ -199,6 +210,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (SAIN.Memory.Decisions.Main.Current == SoloDecision.Investigate)
             {
                 return SteerPriority.MoveDirection;
+            }
+            if (SAIN.Memory.Decisions.Main.Current == SoloDecision.Search)
+            {
+                return SteerPriority.Search;
             }
             if (SteerRandomToggle)
             {
@@ -468,66 +483,6 @@ namespace SAIN.SAINComponent.Classes.Mover
         }
 
         private float RandomLookTimer = 0f;
-
-        // Old code, pre refactor on 3/25/2024
-        public bool SteerByPriorityOld(bool lookRandomifFalse = true)
-        {
-            if (LookToAimTarget())
-            {
-                CurrentSteerPriority = SteerPriority.None;
-                return true;
-            }
-            if (EnemyVisible())
-            {
-                CurrentSteerPriority = SteerPriority.Enemy;
-                return true;
-            }
-            if (Time.time - BotOwner.Memory.LastTimeHit < 1f)
-            {
-                CurrentSteerPriority = SteerPriority.LastHit;
-                LookToLastHitPos();
-                return true;
-            }
-            if (BotOwner.Memory.IsUnderFire)
-            {
-                CurrentSteerPriority = SteerPriority.UnderFire;
-                LookToUnderFirePos();
-                return true;
-            }
-            if (SAIN.Enemy?.TimeSinceSeen < 2f && SAIN.Enemy.Seen)
-            {
-                CurrentSteerPriority = SteerPriority.LastSeenEnemy;
-                LookToEnemyLastSeenPos();
-                return true;
-            }
-            var sound = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, 30f, 2f);
-            if (sound != null)
-            {
-                CurrentSteerPriority = SteerPriority.Hear;
-                LookToHearPos(sound.Position);
-                return true;
-            }
-            if (SAIN.Enemy?.TimeSinceSeen < 12f && SAIN.Enemy.Seen)
-            {
-                CurrentSteerPriority = SteerPriority.LastSeenEnemy;
-                LookToEnemyLastSeenPos();
-                return true;
-            }
-            if (SAIN.Memory.Decisions.Main.Current == SoloDecision.Investigate)
-            {
-                CurrentSteerPriority = SteerPriority.MoveDirection;
-                LookToMovingDirection();
-                return true;
-            }
-
-            if (lookRandomifFalse)
-            {
-                CurrentSteerPriority = SteerPriority.Random;
-                LookToRandomPosition();
-            }
-            return false;
-        }
-
     }
 
     public enum SteerPriority
@@ -543,6 +498,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         UnderFire,
         MoveDirection,
         LastKnownLocation,
-        ClosestHeardEnemy
+        ClosestHeardEnemy,
+        Search
     }
 }

@@ -88,6 +88,7 @@ namespace SAIN.SAINComponent
                 Search = new SAINSearchClass(this);
                 Vault = new SAINVaultClass(this);
                 Suppression = new SAINBotSuppressClass(this);
+                AILimit = new SAINAILimit(this);
             }
             catch (Exception ex)
             {
@@ -117,6 +118,7 @@ namespace SAIN.SAINComponent
             Steering.Init();
             Vault.Init();
             Suppression.Init();
+            AILimit.Init();
 
             TimeBotCreated = Time.time;
 
@@ -151,7 +153,7 @@ namespace SAIN.SAINComponent
 
                 HandlePatrolData();
 
-                if (LimitAI())
+                if (AILimit.LimitAIThisFrame)
                 {
                     Stopwatch.Stop();
                     //ProfilePerformance(Stopwatch);
@@ -189,14 +191,13 @@ namespace SAIN.SAINComponent
                 Stopwatch.Stop();
                 ProfilePerformance(Stopwatch);
             }
-
-            Stopwatch.Restart();
         }
 
         private Stopwatch Stopwatch = new Stopwatch();
 
         private void LateUpdate()
         {
+            AILimit?.UpdateAILimit();
             if (SAINPlugin.DebugMode && LogTimer < Time.time)
             {
                 LogTimer = Time.time + 5;
@@ -214,38 +215,31 @@ namespace SAIN.SAINComponent
 
         private static float LogTimer;
 
-        private bool LimitAI()
+        public bool IsHumanACareEnemy
         {
-            CurrentAILimit = CheckLimitAI();
-
-            float timeToAdd = 0f;
-            switch (CurrentAILimit)
+            get
             {
-                case AILimitSetting.Far:
-                    timeToAdd = 0.5f;
-                    break;
+                if (HasEnemy && !Enemy.IsAI)
+                {
+                    return true;
+                }
+                var closestHeard = EnemyController.ClosestHeardEnemy;
+                if (closestHeard != null && !closestHeard.IsAI)
+                {
+                    return true;
+                }
 
-                case AILimitSetting.VeryFar:
-                    timeToAdd = 1f;
-                    break;
-
-                case AILimitSetting.Narnia:
-                    timeToAdd = 2f;
-                    break;
-
-                default:
-                    break;
+                foreach (var player in Memory.VisiblePlayers)
+                {
+                    if (!player.IsAI)
+                    {
+                        return true;
+                    }
+                }
+                
+                return false;
             }
-
-            if (CurrentAILimit != AILimitSetting.Close && AILimitTimer + timeToAdd > Time.time)
-            {
-                return true;
-            }
-            AILimitTimer = Time.time;
-            return false;
         }
-
-        private float AILimitTimer;
 
         private void HandlePatrolData()
         {
@@ -259,47 +253,7 @@ namespace SAIN.SAINComponent
             }
         }
 
-        public AILimitSetting CurrentAILimit { get; private set; }
-
-        private AILimitSetting CheckLimitAI()
-        {
-            const float NarniaDist = 600;
-            const float VeryFarDist = 300;
-            const float FarDist = 150f;
-
-            AILimitSetting result = AILimitSetting.Close;
-
-            var mainPlayer = GameWorldHandler.SAINMainPlayer?.SAINPerson;
-            if (mainPlayer != null)
-            {
-                bool isPlayerMainEnemy = HasEnemy && !Enemy.IsAI;
-                if (!isPlayerMainEnemy)
-                {
-                    float sqrMag = (mainPlayer.Position - Position).sqrMagnitude;
-                    if (sqrMag >= NarniaDist * NarniaDist)
-                    {
-                        result = AILimitSetting.Narnia;
-                    }
-                    else if (sqrMag >= VeryFarDist * VeryFarDist)
-                    {
-                        result = AILimitSetting.VeryFar;
-                    }
-                    else if (sqrMag >= FarDist * FarDist)
-                    {
-                        result = AILimitSetting.Far;
-                    }
-                }
-            }
-            return result;
-        }
-
-        public enum AILimitSetting
-        {
-            Close = 0,
-            Far = 1,
-            VeryFar = 2,
-            Narnia = 3,
-        }
+        public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
 
         public bool BotIsAlive => Player?.HealthController?.IsAlive == true;
 
@@ -385,6 +339,7 @@ namespace SAIN.SAINComponent
                 Enemy?.Dispose();
                 Vault?.Dispose();
                 Suppression?.Dispose();
+                AILimit?.Dispose();
 
                 Destroy(this);
             }
@@ -437,6 +392,7 @@ namespace SAIN.SAINComponent
             }
         }
 
+        public SAINAILimit AILimit { get; private set; }
         public SAINBotSuppressClass Suppression { get; private set; }
         public SAINVaultClass Vault { get; private set; }
         public SAINSearchClass Search { get; private set; }

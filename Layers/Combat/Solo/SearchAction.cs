@@ -68,14 +68,20 @@ namespace SAIN.Layers.Combat.Solo
                     else if (CheckMagTimer < Time.time && NextCheckTimer < Time.time)
                     {
                         NextCheckTimer = Time.time + 3f;
-                        CheckMagTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
-                        SAIN.Player.HandsController.FirearmsAnimator.CheckAmmo();
+                        if (EFTMath.RandomBool())
+                        {
+                            SAIN.Player.HandsController.FirearmsAnimator.CheckAmmo();
+                            CheckMagTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
+                        }
                     }
                     else if (CheckChamberTimer < Time.time && NextCheckTimer < Time.time)
                     {
                         NextCheckTimer = Time.time + 3f;
-                        CheckChamberTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
-                        SAIN.Player.HandsController.FirearmsAnimator.CheckChamber();
+                        if (EFTMath.RandomBool())
+                        {
+                            SAIN.Player.HandsController.FirearmsAnimator.CheckChamber();
+                            CheckChamberTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
+                        }
                     }
                 }
             }
@@ -148,22 +154,23 @@ namespace SAIN.Layers.Combat.Solo
             }
             if (SteerByPriority(false) == false)
             {
-                if (CanSeeDangerOrCorner(out Vector3 point) && SAIN.Enemy != null)
+                if (CanSeeDangerOrCorner(out Vector3 point) && SAIN.CurrentTargetPosition != null)
                 {
                     Vector3 direction = point - SAIN.Position;
-                    Vector3 enemyDirection = SAIN.Enemy.EnemyDirection;
-                    float dot = Vector3.Dot(direction, enemyDirection);
-                    if (dot > 0f)
+                    Vector3 targetDirection = SAIN.CurrentTargetPosition.Value - SAIN.Position;
+                    float dot = Vector3.Dot(direction, targetDirection);
+                    if (dot > 0.25f)
                     {
                         SAIN.Steering.LookToPoint(point);
                     }
-                }
-                else if (SAIN.Steering.LookToEnemyLastSeenClose())
-                {
+                    else
+                    {
+                        SAIN.Steering.LookToPoint(SAIN.CurrentTargetPosition.Value);
+                    }
                 }
                 else
                 {
-                    SAIN.Steering.LookToRandomPosition();
+                    LookToMovingDirection();
                 }
             }
         }
@@ -181,7 +188,7 @@ namespace SAIN.Layers.Combat.Solo
             if (CheckSeeTimer < Time.time)
             {
                 LookPoint = Vector3.zero;
-                CheckSeeTimer = Time.time + 1f * Random.Range(0.66f, 1.33f);
+                CheckSeeTimer = Time.time + 0.5f * Random.Range(0.66f, 1.33f);
                 var headPosition = SAIN.Transform.Head;
 
                 var canSeePoint = !Vector.Raycast(headPosition,

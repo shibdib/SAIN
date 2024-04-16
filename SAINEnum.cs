@@ -214,4 +214,12 @@ namespace SAIN
         SoundNull = 5,
         Forced = 6,
     }
+
+    public enum AILimitSetting
+    {
+        Close = 0,
+        Far = 1,
+        VeryFar = 2,
+        Narnia = 3,
+    }
 }

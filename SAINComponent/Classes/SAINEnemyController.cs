@@ -7,6 +7,7 @@ using SAIN.SAINComponent;
 using SAIN.SAINComponent.BaseClasses;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
@@ -206,57 +207,51 @@ namespace SAIN.SAINComponent.Classes
             return isNull;
         }
 
-        public bool IsMainPlayerActiveEnemy()
+        public bool IsHumanPlayerActiveEnemy()
         {
-            return ActiveEnemy != null && ActiveEnemy.EnemyIPlayer != null && ActiveEnemy.EnemyIPlayer.IsYourPlayer;
+            return ActiveEnemy != null && ActiveEnemy.EnemyIPlayer != null && ActiveEnemy.EnemyIPlayer.AIData?.IsAI == false;
         }
 
-        public bool IsMainPlayerAnEnemy()
+        public bool IsHumanPlayerLookAtMe(out Player lookingPlayer)
         {
-            Player mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (mainPlayer != null)
+            if (CheckMainPlayerVisionTimer < Time.time)
             {
-                string profileID = mainPlayer.ProfileId;
-                if (IsPlayerAnEnemy(profileID))
+                CheckMainPlayerVisionTimer = Time.time + 0.25f;
+                MainPlayerWasLookAtMe = false;
+                _lookingPlayer = null;
+
+                var gameworld = GameWorldHandler.SAINGameWorld?.GameWorld;
+                if (gameworld != null)
                 {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public bool IsMainPlayerLookAtMe()
-        {
-            if (GameWorldHandler.SAINMainPlayer != null)
-            {
-                var person = GameWorldHandler.SAINMainPlayer.SAINPerson;
-                Vector3 mainPlayerHeadPos = person.Transform.Head;
-
-                Vector3 lookDir = person.Transform.LookDirection;
-
-                Vector3 botChestPos = SAIN.Person.Transform.Chest;
-                Vector3 botDir = (botChestPos - mainPlayerHeadPos);
-
-                if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
-                {
-                    if (CheckMainPlayerVisionTimer < Time.time)
+                    var players = gameworld.AllAlivePlayersList;
+                    if (players != null)
                     {
-                        CheckMainPlayerVisionTimer = Time.time + 1f;
-                        MainPlayerWasLookAtMe = !Physics.Raycast(mainPlayerHeadPos, botDir, botDir.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
+                        foreach (var player in players)
+                        {
+                            if (SAIN.Memory.VisiblePlayers.Contains(player))
+                            {
+                                Vector3 lookDir = player.LookDirection;
+                                Vector3 playerHeadPos = player.MainParts[BodyPartType.head].Position;
+
+                                Vector3 botChestPos = SAIN.Person.Transform.Chest;
+                                Vector3 botDir = (botChestPos - playerHeadPos);
+
+                                if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
+                                {
+                                    MainPlayerWasLookAtMe = true;
+                                    _lookingPlayer = player;
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
-                else
-                {
-                    MainPlayerWasLookAtMe = false;
-                }
             }
-            else
-            {
-                MainPlayerWasLookAtMe = false;
-            }
+            lookingPlayer = _lookingPlayer;
             return MainPlayerWasLookAtMe;
         }
 
+        private Player _lookingPlayer;
         private float CheckMainPlayerVisionTimer;
         private bool MainPlayerWasLookAtMe;
 
