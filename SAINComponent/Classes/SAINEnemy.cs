@@ -2,6 +2,7 @@
 using SAIN.SAINComponent.BaseClasses;
 using UnityEngine;
 using UnityEngine.AI;
+using static RootMotion.FinalIK.AimPoser;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -39,34 +40,22 @@ namespace SAIN.SAINComponent.Classes
             bool isCurrent = IsCurrentEnemy;
             Vision.Update(isCurrent);
             Path.Update(isCurrent);
-
-            UpdateHearStatus();
-        }
-
-        public void UpdateHearStatus()
-        {
-            if (HeardRecently && TimeSinceHeard + TimeSinceHeardTimeAdd < Time.time)
-            {
-                SetHeardStatus(false, Vector3.zero);
-            }
         }
 
         public readonly bool IsAI;
 
         public float LastActiveTime;
 
-        private readonly float TimeSinceHeardTimeAdd = 10f;
+        private readonly float TimeSinceHeardTimeAdd = 8f;
 
         public bool Heard { get; private set; }
 
         public void SetHeardStatus(bool canHear, Vector3 pos)
         {
             HeardRecently = canHear;
-            if (canHear)
+            if (HeardRecently)
             {
-                Heard = true;
                 LastHeardPosition = pos;
-                TimeLastHeard = Time.time;
                 HasSeenLastKnownLocation = false;
             }
         }
@@ -82,7 +71,29 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        public bool HeardRecently { get; set; }
+        public bool HeardRecently
+        {
+            get
+            {
+                if (Heard && TimeSinceHeard + TimeSinceHeardTimeAdd < Time.time)
+                {
+                    _heardRecently = false;
+                }
+                return _heardRecently;
+            }
+            set
+            {
+                if (value)
+                {
+                    Heard = true;
+                    TimeLastHeard = Time.time;
+                }
+                _heardRecently = value;
+            }
+        }
+
+        private bool _heardRecently;
+
         public float TimeSinceHeard => Heard ? Time.time - TimeLastHeard : float.MaxValue;
         public float TimeLastHeard { get; private set; }
         public Vector3? LastHeardPosition { get; private set; }
