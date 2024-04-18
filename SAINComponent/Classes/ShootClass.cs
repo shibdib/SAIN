@@ -1,14 +1,11 @@
-﻿using BepInEx.Logging;
-using EFT;
-using SAIN.Components;
-using SAIN.Helpers;
+﻿using EFT;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
 {
     public class ShootClass : BaseNodeClass
     {
-        public ShootClass(BotOwner owner) 
+        public ShootClass(BotOwner owner)
             : base(owner)
         {
             SAIN = owner.GetComponent<SAINComponentClass>();
@@ -29,37 +26,8 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            SetAimStatus();
+            SAIN.AimDownSightsController.UpdateADSstatus();
             AimAtEnemy();
-        }
-
-        private void SetAimStatus()
-        {
-            var enemy = SAIN.Enemy;
-
-            SoloDecision currentDecision = SAIN.Memory.Decisions.Main.Current;
-
-            var shootController = BotOwner.WeaponManager.ShootController;
-            if (shootController != null && currentDecision == SoloDecision.HoldInCover
-                || currentDecision == SoloDecision.StandAndShoot
-                || (enemy != null
-                    && enemy.CanShoot
-                    && enemy.IsVisible
-                    && enemy.RealDistance > 20f))
-            {
-                if (!shootController.IsAiming && changeAimTimer < Time.time)
-                {
-                    changeAimTimer = Time.time + 2f * Random.Range(0.5f, 1.5f);
-                    shootController?.SetAim(true);
-                }
-            }
-            else
-            {
-                if (shootController.IsAiming)
-                {
-                    shootController?.SetAim(false);
-                }
-            }
         }
 
         private void AimAtEnemy()

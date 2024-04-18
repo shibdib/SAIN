@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class BlindFireClass : SAINBase, ISAINClass
+    public class BlindFireController : SAINBase, ISAINClass
     {
-        public BlindFireClass(SAINComponentClass sain) : base(sain)
+        public BlindFireController(SAINComponentClass sain) : base(sain)
         {
         }
 
@@ -55,8 +55,9 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 ResetBlindFire();
                 BlindFireTimer = Time.time + 0.5f;
+                SAIN.Shoot(false);
             }
-            else // if (!SAIN.NoBushESP.NoBushESPActive && SAIN.FriendlyFireClass.ClearShot)
+            else
             {
                 if (BlindFireTimer < Time.time)
                 {
@@ -68,7 +69,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 Vector3 blindFireDirection = Vector.Rotate(targetPos - start, Vector.RandomRange(5), Vector.RandomRange(5), 0);
                 BlindFireTargetPos = blindFireDirection + start;
                 SAIN.Steering.LookToPoint(BlindFireTargetPos);
-                SAIN.Shoot();
+                SAIN.Shoot(true, false, SAINComponentClass.EShootReason.Blindfire);
             }
         }
 

@@ -183,10 +183,10 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
 
-            bool CheckTime = timeChangeDec < 5f; 
-            bool Moving = BotOwner.Mover?.RealDestPoint != Vector3.one && BotOwner.Mover?.DistDestination > 2f;
-
-            return Running && Moving && CheckTime;
+            bool CheckTime = timeChangeDec < 30f; 
+            bool Moving = BotOwner.Mover.HasPathAndNoComplete;
+             
+            return Running && BotOwner.Mover.HasPathAndNoComplete && CheckTime;
         }
 
         private bool CheckStuckDecision(out SoloDecision Decision)

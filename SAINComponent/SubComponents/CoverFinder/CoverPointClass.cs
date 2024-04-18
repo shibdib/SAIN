@@ -134,7 +134,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 }
                 else
                 {
-                    PathLength = Mathf.Infinity;
+                    PathLength = float.MaxValue;
                 }
             }
             return PathLength;
@@ -149,7 +149,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             get
             {
                 ReCheckStatusTimer += Time.deltaTime;
-                if (ReCheckStatusTimer < 0.25f)
+                if (ReCheckStatusTimer < 0.1f)
                 {
                     return OldStatus;
                 }
@@ -158,7 +158,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 float sqrMagnitude = (BotOwner.Position - Position).sqrMagnitude;
 
                 CoverStatus status;
-                if (sqrMagnitude <= InCoverDist * InCoverDist)
+                if (OldStatus == CoverStatus.InCover && sqrMagnitude <= InCoverStayDist * InCoverStayDist)
+                {
+                    status = CoverStatus.InCover;
+                }
+                else if (sqrMagnitude <= InCoverDist * InCoverDist)
                 {
                     status = CoverStatus.InCover;
                 }
@@ -174,6 +178,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 {
                     status = CoverStatus.FarFromCover;
                 }
+                CoverDistSqrMagnitude = sqrMagnitude;
                 OldStatus = status;
                 return status;
             }
@@ -188,7 +193,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public float TimeCreated { get; private set; }
 
         private const float InCoverDist = 0.75f;
+        private const float InCoverStayDist = 1f;
         private const float CloseCoverDist = 8f;
         private const float MidCoverDist = 20f;
+
+        public float CoverDistSqrMagnitude { get; private set; }
     }
 }

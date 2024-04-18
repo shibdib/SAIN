@@ -248,7 +248,6 @@
     <Compile Include="Attributes\GUIEntryConfig.cs" />
     <Compile Include="BotController\Classes\BotSquads.cs" />
     <Compile Include="BotController\Classes\MemberInfo.cs" />
-    <Compile Include="BotController\Classes\PlaceForCheckSAIN.cs" />
     <Compile Include="BotController\Classes\Squad.cs" />
     <Compile Include="Components\Extract\ExtractFinderComponent.cs" />
     <Compile Include="Components\MainPlayer\BaseMainPlayer.cs" />
@@ -293,6 +292,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\LootingBotsSettings.cs" />
     <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
+    <Compile Include="SAINComponent\Classes\AimDownSightsController.cs" />
     <Compile Include="SAINComponent\Classes\Decision\DecisionWrapper.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="Editor\PresetSelection.cs" />
@@ -365,7 +365,7 @@
     <Compile Include="SAINComponent\Classes\WeaponFunction\Recoil.cs" />
     <Compile Include="Components\SAINNoBushESP.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SideStepClass.cs" />
-    <Compile Include="SAINComponent\Classes\Mover\BlindFireClass.cs" />
+    <Compile Include="SAINComponent\Classes\Mover\BlindFireController.cs" />
     <Compile Include="SAINComponent\Classes\Mover\PoseClass.cs" />
     <Compile Include="SAINComponent\Classes\Mover\ProneClass.cs" />
     <Compile Include="Helpers\SAINSoundTypeHandler.cs" />

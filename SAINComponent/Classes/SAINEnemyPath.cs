@@ -79,8 +79,8 @@ namespace SAIN.SAINComponent.Classes
 
         public EnemyPathDistance CheckPathDistance()
         {
-            const float VeryCloseDist = 8f;
-            const float CloseDist = 35f;
+            const float VeryCloseDist = 15f;
+            const float CloseDist = 50f;
             const float FarDist = 100f;
             const float VeryFarDist = 150f;
 

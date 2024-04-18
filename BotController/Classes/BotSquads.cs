@@ -48,8 +48,6 @@ namespace SAIN.BotController.Classes
 
         private float DebugTimer = 0f;
 
-        private readonly Dictionary<string, string> BotSquadKVP = new Dictionary<string, string>();
-
         public readonly Dictionary<string, Squad> Squads = new Dictionary<string, Squad>();
 
         public Squad GetSquad(SAINComponentClass sain)

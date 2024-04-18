@@ -31,14 +31,14 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        public List<PlaceForCheck> PlacesForCheck => EFTBotGroup?.PlacesForCheck;
+        public List<PlaceForCheck> GroupPlacesForCheck => EFTBotGroup?.PlacesForCheck;
 
         public bool IsPointTooCloseToLastPlaceForCheck(Vector3 position)
         {
             PlaceForCheck mostRecentPlace = null;
-            if (PlacesForCheck != null && PlacesForCheck.Count > 0)
+            if (GroupPlacesForCheck != null && GroupPlacesForCheck.Count > 0)
             {
-                mostRecentPlace = PlacesForCheck[PlacesForCheck.Count - 1];
+                mostRecentPlace = GroupPlacesForCheck[GroupPlacesForCheck.Count - 1];
 
                 if (mostRecentPlace != null && (position - mostRecentPlace.Position).sqrMagnitude < 2)
                 {
@@ -48,45 +48,43 @@ namespace SAIN.BotController.Classes
             return false;
         }
 
-        public void AddPointToSearch(Vector3 position, float soundPower, BotOwner botOwner, AISoundType soundType, Vector3 originalPosition, IPlayer player)
+        public enum ESearchPointType
+        {
+            Hearing,
+            Flashlight,
+        }
+
+        public void AddPointToSearch(Vector3 position, float soundPower, BotOwner botOwner, AISoundType soundType, Vector3 originalPosition, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
         {
             if (EFTBotGroup == null)
             {
                 EFTBotGroup = botOwner.BotsGroup;
                 Logger.LogError("Botsgroup null");
             }
-            if (PlacesForCheck == null)
+            if (GroupPlacesForCheck == null)
             {
                 Logger.LogError("PlacesForCheck null");
                 return;
             }
-            try
-            {
-                SetVisibleAndHeard(player, position);
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e);
-            }
 
-            // Compare the most recent place for check with this new one we're adding.
-            // If they are close by, just update that one instead of creating a new instance
-            try
+            if (searchType  == ESearchPointType.Hearing)
             {
-                if (UpdateExistingPlaceForCheck(soundType, position))
+                try
                 {
-                    return;
+                    SetVisibleAndHeard(player, position);
                 }
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e);
+                catch (Exception e)
+                {
+                    Logger.LogError(e);
+                }
             }
 
             bool isDanger = soundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
-            AddNewPlaceForCheck(botOwner, position, checkType);
+            AddNewPlaceForCheck(botOwner, position, checkType, player);
         }
+
+        private readonly Dictionary<IPlayer, PlaceForCheck> PlayerPlaceChecks = new Dictionary<IPlayer, PlaceForCheck>();
 
         private void SetVisibleAndHeard(IPlayer player, Vector3 position)
         {
@@ -125,52 +123,104 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        private bool UpdateExistingPlaceForCheck(AISoundType soundType, Vector3 position)
+        private void AddNewPlaceForCheck(BotOwner botOwner, Vector3 position, PlaceForCheckType checkType, IPlayer player)
         {
-            PlaceForCheck mostRecentPlace = null;
-            bool isDanger = soundType == AISoundType.step ? false : true;
-            PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
+            const float navSampleDist = 5f;
+            const float dontLerpDist = 50f;
 
-            // Compare the most recent place for check with this new one we're adding.
-            // If they are close by, just update that one instead of creating a new instance
-            if (PlacesForCheck != null && PlacesForCheck.Count > 0)
+            if (FindNavMesh(position, out Vector3 hitPosition, navSampleDist))
             {
-                mostRecentPlace = PlacesForCheck[PlacesForCheck.Count - 1];
-
-                if (mostRecentPlace != null && (position - mostRecentPlace.Position).sqrMagnitude < 2)
+                // Too many places were being sent to a bot, causing confused behavior.
+                // This way I'm tying 1 placeforcheck to each player and updating it based on new info.
+                PlaceForCheck oldPlace = null;
+                bool placeUpdated = false;
+                if (PlayerPlaceChecks.ContainsKey(player))
                 {
-                    if (isDanger)
+                    oldPlace = PlayerPlaceChecks[player];
+                    if (oldPlace != null 
+                        && (oldPlace.BasePoint - position).sqrMagnitude <= dontLerpDist * dontLerpDist)
                     {
-                        mostRecentPlace.Type = PlaceForCheckType.danger;
+                        Vector3 averagePosition = averagePosition = Vector3.Lerp(oldPlace.BasePoint, hitPosition, 0.5f);
+
+                        if (FindNavMesh(averagePosition, out hitPosition, navSampleDist) 
+                            && CanPathToPoint(hitPosition, botOwner) == NavMeshPathStatus.PathComplete)
+                        {
+                            //bool isOldPlaceActive = botOwner.Memory.GoalTarget.GoalTarget == oldPlace;
+
+                            PlaceForCheck replacementPlace = new PlaceForCheck(hitPosition, checkType);
+
+                            if (GroupPlacesForCheck.Contains(oldPlace))
+                            {
+                                GroupPlacesForCheck.Remove(oldPlace);
+                            }
+
+                            GroupPlacesForCheck.Add(replacementPlace);
+                            PlayerPlaceChecks[player] = replacementPlace;
+                            CalcGoalForBot(botOwner);
+                            placeUpdated = true;
+                        }
                     }
-                    mostRecentPlace.BasePoint = position;
-                    return true;
+                }
+
+                if (!placeUpdated 
+                    && CanPathToPoint(hitPosition, botOwner) == NavMeshPathStatus.PathComplete)
+                {
+                    PlaceForCheck newPlace = new PlaceForCheck(position, checkType);
+                    GroupPlacesForCheck.Add(newPlace);
+                    AddOrUpdatePlaceForPlayer(newPlace, player);
+                    CalcGoalForBot(botOwner);
                 }
             }
+        }
+
+        private bool FindNavMesh(Vector3 position, out Vector3 hitPosition, float navSampleDist = 5f)
+        {
+            if (NavMesh.SamplePosition(position, out NavMeshHit hit, navSampleDist, -1))
+            {
+                hitPosition = hit.position;
+                return true;
+            }
+            Vector3 rayEnd = position + (Vector3.down * navSampleDist * navSampleDist);
+            if (NavMesh.Raycast(position, rayEnd, out NavMeshHit hit2, NavMesh.AllAreas))
+            {
+                hitPosition = hit2.position;
+                return true;
+            }
+            hitPosition = Vector3.zero;
             return false;
         }
 
-        private void AddNewPlaceForCheck(BotOwner botOwner, Vector3 position, PlaceForCheckType checkType)
+        private NavMeshPathStatus CanPathToPoint(Vector3 point, BotOwner botOwner)
         {
-            if (NavMesh.SamplePosition(position, out NavMeshHit hit, 10f, -1))
+            NavMeshPath path = new NavMeshPath();
+            NavMesh.CalculatePath(botOwner.Position, point, -1, path);
+            return path.status;
+        }
+
+        private void CalcGoalForBot(BotOwner botOwner)
+        {
+            try
             {
-                NavMeshPath path = new NavMeshPath();
-                if (NavMesh.CalculatePath(botOwner.Position, hit.position, -1, path))
+                if (!botOwner.Memory.GoalTarget.HavePlaceTarget() && botOwner.Memory.GoalEnemy == null)
                 {
-                    position = hit.position;
-
-                    try
-                    {
-                        PlaceForCheck placeForCheck = new PlaceForCheck(position, checkType);
-                        PlacesForCheck.Add(placeForCheck);
-
-                        if (!botOwner.Memory.GoalTarget.HavePlaceTarget() && botOwner.Memory.GoalEnemy == null)
-                        {
-                            botOwner.BotsGroup.CalcGoalForBot(botOwner);
-                        }
-                    }
-                    catch (Exception e) { Logger.LogError(e); }
+                    botOwner.BotsGroup.CalcGoalForBot(botOwner);
                 }
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e);
+            }
+        }
+
+        private void AddOrUpdatePlaceForPlayer(PlaceForCheck place, IPlayer player)
+        {
+            if (PlayerPlaceChecks.ContainsKey(player))
+            {
+                PlayerPlaceChecks[player] = place;
+            }
+            else
+            {
+                PlayerPlaceChecks.Add(player, place);
             }
         }
 

@@ -12,6 +12,7 @@ using SAIN.SAINComponent.Classes.Talk;
 using System;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace SAIN.SAINComponent
 {
@@ -89,6 +90,13 @@ namespace SAIN.SAINComponent
                 Vault = new SAINVaultClass(this);
                 Suppression = new SAINBotSuppressClass(this);
                 AILimit = new SAINAILimit(this);
+                AimDownSightsController = new AimDownSightsController(this);
+
+                NavMeshAgent = this.GetComponent<NavMeshAgent>();
+                if (NavMeshAgent == null)
+                {
+                    Logger.LogError("Agent Null");
+                }
             }
             catch (Exception ex)
             {
@@ -119,11 +127,14 @@ namespace SAIN.SAINComponent
             Vault.Init();
             Suppression.Init();
             AILimit.Init();
+            AimDownSightsController.Init();
 
             TimeBotCreated = Time.time;
 
             return true;
         }
+
+        public NavMeshAgent NavMeshAgent { get; private set; }
 
         public float TimeBotCreated { get; private set; }
 
@@ -153,6 +164,8 @@ namespace SAIN.SAINComponent
 
                 HandlePatrolData();
 
+                AILimit.UpdateAILimit();
+
                 if (AILimit.LimitAIThisFrame)
                 {
                     Stopwatch.Stop();
@@ -180,6 +193,8 @@ namespace SAIN.SAINComponent
                 Steering.Update();
                 Vault.Update();
                 Suppression.Update();
+                AimDownSightsController.Update();
+
                 BotOwner.DoorOpener.Update(); 
                 UpdateGoalTarget();
 
@@ -197,7 +212,6 @@ namespace SAIN.SAINComponent
 
         private void LateUpdate()
         {
-            AILimit?.UpdateAILimit();
             if (SAINPlugin.DebugMode && LogTimer < Time.time)
             {
                 LogTimer = Time.time + 5;
@@ -273,15 +287,33 @@ namespace SAIN.SAINComponent
             }
         }
 
-        public void Shoot(bool checkFF = true)
+        public bool Shoot(bool value, bool checkFF = true, EShootReason reason = EShootReason.None)
         {
-            if (checkFF && !FriendlyFireClass.ClearShot)
-            {
-                BotOwner.ShootData.EndShoot();
-                return;
-            }
+            ManualShootReason = reason;
 
-            BotOwner.ShootData.Shoot();
+            if (value)
+            {
+                if (checkFF && !FriendlyFireClass.ClearShot)
+                {
+                    BotOwner.ShootData.EndShoot();
+                    return false;
+                }
+                else
+                {
+                    return BotOwner.ShootData.Shoot();
+                }
+            }
+            return false;
+        }
+
+        public EShootReason ManualShootReason { get; private set; }
+
+        public enum EShootReason
+        {
+            None = 0,
+            SquadSuppressing = 1,
+            Blindfire = 2,
+            WalkToCoverSuppress = 3,
         }
 
         private bool SAINActive => BigBrainHandler.IsBotUsingSAINLayer(BotOwner);
@@ -340,6 +372,7 @@ namespace SAIN.SAINComponent
                 Vault?.Dispose();
                 Suppression?.Dispose();
                 AILimit?.Dispose();
+                AimDownSightsController?.Dispose();
 
                 Destroy(this);
             }
@@ -358,6 +391,17 @@ namespace SAIN.SAINComponent
                     {
                         BotOwner.Memory.GoalTarget.Clear();
                         BotOwner.CalcGoal();
+                    }
+                }
+            }
+            var placesForCheck = Squad.SquadInfo?.GroupPlacesForCheck;
+            if (placesForCheck != null)
+            {
+                foreach (var place in placesForCheck)
+                {
+                    if (place != null)
+                    {
+                        DebugGizmos.Line(place.Position, Position, 0.025f, Time.deltaTime, true);
                     }
                 }
             }
@@ -392,6 +436,7 @@ namespace SAIN.SAINComponent
             }
         }
 
+        public AimDownSightsController AimDownSightsController { get; private set; }
         public SAINAILimit AILimit { get; private set; }
         public SAINBotSuppressClass Suppression { get; private set; }
         public SAINVaultClass Vault { get; private set; }

@@ -94,14 +94,16 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 Vector3 corner = SAIN.Enemy.LastCornerToEnemy.Value;
                 corner += Vector3.up * 1f;
                 SAIN.Steering.LookToPoint(corner);
-                if (SuppressTimer < Time.time && BotOwner.WeaponManager.HaveBullets)
+                if (SuppressTimer < Time.time 
+                    && BotOwner.WeaponManager.HaveBullets 
+                    && SAIN.Shoot(true, true, SAINComponentClass.EShootReason.WalkToCoverSuppress))
                 {
                     SuppressTimer = Time.time + 0.5f * Random.Range(0.66f, 1.25f);
-                    SAIN.Shoot();
                 }
             }
             else
             {
+                SAIN.Shoot(false);
                 if (!BotOwner.ShootData.Shooting)
                 {
                     SAIN.Steering.SteerByPriority(false);

@@ -37,9 +37,10 @@ namespace SAIN.SAINComponent.Classes.Debug
             {
                 if (CheckMoveTimer < Time.time)
                 {
+                    const float DistThreshold = 0.25f;
                     bool botWasMoving = BotIsMoving;
-                    CheckMoveTimer = Time.time + 0.33f;
-                    BotIsMoving = (LastPos - BotOwner.Position).sqrMagnitude > 0.01f;
+                    CheckMoveTimer = Time.time + 1f;
+                    BotIsMoving = (LastPos - BotOwner.Position).sqrMagnitude > DistThreshold * DistThreshold;
                     LastPos = BotOwner.Position;
 
                     if (botWasMoving && !BotIsMoving)
@@ -54,62 +55,82 @@ namespace SAIN.SAINComponent.Classes.Debug
 
                 if (CheckStuckTimer < Time.time)
                 {
-                    CheckStuckTimer = Time.time + 0.25f;
-
-                    bool stuck = BotStuckOnObject() 
-                        || BotStuckOnPlayer();
-
-                    if (!BotIsStuck && stuck)
+                    if (BotOwner.DoorOpener.Interacting)
                     {
-                        TimeStuck = Time.time;
+                        CheckStuckTimer = Time.time + 1f;
+                        BotIsStuck = false;
                     }
-                    BotIsStuck = stuck;
-                }
-
-                // If the bot is no longer stuck, but we are checking if we can teleport them, cancel the coroutine
-                if (!BotIsStuck 
-                    && TeleportCoroutineStarted 
-                    && TeleportCoroutine != null)
-                {
-                    SAIN.StopCoroutine(TeleportCoroutine);
-                    TeleportCoroutineStarted = false;
-                    HasTriedJumpOrVault = false;
-                    JumpTimer = Time.time + 1f;
-                    IsTeleporting = false;
-                }
-
-                if (BotIsStuck)
-                {
-                    if (DebugStuckTimer < Time.time && TimeSinceStuck > 1f)
+                    else
                     {
-                        DebugStuckTimer = Time.time + 3f;
-                        Logger.LogWarning($"[{BotOwner.name}] has been stuck for [{TimeSinceStuck}] seconds " +
-                            $"on [{StuckHit.transform.name}] object " +
-                            $"at [{StuckHit.transform.position}] " +
-                            $"with Current Decision as [{SAIN.Memory.Decisions.Main.Current}]");
-                    }
+                        CheckStuckTimer = Time.time + 0.25f;
 
-                    if (HasTriedJumpOrVault 
-                        && TimeSinceTriedJumpOrVault + 2f < Time.time 
-                        && !TeleportCoroutineStarted)
-                    {
-                        TeleportCoroutineStarted = true;
-                        TeleportCoroutine = SAIN.StartCoroutine(CheckIfTeleport());
-                    }
+                        bool stuck = BotStuckGeneric()
+                            || BotStuckOnObject()
+                            || BotStuckOnPlayer();
 
-                    if (JumpTimer < Time.time 
-                        && TimeSinceStuck > 1f)
-                    {
-                        JumpTimer = Time.time + 1f;
-
-                        if (!HasTriedJumpOrVault)
+                        if (!BotIsStuck && stuck)
                         {
-                            HasTriedJumpOrVault = true;
-                            TimeSinceTriedJumpOrVault = Time.time;
+                            TimeStuck = Time.time;
                         }
-                        if (!Player.MovementContext.TryVaulting())
+                        if (TimeSinceStuck < 1f)
                         {
-                            SAIN.Mover.TryJump();
+                            BotIsStuck = false;
+                        }
+                        else
+                        {
+                            BotIsStuck = stuck;
+                        }
+                        BotIsStuck = stuck;
+                    }
+
+                    // If the bot is no longer stuck, but we are checking if we can teleport them, cancel the coroutine
+                    if (!BotIsStuck
+                        && TeleportCoroutineStarted
+                        && TeleportCoroutine != null)
+                    {
+                        SAIN.StopCoroutine(TeleportCoroutine);
+                        TeleportCoroutineStarted = false;
+                        HasTriedJumpOrVault = false;
+                        JumpTimer = Time.time + 1f;
+                        IsTeleporting = false;
+                    }
+
+                    if (BotIsStuck)
+                    {
+                        if (DebugStuckTimer < Time.time && TimeSinceStuck > 3f)
+                        {
+                            DebugStuckTimer = Time.time + 3f;
+                            Logger.LogWarning($"[{BotOwner.name}] has been stuck for [{TimeSinceStuck}] seconds " +
+                                $"on [{StuckHit.transform?.name}] object " +
+                                $"at [{StuckHit.transform?.position}] " +
+                                $"with Current Decision as [{SAIN.Memory.Decisions.Main.Current}]");
+                        }
+
+                        if (HasTriedJumpOrVault
+                            && TimeSinceStuck > 5f
+                            && TimeSinceTriedJumpOrVault + 2f < Time.time
+                            && !TeleportCoroutineStarted)
+                        {
+                            TeleportCoroutineStarted = true;
+                            TeleportCoroutine = SAIN.StartCoroutine(CheckIfTeleport());
+                        }
+
+                        if (JumpTimer < Time.time)
+                        {
+                            JumpTimer = Time.time + 1f;
+
+                            if (!Player.MovementContext.TryVaulting())
+                            {
+                                if (TimeSinceStuck > 1f)
+                                {
+                                    if (!HasTriedJumpOrVault)
+                                    {
+                                        HasTriedJumpOrVault = true;
+                                        TimeSinceTriedJumpOrVault = Time.time;
+                                    }
+                                    SAIN.Mover.TryJump();
+                                }
+                            }
                         }
                     }
                 }
@@ -282,7 +303,7 @@ namespace SAIN.SAINComponent.Classes.Debug
         }
 
         private static NavMeshPath PathToPlayer;
-        private static List<Player> HumanPlayers = new List<Player>();
+        private List<Player> HumanPlayers = new List<Player>();
 
         public void Dispose()
         {
@@ -354,9 +375,18 @@ namespace SAIN.SAINComponent.Classes.Debug
             return false;
         }
 
+        private bool BotStuckGeneric()
+        {
+            return !BotIsMoving && !BotOwner.DoorOpener.Interacting && TimeSpentNotMoving > 1f;
+        }
+
         public bool BotStuckOnObject()
         {
-            if (CanBeStuckDecisions(SAIN.Memory.Decisions.Main.Current) && !BotIsMoving && !BotOwner.DoorOpener.Interacting && SAIN.Decision.TimeSinceChangeDecision > 0.5f)
+            if (BotOwner.Mover.HasPathAndNoComplete && !BotIsMoving && !BotOwner.DoorOpener.Interacting)
+            {
+
+            }
+            if (CanBeStuckDecisions(SAIN.Memory.Decisions.Main.Current) && !BotIsMoving && !BotOwner.DoorOpener.Interacting && SAIN.Decision.TimeSinceChangeDecision > 1f)
             {
                 if (BotOwner.Mover == null)
                 {

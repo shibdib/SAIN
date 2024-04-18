@@ -46,7 +46,7 @@ namespace SAIN.SAINComponent.Classes
 
         public float LastActiveTime;
 
-        private readonly float TimeSinceHeardTimeAdd = 8f;
+        private readonly float TimeCantHearAnymore = 3f;
 
         public bool Heard { get; private set; }
 
@@ -75,7 +75,7 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
-                if (Heard && TimeSinceHeard + TimeSinceHeardTimeAdd < Time.time)
+                if (Heard && TimeSinceHeard > TimeCantHearAnymore)
                 {
                     _heardRecently = false;
                 }

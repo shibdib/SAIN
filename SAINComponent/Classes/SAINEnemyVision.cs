@@ -21,9 +21,9 @@ namespace SAIN.SAINComponent.Classes
             bool visible = false;
             bool canshoot = false;
 
-            if (CheckLosTimer < Time.time)
+            if (CheckLosTimer + timeToAdd < Time.time)
             {
-                CheckLosTimer = Time.time + timeToAdd;
+                CheckLosTimer = Time.time;
                 InLineOfSight = CheckLineOfSight(true);
             }
 

@@ -8,7 +8,7 @@ namespace SAIN.SAINComponent.Classes.Mover
     {
         public SAINMoverClass(SAINComponentClass sain) : base(sain)
         {
-            BlindFire = new BlindFireClass(sain);
+            BlindFire = new BlindFireController(sain);
             SideStep = new SideStepClass(sain);
             Lean = new LeanClass(sain);
             Prone = new ProneClass(sain);
@@ -34,7 +34,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
         }
 
-        public BlindFireClass BlindFire { get; private set; }
+        public BlindFireController BlindFire { get; private set; }
         public SideStepClass SideStep { get; private set; }
         public LeanClass Lean { get; private set; }
         public PoseClass Pose { get; private set; }

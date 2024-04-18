@@ -147,6 +147,7 @@ namespace SAIN.Components
 
                     debugHitPos = hit.position;
 
+                    
                     bot.BotsGroup.AddPointToSearch(hit.position, 20f, bot, true);
                 }
             }

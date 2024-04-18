@@ -5,7 +5,9 @@ using SAIN.SAINComponent.BaseClasses;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Mover;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace SAIN.Components
 {
@@ -30,6 +32,9 @@ namespace SAIN.Components
         private void Start()
         {
             CamoClass.Start();
+            //NavMesh.SetAreaCost(1, 69);
+            //NavMesh.SetAreaCost(2, 6969);
+            //NavMesh.SetAreaCost(3, 696969);
         }
 
         private void Update()
@@ -43,7 +48,58 @@ namespace SAIN.Components
             {
                 debugtimer = Time.time + 1f;
                 float speedRatio = MainPlayer.MovementContext.ClampedSpeed / MainPlayer.MovementContext.MaxSpeed;
-                //Logger.LogDebug(speedRatio.Round100());
+                //Logger.LogDebug(MainPlayer.MovementContext.ClampedSpeed);
+            }
+
+            //Logger.LogDebug(NavMesh.GetAreaCost(0));
+            //Logger.LogDebug(NavMesh.GetAreaCost(1));
+            //Logger.LogDebug(NavMesh.GetAreaCost(2));
+            //Logger.LogDebug(NavMesh.GetAreaCost(3));
+
+            //FindPlacesToShoot(PlacesToShootMe);
+        }
+
+        public readonly List<Vector3> PlacesToShootMe = new List<Vector3>();
+
+        public void FindPlacesToShoot(List<Vector3> places, Vector3 directionToBot, float dotThreshold = 0f)
+        {
+            const float minPointDist = 5f;
+            const float maxPointDist = 300f;
+            const int iterationMax = 100;
+            const int successMax = 5;
+            const float yVal = 0.25f;
+            const float navSampleRange = 0.25f;
+            const float downDirDist = 10f;
+
+            LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
+
+            int successCount = 0;
+            places.Clear();
+            for (int i = 0; i < iterationMax; i++)
+            {
+                Vector3 start = SAINPerson.Transform.Head;
+                Vector3 randomDirection = UnityEngine.Random.onUnitSphere;
+                randomDirection.y = UnityEngine.Random.Range(-yVal, yVal);
+                float distance = UnityEngine.Random.Range(minPointDist, maxPointDist);
+
+                if (!Physics.Raycast(start, randomDirection, distance, mask))
+                {
+                    Vector3 openPoint = start + randomDirection * distance;
+
+                    if (Physics.Raycast(openPoint, Vector3.down, out var rayHit2, downDirDist, mask)
+                        && (rayHit2.point - start).sqrMagnitude > minPointDist * minPointDist
+                        && NavMesh.SamplePosition(rayHit2.point, out var navHit2, navSampleRange, -1))
+                    {
+                        DebugGizmos.Sphere(navHit2.position, 0.1f, Color.blue, true, 3f);
+                        DebugGizmos.Line(navHit2.position, start, 0.025f, Time.deltaTime, true);
+                        places.Add(navHit2.position);
+                        successCount++;
+                    }
+                }
+                if (successCount >= successMax)
+                {
+                    break;
+                }
             }
         }
 

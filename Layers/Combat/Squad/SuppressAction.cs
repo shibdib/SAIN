@@ -29,14 +29,14 @@ namespace SAIN.Layers.Combat.Squad
 
                     SAIN.Steering.LookToPoint(pos.Value);
 
-                    if (WaitShootTimer < Time.time && BotOwner.WeaponManager.HaveBullets)
+                    if (WaitShootTimer < Time.time && BotOwner.WeaponManager.HaveBullets && SAIN.Shoot(true, true, SAINComponentClass.EShootReason.SquadSuppressing))
                     {
                         WaitShootTimer = Time.time + 0.5f * Random.Range(0.66f, 1.33f);
-                        SAIN.Shoot();
                     }
                 }
                 else
                 {
+                    SAIN.Shoot(false);
                     if (!BotOwner.ShootData.Shooting)
                     {
                         SAIN.Steering.SteerByPriority();
