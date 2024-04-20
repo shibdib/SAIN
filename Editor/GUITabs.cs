@@ -10,6 +10,7 @@ using static EFT.SpeedTree.TreeWind;
 using SAIN.Preset.GlobalSettings;
 using static GClass1711;
 using SAIN.Attributes;
+using SAIN.Preset;
 
 namespace SAIN.Editor
 {
@@ -57,7 +58,7 @@ namespace SAIN.Editor
             }
             if (saved)
             {
-                SAINPlugin.LoadedPreset.ExportGlobalSettings();
+                SAINPresetClass.ExportGlobalSettings(SAINPlugin.LoadedPreset.GlobalSettings, SAINPlugin.LoadedPreset.Info.Name);
             }
         }
 

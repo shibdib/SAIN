@@ -10,9 +10,9 @@ using static SAIN.Helpers.JsonUtility;
 
 namespace SAIN.Preset.BotSettings
 {
-    public class BotSettingsClass : BasePreset
+    public class SAINBotSettingsClass : BasePreset
     {
-        public BotSettingsClass(SAINPresetClass preset) : base(preset)
+        public SAINBotSettingsClass(SAINPresetClass preset) : base(preset)
         {
             ImportBotSettings();
         }
@@ -25,22 +25,19 @@ namespace SAIN.Preset.BotSettings
                 return;
             }
 
+            LoadEFTSettings();
+            LoadSAINSettings();
+        }
+
+        private void LoadSAINSettings()
+        {
             BotDifficulty[] Difficulties = EnumValues.Difficulties;
             foreach (var BotType in BotTypeDefinitions.BotTypesList)
             {
                 string name = BotType.Name;
                 WildSpawnType wildSpawnType = BotType.WildSpawnType;
 
-                if (Load.LoadObject(out EFTBotSettings eftSettingsGroup, name, EFTFolderString))
-                {
-                    if (!EFTSettings.ContainsKey(wildSpawnType))
-                        EFTSettings.Add(wildSpawnType, eftSettingsGroup);
-                }
-                else
-                {
-                    Logger.LogError($"Failed to import EFT Bot Settings for {name}");
-                }
-                if (!Preset.Import(out SAINSettingsGroupClass sainSettingsGroup, name, "BotSettings"))
+                if (!SAINPresetClass.Import(out SAINSettingsGroupClass sainSettingsGroup, Preset.Info.Name, name, "BotSettings"))
                 {
                     sainSettingsGroup = new SAINSettingsGroupClass(Difficulties)
                     {
@@ -50,9 +47,27 @@ namespace SAIN.Preset.BotSettings
                     };
 
                     UpdateSAINSettingsToEFTDefault(wildSpawnType, sainSettingsGroup);
-                    Preset.Export(sainSettingsGroup, name, "BotSettings");
+                    SAINPresetClass.Export(sainSettingsGroup, Preset.Info.Name, name, "BotSettings");
                 }
                 SAINSettings.Add(wildSpawnType, sainSettingsGroup);
+            }
+        }
+
+        private void UpdateDefaultSettings(SAINSettingsGroupClass sainSettings, WildSpawnType wildSpawnType)
+        {
+            if (wildSpawnType == EnumValues.WildSpawn.Usec)
+            {
+
+            }
+            else if (wildSpawnType == EnumValues.WildSpawn.Bear)
+            {
+
+            }
+            else switch (wildSpawnType)
+            {
+                case WildSpawnType.assault:
+                        var diffSetting = sainSettings.Settings[BotDifficulty.easy];
+                    break;
             }
         }
 
@@ -132,18 +147,16 @@ namespace SAIN.Preset.BotSettings
 
                 if (!EFTSettings.ContainsKey(wildSpawnType))
                 {
-                    if (!Load.LoadObject(out EFTBotSettings eftSettings, name, EFTFolderString))
+                    if (!Load.LoadObject(out EFTBotSettings eftSettings, name, "Default Bot Config Values"))
                     {
+                        Logger.LogError($"Failed to Import EFT Bot Settings for {name}");
                         eftSettings = new EFTBotSettings(name, wildSpawnType, Difficulties);
-                        SaveObjectToJson(eftSettings, name, EFTFolderString);
+                        SaveObjectToJson(eftSettings, name, "Default Bot Config Values");
                     }
-
                     EFTSettings.Add(wildSpawnType, eftSettings);
                 }
             }
         }
-
-        private const string EFTFolderString = "EFT Bot Settings - DO NOT TOUCH";
 
         public SAINSettingsClass GetSAINSettings(WildSpawnType type, BotDifficulty difficulty)
         {
@@ -156,7 +169,7 @@ namespace SAIN.Preset.BotSettings
                 }
                 else
                 {
-                    Logger.LogError($"[{difficulty}] does not exist in [{type}] Settings Group!");
+                    Logger.LogError($"[{difficulty}] does not exist in [{type}] SAIN Settings!");
                 }
             }
             else
@@ -187,24 +200,10 @@ namespace SAIN.Preset.BotSettings
             return EFTSettings[EnumValues.WildSpawn.Usec].Settings[BotDifficulty.normal];
         }
 
-        public void ExportBotSettings()
-        {
-            if (Preset == null)
-            {
-                Logger.LogError($"Preset Is Null in {GetType().Name}");
-                return;
-            }
-
-            foreach (SAINSettingsGroupClass settings in SAINSettings.Values)
-            {
-                Preset.Export(settings, settings.Name, "BotSettings");
-            }
-        }
-
         public Dictionary<WildSpawnType, SAINSettingsGroupClass> SAINSettings = new Dictionary<WildSpawnType, SAINSettingsGroupClass>();
         public Dictionary<WildSpawnType, EFTBotSettings> EFTSettings = new Dictionary<WildSpawnType, EFTBotSettings>();
 
-        static BotSettingsClass()
+        static SAINBotSettingsClass()
         {
             DefaultDifficultyModifier = new Dictionary<WildSpawnType, float>
             {

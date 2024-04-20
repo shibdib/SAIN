@@ -1,7 +1,9 @@
 ﻿using EFT.UI;
+using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset;
 using System;
+using System.IO;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using static Mono.Security.X509.X520;
@@ -19,7 +21,7 @@ namespace SAIN.Editor.GUISections
 
             GUIContent content = new GUIContent(
                         $"Selected Preset Version: {selectedPreset.SAINVersion} " +
-                        $"but current SAIN Preset Version is: {AssemblyInfoClass.SAINPresetVersion}, you may experience issues.");
+                        $"but current SAIN Preset Version is: {AssemblyInfoClass.SAINPresetVersion}, default bot config values may be set incorrectly due to updates to SAIN.");
 
             Rect rect = GUILayoutUtility.GetRect(content, GetStyle(Style.alert), Height(LabelHeight + 5));
             if (selectedPreset.SAINVersion != AssemblyInfoClass.SAINPresetVersion)
@@ -105,21 +107,35 @@ namespace SAIN.Editor.GUISections
 
                 BeginHorizontal();
                 Space(25);
-                if (Button("Save New Preset", EFT.UI.EUISoundType.InsuranceInsured, Height(30f)))
+                SAINPresetDefinition info = SAINPlugin.LoadedPreset.Info;
+                if (info.CanEditName && Button("Save Info", "Update the selected presets name, description, and creator.", EFT.UI.EUISoundType.InsuranceInsured, Height(30f)))
                 {
-                    var definition = new SAINPresetDefinition()
-                    {
-                        Name = NewName,
-                        Description = NewDescription,
-                        Creator = NewCreator,
-                        SAINVersion = AssemblyInfoClass.SAINPresetVersion,
-                        DateCreated = DateTime.Today.ToString()
-                    };
-                    PresetHandler.PresetOptions.Add(definition);
-                    PresetHandler.SavePresetDefinition(definition);
-                    PresetHandler.InitPresetFromDefinition(definition);
+                    string oldName = info.Name;
+                    var newInfo = info.Clone();
 
-                    OpenNewPresetMenu = !OpenNewPresetMenu;
+                    newInfo.Name = NewName;
+                    newInfo.Description = NewDescription;
+                    newInfo.Creator = NewCreator;
+                    newInfo.PresetCopiedFrom = info.Name;
+
+                    DeletePreset(info);
+
+                    PresetHandler.SavePresetDefinition(newInfo);
+                    PresetHandler.InitPresetFromDefinition(newInfo, true);
+                    PresetHandler.LoadPresetOptions();
+                }
+                if (Button("Save A New Preset", EFT.UI.EUISoundType.InsuranceInsured, Height(30f)))
+                {
+                    SAINPresetDefinition newPreset = SAINPlugin.LoadedPreset.Info.Clone();
+
+                    newPreset.Name = NewName;
+                    newPreset.Description = NewDescription;
+                    newPreset.Creator = NewCreator;
+                    newPreset.SAINVersion = AssemblyInfoClass.SAINPresetVersion;
+                    newPreset.DateCreated = DateTime.Today.ToString();
+
+                    PresetHandler.SavePresetDefinition(newPreset);
+                    PresetHandler.InitPresetFromDefinition(newPreset, true);
                 }
                 Space(25);
                 EndHorizontal();
@@ -142,6 +158,23 @@ namespace SAIN.Editor.GUISections
                 return true;
             }
             return false;
+        }
+
+        private static void DeletePreset(SAINPresetDefinition preset)
+        {
+            if (JsonUtility.GetFoldersPath(out string foldersPath, "Presets", preset.Name))
+            {
+                string filePath = Path.Combine(foldersPath, "Info");
+                filePath += ".json";
+
+                Logger.NotifyDebug($"Trying to delete: {foldersPath}");
+                if (Directory.Exists(foldersPath))
+                {
+                    Directory.Delete(foldersPath, true);
+                    Logger.NotifyDebug($"Deleted: {foldersPath}");
+                }
+            }
+            PresetHandler.PresetOptions.Remove(preset);
         }
 
         private static string LabeledTextField(string value, string label)

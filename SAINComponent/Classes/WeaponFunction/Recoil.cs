@@ -44,29 +44,39 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             distance /= 20f;
             distance = distance * 0.75f + 0.25f;
 
-            float weaponhorizrecoil = CalcRecoil(SAIN.Info.WeaponInfo.RecoilForceUp);
-            float weaponvertrecoil = CalcRecoil(SAIN.Info.WeaponInfo.RecoilForceBack);
+            float weaponhorizrecoil = CalcHorizRecoil(SAIN.Info.WeaponInfo.RecoilForceUp);
+            float weaponvertrecoil = CalcVertRecoil(SAIN.Info.WeaponInfo.RecoilForceBack);
 
             float addRecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.AddRecoil;
-            float horizRecoil = (1f * weaponhorizrecoil + addRecoil);
-            float vertRecoil = (1f * weaponvertrecoil + addRecoil);
+            float horizRecoil = (1f * (weaponhorizrecoil + addRecoil));
+            float vertRecoil = (1f * (weaponvertrecoil + addRecoil));
 
             float maxrecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.MaxRecoil;
 
             float randomHorizRecoil = Random.Range(-horizRecoil, horizRecoil);
             float randomvertRecoil = Random.Range(-vertRecoil, vertRecoil);
+            Vector3 newRecoil = new Vector3(randomHorizRecoil, randomvertRecoil, randomHorizRecoil);
+            newRecoil = MathHelpers.VectorClamp(newRecoil, -maxrecoil, maxrecoil) * RecoilMultiplier;
 
-            Vector3 vector = new Vector3(currentRecoil.x + randomHorizRecoil, currentRecoil.y + randomvertRecoil, currentRecoil.z + randomHorizRecoil);
-            vector = MathHelpers.VectorClamp(vector, -maxrecoil, maxrecoil) * RecoilMultiplier;
+            Vector3 vector = newRecoil + currentRecoil;
             return vector;
         }
 
         private float RecoilMultiplier => Mathf.Round(SAIN.Info.FileSettings.Shoot.RecoilMultiplier * GlobalSettings.Shoot.GlobalRecoilMultiplier * 100f) / 100f;
 
-        float CalcRecoil(float recoilVal)
+        float CalcVertRecoil(float recoilVal)
         {
-            float result = recoilVal / RecoilBaseline;
+            float result = recoilVal / 100;
             result *= SAIN.Info.WeaponInfo.FinalModifier;
+            result *= UnityEngine.Random.Range(0.66f, 1.33f);
+            return result;
+        }
+
+        float CalcHorizRecoil(float recoilVal)
+        {
+            float result = recoilVal / 200;
+            result *= SAIN.Info.WeaponInfo.FinalModifier;
+            result *= UnityEngine.Random.Range(0.66f, 1.33f);
             return result;
         }
 

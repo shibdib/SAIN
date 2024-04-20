@@ -4,10 +4,10 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class CoverSettings
     {
-        [Name("Enhanced Cover Finding - Experimental")]
+        [Name("Enhanced Cover Finding")]
         [Description("CAN REDUCE PERFORMANCE. Improves bot reactions in a fight by decreasing the time it takes to find cover, can help with bots standing still occasionally before running for cover. Comes at the cost of some reduced performance overall.")]
-        [Default(false)]
-        public bool EnhancedCoverFinding = false;
+        [Default(true)]
+        public bool EnhancedCoverFinding = true;
 
         [Default(6f)]
         [MinMax(1f, 30f, 1f)]
@@ -39,20 +39,20 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         public float ShiftCoverResetTime = 10f;
 
-        [Default(0.85f)]
+        [Default(0.75f)]
         [MinMax(0.5f, 1.5f, 100f)]
         [Advanced]
-        public float CoverMinHeight = 0.85f;
+        public float CoverMinHeight = 0.75f;
 
-        [Default(5f)]
+        [Default(8f)]
         [MinMax(0f, 30f, 1f)]
         [Advanced]
-        public float CoverMinEnemyDistance = 5f;
+        public float CoverMinEnemyDistance = 8f;
 
-        [Default(0.33f)]
+        [Default(0.25f)]
         [MinMax(0.01f, 1f, 100f)]
         [Advanced]
-        public float CoverUpdateFrequency = 0.33f;
+        public float CoverUpdateFrequency = 0.25f;
 
         [Default(false)]
         [Advanced]

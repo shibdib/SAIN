@@ -165,8 +165,11 @@ namespace SAIN.Helpers
             }
         }
 
+        [JsonProperty]
         public string Name;
+        [JsonProperty]
         public WildSpawnType WildSpawnType;
+        [JsonProperty]
         public Dictionary<BotDifficulty, BotSettingsComponents> Settings = new Dictionary<BotDifficulty, BotSettingsComponents>();
     }
 }

@@ -43,12 +43,12 @@ namespace SAIN.Preset.Personalities
 
             [NameAndDescription("Power Level Minimum", "Minimum Power level for a bot to use this personality." + PowerLevelDescription)]
             [Default(0)]
-            [MinMax(0, 250, 1)]
+            [MinMax(0, 500, 1)]
             public float PowerLevelMin = 0;
 
             [NameAndDescription("Power Level Maximum", "Maximum Power level for a bot to use this personality." + PowerLevelDescription)]
             [Default(250)]
-            [MinMax(0, 250, 1)]
+            [MinMax(0, 500, 1)]
             public float PowerLevelMax = 250;
 
             [Default(1f)]

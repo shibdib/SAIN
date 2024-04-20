@@ -40,7 +40,7 @@ namespace SAIN.Patches.Shoot
                 * (___vector3_4
                 + ___botOwner_0.RecoilData.RecoilOffset);
 
-            if (___botOwner_0?.Memory?.GoalEnemy?.Person?.IsYourPlayer == true)
+            if (___botOwner_0?.Memory?.GoalEnemy?.Person != null && ___botOwner_0.Memory.GoalEnemy.Person.IsAI == false)
             {
                 float ExtraSpread = SAINNotLooking.GetSpreadIncrease(___botOwner_0);
                 if (ExtraSpread > 0)

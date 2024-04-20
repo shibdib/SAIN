@@ -147,6 +147,14 @@ namespace SAIN.SAINComponent.Classes
             {
                 return;
             }
+            if (this.botOwner_0.RecoilData.RecoilOffset.sqrMagnitude > 4f * 4f)
+            {
+                if (this.botOwner_0.ShootData.Shooting)
+                {
+                    this.botOwner_0.ShootData.EndShoot();
+                }
+                return;
+            }
             if (this.botOwner_0.ShootData.Shoot())
             {
                 if (this.int_0 > this.botOwner_0.WeaponManager.Reload.BulletCount)

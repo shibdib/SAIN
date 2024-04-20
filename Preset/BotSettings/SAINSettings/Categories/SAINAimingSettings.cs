@@ -7,8 +7,14 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINAimingSettings
     {
+        [Name("Distance Aim Time Multiplier")]
+        [Description("Multiplies the time a bot takes to aim based on distance. So higher values will cause bots to take longer to aim depending on distance.")]
+        [Default(1f)]
+        [MinMax(0.1f, 5f, 100f)]
+        public float DistanceAimTimeMultiplier = 1f;
+
         [Name("Faster CQB Reactions")]
-        [Description("Sets whether this bot reacts faster at close ranges")]
+        [Description("Sets whether this bot reacts and aims faster before being able to shoot at close ranges")]
         [Default(true)]
         public bool FasterCQBReactions = true;
 
@@ -41,7 +47,12 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [MinMax(0.1f, 0.95f, 100f)]
         [Advanced]
         [CopyValue]
-        public float MAX_AIMING_UPGRADE_BY_TIME = 0.8f;
+        public float MAX_AIMING_UPGRADE_BY_TIME = 0.5f;
+
+        [Default(2f)]
+        [MinMax(0.1f, 6f, 100f)]
+        [Advanced]
+        public float COEF_IF_MOVE = 2f;
 
         [Name("Max Aim Time")]
         [Description(null)]
@@ -96,7 +107,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float FIRST_CONTACT_ADD_SEC = 0.5f;
+        public float FIRST_CONTACT_ADD_SEC = 0.33f;
 
         [Hidden]
         [JsonIgnore]

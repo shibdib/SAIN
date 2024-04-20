@@ -69,28 +69,25 @@ namespace SAIN.Plugin
 
         public static void SavePresetDefinition(SAINPresetDefinition definition)
         {
-            bool newPreset = true;
-            for (int i = 0; i < PresetOptions.Count; i++)
+            for (int i = 0; i < 100; i++)
             {
-                var preset = PresetOptions[i];
-                if (preset.Name == definition.Name)
+                if (DoesFileExist("Info", PresetsFolder, definition.Name))
                 {
-                    newPreset = false;
+                    definition.Name = definition.Name + $" Copy()";
+                    continue;
                 }
-            }
-            if (newPreset)
-            {
-                PresetOptions.Add(definition);
+                break;
             }
 
+            PresetOptions.Add(definition);
             SaveObjectToJson(definition, "Info", PresetsFolder, definition.Name);
         }
 
-        public static void InitPresetFromDefinition(SAINPresetDefinition def)
+        public static void InitPresetFromDefinition(SAINPresetDefinition def, bool isCopy = false)
         {
             try
             {
-                LoadedPreset = new SAINPresetClass(def);
+                LoadedPreset = new SAINPresetClass(def, isCopy);
             }
             catch (Exception ex)
             {
@@ -211,7 +208,7 @@ namespace SAIN.Plugin
                 }
             }
 
-            preset.ExportGlobalSettings();
+            SAINPresetClass.ExportGlobalSettings(preset.GlobalSettings, preset.Info.Name);
             return preset;
         }
 
@@ -237,14 +234,14 @@ namespace SAIN.Plugin
                 }
             }
 
-            preset.ExportGlobalSettings();
+            SAINPresetClass.ExportGlobalSettings(preset.GlobalSettings, preset.Info.Name);
             return preset;
         }
 
         private static SAINPresetClass CreateHardPreset()
         {
             var preset = SAINPresetDefinition.CreateDefault(PresetNameHard, DefaultPresetDescription);
-            preset.ExportGlobalSettings();
+            SAINPresetClass.ExportGlobalSettings(preset.GlobalSettings, preset.Info.Name);
             return preset;
         }
 
@@ -270,7 +267,7 @@ namespace SAIN.Plugin
                 }
             }
 
-            preset.ExportGlobalSettings();
+            SAINPresetClass.ExportGlobalSettings(preset.GlobalSettings, preset.Info.Name);
             return preset;
         }
 
@@ -296,7 +293,7 @@ namespace SAIN.Plugin
                 }
             }
 
-            preset.ExportGlobalSettings();
+            SAINPresetClass.ExportGlobalSettings(preset.GlobalSettings, preset.Info.Name);
             return preset;
         }
     }

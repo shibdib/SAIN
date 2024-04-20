@@ -22,7 +22,7 @@ namespace SAIN.Preset.Personalities
         {
             foreach (var item in EnumValues.Personalities)
             {
-                if (Preset.Import(out PersonalitySettingsClass personality, item.ToString(), nameof(Personalities)))
+                if (SAINPresetClass.Import(out PersonalitySettingsClass personality, Preset.Info.Name, item.ToString(), nameof(Personalities)))
                 {
                     Personalities.Add(item, personality);
                 }
@@ -51,29 +51,6 @@ namespace SAIN.Preset.Personalities
                 string message = "The Preset you are using is out of date, and required manual fixing. Its recommended you create a new one.";
                 NotificationManagerClass.DisplayMessageNotification(message);
                 Logger.LogWarning(message);
-            }
-        }
-
-        public void ExportPersonalities()
-        {
-            foreach (var pers in Personalities)
-            {
-                if (pers.Value != null && Preset?.Export(pers.Value, pers.Key.ToString(), nameof(Personalities)) == true)
-                {
-                    continue;
-                }
-                else if (pers.Value == null)
-                {
-                    Logger.LogError("Personality Settings Are Null");
-                }
-                else if (Preset == null)
-                {
-                    Logger.LogError("Preset Is Null");
-                }
-                else
-                {
-                    Logger.LogError($"Failed to Export {pers.Key}");
-                }
             }
         }
 
@@ -136,7 +113,7 @@ namespace SAIN.Preset.Personalities
 
                 AddPMCTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                Preset.Export(settings, pers.ToString(), nameof(Personalities));
+                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
             pers = IPersonality.Chad;
@@ -187,7 +164,7 @@ namespace SAIN.Preset.Personalities
 
                 AddPMCTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                Preset.Export(settings, pers.ToString(), nameof(Personalities));
+                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
             pers = IPersonality.Rat;
@@ -229,7 +206,7 @@ namespace SAIN.Preset.Personalities
 
                 AddAllBotTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                Preset.Export(settings, pers.ToString(), nameof(Personalities));
+                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
             pers = IPersonality.Timmy;
@@ -268,7 +245,7 @@ namespace SAIN.Preset.Personalities
 
                 AddPMCTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                Preset.Export(settings, pers.ToString(), nameof(Personalities));
+                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
             pers = IPersonality.Coward;
@@ -303,7 +280,7 @@ namespace SAIN.Preset.Personalities
                 };
                 AddAllBotTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                Preset.Export(settings, pers.ToString(), nameof(Personalities));
+                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
             pers = IPersonality.Normal;
@@ -336,7 +313,7 @@ namespace SAIN.Preset.Personalities
 
                 AddAllBotTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                Preset.Export(settings, pers.ToString(), nameof(Personalities));
+                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
         }
 

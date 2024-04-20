@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using SAIN.Preset.Personalities;
+using System.Diagnostics;
 
 namespace SAIN.Helpers
 {
@@ -35,58 +36,10 @@ namespace SAIN.Helpers
 
     public static class JsonUtility
     {
-        private static readonly string LogOutputPath = Path.Combine(GetSAINPluginPath(), "SAINLogOutput.log");
-        private const float MaxFileSizeInMB = 10.0f;
-
-        public static void AppendSAINLog(object data)
-        {
-            if (!File.Exists(LogOutputPath))
-            {
-                File.Create(LogOutputPath);
-            }
-            FileInfo fileInfo = new FileInfo(LogOutputPath);
-            // If the file size is greater than the maximum allowed size
-            if ((float)fileInfo.Length / (1024 * 1024) >= MaxFileSizeInMB)
-            {
-                // Read the existing content
-                string[] lines = File.ReadAllLines(LogOutputPath);
-
-                // Determine how many lines to skip (for example, skip 25% of the lines)
-                int linesToSkip = lines.Length / 4;
-
-                // Write back the truncated content, skipping the first linesToSkip lines
-                using (StreamWriter writer = new StreamWriter(LogOutputPath, false))
-                {
-                    for (int i = linesToSkip; i < lines.Length; i++)
-                    {
-                        writer.WriteLine(lines[i]);
-                    }
-                }
-            }
-
-            // Append the new log entry
-            using (StreamWriter writer = new StreamWriter(LogOutputPath, true))
-            {
-                writer.WriteLine(data);
-            }
-        }
-
         public static readonly Dictionary<JsonEnum, string> FileAndFolderNames = new Dictionary<JsonEnum, string> 
         {
-            { JsonEnum.Json, ".json" },
-            { JsonEnum.JsonSearch, "*.json" },
             { JsonEnum.Presets, "Presets" },
-            { JsonEnum.BigBrain, "BigBrain - DO NOT TOUCH" },
-            { JsonEnum.EFTBotSettings, "EFT Bot Settings - DO NOT TOUCH" },
-            { JsonEnum.BigBrainBrains, "BrainInfos" },
-            { JsonEnum.BigBrainLayers, "LayerInfos" },
-            { JsonEnum.BigBrainLayerNames, "LayerNames" },
             { JsonEnum.GlobalSettings, "GlobalSettings" },
-            { JsonEnum.SAINBotSettings, "BotSettings" },
-            { JsonEnum.DefaultEditorSettings, "Settings" },
-            { JsonEnum.PresetDefinition, "Info" },
-            { JsonEnum.Personalities, "Personalities" },
-            { JsonEnum.LogOutput, "SAINLogOutput" },
         };
 
         public const string PresetsFolder = "Presets";
@@ -103,12 +56,16 @@ namespace SAIN.Helpers
 
             try
             {
-                string foldersPath = GetFoldersPath(folders);
+                if (!GetFoldersPath(out string foldersPath, folders))
+                {
+                    Directory.CreateDirectory(foldersPath);
+                }
                 string filePath = Path.Combine(foldersPath, fileName);
                 filePath += ".json";
 
                 string jsonString = JsonConvert.SerializeObject(objectToSave, Formatting.Indented);
                 File.Create(filePath).Dispose();
+
                 StreamWriter streamWriter = new StreamWriter(filePath);
                 streamWriter.Write(jsonString);
                 streamWriter.Flush();
@@ -118,6 +75,17 @@ namespace SAIN.Helpers
             {
                 Logger.LogError(e);
             }
+        }
+
+        public static bool DoesFileExist(string fileName, params string[] folders)
+        {
+            if (!GetFoldersPath(out string foldersPath, folders))
+            {
+                return false;
+            }
+            string filePath = Path.Combine(foldersPath, fileName);
+            filePath += ".json";
+            return File.Exists(filePath);
         }
 
         public static class Load
@@ -130,7 +98,10 @@ namespace SAIN.Helpers
             public static void GetPresetOptions(List<SAINPresetDefinition> list)
             {
                 list.Clear();
-                string foldersPath = GetFoldersPath(PresetsFolder);
+                if (!GetFoldersPath(out string foldersPath, PresetsFolder))
+                {
+                    Directory.CreateDirectory(foldersPath);
+                }
                 var array = Directory.GetDirectories(foldersPath);
                 foreach ( var item in array )
                 {
@@ -143,15 +114,17 @@ namespace SAIN.Helpers
                     }
                     else
                     {
-                        Logger.LogError(path);
+                        Logger.LogError($"Could not Import Info.json at path [{path}]. Is the file missing?");
                     }
                 }
             }
 
             public static void LoadAllFiles<T>(List<T> list, string searchPattern = null , params string[] folders)
             {
-                string foldersPath = GetFoldersPath(folders);
-
+                if (!GetFoldersPath(out string foldersPath, folders))
+                {
+                    return;
+                }
                 string[] files;
                 if (searchPattern != null)
                 {
@@ -180,14 +153,16 @@ namespace SAIN.Helpers
 
             public static string LoadTextFile(string fileExtension, string fileName, params string[] folders)
             {
-                string foldersPath = GetFoldersPath(folders);
-                string filePath = Path.Combine(foldersPath, fileName);
-
-                filePath += fileExtension;
-
-                if (File.Exists(filePath))
+                if (GetFoldersPath(out string foldersPath, folders))
                 {
-                    return File.ReadAllText(filePath);
+                    string filePath = Path.Combine(foldersPath, fileName);
+
+                    filePath += fileExtension;
+
+                    if (File.Exists(filePath))
+                    {
+                        return File.ReadAllText(filePath);
+                    }
                 }
                 return null;
             }
@@ -211,7 +186,7 @@ namespace SAIN.Helpers
             }
         }
 
-        private static void CheckDirectionary(string path)
+        private static void CheckCreateFolder(string path)
         {
             if (!Directory.Exists(path))
             {
@@ -219,23 +194,22 @@ namespace SAIN.Helpers
             }
         }
 
-        private static string GetFoldersPath(params string[] folders)
+        public static bool GetFoldersPath(out string path, params string[] folders)
         {
-            string path = GetSAINPluginPath();
+            path = GetSAINPluginPath();
             for (int i = 0; i < folders.Length; i++)
             {
                 path = Path.Combine(path, folders[i]);
             }
-            CheckDirectionary(path);
-            return path;
+            return Directory.Exists(path);
         }
 
-        private static string GetSAINPluginPath()
+        public static string GetSAINPluginPath()
         {
             string pluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var path = Path.Combine(pluginFolder, nameof(SAIN));
-            CheckDirectionary(path);
-            return path;
+            //var path = Path.Combine(pluginFolder, nameof(SAIN));
+            CheckCreateFolder(pluginFolder);
+            return pluginFolder;
         }
     }
 }

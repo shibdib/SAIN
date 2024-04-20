@@ -60,10 +60,10 @@ namespace SAIN.SAINComponent.Classes.Info
             CalcTimeBeforeSearch();
             CalcHoldGroundDelay();
 
-            SAIN.StartCoroutine(SetConfigValuesCoroutine(FileSettings));
+            SetConfigValues(FileSettings);
         }
 
-        public IEnumerator SetConfigValuesCoroutine(SAINSettingsClass sainFileSettings)
+        private void SetConfigValues(SAINSettingsClass sainFileSettings)
         {
             var eftFileSettings = BotOwner.Settings.FileSettings;
             if (EFTSettingsCategories == null)
@@ -93,6 +93,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
                     FieldInfo[] sainFields = SAINSettingsFields[sainCategoryField];
                     FieldInfo[] eftFields = EFTSettingsFields[eftCategoryField];
+
                     foreach (FieldInfo sainVarField in sainFields)
                     {
                         FieldInfo eftVarField = Reflection.FindFieldByName(sainVarField.Name, eftFields);
@@ -101,14 +102,24 @@ namespace SAIN.SAINComponent.Classes.Info
                             object sainValue = sainVarField.GetValue(sainCategory);
                             if (SAINPlugin.DebugMode)
                             {
-                                // Logger.LogInfo($"{eftVarField.Value} Default {eftVarField.GetValue(eftCategory)} NewValue: {sainValue}");
+                                //string message = $"[{eftVarField.Name}] : Default Value = [{eftVarField.GetValue(eftCategory)}] New Value = [{sainValue}]";
+                                //Logger.LogInfo(message);
+                                //Logger.NotifyInfo(message);
                             }
+                            string message = $"[{eftVarField.Name}] : Default Value = [{eftVarField.GetValue(eftCategory)}] New Value = [{sainValue}]";
+                            //Logger.LogInfo(message);
+                            //Logger.NotifyInfo(message);
 
                             eftVarField.SetValue(eftCategory, sainValue);
                         }
+                        else
+                        {
+                            string message = $"[{sainVarField.Name}] : Does Not Exist in EFT Bot Settings";
+                            //Logger.LogInfo(message);
+                            //Logger.NotifyInfo(message);
+                        }
                     }
                 }
-                yield return null;
             }
             UpdateSettingClass.ManualSettingsUpdate(WildSpawnType, BotDifficulty, BotOwner, FileSettings);
         }

@@ -43,7 +43,7 @@ namespace SAIN.Editor
             ;
             if (BuilderClass.SaveChanges(BotSettingsWereEdited, toolTip, 35f))
             {
-                SAINPlugin.LoadedPreset.ExportBotSettings();
+                SAINPresetClass.ExportBotSettings(SAINPlugin.LoadedPreset.BotSettings, SAINPlugin.LoadedPreset.Info.Name);
             }
 
             FlexibleSpace();
