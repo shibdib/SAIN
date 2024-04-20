@@ -87,7 +87,7 @@ namespace SAIN.Components
                 SAINComponentClass sain = bot.Value;
                 if (sain != null && sain.BotOwner != null && bot.Key != player.ProfileId)
                 {
-                    if (phrase == EPhraseTrigger.OnFight && sain.BotOwner.EnemiesController.IsEnemy(player))
+                    if (sain.BotOwner.EnemiesController.IsEnemy(player))
                     {
                         sain.Talk.EnemyTalk.SetEnemyTalk(player);
                     }

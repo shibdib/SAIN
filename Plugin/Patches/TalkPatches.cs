@@ -50,7 +50,7 @@ namespace SAIN.Patches.Talk
                 {
                     if (SAINPlugin.DebugMode)
                     {
-                        Logger.LogInfo($"PlayerTalkPatch: Blocked {@event}");
+                        //Logger.LogInfo($"PlayerTalkPatch: Blocked {@event}");
                     }
                     return false;
                 }
@@ -59,7 +59,7 @@ namespace SAIN.Patches.Talk
                 {
                     if (SAINPlugin.DebugMode)
                     {
-                        Logger.LogInfo($"PlayerTalkPatch: Allowed {@event}");
+                        //Logger.LogInfo($"PlayerTalkPatch: Allowed {@event}");
                     }
 
                     SAINPlugin.BotController?.PlayerTalk(@event, mask, __instance);
@@ -68,7 +68,7 @@ namespace SAIN.Patches.Talk
 
                 if (SAINPlugin.DebugMode)
                 {
-                    Logger.LogInfo($"PlayerTalkPatch: Blocked {@event}");
+                    //Logger.LogInfo($"PlayerTalkPatch: Blocked {@event}");
                 }
 
                 return false;

@@ -55,7 +55,6 @@ namespace SAIN.SAINComponent.Classes.Info
 
             Personality = GetPersonality();
             PersonalitySettingsClass = SAINPlugin.LoadedPreset.PersonalityManager.Personalities[Personality];
-            SearchMoveSpeed = PersonalitySettingsClass.Variables.BaseSearchMoveSpeed.Randomize(0.9f, 1.1f).Round100();
 
             UpdateExtractTime();
             CalcTimeBeforeSearch();
@@ -228,7 +227,6 @@ namespace SAIN.SAINComponent.Classes.Info
         public PersonalitySettingsClass PersonalitySettingsClass { get; private set; }
 
         public float PercentageBeforeExtract { get; set; } = -1f;
-        public float SearchMoveSpeed { get; private set; }
         public bool ForceExtract { get; set; } = false;
 
         public WeaponInfoClass WeaponInfo { get; private set; }

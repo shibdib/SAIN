@@ -63,15 +63,14 @@ namespace SAIN.Patches.Shoot
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ____owner, ref float ___nextFingerUpTime)
         {
-            Weapon weapon = ____owner.WeaponManager.CurrentWeapon;
-
-            // Config ToggleOnOff Check, Null aim data check, and Make sure the weapon can actually full auto (probably not necessary)
             if (____owner.AimingData == null)
             {
                 return true;
             }
 
-            if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto || weapon.SelectedFireMode == Weapon.EFireMode.burst)
+            Weapon weapon = ____owner.WeaponManager.CurrentWeapon;
+
+            if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
             {
                 float distance = ____owner.AimingData.LastDist2Target;
                 float scaledDistance = FullAutoBurstLength(____owner, distance);
@@ -80,6 +79,8 @@ namespace SAIN.Patches.Shoot
 
                 return false;
             }
+
+            ___nextFingerUpTime = 0.001f + Time.time;
 
             return true;
         }

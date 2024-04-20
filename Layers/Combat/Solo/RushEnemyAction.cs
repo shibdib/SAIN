@@ -100,7 +100,7 @@ namespace SAIN.Layers.Combat.Solo
                 }
                 else
                 {
-                    SAIN.Mover.GoToPoint(Destination);
+                    SAIN.Mover.GoToPoint(Destination, out bool calculating);
                 }
             }
 

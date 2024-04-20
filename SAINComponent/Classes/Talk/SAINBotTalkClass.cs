@@ -144,7 +144,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             PersonalPhraseDict[type].TimeLastSaid = Time.time;
             if (SAINPlugin.DebugMode)
             {
-                Logger.LogDebug(type);
+                //Logger.LogDebug(type);
             }
         }
 

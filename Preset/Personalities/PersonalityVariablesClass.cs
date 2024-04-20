@@ -70,6 +70,15 @@ namespace SAIN.Preset.Personalities
             [MinMax(0.1f, 500f)]
             public float SearchBaseTime = 40;
 
+            [Default(false)]
+            public bool CanBegForLife = false;
+
+            [Default(true)]
+            public bool WillSearchForEnemy = true;
+
+            [Default(true)]
+            public bool WillSearchFromAudio = true;
+
             [Default(1f)]
             [MinMax(0.01f, 5f, 100)]
             public float AggressionMultiplier = 1f;
@@ -81,17 +90,58 @@ namespace SAIN.Preset.Personalities
             public bool CanTaunt = false;
 
             [Default(false)]
+            [Hidden]
             public bool Sneaky = false;
 
-            [Default(0.0f)]
+            [Default(1f)]
             [Percentage0to1]
             [Hidden]
-            public float SneakySpeed = 0.0f;
+            public float SneakySpeed = 1f;
 
-            [Default(0.0f)]
+            [Default(1f)]
             [Percentage0to1]
             [Hidden]
-            public float SneakyPose = 0.0f;
+            public float SneakyPose = 1f;
+
+            [Default(1f)]
+            [Percentage0to1]
+            [Hidden]
+            public float SearchNoEnemySpeed = 1f;
+
+            [Default(1f)]
+            [Percentage0to1]
+            [Hidden]
+            public float SearchNoEnemyPose = 1f;
+
+            [Default(1f)]
+            [Percentage0to1]
+            [Hidden]
+            public float SearchHasEnemySpeed = 1f;
+
+            [Default(1f)]
+            [Percentage0to1]
+            [Hidden]
+            public float SearchHasEnemyPose = 1f;
+
+            [Default(1f)]
+            [Percentage0to1]
+            [Hidden]
+            public float MoveToCoverNoEnemySpeed = 1f;
+
+            [Default(1f)]
+            [Percentage0to1]
+            [Hidden]
+            public float MoveToCoverNoEnemyPose = 1f;
+
+            [Default(1f)]
+            [Percentage0to1]
+            [Hidden]
+            public float MoveToCoverHasEnemySpeed = 1f;
+
+            [Default(1f)]
+            [Percentage0to1]
+            [Hidden]
+            public float MoveToCoverHasEnemyPose = 1f;
 
             [Default(true)]
             [Hidden]
@@ -106,10 +156,6 @@ namespace SAIN.Preset.Personalities
             [MinMax(0.5f, 60f, 10)]
             [Hidden]
             public float CheckAmbushFrequency = 5f;
-
-            [Default(1f)]
-            [Percentage0to1]
-            public float BaseSearchMoveSpeed = 1f;
 
             [Default(false)]
             [Advanced]

@@ -45,12 +45,15 @@ namespace SAIN.SAINComponent.Classes
                 {
                     pointToShoot = GetPointToShoot();
                 }
-                else if (!enemy.IsVisible && enemy.HeardRecently && enemy.InLineOfSight)
+                else if (!enemy.IsVisible 
+                    && enemy.HeardRecently 
+                    && enemy.InLineOfSight)
                 {
-                    enemy.CheckIfSeenLastKnown();
-                    if (enemy.HasSeenLastKnownLocation)
+                    EnemyPlace lastKnown = enemy.KnownPlaces.LastKnownPlace;
+                    if (lastKnown != null 
+                        && lastKnown.HasSeen)
                     {
-                        pointToShoot = enemy.LastKnownLocation + Vector3.up;
+                        pointToShoot = lastKnown.Position + Vector3.up;
                     }
                 }
                 if (pointToShoot != null)

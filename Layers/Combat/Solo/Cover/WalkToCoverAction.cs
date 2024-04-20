@@ -40,7 +40,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (CoverDestination == null)
             {
                 var coverPoint = SAIN.Cover.ClosestPoint;
-                if (coverPoint != null && !coverPoint.Spotted && SAIN.Mover.GoToPoint(coverPoint.Position))
+                if (coverPoint != null && !coverPoint.Spotted && SAIN.Mover.GoToPoint(coverPoint.Position, out bool calculating))
                 {
                     CoverDestination = coverPoint;
                     CoverDestination.BotIsUsingThis = true;
@@ -51,10 +51,19 @@ namespace SAIN.Layers.Combat.Solo.Cover
             }
             if (CoverDestination != null && RecalcPathTimer < Time.time)
             {
-                RecalcPathTimer = Time.time + 2f;
-                SAIN.Mover.GoToPoint(CoverDestination.Position);
-                SAIN.Mover.SetTargetMoveSpeed(1f);
-                SAIN.Mover.SetTargetPose(1f);
+                if (SAIN.Mover.GoToPoint(CoverDestination.Position, out bool calculating))
+                {
+                    RecalcPathTimer = Time.time + 2f;
+
+                    var personalitySettings = SAIN.Info.PersonalitySettings;
+                    float moveSpeed = personalitySettings.Sneaky ? personalitySettings.SneakySpeed : 1f;
+                    SAIN.Mover.SetTargetMoveSpeed(1f);
+                    SAIN.Mover.SetTargetPose(1f);
+                }
+                else
+                {
+                    RecalcPathTimer = Time.time + 0.25f;
+                }
             }
 
             EngageEnemy();
@@ -75,12 +84,23 @@ namespace SAIN.Layers.Combat.Solo.Cover
             return false;
         }
 
-        private void MoveTo(Vector3 position)
+        private bool MoveTo(Vector3 position)
         {
-            CoverDestination.BotIsUsingThis = true;
-            SAIN.Mover.GoToPoint(position);
-            SAIN.Mover.SetTargetMoveSpeed(1f);
-            SAIN.Mover.SetTargetPose(1f);
+            if (SAIN.Mover.GoToPoint(position, out bool calculating))
+            {
+                CoverDestination.BotIsUsingThis = true;
+                if (SAIN.HasEnemy || BotOwner.Memory.IsUnderFire)
+                {
+                    SAIN.Mover.SetTargetMoveSpeed(1f);
+                }
+                else
+                {
+                    SAIN.Mover.SetTargetMoveSpeed(0.65f);
+                }
+                SAIN.Mover.SetTargetPose(1f);
+                return true;
+            }
+            return false;
         }
 
         private CoverPoint CoverDestination;
@@ -111,7 +131,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 Shoot.Update();
             }
         }
-
 
         public override void Start()
         {

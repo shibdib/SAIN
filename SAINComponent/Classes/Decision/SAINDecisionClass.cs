@@ -173,7 +173,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             float timeChangeDec = SAIN.Decision.TimeSinceChangeDecision;
             bool Running = CurrentSoloDecision == SoloDecision.Retreat || CurrentSoloDecision == SoloDecision.RunToCover;
-            if (Running && !SAIN.BotStuck.BotIsMoving && SAIN.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 0.5f)
+            if (Running && !SAIN.BotStuck.BotHasChangedPosition && SAIN.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 0.5f)
             {
                 return false;
             }

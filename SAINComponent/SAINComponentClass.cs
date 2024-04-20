@@ -91,6 +91,7 @@ namespace SAIN.SAINComponent
                 Suppression = new SAINBotSuppressClass(this);
                 AILimit = new SAINAILimit(this);
                 AimDownSightsController = new AimDownSightsController(this);
+                BotStun = new SAINBotShotStun(this);
 
                 NavMeshAgent = this.GetComponent<NavMeshAgent>();
                 if (NavMeshAgent == null)
@@ -128,6 +129,7 @@ namespace SAIN.SAINComponent
             Suppression.Init();
             AILimit.Init();
             AimDownSightsController.Init();
+            BotStun.Init();
 
             TimeBotCreated = Time.time;
 
@@ -194,6 +196,7 @@ namespace SAIN.SAINComponent
                 Vault.Update();
                 Suppression.Update();
                 AimDownSightsController.Update();
+                BotStun.Update();
 
                 BotOwner.DoorOpener.Update(); 
                 UpdateGoalTarget();
@@ -275,13 +278,17 @@ namespace SAIN.SAINComponent
         {
             get
             {
+                if (BotOwner.AimingData != null)
+                {
+                    return BotOwner.AimingData.LastDist2Target;
+                }
                 if (Enemy != null)
                 {
                     return Enemy.RealDistance;
                 }
-                else if (BotOwner.Memory.GoalEnemy != null)
+                else if (CurrentTargetPosition != null)
                 {
-                    return BotOwner.Memory.GoalEnemy.Distance;
+                    return (CurrentTargetPosition.Value - Position).magnitude;
                 }
                 return 200f;
             }
@@ -373,6 +380,7 @@ namespace SAIN.SAINComponent
                 Suppression?.Dispose();
                 AILimit?.Dispose();
                 AimDownSightsController?.Dispose();
+                BotStun?.Dispose();
 
                 Destroy(this);
             }
@@ -415,9 +423,9 @@ namespace SAIN.SAINComponent
         {
             get
             {
-                if (HasEnemy && Enemy.LastKnownLocation != null)
+                if (HasEnemy && Enemy.LastKnownPosition != null)
                 {
-                    return Enemy.LastKnownLocation;
+                    return Enemy.LastKnownPosition;
                 }
                 var Target = BotOwner.Memory.GoalTarget;
                 if (Target != null && Target?.Position != null)
@@ -436,6 +444,7 @@ namespace SAIN.SAINComponent
             }
         }
 
+        public SAINBotShotStun BotStun { get; private set; }
         public AimDownSightsController AimDownSightsController { get; private set; }
         public SAINAILimit AILimit { get; private set; }
         public SAINBotSuppressClass Suppression { get; private set; }

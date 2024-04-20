@@ -27,67 +27,78 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             SAIN.Steering.SteerByPriority();
             Shoot.Update();
-            if (NewPoint == null)
+            if (NewPoint == null 
+                && FindPointToGo() 
+                && SAIN.Mover.GoToPoint(NewPoint.Position, out bool calculating))
             {
-                if (FindPointToGo())
-                {
-                    SAIN.Mover.GoToPoint(NewPoint.Position);
-                    SAIN.Mover.SetTargetMoveSpeed(1f);
-                    SAIN.Mover.SetTargetPose(1f);
-                }
+                SAIN.Mover.SetTargetMoveSpeed(GetSpeed());
+                SAIN.Mover.SetTargetPose(GetPose());
+            }
+            else if (NewPoint != null && NewPoint.CoverStatus == CoverStatus.InCover)
+            {
+                SAIN.Decision.EnemyDecisions.ShiftCoverComplete = true;
             }
             else
             {
-                if ((NewPoint.Position - BotOwner.Position).sqrMagnitude < 2f)
-                {
-                    SAIN.Decision.EnemyDecisions.ShiftCoverComplete = true;
-                }
+
             }
+        }
+
+        private float GetSpeed()
+        {
+            var settings = SAIN.Info.PersonalitySettings;
+            return SAIN.HasEnemy ? settings.MoveToCoverHasEnemySpeed : settings.MoveToCoverNoEnemySpeed;
+        }
+
+        private float GetPose()
+        {
+            var settings = SAIN.Info.PersonalitySettings;
+            return SAIN.HasEnemy ? settings.MoveToCoverHasEnemyPose : settings.MoveToCoverNoEnemyPose;
         }
 
         private bool FindPointToGo()
         {
-            var cover = SAIN.Cover.CoverInUse;
-            if (cover != null && cover.BotIsHere)
+            if (NewPoint != null)
             {
-                cover.BotIsUsingThis = false;
-                StartPosition = cover.Position;
-                UsedPoints.Add(cover);
-                var Points = SAIN.Cover.CoverFinder.CoverPoints;
-                for (int i = 0; i < Points.Count; i++)
-                {
-                    var point = Points[i];
+                return true;
+            }
 
-                    if (point.CoverHeight > cover.CoverHeight)
+            var coverInUse = SAIN.Cover.CoverInUse;
+            if (coverInUse != null)
+            {
+                if (NewPoint == null)
+                {
+                    if (!UsedPoints.Contains(coverInUse))
                     {
-                        point.CheckPathSafety();
-                        if (point.IsSafePath && !UsedPoints.Contains(point))
+                        UsedPoints.Add(coverInUse);
+                    }
+
+                    var coverPoints = SAIN.Cover.CoverFinder.CoverPoints;
+                    for (int i = 0; i < coverPoints.Count; i++)
+                    {
+                        var shiftCoverTarget = coverPoints[i];
+
+                        if (shiftCoverTarget.CoverHeight > coverInUse.CoverHeight
+                            && shiftCoverTarget.CheckPathSafety()
+                            && !UsedPoints.Contains(shiftCoverTarget))
                         {
                             for (int j = 0; j < UsedPoints.Count; j++)
                             {
-                                if ((UsedPoints[j].Position - point.Position).sqrMagnitude > 5f)
+                                if ((UsedPoints[j].Position - shiftCoverTarget.Position).sqrMagnitude > 5f)
                                 {
-                                    point.BotIsUsingThis = true;
-                                    NewPoint = point;
-
-                                    SAIN.Mover.GoToPoint(NewPoint.Position);
-                                    SAIN.Mover.SetTargetMoveSpeed(1f);
-                                    SAIN.Mover.SetTargetPose(1f);
+                                    coverInUse.BotIsUsingThis = false;
+                                    shiftCoverTarget.BotIsUsingThis = true;
+                                    NewPoint = shiftCoverTarget;
                                     return true;
                                 }
                             }
                         }
                     }
-
                 }
                 if (NewPoint == null)
                 {
                     SAIN.Decision.EnemyDecisions.ShiftCoverComplete = true;
                 }
-            }
-            else
-            {
-                StartPosition = BotOwner.Position;
             }
             return false;
         }
@@ -96,7 +107,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
         }
 
-        private Vector3? StartPosition;
         private readonly List<CoverPoint> UsedPoints = new List<CoverPoint>();
         private CoverPoint NewPoint;
 

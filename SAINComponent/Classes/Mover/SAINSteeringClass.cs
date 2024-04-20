@@ -55,7 +55,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     }
                     else if (SAIN.EnemyController.ClosestHeardEnemy != null)
                     {
-                        LookToPoint(SAIN.EnemyController.ClosestHeardEnemy.LastKnownLocation);
+                        LookToPoint(SAIN.EnemyController.ClosestHeardEnemy.LastKnownPosition);
                     }
                     break;
 
@@ -88,7 +88,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     break;
 
                 case SteerPriority.LastKnownLocation:
-                    var lastKnownPos = SAIN.Enemy?.LastKnownLocation;
+                    var lastKnownPos = SAIN.Enemy?.LastKnownPosition;
                     if (lastKnownPos != null)
                     {
                         LookToPoint(lastKnownPos);
@@ -186,13 +186,12 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return SteerPriority.ClosestHeardEnemy;
             }
-            if (SAIN.Enemy?.LastKnownLocation != null && SAIN.Enemy.TimeSinceLastKnownUpdated < Steer_TimeSinceLocationKnown_Threshold)
+            EnemyPlace lastKnownPlace = SAIN.Enemy?.KnownPlaces?.LastKnownPlace;
+            if (lastKnownPlace != null 
+                && lastKnownPlace.TimePositionUpdated < Steer_TimeSinceLocationKnown_Threshold 
+                && !lastKnownPlace.HasSeen)
             {
-                SAIN.Enemy?.CheckIfSeenLastKnown();
-                if (!SAIN.Enemy.HasSeenLastKnownLocation)
-                {
-                    return SteerPriority.LastKnownLocation;
-                }
+                return SteerPriority.LastKnownLocation;
             }
             if (SAIN.Enemy?.TimeSinceSeen < Steer_TimeSinceSeen_Short && SAIN.Enemy.Seen)
             {

@@ -112,8 +112,20 @@ namespace SAIN.Layers.Combat.Solo
         {
             if (SAIN == null) return false;
 
-            return CurrentDecision != SoloDecision.None;
+            if (CurrentDecision != SoloDecision.None)
+            {
+                return true;
+            }
+            else if (SAIN.Mover.BotBodyObstacle.isActiveAndEnabled)
+            {
+                //SAIN.Mover.UpdateBodyNavObstacle(false);
+                //return true;
+            }
+
+            return false;
         }
+
+
 
         public override bool IsCurrentActionEnding()
         {

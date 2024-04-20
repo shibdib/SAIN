@@ -38,8 +38,9 @@ namespace SAIN.Layers.Combat.Solo
 
             if (RecalcPathtimer < Time.time)
             {
-                RecalcPathtimer = Time.time + 4f;
-                SAIN.Mover.GoToPoint(PlaceForCheck.Position);
+                bool moving = SAIN.Mover.GoToPoint(PlaceForCheck.Position, out bool calculating);
+                float timeAdd = moving ? 4f : 0.5f;
+                RecalcPathtimer = Time.time + timeAdd;
             }
             const float MinDistance = 10;
             if ((BotOwner.Position - PlaceForCheck.Position).sqrMagnitude < MinDistance * MinDistance)

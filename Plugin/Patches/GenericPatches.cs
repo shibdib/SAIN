@@ -42,6 +42,46 @@ namespace SAIN.Patches.Generic
         }
     }
 
+    internal class OnMakingShotRecoilPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod() => typeof(Player).GetMethod("OnMakingShot");
+        [PatchPrefix]
+        public static void PatchPrefix(ref Player __instance)
+        {
+            if (__instance.IsAI)
+            {
+                BotOwner botOwner = __instance?.AIData?.BotOwner;
+                if (botOwner != null && SAINPlugin.BotController.GetBot(botOwner.ProfileId, out var sain))
+                {
+                    sain?.Info?.WeaponInfo?.Recoil?.WeaponShot();
+                }
+            }
+        }
+    }
+
+    internal class GetHitPatch : ModulePatch
+    {
+        private static Type _aimingDataType;
+        private static MethodInfo _aimingDataGetHit;
+
+        protected override MethodBase GetTargetMethod()
+        {
+            _aimingDataType = PatchConstants.EftTypes.Single(x => x.GetProperty("LastSpreadCount") != null && x.GetProperty("LastAimTime") != null);
+            _aimingDataGetHit = AccessTools.Method(_aimingDataType, "GetHit");
+            return _aimingDataGetHit;
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref BotOwner ___botOwner_0, DamageInfo damageInfo)
+        {
+            BotOwner botOwner = ___botOwner_0;
+            if (botOwner != null && SAINPlugin.BotController.GetBot(botOwner.ProfileId, out var sain))
+            {
+                sain.BotStun.GetHit(damageInfo);
+            }
+        }
+    }
+
     internal class ForceNoHeadAimPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(EnemyInfo).GetMethod("method_7");
@@ -49,6 +89,20 @@ namespace SAIN.Patches.Generic
         public static void PatchPrefix(ref bool withLegs, ref bool canBehead)
         {
             canBehead = false;
+        }
+    }
+
+    internal class NoTeleportPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotMover), "GoToPoint", new[] { typeof(Vector3), typeof(bool), typeof(float), typeof(bool), typeof(bool), typeof(bool) });
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref Vector3 pos, ref bool slowAtTheEnd, ref float reachDist, ref bool getUpWithCheck, ref bool mustHaveWay, ref bool onlyShortTrie)
+        {
+            mustHaveWay = false;
         }
     }
 

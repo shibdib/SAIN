@@ -45,17 +45,13 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Name("Max Aim Time")]
         [Description(null)]
-        [Default(2f)]
-        [MinMax(0.1f, 5f, 10f)]
+        [Default(4f)]
+        [MinMax(0.1f, 6f, 100f)]
         [Advanced]
-        [CopyValue]
-        public float MAX_AIM_TIME = 2f;
+        //[CopyValue]
+        public float MAX_AIM_TIME = 4f;
 
-        [Name("Aim Type")]
-        [Description(null)]
-        [Default(4)]
-        [MinMax(1, 6)]
-        [Advanced]
+        [Hidden]
         public int AIMING_TYPE = 4;
 
         [Name("Friendly Fire Spherecast Size")]
@@ -80,7 +76,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Default(0.5f)]
         [MinMax(0.1f, 0.99f, 100f)]
         [Advanced]
-        public float BASE_HIT_AFFECTION_DELAY_SEC = 0.5f;
+        public float BASE_HIT_AFFECTION_DELAY_SEC = 1f;
 
         [NameAndDescription(
             "Minimum Hit Reaction Angle",

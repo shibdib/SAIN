@@ -112,17 +112,6 @@ namespace SAIN.Patches.Shoot
         {
             if (SAINPlugin.BotController.GetBot(____owner.ProfileId, out var component))
             {
-                Recoil recoil = component?.Info?.WeaponInfo?.Recoil;
-                if (recoil == null)
-                {
-                    return true;
-                }
-                // if (___float_0 < Time.time)
-                // {
-                //     //___float_0 = recoil.RecoilTimeWait;
-                //     ____recoilOffset = recoil.CalculateRecoil(____recoilOffset);
-                // }
-                ____recoilOffset = recoil.CalculateRecoil(____recoilOffset);
                 return false;
             }
             return true;
@@ -140,17 +129,16 @@ namespace SAIN.Patches.Shoot
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref Vector3 ____recoilOffset, ref BotOwner ____owner, ref float ____remainRecoilTime)
+        public static bool PatchPrefix(ref Vector3 ____recoilOffset, ref BotOwner ____owner)
         {
             if (SAINPlugin.BotController.GetBot(____owner.ProfileId, out var component))
             {
                 var recoil = component?.Info?.WeaponInfo?.Recoil;
-                if (recoil == null)
+                if (recoil != null)
                 {
-                    return true;
+                    ____recoilOffset = recoil.RecoilOffset;
+                    return false;
                 }
-                ____recoilOffset = recoil.CalculateDecay(____recoilOffset, out float time);
-                return false;
             }
             return true;
         }

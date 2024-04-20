@@ -96,6 +96,7 @@ namespace SAIN.SAINComponent.Classes
                 if (wasVisible)
                 {
                     TimeLastSeen = Time.time;
+                    Enemy.UpdateKnownPosition(EnemyPerson.Position, false, true);
                 }
             }
 

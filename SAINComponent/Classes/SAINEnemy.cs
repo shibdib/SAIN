@@ -1,8 +1,11 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using SAIN.SAINComponent.BaseClasses;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 using static RootMotion.FinalIK.AimPoser;
+using static SAIN.SAINComponent.Classes.SAINEnemy;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -18,6 +21,7 @@ namespace SAIN.SAINComponent.Classes
             EnemyStatus = new SAINEnemyStatus(this);
             Vision = new SAINEnemyVision(this);
             Path = new SAINEnemyPath(this);
+            KnownPlaces = new EnemyKnownPlaces(this);
         }
 
         public EnemyInfo EnemyInfo { get; private set; }
@@ -40,6 +44,16 @@ namespace SAIN.SAINComponent.Classes
             bool isCurrent = IsCurrentEnemy;
             Vision.Update(isCurrent);
             Path.Update(isCurrent);
+
+            if (isCurrent)
+            {
+                KnownPlaces.Update();
+            }
+        }
+
+        public void UpdateKnownPosition(Vector3 position, bool arrived = false, bool seen = false)
+        {
+            KnownPlaces.AddPosition(position, arrived, seen);
         }
 
         public readonly bool IsAI;
@@ -53,10 +67,10 @@ namespace SAIN.SAINComponent.Classes
         public void SetHeardStatus(bool canHear, Vector3 pos)
         {
             HeardRecently = canHear;
-            if (HeardRecently)
+            if (canHear)
             {
-                LastHeardPosition = pos;
-                HasSeenLastKnownLocation = false;
+                UpdateKnownPosition(pos);
+                LastHeardPosition = new Vector3?(pos);
             }
         }
 
@@ -102,26 +116,6 @@ namespace SAIN.SAINComponent.Classes
         {
         }
 
-        public bool HasSeenLastKnownLocation { get; private set; }
-
-        public bool CheckIfSeenLastKnown()
-        {
-            if (!HasSeenLastKnownLocation && CheckLastSeenTimer < Time.time)
-            {
-                CheckLastSeenTimer = Time.time + 0.2f;
-                if (LastKnownLocation != null)
-                {
-                    Vector3 lastknown = LastKnownLocation.Value;
-                    Vector3 botPos = SAIN.Person.Transform.Head;
-                    Vector3 direction = lastknown - botPos;
-                    HasSeenLastKnownLocation = !Physics.Raycast(botPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMaskAI);
-                }
-            }
-            return HasSeenLastKnownLocation;
-        }
-
-        private float CheckLastSeenTimer;
-
         public EnemyPathDistance CheckPathDistance() => Path.CheckPathDistance();
 
         // ActiveEnemy Properties
@@ -133,45 +127,18 @@ namespace SAIN.SAINComponent.Classes
 
         public float TimeSinceEnemyCreated => Time.time - TimeEnemyCreated;
 
-        public Vector3? LastKnownLocation
-        {
-            get
-            {
-                Vector3? result = null;
-                if (IsVisible)
-                {
-                    result = EnemyPosition;
-                }
-                else if (Seen && !Heard)
-                {
-                    result = LastSeenPosition;
-                }
-                else if (!Seen && Heard)
-                {
-                    result = LastHeardPosition;
-                }
-                else if (Seen && Heard)
-                {
-                    if (TimeSinceSeen > TimeSinceHeard)
-                    {
-                        result = LastSeenPosition;
-                    }
-                    else
-                    {
-                        result = LastHeardPosition;
-                    }
-                }
-                return result;
-            }
-        }
+        public Vector3? LastKnownPosition => KnownPlaces.LastKnownPlace?.Position;
+
+        public EnemyKnownPlaces KnownPlaces { get; private set; }
 
         public float TimeSinceLastKnownUpdated
         {
             get
             {
-                if (Seen || Heard)
+                EnemyPlace lastKnown = KnownPlaces.LastKnownPlace;
+                if (lastKnown != null)
                 {
-                    return Mathf.Max(TimeSinceHeard, TimeSinceSeen);
+                    return lastKnown.TimePositionUpdated;
                 }
                 return float.MaxValue;
             }

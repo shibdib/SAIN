@@ -20,13 +20,21 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Update()
         {
+            RecoilOffset = CalculateDecay(RecoilOffset);
         }
 
         public void Dispose()
         {
         }
 
-        public Vector3 CalculateRecoil(Vector3 targetpoint)
+        public void WeaponShot()
+        {
+            RecoilOffset = CalculateRecoil(RecoilOffset);
+        }
+
+        public Vector3 RecoilOffset { get; private set; } = Vector3.zero;
+
+        public Vector3 CalculateRecoil(Vector3 currentRecoil)
         {
             float distance = SAIN.DistanceToAimTarget;
 
@@ -40,15 +48,15 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             float weaponvertrecoil = CalcRecoil(SAIN.Info.WeaponInfo.RecoilForceBack);
 
             float addRecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.AddRecoil;
-            float horizRecoil = (1f * weaponhorizrecoil + addRecoil) * distance;
-            float vertRecoil = (1f * weaponvertrecoil + addRecoil) * distance;
+            float horizRecoil = (1f * weaponhorizrecoil + addRecoil);
+            float vertRecoil = (1f * weaponvertrecoil + addRecoil);
 
-            float maxrecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.MaxRecoil * distance;
+            float maxrecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.MaxRecoil;
 
             float randomHorizRecoil = Random.Range(-horizRecoil, horizRecoil);
             float randomvertRecoil = Random.Range(-vertRecoil, vertRecoil);
 
-            Vector3 vector = new Vector3(targetpoint.x + randomHorizRecoil, targetpoint.y + randomvertRecoil, targetpoint.z + randomHorizRecoil);
+            Vector3 vector = new Vector3(currentRecoil.x + randomHorizRecoil, currentRecoil.y + randomvertRecoil, currentRecoil.z + randomHorizRecoil);
             vector = MathHelpers.VectorClamp(vector, -maxrecoil, maxrecoil) * RecoilMultiplier;
             return vector;
         }
@@ -62,81 +70,16 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return result;
         }
 
-        public Vector3 CalculateDecay(Vector3 oldVector, out float rate)
+        public Vector3 CalculateDecay(Vector3 oldVector)
         {
-            var mode = SAIN.Info.WeaponInfo.CurrentWeapon.SelectedFireMode;
-            if (mode == EFireMode.fullauto || mode == EFireMode.burst)
-            {
-                rate = Time.time + FullAutoTimePerShot;
-                //rate = Time.time + (FullAutoTimePerShot / 3f);
-            }
-            else
-            {
-                rate = Time.time + SemiAutoTimePerShot;
-                //rate = Time.time + (SemiAutoTimePerShot / 3f);
-            }
-            return Vector3.Lerp(Vector3.zero, oldVector, SAINPlugin.LoadedPreset.GlobalSettings.Shoot.RecoilDecay);
-        }
+            if (oldVector == Vector3.zero) return oldVector;
 
-        public float RecoilTimeWait
-        {
-            get
+            Vector3 decayed = Vector3.Lerp(Vector3.zero, oldVector, SAINPlugin.LoadedPreset.GlobalSettings.Shoot.RecoilDecay);
+            if ((decayed - Vector3.zero).sqrMagnitude < 0.01f)
             {
-                if (SAIN.Info.WeaponInfo.IsSetFullAuto() || SAIN.Info.WeaponInfo.IsSetBurst())
-                {
-                    return Time.time + FullAutoTimePerShot * 0.8f;
-                }
-                else
-                {
-                    return Time.time + SemiAutoTimePerShot * 0.8f;
-                }
+                decayed = Vector3.zero;
             }
-        }
-
-        private float FullAutoTimePerShot
-        {
-            get
-            {
-                float roundspersecond = FullAutoFireRate / 60;
-
-                float secondsPerShot = 1f / roundspersecond;
-
-                return secondsPerShot;
-            }
-        }
-
-        private float SingleFireRate
-        {
-            get
-            {
-                var template = SAIN.Info.WeaponInfo.CurrentWeapon?.Template;
-                if (template != null)
-                {
-                    return template.SingleFireRate;
-                }
-                return 300f;
-            }
-        }
-
-        private float FullAutoFireRate
-        {
-            get
-            {
-                var template = SAIN.Info.WeaponInfo.CurrentWeapon?.Template;
-                if (template != null)
-                {
-                    return template.bFirerate;
-                }
-                return 800f;
-            }
-        }
-
-        private float SemiAutoTimePerShot
-        {
-            get
-            {
-                return 1f / (SingleFireRate / 60f);
-            }
+            return decayed;
         }
 
         private float RecoilBaseline

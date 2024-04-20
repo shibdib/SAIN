@@ -16,7 +16,6 @@ namespace SAIN.Preset.Personalities
             ImportPersonalities();
         }
 
-
         public bool VerificationPassed = true;
 
         private void ImportPersonalities()
@@ -49,7 +48,9 @@ namespace SAIN.Preset.Personalities
             }
             if (hadToFix)
             {
-                Logger.LogWarning("The Preset you are using is out of date, and required manual fixing. Its recommended you create a new one.");
+                string message = "The Preset you are using is out of date, and required manual fixing. Its recommended you create a new one.";
+                NotificationManagerClass.DisplayMessageNotification(message);
+                Logger.LogWarning(message);
             }
         }
 
@@ -76,6 +77,12 @@ namespace SAIN.Preset.Personalities
             }
         }
 
+        public void ResetToDefaults()
+        {
+            Personalities.Clear();
+            InitDefaults();
+        }
+
         private void InitDefaults()
         {
             var pers = IPersonality.GigaChad;
@@ -88,24 +95,42 @@ namespace SAIN.Preset.Personalities
                     Variables =
                     {
                         Enabled = true,
-                        CanJumpCorners = true,
                         RandomChanceIfMeetRequirements = 60,
-                        RandomlyAssignedChance = 5,
+                        RandomlyAssignedChance = 3,
+                        PowerLevelMin = 250f,
+
                         CanTaunt = true,
                         CanRespondToVoice = true,
                         TauntFrequency = 8,
                         TauntMaxDistance = 50f,
+                        ConstantTaunt = true,
+
                         HoldGroundBaseTime = 1.25f,
                         HoldGroundMaxRandom = 1.5f,
                         HoldGroundMinRandom = 0.65f,
+
+                        WillSearchForEnemy = true,
+                        WillSearchFromAudio = true,
                         SearchBaseTime = 8f,
-                        PowerLevelMin = 200f,
                         SprintWhileSearch = true,
                         FrequentSprintWhileSearch = true,
+
+                        CanJumpCorners = true,
                         CanRushEnemyReloadHeal = true,
-                        ConstantTaunt = true,
+                        CanFakeDeathRare = true,
+
                         AggressionMultiplier = 2f,
-                        ShiftCoverTimeMultiplier = 0.5f
+                        ShiftCoverTimeMultiplier = 0.5f,
+
+                        SearchHasEnemySpeed = 1f,
+                        SearchHasEnemyPose = 1f,
+                        SearchNoEnemySpeed = 1f,
+                        SearchNoEnemyPose = 1f,
+
+                        MoveToCoverHasEnemySpeed = 1f,
+                        MoveToCoverHasEnemyPose = 1f,
+                        MoveToCoverNoEnemySpeed = 1f,
+                        MoveToCoverNoEnemyPose = 1f,
                     }
                 };
 
@@ -124,22 +149,39 @@ namespace SAIN.Preset.Personalities
                     Variables =
                     {
                         Enabled = true,
-                        CanJumpCorners = true,
+
                         RandomChanceIfMeetRequirements = 60,
                         RandomlyAssignedChance = 5,
+                        PowerLevelMin = 200f,
+
                         CanTaunt = true,
                         CanRespondToVoice = true,
-                        TauntFrequency = 10,
-                        TauntMaxDistance = 40f,
+                        TauntFrequency = 15,
+                        TauntMaxDistance = 30f,
+                        FrequentTaunt = false,
+
                         HoldGroundBaseTime = 1f,
                         HoldGroundMaxRandom = 1.5f,
                         HoldGroundMinRandom = 0.65f,
+
+                        WillSearchForEnemy = true,
+                        WillSearchFromAudio = true,
                         SearchBaseTime = 30f,
-                        PowerLevelMin = 150f,
                         SprintWhileSearch = true,
+
+                        CanJumpCorners = false,
                         CanRushEnemyReloadHeal = true,
-                        FrequentTaunt = true,
                         AggressionMultiplier = 1.5f,
+
+                        SearchHasEnemySpeed = 1f,
+                        SearchHasEnemyPose = 1f,
+                        SearchNoEnemySpeed = 0.7f,
+                        SearchNoEnemyPose = 1f,
+
+                        MoveToCoverHasEnemySpeed = 1f,
+                        MoveToCoverHasEnemyPose = 1f,
+                        MoveToCoverNoEnemySpeed = 0.7f,
+                        MoveToCoverNoEnemyPose = 1f,
                     }
                 };
 
@@ -161,11 +203,26 @@ namespace SAIN.Preset.Personalities
                         RandomChanceIfMeetRequirements = 50,
                         RandomlyAssignedChance = 25,
                         HoldGroundBaseTime = 0.75f,
+                        WillSearchForEnemy = false,
+                        WillSearchFromAudio = false,
                         SearchBaseTime = 180f,
                         PowerLevelMax = 50f,
                         AggressionMultiplier = 0.65f,
+
                         Sneaky = true,
-                        BaseSearchMoveSpeed = 0.2f,
+                        SneakyPose = 0f,
+                        SneakySpeed = 0f,
+
+                        SearchHasEnemySpeed = 0f,
+                        SearchHasEnemyPose = 0f,
+                        SearchNoEnemySpeed = 0f,
+                        SearchNoEnemyPose = 1f,
+
+                        MoveToCoverHasEnemySpeed = 0.5f,
+                        MoveToCoverHasEnemyPose = 0.5f,
+                        MoveToCoverNoEnemySpeed = 0.3f,
+                        MoveToCoverNoEnemyPose = 0.7f,
+
                         CanShiftCoverPosition = false
                     }
                 };
@@ -190,10 +247,22 @@ namespace SAIN.Preset.Personalities
                         PowerLevelMax = 40f,
                         MaxLevel = 10,
                         HoldGroundBaseTime = 0.5f,
+                        WillSearchForEnemy = true,
+                        WillSearchFromAudio = false,
                         SearchBaseTime = 120f,
                         AggressionMultiplier = 0.75f,
-                        BaseSearchMoveSpeed = 0.65f,
-                        ShiftCoverTimeMultiplier = 0.66f
+                        ShiftCoverTimeMultiplier = 0.66f,
+                        CanBegForLife = true,
+
+                        SearchHasEnemySpeed = 0f,
+                        SearchHasEnemyPose = 1f,
+                        SearchNoEnemySpeed = 0f,
+                        SearchNoEnemyPose = 1f,
+
+                        MoveToCoverHasEnemySpeed = 1f,
+                        MoveToCoverHasEnemyPose = 1f,
+                        MoveToCoverNoEnemySpeed = 1f,
+                        MoveToCoverNoEnemyPose = 1f,
                     }
                 };
 
@@ -214,10 +283,22 @@ namespace SAIN.Preset.Personalities
                         Enabled = true,
                         RandomlyAssignedChance = 25,
                         HoldGroundBaseTime = 0.5f,
+                        WillSearchForEnemy = false,
+                        WillSearchFromAudio = false,
                         SearchBaseTime = 90f,
                         AggressionMultiplier = 0.45f,
-                        BaseSearchMoveSpeed = 0.1f,
-                        CanShiftCoverPosition = false
+                        CanShiftCoverPosition = false,
+                        CanBegForLife = true,
+
+                        SearchHasEnemySpeed = 0f,
+                        SearchHasEnemyPose = 1f,
+                        SearchNoEnemySpeed = 0f,
+                        SearchNoEnemyPose = 1f,
+
+                        MoveToCoverHasEnemySpeed = 1f,
+                        MoveToCoverHasEnemyPose = 1f,
+                        MoveToCoverNoEnemySpeed = 1f,
+                        MoveToCoverNoEnemyPose = 1f,
                     }
                 };
                 AddAllBotTypes(settings.Variables.AllowedTypes);
@@ -236,9 +317,20 @@ namespace SAIN.Preset.Personalities
                     {
                         Enabled = true,
                         HoldGroundBaseTime = 0.65f,
+                        WillSearchForEnemy = true,
+                        WillSearchFromAudio = true,
                         SearchBaseTime = 60f,
                         CanRespondToVoice = true,
-                        BaseSearchMoveSpeed = 0.6f,
+
+                        SearchHasEnemySpeed = 0.6f,
+                        SearchHasEnemyPose = 1f,
+                        SearchNoEnemySpeed = 0.33f,
+                        SearchNoEnemyPose = 1f,
+
+                        MoveToCoverHasEnemySpeed = 1f,
+                        MoveToCoverHasEnemyPose = 1f,
+                        MoveToCoverNoEnemySpeed = 1f,
+                        MoveToCoverNoEnemyPose = 1f,
                     }
                 };
 
@@ -260,7 +352,6 @@ namespace SAIN.Preset.Personalities
             allowedTypes.Add(BotTypeDefinitions.BotTypes[WildSpawn.Bear].Name);
         }
 
-        public Dictionary<IPersonality, PersonalitySettingsClass> Personalities =
-            new Dictionary<IPersonality, PersonalitySettingsClass>();
+        public Dictionary<IPersonality, PersonalitySettingsClass> Personalities = new Dictionary<IPersonality, PersonalitySettingsClass>();
     }
 }

@@ -37,7 +37,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     else
                     {
                         bool shallCrawl = SAIN.Decision.CurrentSelfDecision != SelfDecision.None && CoverDestination.CoverStatus == CoverStatus.FarFromCover && shallProne;
-                        MoveSuccess = SAIN.Mover.GoToPoint(CoverDestination.Position, -1, shallCrawl);
+                        MoveSuccess = SAIN.Mover.GoToPoint(CoverDestination.Position, out bool calculating, -1, shallCrawl);
                     }
                 }
                 if (MoveSuccess)

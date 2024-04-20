@@ -1,9 +1,6 @@
-﻿using BepInEx.Logging;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using HarmonyLib;
-using SAIN.Components;
-using SAIN.Preset.GlobalSettings.Categories;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -30,28 +27,94 @@ namespace SAIN.SAINComponent.Classes.Debug
             PathController = _pathControllerField.GetValue(BotOwner.Mover) as PathControllerClass;
         }
 
+        public bool BotIsMoving { get; private set; }
+        private bool _botIsMoving;
+
+        public float TimeStartedMoving { get; private set; }
+        public float TimeStoppedMoving { get; private set; }
+
+        private float _timeStartMoving;
+
+        private float _timeStopMoving;
+        public float TimeSinceMovingStarted => TimeStartedMoving - Time.time;
+
+        private void CheckIfMoving()
+        {
+            float time = Time.time;
+
+            // Check if a bot is being told to move by the botowner pathfinder, and record the time this starts and stops
+            bool botWasMoving = _botIsMoving;
+            _botIsMoving = BotOwner.Mover.IsMoving;
+            if (_botIsMoving && !botWasMoving)
+            {
+                _timeStartMoving = time;
+            }
+            else if (!_botIsMoving && botWasMoving)
+            {
+                _timeStopMoving = time;
+            }
+
+            // How long a bot must be "moving" for before we check
+            const float movingForPeriod = 0.25f;
+
+            // Has the bot been told to move for over x seconds? then record the state for use in other classes
+            if (_botIsMoving && time - _timeStartMoving > movingForPeriod)
+            {
+                if (!BotIsMoving)
+                {
+                    TimeStartedMoving = time;
+                }
+                BotIsMoving = true;
+            }
+            else if (!_botIsMoving)
+            {
+                if (BotIsMoving)
+                {
+                    TimeStoppedMoving = time;
+                }
+                BotIsMoving = false;
+            }
+        }
+
+        private void CheckIfPositionChanged()
+        {
+            if (CheckPositionTimer < Time.time)
+            {
+                CheckPositionTimer = Time.time + 1f;
+
+                bool botChangedPositionLast = BotHasChangedPosition;
+
+                const float DistThreshold = 0.25f;
+                BotHasChangedPosition = (LastPos - BotOwner.Position).sqrMagnitude > DistThreshold * DistThreshold;
+
+                if (botChangedPositionLast && !BotHasChangedPosition)
+                {
+                    TimeStartedChangingPosition = Time.time;
+                }
+                else if (BotHasChangedPosition)
+                {
+                    TimeStartedChangingPosition = 0f;
+                }
+
+                LastPos = BotOwner.Position;
+            }
+        }
+
+        private float _nextVaultTime;
+
         public void Update()
         {
-            if (SAIN.BotActive 
+            if (SAIN.BotActive
                 && !SAIN.GameIsEnding)
             {
-                if (CheckMoveTimer < Time.time)
+                if (_nextVaultTime < Time.time)
                 {
-                    const float DistThreshold = 0.25f;
-                    bool botWasMoving = BotIsMoving;
-                    CheckMoveTimer = Time.time + 1f;
-                    BotIsMoving = (LastPos - BotOwner.Position).sqrMagnitude > DistThreshold * DistThreshold;
-                    LastPos = BotOwner.Position;
-
-                    if (botWasMoving && !BotIsMoving)
-                    {
-                        TimeStartNotMoving = Time.time;
-                    }
-                    else if (BotIsMoving)
-                    {
-                        TimeStartNotMoving = 0f;
-                    }
+                    _nextVaultTime = Time.time + 0.5f;
+                    Player.MovementContext.TryVaulting();
                 }
+
+                CheckIfMoving();
+                CheckIfPositionChanged();
 
                 if (CheckStuckTimer < Time.time)
                 {
@@ -121,7 +184,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
                             if (!Player.MovementContext.TryVaulting())
                             {
-                                if (TimeSinceStuck > 1f)
+                                if (TimeSinceStuck > 5f)
                                 {
                                     if (!HasTriedJumpOrVault)
                                     {
@@ -139,10 +202,10 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private float TimeSinceTriedJumpOrVault;
         private bool HasTriedJumpOrVault;
-        const float MinDistance = 100f;
-        const float MaxDistance = 300f;
-        const float PathLengthCoef = 1.25f;
-        const float MinDistancePathLength = MinDistance * PathLengthCoef;
+        private const float MinDistance = 100f;
+        private const float MaxDistance = 300f;
+        private const float PathLengthCoef = 1.25f;
+        private const float MinDistancePathLength = MinDistance * PathLengthCoef;
 
         private bool TeleportCoroutineStarted;
         private Coroutine TeleportCoroutine;
@@ -315,13 +378,13 @@ namespace SAIN.SAINComponent.Classes.Debug
         public float TimeSinceStuck => Time.time - TimeStuck;
         public float TimeStuck { get; private set; }
 
-        private float CheckMoveTimer = 0f;
+        private float CheckPositionTimer = 0f;
 
         private Vector3 LastPos = Vector3.zero;
 
-        public float TimeSpentNotMoving => Time.time - TimeStartNotMoving;
+        public float TimeSpentNotMoving => Time.time - TimeStartedChangingPosition;
 
-        public float TimeStartNotMoving { get; private set; }
+        public float TimeStartedChangingPosition { get; private set; }
 
         public bool BotIsStuck { get; private set; }
 
@@ -333,7 +396,7 @@ namespace SAIN.SAINComponent.Classes.Debug
         public bool BotStuckOnPlayer()
         {
             var decision = SAIN.Memory.Decisions.Main.Current;
-            if (!BotIsMoving && CanBeStuckDecisions(decision))
+            if (!BotHasChangedPosition && CanBeStuckDecisions(decision))
             {
                 if (BotOwner.Mover == null)
                 {
@@ -377,16 +440,12 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private bool BotStuckGeneric()
         {
-            return !BotIsMoving && !BotOwner.DoorOpener.Interacting && TimeSpentNotMoving > 1f;
+            return BotIsMoving && !BotHasChangedPosition && !BotOwner.DoorOpener.Interacting && TimeSpentNotMoving > 2f;
         }
 
         public bool BotStuckOnObject()
         {
-            if (BotOwner.Mover.HasPathAndNoComplete && !BotIsMoving && !BotOwner.DoorOpener.Interacting)
-            {
-
-            }
-            if (CanBeStuckDecisions(SAIN.Memory.Decisions.Main.Current) && !BotIsMoving && !BotOwner.DoorOpener.Interacting && SAIN.Decision.TimeSinceChangeDecision > 1f)
+            if (CanBeStuckDecisions(SAIN.Memory.Decisions.Main.Current) && !BotHasChangedPosition && !BotOwner.DoorOpener.Interacting && SAIN.Decision.TimeSinceChangeDecision > 1f)
             {
                 if (BotOwner.Mover == null)
                 {
@@ -405,7 +464,7 @@ namespace SAIN.SAINComponent.Classes.Debug
             return false;
         }
 
-        public bool BotIsMoving { get; private set; }
+        public bool BotHasChangedPosition { get; private set; }
 
         private float JumpTimer = 0f;
     }
