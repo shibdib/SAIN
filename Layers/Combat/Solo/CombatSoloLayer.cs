@@ -8,14 +8,6 @@ using System.Collections.Generic;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    public enum MoveToCoverStates
-    {
-        MoveSlow,
-        MoveNormal,
-        Run,
-        Panic,
-    }
-
     internal class CombatSoloLayer : SAINLayer
     {
         public CombatSoloLayer(BotOwner bot, int priority) : base(bot, priority, Name)
@@ -112,20 +104,8 @@ namespace SAIN.Layers.Combat.Solo
         {
             if (SAIN == null) return false;
 
-            if (CurrentDecision != SoloDecision.None)
-            {
-                return true;
-            }
-            else if (SAIN.Mover.BotBodyObstacle.isActiveAndEnabled)
-            {
-                //SAIN.Mover.UpdateBodyNavObstacle(false);
-                //return true;
-            }
-
-            return false;
+            return CurrentDecision != SoloDecision.None;
         }
-
-
 
         public override bool IsCurrentActionEnding()
         {

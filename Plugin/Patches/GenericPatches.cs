@@ -102,7 +102,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static void PatchPrefix(ref Vector3 pos, ref bool slowAtTheEnd, ref float reachDist, ref bool getUpWithCheck, ref bool mustHaveWay, ref bool onlyShortTrie)
         {
-            mustHaveWay = false;
+            //mustHaveWay = false;
         }
     }
 

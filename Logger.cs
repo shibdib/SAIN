@@ -100,10 +100,10 @@ namespace SAIN
             }
             if (level == LogLevel.Error || level == LogLevel.Fatal)
             {
-                NotifyError(data);
+                //NotifyError(data);
                 if (MonoBehaviourSingleton<PreloaderUI>.Instance?.Console != null)
                 {
-                    ConsoleScreen.LogError(data.ToString());
+                    //ConsoleScreen.LogError(data.ToString());
                 }
             }
             SAINLogger.Log(level, result);

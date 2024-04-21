@@ -146,10 +146,31 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             //LastMoveTime = Time.time;
             //LastPosition = SAIN.Position;
+            if (CanGoToPoint(point, out Vector3 pointToGo))
+            {
+                if (reachDist < 0f)
+                {
+                    reachDist = BotOwner.Settings.FileSettings.Move.REACH_DIST;
+                }
+                CurrentPathStatus = BotOwner.Mover.GoToPoint(pointToGo, true, reachDist, false, false, true);
+                if (CurrentPathStatus == NavMeshPathStatus.PathComplete)
+                {
+                    if (crawl)
+                    {
+                        Prone.SetProne(true);
+                    }
+                    BotOwner.DoorOpener?.Update();
+                    calculating = false;
+                    return true;
+                }
+            }
 
-            GoToPointCoroutine = SAIN.StartCoroutine(TryGoToPoint(point, reachDist, crawl));
+            CurrentPathStatus = NavMeshPathStatus.PathInvalid;
 
-            calculating = _coroutineRunning;
+            //GoToPointCoroutine = SAIN.StartCoroutine(TryGoToPoint(point, reachDist, crawl));
+            //calculating = _coroutineRunning;
+
+            calculating = false;
             return CurrentPathStatus != NavMeshPathStatus.PathInvalid;
         }
 

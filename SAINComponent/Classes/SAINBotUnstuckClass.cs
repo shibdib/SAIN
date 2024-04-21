@@ -174,8 +174,8 @@ namespace SAIN.SAINComponent.Classes.Debug
                             && TimeSinceTriedJumpOrVault + 2f < Time.time
                             && !TeleportCoroutineStarted)
                         {
-                            TeleportCoroutineStarted = true;
-                            TeleportCoroutine = SAIN.StartCoroutine(CheckIfTeleport());
+                            //TeleportCoroutineStarted = true;
+                            //TeleportCoroutine = SAIN.StartCoroutine(CheckIfTeleport());
                         }
 
                         if (JumpTimer < Time.time)
