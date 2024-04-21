@@ -68,15 +68,15 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public readonly bool SURGE_KIT_ONLY_SAFE_CONTAINER = true;
+        public bool SURGE_KIT_ONLY_SAFE_CONTAINER = false;
 
         [Hidden]
         [JsonIgnore]
-        public readonly bool CAN_USE_MEDS = true;
+        public bool CAN_USE_MEDS = true;
 
         [Hidden]
         [JsonIgnore]
-        public readonly bool CAN_USE_FOOD_DRINK = true;
+        public bool CAN_USE_FOOD_DRINK = true;
 
         [Hidden]
         [JsonIgnore]

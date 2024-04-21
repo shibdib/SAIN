@@ -215,52 +215,74 @@ namespace SAIN.SAINComponent.Classes.Debug
             bool shallTeleport = true;
             var humanPlayers = GetHumanPlayers();
 
-            Vector3? teleportDestination = GetPlaceToTeleport();
+            Vector3? teleportDestination = null;
+
+            const float minTeleDist = 1f;
+            if (BotOwner.Mover.HavePath)
+            {
+                for (int i = PathController.CurPath.CurIndex; i < PathController.CurPath.Length - 1; i++)
+                {
+                    Vector3 corner = PathController.CurPath.GetPoint(i);
+                    Vector3 cornerDirection = corner - SAIN.Position;
+                    float cornerDistance = cornerDirection.sqrMagnitude;
+                    if (cornerDirection.sqrMagnitude >= minTeleDist * minTeleDist)
+                    {
+                        teleportDestination = new Vector3?(corner);
+                        yield break;
+                    }
+                    yield return null;
+                }
+            }
+
+            Vector3 botPosition = SAIN.Position;
 
             if (teleportDestination != null)
             {
-                foreach (var humanPlayer in humanPlayers)
+                var allPlayers = Singleton<GameWorld>.Instance?.AllAlivePlayersList;
+                if (allPlayers != null)
                 {
-                    if (!BotIsStuck)
+                    foreach (var player in allPlayers)
                     {
-                        shallTeleport = false;
-                        break;
-                    }
-
-                    if (humanPlayer == null || humanPlayer?.HealthController?.IsAlive == false)
-                    {
-                        continue;
-                    }
-
-                    // Make sure the player isn't visible to the bot
-                    if (SAIN.Memory.VisiblePlayers.Contains(humanPlayer))
-                    {
-                        shallTeleport = false;
-                        break;
-                    }
-
-                    // Makes sure the bot isn't too close to a human for them to hear
-                    float sqrMag = (humanPlayer.Position - SAIN.Position).sqrMagnitude;
-                    if (sqrMag < MinDistance * MinDistance)
-                    {
-                        shallTeleport = false;
-                        break;
-                    }
-
-                    // Checks the max distance to do a path calculation
-                    if (sqrMag < MaxDistance * MaxDistance)
-                    {
-                        Vector3 playerPosition = humanPlayer.Position;
-                        NavMeshPath path = CalcPath(SAIN.Position, playerPosition, out float pathLength);
-                        if (CheckPathLength(playerPosition, path, pathLength) == false)
+                        if (ShallCheckPlayer(player))
                         {
-                            shallTeleport = false;
-                            break;
+                            if (!BotIsStuck)
+                            {
+                                shallTeleport = false;
+                                yield break;
+                            }
+
+                            // Make sure the player isn't visible to the bot
+                            if (SAIN.Memory.VisiblePlayers.Contains(player))
+                            {
+                                shallTeleport = false;
+                                break;
+                            }
+
+                            Vector3 playerPosition = player.Position;
+
+                            // Makes sure the bot isn't too close to a human for them to hear
+                            float sqrMag = (playerPosition - botPosition).sqrMagnitude;
+                            if (sqrMag < MinDistance * MinDistance)
+                            {
+                                shallTeleport = false;
+                                break;
+                            }
+
+                            // Checks the max distance to do a path calculation
+                            if (sqrMag < MaxDistance * MaxDistance)
+                            {
+                                NavMeshPath path = CalcPath(botPosition, playerPosition, out float pathLength);
+                                if (CheckPathLength(playerPosition, path, pathLength) == false)
+                                {
+                                    shallTeleport = false;
+                                    break;
+                                }
+                            }
+
+                            // Check next player on the next frame
+                            yield return null;
                         }
                     }
-
-                    // Check next player on the next frame
-                    yield return null;
                 }
             }
 
@@ -268,8 +290,8 @@ namespace SAIN.SAINComponent.Classes.Debug
 
             if (IsTeleporting)
             {
-                Teleport(teleportDestination.Value);
-                float distance = (teleportDestination.Value - SAIN.Position).magnitude;
+                Teleport(teleportDestination.Value + Vector3.up * 0.25f);
+                float distance = (teleportDestination.Value - botPosition).magnitude;
                 Logger.LogDebug($"Teleporting stuck bot: [{Player.name}] [{distance}] meters to the next corner they are trying to go to");
             }
 
@@ -278,14 +300,33 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private bool IsTeleporting;
 
-        private Vector3? GetPlaceToTeleport()
+        private bool CheckVisibilityToAllPlayers(Vector3 point)
         {
-            Vector3? destination = null;
-            if (BotOwner.Mover.HavePath)
+            var allPlayers = Singleton<GameWorld>.Instance?.AllAlivePlayersList;
+            if (allPlayers == null)
             {
-                destination = PathController.CurrentCorner();
+                return false;
             }
-            return destination;
+
+            Vector3 testPoint = point + Vector3.up;
+
+            foreach (var player in allPlayers)
+            {
+                if (ShallCheckPlayer(player))
+                {
+
+                }
+            }
+            return false;
+        }
+
+        private bool ShallCheckPlayer(Player player)
+        {
+            if (Player == null || Player.HealthController == null || Player.AIData == null)
+            {
+                return false;
+            }
+            return Player.HealthController.IsAlive == true && Player.AIData.IsAI == false;
         }
 
         private void Teleport(Vector3 position)

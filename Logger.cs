@@ -36,7 +36,7 @@ namespace SAIN
             ENotificationIconType iconType = ENotificationIconType.Default,
             UnityEngine.Color? textColor = null, bool Error = false)
         {
-            if (_nextNotification < Time.time)
+            if (_nextNotification < Time.time && SAINPlugin.DebugMode)
             {
                 _nextNotification = Time.time + 0.25f;
                 string message = Error ? CreateErrorMessage(data) : data.ToString();

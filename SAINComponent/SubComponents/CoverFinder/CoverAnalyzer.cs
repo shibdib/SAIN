@@ -36,7 +36,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             NavMeshPath path = new NavMeshPath();
             if (CheckColliderForCover(collider, out Vector3 place, out bool isSafe, path))
             {
-                newPoint = new CoverPoint(place, collider, path);
+                newPoint = new CoverPoint(SAIN, place, collider, path);
                 newPoint.IsSafePath = isSafe;
                 return true;
             }
@@ -50,7 +50,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             if (CheckColliderForCover(coverPoint.Collider, out Vector3 place, out bool isSafe, coverPoint.PathToPoint))
             {
                 coverPoint.IsSafePath = isSafe;
-                coverPoint.Position = place;
+                coverPoint.SetPosition(SAIN, place);
             }
 
             return false;
@@ -169,7 +169,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             {
                 foreach (var point in CoverFinder.SpottedCoverPoints)
                 {
-                    if (!point.IsValidAgain && point.TooClose(position))
+                    Vector3 coverPos = point.CoverPoint.GetPosition(SAIN);
+                    if (!point.IsValidAgain && point.TooClose(coverPos, position))
                     {
                         return false;
                     }
@@ -295,14 +296,14 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 {
                     if (member.Cover.CurrentCoverPoint != null)
                     {
-                        if (Vector3.Distance(position, member.Cover.CurrentCoverPoint.Position) < DistanceToBotCoverThresh)
+                        if (Vector3.Distance(position, member.Cover.CurrentCoverPoint.GetPosition(SAIN)) < DistanceToBotCoverThresh)
                         {
                             return false;
                         }
                     }
                     if (member.Cover.FallBackPoint != null)
                     {
-                        if (Vector3.Distance(position, member.Cover.FallBackPoint.Position) < DistanceToBotCoverThresh)
+                        if (Vector3.Distance(position, member.Cover.FallBackPoint.GetPosition(SAIN)) < DistanceToBotCoverThresh)
                         {
                             return false;
                         }

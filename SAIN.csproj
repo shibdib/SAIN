@@ -304,6 +304,7 @@
     <Compile Include="SAINComponent\Classes\Mover\SAINMovementPlanController.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINVaultClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINAILimit.cs" />
+    <Compile Include="SAINComponent\Classes\SAINBotHitReaction - Copy.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotHitReaction.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotUnstuckClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINEnemyPath.cs" />
@@ -429,7 +430,6 @@
     <Compile Include="Editor\Util\RectLayout.cs" />
     <Compile Include="Editor\Util\StylesClass.cs" />
     <Compile Include="Helpers\AudioHelpers.cs" />
-    <Compile Include="Helpers\CoverPointHelpers.cs" />
     <Compile Include="Helpers\DebugGizmos.cs" />
     <Compile Include="Helpers\EFTMath.cs" />
     <Compile Include="SAINComponent\Classes\Sense\DazzleClass.cs" />

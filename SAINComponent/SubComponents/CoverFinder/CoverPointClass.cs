@@ -1,4 +1,5 @@
 ﻿using EFT;
+using EFT.Game.Spawning;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
@@ -19,7 +20,15 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public void Init(SAINComponentClass sain, Vector3 point, NavMeshPath pathToPoint)
         {
-            CoverPoint = new CoverPoint(point, Collider, pathToPoint);
+            if (CoverPoint == null)
+            {
+                CoverPoint = new CoverPoint(sain, point, Collider, pathToPoint);
+            }
+            else
+            {
+                var info = CoverPoint.GetInfo(sain);
+                CoverPoint.SetPosition(info, point);
+            }
         }
 
         public void Update()
@@ -33,7 +42,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         }
 
         public CoverPoint CoverPoint { get; private set; }
-        public Vector3 Position => CoverPoint.Position;
         public NavMeshPath PathToPoint => CoverPoint.PathToPoint;
         public Collider Collider { get; private set; }
     }
@@ -42,14 +50,15 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
     {
         public readonly Dictionary<string, SAINBotCoverInfo> BotCoverInfos = new Dictionary<string, SAINBotCoverInfo>();
 
-        public CoverPoint(Vector3 point, Collider collider, NavMeshPath pathToPoint)
+        public CoverPoint(SAINComponentClass sain, Vector3 point, Collider collider, NavMeshPath pathToPoint)
         {
-            Position = point;
             Collider = collider;
-
             Vector3 size = collider.bounds.size;
             CoverHeight = size.y;
             CoverValue = (size.x + size.y + size.z).Round10();
+
+            var info = GetInfo(sain);
+            SetPosition(info, point);
 
             TimeCreated = Time.time;
 
@@ -95,10 +104,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             info.HitInCoverCount += hitInCover;
             info.HitInCoverUnknownCount += hitUnknown;
         }
-
-        public int HitInCoverUnknownCount { get; set; }
-        public int HitInCoverCount { get; set; }
-        public int HitInCoverCantSeeCount { get; set; }
 
         public bool IsSafePath { get; set; }
 
@@ -186,7 +191,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 info.PointIsVisible = false;
                 if (info.SAIN.Enemy != null)
                 {
-                    Vector3 coverPos = Position;
+                    Vector3 coverPos = info.Position;
                     coverPos += Vector3.up * 0.5f;
                     Vector3 start = info.SAIN.Enemy.EnemyHeadPosition;
                     Vector3 direction = coverPos - start;
@@ -209,7 +214,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 info.nextCalcPathTime = Time.time + 2;
 
                 PathToPoint.ClearCorners();
-                if (NavMesh.CalculatePath(info.SAIN.Position, Position, -1, PathToPoint))
+                if (NavMesh.CalculatePath(info.SAIN.Position, info.Position, -1, PathToPoint))
                 {
                     info.pathLength = PathToPoint.CalculatePathLength();
                 }
@@ -221,7 +226,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return info.pathLength;
         }
 
-        public float PathLength { get; private set; }
+        public float GetPathLength(SAINComponentClass sain)
+        {
+            return GetInfo(sain).pathLength;
+        }
 
         public CoverStatus GetCoverStatus(SAINComponentClass sain)
         {
@@ -234,7 +242,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             if (info.nextCheckStatusTime < Time.time)
             {
                 info.nextCheckStatusTime = Time.time + 0.25f;
-                float sqrMagnitude = (info.SAIN.Position - Position).sqrMagnitude;
+                float sqrMagnitude = (info.SAIN.Position - info.Position).sqrMagnitude;
                 info.SqrMagnitude = sqrMagnitude;
 
                 CoverStatus status;
@@ -271,7 +279,27 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private const float MidCoverDist = 20f;
 
         public Collider Collider { get; private set; }
-        public Vector3 Position { get; set; }
+
+        public Vector3 GetPosition(SAINComponentClass sain)
+        {
+            return GetInfo(sain).Position;
+        }
+
+        public void SetPosition(SAINComponentClass sain, Vector3 value)
+        {
+            GetInfo(sain).Position = value;
+        }
+
+        public Vector3 GetPosition(SAINBotCoverInfo info)
+        {
+            return info.Position;
+        }
+
+        public void SetPosition(SAINBotCoverInfo info, Vector3 value)
+        {
+            info.Position = value;
+        }
+
         public float TimeCreated { get; private set; }
 
     }

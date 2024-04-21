@@ -30,14 +30,14 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 if (FindTargetCover())
                 {
                     RecalcTimer = Time.time + 2f;
-                    if ((CoverDestination.Position - BotOwner.Position).sqrMagnitude > 4f)
+                    if ((CoverDestination.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude > 4f)
                     {
-                        MoveSuccess = BotOwner.BotRun.Run(CoverDestination.Position, false, 0.6f);
+                        MoveSuccess = BotOwner.BotRun.Run(CoverDestination.GetPosition(SAIN), false, 0.6f);
                     }
                     else
                     {
-                        bool shallCrawl = SAIN.Decision.CurrentSelfDecision != SelfDecision.None && CoverDestination.GetCoverStatus() == CoverStatus.FarFromCover && shallProne;
-                        MoveSuccess = SAIN.Mover.GoToPoint(CoverDestination.Position, out bool calculating, -1, shallCrawl);
+                        bool shallCrawl = SAIN.Decision.CurrentSelfDecision != SelfDecision.None && CoverDestination.GetCoverStatus(SAIN) == CoverStatus.FarFromCover && shallProne;
+                        MoveSuccess = SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out bool calculating, -1, shallCrawl);
                     }
                 }
                 if (MoveSuccess)
@@ -72,9 +72,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
             }
 
             CoverPoint coverPoint = SelectPoint();
-            if (coverPoint != null && !coverPoint.GetSpotted())
+            if (coverPoint != null && !coverPoint.GetSpotted(SAIN))
             {
-                if (SAIN.Mover.CanGoToPoint(coverPoint.Position, out Vector3 pointToGo, true, 1f))
+                if (SAIN.Mover.CanGoToPoint(coverPoint.GetPosition(SAIN), out Vector3 pointToGo, true, 1f))
                 {
                     //coverPoint.Position = pointToGo;
                     coverPoint.SetBotIsUsingThis(true);
@@ -95,7 +95,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 return fallback;
             }
-            else if (coverInUse != null && !coverInUse.GetSpotted())
+            else if (coverInUse != null && !coverInUse.GetSpotted(SAIN))
             {
                 return coverInUse;
             }

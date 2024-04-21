@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using EFT;
+using EFT.InventoryLogic;
 using HarmonyLib;
 using SAIN.Components;
 using System;
@@ -17,80 +18,66 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
-            RefreshMeds();
         }
+
+        private float _handsBusyTimer;
 
         public void Update()
         {
-            if (!UsingMeds)
+            RefreshMeds();
+
+            if (!UsingMeds && Player != null)
             {
-                if (WasUsingMeds)
+                if (_handsBusyTimer < Time.time)
                 {
-                    RefreshMeds();
+                    var handsController = Player.HandsController;
+                    if (handsController.IsInInteractionStrictCheck())
+                    {
+                        _handsBusyTimer = Time.time + 1f;
+                        return;
+                    }
+
+                    switch (SAIN.Memory.Decisions.Self.Current)
+                    {
+                        case SelfDecision.Reload:
+                            TryReload();
+                            break;
+
+                        case SelfDecision.Surgery:
+                            DoSurgery();
+                            break;
+
+                        case SelfDecision.FirstAid:
+                            DoFirstAid();
+                            break;
+
+                        case SelfDecision.Stims:
+                            DoStims();
+                            break;
+
+                        default:
+                            break;
+                    }
                 }
-                switch (SAIN.Memory.Decisions.Self.Current)
-                {
-                    case SelfDecision.Reload:
-                        TryReload();
-                        break;
-
-                    case SelfDecision.Surgery:
-                        DoSurgery();
-                        break;
-
-                    case SelfDecision.FirstAid:
-                        DoFirstAid();
-                        break;
-
-                    case SelfDecision.Stims:
-                        DoStims();
-                        break;
-
-                    default:
-                        break;
-                }
-                WasUsingMeds = UsingMeds;
             }
         }
 
         private void RefreshMeds()
         {
-            // According to BSG bots should only be able to look either in the secure container or EVERYWHERE ELSE, so I'm setting the toggle both ways and calling RefreshMeds to get both. If I understand that right.
-            if (UseMedsOnlySafeContainerProp == null)
+            if (_refreshMedsTimer < Time.time)
             {
-                FirstAidField = AccessTools.Field(typeof(BotMedecine), "FirstAid");
-                UseMedsOnlySafeContainerProp = AccessTools.Field(FirstAidField.FieldType, "bool_2");
-            }
-
-            BotOwner.Medecine.RefreshCurMeds();
-
-            return;
-
-            if (UseMedsOnlySafeContainerProp != null)
-            {
-                object value = UseMedsOnlySafeContainerProp.GetValue(BotOwner.Medecine.FirstAid);
-                if (value != null && value is bool useSafeContainer)
-                {
-                    useSafeContainer = !useSafeContainer;
-                    UseMedsOnlySafeContainerProp.SetValue(BotOwner.Medecine.FirstAid, useSafeContainer);
-
-                    BotOwner.Medecine.RefreshCurMeds();
-                }
+                _refreshMedsTimer = Time.time + 5f;
+                BotOwner.Medecine.RefreshCurMeds();
             }
         }
 
-        private static FieldInfo FirstAidField;
-        private static FieldInfo UseMedsOnlySafeContainerProp;
+        private float _refreshMedsTimer;
 
         public void Dispose()
         {
         }
 
-
-        private bool WasUsingMeds = false;
-
         private bool UsingMeds => BotOwner.Medecine?.Using == true;
-
 
         public void DoFirstAid()
         {
@@ -115,13 +102,39 @@ namespace SAIN.SAINComponent.Classes.Decision
         public void DoStims()
         {
             var stims = BotOwner.Medecine.Stimulators;
-            if (StimTimer < Time.time && stims.CanUseNow())
+            if (HealTimer < Time.time && stims.CanUseNow())
             {
-                StimTimer = Time.time + 5f;
+                HealTimer = Time.time + 5f;
                 try { stims.TryApply(); }
                 catch { }
             }
         }
+
+        private bool HaveStimsToHelp()
+        {
+            return false;
+        }
+
+        private void Refresh()
+        {
+            Player getPlayer = Player;
+            MedicalItems.Clear();
+
+            getPlayer.GClass2761_0.GetAcceptableItemsNonAlloc<MedsClass>(anySlots, MedicalItems, null);
+            foreach (var item in MedicalItems)
+            {
+            }
+        }
+
+        public static readonly EquipmentSlot[] anySlots = new EquipmentSlot[]
+        {
+            EquipmentSlot.Pockets,
+            EquipmentSlot.TacticalVest,
+            EquipmentSlot.Backpack,
+            EquipmentSlot.SecuredContainer,
+        };
+
+        private readonly List<MedsClass> MedicalItems = new List<MedsClass>();
 
         public void TryReload()
         {
@@ -130,7 +143,6 @@ namespace SAIN.SAINComponent.Classes.Decision
                 BotOwner.WeaponManager.Reload.TryReload();
                 if (BotOwner.WeaponManager.Reload.NoAmmoForReloadCached)
                 {
-                    //System.Console.WriteLine("NoAmmoForReloadCached");
                     BotOwner.WeaponManager.Reload.TryFillMagazines();
                 }
             }

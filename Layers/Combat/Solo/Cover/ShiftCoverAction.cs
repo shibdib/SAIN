@@ -29,12 +29,12 @@ namespace SAIN.Layers.Combat.Solo.Cover
             Shoot.Update();
             if (NewPoint == null 
                 && FindPointToGo() 
-                && SAIN.Mover.GoToPoint(NewPoint.Position, out bool calculating))
+                && SAIN.Mover.GoToPoint(NewPoint.GetPosition(SAIN), out bool calculating))
             {
                 SAIN.Mover.SetTargetMoveSpeed(GetSpeed());
                 SAIN.Mover.SetTargetPose(GetPose());
             }
-            else if (NewPoint != null && NewPoint.GetCoverStatus() == CoverStatus.InCover)
+            else if (NewPoint != null && NewPoint.GetCoverStatus(SAIN) == CoverStatus.InCover)
             {
                 SAIN.Decision.EnemyDecisions.ShiftCoverComplete = true;
             }
@@ -84,7 +84,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         {
                             for (int j = 0; j < UsedPoints.Count; j++)
                             {
-                                if ((UsedPoints[j].Position - shiftCoverTarget.Position).sqrMagnitude > 5f)
+                                if ((UsedPoints[j].GetPosition(SAIN) - shiftCoverTarget.GetPosition(SAIN)).sqrMagnitude > 5f)
                                 {
                                     coverInUse.SetBotIsUsingThis(false);
                                     shiftCoverTarget.SetBotIsUsingThis(true);

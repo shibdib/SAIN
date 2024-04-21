@@ -27,7 +27,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (CoverDestination != null)
             {
-                if (!SAIN.Cover.CoverPoints.Contains(CoverDestination) || CoverDestination.GetSpotted())
+                if (!SAIN.Cover.CoverPoints.Contains(CoverDestination) || CoverDestination.GetSpotted(SAIN))
                 {
                     CoverDestination.SetBotIsUsingThis(false);
                     CoverDestination = null;
@@ -40,7 +40,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (CoverDestination == null)
             {
                 var coverPoint = SAIN.Cover.ClosestPoint;
-                if (coverPoint != null && !coverPoint.GetSpotted() && SAIN.Mover.GoToPoint(coverPoint.Position, out bool calculating))
+                if (coverPoint != null && !coverPoint.GetSpotted(SAIN) && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out bool calculating))
                 {
                     CoverDestination = coverPoint;
                     CoverDestination.SetBotIsUsingThis(true);
@@ -51,7 +51,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             }
             if (CoverDestination != null && RecalcPathTimer < Time.time)
             {
-                if (SAIN.Mover.GoToPoint(CoverDestination.Position, out bool calculating))
+                if (SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out bool calculating))
                 {
                     RecalcPathTimer = Time.time + 2f;
 
@@ -75,11 +75,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private bool FindTargetCover()
         {
             var coverPoint = SAIN.Cover.ClosestPoint;
-            if (coverPoint != null && !coverPoint.GetSpotted())
+            if (coverPoint != null && !coverPoint.GetSpotted(SAIN))
             {
                 coverPoint.SetBotIsUsingThis(true);
                 CoverDestination = coverPoint;
-                DestinationPosition = coverPoint.Position;
+                DestinationPosition = coverPoint.GetPosition(SAIN);
             }
             return false;
         }

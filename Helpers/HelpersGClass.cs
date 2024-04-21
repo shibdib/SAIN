@@ -13,6 +13,8 @@ using EFTSettingsGroup = GClass458;
 using EFTStatModifiersClass = GClass529;
 using EFTTime = GClass1296;
 using EFTSearchPoint = PlaceForCheck;
+using ScavBaseBrain = GClass290;
+using PMCBaseBrain = GClass286;
 using Aki.Reflection.Patching;
 
 ////////
@@ -43,6 +45,83 @@ namespace SAIN.Helpers
             EFTBotSettingsProp = AccessTools.Property(typeof(BotDifficultySettingsClass), "FileSettings");
             RefreshSettingsMethod = AccessTools.Method(typeof(BotDifficultySettingsClass), "method_0");
             PathControllerField = AccessTools.Field(typeof(BotMover), "_pathController");
+        }
+
+        public static bool UpdateBaseBrain(BotOwner botOwner)
+        {
+            bool brainSwapped = false;
+            WildSpawnType wildSpawnType = botOwner.Profile.Info.Settings.Role;
+            switch (wildSpawnType)
+            {
+                case WildSpawnType.assault:
+                case WildSpawnType.assaultGroup:
+                case WildSpawnType.crazyAssaultEvent:
+                case WildSpawnType.cursedAssault:
+                    botOwner.Brain.BaseBrain = new ScavBaseBrain(botOwner);
+                    brainSwapped = true;
+                    break;
+
+                    default:
+                    break;
+            }
+            if (!brainSwapped && EnumValues.WildSpawn.IsPMC(wildSpawnType))
+            {
+                botOwner.Brain.BaseBrain = new PMCBaseBrain(botOwner, false);
+                brainSwapped = true;
+            }
+
+            if (brainSwapped)
+            {
+                BaseBrain baseBrain = botOwner.Brain.BaseBrain;
+                string name = botOwner.name + " " + botOwner.Profile.Info.Settings.Role.ToString();
+
+                botOwner.Brain.Agent = new AICoreAgentClass<BotLogicDecision>(
+                    botOwner.BotsController.AICoreController,
+                    baseBrain,
+                    GClass460.ActionsList(botOwner),
+                    botOwner.gameObject,
+                    name,
+                    new Func<BotLogicDecision, GClass134>(botOwner.Brain.method_0));
+
+                if (!InvokeOnSetStrategy(baseBrain, botOwner))
+                {
+                    return false;
+                }
+            }
+            return brainSwapped;
+        }
+
+        private static FieldInfo _onSetStratField;
+
+        private static bool InvokeOnSetStrategy(BaseBrain strategy, BotOwner botOwner)
+        {
+            // Get the event field using reflection
+            if (_onSetStratField == null)
+            {
+                _onSetStratField = AccessTools.Field(typeof(StandartBotBrain), "OnSetStrategy");
+            }
+
+            // Check if the event field exists
+            if (_onSetStratField != null)
+            {
+                // Get the event delegate
+                var eventDelegate = (MulticastDelegate)_onSetStratField.GetValue(botOwner.Brain);
+
+                // Check if there are subscribers
+                if (eventDelegate != null)
+                {
+                    // Get the list of event handlers
+                    Delegate[] eventHandlers = eventDelegate.GetInvocationList();
+
+                    // Invoke each event handler
+                    foreach (Delegate handler in eventHandlers)
+                    {
+                        handler.DynamicInvoke(strategy);
+                    }
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static void RefreshSettings(BotDifficultySettingsClass settings)

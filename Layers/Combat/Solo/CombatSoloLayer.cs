@@ -16,10 +16,6 @@ namespace SAIN.Layers.Combat.Solo
 
         public static readonly string Name = BuildLayerName<CombatSoloLayer>();
 
-        public void CalculateSearchPlan(SAINComponentClass sain)
-        {
-        }
-
         public override Action GetNextAction()
         {
             SoloDecision Decision = CurrentDecision;
@@ -94,7 +90,7 @@ namespace SAIN.Layers.Combat.Solo
                     return new Action(typeof(InvestigateAction), $"{Decision}");
 
                 default:
-                    return new Action(typeof(WalkToCoverAction), $"DEFAULT! {Decision}");
+                    return new Action(typeof(StandAndShootAction), $"DEFAULT! {Decision}");
             }
         }
 

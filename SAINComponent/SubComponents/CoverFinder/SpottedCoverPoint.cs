@@ -11,13 +11,12 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             TimeCreated = Time.time;
         }
 
-        public bool TooClose(Vector3 newPos, float sqrdist = 3f)
+        public bool TooClose(Vector3 coverInfoPosition, Vector3 newPos, float sqrdist = 3f)
         {
-            return (Position - newPos).sqrMagnitude > sqrdist;
+            return (coverInfoPosition - newPos).sqrMagnitude > sqrdist;
         }
 
         public CoverPoint CoverPoint { get; private set; }
-        public Vector3 Position => CoverPoint.Position;
         public float TimeCreated { get; private set; }
         public float TimeSinceCreated => Time.time - TimeCreated;
 

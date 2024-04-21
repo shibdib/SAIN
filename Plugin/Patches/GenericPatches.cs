@@ -82,6 +82,21 @@ namespace SAIN.Patches.Generic
         }
     }
 
+    internal class ForceAIBrainPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod() => typeof(StandartBotBrain).GetMethod("Activate");
+        [PatchPrefix]
+        public static bool PatchPrefix(ref BotOwner ___botOwner_0)
+        {
+            if (HelpersGClass.UpdateBaseBrain(___botOwner_0))
+            {
+                SAIN.Logger.NotifyWarning("Updated BaseBrain");
+                return false;
+            }
+            return true;
+        }
+    }
+
     internal class ForceNoHeadAimPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(EnemyInfo).GetMethod("method_7");

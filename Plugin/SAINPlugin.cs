@@ -81,6 +81,7 @@ namespace SAIN
                 typeof(Patches.Generic.OnMakingShotRecoilPatch),
                 typeof(Patches.Generic.GetHitPatch),
                 typeof(Patches.Generic.BotGroupAddEnemyPatch),
+                typeof(Patches.Generic.ForceAIBrainPatch),
                 typeof(Patches.Generic.ForceNoHeadAimPatch),
                 typeof(Patches.Generic.NoTeleportPatch),
                 typeof(Patches.Generic.ShallKnowEnemyPatch),
