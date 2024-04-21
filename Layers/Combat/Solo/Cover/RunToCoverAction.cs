@@ -36,7 +36,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     }
                     else
                     {
-                        bool shallCrawl = SAIN.Decision.CurrentSelfDecision != SelfDecision.None && CoverDestination.CoverStatus == CoverStatus.FarFromCover && shallProne;
+                        bool shallCrawl = SAIN.Decision.CurrentSelfDecision != SelfDecision.None && CoverDestination.GetCoverStatus() == CoverStatus.FarFromCover && shallProne;
                         MoveSuccess = SAIN.Mover.GoToPoint(CoverDestination.Position, out bool calculating, -1, shallCrawl);
                     }
                 }
@@ -67,17 +67,17 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (CoverDestination != null)
             {
-                CoverDestination.BotIsUsingThis = false;
+                CoverDestination.SetBotIsUsingThis(false);
                 CoverDestination = null;
             }
 
             CoverPoint coverPoint = SelectPoint();
-            if (coverPoint != null && !coverPoint.Spotted)
+            if (coverPoint != null && !coverPoint.GetSpotted())
             {
                 if (SAIN.Mover.CanGoToPoint(coverPoint.Position, out Vector3 pointToGo, true, 1f))
                 {
                     //coverPoint.Position = pointToGo;
-                    coverPoint.BotIsUsingThis = true;
+                    coverPoint.SetBotIsUsingThis(true);
                     CoverDestination = coverPoint;
                     return true;
                 }
@@ -91,11 +91,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
             SoloDecision currentDecision = SAIN.Memory.Decisions.Main.Current;
             CoverPoint coverInUse = SAIN.Cover.CoverInUse;
 
-            if (currentDecision == SoloDecision.Retreat && fallback != null && fallback.CheckPathSafety())
+            if (currentDecision == SoloDecision.Retreat && fallback != null && fallback.CheckPathSafety(SAIN))
             {
                 return fallback;
             }
-            else if (coverInUse != null && !coverInUse.Spotted)
+            else if (coverInUse != null && !coverInUse.GetSpotted())
             {
                 return coverInUse;
             }

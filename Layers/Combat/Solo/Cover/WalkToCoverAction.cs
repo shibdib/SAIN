@@ -27,9 +27,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (CoverDestination != null)
             {
-                if (!SAIN.Cover.CoverPoints.Contains(CoverDestination) || CoverDestination.Spotted)
+                if (!SAIN.Cover.CoverPoints.Contains(CoverDestination) || CoverDestination.GetSpotted())
                 {
-                    CoverDestination.BotIsUsingThis = false;
+                    CoverDestination.SetBotIsUsingThis(false);
                     CoverDestination = null;
                 }
             }
@@ -40,10 +40,10 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (CoverDestination == null)
             {
                 var coverPoint = SAIN.Cover.ClosestPoint;
-                if (coverPoint != null && !coverPoint.Spotted && SAIN.Mover.GoToPoint(coverPoint.Position, out bool calculating))
+                if (coverPoint != null && !coverPoint.GetSpotted() && SAIN.Mover.GoToPoint(coverPoint.Position, out bool calculating))
                 {
                     CoverDestination = coverPoint;
-                    CoverDestination.BotIsUsingThis = true;
+                    CoverDestination.SetBotIsUsingThis(true);
                     RecalcPathTimer = Time.time + 2f;
                     SAIN.Mover.SetTargetMoveSpeed(1f);
                     SAIN.Mover.SetTargetPose(1f);
@@ -75,9 +75,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private bool FindTargetCover()
         {
             var coverPoint = SAIN.Cover.ClosestPoint;
-            if (coverPoint != null && !coverPoint.Spotted)
+            if (coverPoint != null && !coverPoint.GetSpotted())
             {
-                coverPoint.BotIsUsingThis = true;
+                coverPoint.SetBotIsUsingThis(true);
                 CoverDestination = coverPoint;
                 DestinationPosition = coverPoint.Position;
             }
@@ -88,7 +88,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (SAIN.Mover.GoToPoint(position, out bool calculating))
             {
-                CoverDestination.BotIsUsingThis = true;
+                CoverDestination.SetBotIsUsingThis(true);
                 if (SAIN.HasEnemy || BotOwner.Memory.IsUnderFire)
                 {
                     SAIN.Mover.SetTargetMoveSpeed(1f);
@@ -141,7 +141,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (CoverDestination != null)
             {
-                CoverDestination.BotIsUsingThis = false;
+                CoverDestination.SetBotIsUsingThis(false);
                 CoverDestination = null;
             }
         }

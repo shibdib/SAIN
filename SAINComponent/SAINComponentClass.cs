@@ -91,7 +91,7 @@ namespace SAIN.SAINComponent
                 Suppression = new SAINBotSuppressClass(this);
                 AILimit = new SAINAILimit(this);
                 AimDownSightsController = new AimDownSightsController(this);
-                BotStun = new SAINBotShotStun(this);
+                BotHitReaction = new SAINBotHitReaction(this);
 
                 NavMeshAgent = this.GetComponent<NavMeshAgent>();
                 if (NavMeshAgent == null)
@@ -129,7 +129,7 @@ namespace SAIN.SAINComponent
             Suppression.Init();
             AILimit.Init();
             AimDownSightsController.Init();
-            BotStun.Init();
+            BotHitReaction.Init();
 
             TimeBotCreated = Time.time;
 
@@ -196,7 +196,7 @@ namespace SAIN.SAINComponent
                 Vault.Update();
                 Suppression.Update();
                 AimDownSightsController.Update();
-                BotStun.Update();
+                BotHitReaction.Update();
 
                 BotOwner.DoorOpener.Update(); 
                 UpdateGoalTarget();
@@ -380,7 +380,7 @@ namespace SAIN.SAINComponent
                 Suppression?.Dispose();
                 AILimit?.Dispose();
                 AimDownSightsController?.Dispose();
-                BotStun?.Dispose();
+                BotHitReaction?.Dispose();
 
                 Destroy(this);
             }
@@ -444,7 +444,7 @@ namespace SAIN.SAINComponent
             }
         }
 
-        public SAINBotShotStun BotStun { get; private set; }
+        public SAINBotHitReaction BotHitReaction { get; private set; }
         public AimDownSightsController AimDownSightsController { get; private set; }
         public SAINAILimit AILimit { get; private set; }
         public SAINBotSuppressClass Suppression { get; private set; }

@@ -50,7 +50,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 ActivateCoverFinder(true);
             }
-            else if (CurrentDecision == SoloDecision.HoldInCover && (currentCover == null || currentCover.Spotted == true || Time.time - currentCover.TimeCreated > 5f))
+            else if (CurrentDecision == SoloDecision.HoldInCover && (currentCover == null || currentCover.GetSpotted() == true || Time.time - currentCover.TimeCreated > 5f))
             {
                 ActivateCoverFinder(true);
             }
@@ -73,21 +73,27 @@ namespace SAIN.SAINComponent.Classes
         private void OnBeingHit(EBodyPart part, float unused, DamageInfo damage)
         {
             LastHitTime = Time.time;
-            CoverPoint activePoint = CoverInUse;
-            if (activePoint != null && activePoint.CoverStatus == CoverStatus.InCover)
+
+            SAINEnemy enemy = SAIN.Enemy;
+            bool HitInCoverKnown = enemy != null && damage.Player != null && enemy.EnemyPlayer.ProfileId == damage.Player.iPlayer.ProfileId;
+            bool HitInCoverCantSee = enemy != null && enemy.IsVisible == false;
+
+            foreach (var coverPoint in CoverPoints)
             {
-                SAINEnemy enemy = SAIN.Enemy;
-                if (enemy != null && damage.Player != null && enemy.EnemyPlayer.ProfileId == damage.Player.iPlayer.ProfileId)
+                if (coverPoint.GetCoverStatus() == CoverStatus.InCover)
                 {
-                    activePoint.HitInCoverCount++;
-                    if (!enemy.IsVisible)
+                    if (HitInCoverCantSee)
                     {
-                        activePoint.HitInCoverCount++;
+                        coverPoint.HitInCoverCantSeeCount++;
                     }
-                }
-                else
-                {
-                    activePoint.HitInCoverUnknownCount++;
+                    if (HitInCoverKnown)
+                    {
+                        coverPoint.HitInCoverCount++;
+                    }
+                    else
+                    {
+                        coverPoint.HitInCoverUnknownCount--;
+                    }
                 }
             }
         }
@@ -120,7 +126,7 @@ namespace SAIN.SAINComponent.Classes
                     CoverPoint point = CoverPoints[i];
                     if (point != null)
                     {
-                        if (point != null && point.Spotted == false && point.IsBad == false)
+                        if (point != null && point.GetSpotted() == false && point.IsBad == false)
                         {
                             return point;
                         }
@@ -204,31 +210,31 @@ namespace SAIN.SAINComponent.Classes
         public bool BotIsAtCoverInUse(out CoverPoint coverInUse)
         {
             coverInUse = CoverInUse;
-            return coverInUse != null && coverInUse.BotIsHere;
+            return coverInUse != null && coverInUse.BotIsHere();
         }
 
         public bool BotIsAtCoverPoint(CoverPoint coverPoint)
         {
-            return coverPoint != null && coverPoint.BotIsHere;
+            return coverPoint != null && coverPoint.BotIsHere();
         }
 
         public bool BotIsAtCoverInUse()
         {
             var coverPoint = CoverInUse;
-            return coverPoint != null && coverPoint.BotIsHere;
+            return coverPoint != null && coverPoint.BotIsHere();
         }
 
         public CoverPoint CoverInUse
         {
             get
             {
-                if (FallBackPoint != null && (FallBackPoint.BotIsUsingThis || BotIsAtCoverPoint(FallBackPoint)))
+                if (FallBackPoint != null && (FallBackPoint.GetBotIsUsingThis() || BotIsAtCoverPoint(FallBackPoint)))
                 {
                     return FallBackPoint;
                 }
                 foreach (var point in CoverPoints)
                 {
-                    if (point != null && (point.BotIsUsingThis || BotIsAtCoverPoint(point)))
+                    if (point != null && (point.GetBotIsUsingThis() || BotIsAtCoverPoint(point)))
                     {
                         return point;
                     }

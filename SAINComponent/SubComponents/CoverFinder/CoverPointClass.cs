@@ -4,161 +4,241 @@ using SAIN.Helpers;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
+    public class CoverPointComponent : MonoBehaviour
+    {
+        public void Awake()
+        {
+            Collider = this.GetComponent<Collider>();
+        }
+
+        public void Init(SAINComponentClass sain, Vector3 point, NavMeshPath pathToPoint)
+        {
+            CoverPoint = new CoverPoint(point, Collider, pathToPoint);
+        }
+
+        public void Update()
+        {
+
+        }
+
+        public void Dispose()
+        {
+            Destroy(this);
+        }
+
+        public CoverPoint CoverPoint { get; private set; }
+        public Vector3 Position => CoverPoint.Position;
+        public NavMeshPath PathToPoint => CoverPoint.PathToPoint;
+        public Collider Collider { get; private set; }
+    }
+
     public class CoverPoint
     {
-        public CoverPoint(SAINComponentClass sain, Vector3 point, Collider collider, NavMeshPath pathToPoint)
-        {
-            SAIN = sain;
+        public readonly Dictionary<string, SAINBotCoverInfo> BotCoverInfos = new Dictionary<string, SAINBotCoverInfo>();
 
+        public CoverPoint(Vector3 point, Collider collider, NavMeshPath pathToPoint)
+        {
             Position = point;
             Collider = collider;
 
             Vector3 size = collider.bounds.size;
             CoverHeight = size.y;
-            CoverValue = (size.x + size.y + size.z).Round1();
+            CoverValue = (size.x + size.y + size.z).Round10();
 
             TimeCreated = Time.time;
-            ReCheckStatusTimer = Time.time;
 
             PathToPoint = pathToPoint;
-            PathLength = PathToPoint.CalculatePathLength();
-            LastPathCalcTimer = Time.time + 2f;
-            CheckPathSafetyTimer = Time.time + 1f;
+        }
 
-            Id = Guid.NewGuid().ToString();
+        public void UpdateInfo(SAINComponentClass sain)
+        {
+            var info = GetInfo(sain);
+        }
+
+        public SAINBotCoverInfo GetInfo(SAINComponentClass sain)
+        {
+            if (!BotCoverInfos.ContainsKey(sain.ProfileId))
+            {
+                BotCoverInfos.Add(sain.ProfileId, new SAINBotCoverInfo(sain));
+            }
+            return BotCoverInfos[sain.ProfileId];
         }
 
         public bool IsBad;
 
         public float CoverValue { get; private set; }
 
-        private readonly SAINComponentClass SAIN;
-
         public NavMeshPath PathToPoint { get; private set; }
 
-        private float LastPathCalcTimer;
+        public void ResetHitInCoverCount(SAINBotCoverInfo info)
+        {
+            info.HitInCoverUnknownCount = 0;
+            info.HitInCoverCantSeeCount = 0;
+            info.HitInCoverCount = 0;
+        }
+
+        public void GetHit(SAINComponentClass sain, int hitUnknown, int hitCantSee, int hitInCover)
+        {
+            var info = GetInfo(sain);
+            GetHit(info, hitUnknown, hitCantSee, hitInCover);
+        }
+
+        public void GetHit(SAINBotCoverInfo info, int hitUnknown, int hitCantSee, int hitInCover)
+        {
+            info.HitInCoverCantSeeCount += hitCantSee;
+            info.HitInCoverCount += hitInCover;
+            info.HitInCoverUnknownCount += hitUnknown;
+        }
 
         public int HitInCoverUnknownCount { get; set; }
         public int HitInCoverCount { get; set; }
+        public int HitInCoverCantSeeCount { get; set; }
 
         public bool IsSafePath { get; set; }
 
         public float CoverHeight { get; private set; }
 
-        public bool CheckPathSafety()
+        public bool CheckPathSafety(SAINComponentClass sain)
         {
-            if (CheckPathSafetyTimer < Time.time)
+            var info = GetInfo(sain);
+            return CheckPathSafety(info);
+        }
+
+        public bool CheckPathSafety(SAINBotCoverInfo info)
+        {
+            if (info.nextPathSafetyTime < Time.time)
             {
-                CheckPathSafetyTimer = Time.time + 3f;
+                info.nextPathSafetyTime = Time.time + 3f;
 
                 Vector3 target;
-                if (SAIN.HasEnemy)
+                if (info.SAIN.HasEnemy)
                 {
-                    target = SAIN.Enemy.EnemyHeadPosition;
+                    target = info.SAIN.Enemy.EnemyHeadPosition;
                 }
-                else if (SAIN.CurrentTargetPosition != null)
+                else if (info.SAIN.CurrentTargetPosition != null)
                 {
-                    target = SAIN.CurrentTargetPosition.Value;
+                    target = info.SAIN.CurrentTargetPosition.Value;
                 }
                 else
                 {
-                    IsSafePath = true;
+                    info.IsSafePath = true;
                     return true;
                 }
 
-                CalcPath();
-                IsSafePath = SAINBotSpaceAwareness.CheckPathSafety(PathToPoint, target);
+                CalcPathLength(info);
+                info.IsSafePath = SAINBotSpaceAwareness.CheckPathSafety(PathToPoint, target);
             }
-            return IsSafePath;
+            return info.IsSafePath;
         }
 
-        private float CheckPathSafetyTimer = 0;
+        private bool botIsUsingThis;
 
-        public string Id { get; set; }
-
-        public bool BotIsUsingThis { get; set; }
-
-        public bool BotIsHere => CoverStatus == CoverStatus.InCover;
-
-        public bool Spotted
+        public bool GetBotIsUsingThis()
         {
-            get
-            {
-                if (HitInCoverCount > 1 || HitInCoverUnknownCount > 0)
-                {
-                    return true;
-                }
-                if (BotIsUsingThis && PointIsVisible())
-                {
-                    return true;
-                }
-                return false;
-            }
+            return botIsUsingThis;
         }
 
-        public bool PointIsVisible()
+        public void SetBotIsUsingThis(bool value)
         {
-            if (VisTimer < Time.time)
+            botIsUsingThis = value;
+        }
+
+        public bool BotInThisCover(SAINComponentClass sain)
+        {
+            var info = GetInfo(sain);
+            return BotInThisCover(info);
+        }
+
+        public bool BotInThisCover(SAINBotCoverInfo info)
+        {
+            return GetCoverStatus(info) == CoverStatus.InCover;
+        }
+
+        public bool GetSpotted(SAINComponentClass sain)
+        {
+            var info = GetInfo(sain);
+            return BotSpotted(info);
+        }
+
+        public bool BotSpotted(SAINBotCoverInfo info)
+        {
+            return info.HitInCoverCount > 2 || info.HitInCoverUnknownCount > 0 || info.HitInCoverCantSeeCount > 1;
+        }
+
+        public bool PointIsVisible(SAINComponentClass sain)
+        {
+            var info = GetInfo(sain);
+            return PointIsVisible(info);
+        }
+
+        public bool PointIsVisible(SAINBotCoverInfo info)
+        {
+            if (info.nextCheckVisTime < Time.time)
             {
-                VisTimer = Time.time + 0.5f;
-                PointVis = false;
-                if (SAIN.Enemy != null)
+                info.nextCheckVisTime = Time.time + 0.5f;
+
+                info.PointIsVisible = false;
+                if (info.SAIN.Enemy != null)
                 {
                     Vector3 coverPos = Position;
                     coverPos += Vector3.up * 0.5f;
-                    Vector3 start = SAIN.Enemy.EnemyHeadPosition;
+                    Vector3 start = info.SAIN.Enemy.EnemyHeadPosition;
                     Vector3 direction = coverPos - start;
-                    PointVis = !Physics.Raycast(start, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
+                    info.PointIsVisible = !Physics.Raycast(start, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
                 }
             }
-            return PointVis;
+            return info.PointIsVisible;
         }
 
-        private bool PointVis;
-        private float VisTimer;
-
-        public float CalcPath()
+        public float CalcPathLength(SAINComponentClass sain)
         {
-            if (LastPathCalcTimer < Time.time)
+            var info = GetInfo(sain);
+            return CalcPathLength(info);
+        }
+
+        public float CalcPathLength(SAINBotCoverInfo info)
+        {
+            if (info.nextCalcPathTime < Time.time)
             {
-                LastPathCalcTimer = Time.time + 2;
+                info.nextCalcPathTime = Time.time + 2;
+
                 PathToPoint.ClearCorners();
-                if (NavMesh.CalculatePath(BotOwner.Position, Position, -1, PathToPoint))
+                if (NavMesh.CalculatePath(info.SAIN.Position, Position, -1, PathToPoint))
                 {
-                    PathLength = PathToPoint.CalculatePathLength();
+                    info.pathLength = PathToPoint.CalculatePathLength();
                 }
                 else
                 {
-                    PathLength = float.MaxValue;
+                    info.pathLength = float.MaxValue;
                 }
             }
-            return PathLength;
+            return info.pathLength;
         }
 
         public float PathLength { get; private set; }
 
-        public float Distance => (BotOwner.Position - Position).magnitude;
-
-        public CoverStatus CoverStatus
+        public CoverStatus GetCoverStatus(SAINComponentClass sain)
         {
-            get
-            {
-                ReCheckStatusTimer += Time.deltaTime;
-                if (ReCheckStatusTimer < 0.1f)
-                {
-                    return OldStatus;
-                }
-                ReCheckStatusTimer = 0f;
+            var info = GetInfo(sain);
+            return GetCoverStatus(info);
+        }
 
-                float sqrMagnitude = (BotOwner.Position - Position).sqrMagnitude;
+        public CoverStatus GetCoverStatus(SAINBotCoverInfo info)
+        {
+            if (info.nextCheckStatusTime < Time.time)
+            {
+                info.nextCheckStatusTime = Time.time + 0.25f;
+                float sqrMagnitude = (info.SAIN.Position - Position).sqrMagnitude;
+                info.SqrMagnitude = sqrMagnitude;
 
                 CoverStatus status;
-                if (OldStatus == CoverStatus.InCover && sqrMagnitude <= InCoverStayDist * InCoverStayDist)
+                if (info.LastStatus == CoverStatus.InCover && sqrMagnitude <= InCoverStayDist * InCoverStayDist)
                 {
                     status = CoverStatus.InCover;
                 }
@@ -178,25 +258,48 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 {
                     status = CoverStatus.FarFromCover;
                 }
-                CoverDistSqrMagnitude = sqrMagnitude;
-                OldStatus = status;
-                return status;
+
+                info.LastStatus = info.Status;
+                info.Status = status;
             }
+            return info.Status;
         }
-
-        private CoverStatus OldStatus;
-        private float ReCheckStatusTimer;
-
-        public BotOwner BotOwner => SAIN.BotOwner;
-        public Collider Collider { get; private set; }
-        public Vector3 Position { get; set; }
-        public float TimeCreated { get; private set; }
 
         private const float InCoverDist = 0.75f;
         private const float InCoverStayDist = 1f;
         private const float CloseCoverDist = 8f;
         private const float MidCoverDist = 20f;
 
-        public float CoverDistSqrMagnitude { get; private set; }
+        public Collider Collider { get; private set; }
+        public Vector3 Position { get; set; }
+        public float TimeCreated { get; private set; }
+
+    }
+
+    public sealed class SAINBotCoverInfo
+    {
+        public SAINBotCoverInfo(SAINComponentClass sain)
+        {
+            SAIN = sain;
+        }
+        public readonly SAINComponentClass SAIN;
+
+        public bool BotIsUsingThis = false;
+        public float TimeLastUsed = 0f;
+        public Vector3 Position = Vector3.zero;
+        public float nextCalcPathTime = 0f;
+        public float pathLength = float.MaxValue;
+        public float nextPathSafetyTime = 0f;
+        public CoverStatus Status = CoverStatus.None;
+        public CoverStatus LastStatus = CoverStatus.None;
+        public bool PointIsVisible = false;
+        public float nextCheckVisTime = 0f;
+        public bool Spotted = false;
+        public int HitInCoverUnknownCount = 0;
+        public int HitInCoverCantSeeCount = 0;
+        public int HitInCoverCount = 0;
+        public bool IsSafePath = false;
+        public float SqrMagnitude = float.MaxValue;
+        public float nextCheckStatusTime = 0f;
     }
 }

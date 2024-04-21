@@ -77,7 +77,7 @@ namespace SAIN.Patches.Generic
             BotOwner botOwner = ___botOwner_0;
             if (botOwner != null && SAINPlugin.BotController.GetBot(botOwner.ProfileId, out var sain))
             {
-                sain.BotStun.GetHit(damageInfo);
+                sain.BotHitReaction.GetHit(damageInfo);
             }
         }
     }

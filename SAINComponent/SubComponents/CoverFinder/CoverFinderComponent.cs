@@ -79,22 +79,77 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private Vector3 LastPositionChecked = Vector3.zero;
 
+        private void CullBadCoverPoints()
+        {
+            int count = CoverPoints.Count;
+            int oneThird = Mathf.RoundToInt(count / 3);
+
+            _cullingList.AddRange(CoverPoints);
+            _cullingList.Sort((x, y) => x.CoverValue.CompareTo(y.CoverValue));
+            _cullingList.RemoveRange(0, oneThird);
+
+            Logger.NotifyDebug($"Culled {oneThird} points of {count} CoverPoints for {BotOwner.name}");
+
+            CoverPoints.Clear();
+            CoverPoints.AddRange(_cullingList);
+            _cullingList.Clear();
+
+            CoverPoints.Sort((x, y) => x.PathLength.CompareTo(y.PathLength));
+        }
+
+        private bool IsPointGoodEnough(CoverPoint newPoint)
+        {
+            float lowestCoverValue = float.MaxValue;
+            foreach (var cover in CoverPoints)
+            {
+                if (lowestCoverValue < cover.CoverValue)
+                {
+                    lowestCoverValue = cover.CoverValue;
+                }
+            }
+            return newPoint.CoverValue > lowestCoverValue;
+        }
+
+        private readonly List<CoverPoint> _cullingList = new List<CoverPoint>();
+        private readonly List<CoverPoint> _removedPoints = new List<CoverPoint>();
+
         private IEnumerator FindCover()
         {
             while (true)
             {
-                Stopwatch stopwatch = Stopwatch.StartNew();
+                if (_nextClearSpottedTime < Time.time)
+                {
+                    _nextClearSpottedTime = Time.time + 1f;
 
-                //UpdateSpotted();
+                    for (int i = SpottedCoverPoints.Count - 1; i >= 0; i--)
+                    {
+                        var spottedPoint = SpottedCoverPoints[i];
+                        if (spottedPoint.IsValidAgain)
+                        {
+                            SpottedCoverPoints.RemoveAt(i);
+                        }
+                    }
+                }
 
                 for (int i = CoverPoints.Count - 1 ; i >= 0; i--)
                 {
                     var coverPoint = CoverPoints[i];
-                    if (coverPoint == null || !RecheckCoverPoint(coverPoint) || coverPoint.Spotted)
+                    if (coverPoint == null || !RecheckCoverPoint(coverPoint))
                     {
                         CoverPoints.RemoveAt(i);
                     }
                     yield return null;
+                }
+                
+                if (CoverPoints.Count >= CoverPoints.Capacity)
+                {
+                    CullBadCoverPoints();
+                }
+
+                Stopwatch stopwatch = null;
+                if (CoverPoints.Count == 0)
+                {
+                    stopwatch = Stopwatch.StartNew();
                 }
 
                 int totalChecked = 0;
@@ -102,7 +157,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 int coverCount = CoverPoints.Count;
 
                 const float DistanceThreshold = 5;
-                if (coverCount < 3 
+                if (coverCount < 5 
                     || (LastPositionChecked - OriginPoint).sqrMagnitude > DistanceThreshold * DistanceThreshold)
                 {
                     LastPositionChecked = OriginPoint;
@@ -110,39 +165,43 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     Collider[] colliders = GetColliders(out int hits);
                     for (int i = 0; i < hits; i++)
                     {
-                        if (coverCount > 4)
-                        {
-                            break;
-                        }
-                        else if (coverCount == 4)
-                        {
-                            yield return new WaitForSeconds(0.1f);
-                        }
-                        else if (coverCount == 3)
-                        {
-                            yield return new WaitForSeconds(0.05f);
-                        }
-                        else if (coverCount == 2)
-                        {
-                            yield return new WaitForSeconds(0.025f);
-                        }
-                        else if (coverCount == 1)
-                        {
-                            yield return null;
-                        }
-
-                        if (waitCount >= 5)
-                        {
-                            waitCount = 0;
-                            yield return null;
-                        }
-
                         totalChecked++;
                         waitCount++;
                         if (CoverAnalyzer.CheckCollider(colliders[i], out var newPoint))
                         {
-                            CoverPoints.Add(newPoint);
-                            coverCount++;
+                            if (coverCount > 7 && IsPointGoodEnough(newPoint))
+                            {
+                                CoverPoints.Add(newPoint);
+                                coverCount++;
+                            }
+                            else if (coverCount <= 7)
+                            {
+                                CoverPoints.Add(newPoint);
+                                coverCount++;
+                            }
+                        }
+                        if (coverCount >= 10)
+                        {
+                            break;
+                        }
+                        else if (coverCount > 0)
+                        {
+                            if (stopwatch?.IsRunning == true)
+                            {
+                                stopwatch.Stop();
+                                if (_debugTimer < Time.time)
+                                {
+                                    _debugTimer = Time.time + 5;
+                                    Logger.LogDebug($"Time to Find First CoverPoint: [{stopwatch.ElapsedMilliseconds}ms]");
+                                    Logger.NotifyDebug($"Time to Find First CoverPoint: [{stopwatch.ElapsedMilliseconds}ms]");
+                                }
+                            }
+                            yield return null;
+                        }
+                        else if (waitCount >= 5)
+                        {
+                            waitCount = 0;
+                            yield return null;
                         }
                     }
 
@@ -175,14 +234,15 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     OrderPointsByPathDist(CoverPoints);
                 }
 
-                stopwatch.Stop();
-                if (SAINPlugin.DebugMode)
+                if (stopwatch?.IsRunning == true)
                 {
-                    Logger.LogDebug($"Time to Complete Cover Finder Loop: [{stopwatch.ElapsedMilliseconds}ms]");
+                    stopwatch.Stop();
                 }
                 yield return new WaitForSeconds(CoverUpdateFrequency);
             }
         }
+
+        private static float _debugTimer;
 
         public static void OrderPointsByPathDist(List<CoverPoint> points)
         {
@@ -237,12 +297,31 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private float DebugLogTimer = 0f;
 
-        public List<SpottedCoverPoint> SpottedPoints { get; private set; } = new List<SpottedCoverPoint>();
+        public List<SpottedCoverPoint> SpottedCoverPoints { get; private set; } = new List<SpottedCoverPoint>();
 
         public bool RecheckCoverPoint(CoverPoint coverPoint)
         {
             return coverPoint != null && !PointIsSpotted(coverPoint) && CoverAnalyzer.CheckCollider(coverPoint);
         }
+
+        private void ClearSpotted()
+        {
+            if (_nextClearSpottedTime < Time.time)
+            {
+                _nextClearSpottedTime = Time.time + 1f;
+
+                for (int i = SpottedCoverPoints.Count - 1; i >= 0; i--)
+                {
+                    var spottedPoint = SpottedCoverPoints[i];
+                    if (spottedPoint.IsValidAgain)
+                    {
+                        SpottedCoverPoints.RemoveAt(i);
+                    }
+                }
+            }
+        }
+
+        private float _nextClearSpottedTime;
 
         private bool PointIsSpotted(CoverPoint point)
         {
@@ -250,11 +329,21 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             {
                 return true;
             }
-            if (point.Spotted)
+
+            ClearSpotted();
+
+            foreach (var spottedPoint in SpottedCoverPoints)
             {
-                SpottedPoints.Add(new SpottedCoverPoint(point.Position));
+                if (spottedPoint.TooClose(point.Position))
+                {
+                    return true;
+                }
             }
-            return point.Spotted;
+            if (point.GetSpotted())
+            {
+                SpottedCoverPoints.Add(new SpottedCoverPoint(point));
+            }
+            return point.GetSpotted();
         }
 
         private Collider[] GetColliders(out int hits)

@@ -105,6 +105,12 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private static readonly float GrenadeMaxEnemyDistance = 100f;
 
+        private bool StartRunUnknownShooter()
+        {
+
+            return false;
+        }
+
         private bool StartThrowGrenade(SAINEnemy enemy)
         {
             if (!GlobalSettings.General.BotsUseGrenades)
@@ -255,7 +261,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             var pathStatus = enemy.CheckPathDistance();
-            return (pathStatus == EnemyPathDistance.VeryClose && SAIN.Enemy.IsVisible) || SAIN.Cover.CoverInUse?.Spotted == true;
+            return (pathStatus == EnemyPathDistance.VeryClose && SAIN.Enemy.IsVisible) || SAIN.Cover.CoverInUse?.GetSpotted() == true;
         }
 
         private bool StartMoveToEngage(SAINEnemy enemy)
@@ -382,7 +388,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         public bool StartHoldInCover()
         {
             var cover = SAIN.Cover.CoverInUse;
-            if (cover != null && !cover.Spotted && (cover.Position - BotOwner.Position).sqrMagnitude < HoldInCoverMaxCoverDist)
+            if (cover != null && !cover.GetSpotted() && (cover.Position - BotOwner.Position).sqrMagnitude < HoldInCoverMaxCoverDist)
             {
                 return true;
             }

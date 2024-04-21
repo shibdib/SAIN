@@ -28,7 +28,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 return;
             }
 
-            if (!Stopped && !CoverInUse.Spotted && (CoverInUse.Position - BotOwner.Position).sqrMagnitude < 0.33f)
+            if (!Stopped && !CoverInUse.GetSpotted() && (CoverInUse.Position - BotOwner.Position).sqrMagnitude < 0.33f)
             {
                 SAIN.Mover.StopMove();
                 Stopped = true;

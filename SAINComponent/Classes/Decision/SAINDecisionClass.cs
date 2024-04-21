@@ -178,7 +178,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
             CoverPoint pointInUse = SAIN.Cover.CoverInUse;
-            if (pointInUse != null && pointInUse.BotIsHere)
+            if (pointInUse != null && pointInUse.BotIsHere())
             {
                 return false;
             }
