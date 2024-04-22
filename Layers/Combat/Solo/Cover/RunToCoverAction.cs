@@ -48,11 +48,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     RecalcTimer = Time.time + 0.2f;
                 }
             }
-            if (MoveSuccess)
-            {
-                SAIN.Steering.LookToMovingDirection();
-            }
-            else
+            if (!MoveSuccess)
             {
                 EngageEnemy();
             }
@@ -127,7 +123,28 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void BuildDebugText(StringBuilder stringBuilder)
         {
-            DebugOverlay.AddCoverInfo(SAIN, stringBuilder);
+            stringBuilder.AppendLine("Run To Cover Info");
+            var cover = SAIN.Cover;
+            stringBuilder.AppendLabeledValue("CoverFinder State", $"{cover.CurrentCoverFinderState}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Cover Count", $"{cover.CoverPoints.Count}", Color.white, Color.yellow, true);
+            if (SAIN.CurrentTargetPosition != null)
+            {
+                stringBuilder.AppendLabeledValue("Current Target Position", $"{SAIN.CurrentTargetPosition.Value}", Color.white, Color.yellow, true);
+            }
+            else
+            {
+                stringBuilder.AppendLabeledValue("Current Target Position", null, Color.white, Color.yellow, true);
+            }
+
+            if (CoverDestination != null)
+            {
+                stringBuilder.AppendLine("Cover Destination");
+                stringBuilder.AppendLabeledValue("Status", $"{CoverDestination.GetCoverStatus(SAIN)}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Height / Value", $"{CoverDestination.CoverHeight} {CoverDestination.CoverValue}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Path Length", $"{CoverDestination.CalcPathLength(SAIN)}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Straight Distance", $"{(CoverDestination.GetPosition(SAIN) - SAIN.Position).magnitude}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Safe Path?", $"{CoverDestination.CheckPathSafety(SAIN)}", Color.white, Color.yellow, true);
+            }
         }
     }
 }

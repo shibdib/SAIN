@@ -32,7 +32,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public CoverAnalyzer CoverAnalyzer { get; private set; }
         public ColliderFinder ColliderFinder { get; private set; }
 
-        private Collider[] Colliders = new Collider[200];
+        private Collider[] Colliders = new Collider[150];
 
         private void Update()
         {
@@ -54,6 +54,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public void LookForCover(Vector3 targetPosition, Vector3 originPoint)
         {
+            //AnalyzeAllColliders();
+
             TargetPoint = targetPosition;
             OriginPoint = originPoint;
 
@@ -72,46 +74,41 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
         }
 
+        private static void AnalyzeAllColliders()
+        {
+            if (!AllCollidersAnalyzed)
+            {
+                AllCollidersAnalyzed = true;
+                float minHeight = CoverFinderComponent.CoverMinHeight;
+                const float minX = 0.1f;
+                const float minZ = 0.1f;
+
+                Collider[] allColliders = new Collider[500000];
+                int hits = Physics.OverlapSphereNonAlloc(Vector3.zero, 1000f, allColliders);
+
+                int hitReduction = 0;
+                for (int i = 0; i < hits; i++)
+                {
+                    Vector3 size = allColliders[i].bounds.size;
+                    if (size.y < CoverFinderComponent.CoverMinHeight
+                        || size.x < minX && size.z < minZ)
+                    {
+                        allColliders[i] = null;
+                        hitReduction++;
+                    }
+                }
+                Logger.LogError($"All Colliders Analyzed. [{hits - hitReduction}] are suitable out of [{hits}] colliders");
+            }
+        }
+
+        private static bool AllCollidersAnalyzed;
+
         public static float CoverMinHeight => SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverMinHeight;
         public static float CoverMinEnemyDist => SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverMinEnemyDistance;
 
         public CoverPoint FallBackPoint { get; private set; }
 
         private Vector3 LastPositionChecked = Vector3.zero;
-
-        private void CullBadCoverPoints()
-        {
-            int count = CoverPoints.Count;
-            int oneThird = Mathf.RoundToInt(count / 3);
-
-            _cullingList.AddRange(CoverPoints);
-            _cullingList.Sort((x, y) => x.CoverValue.CompareTo(y.CoverValue));
-            _cullingList.RemoveRange(0, oneThird);
-
-            Logger.NotifyDebug($"Culled {oneThird} points of {count} CoverPoints for {BotOwner.name}");
-
-            CoverPoints.Clear();
-            CoverPoints.AddRange(_cullingList);
-            _cullingList.Clear();
-
-            CoverPoints.Sort((x, y) => x.GetPathLength(SAIN).CompareTo(y.GetPathLength(SAIN)));
-        }
-
-        private bool IsPointGoodEnough(CoverPoint newPoint)
-        {
-            float lowestCoverValue = float.MaxValue;
-            foreach (var cover in CoverPoints)
-            {
-                if (lowestCoverValue < cover.CoverValue)
-                {
-                    lowestCoverValue = cover.CoverValue;
-                }
-            }
-            return newPoint.CoverValue > lowestCoverValue;
-        }
-
-        private readonly List<CoverPoint> _cullingList = new List<CoverPoint>();
-        private readonly List<CoverPoint> _removedPoints = new List<CoverPoint>();
 
         private IEnumerator FindCover()
         {
@@ -136,20 +133,16 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 for (int i = CoverPoints.Count - 1 ; i >= 0; i--)
                 {
                     var coverPoint = CoverPoints[i];
-                    if (coverPoint == null || !RecheckCoverPoint(coverPoint))
+                    if (coverPoint == null 
+                        || !RecheckCoverPoint(coverPoint))
                     {
                         CoverPoints.RemoveAt(i);
                     }
                     yield return null;
                 }
-                
-                if (CoverPoints.Count >= CoverPoints.Capacity)
-                {
-                    //CullBadCoverPoints();
-                }
 
                 Stopwatch findFirstPointStopWatch = null;
-                if (CoverPoints.Count == 0)
+                if (CoverPoints.Count == 0 && SAINPlugin.DebugMode)
                 {
                     findFirstPointStopWatch = Stopwatch.StartNew();
                 }
@@ -171,20 +164,16 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                         waitCount++;
                         if (CoverAnalyzer.CheckCollider(colliders[i], out var newPoint))
                         {
-                            if (coverCount > 7 && IsPointGoodEnough(newPoint))
-                            {
-                                CoverPoints.Add(newPoint);
-                                coverCount++;
-                            }
-                            else if (coverCount <= 7)
-                            {
-                                CoverPoints.Add(newPoint);
-                                coverCount++;
-                            }
+                            CoverPoints.Add(newPoint);
+                            coverCount++;
                         }
                         if (coverCount >= 10)
                         {
                             break;
+                        }
+                        else if (coverCount > 2)
+                        {
+                            yield return null;
                         }
                         else if (coverCount > 0)
                         {
@@ -198,9 +187,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                                     Logger.NotifyDebug($"Time to Find First CoverPoint: [{findFirstPointStopWatch.ElapsedMilliseconds}ms]");
                                 }
                             }
-                            yield return null;
+                            if (waitCount >= 3)
+                            {
+                                waitCount = 0;
+                                yield return null;
+                            }
                         }
-                        else if (waitCount >= 5)
+                        else if (waitCount >= 10)
                         {
                             waitCount = 0;
                             yield return null;
@@ -242,7 +235,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 }
 
                 fullStopWatch.Stop();
-                if (_debugTimer2 < Time.time)
+                if (_debugTimer2 < Time.time && SAINPlugin.DebugMode)
                 {
                     _debugTimer2 = Time.time + 5;
                     Logger.LogDebug($"Time to Complete Coverfinder Loop: [{fullStopWatch.ElapsedMilliseconds}ms]");
@@ -263,7 +256,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         static float CoverUpdateFrequency => SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverUpdateFrequency;
 
-        private static CoverPoint FindFallbackPoint(List<CoverPoint> points)
+        private CoverPoint FindFallbackPoint(List<CoverPoint> points)
         {
             CoverPoint result = null;
             CoverPoint safestResult = null;
@@ -275,7 +268,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 if (result == null
                     || point.Collider.bounds.size.y > result.Collider.bounds.size.y)
                 {
-                    if (point.IsSafePath)
+                    if (point.IsSafePath(SAIN))
                     {
                         safestResult = point;
                     }

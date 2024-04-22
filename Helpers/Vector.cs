@@ -21,6 +21,7 @@ namespace SAIN.Helpers
             Vector3 direction = end - start;
             return Physics.Raycast(start, direction.normalized, direction.magnitude, mask);
         }
+
         public static bool Raycast(Vector3 start, Vector3 end, out RaycastHit hitInfo, LayerMask mask)
         {
             Vector3 direction = end - start;
@@ -28,6 +29,7 @@ namespace SAIN.Helpers
         }
 
         public static float DistanceBetween(Vector3 A, Vector3 B) => (A - B).magnitude;
+
         public static float DistanceBetweenSqr(Vector3 A, Vector3 B) => (A - B).sqrMagnitude;
 
         public static Vector3 DangerPoint(Vector3 position, Vector3 force, float mass)

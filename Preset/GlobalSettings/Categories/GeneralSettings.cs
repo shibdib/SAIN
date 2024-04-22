@@ -15,14 +15,21 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0.1f, 5f, 100f)]
         public float GlobalDifficultyModifier = 1f;
 
+        [Name("Performance Mode")]
+        [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN")]
+        [Default(false)]
+        [Hidden]
+        [JsonIgnore]
+        public bool PerformanceMode = false;
+
         [Name("Bot Grenades")]
         [Default(true)]
         public bool BotsUseGrenades = true;
 
-        [Name("HeadShot Protection")]
-        [Description("Experimental, will move bot's aiming target if it ends up on the player's head. NOT FOOLPROOF. It's more of a strong suggestion rather than a hard limit. If you find you are dying to headshots too frequently still, I recommend increasing your head health with another mod.")]
-        [Default(false)]
-        public bool HeadShotProtection = false;
+        [Name("Headshot Protection")]
+        [Description("Force Bots to aim for center of mass.")]
+        [Default(true)]
+        public bool HeadShotProtection = true;
 
         [Name("Bot Reaction and Accuracy Changes Toggle - Experimental")]
         [Section("Unseen Bot")]

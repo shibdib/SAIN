@@ -75,13 +75,11 @@ namespace SAIN.SAINComponent.Classes
 
             var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
             var currentCover = CoverInUse;
-            if (CurrentDecision == SoloDecision.UnstuckMoveToCover 
-                || CurrentDecision == SoloDecision.Retreat 
-                || CurrentDecision == SoloDecision.RunToCover 
-                || CurrentDecision == SoloDecision.WalkToCover)
+            if (CurrentDecision != SoloDecision.None)
             {
                 ActivateCoverFinder(true);
             }
+            /*
             else if (CurrentDecision == SoloDecision.HoldInCover 
                 && (currentCover == null 
                 || currentCover.GetSpotted(SAIN) == true 
@@ -89,6 +87,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 ActivateCoverFinder(true);
             }
+            */
             else
             {
                 ActivateCoverFinder(false);

@@ -1,6 +1,8 @@
 ﻿using BepInEx.Logging;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Net;
 using UnityEngine;
 using UnityEngine.AI;
 using Color = UnityEngine.Color;
@@ -123,6 +125,13 @@ namespace SAIN.Helpers
             return lineObject;
         }
 
+        public static void UpdatePositionLine(Vector3 a, Vector3 b, GameObject gameObject)
+        {
+            var lineRenderer = gameObject.GetComponent<LineRenderer>();
+            lineRenderer?.SetPosition(0, a);
+            lineRenderer?.SetPosition(1, b);
+        }
+
         public static GameObject Line(Vector3 startPoint, Vector3 endPoint, float lineWidth = 0.1f, float expiretime = 1f, bool taperLine = false)
         {
             return Line(startPoint, endPoint, RandomColor, lineWidth, expiretime > 0, expiretime, taperLine);
@@ -234,6 +243,28 @@ namespace SAIN.Helpers
             return list;
         }
 
+        public static List<GameObject> DrawLinesBetweenPoints(float lineSize, float expireTime, float raisePoints, Color color, params Vector3[] points)
+        {
+            if (!DrawGizmos)
+            {
+                return null;
+            }
+
+            List<GameObject> list = new List<GameObject>();
+            for (int i = 0; i < points.Length; i++)
+            {
+                Vector3 pointA = points[i];
+                pointA.y += raisePoints;
+
+                float sphereSize = Mathf.Clamp(lineSize * sphereMulti, minSphere, maxSphere);
+                GameObject sphere = Sphere(pointA, sphereSize, color, expireTime > 0, expireTime);
+                list.Add(sphere);
+
+                DrawLinesToPoint(list, pointA, color, lineSize, expireTime, raisePoints, points);
+            }
+            return list;
+        }
+
         private static float RandomFloat => Random.Range(0.2f, 1f);
         public static Color RandomColor => new Color(RandomFloat, RandomFloat, RandomFloat);
 
@@ -270,8 +301,8 @@ namespace SAIN.Helpers
 
                 for (int i = 0; i < Path.corners.Length - 1; i++)
                 {
-                    Vector3 corner1 = Path.corners[i];
-                    Vector3 corner2 = Path.corners[i + 1];
+                    Vector3 corner1 = Path.corners[i] + Vector3.up;
+                    Vector3 corner2 = Path.corners[i + 1] + Vector3.up;
 
                     Color color;
                     if (useDrawerSetColors)

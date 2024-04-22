@@ -43,7 +43,7 @@ namespace SAIN
             }
             else
             {
-                EFTCoreSettings.UpdateArmorClassCoef(7f);
+                EFTCoreSettings.UpdateArmorClassCoef(6f);
             }
         }
 

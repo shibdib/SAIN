@@ -37,7 +37,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             if (CheckColliderForCover(collider, out Vector3 place, out bool isSafe, path))
             {
                 newPoint = new CoverPoint(SAIN, place, collider, path);
-                newPoint.IsSafePath = isSafe;
+                newPoint.SetIsSafePath(isSafe, SAIN);
                 return true;
             }
             return false;
@@ -49,7 +49,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             NavMeshPath path = new NavMeshPath();
             if (CheckColliderForCover(coverPoint.Collider, out Vector3 place, out bool isSafe, coverPoint.PathToPoint))
             {
-                coverPoint.IsSafePath = isSafe;
+                coverPoint.SetIsSafePath(isSafe, SAIN);
                 coverPoint.SetPosition(SAIN, place);
             }
 

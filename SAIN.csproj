@@ -271,6 +271,7 @@
     <Compile Include="Helpers\SAINWeaponInfo.cs" />
     <Compile Include="Helpers\SAINWeaponInfoHandler.cs" />
     <Compile Include="Helpers\UpdateSettingClass.cs" />
+    <Compile Include="Layers\Combat\Solo\FlankAction.cs" />
     <Compile Include="Layers\DebugOverlay.cs" />
     <Compile Include="Layers\Extract\LootingBotsInterop.cs" />
     <Compile Include="Layers\Extract\SAINLootingBotsIntegration.cs" />
@@ -288,6 +289,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\DefaultBrainsClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\Layer.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\LayerInfoClass.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\DebugSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\NoBushESPSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\LootingBotsSettings.cs" />
     <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
@@ -300,11 +302,10 @@
     <Compile Include="SAINComponent\Classes\EnemyKnownPlaces.cs" />
     <Compile Include="SAINComponent\Classes\EnemyPlace.cs" />
     <Compile Include="SAINComponent\Classes\ESearchMove.cs" />
-    <Compile Include="Helpers\SealedClass\PointDirection.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINMovementPlanController.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINVaultClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINAILimit.cs" />
-    <Compile Include="SAINComponent\Classes\SAINBotHitReaction - Copy.cs" />
+    <Compile Include="SAINComponent\Classes\SAINBotMedicine.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotHitReaction.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotUnstuckClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINEnemyPath.cs" />
@@ -323,7 +324,6 @@
     <Compile Include="SAINComponent\Classes\SAINMemoryClass.cs" />
     <Compile Include="SAINComponent\Classes\Info\ProfileClass.cs" />
     <Compile Include="SAINComponent\PersonBase\PersonBaseClass.cs" />
-    <Compile Include="SAINComponent\Classes\OldTransformClass.cs" />
     <Compile Include="Preset\BotSettings\SAINSettings\SAINSettingsGroupClass.cs" />
     <Compile Include="Preset\BotTypeDefinitions.cs" />
     <Compile Include="Helpers\EnumValues.cs" />
@@ -395,9 +395,6 @@
     <Compile Include="Editor\Util\Sounds.cs" />
     <Compile Include="Helpers\EFTInfo.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="Helpers\Util\Textures\ModifyTexture.cs" />
-    <Compile Include="Helpers\Util\Textures\SaveTexture.cs" />
-    <Compile Include="Helpers\Util\Textures\LoadTexture.cs" />
     <Compile Include="Plugin\BigBrainHandler.cs" />
     <Compile Include="Plugin\GameWorldHandler.cs" />
     <Compile Include="SAINComponent\Classes\ShootClass.cs" />
@@ -433,7 +430,7 @@
     <Compile Include="Helpers\DebugGizmos.cs" />
     <Compile Include="Helpers\EFTMath.cs" />
     <Compile Include="SAINComponent\Classes\Sense\DazzleClass.cs" />
-    <Compile Include="Helpers\Util\JsonUtility.cs" />
+    <Compile Include="Helpers\JsonUtility.cs" />
     <Compile Include="Helpers\ShootHelpers.cs" />
     <Compile Include="Helpers\Vector.cs" />
     <Compile Include="Layers\Combat\Squad\RegroupAction.cs" />

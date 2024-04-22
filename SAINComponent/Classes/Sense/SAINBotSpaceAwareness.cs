@@ -2,9 +2,11 @@
 using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
+using SAIN.Layers.Combat.Solo;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,258 +16,241 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes
 {
-    public enum SAINBodyPart
+    public sealed class FlankRoute
     {
-        Head,
-        WeaponRoot,
-        LeftShoulder,
-        RightShoulder,
-        LeftLeg,
-        RightLeg,
-        Center
+        public Vector3 FlankPoint;
+        public Vector3 FlankPoint2;
+        public NavMeshPath FirstPath;
+        public NavMeshPath SecondPath;
+        public NavMeshPath ThirdPath;
     }
 
-    public enum SAINPose
+    public class SAINBotSpaceAwareness : SAINBase, ISAINClass
     {
-        None,
-        Stand,
-        StandLeanLeft,
-        StandLeanRight,
-        Crouch,
-        CrouchLeanLeft,
-        CrouchLeanRight,
-        Prone,
-        ProneLeanLeft,
-        ProneLeanRight,
-    }
-
-    public class SAINBotSpaceAwareness
-    {
-        public sealed class BoneOffsetClass
+        public SAINBotSpaceAwareness(SAINComponentClass sain) : base(sain)
         {
-            public Dictionary<SAINBodyPart, Vector3> Offsets = new Dictionary<SAINBodyPart, Vector3>();
+        }
 
-            public bool Get(SAINBodyPart part, out Vector3 result)
-            {
-                if (Offsets.ContainsKey(part) && Offsets[part] != Vector3.zero)
-                {
-                    result = Offsets[part];
-                    return true;
-                }
-                result = Vector3.zero;
-                return false;
-            }
+        public void Init()
+        {
+        }
 
-            public bool Set(SAINBodyPart part, Vector3 offset)
+        public void Update()
+        {
+            if (SAIN.HasEnemy && _findFlankTimer < Time.time && SAIN.Enemy.EnemyPlayer.IsYourPlayer)
             {
-                if (Offsets.ContainsKey(part) && Offsets[part] == Vector3.zero)
+                _findFlankTimer = Time.time + 1f;
+                // CurrentFlankRoute = FindFlankRoute();
+                if (CurrentFlankRoute != null)
                 {
-                    Offsets[part] = offset;
-                    return true;
-                }
-                return false;
-            }
-
-            public void Add(SAINBodyPart part, Vector3 offset)
-            {
-                if (!Offsets.ContainsKey(part))
-                {
-                    Offsets.Add(part, offset);
+                    Logger.NotifyDebug("Found Flank Route"); 
+                    DrawDebug(CurrentFlankRoute);
                 }
             }
         }
 
-        private static Dictionary<SAINPose, BoneOffsetClass> PlayerBoneOffsets = new Dictionary<SAINPose, BoneOffsetClass>();
+        public FlankRoute CurrentFlankRoute { get; private set; }
 
-        public static void Update()
+        private float _findFlankTimer;
+
+        public void Dispose()
         {
-            if (MainPlayer != null)
-            {
-                foreach (SAINBodyPart part in EnumValues.GetEnum<SAINBodyPart>())
-                {
-                    SAINPose pose = FindSAINPose(MainPlayer);
-                    Vector3 offset = GetOffset(part, pose);
+        }
 
-                    if (offset != Vector3.zero)
+        public FlankRoute FindFlankRoute()
+        {
+            SAINEnemy enemy = SAIN.Enemy;
+            if (enemy == null)
+            {
+                return null;
+            }
+
+            FlankRoute flankRoute = null;
+
+            Vector3 enemyPosition = SAIN.Enemy.EnemyPosition;
+            Vector3 botPosition = SAIN.Position;
+
+            Vector3? middleNode = FindMiddlePoint(enemy.Path.PathToEnemy, enemy.Path.PathDistance, out int index);
+
+            if (middleNode != null)
+            {
+                Vector3 directionFromMiddle = enemyPosition - middleNode.Value;
+
+                SideTurn randomTurn = EFTMath.RandomBool() ? SideTurn.right : SideTurn.left;
+
+                flankRoute = FindFlank(
+                    middleNode.Value,
+                    directionFromMiddle,
+                    botPosition,
+                    enemy,
+                    randomTurn);
+
+                if (flankRoute != null)
+                {
+                    return flankRoute;
+                }
+
+                randomTurn = randomTurn == SideTurn.left ? SideTurn.right : SideTurn.left;
+
+                flankRoute = FindFlank(
+                    middleNode.Value,
+                    directionFromMiddle,
+                    botPosition,
+                    enemy,
+                    randomTurn);
+
+                if (flankRoute != null)
+                {
+                    return flankRoute;
+                }
+            }
+            return null;
+        }
+
+        private IEnumerator CalculateFlank()
+        {
+            yield return null;
+        }
+
+        private FlankRoute FindFlank(Vector3 middleNode, Vector3 directionFromMiddle, Vector3 botPosition, SAINEnemy enemy, SideTurn sideTurn)
+        {
+            Vector3 flankDirection1 = Vector.Rotate90(directionFromMiddle, sideTurn);
+            if (SamplePointAndCheckPath(flankDirection1, middleNode, out NavMeshPath path) 
+                && SamplePointAndCheckPath(flankDirection1 * 0.5f, enemy.EnemyPosition, out NavMeshPath path2))
+            {
+                Vector3 flankPoint1 = path.corners[path.corners.Length - 1];
+                Vector3 flankPoint2 = path2.corners[path2.corners.Length - 1];
+
+                NavMeshPath pathToEnemy = enemy.Path.PathToEnemy;
+
+                NavMeshPath flankPath = new NavMeshPath();
+                if (NavMesh.CalculatePath(botPosition, flankPoint1, -1, flankPath)
+                    && ArePathsDifferent(pathToEnemy, flankPath))
+                {
+                    NavMeshPath flankPath2 = new NavMeshPath();
+                    if (NavMesh.CalculatePath(flankPoint1, flankPoint2, -1, flankPath2)
+                        && ArePathsDifferent(pathToEnemy, flankPath2)
+                        && ArePathsDifferent(flankPath, flankPath2) 
+                        && CheckPathSafety(flankPath2, enemy.EnemyHeadPosition))
                     {
-                        Logger.LogWarning($"{part} : {pose} : {offset.magnitude}");
+                        NavMeshPath flankPath3 = new NavMeshPath();
+                        if (NavMesh.CalculatePath(flankPoint2, enemy.EnemyPosition, -1, flankPath3)
+                            && ArePathsDifferent(pathToEnemy, flankPath3)
+                            && ArePathsDifferent(flankPath, flankPath3)
+                            && ArePathsDifferent(flankPath2, flankPath3))
+                        {
+                            return new FlankRoute
+                            {
+                                FlankPoint = flankPoint1,
+                                FlankPoint2 = flankPoint2,
+                                FirstPath = flankPath,
+                                SecondPath = flankPath2,
+                                ThirdPath = flankPath3,
+                            };
+                        }
                     }
                 }
             }
+            return null;
         }
 
-        private static Vector3 GetHeadOffset(SAINPose pose)
+        private void DrawDebug(FlankRoute route)
         {
-            BoneOffsetClass offsetClass = PlayerBoneOffsets[pose];
-
-            if (!offsetClass.Get(SAINBodyPart.Head, out Vector3 result))
+            if (SAINPlugin.DebugMode && SAINPlugin.DrawDebugGizmos)
             {
-                Vector3 headPosition = MainPlayer.MainParts[BodyPartType.head].Position;
-                Vector3 floorPosition = MainPlayer.Position;
-                result = headPosition - floorPosition;
-
-                offsetClass.Set(SAINBodyPart.Head, result);
-            }
-            return result;
-        }
-
-        private static Vector3 GetWeaponRootOffset(SAINPose pose)
-        {
-            BoneOffsetClass offsetClass = PlayerBoneOffsets[pose];
-
-            if (!offsetClass.Get(SAINBodyPart.WeaponRoot, out Vector3 result))
-            {
-                Vector3 rootPos = MainPlayer.WeaponRoot.position;
-                Vector3 floorPosition = MainPlayer.Position;
-                result = rootPos - floorPosition;
-
-                offsetClass.Set(SAINBodyPart.WeaponRoot, result);
-            }
-
-            return result;
-        }
-
-        private static bool CheckAddOffset(SAINPose pose, SAINBodyPart part, out Vector3 result)
-        {
-            if (!PlayerBoneOffsets.ContainsKey(pose))
-            {
-                PlayerBoneOffsets.Add(pose, new BoneOffsetClass());
-            }
-
-            BoneOffsetClass boneOffset = PlayerBoneOffsets[pose];
-
-            if (!boneOffset.Offsets.ContainsKey(part))
-            {
-                boneOffset.Offsets.Add(part, Vector3.zero);
-            }
-
-            boneOffset.Get(part, out result);
-
-            return result == Vector3.zero;
-
-        }
-
-        private static SAINPose FindSAINPose(Player player)
-        {
-            SAINPose result = SAINPose.None;
-            if (player != null)
-            {
-                LeanSetting lean = CheckIfLeaning(player);
-
-                switch (player.Pose)
+                if (_timer < Time.time)
                 {
-                    case EPlayerPose.Stand:
-                        switch (lean)
-                        {
-                            case LeanSetting.None:
-                                result = SAINPose.Stand;
-                                break;
-                            case LeanSetting.Right:
-                                result = SAINPose.StandLeanRight;
-                                break;
-                            case LeanSetting.Left:
-                                result = SAINPose.StandLeanLeft;
-                                break;
-                        }
-                        break;
-
-                    case EPlayerPose.Duck:
-                        switch (lean)
-                        {
-                            case LeanSetting.None:
-                                result = SAINPose.Crouch;
-                                break;
-                            case LeanSetting.Right:
-                                result = SAINPose.CrouchLeanRight;
-                                break;
-                            case LeanSetting.Left:
-                                result = SAINPose.CrouchLeanLeft;
-                                break;
-                        }
-                        break;
-
-                    case EPlayerPose.Prone:
-                        switch (lean)
-                        {
-                            case LeanSetting.None:
-                                result = SAINPose.Prone;
-                                break;
-                            case LeanSetting.Right:
-                                result = SAINPose.ProneLeanRight;
-                                break;
-                            case LeanSetting.Left:
-                                result = SAINPose.ProneLeanLeft;
-                                break;
-                        }
-                        break;
+                    _timer = Time.time + 60f;
+                    list1.DrawTempPath(route.FirstPath, true, RandomColor, RandomColor, 0.1f, 60f);
+                    list2.DrawTempPath(route.SecondPath, true, RandomColor, RandomColor, 0.1f, 60f);
+                    list3.DrawTempPath(route.ThirdPath, true, RandomColor, RandomColor, 0.1f, 60f);
+                    DebugGizmos.Ray(route.FlankPoint, Vector3.up, RandomColor, 3f, 0.2f, true, 60f);
+                    DebugGizmos.Ray(route.FlankPoint2, Vector3.up, RandomColor, 3f, 0.2f, true, 60f);
+                    DebugGizmos.Line(route.FirstPath.corners[0] + Vector3.up, route.ThirdPath.corners[route.SecondPath.corners.Length - 1] + Vector3.up, Color.white, 0.1f, true, 60f);
                 }
             }
-            return result;
+            else
+            {
+            }
         }
 
-        private static LeanSetting CheckIfLeaning(Player player)
+        private Color RandomColor = DebugGizmos.RandomColor;
+
+        float _timer;
+
+        DebugGizmos.DrawLists list1 = new DebugGizmos.DrawLists(Color.red, Color.red, "flankroute1");
+        DebugGizmos.DrawLists list2 = new DebugGizmos.DrawLists(Color.blue, Color.blue, "flankroute2");
+        DebugGizmos.DrawLists list3 = new DebugGizmos.DrawLists(Color.blue, Color.blue, "flankroute3");
+
+        private static bool ArePathsDifferent(NavMeshPath path1, NavMeshPath path2, float minRatio = 0.25f)
         {
-            if (player != null)
+            int sameCount = 0;
+            int differentCount = 0;
+
+            for (int i = 0; i < path1.corners.Length; i++)
             {
-                float leanNum = player.MovementContext.Tilt;
-                if (leanNum >= 5)
+                Vector3 node = path1.corners[i];
+                bool sameNode = false;
+                for (int j = 0; j < path2.corners.Length; j++)
                 {
-                    return LeanSetting.Right;
+                    Vector3 node2 = path2.corners[j];
+                    if ((node - node2).sqrMagnitude < 0.1f)
+                    {
+                        sameNode = true;
+                        break;
+                    }
                 }
-                else if (leanNum <= -5)
+                if (sameNode)
                 {
-                    return LeanSetting.Left;
+                    sameCount++;
+                }
+                else
+                {
+                    differentCount++;
                 }
             }
-            return LeanSetting.None;
+            float ratio = (float)sameCount / (float)path1.corners.Length;
+            //Logger.NotifyDebug($"Result = [{ratio <= minRatio}]Path 1 length: {path1.corners.Length} Path2 length: {path2.corners.Length} Same Node Count: {sameCount} ratio: {ratio}");
+            return ratio <= minRatio;
         }
 
-        private static Vector3 GetOffset(SAINBodyPart bodyPart, SAINPose pose)
+        private static bool SamplePointAndCheckPath(Vector3 point, Vector3 origin, out NavMeshPath path)
         {
-            if (!CheckAddOffset(pose, bodyPart, out Vector3 result))
+            if (NavMesh.SamplePosition(point, out NavMeshHit hit, 10f, NavMesh.AllAreas))
             {
-                return result;
+                path = new NavMeshPath();
+                return NavMesh.CalculatePath(origin, hit.position, NavMesh.AllAreas, path);
+            }
+            path = null;
+            return false;
+        }
+
+        private static Vector3? FindMiddlePoint(NavMeshPath path, float pathLength, out int index)
+        {
+            index = 0;
+            if (path.corners.Length < 3)
+            {
+                return null;
             }
 
-            switch (bodyPart)
+            const float maxDistance = 50f;
+            Vector3 endGoal = path.corners[path.corners.Length - 1];
+            float currentLength = 0f;
+            for (int i = 0; i < path.corners.Length - 1; i++)
             {
-                case SAINBodyPart.Head:
-                    result = GetHeadOffset(pose);
-                    break;
-
-                case SAINBodyPart.WeaponRoot:
-                    result = GetWeaponRootOffset(pose);
-                    break;
-
-                case SAINBodyPart.LeftShoulder:
-                    break;
-
-                case SAINBodyPart.RightShoulder:
-                    break;
-
-                case SAINBodyPart.LeftLeg:
-                    break;
-
-                case SAINBodyPart.RightLeg:
-                    break;
-
-                case SAINBodyPart.Center:
-                    break;
+                Vector3 cornerA = path.corners[i];
+                Vector3 cornerB = path.corners[i + 1];
+                currentLength += (cornerA - cornerB).magnitude;
+                if (currentLength >= pathLength / 2)
+                {
+                    if ((cornerA - endGoal).sqrMagnitude <= maxDistance * maxDistance)
+                    {
+                        index = i;
+                        return new Vector3?(cornerA);
+                    }
+                }
             }
-
-            return result;
-        }
-
-        private static Player MainPlayer => Singleton<GameWorld>.Instance?.MainPlayer;
-
-        public static float CheckLineOfSightToMainPlayer(Player playerToTest)
-        {
-            return 0f;
-        }
-
-        public static float CheckLineOfSightToMainPlayer(CoverPoint coverPoint)
-        {
-            return 0f;
+            return null;
         }
 
         public static bool CheckPathSafety(NavMeshPath path, Vector3 enemyHeadPos, float ratio = 0.5f)
@@ -273,7 +258,7 @@ namespace SAIN.SAINComponent.Classes
             Vector3[] corners = path.corners;
             int max = corners.Length - 1;
 
-            for (int i = 0; i < max - 1; i++)
+            for (int i = 0; i < max; i++)
             {
                 Vector3 pointA = corners[i];
                 Vector3 pointB = corners[i + 1];

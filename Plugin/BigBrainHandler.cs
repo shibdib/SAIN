@@ -50,9 +50,10 @@ namespace SAIN
                 "Help",
                 "AdvAssaultTarget",
                 "Hit",
+                "Simple Target",
                 "Pmc",
                 "AssaultHaveEnemy",
-                "Request"
+                "Request",
             };
 
         static BigBrainHandler()
@@ -125,7 +126,26 @@ namespace SAIN
 
             BrainManager.RemoveLayers(LayersToRemove, stringList);
 
+            AddAnnoyingLayerNames();
+            BrainManager.RemoveLayers(AnnoyingLayerNameThanksBSG, new List<string> { Brain.PMC.ToString(), Brain.Assault.ToString(), });
+
             BigBrainInitialized = true;
+        }
+
+        private static readonly List<string> AnnoyingLayerNameThanksBSG = new List<string>
+        {
+            "PeacecReqNull",
+            "FightReqNull",
+        };
+
+        private static void AddAnnoyingLayerNames()
+        {
+            BotRequestType[] types = EnumValues.GetEnum<BotRequestType>();
+            foreach (BotRequestType type in types)
+            {
+                AnnoyingLayerNameThanksBSG.Add("PcReq:" + type.ToString());
+                AnnoyingLayerNameThanksBSG.Add("FiReq:" + type.ToString());
+            }
         }
 
         public static readonly List<string> SAINLayers = new List<string>
@@ -138,7 +158,6 @@ namespace SAIN
         public static readonly List<string> SAINCombatLayers = new List<string>
         {
             CombatSquadLayer.Name,
-            ExtractLayer.Name,
             CombatSoloLayer.Name,
         };
 

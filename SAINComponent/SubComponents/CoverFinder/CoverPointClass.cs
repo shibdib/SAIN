@@ -105,7 +105,15 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             info.HitInCoverUnknownCount += hitUnknown;
         }
 
-        public bool IsSafePath { get; set; }
+        public bool IsSafePath(SAINComponentClass sain)
+        {
+            return GetInfo(sain).IsSafePath;
+        }
+
+        public void SetIsSafePath(bool value, SAINComponentClass sain)
+        {
+            GetInfo(sain).IsSafePath = value;
+        }
 
         public float CoverHeight { get; private set; }
 

@@ -51,14 +51,6 @@ namespace SAIN.SAINComponent.Classes
                 else
                 {
                     enemy.Update();
-                    if (enemy.LastHeardPosition != null)
-                    {
-                        DebugGizmos.Line(enemy.LastHeardPosition.Value, SAIN.Position, Color.yellow, 0.01f, false, Time.deltaTime, true);
-                    }
-                    if (enemy.LastSeenPosition != null)
-                    {
-                        DebugGizmos.Line(enemy.LastSeenPosition.Value, SAIN.Position, Color.red, 0.01f, false, Time.deltaTime, true);
-                    }
                 }
             }
 
@@ -69,6 +61,9 @@ namespace SAIN.SAINComponent.Classes
 
             EnemyIDsToRemove.Clear();
         }
+
+        private GameObject debugLastSeenPosition;
+        private GameObject debugLastHeardPosition;
 
         public SAINEnemy ClosestHeardEnemy { get; private set; }
 
@@ -101,6 +96,38 @@ namespace SAIN.SAINComponent.Classes
             if (ClosestHeardEnemy != null && ClosestHeardEnemy.HeardRecently == false)
             {
                 ClosestHeardEnemy = null;
+            }
+            if (ActiveEnemy != null)
+            {
+                if (SAINPlugin.DebugMode && SAINPlugin.DrawDebugGizmos)
+                {
+                    if (ActiveEnemy.LastHeardPosition != null)
+                    {
+                        if (debugLastHeardPosition == null)
+                        {
+                            debugLastHeardPosition = DebugGizmos.Line(ActiveEnemy.LastHeardPosition.Value, SAIN.Position, Color.yellow, 0.01f, false, Time.deltaTime, true);
+                        }
+                        DebugGizmos.UpdatePositionLine(ActiveEnemy.LastHeardPosition.Value, SAIN.Position, debugLastHeardPosition);
+                    }
+                    if (ActiveEnemy.LastSeenPosition != null)
+                    {
+                        if (debugLastSeenPosition == null)
+                        {
+                            debugLastSeenPosition = DebugGizmos.Line(ActiveEnemy.LastSeenPosition.Value, SAIN.Position, Color.red, 0.01f, false, Time.deltaTime, true);
+                        }
+                        DebugGizmos.UpdatePositionLine(ActiveEnemy.LastSeenPosition.Value, SAIN.Position, debugLastSeenPosition);
+                    }
+                }
+                else if (debugLastHeardPosition != null || debugLastSeenPosition != null)
+                {
+                    GameObject.Destroy(debugLastHeardPosition);
+                    GameObject.Destroy(debugLastSeenPosition);
+                }
+            }
+            else if (debugLastHeardPosition != null || debugLastSeenPosition != null)
+            {
+                GameObject.Destroy(debugLastHeardPosition);
+                GameObject.Destroy(debugLastSeenPosition);
             }
         }
 

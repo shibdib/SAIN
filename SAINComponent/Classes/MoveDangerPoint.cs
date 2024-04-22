@@ -1,6 +1,5 @@
 ﻿using EFT;
 using SAIN.Helpers;
-using SAIN.Helpers.SealedClass;
 using System;
 using UnityEngine;
 using UnityEngine.AI;

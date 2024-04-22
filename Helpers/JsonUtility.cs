@@ -18,20 +18,8 @@ namespace SAIN.Helpers
 {
     public enum JsonEnum
     {
-        Json,
-        JsonSearch,
         Presets,
-        BigBrain,
-        BigBrainBrains,
-        BigBrainLayers,
-        BigBrainLayerNames,
         GlobalSettings,
-        EFTBotSettings,
-        SAINBotSettings,
-        DefaultEditorSettings,
-        PresetDefinition,
-        Personalities,
-        LogOutput
     }
 
     public static class JsonUtility

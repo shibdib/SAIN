@@ -19,7 +19,7 @@ namespace SAIN.SAINComponent.Classes
 
         public static float GetSpreadIncrease(BotOwner bot)
         {
-            if (CheckIfPlayerNotLooking(bot))
+            if (Settings.NotLookingToggle && CheckIfPlayerNotLooking(bot))
             {
                 return Settings.NotLookingAccuracyAmount;
             }

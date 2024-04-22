@@ -147,7 +147,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 return;
             }
-            if (this.botOwner_0.RecoilData.RecoilOffset.sqrMagnitude > 4f * 4f)
+            if (this.botOwner_0.RecoilData.RecoilOffset.sqrMagnitude > 1f)
             {
                 if (this.botOwner_0.ShootData.Shooting)
                 {

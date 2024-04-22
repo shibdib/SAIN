@@ -25,6 +25,7 @@ namespace SAIN.SAINComponent.Classes.Debug
         public void Init()
         {
             PathController = _pathControllerField.GetValue(BotOwner.Mover) as PathControllerClass;
+            DontUnstuckMe = DontUnstuckTheseTypes.Contains(SAIN.Info.Profile.WildSpawnType);
         }
 
         public bool BotIsMoving { get; private set; }
@@ -101,12 +102,24 @@ namespace SAIN.SAINComponent.Classes.Debug
         }
 
         private float _nextVaultTime;
+        private bool DontUnstuckMe;
+
+        private static readonly List<WildSpawnType> DontUnstuckTheseTypes = new List<WildSpawnType>
+        {
+            WildSpawnType.marksman,
+            WildSpawnType.shooterBTR,
+        };
 
         public void Update()
         {
             if (SAIN.BotActive
                 && !SAIN.GameIsEnding)
             {
+                if (DontUnstuckMe)
+                {
+                    return;
+                }
+
                 if (_nextVaultTime < Time.time)
                 {
                     _nextVaultTime = Time.time + 0.5f;

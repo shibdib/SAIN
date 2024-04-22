@@ -368,7 +368,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     if (HearPath.corners.Length > 2)
                     {
-                        for (int i = HearPath.corners.Length - 1; i > 0; i--)
+                        for (int i = HearPath.corners.Length - 1; i >= 0; i--)
                         {
                             Vector3 corner = HearPath.corners[i];
                             corner.y += 1f;

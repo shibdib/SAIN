@@ -117,7 +117,35 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void BuildDebugText(StringBuilder stringBuilder)
         {
-            DebugOverlay.AddCoverInfo(SAIN, stringBuilder);
+            stringBuilder.AppendLine("Hold In Cover Info");
+            var cover = SAIN.Cover;
+            stringBuilder.AppendLabeledValue("CoverFinder State", $"{cover.CurrentCoverFinderState}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Cover Count", $"{cover.CoverPoints.Count}", Color.white, Color.yellow, true);
+
+            stringBuilder.AppendLabeledValue("Current Cover Status", $"{CoverInUse?.GetCoverStatus(SAIN)}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Current Cover Height", $"{CoverInUse?.CoverHeight}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Current Cover Value", $"{CoverInUse?.CoverValue}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("CoverFinder State", $"{cover.CurrentCoverFinderState}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Cover Count", $"{cover.CoverPoints.Count}", Color.white, Color.yellow, true);
+            if (SAIN.CurrentTargetPosition != null)
+            {
+                stringBuilder.AppendLabeledValue("Current Target Position", $"{SAIN.CurrentTargetPosition.Value}", Color.white, Color.yellow, true);
+            }
+            else
+            {
+                stringBuilder.AppendLabeledValue("Current Target Position", null, Color.white, Color.yellow, true);
+            }
+
+            if (CoverInUse != null)
+            {
+                stringBuilder.AppendLine("Cover In Use");
+                stringBuilder.AppendLabeledValue("Status", $"{CoverInUse.GetCoverStatus(SAIN)}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Height / Value", $"{CoverInUse.CoverHeight} {CoverInUse.CoverValue}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Path Length", $"{CoverInUse.CalcPathLength(SAIN)}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Straight Distance", $"{(CoverInUse.GetPosition(SAIN) - SAIN.Position).magnitude}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Safe Path?", $"{CoverInUse.CheckPathSafety(SAIN)}", Color.white, Color.yellow, true);
+            }
+
         }
     }
 }

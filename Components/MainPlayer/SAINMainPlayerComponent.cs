@@ -5,6 +5,7 @@ using SAIN.SAINComponent.BaseClasses;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Mover;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -61,15 +62,31 @@ namespace SAIN.Components
 
         public readonly List<Vector3> PlacesToShootMe = new List<Vector3>();
 
-        public void FindPlacesToShoot(List<Vector3> places, Vector3 directionToBot, float dotThreshold = 0f)
+        public sealed class FindPlacesToShootParameters
         {
-            const float minPointDist = 5f;
-            const float maxPointDist = 300f;
-            const int iterationMax = 100;
-            const int successMax = 5;
-            const float yVal = 0.25f;
-            const float navSampleRange = 0.25f;
-            const float downDirDist = 10f;
+            public float minPointDist = 5f;
+            public float maxPointDist = 300f;
+            public int iterationMax = 100;
+            public int successMax = 5;
+            public float yVal = 0.25f;
+            public float navSampleRange = 0.25f;
+            public float downDirDist = 10f;
+        }
+
+        public IEnumerator FindPlaceToShoot(FindPlacesToShootParameters parameters)
+        {
+            yield return null;
+        }
+
+        public void FindPlacesToShoot(List<Vector3> places, Vector3 directionToBot, FindPlacesToShootParameters parameters)
+        {
+            float minPointDist = parameters.minPointDist;
+            float maxPointDist = parameters.maxPointDist;
+            int iterationMax = parameters.iterationMax;
+            int successMax = parameters.successMax;
+            float yVal = parameters.yVal;
+            float navSampleRange = parameters.navSampleRange;
+            float downDirDist = parameters.downDirDist;
 
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
 

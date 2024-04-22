@@ -1,4 +1,5 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
 using static SAIN.Helpers.JsonUtility;

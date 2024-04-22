@@ -203,7 +203,7 @@ namespace SAIN.Helpers
             core.DIST_NOT_TO_GROUP_SQR = 50f * 50f;
             core.MIN_DIST_TO_STOP_RUN = 0f;
             core.CAN_SHOOT_TO_HEAD = false;
-            core.ARMOR_CLASS_COEF = 7f;
+            core.ARMOR_CLASS_COEF = 6f;
             core.SHOTGUN_POWER = 40f;
             core.RIFLE_POWER = 50f;
             core.PISTOL_POWER = 20f;

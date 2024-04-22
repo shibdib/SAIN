@@ -5,6 +5,7 @@ using System;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.Layers
 {
@@ -30,6 +31,7 @@ namespace SAIN.Layers
 
             string name;
             object resultValue;
+            int count = 0;
 
             FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
             foreach (FieldInfo field in fields)
@@ -39,10 +41,10 @@ namespace SAIN.Layers
                 string stringValue = null;
                 if (resultValue != null)
                 {
+                    count++;
                     stringValue = resultValue.ToString();
+                    stringBuilder.AppendLabeledValue($"{count}. {name}", stringValue, Color.white, Color.yellow, true);
                 }
-
-                stringBuilder.AppendLabeledValue(name, stringValue, Color.white, Color.yellow, true);
             }
 
             PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
@@ -53,10 +55,10 @@ namespace SAIN.Layers
                 string stringValue = null;
                 if (resultValue != null)
                 {
+                    count++;
                     stringValue = resultValue.ToString();
+                    stringBuilder.AppendLabeledValue($"{count}. {name}", stringValue, Color.white, Color.yellow, true);
                 }
-
-                stringBuilder.AppendLabeledValue(name, stringValue, Color.white, Color.yellow, true);
             }
         }
 
@@ -145,8 +147,15 @@ namespace SAIN.Layers
         public static void AddCoverInfo(SAINComponentClass SAIN, StringBuilder stringBuilder)
         {
             stringBuilder.AppendLine(nameof(SAINComponentClass.Cover));
-            DisplayPropertyAndFieldValues(SAIN.Cover, stringBuilder);
-            DisplayPropertyAndFieldValues(SAIN.Cover.CoverInUse, stringBuilder);
+            var cover = SAIN.Cover;
+            stringBuilder.AppendLabeledValue("CoverFinder State", $"{cover.CurrentCoverFinderState}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Closest Point Status", $"{cover.ClosestPoint?.GetCoverStatus(SAIN)}", Color.white, Color.yellow, true);
+            
+            stringBuilder.AppendLabeledValue("Cover Count", $"{cover.CoverPoints.Count}", Color.white, Color.yellow, true);
+            foreach (var point in cover.CoverPoints)
+            {
+                DisplayPropertyAndFieldValues(point.GetInfo(SAIN), stringBuilder);
+            }
         }
 
         public static void AddAimData(BotOwner BotOwner, StringBuilder stringBuilder)

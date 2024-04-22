@@ -92,6 +92,7 @@ namespace SAIN.SAINComponent
                 AILimit = new SAINAILimit(this);
                 AimDownSightsController = new AimDownSightsController(this);
                 BotHitReaction = new SAINBotHitReaction(this);
+                SpaceAwareness = new SAINBotSpaceAwareness(this);
 
                 NavMeshAgent = this.GetComponent<NavMeshAgent>();
                 if (NavMeshAgent == null)
@@ -130,6 +131,7 @@ namespace SAIN.SAINComponent
             AILimit.Init();
             AimDownSightsController.Init();
             BotHitReaction.Init();
+            SpaceAwareness.Init();
 
             TimeBotCreated = Time.time;
 
@@ -140,7 +142,6 @@ namespace SAIN.SAINComponent
 
         public float TimeBotCreated { get; private set; }
 
-        public bool SAINEnabled => Info?.FileSettings?.Core != null ? Info.FileSettings.Core.SAINEnabled : false;
 
         private void Update()
         {
@@ -150,11 +151,6 @@ namespace SAIN.SAINComponent
                 return;
             }
 
-            if (SAINEnabled)
-            {
-                //return;
-            }
-
             if (GameIsEnding)
             {
                 return;
@@ -162,16 +158,12 @@ namespace SAIN.SAINComponent
 
             if (BotActive)
             {
-                Stopwatch.Restart();
-
                 HandlePatrolData();
 
                 AILimit.UpdateAILimit();
 
                 if (AILimit.LimitAIThisFrame)
                 {
-                    Stopwatch.Stop();
-                    //ProfilePerformance(Stopwatch);
                     return;
                 }
 
@@ -197,6 +189,7 @@ namespace SAIN.SAINComponent
                 Suppression.Update();
                 AimDownSightsController.Update();
                 BotHitReaction.Update();
+                SpaceAwareness.Update();
 
                 BotOwner.DoorOpener.Update(); 
                 UpdateGoalTarget();
@@ -205,9 +198,6 @@ namespace SAIN.SAINComponent
                 {
                     BotOwner.BotLight?.TurnOn();
                 }
-
-                Stopwatch.Stop();
-                ProfilePerformance(Stopwatch);
             }
         }
 
@@ -215,20 +205,7 @@ namespace SAIN.SAINComponent
 
         private void LateUpdate()
         {
-            if (SAINPlugin.DebugMode && LogTimer < Time.time)
-            {
-                LogTimer = Time.time + 5;
-                //Logger.LogDebug(TotalTime);
-            }
-            TotalTime = 0;
         }
-
-        private static void ProfilePerformance(Stopwatch stopWatch)
-        {
-            TotalTime += stopWatch.Elapsed.Milliseconds;
-        }
-
-        private static double TotalTime;
 
         private static float LogTimer;
 
@@ -381,6 +358,7 @@ namespace SAIN.SAINComponent
                 AILimit?.Dispose();
                 AimDownSightsController?.Dispose();
                 BotHitReaction?.Dispose();
+                SpaceAwareness?.Dispose();
 
                 Destroy(this);
             }
@@ -444,6 +422,7 @@ namespace SAIN.SAINComponent
             }
         }
 
+        public SAINBotSpaceAwareness SpaceAwareness { get; private set; }
         public SAINBotHitReaction BotHitReaction { get; private set; }
         public AimDownSightsController AimDownSightsController { get; private set; }
         public SAINAILimit AILimit { get; private set; }
