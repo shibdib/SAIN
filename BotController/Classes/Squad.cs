@@ -84,11 +84,13 @@ namespace SAIN.BotController.Classes
             AddNewPlaceForCheck(botOwner, position, checkType, player);
         }
 
-        private readonly Dictionary<IPlayer, PlaceForCheck> PlayerPlaceChecks = new Dictionary<IPlayer, PlaceForCheck>();
+        public readonly Dictionary<IPlayer, PlaceForCheck> PlayerPlaceChecks = new Dictionary<IPlayer, PlaceForCheck>();
 
         private void SetVisibleAndHeard(IPlayer player, Vector3 position)
         {
             const float SoundAggroDist = 75f;
+
+            bool playerIsHuman = player.IsAI == false;
 
             if (player != null && Members != null)
             {
@@ -100,6 +102,11 @@ namespace SAIN.BotController.Classes
                     }
                     SAINEnemy sainEnemy = member.Value?.EnemyController?.CheckAddEnemy(player);
                     sainEnemy?.SetHeardStatus(true, position);
+
+                    if (playerIsHuman)
+                    {
+                        member.Value.Cover.ForceCoverFinderState(true, 30f);
+                    }
 
                     if (sainEnemy != null && member.Value?.Info?.Profile?.IsPMC == true)
                     {

@@ -77,7 +77,14 @@ namespace SAIN.Layers.Combat.Solo
                     return new Action(typeof(StandAndShootAction), $"{Decision}");
 
                 case SoloDecision.HoldInCover:
-                    return new Action(typeof(HoldinCoverAction), $"{Decision}");
+                    if (SelfDecision != SelfDecision.None)
+                    {
+                        return new Action(typeof(HoldinCoverAction), $"{Decision} + {SelfDecision}");
+                    }
+                    else
+                    {
+                        return new Action(typeof(HoldinCoverAction), $"{Decision}");
+                    }
 
                 case SoloDecision.Shoot:
                     return new Action(typeof(ShootAction), $"{Decision}");

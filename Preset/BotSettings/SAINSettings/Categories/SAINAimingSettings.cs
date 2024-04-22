@@ -81,6 +81,9 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Hidden]
         public int RECALC_MUST_TIME_MAX = 2;
 
+        [Hidden]
+        public float DAMAGE_TO_DISCARD_AIM_0_100 = 100;
+
         [NameAndDescription(
             "Hit Reaction Recovery Time",
             "How much time it takes to recover a bot's aim when they get hit by a bullet")]

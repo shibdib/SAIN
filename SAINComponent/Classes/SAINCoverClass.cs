@@ -7,6 +7,14 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
 {
+    public enum CoverFinderState
+    {
+        off = 0,
+        on = 1,
+        forceOff = 2,
+        forceOn = 3,
+    }
+
     public class SAINCoverClass : SAINBase, ISAINClass
     {
         public SAINCoverClass(SAINComponentClass sain) : base(sain)
@@ -20,6 +28,16 @@ namespace SAIN.SAINComponent.Classes
             CoverFinder.Init(SAIN);
         }
 
+        public void ForceCoverFinderState(bool value, float duration = 30f)
+        {
+            ForcedCoverFinderState = value ? CoverFinderState.forceOn : CoverFinderState.forceOff;
+            _forcedStateTimer = Time.time + duration;
+        }
+
+        public CoverFinderState CurrentCoverFinderState { get; private set; }
+        private CoverFinderState ForcedCoverFinderState;
+        private float _forcedStateTimer;
+
         public void Update()
         {
             if (!SAIN.BotActive || SAIN.GameIsEnding)
@@ -28,16 +46,27 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            // If the config option is enabled. Let a bot find cover all the time when they have a target or enemy if the enemy is the player.
-            if (GlobalSettings.Cover.EnhancedCoverFinding && SAIN.CurrentTargetPosition != null)
+            if (ForcedCoverFinderState != CoverFinderState.off && _forcedStateTimer < Time.time)
             {
-                if (SAIN.HasEnemy && SAIN.Enemy?.EnemyPlayer != null && SAIN.Enemy.EnemyPlayer.IsYourPlayer == true)
-                {
-                    ActivateCoverFinder(true);
-                    return;
-                }
-                // No way to check if a GoalTarget is created by a player afaik, so enable it anyways
-                else if (SAIN.Enemy == null)
+                ForcedCoverFinderState = CoverFinderState.off;
+            }
+            if (ForcedCoverFinderState == CoverFinderState.forceOn)
+            {
+                ActivateCoverFinder(true, true);
+                return;
+            }
+            if (ForcedCoverFinderState == CoverFinderState.forceOff)
+            {
+                ActivateCoverFinder(false, true);
+                return;
+            }
+
+            // If the config option is enabled. Let a bot find cover all the time when they have a target or enemy if the enemy is the player.
+            if (GlobalSettings.Cover.EnhancedCoverFinding 
+                && SAIN.CurrentTargetPosition != null)
+            {
+                var aiData = SAIN.Enemy?.EnemyPlayer?.AIData;
+                if (SAIN.HasEnemy && aiData != null && aiData.IsAI == false)
                 {
                     ActivateCoverFinder(true);
                     return;
@@ -46,11 +75,17 @@ namespace SAIN.SAINComponent.Classes
 
             var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
             var currentCover = CoverInUse;
-            if (CurrentDecision == SoloDecision.UnstuckMoveToCover || CurrentDecision == SoloDecision.Retreat || CurrentDecision == SoloDecision.RunToCover || CurrentDecision == SoloDecision.WalkToCover)
+            if (CurrentDecision == SoloDecision.UnstuckMoveToCover 
+                || CurrentDecision == SoloDecision.Retreat 
+                || CurrentDecision == SoloDecision.RunToCover 
+                || CurrentDecision == SoloDecision.WalkToCover)
             {
                 ActivateCoverFinder(true);
             }
-            else if (CurrentDecision == SoloDecision.HoldInCover && (currentCover == null || currentCover.GetSpotted(SAIN) == true || Time.time - currentCover.TimeCreated > 5f))
+            else if (CurrentDecision == SoloDecision.HoldInCover 
+                && (currentCover == null 
+                || currentCover.GetSpotted(SAIN) == true 
+                || Time.time - currentCover.TimeCreated > 5f))
             {
                 ActivateCoverFinder(true);
             }
@@ -98,15 +133,17 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private void ActivateCoverFinder(bool value)
+        private void ActivateCoverFinder(bool value, bool forced = false)
         {
             if (value && GetPointToHideFrom(out var target))
             {
                 CoverFinder?.LookForCover(target.Value, BotOwner.Position);
+                CurrentCoverFinderState = forced ? CoverFinderState.forceOn : CoverFinderState.on;
             }
             if (!value)
             {
                 CoverFinder?.StopLooking();
+                CurrentCoverFinderState = forced ? CoverFinderState.forceOff : CoverFinderState.off;
             }
         }
 

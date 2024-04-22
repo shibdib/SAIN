@@ -135,7 +135,7 @@ namespace SAIN.Layers.Combat.Solo
             if (BotOwner.Memory.IsUnderFire)
             {
                 SAIN.Mover.Sprint(false);
-                SteerByPriority(true);
+                SteerByPriority(false);
                 return;
             }
             if (SprintEnabled)

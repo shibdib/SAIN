@@ -30,6 +30,11 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool GetDecision(out SoloDecision Decision)
         {
+            if (BotOwner.Memory.IsUnderFire)
+            {
+
+            }
+
             SAINEnemy enemy = SAIN.Enemy;
             if (enemy == null)
             {
@@ -101,6 +106,22 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             return true;
+        }
+
+        private bool StayInCoverToSelfCare()
+        {
+            SelfDecision currentSelf = SAIN.Memory.Decisions.Self.Current;
+            SoloDecision currentMain = SAIN.Memory.Decisions.Main.Current;
+
+            if (currentMain == SoloDecision.HoldInCover)
+            {
+
+            }
+            if (currentSelf != SelfDecision.None && StartHoldInCover())
+            {
+
+            }
+            return false;
         }
 
         private static readonly float GrenadeMaxEnemyDistance = 100f;

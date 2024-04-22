@@ -29,7 +29,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 bool shallProne = SAIN.Mover.Prone.ShallProneHide();
                 if (FindTargetCover())
                 {
-                    RecalcTimer = Time.time + 2f;
                     if ((CoverDestination.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude > 4f)
                     {
                         MoveSuccess = BotOwner.BotRun.Run(CoverDestination.GetPosition(SAIN), false, 0.6f);
@@ -46,7 +45,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
                 else
                 {
-                    RecalcTimer = Time.time + 0.1f;
+                    RecalcTimer = Time.time + 0.2f;
                 }
             }
             if (MoveSuccess)

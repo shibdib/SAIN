@@ -352,9 +352,24 @@ namespace SAIN.SAINComponent.Classes.Decision
                     var pathStatus = enemy.CheckPathDistance();
                     bool SeenRecent = enemy.TimeSinceSeen < StartSurgery_SeenRecentTime;
 
-                    if (!SeenRecent && pathStatus != EnemyPathDistance.Far && pathStatus != EnemyPathDistance.Close)
+                    if (!SeenRecent && pathStatus != EnemyPathDistance.Far && pathStatus != EnemyPathDistance.Close && pathStatus != EnemyPathDistance.VeryClose)
                     {
                         useSurgery = true;
+                    }
+                }
+
+                if (SAIN.HasEnemy)
+                {
+                    foreach (var enemyInfo in SAIN.EnemyController.Enemies)
+                    {
+                        if (enemyInfo.Value.InLineOfSight)
+                        {
+                            useSurgery = false;
+                        }
+                        else if (enemyInfo.Value.TimeSinceSeen < StartSurgery_SeenRecentTime)
+                        {
+                            useSurgery = false;
+                        }
                     }
                 }
             }

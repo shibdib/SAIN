@@ -22,6 +22,7 @@ namespace SAIN
         RushEnemy,
         MoveToEngage,
         Ambush,
+        ReturnFire,
 
         UnstuckSearch,
         UnstuckMoveToCover,

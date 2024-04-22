@@ -49,10 +49,10 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
         }
 
-        private const int CheckDecisionFrameTarget = 3;
+        private const int CheckDecisionFrameTarget = 6;
         private int CheckDecisionFrameCount = 0;
 
-        private const int CheckEnemyFrameTarget = 3;
+        private const int CheckEnemyFrameTarget = 6;
         private int CheckEnemyFrameCount = 0;
 
         public void Dispose()

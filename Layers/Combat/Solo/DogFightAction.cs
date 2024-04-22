@@ -29,17 +29,17 @@ namespace SAIN.Layers.Combat.Solo
             }
 
             SAIN.Mover.SetTargetPose(1f);
-            SAIN.Mover.SetTargetMoveSpeed(1f);
+            SAIN.Mover.SetTargetMoveSpeed(0.75f);
             SAIN.Steering.SteerByPriority(false);
             bool EnemyVisible = enemy.IsVisible;
 
             if (UpdateMovementTimer < Time.time)
             {
-                UpdateMovementTimer = Time.time + 0.15f;
+                UpdateMovementTimer = Time.time + 0.35f;
                 if (EnemyVisible 
                     && BackUp(out var pos))
                 {
-                    BotOwner.GoToPoint(pos, false, -1, false, false, false);
+                    BotOwner.GoToPoint(pos, true, -1, false, false, false);
                 }
                 else if (!EnemyVisible 
                     && CheckMoveToEnemyTimer < Time.time

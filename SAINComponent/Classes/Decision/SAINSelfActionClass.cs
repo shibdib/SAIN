@@ -92,7 +92,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         public void DoSurgery()
         {
             var surgery = BotOwner.Medecine.SurgicalKit;
-            if (HealTimer < Time.time && surgery.ShallStartUse())
+            if (HealTimer < Time.time && !BotOwner.Mover.IsMoving && SAIN.Cover.BotIsAtCoverInUse() && surgery.ShallStartUse())
             {
                 HealTimer = Time.time + 5f;
                 surgery.ApplyToCurrentPart();
