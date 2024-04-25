@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Net;
+using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
 using Color = UnityEngine.Color;
@@ -14,6 +15,7 @@ namespace SAIN.Helpers
         public Vector3 WorldPos;
         public string Text;
         public GUIStyle Style;
+        public StringBuilder StringBuilder = new StringBuilder();
     }
 
     public class DebugGizmos
@@ -36,7 +38,7 @@ namespace SAIN.Helpers
 
         public static void OnGUI()
         {
-            if (!DrawGizmos)
+            if (!SAINPlugin.EditorDefaults.DrawDebugLabels)
             {
                 GUIObjects.Clear();
             }
@@ -44,7 +46,8 @@ namespace SAIN.Helpers
             {
                 foreach (var obj in GUIObjects)
                 {
-                    DrawLabel(obj.WorldPos, obj.Text, obj.Style);
+                    string text = obj.Text.IsNullOrEmpty() ? obj.StringBuilder.ToString() : obj.Text;
+                    DrawLabel(obj.WorldPos, text, obj.Style);
                 }
             }
         }
@@ -58,8 +61,17 @@ namespace SAIN.Helpers
         public static GUIObject CreateLabel(Vector3 worldPos, string text, GUIStyle guiStyle = null)
         {
             GUIObject obj = new GUIObject { WorldPos = worldPos, Text = text, Style = guiStyle };
-            GUIObjects.Add(obj);
+            AddGUIObject(obj);
             return obj;
+        }
+
+        public static void AddGUIObject(GUIObject obj)
+        {
+            if (GUIObjects.Contains(obj))
+            {
+                return;
+            }
+            GUIObjects.Add(obj);
         }
 
         public static void DestroyLabel(GUIObject obj)
@@ -79,7 +91,7 @@ namespace SAIN.Helpers
             {
                 if (DefaultStyle == null)
                 {
-                    DefaultStyle = new GUIStyle(GUI.skin.label);
+                    DefaultStyle = new GUIStyle(GUI.skin.box);
                     DefaultStyle.alignment = TextAnchor.MiddleLeft;
                     DefaultStyle.fontSize = 14;
                     DefaultStyle.margin = new RectOffset(3, 3, 3, 3);

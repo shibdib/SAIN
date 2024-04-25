@@ -44,6 +44,11 @@ namespace SAIN.Editor
         [Debug]
         public bool DrawDebugGizmos;
 
+        [Name("Draw Debug Labels")]
+        [Default(false)]
+        [Debug]
+        public bool DrawDebugLabels;
+
         [Name("Collect and Export Bot Layer and Brain Info")]
         [Default(false)]
         [Debug]

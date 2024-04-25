@@ -34,17 +34,8 @@ namespace SAIN.Preset.GlobalSettings
         [Name("General")]
         public GeneralSettings General = new GeneralSettings();
 
-        [Name("Looting Bots")]
-        public LootingBotsSettings LootingBots = new LootingBotsSettings();
-
-        [Name("No Bush ESP")]
-        public NoBushESPSettings NoBushESP = new NoBushESPSettings();
-
         [Name("Aiming")]
         public AimSettings Aiming = new AimSettings();
-
-        [Name("Shoot")]
-        public ShootSettings Shoot = new ShootSettings();
 
         [Name("Cover")]
         public CoverSettings Cover = new CoverSettings();
@@ -55,17 +46,26 @@ namespace SAIN.Preset.GlobalSettings
         [Name("Flashlight")]
         public FlashlightSettings Flashlight = new FlashlightSettings();
 
-        [Name("Personality")]
+        [Name("Force Personality")]
         public PersonalitySettings Personality = new PersonalitySettings();
-
-        [Name("Mind")]
-        public MindSettings Mind = new MindSettings();
 
         [Name("Hearing")]
         public HearingSettings Hearing = new HearingSettings();
 
         [Name("Look")]
         public LookSettings Look = new LookSettings();
+
+        [Name("Looting Bots")]
+        public LootingBotsSettings LootingBots = new LootingBotsSettings();
+
+        [Name("Mind")]
+        public MindSettings Mind = new MindSettings();
+
+        [Name("No Bush ESP")]
+        public NoBushESPSettings NoBushESP = new NoBushESPSettings();
+
+        [Name("Shoot")]
+        public ShootSettings Shoot = new ShootSettings();
 
         [Hidden]
         public EFTCoreSettings EFTCoreSettings = new EFTCoreSettings();

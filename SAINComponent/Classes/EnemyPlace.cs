@@ -68,7 +68,5 @@ namespace SAIN.SAINComponent.Classes
         private bool _hasSeen;
 
         public float TimeSeen;
-
-        public readonly List<Vector3> KnownLocations = new List<Vector3>(5);
     }
 }

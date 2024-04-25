@@ -132,6 +132,12 @@ namespace SAIN.Patches.Generic
         {
             BotOwner botOwner = __instance?.Owner;
 
+            if (BotsGroupSenseRecently(__instance))
+            {
+                __result = true;
+                return;
+            }
+
             if (__instance.Person != null
                 && SAINPlugin.GetSAIN(botOwner, out SAINComponentClass sain, nameof(ShallKnowEnemyPatch)))
             {
@@ -149,6 +155,20 @@ namespace SAIN.Patches.Generic
                 }
             }
         }
+        public static bool BotsGroupSenseRecently(EnemyInfo enemyInfo)
+        {
+            BotsGroup group = enemyInfo.Owner.BotsGroup;
+            for (int i = 0; i < group.MembersCount; i++)
+            {
+                if (SAINPlugin.GetSAIN(group.Member(i), out SAINComponentClass sain, nameof(ShallKnowEnemyPatch)) 
+                    && EnemySenseRecently(sain, enemyInfo))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         public static bool SquadSensedRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
         {
@@ -159,7 +179,7 @@ namespace SAIN.Patches.Generic
             {
                 foreach (var member in members)
                 {
-                    if (EnemySenseRecently(member.Value, enemyInfo))
+                    if (member.Value != null && member.Value.Player?.HealthController.IsAlive == true && EnemySenseRecently(member.Value, enemyInfo))
                     {
                         senseRecently = true;
                         break;
@@ -183,7 +203,16 @@ namespace SAIN.Patches.Generic
                 if (myEnemy.Seen 
                     && myEnemy.Heard 
                     && myEnemy.TimeSinceHeard <= TimeToForgetEnemySeen 
-                    && myEnemy.TimeSinceSeen <= sain.BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC)
+                    && myEnemy.TimeSinceSeen <= sain.Info.ForgetEnemyTime)
+                {
+                    return true;
+                }
+                if (myEnemy.KnownPlaces.SearchedAllKnownLocations)
+                {
+                    //return false;
+                }
+                if (myEnemy.Seen
+                    && myEnemy.TimeSinceSeen <= sain.Info.ForgetEnemyTime)
                 {
                     return true;
                 }
@@ -219,12 +248,13 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            if (__result == false)
+            BotOwner botOwner = __instance?.Owner;
+
+            if (ShallKnowEnemyPatch.BotsGroupSenseRecently(__instance))
             {
+                __result = true;
                 return;
             }
-
-            BotOwner botOwner = __instance?.Owner;
 
             if (__instance.Person != null
                 && SAINPlugin.GetSAIN(botOwner, out SAINComponentClass sain, nameof(ShallKnowEnemyPatch)))
