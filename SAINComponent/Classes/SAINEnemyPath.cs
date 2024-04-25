@@ -1,6 +1,8 @@
-﻿using SAIN.Helpers;
+﻿using EFT;
+using SAIN.Helpers;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.UI.GridLayoutGroup;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -12,51 +14,117 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update(bool isCurrentEnemy)
         {
-            if (!isCurrentEnemy)
+            if (Enemy.IsAI && Enemy.RealDistance > 300)
             {
-                LastCornerToEnemy = null;
-                CanSeeLastCornerToEnemy = false;
                 return;
             }
-
-            if (CheckPathTimer < Time.time)
+            if (!Enemy.IsAI && Enemy.RealDistance > 500)
             {
-                CheckPathTimer = Time.time + 0.35f;
-                CalcPath();
+                return;
             }
+            float timeAdd = 1f;
+            if (!isCurrentEnemy && Enemy.IsAI)
+            {
+                timeAdd = 8f;
+            }
+            if (!isCurrentEnemy && !Enemy.IsAI)
+            {
+                timeAdd = 2f;
+            }
+            if (isCurrentEnemy && !Enemy.IsAI)
+            {
+                timeAdd = 0.5f;
+            }
+
+            if (CheckPathTimer + timeAdd < Time.time)
+            {
+                CheckPathTimer = Time.time;
+                CalcPath(isCurrentEnemy);
+            }
+
+            //var blindCorner = BlindCornerToEnemy;
         }
 
         public NavMeshPathStatus PathToEnemyStatus { get; private set; }
 
-        private void CalcPath()
+        public void Clear()
         {
-            bool hasLastCorner = false;
-            float pathDistance = Mathf.Infinity;
-
-            Vector3 enemyPosition;
-            if (Enemy.LastSeenPosition != null)
+            if (PathToEnemy != null && PathToEnemy.corners.Length > 0)
             {
-                enemyPosition = Enemy.LastSeenPosition.Value;
+                PathToEnemy.ClearCorners();
             }
-            else
+            if (PathToEnemyStatus != NavMeshPathStatus.PathInvalid)
             {
-                enemyPosition = EnemyPosition;
+                PathToEnemyStatus = NavMeshPathStatus.PathInvalid;
             }
-
-            PathToEnemy.ClearCorners();
-            if (NavMesh.CalculatePath(SAIN.Position, enemyPosition, -1, PathToEnemy))
+            if (LastCornerToEnemy != null)
             {
-                pathDistance = PathToEnemy.CalculatePathLength();
-                if (PathToEnemy.corners.Length > 2)
+                LastCornerToEnemy = null;
+            }
+            if (CanSeeLastCornerToEnemy)
+            {
+                CanSeeLastCornerToEnemy = false;
+            }
+            if (_blindCorner != null)
+            {
+                _blindCorner = null;
+            }
+        }
+
+        private void CalcPath(bool isCurrentEnemy)
+        {
+            if (!isCurrentEnemy)
+            {
+                bool clearPath = false;
+
+                if (Enemy.Seen == false && Enemy.Heard == false)
                 {
-                    hasLastCorner = true;
+                    clearPath = true;
+                }
+                else if (Enemy.TimeSinceLastKnownUpdated < BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC)
+                {
+                    clearPath = true;
+                }
+
+                if (clearPath)
+                {
+                    Clear();
+                    return;
                 }
             }
 
-            PathDistance = pathDistance;
-            PathToEnemyStatus = PathToEnemy.status;
+            // We should always have a not null LastKnownPosition here, but have the real position as a fallback just in case
+            Vector3? enemyPosition = Enemy.LastKnownPosition ?? new Vector3?(EnemyPosition);
 
-            if (hasLastCorner && PathToEnemyStatus == NavMeshPathStatus.PathComplete)
+            Vector3 botPosition = SAIN.Position;
+
+            // Did we already check the current enemy position and has the bot not moved? dont recalc path then
+            if (_enemyLastPosChecked != null 
+                && (_enemyLastPosChecked.Value - enemyPosition.Value).sqrMagnitude < 0.1f
+                && (_botLastPosChecked - botPosition).sqrMagnitude < 0.1f)
+            {
+                return;
+            }
+
+            // cache the positions we are currently checking
+            _enemyLastPosChecked = enemyPosition;
+            _botLastPosChecked = botPosition;
+
+            // calculate a path to the enemys position
+            ClearCorners();
+            if (NavMesh.CalculatePath(botPosition, enemyPosition.Value, -1, PathToEnemy))
+            {
+                PathDistance = PathToEnemy.CalculatePathLength();
+            }
+
+            PathToEnemyStatus = PathToEnemy.status;
+            FindLastCornerToEnemy();
+        }
+
+        private void FindLastCornerToEnemy()
+        {
+            // find the last corner before arriving at an enemy position, and then check if we can see it.
+            if (PathToEnemyStatus == NavMeshPathStatus.PathComplete && PathToEnemy.corners.Length > 2)
             {
                 Vector3 lastCorner = PathToEnemy.corners[PathToEnemy.corners.Length - 2];
                 LastCornerToEnemy = lastCorner;
@@ -70,11 +138,23 @@ namespace SAIN.SAINComponent.Classes
             else
             {
                 LastCornerToEnemy = null;
+                CanSeeLastCornerToEnemy = false;
             }
         }
 
-        private void UpdateDistance()
+        private Vector3? _enemyLastPosChecked;
+        private Vector3 _botLastPosChecked;
+
+        private void ClearCorners()
         {
+            if (PathToEnemy == null)
+            {
+                PathToEnemy = new NavMeshPath();
+            }
+            else
+            {
+                PathToEnemy.ClearCorners();
+            }
         }
 
         public EnemyPathDistance CheckPathDistance()
@@ -111,20 +191,59 @@ namespace SAIN.SAINComponent.Classes
             return pathDistance;
         }
 
-        public float DistanceToEnemy(Vector3 point) => Vector.DistanceBetween(Enemy.EnemyPosition, point);
-
-        public float DistanceToMe(Vector3 point) => Vector.DistanceBetween(SAIN.Transform.Position, point);
-
-        public bool HasArrivedAtLastSeen => !Enemy.EnemyPerson.PlayerNull && Enemy.Seen && !Enemy.IsVisible && (MyDistanceFromLastSeen < 2f || VisitedLastSeenPosition);
-        private bool VisitedLastSeenPosition => !Enemy.EnemyPerson.PlayerNull && Enemy.Seen && !Enemy.IsVisible && (MyDistanceFromLastSeen < 2f || VisitedLastSeenPosition);
-        public float EnemyDistanceFromLastSeen => Enemy.LastSeenPosition != null ? DistanceToEnemy(Enemy.LastSeenPosition.Value) : 0f;
-        public float EnemyDistance => DistanceToMe(Enemy.EnemyPosition);
-        public float MyDistanceFromLastSeen => Enemy.LastSeenPosition != null ? DistanceToMe(Enemy.LastSeenPosition.Value) : EnemyDistance;
-        public float PathDistance { get; private set; }
+        public float PathDistance { get; private set; } = float.MaxValue;
         public Vector3? LastCornerToEnemy { get; private set; }
         public bool CanSeeLastCornerToEnemy { get; private set; }
 
-        public readonly NavMeshPath PathToEnemy = new NavMeshPath();
+        public Vector3? BlindCornerToEnemy 
+        { 
+            get 
+            { 
+                if (_nextCheckBlindCornerTime < Time.time)
+                {
+                    _nextCheckBlindCornerTime = Time.time + 0.5f;
+
+                    _blindCorner = Vector.FindFirstBlindCorner(BotOwner, PathToEnemy);
+
+                    if (_blindCorner != null && SAINPlugin.DebugMode)
+                    {
+                        if (blindcornerGUIObject == null)
+                        {
+                            blindcornerGUIObject = DebugGizmos.CreateLabel(_blindCorner.Value, $"Blind Corner for {BotOwner.name} => {Enemy.EnemyPlayer?.name}");
+                        }
+                        else
+                        {
+                            blindcornerGUIObject.WorldPos = _blindCorner.Value;
+                        }
+
+                        if (blindcornerGammeObject != null)
+                        {
+                            blindcornerGammeObject.transform.position = _blindCorner.Value;
+                        }
+                        else
+                        {
+                            blindcornerGammeObject = DebugGizmos.Sphere(_blindCorner.Value, 0.1f, Color.red, false);
+                        }
+                    }
+
+                    if (!SAINPlugin.DebugMode && blindcornerGUIObject != null)
+                    {
+                        DebugGizmos.DestroyLabel(blindcornerGUIObject);
+                        GameObject.Destroy(blindcornerGammeObject);
+                        blindcornerGUIObject = null;
+                    }
+                }
+                return _blindCorner;
+            }
+        }
+
+        private GUIObject blindcornerGUIObject;
+        private GameObject blindcornerGammeObject;
+
+        private Vector3? _blindCorner;
+        private float _nextCheckBlindCornerTime;
+
+        public NavMeshPath PathToEnemy { get; private set; }
 
         private float CheckPathTimer = 0f;
     }

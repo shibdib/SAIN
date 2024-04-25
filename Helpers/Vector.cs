@@ -16,6 +16,64 @@ namespace SAIN.Helpers
 {
     public static class Vector
     {
+        public static Vector3? FindFirstBlindCorner(BotOwner botOwner, NavMeshPath path)
+        {
+            LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
+            Vector3 headPosition = botOwner.LookSensor._headPoint;
+            Vector3 botPosition = botOwner.Position;
+            Vector3 headOffset = headPosition - botPosition;
+            Vector3[] corners = path.corners;
+
+            if (corners.Length > 2)
+            {
+                for (int i = 0; i < corners.Length - 2; i++)
+                {
+                    Vector3 cornerA = corners[i];
+                    Vector3 cornerB = corners[i + 1];
+                    Vector3 cornerC = corners[i + 2];
+
+                    if (CheckIfBlindCorner(botPosition, cornerC, headOffset))
+                    {
+                        if (SAINPlugin.DebugMode)
+                        {
+                            DebugGizmos.Sphere(cornerB, 0.025f, 5f);
+                        }
+                        Vector3 result = AdjustCornerPosition(cornerA, cornerB, cornerC, 0.1f);
+                        return new Vector3?(result + headOffset);
+                    }
+                }
+            }
+            return null;
+        }
+
+        public static bool CheckIfBlindCorner(Vector3 lookSensor, Vector3 corner, Vector3 offset)
+        {
+            Vector3 testPoint = corner + offset;
+            Vector3 cornerCDirection = testPoint - lookSensor;
+            return Physics.Raycast(lookSensor, cornerCDirection, cornerCDirection.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
+        }
+
+        public static Vector3 AdjustCornerPosition(Vector3 cornerA, Vector3 cornerB, Vector3 cornerC, float amount = 0.1f)
+        {
+            cornerA.y = cornerB.y;
+            cornerC.y = cornerB.y;
+
+            // Calculate midpoint between corner A and C
+            Vector3 midpoint = (cornerA + cornerC) / 2f;
+
+            // Calculate vector from corner B to midpoint
+            Vector3 directionToMidpoint = midpoint - cornerB;
+
+            // Normalize this vector to get its direction
+            Vector3 adjustmentDirection = directionToMidpoint.normalized;
+
+            // Multiply this direction vector by 0.2f to get the adjustment vector
+            Vector3 adjustmentVector = adjustmentDirection * amount;
+
+            // Add this adjustment vector to corner B to move it closer to the line between corner A and C
+            return cornerB + adjustmentVector;
+        }
+
         public static bool Raycast(Vector3 start, Vector3 end, LayerMask mask)
         {
             Vector3 direction = end - start;

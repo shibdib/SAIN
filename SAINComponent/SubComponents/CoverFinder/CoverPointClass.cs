@@ -52,6 +52,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public CoverPoint(SAINComponentClass sain, Vector3 point, Collider collider, NavMeshPath pathToPoint)
         {
+            TimeCreated = Time.time;
+            TimeLastUpdated = TimeCreated;
+
             Collider = collider;
             Vector3 size = collider.bounds.size;
             CoverHeight = size.y;
@@ -60,10 +63,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             var info = GetInfo(sain);
             SetPosition(info, point);
 
-            TimeCreated = Time.time;
 
             PathToPoint = pathToPoint;
         }
+
+        public float TimeLastUpdated;
 
         public void UpdateInfo(SAINComponentClass sain)
         {
@@ -305,6 +309,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public void SetPosition(SAINBotCoverInfo info, Vector3 value)
         {
+            TimeLastUpdated = Time.time;
             info.Position = value;
         }
 

@@ -35,6 +35,10 @@ namespace SAIN.Editor
         [Default(false)]
         public bool GlobalDebugMode;
 
+        [Name("Debug External")]
+        [Default(false)]
+        public bool DebugExternal;
+
         [Name("Draw Debug Gizmos")]
         [Default(false)]
         [Debug]

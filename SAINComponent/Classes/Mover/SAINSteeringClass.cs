@@ -100,7 +100,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     break;
 
                 case SteerPriority.LastSeenEnemy:
-                    LookToEnemyLastSeenPos();
+                    LookToLastKnownEnemyPosition();
                     break;
 
                 case SteerPriority.Hear:
@@ -115,7 +115,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     break;
 
                 case SteerPriority.LastSeenEnemyLong:
-                    LookToEnemyLastSeenPos();
+                    LookToLastKnownEnemyPosition();
                     break;
 
                 case SteerPriority.MoveDirection:
@@ -230,27 +230,19 @@ namespace SAIN.SAINComponent.Classes.Mover
             return false;
         }
 
-        public bool LookToEnemyLastSeenPos()
+        public bool LookToLastKnownEnemyPosition()
         {
             SAINEnemy enemy = SAIN.Enemy;
-            Vector3? LastSeenPosition = enemy?.LastSeenPosition;
-            if (LastSeenPosition != null && enemy?.IsVisible == false)
+            Vector3? LastKnownPosition = enemy?.LastKnownPosition;
+            if (LastKnownPosition != null && enemy?.IsVisible == false)
             {
-                Vector3 pos = LastSeenPosition.Value;
-                //  + Vector3.up * 1f
-                LookToPoint(pos, 150f);
-                return true;
-            }
-            return false;
-        }
+                Vector3 pos = LastKnownPosition.Value;
 
-        public bool LookToEnemyLastSeenClose()
-        {
-            SAINEnemy enemy = SAIN.Enemy;
-            if (enemy?.LastSeenPosition != null
-                && enemy.Path.EnemyDistanceFromLastSeen < 10f)
-            {
-                LookToPoint(enemy?.LastSeenPosition);
+                if (enemy.Path.PathToEnemy.corners.Length > 2 && enemy.Path.CanSeeLastCornerToEnemy)
+                {
+
+                }
+                LookToPoint(pos, 150f);
                 return true;
             }
             return false;
@@ -311,10 +303,20 @@ namespace SAIN.SAINComponent.Classes.Mover
         public bool EnemyVisible()
         {
             SAINEnemy enemy = SAIN.Enemy;
-            if (enemy != null && enemy.IsVisible)
+
+            if (enemy != null 
+                && enemy.IsVisible)
             {
                 return true;
             }
+
+            if (enemy != null 
+                && enemy.InLineOfSight 
+                && enemy.TimeSinceSeen < 3f)
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -469,9 +471,9 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 if (enemy.Seen && enemy.TimeSinceSeen < 10f)
                 {
-                    if (enemy.NavMeshPath.corners.Length > 1)
+                    if (enemy.PathToEnemy.corners.Length > 1)
                     {
-                        Vector3 pos = enemy.NavMeshPath.corners[1];
+                        Vector3 pos = enemy.PathToEnemy.corners[1];
                         pos += Vector3.up * 1f;
                         LookToPoint(pos, 80f);
                         return true;

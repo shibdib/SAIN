@@ -7,31 +7,26 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
     {
         [Hidden]
         [JsonIgnore]
-        public float BASE_ROTATE_SPEED = 270;
+        public float BASE_ROTATE_SPEED = 300;
 
         [Hidden]
         [JsonIgnore]
-        public float FIRST_TURN_SPEED = 160;
+        public float FIRST_TURN_SPEED = 240;
+        // 160 default
 
         [Hidden]
         [JsonIgnore]
-        public float FIRST_TURN_BIG_SPEED = 320;
+        public float FIRST_TURN_BIG_SPEED = 350;
+        // 320 default
 
         [Hidden]
         [JsonIgnore]
-        public float TURN_SPEED_ON_SPRINT = 200;
+        public float TURN_SPEED_ON_SPRINT = 300;
+        // 200 default
 
         [Hidden]
         [JsonIgnore]
-        public float RUN_TO_COVER_MIN = 0f;
-
-        [Hidden]
-        [JsonIgnore]
-        public float COEF_IF_MOVE = 1.33f;
-
-        [Hidden]
-        [JsonIgnore]
-        public float TIME_COEF_IF_MOVE = 1.33f;
+        public float RUN_TO_COVER_MIN = 2f;
 
         [Hidden]
         [JsonIgnore]

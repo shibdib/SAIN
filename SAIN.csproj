@@ -177,6 +177,10 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="Unity.Postprocessing.Runtime, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Unity.Postprocessing.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
@@ -246,6 +250,7 @@
     <Compile Include="Attributes\AttributesGUI.cs" />
     <Compile Include="Attributes\AttributesInfoClass.cs" />
     <Compile Include="Attributes\GUIEntryConfig.cs" />
+    <Compile Include="BotController\Classes\BotCoverController.cs" />
     <Compile Include="BotController\Classes\BotSquads.cs" />
     <Compile Include="BotController\Classes\MemberInfo.cs" />
     <Compile Include="BotController\Classes\Squad.cs" />
@@ -362,6 +367,7 @@
     <Compile Include="SAINComponent\Classes\SAINBotSuppressClass.cs" />
     <Compile Include="SAINComponent\SubComponents\CoverFinder\ColliderFinder.cs" />
     <Compile Include="SAINComponent\SubComponents\CoverFinder\CoverAnalyzer.cs" />
+    <Compile Include="BotController\Classes\SquadCoverFinder.cs" />
     <Compile Include="SAINComponent\SubComponents\CoverFinder\SpottedCoverPoint.cs" />
     <Compile Include="SAINComponent\Classes\SAINEnemyController.cs" />
     <Compile Include="SAINComponent\Classes\WeaponFunction\Firerate.cs" />

@@ -21,7 +21,7 @@ namespace SAIN.Components.Helpers
             {
                 Logger = BepInEx.Logging.Logger.CreateLogSource("SAIN: Sound Manager");
             }
-            if (BotController == null || BotController.Bots.Count == 0)
+            if (BotController == null || BotController.Bots == null || BotController.Bots.Count == 0)
             {
                 return;
             }
@@ -42,7 +42,7 @@ namespace SAIN.Components.Helpers
                     if (sound == "Draw")
                     {
                         soundType = SAINSoundType.GrenadeDraw;
-                        soundDist = 15f;
+                        soundDist = 25f;
                     }
                 }
                 else if (Item is MedsClass)
@@ -50,7 +50,7 @@ namespace SAIN.Components.Helpers
                     soundType = SAINSoundType.Heal;
                     if (sound == "CapRemove" || sound == "Inject")
                     {
-                        soundDist = 15f;
+                        soundDist = 20f;
                     }
                     else
                     {
@@ -67,7 +67,7 @@ namespace SAIN.Components.Helpers
                 }
             }
             //Logger.LogInfo($"soundType: {soundType} : Sound {sound}");
-            BotController.AISoundPlayed(soundType, player, soundDist);
+            BotController?.AISoundPlayed?.Invoke(soundType, player, soundDist);
         }
     }
 }

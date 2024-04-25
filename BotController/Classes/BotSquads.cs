@@ -1,6 +1,7 @@
 ﻿using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
+using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,6 +51,8 @@ namespace SAIN.BotController.Classes
 
         public readonly Dictionary<string, Squad> Squads = new Dictionary<string, Squad>();
 
+        public SquadCoverFinder SquadCoverFinder { get; private set; }
+
         public Squad GetSquad(SAINComponentClass sain)
         {
             Squad result = null;
@@ -67,8 +70,7 @@ namespace SAIN.BotController.Classes
                     var defaultMember = group.Member(i);
                     if (defaultMember != null)
                     {
-                        var profileId = defaultMember.ProfileId;
-                        if (BotController.GetBot(profileId, out var sainComponent))
+                        if (BotController.GetSAIN(defaultMember, out var sainComponent))
                         {
                             if (SAINPlugin.DebugMode)
                                 Logger.LogInfo($"Found SAIN Bot for squad");

@@ -113,7 +113,7 @@ namespace SAIN.Helpers
             if (SAINPlugin.DebugMode)
             {
                 Logger.LogDebug(debugString);
-                Logger.NotifyDebug(debugString, EFT.Communications.ENotificationDurationType.Long);
+                //Logger.NotifyDebug(debugString, EFT.Communications.ENotificationDurationType.Long);
             }
         }
 
@@ -135,7 +135,7 @@ namespace SAIN.Helpers
             float result = Mathf.Round(defaultValue * multiplier * 100f) / 100f;
             if (SAINPlugin.DebugMode)
             {
-                debugString.AppendLabeledValue($"Multiplied [{name}]", $"Default Value: [{defaultValue}] Multiplier: [{multiplier}] Result: [{result}]", Color.white, Color.yellow);
+                debugString.AppendLabeledValue($"Multiplied [{name}]", $"Default Value: [{defaultValue}] Multiplier: [{multiplier}] Result: [{result}]", Color.white, Color.white);
             }
             return result;
         }

@@ -135,26 +135,26 @@ namespace SAIN.Patches.Vision
             }
 
             Player player = EFTInfo.GetPlayer(__instance?.Person?.ProfileId);
-            if (player != null)
+            if (player != null && !player.IsAI)
             {
                 float visibility = SAINVisionClass.GetVisibilityModifier(player);
                 __result /= visibility;
-                Vector3 botLookDir = __instance.Owner.LookDirection.normalized;
-                Vector3 enemyDir = (enemy.position - __instance.Owner.Position).normalized;
 
-                float elevationDifference = enemyDir.y - botLookDir.y;
-                if (elevationDifference > 0.5f)
+                float elevationDifference = enemy.position.y - BotTransform.position.y;
+
+                if (elevationDifference > 2f)
                 {
-                    __result *= 1.2f;
+                    __result *= 1.15f;
                 }
-                if (elevationDifference < -0.5f)
+                if (elevationDifference < -2f)
                 {
                     __result *= 0.85f;
                 }
+                //Logger.LogDebug($"Elevation Difference: {elevationDifference}");
             }
 
             // Not Looking Implementation
-            if (__instance?.Person?.IsYourPlayer == true)
+            if (__instance?.Person?.IsYourPlayer == true && !__instance.IsVisible)
             {
                 __result *= SAINNotLooking.GetVisionSpeedIncrease(__instance.Owner);
             }

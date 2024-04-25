@@ -16,6 +16,7 @@ using Aki.Reflection.Utils;
 using System;
 using System.Linq;
 using SAIN.SAINComponent.Classes;
+using SAIN.SAINComponent;
 
 namespace SAIN.Patches.Generic
 {
@@ -48,13 +49,9 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static void PatchPrefix(ref Player __instance)
         {
-            if (__instance.IsAI)
+            if (SAINPlugin.GetSAIN(__instance, out var sain, nameof(OnMakingShotRecoilPatch)))
             {
-                BotOwner botOwner = __instance?.AIData?.BotOwner;
-                if (botOwner != null && SAINPlugin.BotController.GetBot(botOwner.ProfileId, out var sain))
-                {
-                    sain?.Info?.WeaponInfo?.Recoil?.WeaponShot();
-                }
+                sain.Info.WeaponInfo.Recoil.WeaponShot();
             }
         }
     }
@@ -74,8 +71,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static void PatchPrefix(ref BotOwner ___botOwner_0, DamageInfo damageInfo)
         {
-            BotOwner botOwner = ___botOwner_0;
-            if (botOwner != null && SAINPlugin.BotController.GetBot(botOwner.ProfileId, out var sain))
+            if (SAINPlugin.GetSAIN(___botOwner_0, out var sain, nameof(GetHitPatch)))
             {
                 sain.BotHitReaction.GetHit(damageInfo);
             }
@@ -123,15 +119,14 @@ namespace SAIN.Patches.Generic
 
     internal class ShallKnowEnemyPatch : ModulePatch
     {
-        const float TimeToForgetEnemyNoSight = 30f;
-
-        private static PropertyInfo OwnerProp;
 
         protected override MethodBase GetTargetMethod()
         {
-            OwnerProp = AccessTools.Property(typeof(EnemyInfo), "Owner");
             return AccessTools.Method(typeof(EnemyInfo), "ShallKnowEnemy");
         }
+
+        const float TimeToForgetEnemyNotSeen = 30f;
+        const float TimeToForgetEnemySeen = 60f;
 
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
@@ -140,22 +135,78 @@ namespace SAIN.Patches.Generic
             {
                 return;
             }
-
-            BotOwner botOwner = OwnerProp.GetValue(__instance) as BotOwner;
-
-            if (botOwner != null && __instance.Person != null && SAINPlugin.BotController.GetBot(botOwner.ProfileId, out var component))
+            try
             {
-                SAINEnemy enemy = component.EnemyController.GetEnemy(__instance.Person.ProfileId);
-                if (enemy != null && !enemy.Seen && enemy.Heard)
+                __result = ShallKnowEnemy(__instance);
+            }
+            catch (Exception e)
+            {
+                SAIN.Logger.LogError(e);
+            }
+        }
+
+        private static bool ShallKnowEnemy(EnemyInfo enemyInfo)
+        {
+            BotOwner botOwner = enemyInfo?.Owner;
+
+            if (enemyInfo.Person != null
+                && SAINPlugin.GetSAIN(botOwner, out SAINComponentClass sain, nameof(ShallKnowEnemyPatch)))
+            {
+                if (SquadSensedRecently(sain, enemyInfo))
                 {
-                    if (enemy.TimeSinceHeard > TimeToForgetEnemyNoSight)
+                    return true;
+                }
+                else if (EnemySenseRecently(sain, enemyInfo))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool SquadSensedRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
+        {
+            // Check each of a sain bots members to see if they heard them recently, if so, we should know this enemy
+            bool senseRecently = false;
+            var members = sain.Squad?.Members;
+            if (members != null && members.Count > 0)
+            {
+                foreach (var member in members)
+                {
+                    if (EnemySenseRecently(member.Value, enemyInfo))
                     {
-                        __result = false;
+                        senseRecently = true;
+                        break;
                     }
                 }
             }
+            return senseRecently;
+        }
+
+        private static bool EnemySenseRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
+        {
+            SAINEnemy myEnemy = sain.EnemyController.GetEnemy(enemyInfo);
+            if (myEnemy != null)
+            {
+                if (!myEnemy.Seen 
+                    && myEnemy.Heard 
+                    && myEnemy.TimeSinceHeard <= TimeToForgetEnemyNotSeen)
+                {
+                    return true;
+                }
+                if (myEnemy.Seen 
+                    && myEnemy.Heard 
+                    && myEnemy.TimeSinceHeard <= TimeToForgetEnemySeen 
+                    && myEnemy.TimeSinceSeen <= sain.BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
+
+    
 
     internal class SkipLookForCoverPatch : ModulePatch
     {
@@ -163,7 +214,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0)
         {
-            if (___botOwner_0 != null && SAINPlugin.BotController.GetBot(___botOwner_0.ProfileId, out var component))
+            if (___botOwner_0 != null && SAINPlugin.BotController.GetSAIN(___botOwner_0, out _))
             {
                 return false;
             }

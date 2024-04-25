@@ -89,5 +89,9 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Hidden]
         [JsonIgnore]
         public float MAX_DIST_TO_PERSUE_AXEMAN = 300f;
+
+        [Hidden]
+        [JsonIgnore]
+        public bool AMBUSH_WHEN_UNDER_FIRE = false;
     }
 }

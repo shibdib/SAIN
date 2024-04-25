@@ -41,6 +41,12 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
+            if (_nextUpdateDistTime < Time.time)
+            {
+                _nextUpdateDistTime = Time.time + 0.5f;
+                RealDistance = (EnemyPerson.Transform.Position - SAIN.Position).magnitude;
+            }
+
             bool isCurrent = IsCurrentEnemy;
             Vision.Update(isCurrent);
             Path.Update(isCurrent);
@@ -50,6 +56,28 @@ namespace SAIN.SAINComponent.Classes
                 KnownPlaces.Update();
             }
         }
+
+        private float _nextUpdateDistTime;
+
+        public float TimeSinceSquadSensed 
+        { 
+            get
+            {
+                if (_nextCheckSenseTime < Time.time)
+                {
+                    _nextCheckSenseTime = Time.time + 1f;
+                    float min = float.MaxValue;
+                    foreach (var member in SAIN.Squad.Members)
+                    {
+
+                    }
+                }
+                return _timeSinceSquadSensed;
+            } 
+        }
+
+        private float _timeSinceSquadSensed;
+        private float _nextCheckSenseTime;
 
         public void UpdateKnownPosition(Vector3 position, bool arrived = false, bool seen = false)
         {
@@ -131,7 +159,7 @@ namespace SAIN.SAINComponent.Classes
 
         public EnemyKnownPlaces KnownPlaces { get; private set; }
 
-        public float TimeSinceLastKnownUpdated
+        public float TimeLastKnownUpdated
         {
             get
             {
@@ -139,6 +167,19 @@ namespace SAIN.SAINComponent.Classes
                 if (lastKnown != null)
                 {
                     return lastKnown.TimePositionUpdated;
+                }
+                return float.MaxValue;
+            }
+        }
+
+        public float TimeSinceLastKnownUpdated
+        {
+            get
+            {
+                EnemyPlace lastKnown = KnownPlaces.LastKnownPlace;
+                if (lastKnown != null)
+                {
+                    return Time.time - lastKnown.TimePositionUpdated;
                 }
                 return float.MaxValue;
             }
@@ -165,13 +206,9 @@ namespace SAIN.SAINComponent.Classes
         public float VisibleStartTime => Vision.VisibleStartTime;
         public float TimeSinceSeen => Vision.TimeSinceSeen;
 
-        // PathToEnemy Properties
-        public bool ArrivedAtLastSeenPosition => Path.HasArrivedAtLastSeen;
-        public float RealDistance => Path.EnemyDistance;
+        public float RealDistance { get; private set; }
         public bool CanSeeLastCornerToEnemy => Path.CanSeeLastCornerToEnemy;
-        public float PathDistance => Path.PathDistance;
-        public NavMeshPath NavMeshPath => Path.PathToEnemy;
-
+        public NavMeshPath PathToEnemy => Path.PathToEnemy;
         public SAINEnemyStatus EnemyStatus { get; private set; }
         public SAINEnemyVision Vision { get; private set; }
         public SAINEnemyPath Path { get; private set; }

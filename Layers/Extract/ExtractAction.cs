@@ -39,7 +39,7 @@ namespace SAIN.Layers
         public override void Update()
         {
             float stamina = SAIN.Player.Physical.Stamina.NormalValue;
-            if (SAIN.Enemy != null && SAIN.Enemy.Seen && (SAIN.Enemy.PathDistance < 50f || SAIN.Enemy.IsVisible))
+            if (SAIN.Enemy != null && SAIN.Enemy.Seen && (SAIN.Enemy.Path.PathDistance < 50f || SAIN.Enemy.IsVisible))
             {
                 NoSprint = true;
             }

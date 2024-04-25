@@ -54,6 +54,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Advanced]
         public float COEF_IF_MOVE = 2f;
 
+        [Hidden]
+        [JsonIgnore]
+        public float TIME_COEF_IF_MOVE = 2f;
+
         [Name("Max Aim Time")]
         [Description(null)]
         [Default(4f)]
@@ -63,6 +67,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         public float MAX_AIM_TIME = 4f;
 
         [Hidden]
+        [JsonIgnore]
         public int AIMING_TYPE = 4;
 
         [Name("Friendly Fire Spherecast Size")]

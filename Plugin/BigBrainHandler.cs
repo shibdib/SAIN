@@ -60,12 +60,13 @@ namespace SAIN
         {
             if (JsonUtility.Load.LoadObject(out List<string> layersList, "DefaultBotLayers"))
             {
-                AllLayersList = layersList;
+                //AllLayersList = layersList;
+                AllLayersList = new List<string>(LayersToRemove);
             }
             else
             {
                 AllLayersList = new List<string>(LayersToRemove);
-                JsonUtility.SaveObjectToJson(AllLayersList, "DefaultBotLayers");
+                //JsonUtility.SaveObjectToJson(AllLayersList, "DefaultBotLayers");
             }
         }
 
@@ -126,8 +127,8 @@ namespace SAIN
 
             BrainManager.RemoveLayers(LayersToRemove, stringList);
 
-            AddAnnoyingLayerNames();
-            BrainManager.RemoveLayers(AnnoyingLayerNameThanksBSG, new List<string> { Brain.PMC.ToString(), Brain.Assault.ToString(), });
+            //AddAnnoyingLayerNames();
+            //BrainManager.RemoveLayers(AnnoyingLayerNameThanksBSG, new List<string> { Brain.PMC.ToString(), Brain.Assault.ToString(), });
 
             BigBrainInitialized = true;
         }

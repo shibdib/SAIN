@@ -32,6 +32,11 @@ namespace SAIN.SAINComponent.Classes
 
         private void AimAtEnemy()
         {
+            if (!BotOwner.WeaponManager.HaveBullets)
+            {
+                SAIN.SelfActions.TryReload();
+                return;
+            }
             var enemy = SAIN.Enemy;
             if (enemy != null)
             {
@@ -84,7 +89,7 @@ namespace SAIN.SAINComponent.Classes
             if (enemy != null)
             {
                 Vector3 value;
-                if (enemy.Distance < 1f)
+                if (enemy.Distance < 10f)
                 {
                     value = enemy.GetCenterPart();
                 }
@@ -147,12 +152,8 @@ namespace SAIN.SAINComponent.Classes
             {
                 return;
             }
-            if (this.botOwner_0.RecoilData.RecoilOffset.sqrMagnitude > 1f)
+            if (this.botOwner_0.RecoilData.RecoilOffset.sqrMagnitude > 3f)
             {
-                if (this.botOwner_0.ShootData.Shooting)
-                {
-                    this.botOwner_0.ShootData.EndShoot();
-                }
                 return;
             }
             if (this.botOwner_0.ShootData.Shoot())

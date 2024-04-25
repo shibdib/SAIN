@@ -13,6 +13,7 @@ using SAIN.Preset;
 using static EFT.SpeedTree.TreeWind;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.BaseClasses;
+using System.Text;
 
 namespace SAIN.Components.BotController
 {
@@ -31,7 +32,8 @@ namespace SAIN.Components.BotController
             WildSpawnType.bossZryachiy,
             WildSpawnType.followerZryachiy,
             WildSpawnType.peacefullZryachiyEvent,
-            WildSpawnType.ravangeZryachiyEvent
+            WildSpawnType.ravangeZryachiyEvent,
+            WildSpawnType.shooterBTR
         };
 
         public void Update()
@@ -77,6 +79,114 @@ namespace SAIN.Components.BotController
             }
         }
 
+        public SAINComponentClass GetSAIN(BotOwner botOwner, StringBuilder debugString)
+        {
+            if (botOwner == null)
+            {
+                Logger.LogAndNotifyError("Botowner is null, cannot get SAIN!");
+                debugString = null;
+                return null;
+            }
+
+            if (debugString == null && SAINPlugin.DebugMode)
+            {
+                debugString = new StringBuilder();
+            }
+
+            string name = botOwner.name;
+            SAINComponentClass result = GetSAIN(name, debugString);
+
+            if ( result == null )
+            {
+                debugString?.AppendLine( $"[{name}] not found in SAIN Bot Dictionary. Getting Component Manually..." );
+
+                result = botOwner.gameObject.GetComponent<SAINComponentClass>();
+
+                if (result != null)
+                {
+                    debugString?.AppendLine($"[{name}] found after using GetComponent.");
+                }
+            }
+
+            if ( result == null )
+            {
+                debugString?.AppendLine( $"[{name}] could not be retrieved from SAIN Bots. WildSpawnType: [{botOwner.Profile.Info.Settings.Role}] Returning Null" );
+            }
+
+            if ( result == null && debugString != null )
+            {
+                Logger.LogAndNotifyError( debugString, EFT.Communications.ENotificationDurationType.Long );
+            }
+            return result;
+        }
+
+        public SAINComponentClass GetSAIN(Player player, StringBuilder debugString)
+        {
+            if (debugString == null && SAINPlugin.DebugMode)
+            {
+                debugString = new StringBuilder();
+            }
+
+            if (player == null)
+            {
+                if (debugString != null)
+                {
+                    debugString.AppendLine("Player is Null, cannot get SAIN!");
+                    Logger.LogAndNotifyError(debugString, EFT.Communications.ENotificationDurationType.Long);
+                }
+                return null;
+            }
+
+            if (player.AIData?.BotOwner != null)
+            {
+                return GetSAIN(player.AIData.BotOwner, debugString);
+            }
+            return null;
+        }
+
+        public SAINComponentClass GetSAIN(string botName, StringBuilder debugString)
+        {
+            if (debugString == null && SAINPlugin.DebugMode)
+            {
+                debugString = new StringBuilder();
+            }
+
+            SAINComponentClass result = null;
+            if ( SAINBotDictionary.ContainsKey(botName) )
+            {
+                result = SAINBotDictionary[botName];
+            }
+            if ( result == null )
+            {
+                debugString?.AppendLine( $"[{botName}] not found in SAIN Bot Dictionary. Comparing names manually to find the bot..." );
+
+                foreach ( var bot in SAINBotDictionary )
+                {
+                    if (bot.Value != null && bot.Value.name == botName)
+                    {
+                        result = bot.Value;
+                        debugString?.AppendLine($"[{botName}] found after comparing names");
+                        break;
+                    }
+                }
+            }
+            if ( result == null )
+            {
+                debugString?.AppendLine( $"[{botName}] Still not found in SAIN Bot Dictionary. Comparing Profile Id instead..." );
+
+                foreach ( var bot in SAINBotDictionary )
+                {
+                    if ( bot.Value != null && bot.Value.ProfileId == botName )
+                    {
+                        result = bot.Value;
+                        debugString?.AppendLine($"[{botName}] found after comparing profileID. Bot Name was [{bot.Value.name}]");
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
         public void AddBot(BotOwner botOwner)
         {
             try
@@ -106,18 +216,18 @@ namespace SAIN.Components.BotController
 
                     if (SAINComponentClass.TryAddSAINToBot(botOwner, out SAINComponentClass component))
                     {
-                        string profileId = component.ProfileId;
-                        if (SAINBotDictionary.ContainsKey(profileId))
+                        string name = botOwner.name;
+                        if (SAINBotDictionary.ContainsKey(name))
                         {
-                            SAINBotDictionary.Remove(profileId);
+                            SAINBotDictionary.Remove(name);
                         }
-                        SAINBotDictionary.Add(profileId, component);
+                        SAINBotDictionary.Add(name, component);
                     }
                 }
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Add Component Error: {ex}");
+                Logger.LogError($"AddBot: Add Component Error: {ex}");
             }
         }
 
@@ -138,7 +248,7 @@ namespace SAIN.Components.BotController
             {
                 if (botOwner != null)
                 {
-                    SAINBotDictionary.Remove(botOwner.ProfileId);
+                    SAINBotDictionary.Remove(botOwner.name);
                     if (botOwner.TryGetComponent(out SAINComponentClass component))
                     {
                         component.Dispose();

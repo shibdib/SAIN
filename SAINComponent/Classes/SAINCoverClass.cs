@@ -61,37 +61,7 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            // If the config option is enabled. Let a bot find cover all the time when they have a target or enemy if the enemy is the player.
-            if (GlobalSettings.Cover.EnhancedCoverFinding 
-                && SAIN.CurrentTargetPosition != null)
-            {
-                var aiData = SAIN.Enemy?.EnemyPlayer?.AIData;
-                if (SAIN.HasEnemy && aiData != null && aiData.IsAI == false)
-                {
-                    ActivateCoverFinder(true);
-                    return;
-                }
-            }
-
-            var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
-            var currentCover = CoverInUse;
-            if (CurrentDecision != SoloDecision.None)
-            {
-                ActivateCoverFinder(true);
-            }
-            /*
-            else if (CurrentDecision == SoloDecision.HoldInCover 
-                && (currentCover == null 
-                || currentCover.GetSpotted(SAIN) == true 
-                || Time.time - currentCover.TimeCreated > 5f))
-            {
-                ActivateCoverFinder(true);
-            }
-            */
-            else
-            {
-                ActivateCoverFinder(false);
-            }
+            ActivateCoverFinder(SAIN.Decision.SAINActive);
         }
 
         public void Dispose()
@@ -134,9 +104,9 @@ namespace SAIN.SAINComponent.Classes
 
         private void ActivateCoverFinder(bool value, bool forced = false)
         {
-            if (value && GetPointToHideFrom(out var target))
+            if (value)
             {
-                CoverFinder?.LookForCover(target.Value, BotOwner.Position);
+                CoverFinder?.LookForCover();
                 CurrentCoverFinderState = forced ? CoverFinderState.forceOn : CoverFinderState.on;
             }
             if (!value)

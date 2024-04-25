@@ -1,7 +1,10 @@
 ﻿using BepInEx.Logging;
 using EFT;
+using EFT.Interactive;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
+using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
@@ -43,6 +46,35 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return false;
         }
 
+        public async Task CheckCollider(CoverPoint point, SAINComponentClass sain, int msDelay)
+        {
+            point.SetIsSafePath(false, sain);
+
+            if (GetPlaceToMove(point.Collider, TargetPoint, BotOwner.Position, out Vector3 place))
+            {
+                await Task.Delay(msDelay);
+
+                if (CheckPosition(place) && CheckHumanPlayerVisibility(place))
+                {
+                    await Task.Delay(msDelay);
+
+                    if (CheckHumanPlayerVisibility(place))
+                    {
+                        await Task.Delay(msDelay);
+
+                        if (CheckPath(place, out bool isSafe, point.PathToPoint))
+                        {
+                            point.SetPosition(sain, place);
+                            point.SetIsSafePath(isSafe, sain);
+                            point.IsBad = false;
+                            return;
+                        }
+                    }
+                }
+            }
+            point.IsBad = true;
+        }
+
         public bool CheckCollider(CoverPoint coverPoint)
         {
             // the closest edge to that farPoint
@@ -75,7 +107,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return false;
         }
 
-        public static bool GetPlaceToMove(Collider collider, Vector3 targetPosition, Vector3 botPosition, out Vector3 place)
+        public static bool GetPlaceToMove(Collider collider, Vector3 targetPosition, Vector3 botPosition, out Vector3 place, float navSampleRange = 1f)
         {
             const float ExtendLengthThresh = 2f;
 
@@ -100,7 +132,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             Vector3 farPoint = colliderPos + colliderDir;
 
             // the closest edge to that farPoint
-            if (NavMesh.SamplePosition(farPoint, out var hit, 1f, -1))
+            if (NavMesh.SamplePosition(farPoint, out var hit, navSampleRange, -1))
             {
                 place = hit.position;
                 return true;
@@ -283,7 +315,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public bool CheckPositionVsOtherBots(Vector3 position)
         {
-            if (SAIN.Squad.SquadLocations == null || SAIN.Squad.Members == null || SAIN.Squad.Members.Count < 2)
+            if (SAIN.Squad.Members == null || SAIN.Squad.Members.Count < 2)
             {
                 return true;
             }
@@ -294,16 +326,19 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             {
                 if (member != null && member.BotOwner != BotOwner)
                 {
-                    if (member.Cover.CurrentCoverPoint != null)
+                    CoverPoint currentCover = member.Cover.CurrentCoverPoint;
+                    if (currentCover != null)
                     {
-                        if (Vector3.Distance(position, member.Cover.CurrentCoverPoint.GetPosition(SAIN)) < DistanceToBotCoverThresh)
+                        Vector3 coverPos = currentCover.GetPosition(SAIN);
+                        if ((position - coverPos).sqrMagnitude < DistanceToBotCoverThresh * DistanceToBotCoverThresh)
                         {
                             return false;
                         }
                     }
-                    if (member.Cover.FallBackPoint != null)
+                    else if (member.Cover.FallBackPoint != null)
                     {
-                        if (Vector3.Distance(position, member.Cover.FallBackPoint.GetPosition(SAIN)) < DistanceToBotCoverThresh)
+                        Vector3 coverPos = member.Cover.FallBackPoint.GetPosition(SAIN);
+                        if ((position - coverPos).sqrMagnitude < DistanceToBotCoverThresh * DistanceToBotCoverThresh)
                         {
                             return false;
                         }

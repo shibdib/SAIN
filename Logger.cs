@@ -31,6 +31,30 @@ namespace SAIN
         public static void NotifyError(object data, ENotificationDurationType duration = ENotificationDurationType.Long) 
             => NotifyMessage(data, duration, ENotificationIconType.Alert, Color.red, true);
 
+        public static void LogAndNotifyInfo(object data, ENotificationDurationType duration = ENotificationDurationType.Default)
+        {
+            Log(LogLevel.Info, data); 
+            NotifyMessage(data, duration, ENotificationIconType.Note);
+        }
+
+        public static void LogAndNotifyDebug(object data, ENotificationDurationType duration = ENotificationDurationType.Default)
+        {
+            Log(LogLevel.Debug, data);
+            NotifyMessage(data, duration, ENotificationIconType.Note, Color.gray);
+        }
+
+        public static void LogAndNotifyWarning(object data, ENotificationDurationType duration = ENotificationDurationType.Default)
+        {
+            Log(LogLevel.Warning, data);
+            NotifyMessage(data, duration, ENotificationIconType.Alert, Color.yellow);
+        }
+
+        public static void LogAndNotifyError(object data, ENotificationDurationType duration = ENotificationDurationType.Long)
+        {
+            Log(LogLevel.Error, data);
+            NotifyMessage(data, duration, ENotificationIconType.Alert, Color.red, true);
+        }
+
         public static void NotifyMessage(object data, 
             ENotificationDurationType durationType = ENotificationDurationType.Default,
             ENotificationIconType iconType = ENotificationIconType.Default,
@@ -38,7 +62,7 @@ namespace SAIN
         {
             if (_nextNotification < Time.time && SAINPlugin.DebugMode)
             {
-                _nextNotification = Time.time + 0.25f;
+                _nextNotification = Time.time + 0.1f;
                 string message = Error ? CreateErrorMessage(data) : data.ToString();
                 NotificationManagerClass.DisplayMessageNotification(message, durationType, iconType, textColor);
             }

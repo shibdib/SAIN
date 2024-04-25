@@ -255,13 +255,78 @@ namespace SAIN.BotController.Classes
 
         public float LeaderPowerLevel { get; private set; }
 
-        public bool MemberIsFallingBack { get; private set; }
+        public bool MemberIsFallingBack
+        {
+            get
+            {
+                return MemberHasDecision(SoloDecision.Retreat, SoloDecision.RunAway, SoloDecision.RunToCover);
+            }
+        }
 
-        public readonly List<SoloDecision> SquadSoloDecisions = new List<SoloDecision>();
+        public bool MemberIsRegrouping
+        {
+            get
+            {
+                return MemberHasDecision(SquadDecision.Regroup);
+            }
+        }
 
-        public readonly List<SquadDecision> SquadDecisions = new List<SquadDecision>();
+        public bool MemberHasDecision(params SoloDecision[] decisionsToCheck)
+        {
+            foreach (var member in Members)
+            {
+                if (member.Value != null)
+                {
+                    var memberDecision = member.Value.Decision.CurrentSoloDecision;
+                    foreach (var decision in decisionsToCheck)
+                    {
+                        if (decision == memberDecision)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
 
-        public readonly List<Vector3> SquadLocations = new List<Vector3>();
+        public bool MemberHasDecision(params SquadDecision[] decisionsToCheck)
+        {
+            foreach (var member in Members)
+            {
+                if (member.Value != null)
+                {
+                    var memberDecision = member.Value.Decision.CurrentSquadDecision;
+                    foreach (var decision in decisionsToCheck)
+                    {
+                        if (decision == memberDecision)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        public bool MemberHasDecision(params SelfDecision[] decisionsToCheck)
+        {
+            foreach (var member in Members)
+            {
+                if (member.Value != null)
+                {
+                    var memberDecision = member.Value.Decision.CurrentSelfDecision;
+                    foreach (var decision in decisionsToCheck)
+                    {
+                        if (decision == memberDecision)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
 
         public float SquadPowerLevel
         {
@@ -322,28 +387,6 @@ namespace SAIN.BotController.Classes
                     }
                 }
             }
-        }
-
-        public void CheckMembers()
-        {
-            SquadLocations.Clear();
-            SquadSoloDecisions.Clear();
-            SquadDecisions.Clear();
-
-            foreach (var memberInfo in MemberInfos.Values)
-            {
-                var sain = memberInfo.SAIN;
-                if (sain != null)
-                {
-                    SquadSoloDecisions.Add(sain.Memory.Decisions.Main.Current);
-                    SquadDecisions.Add(sain.Decision.CurrentSquadDecision);
-                    SquadLocations.Add(sain.Position);
-                }
-            }
-
-            MemberIsFallingBack = SquadSoloDecisions.Contains(SoloDecision.Retreat) 
-                || SquadSoloDecisions.Contains(SoloDecision.RunToCover) 
-                || SquadSoloDecisions.Contains(SoloDecision.RunAway);
         }
 
         private float RecheckSquadTimer;

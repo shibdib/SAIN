@@ -53,17 +53,17 @@ namespace SAIN.Preset.GlobalSettings
         [Experimental]
         [Advanced]
         [Description("The Maximum Angle for the player to be considered looking at a bot.")]
-        [Default(15f)]
+        [Default(45f)]
         [MinMax(5f, 45f, 1f)]
-        public float NotLookingAngle = 15f;
+        public float NotLookingAngle = 45f;
 
         [Name("Bot Reaction Multiplier When Out of Sight")]
         [Section("Unseen Bot")]
         [Experimental]
         [Description("How much to multiply bot vision speed by if you aren't looking at them when they notice you. Higher = More time before reacting.")]
-        [Default(1.33f)]
-        [MinMax(1.1f, 5f, 100f)]
-        public float NotLookingVisionSpeedModifier = 1.33f;
+        [Default(1.1f)]
+        [MinMax(1f, 2f, 100f)]
+        public float NotLookingVisionSpeedModifier = 1.1f;
 
         [Name("Bot Accuracy and Spread Increase When Out of Sight")]
         [Section("Unseen Bot")]

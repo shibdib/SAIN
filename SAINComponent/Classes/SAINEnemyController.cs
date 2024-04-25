@@ -145,6 +145,48 @@ namespace SAIN.SAINComponent.Classes
             return null;
         }
 
+        public SAINEnemy GetEnemy(EnemyInfo enemyInfo)
+        {
+            if (enemyInfo == null)
+            {
+                return null;
+            }
+            if (Enemies.ContainsKey(enemyInfo.ProfileId))
+            {
+                return Enemies[enemyInfo.ProfileId];
+            }
+            foreach (var enemy in Enemies)
+            {
+                var enemyStoredInfo = enemy.Value.EnemyInfo;
+                if (enemyStoredInfo != null && enemyStoredInfo == enemyInfo)
+                {
+                    return enemy.Value;
+                }
+            }
+            return null;
+        }
+
+        public SAINEnemy GetEnemy(IPlayer iPlayer)
+        {
+            if (iPlayer == null)
+            {
+                return null;
+            }
+            if (Enemies.ContainsKey(iPlayer.ProfileId))
+            {
+                return Enemies[iPlayer.ProfileId];
+            }
+            foreach (var enemy in Enemies)
+            {
+                IPlayer enemyIPlayer = enemy.Value?.EnemyIPlayer;
+                if (enemyIPlayer != null && enemyIPlayer == iPlayer)
+                {
+                    return enemy.Value;
+                }
+            }
+            return null;
+        }
+
         public bool HasEnemy => ActiveEnemy?.EnemyPerson?.IsActive == true;
 
         public SAINEnemy ActiveEnemy { get; private set; }

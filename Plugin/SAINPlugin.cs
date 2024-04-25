@@ -2,6 +2,7 @@ using Aki.Reflection.Patching;
 using BepInEx;
 using BepInEx.Configuration;
 using DrakiaXYZ.VersionChecker;
+using EFT;
 using HarmonyLib;
 using SAIN.Components;
 using SAIN.Editor;
@@ -9,8 +10,10 @@ using SAIN.Helpers;
 using SAIN.Layers;
 using SAIN.Patches.Generic;
 using SAIN.Patches.Hearing;
+using SAIN.Patches.Shoot;
 using SAIN.Plugin;
 using SAIN.Preset;
+using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Mover;
 using System;
@@ -28,6 +31,32 @@ namespace SAIN
     [BepInProcess(EscapeFromTarkov)]
     public class SAINPlugin : BaseUnityPlugin
     {
+        public static bool GetSAIN(BotOwner botOwner, out SAINComponentClass sain, string patchName)
+        {
+            sain = null;
+            if (SAINPlugin.BotController == null)
+            {
+                SAIN.Logger.LogError($"Bot Controller Null in [{patchName}]");
+                return false;
+            }
+            return SAINPlugin.BotController.GetSAIN(botOwner, out sain);
+        }
+
+        public static bool GetSAIN(Player player, out SAINComponentClass sain, string patchName)
+        {
+            sain = null;
+            if (player != null && !player.IsAI)
+            {
+                return false;
+            }
+            if (SAINPlugin.BotController == null)
+            {
+                SAIN.Logger.LogError($"Bot Controller Null in [{patchName}]");
+                return false;
+            }
+            return SAINPlugin.BotController.GetSAIN(player, out sain);
+        }
+
         public static bool DebugMode => EditorDefaults.GlobalDebugMode;
         public static bool DrawDebugGizmos => EditorDefaults.DrawDebugGizmos;
         public static PresetEditorDefaults EditorDefaults => PresetHandler.EditorDefaults;
@@ -40,7 +69,6 @@ namespace SAIN
         {
             if (!VersionChecker.CheckEftVersion(Logger, Info, Config))
             {
-                Sounds.PlaySound(EFT.UI.EUISoundType.ErrorMessage);
                 throw new Exception("Invalid EFT Version");
             }
 

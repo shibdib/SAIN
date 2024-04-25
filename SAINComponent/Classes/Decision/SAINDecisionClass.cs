@@ -16,7 +16,10 @@ namespace SAIN.SAINComponent.Classes.Decision
             SquadDecisions = new SquadDecisionClass(sain);
         }
 
-        public Action<SoloDecision, SquadDecision, SelfDecision, float> NewDecision { get; set; }
+        public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnDecisionMade;
+        public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnSAINStart;
+        public event Action<float> OnSAINEnd;
+        public bool SAINActive { get; private set; }
 
         public void Init()
         {
@@ -47,6 +50,10 @@ namespace SAIN.SAINComponent.Classes.Decision
                 CheckDecisionFrameCount = 0;
                 GetDecision();
             }
+
+            SAINActive = CurrentSoloDecision != SoloDecision.None 
+                || CurrentSelfDecision != SelfDecision.None 
+                || CurrentSquadDecision != SquadDecision.None;
         }
 
         private const int CheckDecisionFrameTarget = 6;
@@ -142,27 +149,43 @@ namespace SAIN.SAINComponent.Classes.Decision
         private void CheckForNewDecisions()
         {
             bool newDecision = false;
-            float newDecisionTime = Time.time;
+            float time = Time.time;
 
             if (CurrentSoloDecision != OldSoloDecision)
             {
-                ChangeDecisionTime = newDecisionTime;
+                ChangeDecisionTime = time;
                 newDecision = true;
             }
             if (CurrentSelfDecision != OldSelfDecision)
             {
-                ChangeSelfDecisionTime = newDecisionTime;
+                ChangeSelfDecisionTime = time;
                 newDecision = true;
             }
             if (CurrentSquadDecision != OldSquadDecision)
             {
-                ChangeSquadDecisionTime = newDecisionTime;
+                ChangeSquadDecisionTime = time;
                 newDecision = true;
             }
 
             if (newDecision)
             {
-                NewDecision?.Invoke(CurrentSoloDecision, CurrentSquadDecision, CurrentSelfDecision, newDecisionTime);
+                OnDecisionMade?.Invoke(CurrentSoloDecision, CurrentSquadDecision, CurrentSelfDecision, time);
+
+                // If previously all decisions were none, sain has now started.
+                if (OldSoloDecision == SoloDecision.None 
+                    && OldSelfDecision == SelfDecision.None
+                    && OldSquadDecision == SquadDecision.None)
+                {
+                    OnSAINStart?.Invoke(CurrentSoloDecision, CurrentSquadDecision, CurrentSelfDecision, time);
+                }
+
+                // Are all decisions None? Then SAIN is no longer active.
+                if (CurrentSoloDecision == SoloDecision.None
+                    && CurrentSelfDecision == SelfDecision.None
+                    && CurrentSquadDecision == SquadDecision.None)
+                {
+                    OnSAINEnd?.Invoke(time);
+                }
             }
         }
 

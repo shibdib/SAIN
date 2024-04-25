@@ -50,7 +50,7 @@ namespace SAIN.Layers.Combat.Solo
                 return;
             }
 
-            Vector3[] EnemyPath = SAIN.Enemy.NavMeshPath.corners;
+            Vector3[] EnemyPath = SAIN.Enemy.PathToEnemy.corners;
             Vector3 EnemyPos = SAIN.Enemy.EnemyPosition;
             if (NewDestTimer < Time.time)
             {
@@ -94,7 +94,7 @@ namespace SAIN.Layers.Combat.Solo
                     }
                 }
                 */
-                if (SAIN.Enemy.PathDistance > 5f)
+                if (SAIN.Enemy.Path.PathDistance > 5f)
                 {
                     BotOwner.BotRun.Run(Destination, false);
                 }
@@ -104,7 +104,7 @@ namespace SAIN.Layers.Combat.Solo
                 }
             }
 
-            if (SAIN.Info.PersonalitySettings.CanJumpCorners && TryJumpTimer < Time.time && SAIN.Enemy.PathDistance > 5f)
+            if (SAIN.Info.PersonalitySettings.CanJumpCorners && TryJumpTimer < Time.time && SAIN.Enemy.Path.PathDistance > 5f)
             {
                 var corner = SAIN.Enemy?.LastCornerToEnemy;
                 if (corner != null)

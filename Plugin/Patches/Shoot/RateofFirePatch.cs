@@ -38,7 +38,7 @@ namespace SAIN.Patches.Shoot
             __result = CalculateAimTime(___botOwner_0, dist, ang, moving, panicing, aimDelay);
 
             if (FasterCQBReactionsGlobal
-                && SAINPlugin.BotController.GetBot(___botOwner_0.ProfileId, out var component))
+                && SAINPlugin.BotController.GetSAIN(___botOwner_0, out var component))
             {
                 var settings = component.Info.FileSettings.Aiming;
                 if (settings.FasterCQBReactions)
@@ -149,7 +149,7 @@ namespace SAIN.Patches.Shoot
         [PatchPostfix]
         public static void PatchPostfix(ref BotOwner ___botOwner_0, ref float __result)
         {
-            if (SAINPlugin.BotController.GetBot(___botOwner_0.ProfileId, out var component))
+            if (SAINPlugin.BotController.GetSAIN(___botOwner_0, out var component))
             {
                 __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
             }
@@ -165,7 +165,7 @@ namespace SAIN.Patches.Shoot
         [PatchPostfix]
         public static void PatchPostfix(ref BotOwner ___botOwner_0, ref float __result)
         {
-            if (SAINPlugin.BotController.GetBot(___botOwner_0.ProfileId, out var component))
+            if (SAINPlugin.BotController.GetSAIN(___botOwner_0, out var component))
             {
                 __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
             }
@@ -181,7 +181,7 @@ namespace SAIN.Patches.Shoot
         [PatchPostfix]
         public static void PatchPostfix(ref BotOwner ___botOwner_0, ref float __result)
         {
-            if (SAINPlugin.BotController.GetBot(___botOwner_0.ProfileId, out var component))
+            if (SAINPlugin.BotController.GetSAIN(___botOwner_0, out var component))
             {
                 __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
             }

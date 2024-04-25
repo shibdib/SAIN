@@ -12,7 +12,7 @@ namespace SAIN.BotController.Classes
 
             HealthStatus = sain.Memory.HealthStatus;
 
-            sain.Decision.NewDecision += UpdateDecisions;
+            sain.Decision.OnDecisionMade += UpdateDecisions;
             sain.Memory.HealthStatusChanged += UpdateHealth;
 
             UpdatePowerLevel();
@@ -60,7 +60,7 @@ namespace SAIN.BotController.Classes
         {
             if (SAIN != null)
             {
-                SAIN.Decision.NewDecision -= UpdateDecisions;
+                SAIN.Decision.OnDecisionMade -= UpdateDecisions;
                 SAIN.Memory.HealthStatusChanged -= UpdateHealth;
             }
         }

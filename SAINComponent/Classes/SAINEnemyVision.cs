@@ -17,6 +17,10 @@ namespace SAIN.SAINComponent.Classes
             }
 
             float timeToAdd = isCurrentEnemy ? 0.1f : 1f;
+            if (!isCurrentEnemy && Enemy.IsAI)
+            {
+                timeToAdd = 5f;
+            }
 
             bool visible = false;
             bool canshoot = false;
@@ -37,6 +41,11 @@ namespace SAIN.SAINComponent.Classes
                 canshoot = true;
             }
 
+            if (SAINPlugin.DebugMode && EnemyPlayer.IsYourPlayer)
+            {
+                //Logger.LogInfo($"LineOfSight [{InLineOfSight}] Visible [{visible}]");
+            }
+
             UpdateVisible(visible);
             UpdateCanShoot(canshoot);
         }
@@ -46,6 +55,10 @@ namespace SAIN.SAINComponent.Classes
             if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
             {
                 return false;
+            }
+            if (SAINPlugin.DebugMode && EnemyPlayer.IsYourPlayer)
+            {
+                //Logger.LogInfo($"EnemyDistance [{Enemy.RealDistance}] Vision Distance [{BotOwner.Settings.Current.CurrentVisibleDistance}]");
             }
             if (noDistRestrictions || Enemy.RealDistance <= BotOwner.Settings.Current.CurrentVisibleDistance)
             {
@@ -78,6 +91,7 @@ namespace SAIN.SAINComponent.Classes
 
             if (IsVisible)
             {
+                TimeLastSeen = Time.time;
                 if (!wasVisible)
                 {
                     VisibleStartTime = Time.time;
@@ -88,16 +102,12 @@ namespace SAIN.SAINComponent.Classes
                     Seen = true;
                 }
                 LastSeenPosition = EnemyPerson.Position;
+                Enemy.UpdateKnownPosition(EnemyPerson.Position, false, true);
             }
 
             if (!IsVisible)
             {
                 VisibleStartTime = -1f;
-                if (wasVisible)
-                {
-                    TimeLastSeen = Time.time;
-                    Enemy.UpdateKnownPosition(EnemyPerson.Position, false, true);
-                }
             }
 
             if (IsVisible != wasVisible)

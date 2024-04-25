@@ -64,6 +64,8 @@ namespace SAIN.Components.Extract
                 return;
             }
 
+            DebugGizmos.OnGUI();
+
             GUIStyle guiStyle = new GUIStyle(GUI.skin.label);
             guiStyle.alignment = TextAnchor.MiddleLeft;
             guiStyle.fontSize = 14;
@@ -97,6 +99,10 @@ namespace SAIN.Components.Extract
             GUIContent content = new GUIContent(text);
 
             float screenScale = 1.0f;
+            if (CameraClass.Instance.SSAA.isActiveAndEnabled)
+            {
+                screenScale = (float)CameraClass.Instance.SSAA.GetOutputWidth() / (float)CameraClass.Instance.SSAA.GetInputWidth();
+            }
             Vector2 guiSize = guiStyle.CalcSize(content);
             float x = (screenPos.x * screenScale) - (guiSize.x / 2);
             float y = Screen.height - ((screenPos.y * screenScale) + guiSize.y);

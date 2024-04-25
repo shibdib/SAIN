@@ -28,6 +28,11 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             if (!UsingMeds && Player != null)
             {
+                if (SAIN.Memory.Decisions.Self.Current == SelfDecision.Reload)
+                {
+                    TryReload();
+                    return;
+                }
                 if (_handsBusyTimer < Time.time)
                 {
                     var handsController = Player.HandsController;

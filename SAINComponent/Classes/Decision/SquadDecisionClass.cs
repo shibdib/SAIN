@@ -148,7 +148,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartHelp(SAINComponentClass member)
         {
-            float distance = member.Enemy.PathDistance;
+            float distance = member.Enemy.Path.PathDistance;
             bool visible = member.Enemy.IsVisible;
             if (distance < SquadDecision_StartHelpFriendDist && visible)
             {

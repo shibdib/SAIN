@@ -7,6 +7,7 @@ using SAIN.Helpers;
 using SAIN.SAINComponent;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
@@ -15,8 +16,8 @@ namespace SAIN.Components
 {
     public class SAINBotControllerComponent : MonoBehaviour
     {
-        public Action<SAINSoundType, Player, float> AISoundPlayed { get; private set; }
-        public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; private set; }
+        public Action<SAINSoundType, Player, float> AISoundPlayed { get; set; }
+        public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; set; }
 
         public Dictionary<string, SAINComponentClass> Bots => BotSpawnController.Bots;
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
@@ -301,9 +302,25 @@ namespace SAIN.Components
             catch { }
         }
 
-        public bool GetBot(string profileId, out SAINComponentClass bot)
+        public bool GetSAIN(string botName, out SAINComponentClass bot)
         {
-            return Bots.TryGetValue(profileId, out bot);
+            StringBuilder debugString = null;
+            bot = BotSpawnController.GetSAIN(botName, debugString);
+            return bot != null;
+        }
+
+        public bool GetSAIN(BotOwner botOwner, out SAINComponentClass bot)
+        {
+            StringBuilder debugString = null;
+            bot = BotSpawnController.GetSAIN(botOwner, debugString);
+            return bot != null;
+        }
+
+        public bool GetSAIN(Player player, out SAINComponentClass bot)
+        {
+            StringBuilder debugString = null;
+            bot = BotSpawnController.GetSAIN(player, debugString);
+            return bot != null;
         }
     }
 

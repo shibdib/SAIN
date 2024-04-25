@@ -46,6 +46,9 @@ namespace SAIN.SAINComponent.Classes
             //_CachedHits.Add(damageInfo);
         }
 
+        private float HitReceiveTime = 0.33f;
+        private float HitRecoverBaseTime = 1f;
+
         public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
             PlayerWhoLastShotMe = damageInfo.Player;

@@ -10,7 +10,7 @@ namespace SAIN.SAINComponent.Classes
             Position = position;
         }
 
-        public Vector3 Position
+        public Vector3? Position
         {
             get
             {
@@ -25,7 +25,7 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private Vector3 _position;
+        private Vector3? _position;
 
         public float TimePositionUpdated;
 

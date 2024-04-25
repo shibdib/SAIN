@@ -67,7 +67,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                 }
                 BotIsMoving = true;
             }
-            else if (!_botIsMoving)
+            else if (!_botIsMoving && time - _timeStopMoving > movingForPeriod)
             {
                 if (BotIsMoving)
                 {
@@ -120,13 +120,17 @@ namespace SAIN.SAINComponent.Classes.Debug
                     return;
                 }
 
-                if (_nextVaultTime < Time.time)
+                if (_nextVaultTime < Time.time && BotOwner.Mover.IsMoving && _timeStartMoving + 1f < Time.time)
                 {
                     _nextVaultTime = Time.time + 0.5f;
-                    Player.MovementContext.TryVaulting();
+                    if (SAIN.Decision.CurrentSoloDecision != SoloDecision.HoldInCover)
+                    {
+                        Player.MovementContext.TryVaulting();
+                    }
                 }
 
                 CheckIfMoving();
+
                 CheckIfPositionChanged();
 
                 if (CheckStuckTimer < Time.time)
@@ -138,7 +142,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                     }
                     else
                     {
-                        CheckStuckTimer = Time.time + 0.25f;
+                        CheckStuckTimer = Time.time + 0.5f;
 
                         bool stuck = BotStuckGeneric()
                             || BotStuckOnObject()
@@ -147,14 +151,6 @@ namespace SAIN.SAINComponent.Classes.Debug
                         if (!BotIsStuck && stuck)
                         {
                             TimeStuck = Time.time;
-                        }
-                        if (TimeSinceStuck < 1f)
-                        {
-                            BotIsStuck = false;
-                        }
-                        else
-                        {
-                            BotIsStuck = stuck;
                         }
                         BotIsStuck = stuck;
                     }
@@ -171,11 +167,11 @@ namespace SAIN.SAINComponent.Classes.Debug
                         IsTeleporting = false;
                     }
 
-                    if (BotIsStuck)
+                    if (BotIsStuck && TimeSinceStuck > 2f)
                     {
-                        if (DebugStuckTimer < Time.time && TimeSinceStuck > 3f)
+                        if (DebugStuckTimer < Time.time && TimeSinceStuck > 5f)
                         {
-                            DebugStuckTimer = Time.time + 3f;
+                            DebugStuckTimer = Time.time + 5f;
                             Logger.LogWarning($"[{BotOwner.name}] has been stuck for [{TimeSinceStuck}] seconds " +
                                 $"on [{StuckHit.transform?.name}] object " +
                                 $"at [{StuckHit.transform?.position}] " +
@@ -183,15 +179,15 @@ namespace SAIN.SAINComponent.Classes.Debug
                         }
 
                         if (HasTriedJumpOrVault
-                            && TimeSinceStuck > 5f
+                            && TimeSinceStuck > 10f
                             && TimeSinceTriedJumpOrVault + 2f < Time.time
                             && !TeleportCoroutineStarted)
                         {
-                            //TeleportCoroutineStarted = true;
-                            //TeleportCoroutine = SAIN.StartCoroutine(CheckIfTeleport());
+                            TeleportCoroutineStarted = true;
+                            TeleportCoroutine = SAIN.StartCoroutine(CheckIfTeleport());
                         }
 
-                        if (JumpTimer < Time.time)
+                        if (JumpTimer < Time.time && TimeSinceStuck > 2f)
                         {
                             JumpTimer = Time.time + 1f;
 

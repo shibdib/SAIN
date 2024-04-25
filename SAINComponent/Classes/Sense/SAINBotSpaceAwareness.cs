@@ -182,35 +182,29 @@ namespace SAIN.SAINComponent.Classes
         DebugGizmos.DrawLists list2 = new DebugGizmos.DrawLists(Color.blue, Color.blue, "flankroute2");
         DebugGizmos.DrawLists list3 = new DebugGizmos.DrawLists(Color.blue, Color.blue, "flankroute3");
 
-        private static bool ArePathsDifferent(NavMeshPath path1, NavMeshPath path2, float minRatio = 0.25f)
+        public static bool ArePathsDifferent(NavMeshPath path1, NavMeshPath path2, float minRatio = 0.5f, float sqrDistCheck = 0.05f)
         {
-            int sameCount = 0;
-            int differentCount = 0;
+            Vector3[] path1Corners = path1.corners;
+            int path1Length = path1Corners.Length;
+            Vector3[] path2Corners = path2.corners;
+            int path2Length = path2Corners.Length;
 
-            for (int i = 0; i < path1.corners.Length; i++)
+            int sameCount = 0;
+            for (int i = 0; i < path1Length; i++)
             {
-                Vector3 node = path1.corners[i];
-                bool sameNode = false;
-                for (int j = 0; j < path2.corners.Length; j++)
+                Vector3 node = path1Corners[i];
+
+                if (i < path2Length)
                 {
-                    Vector3 node2 = path2.corners[j];
-                    if ((node - node2).sqrMagnitude < 0.1f)
+                    Vector3 node2 = path2Corners[i];
+                    if (node.IsEqual(node2, sqrDistCheck))
                     {
-                        sameNode = true;
-                        break;
+                        sameCount++;
                     }
                 }
-                if (sameNode)
-                {
-                    sameCount++;
-                }
-                else
-                {
-                    differentCount++;
-                }
             }
-            float ratio = (float)sameCount / (float)path1.corners.Length;
-            //Logger.NotifyDebug($"Result = [{ratio <= minRatio}]Path 1 length: {path1.corners.Length} Path2 length: {path2.corners.Length} Same Node Count: {sameCount} ratio: {ratio}");
+            float ratio = (float)sameCount / (float)path1Length;
+            //Logger.LogDebug($"Result = [{ratio <= minRatio}]Path 1 length: {path1.corners.Length} Path2 length: {path2.corners.Length} Same Node Count: {sameCount} ratio: {ratio}");
             return ratio <= minRatio;
         }
 

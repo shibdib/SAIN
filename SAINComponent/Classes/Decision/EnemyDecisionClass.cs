@@ -169,7 +169,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             if (SAIN.Info.PersonalitySettings?.CanRushEnemyReloadHeal == true)
             {
-                if (enemy != null && enemy.PathDistance < RushEnemyMaxPathDistance)
+                if (enemy != null && enemy.Path.PathDistance < RushEnemyMaxPathDistance)
                 {
                     if (!SAIN.Decision.SelfActionDecisions.LowOnAmmo(RushEnemyLowAmmoRatio) && SAIN.Memory.HealthStatus != ETagStatus.Dying && BotOwner?.CanSprintPlayer == true)
                     {

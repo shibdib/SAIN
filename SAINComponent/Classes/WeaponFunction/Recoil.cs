@@ -20,8 +20,30 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Update()
         {
-            RecoilOffset = CalculateDecay(RecoilOffset);
+            if (_shot)
+            {
+                _count++;
+                CurrentRecoilOffset = Vector3.Lerp(CurrentRecoilOffset, _recoilOffsetTarget, _count / 3f);
+                if (_count >= 3)
+                {
+                    _shot = false;
+                    _recoilOffsetTarget = Vector3.zero;
+                    _count = 0;
+                }
+            }
+
+            if (CurrentRecoilOffset != Vector3.zero)
+            {
+                Vector3 decayedRecoil = Vector3.Lerp(CurrentRecoilOffset, Vector3.zero, SAINPlugin.LoadedPreset.GlobalSettings.Shoot.RecoilDecay);
+                if ((decayedRecoil -  CurrentRecoilOffset).sqrMagnitude < 0.05f)
+                {
+                    decayedRecoil = Vector3.zero;
+                }
+                CurrentRecoilOffset = decayedRecoil;
+            }
         }
+
+        private int _count;
 
         public void Dispose()
         {
@@ -29,10 +51,15 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void WeaponShot()
         {
-            RecoilOffset = CalculateRecoil(RecoilOffset);
+            _shot = true;
+            _count = 0;
+            _recoilOffsetTarget = CalculateRecoil(_recoilOffsetTarget);
         }
 
-        public Vector3 RecoilOffset { get; private set; } = Vector3.zero;
+        private bool _shot;
+
+        private Vector3 _recoilOffsetTarget;
+        public Vector3 CurrentRecoilOffset { get; private set; } = Vector3.zero;
 
         public Vector3 CalculateRecoil(Vector3 currentRecoil)
         {

@@ -193,11 +193,6 @@ namespace SAIN.SAINComponent
 
                 BotOwner.DoorOpener.Update(); 
                 UpdateGoalTarget();
-
-                if (Enemy == null && BotOwner.BotLight?.IsEnable == false)
-                {
-                    BotOwner.BotLight?.TurnOn();
-                }
             }
         }
 
@@ -375,6 +370,10 @@ namespace SAIN.SAINComponent
                 {
                     if ((Target.Value - Position).sqrMagnitude < 2f)
                     {
+                        if (EFTMath.RandomBool(33))
+                        {
+                            Talk.Say(EPhraseTrigger.Clear, null, true);
+                        }
                         BotOwner.Memory.GoalTarget.Clear();
                         BotOwner.CalcGoal();
                     }
@@ -401,14 +400,18 @@ namespace SAIN.SAINComponent
         {
             get
             {
+                if (HasEnemy && Enemy.IsVisible)
+                {
+                    return Enemy.EnemyPosition;
+                }
                 if (HasEnemy && Enemy.LastKnownPosition != null)
                 {
                     return Enemy.LastKnownPosition;
                 }
-                var Target = BotOwner.Memory.GoalTarget;
-                if (Target != null && Target?.Position != null)
+                var placeForCheck = BotOwner.Memory.GoalTarget?.GoalTarget;
+                if (placeForCheck != null)
                 {
-                    return Target.Position;
+                    return placeForCheck.Position;
                 }
                 if (Time.time - BotOwner.Memory.LastTimeHit < 10f)
                 {
@@ -452,7 +455,7 @@ namespace SAIN.SAINComponent
         public SAINSteeringClass Steering { get; private set; }
 
         public bool IsDead => BotOwner == null || BotOwner.IsDead == true || Player == null || Player.HealthController.IsAlive == false;
-        public bool BotActive => IsDead == false && BotOwner.enabled && Player.enabled && BotOwner.BotState == EBotState.Active;
+        public bool BotActive => IsDead == false && BotOwner.enabled && Player.enabled && BotOwner.BotState == EBotState.Active && BotOwner.StandBy.StandByType == BotStandByType.active;
         public bool GameIsEnding => Singleton<IBotGame>.Instance == null || Singleton<IBotGame>.Instance.Status == GameStatus.Stopping;
 
         public Vector3 Position => Person.Position;

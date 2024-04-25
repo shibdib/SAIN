@@ -25,7 +25,7 @@ namespace SAIN.Patches.Hearing
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ____botOwner)
         {
-            if (SAINPlugin.BotController.Bots.ContainsKey(____botOwner.ProfileId))
+            if (SAINPlugin.BotController?.GetSAIN(____botOwner, out _) == true)
             {
                 return false;
             }

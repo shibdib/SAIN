@@ -70,9 +70,9 @@ namespace SAIN.SAINComponent.Classes
                     for (int i = knownPlaces.Count - 1; i >= 0; i--)
                     {
                         EnemyPlace enemyPlace = knownPlaces[i];
-                        if (enemyPlace != null && !enemyPlace.HasArrived && !enemyPlace.HasSeen)
+                        if (enemyPlace?.Position != null && !enemyPlace.HasArrived && !enemyPlace.HasSeen)
                         {
-                            return enemyPlace.Position;
+                            return enemyPlace.Position.Value;
                         }
                     }
                     return RandomSearch();
@@ -91,6 +91,10 @@ namespace SAIN.SAINComponent.Classes
                 {
                     if ((sound.Position - BotOwner.Position).sqrMagnitude < 2f)
                     {
+                        if (EFTMath.RandomBool(33))
+                        {
+                            SAIN.Talk.Say(EPhraseTrigger.Clear, null, true);
+                        }
                         sound.IsCome = true;
                         BotOwner.CalcGoal();
                     }

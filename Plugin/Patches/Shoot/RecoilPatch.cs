@@ -40,7 +40,7 @@ namespace SAIN.Patches.Shoot
 
             // Applies aiming offset, recoil offset, and scatter offsets
             // Default Setup :: Vector3 finalTarget = __instance.RealTargetPoint + badShootOffset + (AimUpgradeByTime * (AimOffset + ___botOwner_0.RecoilData.RecoilOffset));
-            Vector3 finalOffset = (aimUpgradeByTime * aimOffset) + recoilOffset;
+            Vector3 finalOffset = badShootOffset + (aimUpgradeByTime * (aimOffset + recoilOffset));
 
             IPlayer person = ___botOwner_0?.Memory?.GoalEnemy?.Person;
             if (person != null)
@@ -175,7 +175,12 @@ namespace SAIN.Patches.Shoot
         [PatchPrefix]
         public static bool PatchPrefix(ref Vector3 ____recoilOffset, ref BotOwner ____owner)
         {
-            if (SAINPlugin.BotController.GetBot(____owner.ProfileId, out var component))
+            if (SAINPlugin.BotController == null)
+            {
+                Logger.LogError($"Bot Controller Null in [{nameof(RecoilPatch)}]");
+                return true;
+            }
+            if (SAINPlugin.BotController.GetSAIN(____owner, out SAINComponentClass sain))
             {
                 return false;
             }
@@ -196,12 +201,17 @@ namespace SAIN.Patches.Shoot
         [PatchPrefix]
         public static bool PatchPrefix(ref Vector3 ____recoilOffset, ref BotOwner ____owner)
         {
-            if (SAINPlugin.BotController.GetBot(____owner.ProfileId, out var component))
+            if (SAINPlugin.BotController == null)
             {
-                var recoil = component?.Info?.WeaponInfo?.Recoil;
+                Logger.LogError($"Bot Controller Null in [{nameof(LoseRecoilPatch)}]");
+                return true;
+            }
+            if (SAINPlugin.BotController.GetSAIN(____owner, out SAINComponentClass sain))
+            {
+                var recoil = sain?.Info?.WeaponInfo?.Recoil;
                 if (recoil != null)
                 {
-                    ____recoilOffset = recoil.RecoilOffset;
+                    ____recoilOffset = recoil.CurrentRecoilOffset;
                     return false;
                 }
             }
@@ -220,9 +230,18 @@ namespace SAIN.Patches.Shoot
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix()
+        public static bool PatchPrefix(ref BotOwner ____owner)
         {
-            return false;
+            if (SAINPlugin.BotController == null)
+            {
+                Logger.LogError($"Bot Controller Null in [{nameof(EndRecoilPatch)}]");
+                return true;
+            }
+            if (SAINPlugin.BotController.GetSAIN(____owner, out SAINComponentClass sain))
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

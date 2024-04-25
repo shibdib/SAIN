@@ -39,7 +39,7 @@ namespace SAIN.Patches.Talk
 
             if (__instance.IsYourPlayer)
             {
-                SAINPlugin.BotController?.PlayerTalk(@event, mask, __instance);
+                SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
                 return true;
             }
             else

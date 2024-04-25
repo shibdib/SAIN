@@ -19,11 +19,12 @@ namespace SAIN.SAINComponent.Classes
             {
                 lastPlace = GetPlaceHaventSeenOrArrived();
                 _nextCheckArrived = Time.time + 0.25f;
-                if (lastPlace != null && lastPlace.HasArrived == false)
+                if (lastPlace?.Position != null && lastPlace.HasArrived == false)
                 {
-                    float sqrMag = (_enemy.SAIN.Position - lastPlace.Position).sqrMagnitude;
+                    float sqrMag = (_enemy.SAIN.Position - lastPlace.Position.Value).sqrMagnitude;
                     if (sqrMag < 1f)
                     {
+                        _enemy.SAIN.Talk.Say(EPhraseTrigger.Clear, null, true);
                         lastPlace.HasArrived = true;
                     }
                 }
@@ -37,9 +38,9 @@ namespace SAIN.SAINComponent.Classes
                     lastPlace = GetPlaceHaventSeenOrArrived();
                 }
 
-                if (lastPlace != null && lastPlace.HasSeen == false)
+                if (lastPlace?.Position != null && lastPlace.HasSeen == false)
                 {
-                    Vector3 lastknown = lastPlace.Position;
+                    Vector3 lastknown = lastPlace.Position.Value;
                     Vector3 botPos = _enemy.SAIN.Person.Transform.Head;
                     Vector3 direction = lastknown - botPos;
                     lastPlace.HasSeen = !Physics.Raycast(botPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMaskAI);
@@ -68,10 +69,10 @@ namespace SAIN.SAINComponent.Classes
             EnemyPlace lastKnown = LastKnownPlace;
             if (lastKnown != null)
             {
-                float sqrMag = (lastKnown.Position - position).sqrMagnitude;
+                float sqrMag = (lastKnown.Position.Value - position).sqrMagnitude;
                 if (sqrMag < 2)
                 {
-                    lastKnown.Position = position;
+                    lastKnown.Position = new Vector3?(position);
                     if (arrived)
                     {
                         lastKnown.HasArrived = true;
