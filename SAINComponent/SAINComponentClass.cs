@@ -56,6 +56,7 @@ namespace SAIN.SAINComponent
             return false;
         }
 
+        public Action<string, BotOwner> OnSAINDisposed { get; set; }
         public SAINPersonClass Person { get; private set; }
 
         public bool Init(SAINPersonClass person)
@@ -327,6 +328,8 @@ namespace SAIN.SAINComponent
         {
             try
             {
+                OnSAINDisposed?.Invoke(ProfileId, BotOwner);
+
                 StopAllCoroutines();
 
                 Search.Dispose();

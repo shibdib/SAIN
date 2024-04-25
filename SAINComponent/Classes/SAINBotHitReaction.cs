@@ -41,11 +41,6 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        public void GetHit(DamageInfo damageInfo)
-        {
-            //_CachedHits.Add(damageInfo);
-        }
-
         private float HitReceiveTime = 0.33f;
         private float HitRecoverBaseTime = 1f;
 
@@ -74,7 +69,7 @@ namespace SAIN.SAINComponent.Classes
             }
             if (PlayerWhoLastShotMe?.IsAI == false)
             {
-                Logger.NotifyDebug($"{BotOwner.name} is hit in {HitReaction}");
+                Logger.LogDebug($"{BotOwner.name} is hit in {HitReaction}");
             }
         }
 
@@ -133,8 +128,6 @@ namespace SAIN.SAINComponent.Classes
         {
             return false;
         }
-
-        private readonly List<DamageInfo> _CachedHits = new List<DamageInfo>();
     }
 
     public enum EHitReaction

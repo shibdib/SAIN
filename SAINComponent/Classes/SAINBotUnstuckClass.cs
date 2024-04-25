@@ -200,7 +200,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                                         HasTriedJumpOrVault = true;
                                         TimeSinceTriedJumpOrVault = Time.time;
                                     }
-                                    SAIN.Mover.TryJump();
+                                    //SAIN.Mover.TryJump();
                                 }
                             }
                         }

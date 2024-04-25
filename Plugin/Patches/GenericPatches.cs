@@ -73,7 +73,6 @@ namespace SAIN.Patches.Generic
         {
             if (SAINPlugin.GetSAIN(___botOwner_0, out var sain, nameof(GetHitPatch)))
             {
-                sain.BotHitReaction.GetHit(damageInfo);
             }
         }
     }
@@ -113,7 +112,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static void PatchPrefix(ref Vector3 pos, ref bool slowAtTheEnd, ref float reachDist, ref bool getUpWithCheck, ref bool mustHaveWay, ref bool onlyShortTrie)
         {
-            //mustHaveWay = false;
+            mustHaveWay = false;
         }
     }
 
@@ -131,40 +130,27 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            if (__result == false)
-            {
-                return;
-            }
-            try
-            {
-                __result = ShallKnowEnemy(__instance);
-            }
-            catch (Exception e)
-            {
-                SAIN.Logger.LogError(e);
-            }
-        }
+            BotOwner botOwner = __instance?.Owner;
 
-        private static bool ShallKnowEnemy(EnemyInfo enemyInfo)
-        {
-            BotOwner botOwner = enemyInfo?.Owner;
-
-            if (enemyInfo.Person != null
+            if (__instance.Person != null
                 && SAINPlugin.GetSAIN(botOwner, out SAINComponentClass sain, nameof(ShallKnowEnemyPatch)))
             {
-                if (SquadSensedRecently(sain, enemyInfo))
+                if (SquadSensedRecently(sain, __instance))
                 {
-                    return true;
+                    __result = true;
                 }
-                else if (EnemySenseRecently(sain, enemyInfo))
+                else if (EnemySenseRecently(sain, __instance))
                 {
-                    return true;
+                    __result = true;
+                }
+                else
+                {
+                    __result = false;
                 }
             }
-            return false;
         }
 
-        private static bool SquadSensedRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
+        public static bool SquadSensedRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
         {
             // Check each of a sain bots members to see if they heard them recently, if so, we should know this enemy
             bool senseRecently = false;
@@ -183,9 +169,9 @@ namespace SAIN.Patches.Generic
             return senseRecently;
         }
 
-        private static bool EnemySenseRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
+        public static bool EnemySenseRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
         {
-            SAINEnemy myEnemy = sain.EnemyController.GetEnemy(enemyInfo);
+            SAINEnemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
             if (myEnemy != null)
             {
                 if (!myEnemy.Seen 
@@ -202,11 +188,62 @@ namespace SAIN.Patches.Generic
                     return true;
                 }
             }
+            else
+            {
+                Logger.LogWarning($"{enemyInfo?.Person?.Profile.Nickname} is not in Enemy List.");
+            }
             return false;
         }
     }
 
-    
+    public enum KnowEnemyReason
+    {
+        None = 0,
+        HeardRecent = 1,
+        SeenRecent = 2,
+        SquadHeardRecent = 3,
+        SquadSeenRecent = 4,
+    }
+
+    internal class ShallKnowEnemyLatePatch : ModulePatch
+    {
+
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(EnemyInfo), "ShallKnowEnemyLate");
+        }
+
+        const float TimeToForgetEnemyNotSeen = 30f;
+        const float TimeToForgetEnemySeen = 60f;
+
+        [PatchPostfix]
+        public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
+        {
+            if (__result == false)
+            {
+                return;
+            }
+
+            BotOwner botOwner = __instance?.Owner;
+
+            if (__instance.Person != null
+                && SAINPlugin.GetSAIN(botOwner, out SAINComponentClass sain, nameof(ShallKnowEnemyPatch)))
+            {
+                if (ShallKnowEnemyPatch.SquadSensedRecently(sain, __instance))
+                {
+                    __result = true;
+                }
+                else if (ShallKnowEnemyPatch.EnemySenseRecently(sain, __instance))
+                {
+                    __result = true;
+                }
+                else
+                {
+                    __result = false;
+                }
+            }
+        }
+    }
 
     internal class SkipLookForCoverPatch : ModulePatch
     {

@@ -1,4 +1,5 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 using System.Collections.Generic;
 
 namespace SAIN.Preset.Personalities
@@ -7,8 +8,11 @@ namespace SAIN.Preset.Personalities
     {
         public class PersonalityVariablesClass
         {
+            [Hidden]
+            [JsonIgnore]
             public static readonly PersonalityVariablesClass Defaults = new PersonalityVariablesClass();
 
+            [JsonIgnore]
             [Hidden]
             const string PowerLevelDescription = " Power level is a combined number that takes into account armor, the class of that armor, and the weapon class that is currently used by a bot." +
                 " Power Level usually falls within 30 to 120 on average, and almost never goes above 150";
@@ -43,13 +47,13 @@ namespace SAIN.Preset.Personalities
 
             [NameAndDescription("Power Level Minimum", "Minimum Power level for a bot to use this personality." + PowerLevelDescription)]
             [Default(0)]
-            [MinMax(0, 500, 1)]
+            [MinMax(0, 800, 1)]
             public float PowerLevelMin = 0;
 
             [NameAndDescription("Power Level Maximum", "Maximum Power level for a bot to use this personality." + PowerLevelDescription)]
-            [Default(250)]
-            [MinMax(0, 500, 1)]
-            public float PowerLevelMax = 250;
+            [Default(800)]
+            [MinMax(0, 800, 1)]
+            public float PowerLevelMax = 800;
 
             [Default(1f)]
             [Advanced]
@@ -90,57 +94,46 @@ namespace SAIN.Preset.Personalities
             public bool CanTaunt = false;
 
             [Default(false)]
-            [Hidden]
             public bool Sneaky = false;
 
             [Default(1f)]
             [Percentage0to1]
-            [Hidden]
             public float SneakySpeed = 1f;
 
             [Default(1f)]
             [Percentage0to1]
-            [Hidden]
             public float SneakyPose = 1f;
 
             [Default(1f)]
             [Percentage0to1]
-            [Hidden]
             public float SearchNoEnemySpeed = 1f;
 
             [Default(1f)]
             [Percentage0to1]
-            [Hidden]
             public float SearchNoEnemyPose = 1f;
 
             [Default(1f)]
             [Percentage0to1]
-            [Hidden]
             public float SearchHasEnemySpeed = 1f;
 
             [Default(1f)]
             [Percentage0to1]
-            [Hidden]
             public float SearchHasEnemyPose = 1f;
 
             [Default(1f)]
             [Percentage0to1]
-            [Hidden]
             public float MoveToCoverNoEnemySpeed = 1f;
 
             [Default(1f)]
             [Percentage0to1]
-            [Hidden]
             public float MoveToCoverNoEnemyPose = 1f;
 
             [Default(1f)]
             [Percentage0to1]
-            [Hidden]
             public float MoveToCoverHasEnemySpeed = 1f;
 
             [Default(1f)]
             [Percentage0to1]
-            [Hidden]
             public float MoveToCoverHasEnemyPose = 1f;
 
             [Default(true)]
