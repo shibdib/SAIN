@@ -323,19 +323,17 @@ namespace SAIN.SAINComponent.Classes
 
             if (player == null)
             {
-                Logger.LogError("player Null!");
+                return null;
             }
 
             SAINPersonComponent _SAINPersonComponent = player?.gameObject.GetOrAddComponent<SAINPersonComponent>();
-            SAINPersonClass enemySAINPerson = _SAINPersonComponent?.SAINPerson;
 
-            if (enemySAINPerson == null)
+            if (_SAINPersonComponent?.SAINPerson == null)
             {
-                Logger.LogError("enemySAINPerson Null!");
-                return new SAINPersonClass(IPlayer);
+                _SAINPersonComponent?.Init(IPlayer);
             }
 
-            return enemySAINPerson;
+            return _SAINPersonComponent?.SAINPerson;
         }
 
         private readonly List<string> EnemyIDsToRemove = new List<string>();

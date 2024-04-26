@@ -267,7 +267,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartDogFightAction(SAINEnemy enemy)
         {
-            if (SAIN.Decision.CurrentSelfDecision != SelfDecision.None)
+            if (SAIN.Decision.CurrentSelfDecision != SelfDecision.None || BotOwner.WeaponManager.Reload.Reloading)
             {
                 return false;
             }

@@ -155,7 +155,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool ContinueRunGrenade => CurrentSelfAction == SelfDecision.RunAwayGrenade && SAIN.Grenade.GrenadeDangerPoint != null;
         public bool UsingMeds => BotOwner.Medecine.Using;
-        private bool ContinueReload => BotOwner.WeaponManager.Reload?.Reloading == true && !StartCancelReload();
+        private bool ContinueReload => BotOwner.WeaponManager.Reload?.Reloading == true; //  && !StartCancelReload()
         public bool CanUseStims
         {
             get
