@@ -18,7 +18,7 @@ namespace SAIN.SAINComponent
 {
     public class SAINComponentClass : MonoBehaviour, IBotComponent
     {
-        public static bool TryAddSAINToBot(BotOwner botOwner, out SAINComponentClass component)
+        public static bool TryAddSAINToBot(BotOwner botOwner, out SAINComponentClass sainComponent)
         {
             Player player = EFTInfo.GetPlayer(botOwner?.ProfileId);
             GameObject gameObject = botOwner?.gameObject;
@@ -26,33 +26,21 @@ namespace SAIN.SAINComponent
             if (gameObject != null && player != null)
             {
                 // If Somehow this bot already has SAIN attached, destroy it.
-                if (gameObject.TryGetComponent(out component))
+                if (gameObject.TryGetComponent(out sainComponent))
                 {
-                    component.Dispose();
+                    sainComponent.Dispose();
                 }
 
                 // Create a new Component
-                component = gameObject.AddComponent<SAINComponentClass>();
+                sainComponent = gameObject.AddComponent<SAINComponentClass>();
 
-                // Try to get the Person Component instead of creating a new one.
-                SAINPersonComponent _SAINPersonComponent = player.gameObject?.GetOrAddComponent<SAINPersonComponent>();
-                SAINPersonClass personClass;
-                if (_SAINPersonComponent != null)
-                {
-                    personClass = _SAINPersonComponent.SAINPerson;
-                }
-                else
-                {
-                    personClass = new SAINPersonClass(player);
-                }
-
-                // Check is component is successfully initialized
-                if (component?.Init(personClass) == true)
+                if (SAINPersonComponent.TryAddSAINPersonToPlayer(player, out SAINPersonComponent personComponent)
+                    && sainComponent?.Init(personComponent?.SAINPerson) == true)
                 {
                     return true;
                 }
             }
-            component = null;
+            sainComponent = null;
             return false;
         }
 
@@ -61,6 +49,12 @@ namespace SAIN.SAINComponent
 
         public bool Init(SAINPersonClass person)
         {
+            if (person == null)
+            {
+                Logger.LogAndNotifyError("Person is Null in SAINComponent Init");
+                return false;
+            }
+
             Person = person;
 
             try

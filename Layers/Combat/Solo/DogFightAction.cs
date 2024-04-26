@@ -22,15 +22,15 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
+            SAIN.Mover.SetTargetPose(1f);
+            SAIN.Mover.SetTargetMoveSpeed(1f);
+            SAIN.Steering.SteerByPriority(false);
+
             SAINEnemy enemy = SAIN.Enemy;
             if (enemy == null)
             {
                 return;
             }
-
-            SAIN.Mover.SetTargetPose(1f);
-            SAIN.Mover.SetTargetMoveSpeed(0.75f);
-            SAIN.Steering.SteerByPriority(false);
             bool EnemyVisible = enemy.IsVisible;
 
             if (UpdateMovementTimer < Time.time)
@@ -39,7 +39,7 @@ namespace SAIN.Layers.Combat.Solo
                 if (EnemyVisible 
                     && BackUp(out var pos))
                 {
-                    BotOwner.GoToPoint(pos, true, -1, false, false, false);
+                    BotOwner.GoToPoint(pos, true, -1, false, false, false, true);
                 }
                 else if (!EnemyVisible 
                     && CheckMoveToEnemyTimer < Time.time

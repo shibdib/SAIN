@@ -19,18 +19,20 @@ namespace SAIN.SAINComponent.Classes
             EnemyPlace lastPlace = null;
             if (_nextCheckArrived < Time.time)
             {
-                lastPlace = GetPlaceHaventSeenOrArrived();
                 _nextCheckArrived = Time.time + 0.25f;
-                if (lastPlace?.Position != null && lastPlace.HasArrived == false)
+                Vector3 myPosition = _enemy.SAIN.Position;
+                foreach (var place in KnownPlaces)
                 {
-                    float sqrMag = (_enemy.SAIN.Position - lastPlace.Position.Value).sqrMagnitude;
-                    if (sqrMag < 1f)
+                    if (place?.Position != null 
+                        && place.HasArrived == false 
+                        && (myPosition - place.Position.Value).sqrMagnitude < 2f)
                     {
-                        if (EFTMath.RandomBool(33))
+                        place.HasArrived = true;
+
+                        if (EFTMath.RandomBool(15))
                         {
                             _enemy.SAIN.Talk.Say(EPhraseTrigger.Clear, null, true);
                         }
-                        lastPlace.HasArrived = true;
                     }
                 }
             }
@@ -48,7 +50,7 @@ namespace SAIN.SAINComponent.Classes
                     Vector3 lastknown = lastPlace.Position.Value + Vector3.up;
                     Vector3 botPos = _enemy.SAIN.Person.Transform.Head;
                     Vector3 direction = lastknown - botPos;
-                    lastPlace.HasSeen = !Physics.Raycast(botPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMaskAI);
+                    lastPlace.HasSeen = !Physics.Raycast(botPos, direction.normalized, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMaskAI);
                 }
             }
 
@@ -81,7 +83,6 @@ namespace SAIN.SAINComponent.Classes
                         DebugGizmos.AddGUIObject(obj);
                     }
                 }
-                Logger.LogDebug(KnownPlaces.Count);
             }
         }
 
@@ -120,19 +121,30 @@ namespace SAIN.SAINComponent.Classes
                 if (_nextCheckSearchTime < Time.time)
                 {
                     _nextCheckSearchTime = Time.time + 1f;
-                    _searchedAllKnownLocations = true;
+
+                    bool allSearched = true;
                     foreach (var place in KnownPlaces)
                     {
                         if (!place.HasArrived)
                         {
-                            _searchedAllKnownLocations = false;
+                            allSearched = false;
+                            break;
                         }
                     }
+
+                    if (allSearched 
+                        && !_searchedAllKnownLocations)
+                    {
+                        TimeAllLocationsSearched = Time.time;
+                    }
+
+                    _searchedAllKnownLocations = allSearched;
                 }
                 return _searchedAllKnownLocations;
-            } 
+            }
         }
-
+        public float TimeSinceAllLocationsSearched => Time.time - TimeAllLocationsSearched;
+        public float TimeAllLocationsSearched { get; private set; }
         private bool _searchedAllKnownLocations;
         private float _nextCheckSearchTime;
 
@@ -184,11 +196,18 @@ namespace SAIN.SAINComponent.Classes
                 lastKnown.HasSeen = true;
             }
 
+
+            if (KnownPlaces.Count >= MaxKnownPlaces)
+            {
+                KnownPlaces.RemoveAt(0);
+            }
+
             KnownPlaces.Add(lastKnown);
         }
 
+        private const int MaxKnownPlaces = 5;
 
-        public List<EnemyPlace> KnownPlaces = new List<EnemyPlace>(5);
+        public List<EnemyPlace> KnownPlaces = new List<EnemyPlace>(MaxKnownPlaces);
         public EnemyPlace LastKnownPlace => KnownPlaces.Count > 0 ? KnownPlaces[KnownPlaces.Count - 1] : null;
     }
 }

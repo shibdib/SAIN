@@ -33,18 +33,17 @@ namespace SAIN.SAINComponent.Classes
         {
         }
 
+        public void DeleteInfo(EDamageType _)
+        {
+            SAIN.EnemyController.RemoveEnemy(EnemyPlayer);
+        }
+
         public void Update()
         {
             if (!SAIN.HasEnemy)
             {
                 SAIN.EnemyController.ClearEnemy();
                 return;
-            }
-
-            if (_nextUpdateDistTime < Time.time)
-            {
-                _nextUpdateDistTime = Time.time + 0.5f;
-                RealDistance = (EnemyPerson.Transform.Position - SAIN.Position).magnitude;
             }
 
             bool isCurrent = IsCurrentEnemy;
@@ -206,7 +205,20 @@ namespace SAIN.SAINComponent.Classes
         public float VisibleStartTime => Vision.VisibleStartTime;
         public float TimeSinceSeen => Vision.TimeSinceSeen;
 
-        public float RealDistance { get; private set; }
+        public float RealDistance 
+        { 
+            get
+            {
+                if (_nextUpdateDistTime < Time.time)
+                {
+                    _nextUpdateDistTime = Time.time + 0.1f;
+                    _realDistance = (EnemyPerson.Transform.Position - SAIN.Position).magnitude;
+                }
+                return _realDistance;
+            }
+        }
+
+        private float _realDistance;
         public bool CanSeeLastCornerToEnemy => Path.CanSeeLastCornerToEnemy;
         public NavMeshPath PathToEnemy => Path.PathToEnemy;
         public SAINEnemyStatus EnemyStatus { get; private set; }

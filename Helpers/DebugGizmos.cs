@@ -47,7 +47,7 @@ namespace SAIN.Helpers
                 foreach (var obj in GUIObjects)
                 {
                     string text = obj.Text.IsNullOrEmpty() ? obj.StringBuilder.ToString() : obj.Text;
-                    DrawLabel(obj.WorldPos, text, obj.Style);
+                    OnGUIDrawLabel(obj.WorldPos, text, obj.Style);
                 }
             }
         }
@@ -79,7 +79,7 @@ namespace SAIN.Helpers
             GUIObjects.Remove(obj);
         }
 
-        private static void DrawLabel(Vector3 worldPos, string text, GUIStyle guiStyle = null)
+        public static void OnGUIDrawLabel(Vector3 worldPos, string text, GUIStyle guiStyle = null)
         {
             Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
             if (screenPos.z <= 0)

@@ -27,6 +27,10 @@ namespace SAIN.SAINComponent.Classes
             {
                 Player.BeingHitAction += GetHit;
             }
+            else
+            {
+                Logger.LogAndNotifyError("Player is Null in SAINBotHitReaction");
+            }
         }
 
         public void Update()

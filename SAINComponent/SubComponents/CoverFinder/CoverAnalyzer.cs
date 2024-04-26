@@ -143,7 +143,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private bool CheckHumanPlayerVisibility(Vector3 point)
         {
             Player closestPlayer = GameWorldHandler.SAINGameWorld?.FindClosestPlayer(out float sqrDist, point);
-            if (SAIN.EnemyController.IsHumanPlayerActiveEnemy() == false && SAIN.EnemyController.IsHumanPlayerLookAtMe(out Player lookingPlayer) == true && lookingPlayer != null)
+            if (SAIN.EnemyController.IsHumanPlayerActiveEnemy == false && SAIN.EnemyController.IsHumanPlayerLookAtMe(out Player lookingPlayer) == true && lookingPlayer != null)
             {
                 Vector3 testPoint = point + (Vector3.up * 0.5f);
 

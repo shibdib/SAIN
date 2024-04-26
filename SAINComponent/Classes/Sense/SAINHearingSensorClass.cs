@@ -101,49 +101,12 @@ namespace SAIN.SAINComponent.Classes
         {
             bool wasHeard = ProcessSound(iPlayer, soundPosition, power, type, out float distance);
 
-            // Checks if the player is not an active enemy and that they are a neutral party
-            if (wasHeard 
-                && !BotOwner.BotsGroup.IsPlayerEnemy(iPlayer) 
-                && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
+            if (IsPlayerFriendly(iPlayer))
             {
-                if (type != AISoundType.step)
+                if (wasHeard && type != AISoundType.step)
                 {
-                    NeutralSound(iPlayer, soundPosition);
-                }
-                return;
-            }
-
-            // Double check that the source isn't from a member of the bot's group.
-            if (wasHeard 
-                && iPlayer.AIData.IsAI 
-                && BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
-            {
-                if (type != AISoundType.step)
-                {
-                    NeutralSound(iPlayer, soundPosition);
-                }
-                return;
-            }
-
-            // Check that the source isn't an ally
-            if (wasHeard
-                && BotOwner.BotsGroup.Allies.Contains(iPlayer))
-            {
-                if (type != AISoundType.step)
-                {
-                    NeutralSound(iPlayer, soundPosition);
-                }
-                return;
-            }
-
-            // Checks if the player is an enemy by their role.
-            if (wasHeard 
-                && iPlayer != null 
-                && !BotOwner.BotsGroup.IsPlayerEnemy(iPlayer))
-            {
-                if (type != AISoundType.step)
-                {
-                    NeutralSound(iPlayer, soundPosition);
+                    try { BotOwner.BotsGroup.LastSoundsController.AddNeutralSound(iPlayer, soundPosition); }
+                    catch { /* empty because bsgs code is bad */ }
                 }
                 return;
             }
@@ -183,16 +146,39 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private void NeutralSound(IPlayer iPlayer, Vector3 soundPosition)
+        private bool IsPlayerFriendly(IPlayer iPlayer)
         {
-            try
+            if (iPlayer != null)
             {
-                BotOwner.BotsGroup.LastSoundsController.AddNeutralSound(iPlayer, soundPosition);
+                // Checks if the player is not an active enemy and that they are a neutral party
+                if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer)
+                    && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
+                {
+                    return true;
+                }
+                // Double check that the source isn't from a member of the bot's group.
+                if (iPlayer.AIData.IsAI
+                    && BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
+                {
+                    return true;
+                }
+                // Check that the source isn't an ally
+                if (BotOwner.BotsGroup.Allies.Contains(iPlayer))
+                {
+                    return true;
+                }
+                // Checks if the player is an enemy by their role.
+                if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer))
+                {
+                    return true;
+                }
+                // One Final Check because my brain is bad.
+                if (!BotOwner.EnemiesController.EnemyInfos.ContainsKey(iPlayer))
+                {
+                    //return true;
+                }
             }
-            catch
-            {
-                // empty because bsgs code is bad
-            }
+            return false;
         }
 
         private bool ProcessSound(IPlayer player, Vector3 position, float power, AISoundType type, out float distance)

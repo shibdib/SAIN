@@ -200,16 +200,15 @@ namespace SAIN.Components.BotController
                     }
 
                     Player player = botOwner.GetPlayer;
-                    if (SAINPersonComponent.TryAddSAINPersonToBot(botOwner, out var personComponent) == false)
-                    {
-                        Logger.LogError("Could not add SAINPerson to bot");
-                    }
-
                     botOwner.LeaveData.OnLeave += RemoveBot;
                     SetBrainInfo(botOwner);
 
                     if (ExclusionList.Contains(settings.Role))
                     {
+                        if (SAINPersonComponent.TryAddSAINPersonToBot(botOwner, out var personComponent) == false)
+                        {
+                            Logger.LogError("Could not add SAINPerson to bot");
+                        }
                         AddNoBushESP(botOwner);
                         return;
                     }

@@ -43,6 +43,7 @@ namespace SAIN.Patches.Shoot
             Vector3 finalOffset = badShootOffset + (aimUpgradeByTime * (aimOffset + recoilOffset));
 
             IPlayer person = ___botOwner_0?.Memory?.GoalEnemy?.Person;
+
             if (person != null)
             {
                 if (SAINPlugin.LoadedPreset.GlobalSettings.General.HeadShotProtection)
@@ -50,6 +51,7 @@ namespace SAIN.Patches.Shoot
                     realTargetPoint = FindCenterMass(person);
                     finalOffset += CheckHeadShotOffset(finalOffset, realTargetPoint, ___botOwner_0, person);
                 }
+
                 if (SAINPlugin.LoadedPreset.GlobalSettings.General.NotLookingToggle)
                 {
                     finalOffset += NotLookingOffset(person, ___botOwner_0);
@@ -65,11 +67,13 @@ namespace SAIN.Patches.Shoot
             Vector3 headPos = person.MainParts[BodyPartType.head].Position;
             Vector3 floorPos = person.Position;
             Vector3 centerMass = Vector3.Lerp(headPos, floorPos, 0.35f);
+
             if (person.IsYourPlayer && SAINPlugin.DebugMode && _debugCenterMassTimer < Time.time)
             {
                 _debugCenterMassTimer = Time.time + 1f;
                 DebugGizmos.Sphere(centerMass, 0.1f, 5f);
             }
+
             return centerMass;
         }
 

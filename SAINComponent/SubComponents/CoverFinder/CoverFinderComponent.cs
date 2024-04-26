@@ -187,7 +187,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
                     if (limit && ShallLimitProcessing())
                     {
-                        yield return new WaitForSeconds(0.1f);
+                        yield return new WaitForSeconds(0.05f);
                         continue;
                     }
                     else
@@ -202,7 +202,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool HavePositionsChanged()
         {
-            const float recheckThresh = 0.5f;
+            const float recheckThresh = 0.35f;
             if ((_lastRecheckTargetPosition - TargetPoint).sqrMagnitude < recheckThresh * recheckThresh
                 && (_lastRecheckBotPosition - OriginPoint).sqrMagnitude < recheckThresh * recheckThresh)
             {
@@ -245,9 +245,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             int totalChecked = 0;
             int waitCount = 0;
             int coverCount = CoverPoints.Count;
-
+            Vector3 targetPositionAtStart = TargetPoint;
+            int recheckPointCount = 0;
             SoloDecision decisionAtStart = SAIN.Decision.CurrentSoloDecision;
             const float DistanceThreshold = 5;
+
             if (coverCount <= 3
                 || (LastPositionChecked - OriginPoint).sqrMagnitude > DistanceThreshold * DistanceThreshold)
             {
@@ -258,16 +260,20 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 {
                     totalChecked++;
                     waitCount++;
+
+                    // The main Calculations
                     if (CoverAnalyzer.CheckCollider(colliders[i], out var newPoint))
                     {
                         CoverPoints.Add(newPoint);
                         coverCount++;
+                        // Limit the cpu time per frame. Generic optimization
                         if (ShallLimitProcessing())
                         {
-                            yield return new WaitForSeconds(0.1f);
+                            yield return new WaitForSeconds(0.05f);
                         }
                     }
 
+                    // Check if a bot's decision has changed mid-loop. If so, have the existing points be rechecked right now.
                     SoloDecision decisionRightNow = SAIN.Decision.CurrentSoloDecision;
                     if (coverCount > 0 
                         && decisionRightNow != decisionAtStart 
@@ -280,13 +286,26 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                         }
                     }
 
+                    // Check if a bot's target has moved mid-loop. If so, have the existing points be rechecked right now.
+                    recheckPointCount++;
+                    if (coverCount > 0 && recheckPointCount >= 10)
+                    {
+                        recheckPointCount = 0;
+                        if ((targetPositionAtStart - TargetPoint).sqrMagnitude > 1f)
+                        {
+                            targetPositionAtStart = TargetPoint;
+                            yield return RecheckCoverPoints(false);
+                        }
+                    }
+
+                    // Generic Optimization
                     if (coverCount > 0 && ShallLimitProcessing())
                     {
                         yield return null;
-                        yield return null;
-                        yield return null;
                     }
 
+
+                    // Main Optimization, scales with the amount of points a bot currently has, and slows down the rate as it grows.
                     if (coverCount >= 10)
                     {
                         break;
@@ -297,6 +316,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     }
                     else if (coverCount > 0)
                     {
+                        // How long did it take to find at least 1 point?
                         if (findFirstPointStopWatch?.IsRunning == true)
                         {
                             findFirstPointStopWatch.Stop();

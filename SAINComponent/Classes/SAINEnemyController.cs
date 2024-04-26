@@ -3,6 +3,7 @@ using Comfort.Common;
 using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.BaseClasses;
 using System.Collections.Generic;
@@ -14,12 +15,40 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINEnemyController : SAINBase, ISAINClass
     {
+        public bool HasEnemy => ActiveEnemy?.EnemyPerson?.IsActive == true;
+        public SAINEnemy ActiveEnemy { get; private set; }
+        public SAINEnemy ClosestHeardEnemy { get; private set; }
+        public bool IsHumanPlayerActiveEnemy => ActiveEnemy != null && ActiveEnemy.EnemyIPlayer != null && ActiveEnemy.EnemyIPlayer.AIData?.IsAI == false;
+
+        public readonly Dictionary<string, SAINEnemy> Enemies = new Dictionary<string, SAINEnemy>();
+
         public SAINEnemyController(SAINComponentClass sain) : base(sain)
         {
         }
 
         public void Init()
         {
+            if (BotOwner != null)
+            {
+                BotOwner.Memory.OnAddEnemy += AddEnemy;
+            }
+            else
+            {
+                Logger.LogAndNotifyError("Botowner Null in EnemyController Init");
+            }
+        }
+
+        public void Update()
+        {
+            UpdateEnemies();
+            CheckAddEnemy();
+
+            if (ClosestHeardEnemy != null && ClosestHeardEnemy.HeardRecently == false)
+            {
+                ClosestHeardEnemy = null;
+            }
+
+            UpdateDebug();
         }
 
         private void UpdateEnemies()
@@ -62,11 +91,6 @@ namespace SAIN.SAINComponent.Classes
             EnemyIDsToRemove.Clear();
         }
 
-        private GameObject debugLastSeenPosition;
-        private GameObject debugLastHeardPosition;
-
-        public SAINEnemy ClosestHeardEnemy { get; private set; }
-
         public SAINEnemy FindClosestHeardEnemy()
         {
             if (findClosestHeardTimer < Time.time)
@@ -89,14 +113,8 @@ namespace SAIN.SAINComponent.Classes
 
         private float findClosestHeardTimer;
 
-        public void Update()
+        private void UpdateDebug()
         {
-            UpdateEnemies();
-            CheckAddEnemy();
-            if (ClosestHeardEnemy != null && ClosestHeardEnemy.HeardRecently == false)
-            {
-                ClosestHeardEnemy = null;
-            }
             if (ActiveEnemy != null)
             {
                 if (SAINPlugin.DebugMode && SAINPlugin.DrawDebugGizmos)
@@ -131,8 +149,14 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
+        private GameObject debugLastSeenPosition;
+        private GameObject debugLastHeardPosition;
+
         public void Dispose()
         {
+            if (BotOwner != null)
+                BotOwner.Memory.OnAddEnemy -= AddEnemy;
+
             Enemies?.Clear();
         }
 
@@ -145,77 +169,37 @@ namespace SAIN.SAINComponent.Classes
             return null;
         }
 
-        public SAINEnemy GetEnemy(EnemyInfo enemyInfo)
-        {
-            if (enemyInfo == null)
-            {
-                return null;
-            }
-            if (Enemies.ContainsKey(enemyInfo.ProfileId))
-            {
-                return Enemies[enemyInfo.ProfileId];
-            }
-            foreach (var enemy in Enemies)
-            {
-                var enemyStoredInfo = enemy.Value.EnemyInfo;
-                if (enemyStoredInfo != null && enemyStoredInfo == enemyInfo)
-                {
-                    return enemy.Value;
-                }
-            }
-            return null;
-        }
-
-        public SAINEnemy GetEnemy(IPlayer iPlayer)
-        {
-            if (iPlayer == null)
-            {
-                return null;
-            }
-            if (Enemies.ContainsKey(iPlayer.ProfileId))
-            {
-                return Enemies[iPlayer.ProfileId];
-            }
-            foreach (var enemy in Enemies)
-            {
-                IPlayer enemyIPlayer = enemy.Value?.EnemyIPlayer;
-                if (enemyIPlayer != null && enemyIPlayer == iPlayer)
-                {
-                    return enemy.Value;
-                }
-            }
-            return null;
-        }
-
-        public bool HasEnemy => ActiveEnemy?.EnemyPerson?.IsActive == true;
-
-        public SAINEnemy ActiveEnemy { get; private set; }
-
         public void ClearEnemy()
         {
             ActiveEnemy = null;
             ClosestHeardEnemy = null;
         }
 
-        public void CheckAddEnemy()
+        public void RemoveEnemy(IPlayer iPlayer)
+        {
+            if (iPlayer == null)
+            {
+                return;
+            }
+            if (ActiveEnemy?.EnemyPerson != null && ActiveEnemy.EnemyPerson.ProfileId == iPlayer.ProfileId)
+            {
+                ActiveEnemy = null;
+            }
+            Enemies.Remove(iPlayer.ProfileId);
+        }
+
+        private void CheckAddEnemy()
         {
             var goalEnemy = BotOwner.Memory.GoalEnemy;
-            IPlayer IPlayer = goalEnemy?.Person;
             
-            bool addEnemy = goalEnemy != null 
-                && CheckPlayerNull(goalEnemy.Person) == false;
-
-            if (addEnemy)
+            if (goalEnemy != null)
             {
-                string id = IPlayer.ProfileId;
-
-                // Check if the dictionary contains a previous SAINEnemy
-                if (!Enemies.ContainsKey(id))
+                IPlayer iPlayer = goalEnemy?.Person;
+                AddEnemy(iPlayer);
+                if (Enemies.ContainsKey(iPlayer.ProfileId))
                 {
-                    SAINPersonClass enemySAINPerson = GetSAINPerson(IPlayer);
-                    Enemies.Add(id, new SAINEnemy(SAIN, enemySAINPerson, goalEnemy));
+                    ActiveEnemy = Enemies[iPlayer.ProfileId];
                 }
-                ActiveEnemy = Enemies[id];
             }
             else
             {
@@ -225,33 +209,41 @@ namespace SAIN.SAINComponent.Classes
 
         public SAINEnemy CheckAddEnemy(IPlayer IPlayer)
         {
-            if (CheckPlayerNull(IPlayer) == false)
+            AddEnemy(IPlayer);
+
+            if (IPlayer != null && Enemies.ContainsKey(IPlayer.ProfileId))
             {
-                string id = IPlayer.ProfileId;
-
-                if (BotOwner.BotsGroup.IsPlayerEnemy(IPlayer) && BotOwner.EnemiesController.IsEnemy(Player) == false)
-                {
-                    BotOwner.BotsGroup.AddEnemy(Player, EBotEnemyCause.addPlayer);
-                }
-
-                if (!Enemies.ContainsKey(id) && BotOwner.EnemiesController.EnemyInfos.ContainsKey(IPlayer))
-                {
-                    EnemyInfo enemyInfo = BotOwner.EnemiesController.EnemyInfos[IPlayer];
-                    SAINPersonClass enemySAINPerson = GetSAINPerson(IPlayer);
-                    SAINEnemy enemy = new SAINEnemy(SAIN, enemySAINPerson, enemyInfo);
-                    Enemies.Add(id, enemy);
-                    return enemy;
-                }
-                if (Enemies.ContainsKey(id))
-                {
-                    return Enemies[id];
-                }
-                if (!BotOwner.EnemiesController.EnemyInfos.ContainsKey(IPlayer))
-                {
-                    //Logger.LogError("Player is not in bots enemy Infos!");
-                }
+                return Enemies[IPlayer.ProfileId];
             }
             return null;
+        }
+
+        private void AddEnemy(IPlayer player)
+        {
+            if (player == null 
+                || !player.HealthController.IsAlive
+                || Enemies.ContainsKey(player.ProfileId) 
+                || player.ProfileId == SAIN.ProfileId 
+                || player.IsAI && player.AIData?.BotOwner == null)
+            {
+                return;
+            }
+
+            if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(player, out EnemyInfo enemyInfo))
+            {
+                SAINPersonClass enemySAINPerson 
+                    = GetSAINPerson(player);
+
+                SAINEnemy newEnemy = new SAINEnemy(SAIN, enemySAINPerson, enemyInfo);
+
+                player.HealthController.DiedEvent += newEnemy.DeleteInfo;
+
+                Enemies.Add(player.ProfileId, newEnemy);
+            }
+            else
+            {
+                // Logger.LogAndNotifyError("Cannot get EnemyInfo from EnemiesController!");
+            }
         }
 
         private bool CheckPlayerNull(IPlayer player)
@@ -276,10 +268,6 @@ namespace SAIN.SAINComponent.Classes
             return isNull;
         }
 
-        public bool IsHumanPlayerActiveEnemy()
-        {
-            return ActiveEnemy != null && ActiveEnemy.EnemyIPlayer != null && ActiveEnemy.EnemyIPlayer.AIData?.IsAI == false;
-        }
 
         public bool IsHumanPlayerLookAtMe(out Player lookingPlayer)
         {
@@ -350,7 +338,6 @@ namespace SAIN.SAINComponent.Classes
             return enemySAINPerson;
         }
 
-        public readonly Dictionary<string, SAINEnemy> Enemies = new Dictionary<string, SAINEnemy>();
         private readonly List<string> EnemyIDsToRemove = new List<string>();
     }
 }

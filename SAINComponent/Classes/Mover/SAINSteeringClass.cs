@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using static RootMotion.FinalIK.AimPoser;
 using static UnityEngine.UI.GridLayoutGroup;
 
 namespace SAIN.SAINComponent.Classes.Mover
@@ -88,14 +89,23 @@ namespace SAIN.SAINComponent.Classes.Mover
                     break;
 
                 case SteerPriority.LastKnownLocation:
-                    var lastKnownPos = SAIN.Enemy?.LastKnownPosition;
-                    if (lastKnownPos != null)
+                    if (SAIN.Enemy != null)
                     {
-                        LookToPoint(lastKnownPos);
-                    }
-                    else
-                    {
-                        LookToRandomPosition();
+                        EnemyPlace lastKnownPlace = SAIN.Enemy.KnownPlaces.LastKnownPlace;
+                        if (lastKnownPlace != null)
+                        {
+                            Vector3? blindCornerToEnemy = SAIN.Enemy.Path.BlindCornerToEnemy;
+                            if (blindCornerToEnemy != null && (blindCornerToEnemy.Value - SAIN.Transform.Head).sqrMagnitude > 1f)
+                            {
+                                LookToPoint(blindCornerToEnemy.Value, 150f);
+                                break;
+                            }
+                            if (lastKnownPlace.Position != null)
+                            {
+                                LookToPoint(lastKnownPlace.Position.Value, 150f);
+                                break;
+                            }
+                        }
                     }
                     break;
 
@@ -151,13 +161,13 @@ namespace SAIN.SAINComponent.Classes.Mover
         // How long a bot will look at where they last saw an enemy instead of something they hear
         private readonly float Steer_TimeSinceLocationKnown_Threshold = 8f;
         // How long a bot will look at where they last saw an enemy instead of something they hear
-        private readonly float Steer_TimeSinceSeen_Short = 2f;
+        private readonly float Steer_TimeSinceSeen_Short = 4f;
         // How long a bot will look at where they last saw an enemy if they don't hear any other threats
-        private readonly float Steer_TimeSinceSeen_Long = 12f;
+        private readonly float Steer_TimeSinceSeen_Long = 15f;
         // How far a sound can be for them to react by looking toward it.
-        private readonly float Steer_HeardSound_Dist = 100f;
+        private readonly float Steer_HeardSound_Dist = 75f;
         // How old a sound can be, in seconds, for them to react by looking toward it.
-        private readonly float Steer_HeardSound_Age = 2f;
+        private readonly float Steer_HeardSound_Age = 3f;
 
         public SteerPriority FindSteerPriority()
         {
@@ -170,10 +180,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return SteerPriority.Enemy;
             }
-            if (SAIN.Memory.Decisions.Main.Current == SoloDecision.Search)
-            {
-
-            }
             if (BotOwner.Memory.IsUnderFire)
             {
                 return SteerPriority.UnderFire;
@@ -181,10 +187,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (Time.time - BotOwner.Memory.LastTimeHit < Steer_LastHitTime)
             {
                 return SteerPriority.LastHit;
-            }
-            if (SAIN.EnemyController.FindClosestHeardEnemy() != null)
-            {
-                return SteerPriority.ClosestHeardEnemy;
             }
             EnemyPlace lastKnownPlace = SAIN.Enemy?.KnownPlaces?.LastKnownPlace;
             if (lastKnownPlace != null 
@@ -197,7 +199,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return SteerPriority.LastSeenEnemy;
             }
-            LastHeardSound = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, Steer_HeardSound_Dist, 3f);
+            LastHeardSound = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, Steer_HeardSound_Dist, Steer_HeardSound_Age);
             if (LastHeardSound != null)
             {
                 return SteerPriority.Hear;
@@ -213,6 +215,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (SAIN.Memory.Decisions.Main.Current == SoloDecision.Search)
             {
                 return SteerPriority.Search;
+            }
+            if (SAIN.EnemyController.FindClosestHeardEnemy() != null)
+            {
+                return SteerPriority.ClosestHeardEnemy;
             }
             if (SteerRandomToggle)
             {
@@ -233,15 +239,26 @@ namespace SAIN.SAINComponent.Classes.Mover
         public bool LookToLastKnownEnemyPosition()
         {
             SAINEnemy enemy = SAIN.Enemy;
-            Vector3? LastKnownPosition = enemy?.LastKnownPosition;
-            if (LastKnownPosition != null && enemy?.IsVisible == false)
+            if (enemy == null || enemy.IsVisible)
+            {
+                return false;
+            }
+
+            EnemyPlace lastKnownPlace = enemy.KnownPlaces.LastKnownPlace;
+            if (lastKnownPlace != null)
+            {
+                Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
+                if (blindCornerToEnemy != null && (blindCornerToEnemy.Value - SAIN.Transform.Head).sqrMagnitude > 1f)
+                {
+                    LookToPoint(blindCornerToEnemy.Value, 150f);
+                    return true;
+                }
+            }
+
+            Vector3? LastKnownPosition = enemy.LastKnownPosition;
+            if (LastKnownPosition != null)
             {
                 Vector3 pos = LastKnownPosition.Value;
-
-                if (enemy.Path.PathToEnemy.corners.Length > 2 && enemy.Path.CanSeeLastCornerToEnemy)
-                {
-
-                }
                 LookToPoint(pos, 150f);
                 return true;
             }

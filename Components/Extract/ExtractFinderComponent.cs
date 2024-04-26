@@ -59,7 +59,7 @@ namespace SAIN.Components.Extract
 
         public void OnGUI()
         {
-            if (!SAINPlugin.DebugMode || !DebugGizmos.DrawGizmos)
+            if (!SAINPlugin.DebugMode || !SAINPlugin.EditorDefaults.DrawDebugLabels)
             {
                 return;
             }
@@ -77,13 +77,13 @@ namespace SAIN.Components.Extract
                 for (int i = 0; i < pathEndpoints.Length; i++)
                 {
                     Vector3 worldPos = pathEndpoints[i] + new Vector3(0, 1, 0);
-                    DrawLabel(worldPos, "Path Endpoint " + (i + 1) + ": " + ex.Settings.Name, guiStyle);
+                    DebugGizmos.OnGUIDrawLabel(worldPos, "Path Endpoint " + (i + 1) + ": " + ex.Settings.Name, guiStyle);
                 }
 
                 if (extractPositionFinders[ex].ExtractPosition.HasValue)
                 {
                     Vector3 worldPos = extractPositionFinders[ex].ExtractPosition.Value + new Vector3(0, 1, 0);
-                    DrawLabel(worldPos, "Extract point: " + ex.Settings.Name, guiStyle);
+                    DebugGizmos.OnGUIDrawLabel(worldPos, "Extract point: " + ex.Settings.Name, guiStyle);
                 }
             }
         }

@@ -157,7 +157,7 @@ namespace SAIN.Patches.Generic
         }
         public static bool BotsGroupSenseRecently(EnemyInfo enemyInfo)
         {
-            BotsGroup group = enemyInfo.Owner.BotsGroup;
+            BotsGroup group = enemyInfo.GroupOwner;
             for (int i = 0; i < group.MembersCount; i++)
             {
                 if (SAINPlugin.GetSAIN(group.Member(i), out SAINComponentClass sain, nameof(ShallKnowEnemyPatch)) 
