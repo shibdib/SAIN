@@ -214,6 +214,19 @@ namespace SAIN.SAINComponent.Classes.Info
             {
                 return result;
             }
+            string nickname = Player.Profile.Nickname.ToLower();
+            if (nickname.Contains("solarint"))
+            {
+                return IPersonality.GigaChad;
+            }
+            if (nickname.Contains("chomp") || nickname.Contains("senko"))
+            {
+                return IPersonality.Chad;
+            }
+            if (nickname.Contains("kaeno") || nickname.Contains("justnu"))
+            {
+                return IPersonality.Timmy;
+            }
             if (!BotTypeDefinitions.BotTypes.ContainsKey(WildSpawnType))
             {
                 return IPersonality.Chad;

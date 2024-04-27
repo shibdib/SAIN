@@ -93,7 +93,7 @@ namespace SAIN.SAINComponent.Classes
                     {
                         if (EFTMath.RandomBool(33))
                         {
-                            SAIN.Talk.Say(EPhraseTrigger.Clear, null, true);
+                            SAIN.Talk.Say(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true);
                         }
                         sound.IsCome = true;
                         BotOwner.CalcGoal();

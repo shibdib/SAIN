@@ -37,7 +37,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            if (SAIN.HasEnemy && _findFlankTimer < Time.time && SAIN.Enemy.EnemyPlayer.IsYourPlayer)
+            if (SAIN.HasEnemy && _findFlankTimer < Time.time && SAIN.Enemy?.EnemyPlayer?.IsYourPlayer == true)
             {
                 _findFlankTimer = Time.time + 1f;
                 // CurrentFlankRoute = FindFlankRoute();

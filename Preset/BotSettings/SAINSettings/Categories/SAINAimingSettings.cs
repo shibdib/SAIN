@@ -60,11 +60,11 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Name("Max Aim Time")]
         [Description(null)]
-        [Default(4f)]
-        [MinMax(0.1f, 6f, 100f)]
+        [Default(1f)]
+        [MinMax(0.01f, 4f, 1000f)]
         [Advanced]
-        //[CopyValue]
-        public float MAX_AIM_TIME = 4f;
+        [CopyValue]
+        public float MAX_AIM_TIME = 1f;
 
         [Hidden]
         [JsonIgnore]
@@ -115,7 +115,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float FIRST_CONTACT_ADD_SEC = 0.33f;
+        public float FIRST_CONTACT_ADD_SEC = 0.2f;
 
         [Hidden]
         [JsonIgnore]

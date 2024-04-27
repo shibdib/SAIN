@@ -1,4 +1,5 @@
 using EFT;
+using SAIN.Helpers;
 using SAIN.Preset.BotSettings.SAINSettings;
 using UnityEngine;
 using static SAIN.Preset.Personalities.PersonalitySettingsClass;
@@ -186,10 +187,23 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             if (LastEnemyTalk == null)
             {
-                if (Vector3.Distance(player.Position, BotOwner.Position) < ResponseDist)
+                if ((player.Position - SAIN.Position).sqrMagnitude < ResponseDist * ResponseDist)
                 {
                     LastEnemyTalk = new EnemyTalkObject();
                 }
+            }
+        }
+
+        private const float FriendlyResponseChance = 50f;
+        private const float FriendlyResponseDistance = 40f;
+
+        public void SetFriendlyTalked(Player player)
+        {
+            if (EFTMath.RandomBool(FriendlyResponseChance) 
+                && BotOwner.Memory.IsPeace 
+                && (player.Position - SAIN.Position).sqrMagnitude < FriendlyResponseDistance * FriendlyResponseDistance)
+            {
+                SAIN.Talk.TalkAfterDelay(EPhraseTrigger.MumblePhrase, ETagStatus.Unaware, Random.Range(0.5f, 1f));
             }
         }
 

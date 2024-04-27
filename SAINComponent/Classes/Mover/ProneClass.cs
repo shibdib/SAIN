@@ -64,15 +64,15 @@ namespace SAIN.SAINComponent.Classes.Mover
             return false;
         }
 
-        public bool ShallProne(bool withShoot, float mindist = 30f)
+        public bool ShallProne(bool withShoot, float mindist = 25f)
         {
             if (Player.MovementContext.CanProne)
             {
                 var enemy = SAIN.Enemy;
                 if (enemy != null)
                 {
-                    float distance = (enemy.EnemyPosition - SAIN.Transform.Position).magnitude;
-                    if (distance > mindist)
+                    float distance = (enemy.EnemyPosition - SAIN.Position).sqrMagnitude;
+                    if (distance > mindist * mindist)
                     {
                         if (withShoot)
                         {

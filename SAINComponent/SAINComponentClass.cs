@@ -44,6 +44,18 @@ namespace SAIN.SAINComponent
             return false;
         }
 
+        private void PlayerKilled(EDamageType damageType)
+        {
+            if (damageType == EDamageType.Bullet)
+            {
+                IFirearmHandsController firearmHandsController = Player?.HandsController as IFirearmHandsController;
+                if (firearmHandsController != null)
+                {
+                    // firearmHandsController.SetTriggerPressed(true);
+                }
+            }
+        }
+
         public Action<string, BotOwner> OnSAINDisposed { get; set; }
         public SAINPersonClass Person { get; private set; }
 
@@ -127,6 +139,15 @@ namespace SAIN.SAINComponent
             AimDownSightsController.Init();
             BotHitReaction.Init();
             SpaceAwareness.Init();
+
+            try
+            {
+                Player.HealthController.DiedEvent += PlayerKilled;
+            }
+            catch
+            {
+
+            }
 
             TimeBotCreated = Time.time;
 
@@ -324,6 +345,12 @@ namespace SAIN.SAINComponent
             {
                 OnSAINDisposed?.Invoke(ProfileId, BotOwner);
 
+                try
+                {
+                    Player.HealthController.DiedEvent -= PlayerKilled;
+                }
+                catch { }
+
                 StopAllCoroutines();
 
                 Search.Dispose();
@@ -352,6 +379,14 @@ namespace SAIN.SAINComponent
                 BotHitReaction?.Dispose();
                 SpaceAwareness?.Dispose();
 
+                try
+                {
+                    GameObject.Destroy(SteeringController);
+                    GameObject.Destroy(NoBushESP);
+                    GameObject.Destroy(FlashLight);
+                }
+                catch { }
+
                 Destroy(this);
             }
             catch { }
@@ -369,7 +404,7 @@ namespace SAIN.SAINComponent
                     {
                         if (EFTMath.RandomBool(33))
                         {
-                            Talk.Say(EPhraseTrigger.Clear, null, true);
+                            Talk.Say(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true);
                         }
                         BotOwner.Memory.GoalTarget.Clear();
                         BotOwner.CalcGoal();
@@ -401,9 +436,31 @@ namespace SAIN.SAINComponent
                 {
                     return Enemy.EnemyPosition;
                 }
-                if (HasEnemy && Enemy.LastKnownPosition != null)
+                if (BotOwner.Memory.IsUnderFire)
                 {
-                    return Enemy.LastKnownPosition;
+                    return Memory.UnderFireFromPosition;
+                }
+
+                    // This is incredibly inefficient, need to limit the times this is called per frame.
+                if (HasEnemy)
+                {
+                    Vector3? lastPlaceHaventSeen = Enemy.KnownPlaces.GetPlaceHaventSeen()?.Position;
+                    if (lastPlaceHaventSeen != null)
+                    {
+                        return lastPlaceHaventSeen;
+                    }
+
+                    lastPlaceHaventSeen = Enemy.KnownPlaces.GetPlaceHaventArrived()?.Position;
+                    if (lastPlaceHaventSeen != null)
+                    {
+                        return lastPlaceHaventSeen;
+                    }
+
+                    if (Enemy.LastKnownPosition != null)
+                    {
+                        return Enemy.LastKnownPosition;
+                    }
+                    return Enemy.EnemyPosition;
                 }
                 var placeForCheck = BotOwner.Memory.GoalTarget?.GoalTarget;
                 if (placeForCheck != null)
@@ -413,10 +470,6 @@ namespace SAIN.SAINComponent
                 if (Time.time - BotOwner.Memory.LastTimeHit < 10f)
                 {
                     return BotOwner.Memory.LastHitPos;
-                }
-                if (BotOwner.Memory.IsUnderFire)
-                {
-                    return Memory.UnderFireFromPosition;
                 }
                 return null;
             }
@@ -450,6 +503,7 @@ namespace SAIN.SAINComponent
         public SAINSelfActionClass SelfActions { get; private set; }
         public SAINBotGrenadeClass Grenade { get; private set; }
         public SAINSteeringClass Steering { get; private set; }
+        public SAINSteeringController SteeringController { get; private set; }
 
         public bool IsDead => BotOwner == null || BotOwner.IsDead == true || Player == null || Player.HealthController.IsAlive == false;
         public bool BotActive => IsDead == false && BotOwner.enabled && Player.enabled && BotOwner.BotState == EBotState.Active && BotOwner.StandBy.StandByType == BotStandByType.active;

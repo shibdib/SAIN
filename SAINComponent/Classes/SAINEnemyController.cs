@@ -157,6 +157,10 @@ namespace SAIN.SAINComponent.Classes
             if (BotOwner != null)
                 BotOwner.Memory.OnAddEnemy -= AddEnemy;
 
+            foreach (var enemy in Enemies)
+            {
+                enemy.Value?.Dispose();
+            }
             Enemies?.Clear();
         }
 
@@ -185,7 +189,11 @@ namespace SAIN.SAINComponent.Classes
             {
                 ActiveEnemy = null;
             }
-            Enemies.Remove(iPlayer.ProfileId);
+            if (Enemies.TryGetValue(iPlayer.ProfileId, out SAINEnemy enemy))
+            {
+                enemy.Dispose();
+                Enemies.Remove(iPlayer.ProfileId);
+            }
         }
 
         private void CheckAddEnemy()
@@ -239,10 +247,6 @@ namespace SAIN.SAINComponent.Classes
                 player.HealthController.DiedEvent += newEnemy.DeleteInfo;
 
                 Enemies.Add(player.ProfileId, newEnemy);
-            }
-            else
-            {
-                // Logger.LogAndNotifyError("Cannot get EnemyInfo from EnemiesController!");
             }
         }
 
@@ -319,8 +323,12 @@ namespace SAIN.SAINComponent.Classes
 
         private static SAINPersonClass GetSAINPerson(IPlayer IPlayer)
         {
-            Player player = Singleton<GameWorld>.Instance?.GetAlivePlayerByProfileID(IPlayer.ProfileId);
+            if (IPlayer == null)
+            {
+                return null;
+            }
 
+            Player player = Singleton<GameWorld>.Instance?.GetAlivePlayerByProfileID(IPlayer.ProfileId);
             if (player == null)
             {
                 return null;

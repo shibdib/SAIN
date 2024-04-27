@@ -92,6 +92,10 @@ namespace SAIN.Components
                     {
                         sain.Talk.EnemyTalk.SetEnemyTalk(player);
                     }
+                    else
+                    {
+                        sain.Talk.EnemyTalk.SetFriendlyTalked(player);
+                    }
                 }
             }
         }

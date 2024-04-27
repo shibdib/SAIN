@@ -162,19 +162,42 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private static readonly float RushEnemyMaxPathDistance = 30f;
+        private static readonly float RushEnemyMaxPathDistance = 10f;
+        private static readonly float RushEnemyMaxPathDistanceSprint = 25f;
         private static readonly float RushEnemyLowAmmoRatio = 0.5f;
 
         private bool StartRushEnemy(SAINEnemy enemy)
         {
             if (SAIN.Info.PersonalitySettings?.CanRushEnemyReloadHeal == true)
             {
-                if (enemy != null && enemy.Path.PathDistance < RushEnemyMaxPathDistance)
+                if (enemy != null 
+                    && !SAIN.Decision.SelfActionDecisions.LowOnAmmo(RushEnemyLowAmmoRatio))
                 {
-                    if (!SAIN.Decision.SelfActionDecisions.LowOnAmmo(RushEnemyLowAmmoRatio) && SAIN.Memory.HealthStatus != ETagStatus.Dying && BotOwner?.CanSprintPlayer == true)
+                    bool inRange = false;
+                    if (enemy.Path.PathDistance < RushEnemyMaxPathDistanceSprint
+                        && BotOwner?.CanSprintPlayer == true)
+                    {
+                        inRange = true;
+                    }
+                    else if (enemy.Path.PathDistance < RushEnemyMaxPathDistance)
+                    {
+                        inRange = true;
+                    }
+
+                    if (inRange
+                        && SAIN.Memory.HealthStatus != ETagStatus.Dying)
                     {
                         var enemyStatus = enemy.EnemyStatus;
                         if (enemyStatus.EnemyIsReloading || enemyStatus.EnemyIsHealing || enemyStatus.EnemyHasGrenadeOut)
+                        {
+                            return true;
+                        }
+                        ETagStatus enemyHealth = enemy.EnemyPlayer.HealthStatus;
+                        if (enemyHealth == ETagStatus.Dying)
+                        {
+                            return true;
+                        }
+                        else if (enemyHealth == ETagStatus.BadlyInjured && enemy.EnemyPlayer.IsInPronePose)
                         {
                             return true;
                         }

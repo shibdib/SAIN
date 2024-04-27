@@ -7,6 +7,22 @@ using static UnityEngine.UI.GridLayoutGroup;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
+    public class SAINSteeringController : MonoBehaviour
+    {
+        public void Init(SAINComponentClass sain)
+        {
+            SAIN = sain;
+            SteeringClass = new SAINSteeringClass(sain);
+        }
+
+        private SAINComponentClass SAIN;
+        public SAINSteeringClass SteeringClass { get; private set; }
+
+        public bool SteerByPriority(bool lookRandom = true) => SteeringClass.SteerByPriority(lookRandom);
+        public void LookToPoint(Vector3 point) => SteeringClass.LookToPoint(point);
+        public void LookToPoint(Vector3? point) => SteeringClass.LookToPoint(point);
+    }
+
     public class SAINSteeringClass : SAINBase, ISAINClass
     {
         public SAINSteeringClass(SAINComponentClass sain) : base(sain)
@@ -19,19 +35,24 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (updateSteerTimer < Time.time)
-            {
-                updateSteerTimer = Time.time + 0.05f;
-                UpdateSteer();
-            }
         }
 
         private float updateSteerTimer;
 
-        private SteerPriority UpdateSteer()
+        private SteerPriority UpdateBotSteering(bool skipTimer = false)
         {
-            LastSteerPriority = CurrentSteerPriority;
-            CurrentSteerPriority = FindSteerPriority();
+            if (skipTimer || updateSteerTimer < Time.time)
+            {
+                LastSteerPriority = CurrentSteerPriority;
+                CurrentSteerPriority = FindSteerPriority();
+
+                float timeAdd = 0.01f;
+                if (LastSteerPriority != CurrentSteerPriority)
+                {
+                    timeAdd = 0.1f;
+                }
+                updateSteerTimer = Time.time + timeAdd;
+            }
             return CurrentSteerPriority;
         }
 
@@ -39,13 +60,21 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
         }
 
-        public bool SteerRandomToggle;
+        private bool SteerRandomToggle;
         private PlaceForCheck LastHeardSound;
 
-        public bool SteerByPriority(bool lookRandomifFalse = true)
+        public bool SteerByPriority(bool lookRandom = true)
         {
-            SteerRandomToggle = lookRandomifFalse;
+            SteerRandomToggle = lookRandom;
+
+            UpdateBotSteering();
+
             HeardSoundSanityCheck();
+
+            if (BotOwner.ShootData.Shooting && CurrentSteerPriority != SteerPriority.Shooting)
+            {
+                CurrentSteerPriority = SteerPriority.Shooting;
+            }
 
             switch (CurrentSteerPriority)
             {
@@ -152,7 +181,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     Logger.LogDebug("Bot was told to steer toward something they heard, but the place to check is null.");
                 }
-                UpdateSteer();
+                UpdateBotSteering(true);
             }
         }
 
@@ -341,7 +370,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (enemy != null)
             {
-                LookToPoint(enemy.EnemyPosition + (Vector3.up * 1.2f));
+                LookToPoint(enemy.EnemyPosition + Vector3.up);
             }
         }
 
@@ -370,6 +399,13 @@ namespace SAIN.SAINComponent.Classes.Mover
                     LookToPoint(soundPos);
                     return;
                 }
+            }
+
+            float turnSpeed = SAIN.HasEnemy ? 200f : 100f;
+            if ((soundPos - SAIN.Position).sqrMagnitude > 75f * 75f)
+            {
+                LookToPoint(soundPos, turnSpeed);
+                return;
             }
 
             if (HearPath == null)
@@ -403,14 +439,13 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
             }
 
-            float speed = SAIN.HasEnemy ? 200f : 100f;
             if (LastSoundHeardCorner != Vector3.zero)
             {
-                LookToPoint(LastSoundHeardCorner, speed);
+                LookToPoint(LastSoundHeardCorner, turnSpeed);
             }
             else
             {
-                LookToPoint(soundPos, speed);
+                LookToPoint(soundPos, turnSpeed);
             }
         }
 
@@ -466,20 +501,26 @@ namespace SAIN.SAINComponent.Classes.Mover
                     LookRandom2 = !LookRandom2;
                     if (LookRandom2 && BotOwner.Memory.LastEnemy != null)
                     {
-                        LookToPoint(BotOwner.Memory.LastEnemy.PersonalLastPos);
-                        return;
+                        pointToLook = BotOwner.Memory.LastEnemy.PersonalLastPos;
                     }
-                    if (SAIN.CurrentTargetPosition != null)
+                    else if (SAIN.CurrentTargetPosition != null)
                     {
                         pointToLook = SAIN.CurrentTargetPosition.Value;
                     }
                 }
+                if (pointToLook == Vector3.zero)
+                {
+                    pointToLook = _lastRandomLookPos;
+                }
                 if (pointToLook != Vector3.zero)
                 {
-                    LookToPoint(pointToLook, 80f);
+                    _lastRandomLookPos = pointToLook;
+                    LookToPoint(pointToLook, Random.Range(50f, 90f));
                 }
             }
         }
+
+        private Vector3 _lastRandomLookPos;
 
         public bool LookToPathToEnemy()
         {

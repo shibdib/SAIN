@@ -181,6 +181,7 @@ namespace SAIN
         GrenadeDraw,
         None,
         Heal,
+        Food,
     }
 
     public enum EnemyPathDistance

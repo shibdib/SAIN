@@ -9,6 +9,7 @@ using UnityEngine;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SAIN.Layers.Combat.Solo;
 using UnityEngine.AI;
+using SAIN.Helpers;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -18,10 +19,23 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
         }
 
+        private float _jumpTimer;
+        private bool _shallJumpToCover;
+
         public override void Update()
         {
             SAIN.Mover.SetTargetMoveSpeed(1f);
             SAIN.Mover.SetTargetPose(1f);
+
+            if (_shallJumpToCover 
+                && BotOwner.GetPlayer.IsSprintEnabled 
+                && MoveSuccess 
+                && BotOwner.Mover.DistDestination < 4f 
+                && _jumpTimer < Time.time)
+            {
+                _jumpTimer = Time.time + 5f;
+                SAIN.Mover.TryJump();
+            }
 
             if (RecalcTimer < Time.time)
             {
@@ -118,6 +132,10 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
+            _shallJumpToCover = EFTMath.RandomBool(20) 
+                && BotOwner.Memory.IsUnderFire 
+                && SAIN.Info.Profile.IsPMC;
+
             CoverDestination = null;
         }
 

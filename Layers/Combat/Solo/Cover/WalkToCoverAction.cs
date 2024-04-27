@@ -118,7 +118,14 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     && BotOwner.WeaponManager.HaveBullets 
                     && SAIN.Shoot(true, true, SAINComponentClass.EShootReason.WalkToCoverSuppress))
                 {
-                    SuppressTimer = Time.time + 0.5f * Random.Range(0.66f, 1.25f);
+                    if (SAIN.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
+                    {
+                        SuppressTimer = Time.time + 0.1f * Random.Range(0.75f, 1.25f);
+                    }
+                    else
+                    {
+                        SuppressTimer = Time.time + 0.5f * Random.Range(0.66f, 1.33f);
+                    }
                 }
             }
             else

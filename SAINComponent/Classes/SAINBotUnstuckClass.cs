@@ -77,15 +77,46 @@ namespace SAIN.SAINComponent.Classes.Debug
             }
         }
 
+        private void CheckRecalcPath()
+        {
+            if (BotIsMoving 
+                && Time.time - TimeStartedMoving > 0.5f 
+                && _recalcPathVault < Time.time)
+            {
+                if (Player.MovementContext.TryVaulting())
+                {
+                    _botVaulted = true;
+                    _recalcPathVault = Time.time + 2f;
+                    return;
+                }
+                else
+                {
+                    _recalcPathVault = Time.time + 1f;
+                }
+            }
+
+            if (_recalcPathTimer < Time.time 
+                && BotIsMoving 
+                && !BotHasChangedPosition 
+                && Time.time - TimeStartedMoving > 1f)
+            {
+                _recalcPathTimer = Time.time + 2f;
+                BotOwner.Mover.RecalcWay();
+            }
+        }
+
+        private float _recalcPathVault;
+        private float _recalcPathTimer;
+
         private void CheckIfPositionChanged()
         {
             if (CheckPositionTimer < Time.time)
             {
-                CheckPositionTimer = Time.time + 1f;
+                CheckPositionTimer = Time.time + 0.5f;
 
                 bool botChangedPositionLast = BotHasChangedPosition;
 
-                const float DistThreshold = 0.25f;
+                const float DistThreshold = 0.1f;
                 BotHasChangedPosition = (LastPos - BotOwner.Position).sqrMagnitude > DistThreshold * DistThreshold;
 
                 if (botChangedPositionLast && !BotHasChangedPosition)
@@ -101,7 +132,7 @@ namespace SAIN.SAINComponent.Classes.Debug
             }
         }
 
-        private float _nextVaultTime;
+        private float _nextVaultCheckTime;
         private bool DontUnstuckMe;
 
         private static readonly List<WildSpawnType> DontUnstuckTheseTypes = new List<WildSpawnType>
@@ -109,6 +140,25 @@ namespace SAIN.SAINComponent.Classes.Debug
             WildSpawnType.marksman,
             WildSpawnType.shooterBTR,
         };
+
+        private void CheckBotVaulted()
+        {
+            if (_botVaulted)
+            {
+                _botVaulted = false;
+                _botVaultedTime = Time.time;
+            }
+
+            if (_botVaultedTime != -1f 
+                && _botVaultedTime + 0.75f < Time.time)
+            {
+                _botVaultedTime = -1f;
+                BotOwner.Mover.RecalcWay();
+            }
+        }
+
+        private bool _botVaulted;
+        private float _botVaultedTime;
 
         public void Update()
         {
@@ -120,18 +170,27 @@ namespace SAIN.SAINComponent.Classes.Debug
                     return;
                 }
 
-                if (_nextVaultTime < Time.time && BotOwner.Mover.IsMoving && _timeStartMoving + 1f < Time.time)
+                if (_nextVaultCheckTime < Time.time && BotOwner.Mover.IsMoving && TimeStartedMoving + 1f < Time.time)
                 {
-                    _nextVaultTime = Time.time + 0.5f;
+                    _nextVaultCheckTime = Time.time + 0.5f;
                     if (SAIN.Decision.CurrentSoloDecision != SoloDecision.HoldInCover)
                     {
-                        Player.MovementContext.TryVaulting();
+                        if (Player.MovementContext.TryVaulting())
+                        {
+                            _botVaulted = true;
+                            _nextVaultCheckTime = Time.time + 2f;
+                        }
+                        else
+                        {
+                            _nextVaultCheckTime = Time.time + 0.5f;
+                        }
                     }
                 }
 
                 CheckIfMoving();
-
                 CheckIfPositionChanged();
+                CheckRecalcPath(); 
+                CheckBotVaulted();
 
                 if (CheckStuckTimer < Time.time)
                 {
@@ -202,6 +261,10 @@ namespace SAIN.SAINComponent.Classes.Debug
                                     }
                                     //SAIN.Mover.TryJump();
                                 }
+                            }
+                            else
+                            {
+                                _botVaulted = true;
                             }
                         }
                     }

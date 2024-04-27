@@ -10,7 +10,7 @@ namespace SAIN.Preset.GlobalSettings
     public class GeneralSettings
     {
         [Name("Performance Mode")]
-        [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN")]
+        [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN. Can cause bots to take too long to find cover to go to.")]
         [Default(false)]
         public bool PerformanceMode = false;
 
@@ -19,7 +19,6 @@ namespace SAIN.Preset.GlobalSettings
         [Default(1f)]
         [MinMax(0.1f, 5f, 100f)]
         public float GlobalDifficultyModifier = 1f;
-
 
         [Name("Bot Grenades")]
         [Default(true)]

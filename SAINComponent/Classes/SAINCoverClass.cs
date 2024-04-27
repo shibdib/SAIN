@@ -52,13 +52,13 @@ namespace SAIN.SAINComponent.Classes
             }
             if (ForcedCoverFinderState == CoverFinderState.forceOn)
             {
-                ActivateCoverFinder(true, true);
-                return;
+                //ActivateCoverFinder(true, true);
+                //return;
             }
             if (ForcedCoverFinderState == CoverFinderState.forceOff)
             {
-                ActivateCoverFinder(false, true);
-                return;
+                //ActivateCoverFinder(false, true);
+                //return;
             }
 
             ActivateCoverFinder(SAIN.Decision.SAINActive);

@@ -141,6 +141,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
+            KnownPlaces?.Dispose();
         }
 
         public EnemyPathDistance CheckPathDistance() => Path.CheckPathDistance();

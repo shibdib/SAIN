@@ -14,8 +14,20 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
+    public enum CoverFinderStatus
+    {
+        None = 0,
+        Idle = 1,
+        SearchingColliders = 1,
+        RecheckingPointsWithLimit = 2,
+        RecheckingPointsNoLimit = 3,
+    }
+
     public class CoverFinderComponent : MonoBehaviour, ISAINSubComponent
     {
+        public bool ProcessingLimited { get; private set; }
+        public CoverFinderStatus CurrentStatus { get; private set; }
+
         public void Init(SAINComponentClass sain)
         {
             SAIN = sain;
@@ -91,7 +103,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                         random.y = Mathf.Clamp(random.y, -5, 5);
                         random = botPosition + random.normalized * 50f;
 
-                        if (CoverAnalyzer.GetPlaceToMove(collider, random, botPosition, out Vector3 place, 2f))
+                        if (CoverAnalyzer.GetPlaceToMove(collider, random, botPosition, out Vector3 place))
                         {
                             SinglePointPath.ClearCorners();
                             if (NavMesh.CalculatePath(botPosition, place, NavMesh.AllAreas, SinglePointPath) 
@@ -122,6 +134,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         {
             if (TakeCoverCoroutine != null)
             {
+                CurrentStatus = CoverFinderStatus.None;
                 StopCoroutine(TakeCoverCoroutine);
                 TakeCoverCoroutine = null;
             }
@@ -163,46 +176,54 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private Vector3 LastPositionChecked = Vector3.zero;
 
+        private CoverFinderStatus _lastStatus;
+
         private IEnumerator RecheckCoverPoints(bool limit = true)
         {
-            if (!limit && !HavePositionsChanged())
+            if (!limit || (limit && HavePositionsChanged()))
             {
-                yield break;
-            }
-
-            float time = Time.time;
-            for (int i = CoverPoints.Count - 1; i >= 0; i--)
-            {
-                var coverPoint = CoverPoints[i];
-                if (coverPoint == null)
+                _lastStatus = CurrentStatus;
+                CurrentStatus = CoverFinderStatus.RecheckingPointsNoLimit;
+                float time = Time.time;
+                for (int i = CoverPoints.Count - 1; i >= 0; i--)
                 {
-                    CoverPoints.RemoveAt(i);
-                }
-                else if (coverPoint.TimeLastUpdated + 0.5f < time)
-                {
-                    if (PointStillGood(coverPoint) == false)
+                    var coverPoint = CoverPoints[i];
+                    if (coverPoint == null)
                     {
                         CoverPoints.RemoveAt(i);
                     }
+                    else if (coverPoint.TimeLastUpdated + 0.1f < time)
+                    {
+                        if (PointStillGood(coverPoint) == false)
+                        {
+                            CoverPoints.RemoveAt(i);
+                        }
 
-                    if (limit && ShallLimitProcessing())
-                    {
-                        yield return new WaitForSeconds(0.05f);
-                        continue;
+                        if (limit && ShallLimitProcessing())
+                        {
+                            CurrentStatus = CoverFinderStatus.RecheckingPointsWithLimit;
+                            yield return new WaitForSeconds(0.05f);
+                            continue;
+                        }
+                        else
+                        {
+                            yield return null;
+                            continue;
+                        }
                     }
-                    else
-                    {
-                        yield return null;
-                        continue;
-                    }
+                    continue;
                 }
+                CurrentStatus = _lastStatus;
             }
-            yield break;
         }
 
         private bool HavePositionsChanged()
         {
-            const float recheckThresh = 0.35f;
+            float recheckThresh = 0.5f;
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode)
+            {
+                recheckThresh = 1.5f;
+            }
             if ((_lastRecheckTargetPosition - TargetPoint).sqrMagnitude < recheckThresh * recheckThresh
                 && (_lastRecheckBotPosition - OriginPoint).sqrMagnitude < recheckThresh * recheckThresh)
             {
@@ -222,167 +243,217 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         {
             if (SAIN.HasEnemy && SAIN.Enemy.IsAI)
             {
+                ProcessingLimited = true;
                 return true;
             }
+
+            ProcessingLimited = false;
             SoloDecision soloDecision = SAIN.Decision.CurrentSoloDecision;
-            return soloDecision == SoloDecision.HoldInCover || soloDecision == SoloDecision.Search;
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode 
+                && soloDecision != SoloDecision.WalkToCover 
+                && soloDecision != SoloDecision.RunToCover 
+                && soloDecision != SoloDecision.Retreat 
+                && soloDecision != SoloDecision.RunAway)
+            {
+                ProcessingLimited = true;
+            }
+            else if (soloDecision == SoloDecision.HoldInCover 
+                || soloDecision == SoloDecision.Search)
+            {
+                ProcessingLimited = true;
+            }
+
+            return ProcessingLimited;
         }
 
         private IEnumerator FindCover()
         {
-            Stopwatch fullStopWatch = Stopwatch.StartNew();
-
-            ClearSpotted();
-
-            yield return RecheckCoverPoints();
-
-            Stopwatch findFirstPointStopWatch = null;
-            if (CoverPoints.Count == 0 && SAINPlugin.DebugMode)
+            while (true)
             {
-                findFirstPointStopWatch = Stopwatch.StartNew();
-            }
+                Stopwatch fullStopWatch = Stopwatch.StartNew();
 
-            int totalChecked = 0;
-            int waitCount = 0;
-            int coverCount = CoverPoints.Count;
-            Vector3 targetPositionAtStart = TargetPoint;
-            int recheckPointCount = 0;
-            SoloDecision decisionAtStart = SAIN.Decision.CurrentSoloDecision;
-            const float DistanceThreshold = 5;
+                ClearSpotted();
 
-            if (coverCount <= 3
-                || (LastPositionChecked - OriginPoint).sqrMagnitude > DistanceThreshold * DistanceThreshold)
-            {
-                LastPositionChecked = OriginPoint;
-
-                Collider[] colliders = GetColliders(out int hits);
-                for (int i = 0; i < hits; i++)
+                if (HavePositionsChanged())
                 {
-                    totalChecked++;
-                    waitCount++;
-
-                    // The main Calculations
-                    if (CoverAnalyzer.CheckCollider(colliders[i], out var newPoint))
+                    CurrentStatus = CoverFinderStatus.RecheckingPointsNoLimit;
+                    float time = Time.time;
+                    for (int i = CoverPoints.Count - 1; i >= 0; i--)
                     {
-                        CoverPoints.Add(newPoint);
-                        coverCount++;
-                        // Limit the cpu time per frame. Generic optimization
-                        if (ShallLimitProcessing())
+                        var coverPoint = CoverPoints[i];
+                        if (coverPoint == null)
                         {
-                            yield return new WaitForSeconds(0.05f);
+                            CoverPoints.RemoveAt(i);
                         }
-                    }
-
-                    // Check if a bot's decision has changed mid-loop. If so, have the existing points be rechecked right now.
-                    SoloDecision decisionRightNow = SAIN.Decision.CurrentSoloDecision;
-                    if (coverCount > 0 
-                        && decisionRightNow != decisionAtStart 
-                        && (decisionAtStart == SoloDecision.HoldInCover || decisionAtStart == SoloDecision.Search || decisionAtStart == SoloDecision.None))
-                    {
-                        if (decisionRightNow == SoloDecision.RunToCover || decisionRightNow == SoloDecision.Retreat || decisionRightNow == SoloDecision.WalkToCover)
+                        else if (!PointStillGood(coverPoint))
                         {
-                            decisionAtStart = decisionRightNow;
-                            yield return RecheckCoverPoints(false);
+                            CoverPoints.RemoveAt(i);
                         }
-                    }
-
-                    // Check if a bot's target has moved mid-loop. If so, have the existing points be rechecked right now.
-                    recheckPointCount++;
-                    if (coverCount > 0 && recheckPointCount >= 10)
-                    {
-                        recheckPointCount = 0;
-                        if ((targetPositionAtStart - TargetPoint).sqrMagnitude > 1f)
-                        {
-                            targetPositionAtStart = TargetPoint;
-                            yield return RecheckCoverPoints(false);
-                        }
-                    }
-
-                    // Generic Optimization
-                    if (coverCount > 0 && ShallLimitProcessing())
-                    {
                         yield return null;
                     }
+                }
+
+                //yield return RecheckCoverPoints();
+                CurrentStatus = CoverFinderStatus.Idle;
+
+                Stopwatch findFirstPointStopWatch = null;
+                if (CoverPoints.Count == 0 && SAINPlugin.DebugMode)
+                {
+                    findFirstPointStopWatch = Stopwatch.StartNew();
+                }
+
+                int totalChecked = 0;
+                int waitCount = 0;
+                int coverCount = CoverPoints.Count;
+                Vector3 targetPositionAtStart = TargetPoint;
+                int recheckPointCount = 0;
+                SoloDecision decisionAtStart = SAIN.Decision.CurrentSoloDecision;
+
+                float DistanceThreshold = 4;
+                int startFinderCount = 3;
+                if (SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode)
+                {
+                    DistanceThreshold = 6f;
+                    startFinderCount = 1;
+                }
 
 
-                    // Main Optimization, scales with the amount of points a bot currently has, and slows down the rate as it grows.
-                    if (coverCount >= 10)
+                if (coverCount <= startFinderCount
+                    || (LastPositionChecked - OriginPoint).sqrMagnitude > DistanceThreshold * DistanceThreshold)
+                {
+                    CurrentStatus = CoverFinderStatus.SearchingColliders;
+                    LastPositionChecked = OriginPoint;
+
+                    Collider[] colliders = GetColliders(out int hits);
+                    for (int i = 0; i < hits; i++)
                     {
-                        break;
-                    }
-                    else if (coverCount > 2)
-                    {
-                        yield return null;
-                    }
-                    else if (coverCount > 0)
-                    {
-                        // How long did it take to find at least 1 point?
-                        if (findFirstPointStopWatch?.IsRunning == true)
+                        totalChecked++;
+                        waitCount++;
+
+                        // The main Calculations
+                        if (CoverAnalyzer.CheckCollider(colliders[i], out var newPoint))
                         {
-                            findFirstPointStopWatch.Stop();
-                            if (_debugTimer < Time.time)
+                            CoverPoints.Add(newPoint);
+                            coverCount++;
+                            // Limit the cpu time per frame. Generic optimization
+                            if (ShallLimitProcessing())
                             {
-                                _debugTimer = Time.time + 5;
-                                Logger.LogDebug($"Time to Find First CoverPoint: [{findFirstPointStopWatch.ElapsedMilliseconds}ms]");
-                                Logger.NotifyDebug($"Time to Find First CoverPoint: [{findFirstPointStopWatch.ElapsedMilliseconds}ms]");
+                                yield return null;
+                                //yield return new WaitForSeconds(0.05f);
                             }
                         }
-                        if (waitCount >= 3)
+
+                        // Check if a bot's decision has changed mid-loop. If so, have the existing points be rechecked right now.
+                        SoloDecision decisionRightNow = SAIN.Decision.CurrentSoloDecision;
+                        if (coverCount > 0
+                            && decisionRightNow != decisionAtStart
+                            && (decisionAtStart == SoloDecision.HoldInCover || decisionAtStart == SoloDecision.Search || decisionAtStart == SoloDecision.None))
+                        {
+                            if (decisionRightNow == SoloDecision.RunToCover || decisionRightNow == SoloDecision.Retreat || decisionRightNow == SoloDecision.WalkToCover)
+                            {
+                                decisionAtStart = decisionRightNow;
+                                yield return RecheckCoverPoints(false);
+                            }
+                        }
+
+                        // Check if a bot's target has moved mid-loop. If so, have the existing points be rechecked right now.
+                        recheckPointCount++;
+                        if (coverCount > 0 && recheckPointCount >= 10)
+                        {
+                            recheckPointCount = 0;
+                            if ((targetPositionAtStart - TargetPoint).sqrMagnitude > 1f)
+                            {
+                                targetPositionAtStart = TargetPoint;
+                                yield return RecheckCoverPoints(false);
+                            }
+                        }
+
+                        // Generic Optimization
+                        // if (coverCount > 0 && ShallLimitProcessing())
+                        // {
+                        //     yield return null;
+                        // }
+
+
+                        // Main Optimization, scales with the amount of points a bot currently has, and slows down the rate as it grows.
+                        if (coverCount >= 10)
+                        {
+                            break;
+                        }
+                        else if (coverCount > 2)
+                        {
+                            yield return null;
+                        }
+                        else if (coverCount > 0)
+                        {
+                            // How long did it take to find at least 1 point?
+                            if (findFirstPointStopWatch?.IsRunning == true)
+                            {
+                                findFirstPointStopWatch.Stop();
+                                if (_debugTimer < Time.time)
+                                {
+                                    _debugTimer = Time.time + 5;
+                                    Logger.LogDebug($"Time to Find First CoverPoint: [{findFirstPointStopWatch.ElapsedMilliseconds}ms]");
+                                    Logger.NotifyDebug($"Time to Find First CoverPoint: [{findFirstPointStopWatch.ElapsedMilliseconds}ms]");
+                                }
+                            }
+                            if (waitCount >= 3)
+                            {
+                                waitCount = 0;
+                                yield return null;
+                            }
+                        }
+                        else if (waitCount >= 10)
                         {
                             waitCount = 0;
                             yield return null;
                         }
                     }
-                    else if (waitCount >= 10)
+
+                    if (coverCount > 1)
                     {
-                        waitCount = 0;
-                        yield return null;
+                        OrderPointsByPathDist(CoverPoints, SAIN);
                     }
-                }
 
-                if (coverCount > 1)
-                {
-                    OrderPointsByPathDist(CoverPoints, SAIN);
-                }
-
-                if (coverCount > 0)
-                {
-                    FallBackPoint = FindFallbackPoint(CoverPoints);
-                    if (DebugLogTimer < Time.time && DebugCoverFinder)
+                    if (coverCount > 0)
                     {
-                        DebugLogTimer = Time.time + 1f;
-                        Logger.LogInfo($"[{BotOwner.name}] - Found [{coverCount}] CoverPoints. Colliders checked: [{totalChecked}] Collider Array Size = [{hits}]");
+                        FallBackPoint = FindFallbackPoint(CoverPoints);
+                        if (DebugLogTimer < Time.time && DebugCoverFinder)
+                        {
+                            DebugLogTimer = Time.time + 1f;
+                            Logger.LogInfo($"[{BotOwner.name}] - Found [{coverCount}] CoverPoints. Colliders checked: [{totalChecked}] Collider Array Size = [{hits}]");
+                        }
+                    }
+                    else
+                    {
+                        FallBackPoint = null;
+                        if (DebugLogTimer < Time.time && DebugCoverFinder)
+                        {
+                            DebugLogTimer = Time.time + 1f;
+                            Logger.LogWarning($"[{BotOwner.name}] - No Cover Found! Valid Colliders checked: [{totalChecked}] Collider Array Size = [{hits}]");
+                        }
                     }
                 }
                 else
                 {
-                    FallBackPoint = null;
-                    if (DebugLogTimer < Time.time && DebugCoverFinder)
-                    {
-                        DebugLogTimer = Time.time + 1f;
-                        Logger.LogWarning($"[{BotOwner.name}] - No Cover Found! Valid Colliders checked: [{totalChecked}] Collider Array Size = [{hits}]");
-                    }
+                    OrderPointsByPathDist(CoverPoints, SAIN);
                 }
-            }
-            else
-            {
-                OrderPointsByPathDist(CoverPoints, SAIN);
-            }
 
-            if (findFirstPointStopWatch?.IsRunning == true)
-            {
-                findFirstPointStopWatch.Stop();
-            }
+                if (findFirstPointStopWatch?.IsRunning == true)
+                {
+                    findFirstPointStopWatch.Stop();
+                }
 
-            fullStopWatch.Stop();
-            if (_debugTimer2 < Time.time && SAINPlugin.DebugMode)
-            {
-                _debugTimer2 = Time.time + 5;
-                Logger.LogDebug($"Time to Complete Coverfinder Loop: [{fullStopWatch.ElapsedMilliseconds}ms]");
-                Logger.NotifyDebug($"Time to Complete Coverfinder Loop: [{fullStopWatch.ElapsedMilliseconds}ms]");
+                fullStopWatch.Stop();
+                if (_debugTimer2 < Time.time && SAINPlugin.DebugMode)
+                {
+                    _debugTimer2 = Time.time + 5;
+                    Logger.LogDebug($"Time to Complete Coverfinder Loop: [{fullStopWatch.ElapsedMilliseconds}ms]");
+                    Logger.NotifyDebug($"Time to Complete Coverfinder Loop: [{fullStopWatch.ElapsedMilliseconds}ms]");
+                }
+                CurrentStatus = CoverFinderStatus.None;
+                yield return new WaitForSeconds(CoverUpdateFrequency);
             }
-
-            yield return new WaitForSeconds(CoverUpdateFrequency);
         }
 
         private static float _debugTimer;

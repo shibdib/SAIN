@@ -6,6 +6,7 @@ using SAIN.SAINComponent.SubComponents;
 using SAIN.SAINComponent;
 using SAIN.Components;
 using UnityEngine;
+using SAIN.Helpers;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -19,26 +20,40 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
+            SAIN.Mover.SetTargetPose(1f);
+            SAIN.Mover.SetTargetMoveSpeed(1f);
+            Shoot.Update();
+
             if (SAIN.Enemy == null)
             {
+                SAIN.Steering.SteerByPriority(true);
                 return;
             }
 
-            SAIN.Mover.SetTargetPose(1f);
-            SAIN.Mover.SetTargetMoveSpeed(1f);
-
             if (SAIN.Enemy.InLineOfSight)
             {
-                Shoot.Update();
                 if (SAIN.Info.PersonalitySettings.CanJumpCorners)
                 {
-                    if (TryJumpTimer < Time.time)
+                    if (shallBunnyHop)
                     {
-                        TryJumpTimer = Time.time + 5f;
                         SAIN.Mover.TryJump();
                     }
+                    else if (TryJumpTimer < Time.time)
+                    {
+                        TryJumpTimer = Time.time + 5f;
+                        if (EFTMath.RandomBool(40))
+                        {
+                            if (!shallBunnyHop && EFTMath.RandomBool(10))
+                            {
+                                shallBunnyHop = true;
+                            }
+                            SAIN.Mover.TryJump();
+                        }
+                    }
                 }
+
                 SAIN.Mover.Sprint(false);
+
                 if (SAIN.Enemy.IsVisible && SAIN.Enemy.CanShoot)
                 {
                     SAIN.Steering.SteerByPriority();
@@ -104,6 +119,11 @@ namespace SAIN.Layers.Combat.Solo
                 }
             }
 
+            if (shallBunnyHop)
+            {
+
+            }
+
             if (SAIN.Info.PersonalitySettings.CanJumpCorners && TryJumpTimer < Time.time && SAIN.Enemy.Path.PathDistance > 5f)
             {
                 var corner = SAIN.Enemy?.LastCornerToEnemy;
@@ -113,18 +133,23 @@ namespace SAIN.Layers.Combat.Solo
                     if (distance < 0.5f)
                     {
                         TryJumpTimer = Time.time + 3f;
-                        SAIN.Mover.TryJump();
+                        if (EFTMath.RandomBool(40))
+                        {
+                            SAIN.Mover.TryJump();
+                        }
                     }
                 }
             }
 
         }
 
+        private bool shallBunnyHop = false;
         private float NewDestTimer = 0f;
         private Vector3? PushDestination;
 
         public override void Start()
         {
+            shallBunnyHop = false;
         }
 
         public override void Stop()

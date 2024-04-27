@@ -18,6 +18,11 @@ namespace SAIN.Helpers
     {
         public static Vector3? FindFirstBlindCorner(BotOwner botOwner, NavMeshPath path)
         {
+            if (botOwner == null || path == null)
+            {
+                return null;
+            }
+
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
             Vector3 headPosition = botOwner.LookSensor._headPoint;
             Vector3 botPosition = botOwner.Position;

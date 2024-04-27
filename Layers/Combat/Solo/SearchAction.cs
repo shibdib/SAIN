@@ -87,9 +87,32 @@ namespace SAIN.Layers.Combat.Solo
             }
         }
 
+        private bool HaveTalked = false;
+
         private void MoveToEnemy()
         {
-            if (SAIN.Enemy == null && (BotOwner.Position - TargetPosition.Value).sqrMagnitude < 2f)
+            if (SAIN.Enemy == null)
+            {
+                float targetDistSqr = (BotOwner.Position - TargetPosition.Value).sqrMagnitude;
+                if (targetDistSqr < 2f)
+                {
+                    SAIN.Decision.ResetDecisions();
+                    return;
+                }
+
+                // Scavs will speak out and be more vocal
+                if (!HaveTalked 
+                    && SAIN.Info.WildSpawnType == WildSpawnType.assault 
+                    && targetDistSqr < 30f * 30f)
+                {
+                    HaveTalked = true;
+                    if (EFTMath.RandomBool(40))
+                    {
+                        SAIN.Talk.Say(EPhraseTrigger.MumblePhrase, ETagStatus.Aware, true);
+                    }
+                }
+            }
+            if (SAIN.Enemy == null && (BotOwner.Position - TargetPosition.Value).sqrMagnitude < 30f * 30f)
             {
                 SAIN.Decision.ResetDecisions();
                 return;

@@ -46,35 +46,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return false;
         }
 
-        public async Task CheckCollider(CoverPoint point, SAINComponentClass sain, int msDelay)
-        {
-            point.SetIsSafePath(false, sain);
-
-            if (GetPlaceToMove(point.Collider, TargetPoint, BotOwner.Position, out Vector3 place))
-            {
-                await Task.Delay(msDelay);
-
-                if (CheckPosition(place) && CheckHumanPlayerVisibility(place))
-                {
-                    await Task.Delay(msDelay);
-
-                    if (CheckHumanPlayerVisibility(place))
-                    {
-                        await Task.Delay(msDelay);
-
-                        if (CheckPath(place, out bool isSafe, point.PathToPoint))
-                        {
-                            point.SetPosition(sain, place);
-                            point.SetIsSafePath(isSafe, sain);
-                            point.IsBad = false;
-                            return;
-                        }
-                    }
-                }
-            }
-            point.IsBad = true;
-        }
-
         public bool CheckCollider(CoverPoint coverPoint)
         {
             // the closest edge to that farPoint
@@ -103,16 +74,17 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     }
                 }
             }
-
             return false;
         }
 
-        public static bool GetPlaceToMove(Collider collider, Vector3 targetPosition, Vector3 botPosition, out Vector3 place, float navSampleRange = 1f)
+        public static bool GetPlaceToMove(Collider collider, Vector3 targetPosition, Vector3 botPosition, out Vector3 place, float navSampleRange = 0.5f)
         {
             const float ExtendLengthThresh = 2f;
 
             place = Vector3.zero;
-            if (collider == null || collider.bounds.size.y < CoverMinHeight || !CheckColliderDirection(collider, targetPosition, botPosition))
+            if (collider == null 
+                || collider.bounds.size.y < CoverMinHeight 
+                || !CheckColliderDirection(collider, targetPosition, botPosition))
             {
                 return false;
             }
@@ -120,12 +92,14 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             Vector3 colliderPos = collider.transform.position;
 
             // The direction from the target to the collider
-            Vector3 colliderDir = (colliderPos - targetPosition).normalized * 1.5f;
+            Vector3 colliderDir = (colliderPos - targetPosition).normalized;
             colliderDir.y = 0f;
 
             if (collider.bounds.size.z > ExtendLengthThresh && collider.bounds.size.x > ExtendLengthThresh)
             {
-                colliderDir *= ExtendLengthThresh;
+                float min = Mathf.Min(collider.bounds.size.z, collider.bounds.size.x);
+                float multiplier = Mathf.Clamp(1f + (min - ExtendLengthThresh), 1f, 3f);
+                colliderDir *= multiplier;
             }
 
             // a farPoint on opposite side of the target
@@ -143,11 +117,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private bool CheckHumanPlayerVisibility(Vector3 point)
         {
             Player closestPlayer = GameWorldHandler.SAINGameWorld?.FindClosestPlayer(out float sqrDist, point);
-            if (SAIN.EnemyController.IsHumanPlayerActiveEnemy == false && SAIN.EnemyController.IsHumanPlayerLookAtMe(out Player lookingPlayer) == true && lookingPlayer != null)
+            if (SAIN.EnemyController.IsHumanPlayerActiveEnemy == false 
+                && SAIN.EnemyController.IsHumanPlayerLookAtMe(out Player lookingPlayer) == true 
+                && lookingPlayer != null)
             {
-                Vector3 testPoint = point + (Vector3.up * 0.5f);
-
-                bool VisibleCheckPass = (VisibilityCheck(testPoint, lookingPlayer.MainParts[BodyPartType.head].Position));
+                bool VisibleCheckPass = (VisibilityCheck(point, lookingPlayer.Position));
 
                 if (SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder)
                 {
@@ -210,9 +184,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
             if (CheckPositionVsOtherBots(position))
             {
-                if ((position - TargetPoint).magnitude > CoverMinEnemyDist)
+                if ((position - TargetPoint).sqrMagnitude > CoverMinEnemyDist * CoverMinEnemyDist)
                 {
-                    if (VisibilityCheck(position + Vector3.up * 0.33f, TargetPoint))
+                    if (VisibilityCheck(position, TargetPoint))
                     {
                         return true;
                     }
@@ -351,9 +325,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private static bool VisibilityCheck(Vector3 position, Vector3 target)
         {
-            const float offset = 0.15f;
+            const float offset = 0.1f;
 
-            if (CheckRayCast(position, target))
+            if (CheckRayCast(position, target, 5f))
             {
                 Vector3 enemyDirection = target - position;
                 enemyDirection = enemyDirection.normalized * offset;
@@ -362,13 +336,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 Vector3 rightPoint = right * enemyDirection;
                 rightPoint += position;
 
-                if (CheckRayCast(rightPoint, target))
+                if (CheckRayCast(rightPoint, target, 5f))
                 {
                     Quaternion left = Quaternion.Euler(0f, -90f, 0f);
                     Vector3 leftPoint = left * enemyDirection;
                     leftPoint += position;
 
-                    if (CheckRayCast(leftPoint, target))
+                    if (CheckRayCast(leftPoint, target, 5f))
                     {
                         return true;
                     }
@@ -376,11 +350,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
             return false;
         }
-
+         
         private static bool CheckRayCast(Vector3 point, Vector3 target, float distance = 3f)
         {
-            point.y += 0.66f;
-            target.y += 0.66f;
+            point.y += 0.5f;
+            target.y += 1.25f;
             Vector3 direction = target - point;
             return Physics.Raycast(point, direction, distance, LayerMaskClass.HighPolyWithTerrainMask);
         }

@@ -16,10 +16,19 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            float timeToAdd = isCurrentEnemy ? 0.1f : 1f;
+            float timeToAdd;
+            bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode;
             if (!isCurrentEnemy && Enemy.IsAI)
             {
-                timeToAdd = 5f;
+                timeToAdd = performanceMode ? 6f : 4f;
+            }
+            else if (performanceMode)
+            {
+                timeToAdd = isCurrentEnemy ? 0.15f : 2f;
+            }
+            else
+            {
+                timeToAdd = isCurrentEnemy ? 0.1f : 1f;
             }
 
             bool visible = false;
@@ -39,11 +48,6 @@ namespace SAIN.SAINComponent.Classes
             if (enemyInfo?.CanShoot == true)
             {
                 canshoot = true;
-            }
-
-            if (SAINPlugin.DebugMode && EnemyPlayer.IsYourPlayer)
-            {
-                //Logger.LogInfo($"LineOfSight [{InLineOfSight}] Visible [{visible}]");
             }
 
             UpdateVisible(visible);

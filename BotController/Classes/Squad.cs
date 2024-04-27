@@ -108,7 +108,8 @@ namespace SAIN.BotController.Classes
                         member.Value.Cover.ForceCoverFinderState(true, 30f);
                     }
 
-                    if (sainEnemy != null && member.Value?.Info?.Profile?.IsPMC == true)
+                    if (sainEnemy != null 
+                        && member.Value?.Info?.Profile?.IsPMC == true)
                     {
                         float sqrMagnitude = (player.Position - position).sqrMagnitude;
                         if (sqrMagnitude < SoundAggroDist * SoundAggroDist)
@@ -117,8 +118,13 @@ namespace SAIN.BotController.Classes
                             if (botOwner != null)
                             {
                                 EnemyInfo goalEnemy = botOwner.Memory?.GoalEnemy;
-                                if (goalEnemy == null && sainEnemy.EnemyInfo != null)
+                                if (goalEnemy == null 
+                                    && sainEnemy.EnemyInfo != null 
+                                    && !sainEnemy.EnemyInfo.HaveSeen)
                                 {
+                                    // By default bots won't set a goal enemy until actually seen.
+                                    // We need PMCs to do this purely on audio, and it seems like this is the simplest way to do so.
+                                    // SAIN won't allow them to shoot even if they are set visible here momentarily, so it should be harmless.
                                     sainEnemy.EnemyInfo.SetVisible(true);
                                     botOwner.Memory.GoalEnemy = goalEnemy;
                                     sainEnemy.EnemyInfo.SetVisible(false);

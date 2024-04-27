@@ -367,7 +367,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (JumpTimer < Time.time && CanJump)
             {
-                JumpTimer = Time.time + 1f;
+                JumpTimer = Time.time + 0.66f;
                 Player.MovementContext.TryJump();
             }
         }

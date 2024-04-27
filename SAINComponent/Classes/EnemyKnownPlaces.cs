@@ -14,6 +14,16 @@ namespace SAIN.SAINComponent.Classes
 
         private readonly SAINEnemy _enemy;
 
+        public void Dispose()
+        {
+            foreach (var obj in GUIObjects)
+            {
+                DebugGizmos.DestroyLabel(obj.Value);
+            }
+            GUIObjects?.Clear();
+            KnownPlaces?.Clear();
+        }
+
         public void Update()
         {
             EnemyPlace lastPlace = null;
@@ -31,22 +41,17 @@ namespace SAIN.SAINComponent.Classes
 
                         if (EFTMath.RandomBool(15))
                         {
-                            _enemy.SAIN.Talk.Say(EPhraseTrigger.Clear, null, true);
+                            _enemy.SAIN.Talk.Say(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true);
                         }
                     }
                 }
             }
             if (_nextCheckSeen < Time.time)
             {
-                _nextCheckSeen = Time.time + 1f;
-
-                if (lastPlace == null)
+                lastPlace = GetPlaceHaventSeen();
+                if (lastPlace?.Position != null)
                 {
-                    lastPlace = GetPlaceHaventSeenOrArrived();
-                }
-
-                if (lastPlace?.Position != null && lastPlace.HasSeen == false)
-                {
+                    _nextCheckSeen = Time.time + 1f;
                     Vector3 lastknown = lastPlace.Position.Value + Vector3.up;
                     Vector3 botPos = _enemy.SAIN.Person.Transform.Head;
                     Vector3 direction = lastknown - botPos;
@@ -148,18 +153,74 @@ namespace SAIN.SAINComponent.Classes
         private bool _searchedAllKnownLocations;
         private float _nextCheckSearchTime;
 
-        private EnemyPlace GetPlaceHaventSeenOrArrived()
+        private EnemyPlace GetPlaceHaventSeenOrArrived(bool skipTimer = false)
         {
-            for (int i = KnownPlaces.Count - 1; i >= 0; i--)
+            if (skipTimer || _getPlaceHaventArrivedOrSeenTimer < Time.time)
             {
-                EnemyPlace enemyPlace = KnownPlaces[i];
-                if (enemyPlace.HasSeen == false || enemyPlace.HasArrived == false)
+                _getPlaceHaventArrivedOrSeenTimer = Time.time + 0.1f;
+                _lastPlaceHaventArrivedOrSeen = null;
+
+                for (int i = KnownPlaces.Count - 1; i >= 0; i--)
                 {
-                    return enemyPlace;
+                    EnemyPlace enemyPlace = KnownPlaces[i];
+                    if (enemyPlace.HasSeen == false || enemyPlace.HasArrived == false)
+                    {
+                        _lastPlaceHaventArrivedOrSeen = enemyPlace;
+                        break;
+                    }
                 }
             }
-            return null;
+            return _lastPlaceHaventArrivedOrSeen;
         }
+
+        private EnemyPlace _lastPlaceHaventArrivedOrSeen;
+        private float _getPlaceHaventArrivedOrSeenTimer;
+
+        public EnemyPlace GetPlaceHaventSeen(bool skipTimer = false)
+        {
+            if (skipTimer || _getPlaceHaventSeenTimer < Time.time)
+            {
+                _getPlaceHaventSeenTimer = Time.time + 0.1f;
+                _lastPlaceHaventSeen = null;
+
+                for (int i = KnownPlaces.Count - 1; i >= 0; i--)
+                {
+                    EnemyPlace enemyPlace = KnownPlaces[i];
+                    if (enemyPlace.HasSeen == false)
+                    {
+                        _lastPlaceHaventSeen = enemyPlace;
+                        break;
+                    }
+                }
+            }
+            return _lastPlaceHaventSeen;
+        }
+
+        private EnemyPlace _lastPlaceHaventSeen;
+        private float _getPlaceHaventSeenTimer;
+
+        public EnemyPlace GetPlaceHaventArrived(bool skipTimer = false)
+        {
+            if (skipTimer || _getPlaceHaventArrivedTimer < Time.time)
+            {
+                _getPlaceHaventArrivedTimer = Time.time + 0.1f;
+                _lastPlaceHaventArrived = null;
+
+                for (int i = KnownPlaces.Count - 1; i >= 0; i--)
+                {
+                    EnemyPlace enemyPlace = KnownPlaces[i];
+                    if (enemyPlace.HasSeen == false)
+                    {
+                        _lastPlaceHaventArrived = enemyPlace;
+                        break;
+                    }
+                }
+            }
+            return _lastPlaceHaventArrived;
+        }
+
+        private EnemyPlace _lastPlaceHaventArrived;
+        private float _getPlaceHaventArrivedTimer;
 
         private float _nextCheckArrived;
         private float _nextCheckSeen;

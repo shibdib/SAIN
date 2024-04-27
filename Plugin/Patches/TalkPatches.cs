@@ -13,6 +13,7 @@ using SAIN.SAINComponent.Classes.Mover;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents;
 using Comfort.Common;
+using SAIN.Helpers;
 
 namespace SAIN.Patches.Talk
 {
@@ -37,7 +38,12 @@ namespace SAIN.Patches.Talk
                 return false;
             }
 
-            if (__instance.IsYourPlayer)
+            if (__instance.IsAI && @event == EPhraseTrigger.OnEnemyShot)
+            {
+
+            }
+
+            if (!__instance.IsAI)
             {
                 SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
                 return true;
@@ -60,6 +66,26 @@ namespace SAIN.Patches.Talk
                     if (SAINPlugin.DebugMode)
                     {
                         //Logger.LogInfo($"PlayerTalkPatch: Allowed {@event}");
+                    }
+
+                    BotOwner botOwner = __instance?.AIData?.BotOwner;
+                    if (botOwner != null)
+                    {
+                        switch (@event)
+                        {
+                            case EPhraseTrigger.OnEnemyShot:
+                            case EPhraseTrigger.OnWeaponReload:
+                            case EPhraseTrigger.EnemyHit:
+                            case EPhraseTrigger.OnOutOfAmmo:
+                                if (EFTMath.RandomBool(75))
+                                {
+                                    return false;
+                                }
+                                break;
+
+                            default:
+                                break;
+                        }
                     }
 
                     SAINPlugin.BotController?.PlayerTalk(@event, mask, __instance);
@@ -239,7 +265,7 @@ namespace SAIN.Patches.Talk
             EPhraseTrigger.OnOutOfAmmo,
             EPhraseTrigger.NeedAmmo,
             EPhraseTrigger.EnemyHit,
-            EPhraseTrigger.OnEnemyShot
+            EPhraseTrigger.OnEnemyShot,
         };
     }
 }

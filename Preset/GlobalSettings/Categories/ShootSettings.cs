@@ -106,7 +106,7 @@ namespace SAIN.Preset.GlobalSettings
             { IWeaponClass.Default, 0.425f },
             { IWeaponClass.assaultCarbine, 0.5f },
             { IWeaponClass.assaultRifle, 0.5f },
-            { IWeaponClass.machinegun, 0.35f },
+            { IWeaponClass.machinegun, 0.15f },
             { IWeaponClass.smg, 0.25f },
             { IWeaponClass.pistol, 0.4f },
             { IWeaponClass.marksmanRifle, 0.75f },

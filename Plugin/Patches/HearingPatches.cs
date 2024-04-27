@@ -1,4 +1,5 @@
 ﻿using Aki.Reflection.Patching;
+using Comfort.Common;
 using EFT;
 using HarmonyLib;
 using Interpolation;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using static EFT.Interactive.BetterPropagationGroups;
 
 namespace SAIN.Patches.Hearing
 {
@@ -89,72 +91,85 @@ namespace SAIN.Patches.Hearing
         }
     }
 
-    public class BetterAudioPatch2 : ModulePatch
+    public class AimSoundPatch : ModulePatch
     {
-        private static MethodInfo _Player;
-        private static FieldInfo _PlayerBridge;
         protected override MethodBase GetTargetMethod()
         {
-            _PlayerBridge = AccessTools.Field(typeof(BaseSoundPlayer), "playersBridge");
-            _Player = AccessTools.PropertyGetter(_PlayerBridge.FieldType, "iPlayer");
-            return AccessTools.Method(typeof(BaseSoundPlayer), "SoundAtPointEventHandler");
+            return AccessTools.Method(typeof(Player), "method_46");
         }
 
         [PatchPrefix]
-        public static void PatchPrefix(string soundName, BaseSoundPlayer __instance)
+        public static void PatchPrefix(float volume, Player __instance)
         {
-            if (SAINPlugin.BotController != null && soundName.Contains("SndFuse"))
+            if (SAINPlugin.BotController != null)
             {
-                object playerBridge = _PlayerBridge.GetValue(__instance);
-                Player player = _Player.Invoke(playerBridge, null) as Player;
-                SAINSoundTypeHandler.AISoundPlayer(soundName, player);
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Aim, __instance, 30f * volume);
             }
         }
     }
 
-    public class BetterAudioPatch3 : ModulePatch
+    public class LootingSoundPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(SoundBank), "PlayWithConstantRolloffDistance");
+            return AccessTools.Method(typeof(GClass2869), "vmethod_0");
         }
 
         [PatchPostfix]
-        public static void PatchPostfix(ref float __result, BetterSource source, EnvironmentType pos, float distance, float volume, float blendParameter, bool forceStereo, SoundBank __instance)
+        public static void PatchPostfix()
         {
-            try
-            {
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex);
-            }
         }
     }
-    public class BetterAudioPatch4 : ModulePatch
+
+    public class SetInHandsGrenadePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BetterSource), "Play");
+            return AccessTools.Method(typeof(Player), "SetInHands", 
+                new[] { typeof(GrenadeClass), typeof(Callback<IHandsThrowController>) });
         }
 
         [PatchPrefix]
-        public static void PatchPrefix(AudioClip clip1, AudioClip clip2, float balance, float volume, bool forceStereo, bool oneShot, BetterSource __instance)
+        public static void PatchPrefix(Player __instance)
         {
-            try
+            if (SAINPlugin.BotController != null)
             {
-                if (clip1 !=  null)
-                {
-                    Logger.LogWarning($"{clip1.name} : {balance} : {volume} : {forceStereo} : {oneShot} ::: {__instance?.OcclusionVolumeFactor}");
-                }
-                if (clip2 != null)
-                {
-                    Logger.LogWarning($"{clip2.name} : {balance} : {volume} : {forceStereo} : {oneShot} ::: {__instance?.OcclusionVolumeFactor}");
-                }
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.GrenadeDraw, __instance, 30f);
             }
-            catch (Exception ex)
+        }
+    }
+    public class SetInHandsFoodPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "SetInHands", 
+                new[] { typeof(FoodClass), typeof(float), typeof(int), typeof(Callback<GInterface130>) });
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(Player __instance)
+        {
+            if (SAINPlugin.BotController != null)
             {
-                Logger.LogError(ex);
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Food, __instance, 20f);
+            }
+        }
+    }
+
+    public class SetInHandsMedsPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "SetInHands", 
+                new[] { typeof(MedsClass), typeof(EBodyPart), typeof(int), typeof(Callback<GInterface130>) });
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(Player __instance)
+        {
+            if (SAINPlugin.BotController != null)
+            {
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Heal, __instance, 30f);
             }
         }
     }

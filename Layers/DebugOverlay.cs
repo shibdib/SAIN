@@ -69,9 +69,12 @@ namespace SAIN.Layers
                 var info = sain.Info;
                 var decisions = sain.Memory.Decisions;
                 stringBuilder.AppendLine($"Name: [{sain.Person.Name}] Personality: [{info.Personality}] Type: [{info.Profile.WildSpawnType}]");
-                stringBuilder.AppendLine($"Steering: [{sain.Steering.CurrentSteerPriority}]");
                 stringBuilder.AppendLine($"Suppression Status: Num: [{sain.Suppression?.SuppressionNumber}] IsSuppressed: [{sain.Suppression?.IsSuppressed}] IsHeavySuppressed: [{sain.Suppression?.IsHeavySuppressed}]");
+                stringBuilder.AppendLine($"Steering: [{sain.Steering.CurrentSteerPriority}]");
                 stringBuilder.AppendLine($"AI Limited: [{sain.CurrentAILimit}]");
+                stringBuilder.AppendLine($"Cover Points Count: [{sain.Cover.CoverPoints.Count}]");
+                stringBuilder.AppendLine($"Cover Finder State: [{sain.Cover.CurrentCoverFinderState}]");
+                stringBuilder.AppendLine($"Cover Finder Status: [{sain.Cover.CoverFinder.CurrentStatus}] Limited? [{sain.Cover.CoverFinder.ProcessingLimited}] ");
 
                 stringBuilder.AppendLine();
 
