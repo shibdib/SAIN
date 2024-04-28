@@ -98,11 +98,11 @@ namespace SAIN
 
     public enum CoverStatus
     {
-        None = 0,
-        InCover = 1,
+        InCover = 0,
+        CloseToCover = 1,
+        MidRangeToCover = 2,
         FarFromCover = 3,
-        CloseToCover = 4,
-        MidRangeToCover = 5,
+        None = 4,
     }
 
     public enum LeanSetting
@@ -129,6 +129,8 @@ namespace SAIN
         Coward,
         Rat,
         Normal,
+        SnappingTurtle,
+        Wreckless,
         Custom1,
         Custom2,
         Custom3,
@@ -157,7 +159,7 @@ namespace SAIN
         Surround,
         Retreat,
         Suppress,
-        BoundingAttack,
+        PushSuppressedEnemy,
         BoundingRetreat,
         Regroup,
         SpreadOut,

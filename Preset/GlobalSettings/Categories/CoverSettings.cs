@@ -4,10 +4,9 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class CoverSettings
     {
-        [Name("Enhanced Cover Finding")]
-        [Description("CAN REDUCE PERFORMANCE. Improves bot reactions in a fight by decreasing the time it takes to find cover, can help with bots standing still occasionally before running for cover. Comes at the cost of some reduced performance overall.")]
         [Default(true)]
-        public bool EnhancedCoverFinding = true;
+        [Advanced]
+        public bool ShiftCoverMustBeSafe = true;
 
         [Default(6f)]
         [MinMax(1f, 30f, 1f)]

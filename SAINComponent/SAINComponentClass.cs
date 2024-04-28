@@ -284,7 +284,7 @@ namespace SAIN.SAINComponent
 
         public bool Shoot(bool value, bool checkFF = true, EShootReason reason = EShootReason.None)
         {
-            ManualShootReason = reason;
+            ManualShootReason = value ? reason : EShootReason.None;
 
             if (value)
             {

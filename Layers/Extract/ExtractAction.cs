@@ -12,6 +12,7 @@ using System.Linq;
 using SAIN.Components.BotController;
 using UnityEngine.AI;
 using SAIN.Helpers;
+using static RootMotion.FinalIK.AimPoser;
 
 namespace SAIN.Layers
 {
@@ -38,8 +39,15 @@ namespace SAIN.Layers
 
         public override void Update()
         {
+            if (SAIN?.Player == null) return;
+
             float stamina = SAIN.Player.Physical.Stamina.NormalValue;
-            if (SAIN.Enemy != null && SAIN.Enemy.Seen && (SAIN.Enemy.Path.PathDistance < 50f || SAIN.Enemy.IsVisible))
+            // Environment id of 0 means a bot is outside.
+            if (SAIN.Player.AIData.EnvironmentId == 0)
+            {
+                NoSprint = true;
+            }
+            else if (SAIN.Enemy != null && SAIN.Enemy.Seen && (SAIN.Enemy.Path.PathDistance < 50f || SAIN.Enemy.IsVisible))
             {
                 NoSprint = true;
             }

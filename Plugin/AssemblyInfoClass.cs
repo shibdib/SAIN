@@ -17,8 +17,8 @@
 
         public const string SAINGUID = "me.sol.sain";
         public const string SAINName = "SAIN";
-        public const string SAINVersion = "2.2.1";
-        public const string SAINPresetVersion = "2.2.0";
+        public const string SAINVersion = "2.2.2";
+        public const string SAINPresetVersion = "2.2.2";
 
         public const string SPTGUID = "com.spt-aki.core";
         public const string SPTVersion = "3.8.0";
@@ -31,5 +31,6 @@
 
         public const string LootingBotsKey = "me.skwizzy.lootingbots";
         public const string RealismModKey = "RealismMod";
+        public const string QuestingBotsKey = "com.DanW.QuestingBots";
     }
 }

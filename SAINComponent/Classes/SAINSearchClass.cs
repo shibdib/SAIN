@@ -239,7 +239,9 @@ namespace SAIN.SAINComponent.Classes
             var persSettings = SAIN.Info.PersonalitySettings;
             float speed;
             float pose;
-            if (shallSprint)
+            // Environment id of 0 means a bot is outside.
+            if (shallSprint 
+                || Player.AIData.EnvironmentId == 0)
             {
                 speed = 1f;
                 pose = 1f;

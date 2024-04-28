@@ -30,7 +30,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (_shallJumpToCover 
                 && BotOwner.GetPlayer.IsSprintEnabled 
                 && MoveSuccess 
-                && BotOwner.Mover.DistDestination < 4f 
+                && BotOwner.Mover.DistDestination < 2f 
                 && _jumpTimer < Time.time)
             {
                 _jumpTimer = Time.time + 5f;
@@ -50,7 +50,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     else
                     {
                         bool shallCrawl = SAIN.Decision.CurrentSelfDecision != SelfDecision.None && CoverDestination.GetCoverStatus(SAIN) == CoverStatus.FarFromCover && shallProne;
-                        MoveSuccess = SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out bool calculating, -1, shallCrawl);
+                        MoveSuccess = SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out bool calculating, -1, shallCrawl, false);
                     }
                 }
                 if (MoveSuccess)

@@ -19,7 +19,17 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
+            if (_updatePoseTimer < Time.time)
+            {
+                _updatePoseTimer = Time.time + 0.25f;
+                if (SAIN.Mover.CurrentStamina > 0.25f)
+                {
+
+                }
+            }
         }
+
+        private float _updatePoseTimer;
 
         public void Dispose()
         {
@@ -27,16 +37,16 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         static ProneClass()
         {
-            BotLayProperty = AccessTools.Property(typeof(BotOwner), "BotLay").PropertyType.GetProperty("IsLay");
+            _isProneProperty = AccessTools.Property(typeof(BotOwner), "BotLay").PropertyType.GetProperty("IsLay");
         }
 
-        private static readonly PropertyInfo BotLayProperty;
+        private static readonly PropertyInfo _isProneProperty;
 
         public bool IsProne => BotOwner.BotLay.IsLay;
 
         public void SetProne(bool value)
         {
-            BotLayProperty.SetValue(BotLay, value);
+            _isProneProperty.SetValue(BotLay, value);
         }
 
         public bool ShallProne(CoverPoint point, bool withShoot)

@@ -22,6 +22,11 @@ namespace SAIN.Helpers
                 return 0.001f;
             }
 
+            if (component.ManualShootReason != SAINComponentClass.EShootReason.None && component.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
+            {
+                return 0.75f;
+            }
+
             //float k = 0.08f; // How fast for the burst length to falloff with Distance
             //float scaledDistance = InverseScaleWithLogisticFunction(distance, k, 20f);
 

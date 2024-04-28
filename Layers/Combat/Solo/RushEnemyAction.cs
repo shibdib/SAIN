@@ -34,18 +34,18 @@ namespace SAIN.Layers.Combat.Solo
             {
                 if (SAIN.Info.PersonalitySettings.CanJumpCorners)
                 {
-                    if (shallBunnyHop)
+                    if (_shallBunnyHop)
                     {
                         SAIN.Mover.TryJump();
                     }
                     else if (TryJumpTimer < Time.time)
                     {
                         TryJumpTimer = Time.time + 5f;
-                        if (EFTMath.RandomBool(40))
+                        if (EFTMath.RandomBool(SAIN.Info.PersonalitySettings.JumpCornerChance))
                         {
-                            if (!shallBunnyHop && EFTMath.RandomBool(10))
+                            if (!_shallBunnyHop && EFTMath.RandomBool(5))
                             {
-                                shallBunnyHop = true;
+                                _shallBunnyHop = true;
                             }
                             SAIN.Mover.TryJump();
                         }
@@ -119,12 +119,7 @@ namespace SAIN.Layers.Combat.Solo
                 }
             }
 
-            if (shallBunnyHop)
-            {
-
-            }
-
-            if (SAIN.Info.PersonalitySettings.CanJumpCorners && TryJumpTimer < Time.time && SAIN.Enemy.Path.PathDistance > 5f)
+            if (_shallTryJump && TryJumpTimer < Time.time && SAIN.Enemy.Path.PathDistance > 5f)
             {
                 var corner = SAIN.Enemy?.LastCornerToEnemy;
                 if (corner != null)
@@ -133,7 +128,7 @@ namespace SAIN.Layers.Combat.Solo
                     if (distance < 0.5f)
                     {
                         TryJumpTimer = Time.time + 3f;
-                        if (EFTMath.RandomBool(40))
+                        if (EFTMath.RandomBool(SAIN.Info.PersonalitySettings.JumpCornerChance))
                         {
                             SAIN.Mover.TryJump();
                         }
@@ -143,14 +138,20 @@ namespace SAIN.Layers.Combat.Solo
 
         }
 
-        private bool shallBunnyHop = false;
+        private bool _shallBunnyHop = false;
         private float NewDestTimer = 0f;
         private Vector3? PushDestination;
 
         public override void Start()
         {
-            shallBunnyHop = false;
+            _shallTryJump = SAIN.Info.PersonalitySettings.CanJumpCorners 
+                && SAIN.Decision.CurrentSquadDecision != SquadDecision.PushSuppressedEnemy
+                && EFTMath.RandomBool(SAIN.Info.PersonalitySettings.JumpCornerChance);
+
+            _shallBunnyHop = false;
         }
+
+        bool _shallTryJump = false;
 
         public override void Stop()
         {

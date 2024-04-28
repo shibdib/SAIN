@@ -67,6 +67,10 @@ namespace SAIN.Layers
 
         private bool ExtractFromTime()
         {
+            if (ModDetection.QuestingBotsLoaded)
+            {
+                return false;
+            }
             float percentageLeft = BotController.BotExtractManager.PercentageRemaining;
             if (percentageLeft <= SAIN.Info.PercentageBeforeExtract)
             {

@@ -38,6 +38,20 @@ namespace SAIN.SAINComponent.Classes
             SAIN.EnemyController.RemoveEnemy(EnemyPlayer);
         }
 
+        public bool EnemyIsSuppressed
+        {
+            get
+            {
+                return _suppressEndTimer < Time.time;
+            }
+            set
+            {
+                _suppressEndTimer = value ? Time.time + 3f : 0f;
+            }
+        }
+
+        private float _suppressEndTimer;
+
         public void Update()
         {
             if (!SAIN.HasEnemy)

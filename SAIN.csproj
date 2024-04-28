@@ -308,6 +308,7 @@
     <Compile Include="SAINComponent\Classes\EnemyPlace.cs" />
     <Compile Include="SAINComponent\Classes\ESearchMove.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINMovementPlanController.cs" />
+    <Compile Include="SAINComponent\Classes\Mover\SprintController.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINVaultClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINAILimit.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotMedicine.cs" />

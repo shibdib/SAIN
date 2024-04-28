@@ -44,6 +44,7 @@ namespace SAIN.Preset.GlobalSettings
             "So if a bot is shooting at you from the back for X seconds, after that time it will no longer reduce their accuracy to give you a better chance to react.")]
         [Default(4f)]
         [MinMax(0.5f, 20f, 100f)]
+        [Advanced]
         public float NotLookingTimeLimit = 4f;
 
         [Name("Bot Reaction and Accuracy Changes Angle")]
@@ -61,6 +62,7 @@ namespace SAIN.Preset.GlobalSettings
         [Description("How much to multiply bot vision speed by if you aren't looking at them when they notice you. Higher = More time before reacting.")]
         [Default(1.1f)]
         [MinMax(1f, 2f, 100f)]
+        [Advanced]
         public float NotLookingVisionSpeedModifier = 1.1f;
 
         [Name("Bot Accuracy and Spread Increase When Out of Sight")]
@@ -71,6 +73,7 @@ namespace SAIN.Preset.GlobalSettings
             " Higher = More spread and less accurate bots.")]
         [Default(0.33f)]
         [MinMax(0.1f, 1.5f, 100f)]
+        [Advanced]
         public float NotLookingAccuracyAmount = 0.33f;
 
         [Name("Disable Talking Patches")]
@@ -82,21 +85,18 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [Default(24)]
         [MinMax(0, 100)]
-        [Hidden]
         public int SAINCombatSquadLayerPriority = 24;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
         [Default(22)]
         [MinMax(0, 100)]
-        [Hidden]
         public int SAINExtractLayerPriority = 22;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
         [Default(20)]
         [MinMax(0, 100)]
-        [Hidden]
         public int SAINCombatSoloLayerPriority = 20;
     }
 }

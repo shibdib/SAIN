@@ -93,15 +93,129 @@ namespace SAIN.Preset.Personalities
                         FrequentSprintWhileSearch = true,
 
                         CanJumpCorners = true,
+                        JumpCornerChance = 40f,
+                        CanBunnyHop = true,
+                        BunnyHopChance = 5f,
+
                         CanRushEnemyReloadHeal = true,
                         CanFakeDeathRare = true,
 
-                        AggressionMultiplier = 2f,
+                        AggressionMultiplier = 1f,
                         ShiftCoverTimeMultiplier = 0.5f,
 
                         SearchHasEnemySpeed = 1f,
                         SearchHasEnemyPose = 1f,
                         SearchNoEnemySpeed = 1f,
+                        SearchNoEnemyPose = 1f,
+
+                        MoveToCoverHasEnemySpeed = 1f,
+                        MoveToCoverHasEnemyPose = 1f,
+                        MoveToCoverNoEnemySpeed = 1f,
+                        MoveToCoverNoEnemyPose = 1f,
+                    }
+                };
+
+                AddPMCTypes(settings.Variables.AllowedTypes);
+                Personalities.Add(pers, settings);
+                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+            }
+
+            pers = IPersonality.Wreckless;
+            if (!Personalities.ContainsKey(pers))
+            {
+                string name = pers.ToString();
+                string description = "Rush B Cyka Blyat. Who care if I die? Gotta get the clip";
+                var settings = new PersonalitySettingsClass(pers, name, description)
+                {
+                    Variables =
+                    {
+                        Enabled = true,
+                        RandomChanceIfMeetRequirements = 3,
+                        RandomlyAssignedChance = 1,
+
+                        CanTaunt = true,
+                        CanRespondToVoice = true,
+                        TauntFrequency = 4,
+                        TauntMaxDistance = 70f,
+                        ConstantTaunt = true,
+
+                        HoldGroundBaseTime = 2.5f,
+                        HoldGroundMaxRandom = 1.5f,
+                        HoldGroundMinRandom = 0.65f,
+
+                        WillSearchForEnemy = true,
+                        WillSearchFromAudio = true,
+                        SearchBaseTime = 0.1f,
+                        SprintWhileSearch = true,
+                        FrequentSprintWhileSearch = true,
+
+                        CanJumpCorners = true,
+                        JumpCornerChance = 75f,
+                        CanBunnyHop = true,
+                        BunnyHopChance = 25f,
+                        CanRushEnemyReloadHeal = true,
+                        CanFakeDeathRare = true,
+
+                        AggressionMultiplier = 1f,
+                        ShiftCoverTimeMultiplier = 0.5f,
+
+                        SearchHasEnemySpeed = 1f,
+                        SearchHasEnemyPose = 1f,
+                        SearchNoEnemySpeed = 1f,
+                        SearchNoEnemyPose = 1f,
+
+                        MoveToCoverHasEnemySpeed = 1f,
+                        MoveToCoverHasEnemyPose = 1f,
+                        MoveToCoverNoEnemySpeed = 1f,
+                        MoveToCoverNoEnemyPose = 1f,
+                    }
+                };
+
+                AddAllBotTypes(settings.Variables.AllowedTypes);
+                Personalities.Add(pers, settings);
+                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+            }
+
+            pers = IPersonality.SnappingTurtle;
+            if (!Personalities.ContainsKey(pers))
+            {
+                string name = pers.ToString();
+                string description = "A player who finds the balance between rat and chad, yin and yang. Will rat you out but can spring out at any moment.";
+                var settings = new PersonalitySettingsClass(pers, name, description)
+                {
+                    Variables =
+                    {
+                        Enabled = true,
+                        RandomChanceIfMeetRequirements = 30,
+                        RandomlyAssignedChance = 1,
+                        PowerLevelMin = 250f,
+
+                        CanTaunt = true,
+                        CanRespondToVoice = false,
+                        TauntFrequency = 15,
+                        TauntMaxDistance = 50f,
+                        ConstantTaunt = false,
+
+                        HoldGroundBaseTime = 1.5f,
+                        HoldGroundMaxRandom = 1.2f,
+                        HoldGroundMinRandom = 0.8f,
+
+                        WillSearchForEnemy = true,
+                        WillSearchFromAudio = true,
+                        SearchBaseTime = 90f,
+                        SprintWhileSearch = false,
+                        FrequentSprintWhileSearch = false,
+
+                        CanJumpCorners = true,
+                        CanRushEnemyReloadHeal = true,
+                        CanFakeDeathRare = true,
+
+                        AggressionMultiplier = 1f,
+                        ShiftCoverTimeMultiplier = 0.5f,
+
+                        SearchHasEnemySpeed = 0.7f,
+                        SearchHasEnemyPose = 1f,
+                        SearchNoEnemySpeed = 0.8f,
                         SearchNoEnemyPose = 1f,
 
                         MoveToCoverHasEnemySpeed = 1f,
@@ -143,12 +257,13 @@ namespace SAIN.Preset.Personalities
 
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = true,
-                        SearchBaseTime = 30f,
+                        SearchBaseTime = 25f,
                         SprintWhileSearch = true,
 
-                        CanJumpCorners = false,
+                        CanJumpCorners = true,
+                        JumpCornerChance = 25f,
                         CanRushEnemyReloadHeal = true,
-                        AggressionMultiplier = 1.5f,
+                        AggressionMultiplier = 1f,
 
                         SearchHasEnemySpeed = 1f,
                         SearchHasEnemyPose = 1f,
@@ -162,7 +277,7 @@ namespace SAIN.Preset.Personalities
                     }
                 };
 
-                AddPMCTypes(settings.Variables.AllowedTypes);
+                AddAllBotTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
@@ -177,14 +292,14 @@ namespace SAIN.Preset.Personalities
                     Variables =
                     {
                         Enabled = true,
-                        RandomChanceIfMeetRequirements = 50,
-                        RandomlyAssignedChance = 25,
+                        RandomChanceIfMeetRequirements = 33,
+                        RandomlyAssignedChance = 15,
                         HoldGroundBaseTime = 0.75f,
                         WillSearchForEnemy = false,
                         WillSearchFromAudio = false,
-                        SearchBaseTime = 180f,
-                        PowerLevelMax = 50f,
-                        AggressionMultiplier = 0.65f,
+                        SearchBaseTime = 240f,
+                        PowerLevelMax = 125f,
+                        AggressionMultiplier = 1f,
 
                         Sneaky = true,
                         SneakyPose = 0f,
@@ -221,13 +336,13 @@ namespace SAIN.Preset.Personalities
                     {
                         Enabled = true,
                         RandomlyAssignedChance = 25,
-                        PowerLevelMax = 40f,
+                        PowerLevelMax = 80f,
                         MaxLevel = 10,
                         HoldGroundBaseTime = 0.5f,
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = false,
-                        SearchBaseTime = 120f,
-                        AggressionMultiplier = 0.75f,
+                        SearchBaseTime = 90f,
+                        AggressionMultiplier = 1f,
                         ShiftCoverTimeMultiplier = 0.66f,
                         CanBegForLife = true,
 
@@ -262,8 +377,8 @@ namespace SAIN.Preset.Personalities
                         HoldGroundBaseTime = 0.5f,
                         WillSearchForEnemy = false,
                         WillSearchFromAudio = false,
-                        SearchBaseTime = 90f,
-                        AggressionMultiplier = 0.45f,
+                        SearchBaseTime = 110f,
+                        AggressionMultiplier = 1f,
                         CanShiftCoverPosition = false,
                         CanBegForLife = true,
 

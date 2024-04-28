@@ -1,4 +1,5 @@
 ﻿using EFT;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -69,7 +70,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             Lean = new LeanClass(sain);
             Prone = new ProneClass(sain);
             Pose = new PoseClass(sain);
+            SprintController = new SprintController(sain);
         }
+
+        private SprintController SprintController;
 
         public void Init()
         {
@@ -114,6 +118,14 @@ namespace SAIN.SAINComponent.Classes.Mover
                 //SAIN.NavMeshAgent.enabled = false;
                 //BotBodyObstacle.enabled = true;
             }
+            try
+            {
+                SprintController.Update();
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e);
+            }
         }
 
         public void Dispose()
@@ -128,7 +140,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public NavMeshObstacle BotBodyObstacle { get; private set; }
 
-        public bool GoToPoint(Vector3 point, out bool calculating, float reachDist = -1f, bool crawl = false)
+        public bool GoToPoint(Vector3 point, out bool calculating, float reachDist = -1f, bool crawl = false, bool slowAtEnd = true)
         {
             if (GoToPointCoroutine != null && _coroutineRunning)
             {
@@ -152,7 +164,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     reachDist = BotOwner.Settings.FileSettings.Move.REACH_DIST;
                 }
-                CurrentPathStatus = BotOwner.Mover.GoToPoint(pointToGo, true, reachDist, false, false, true);
+                CurrentPathStatus = BotOwner.Mover.GoToPoint(pointToGo, slowAtEnd, reachDist, false, false, true);
                 if (CurrentPathStatus == NavMeshPathStatus.PathComplete)
                 {
                     if (crawl)
@@ -325,6 +337,8 @@ namespace SAIN.SAINComponent.Classes.Mover
                 Player.Physical.Stamina.UpdateStamina(stamina.TotalCapacity / 8f);
             }
         }
+
+        public float CurrentStamina => Player.Physical.Stamina.NormalValue;
 
         public void SetTargetPose(float pose)
         {

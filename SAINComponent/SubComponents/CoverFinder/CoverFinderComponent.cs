@@ -285,11 +285,14 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                         {
                             CoverPoints.RemoveAt(i);
                         }
-                        else if (!PointStillGood(coverPoint))
+                        else
                         {
-                            CoverPoints.RemoveAt(i);
+                            if (!PointStillGood(coverPoint))
+                            {
+                                CoverPoints.RemoveAt(i);
+                            }
+                            yield return null;
                         }
-                        yield return null;
                     }
                 }
 

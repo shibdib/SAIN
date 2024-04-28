@@ -51,6 +51,7 @@ namespace SAIN.Layers.Combat.Squad
                         WaitShootTimer < Time.time 
                         && SAIN.Shoot(true, true, SAINComponentClass.EShootReason.SquadSuppressing))
                     {
+                        enemy.EnemyIsSuppressed = true;
                         float waitTime = hasMachineGun ? 0.1f : 0.5f;
                         WaitShootTimer = Time.time + (waitTime * Random.Range(0.75f, 1.25f));
                     }

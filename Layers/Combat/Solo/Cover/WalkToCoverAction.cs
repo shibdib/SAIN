@@ -40,7 +40,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (CoverDestination == null)
             {
                 var coverPoint = SAIN.Cover.ClosestPoint;
-                if (coverPoint != null && !coverPoint.GetSpotted(SAIN) && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out bool calculating))
+                if (coverPoint != null 
+                    && !coverPoint.GetSpotted(SAIN) 
+                    && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out bool calculating, -1, false, false))
                 {
                     CoverDestination = coverPoint;
                     CoverDestination.SetBotIsUsingThis(true);
@@ -95,7 +97,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
                 else
                 {
-                    SAIN.Mover.SetTargetMoveSpeed(0.65f);
+                    SAIN.Mover.SetTargetMoveSpeed(0.75f);
                 }
                 SAIN.Mover.SetTargetPose(1f);
                 return true;
@@ -118,6 +120,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     && BotOwner.WeaponManager.HaveBullets 
                     && SAIN.Shoot(true, true, SAINComponentClass.EShootReason.WalkToCoverSuppress))
                 {
+                    SAIN.Enemy.EnemyIsSuppressed = true;
                     if (SAIN.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
                     {
                         SuppressTimer = Time.time + 0.1f * Random.Range(0.75f, 1.25f);
@@ -151,6 +154,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 CoverDestination.SetBotIsUsingThis(false);
                 CoverDestination = null;
             }
+            SAIN.Shoot(false, true, SAINComponentClass.EShootReason.None);
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)

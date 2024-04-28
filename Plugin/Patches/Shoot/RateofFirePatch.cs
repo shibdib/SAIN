@@ -86,6 +86,12 @@ namespace SAIN.Patches.Shoot
                 timeToAimResult *= fileSettings.Aiming.COEF_IF_MOVE;
             }
 
+            var shootController = botOwner.WeaponManager.ShootController;
+            if (shootController != null && shootController.IsAiming == true)
+            {
+                timeToAimResult *= 0.8f;
+            }
+
             float timeToAimResultClamped = Mathf.Clamp(timeToAimResult, 0f, fileSettings.Aiming.MAX_AIM_TIME);
 
             //StringBuilder debugString = new StringBuilder();

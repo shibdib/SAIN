@@ -24,9 +24,15 @@ namespace SAIN
 
         public static bool LootingBotsLoaded { get; private set; }
         public static bool RealismLoaded { get; private set; }
+        public static bool QuestingBotsLoaded { get; private set; }
 
         public static void CheckPlugins()
         {
+            if (Chainloader.PluginInfos.ContainsKey(QuestingBotsKey))
+            {
+                QuestingBotsLoaded = true;
+                Logger.LogInfo($"SAIN: Questing Bots Detected.");
+            }
             if (Chainloader.PluginInfos.ContainsKey(LootingBotsKey))
             {
                 LootingBotsLoaded = true;
@@ -39,7 +45,7 @@ namespace SAIN
 
                 // If RealismModKey mod is loaded, we need to adjust how powerlevel is calculated to take into account armor class going up to 10 instead of 6
                 // 7 is the default
-                EFTCoreSettings.UpdateArmorClassCoef(4f);
+                EFTCoreSettings.UpdateArmorClassCoef(3.5f);
             }
             else
             {
@@ -53,6 +59,7 @@ namespace SAIN
 
             BeginHorizontal();
             IsDetected(LootingBotsLoaded, "Looting Bots");
+            IsDetected(QuestingBotsLoaded, "Questing Bots");
             IsDetected(RealismLoaded, "Realism Mod");
             EndHorizontal();
 

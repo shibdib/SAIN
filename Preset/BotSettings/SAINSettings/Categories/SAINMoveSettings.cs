@@ -28,17 +28,17 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [JsonIgnore]
         public float RUN_TO_COVER_MIN = 0f;
 
-        [Hidden]
-        [JsonIgnore]
-        public float BOT_MOVE_IF_DELTA = 0.025f;
+        // [Hidden]
+        // [JsonIgnore]
+        // public float BOT_MOVE_IF_DELTA = 0.025f;
 
-        [Hidden]
-        [JsonIgnore]
-        public float REACH_DIST = 0.4f;
-
-        [Hidden]
-        [JsonIgnore]
-        public float REACH_DIST_RUN = 0.8f;
+        //[Hidden]
+        //[JsonIgnore]
+        //public float REACH_DIST = 0.4f;
+        //
+        //[Hidden]
+        //[JsonIgnore]
+        //public float REACH_DIST_RUN = 0.8f;
 
         [Hidden]
         [JsonIgnore]

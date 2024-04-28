@@ -4,6 +4,7 @@ using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
 using UnityEngine;
 
@@ -351,10 +352,31 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartRunForCover()
         {
-            return StartRunCoverTimer < Time.time && BotOwner.CanSprintPlayer;
+            if (!BotOwner.CanSprintPlayer)
+            {
+                return false;
+            }
+            bool underFire = BotOwner.Memory.IsUnderFire;
+            if (underFire 
+                && SAIN.Enemy != null 
+                && SAIN.Enemy.Seen
+                && !SAIN.Enemy.IsVisible 
+                && SAIN.Enemy.TimeSinceSeen > 3f)
+            {
+                return true;
+            }
+            if (StartRunCoverTimer < Time.time)
+            {
+                CoverPoint closestCover = SAIN.Cover.ClosestPoint;
+                if (closestCover != null)
+                {
+                    return (closestCover.GetPosition(SAIN) - SAIN.Position).sqrMagnitude > 1f;
+                }
+            }
+            return StartRunCoverTimer < Time.time;
         }
 
-        private static readonly float RunToCoverTime = 2f;
+        private static readonly float RunToCoverTime = 1.5f;
         private static readonly float RunToCoverTimeRandomMin = 0.66f;
         private static readonly float RunToCoverTimeRandomMax = 1.33f;
 
@@ -402,6 +424,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartSearch(SAINEnemy enemy)
         {
+            if (!SAIN.Info.PersonalitySettings.WillSearchForEnemy)
+            {
+                return false;
+            }
             if (SAIN.Suppression.IsSuppressed)
             {
                 return false;
@@ -427,12 +453,14 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private float TimeBeforeSearch => SAIN.Info.TimeBeforeSearch;
 
-        private static readonly float HoldInCoverMaxCoverDist = 1f;
+        private static readonly float HoldInCoverMaxCoverDist = 0.75f * 0.75f;
 
         public bool StartHoldInCover()
         {
             var cover = SAIN.Cover.CoverInUse;
-            if (cover != null && !cover.GetSpotted(SAIN) && (cover.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude < HoldInCoverMaxCoverDist)
+            if (cover != null 
+                && !cover.GetSpotted(SAIN) 
+                && (cover.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude < HoldInCoverMaxCoverDist)
             {
                 return true;
             }
@@ -443,7 +471,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             if (enemy.IsVisible && enemy.CanShoot)
             {
-                if (enemy.RealDistance > SAIN.Info.WeaponInfo.EffectiveWeaponDistance * 1.5f)
+                if (enemy.RealDistance > SAIN.Info.WeaponInfo.EffectiveWeaponDistance * 1.25f)
                 {
                     return false;
                 }
@@ -452,6 +480,15 @@ namespace SAIN.SAINComponent.Classes.Decision
                 if (holdGround <= 0f)
                 {
                     return false;
+                }
+
+                if (!enemy.EnemyLookingAtMe)
+                {
+                    CoverPoint closestPoint = SAIN.Cover.ClosestPoint;
+                    if (!enemy.EnemyLookingAtMe && closestPoint != null && closestPoint.GetCoverStatus(SAIN) <= CoverStatus.CloseToCover)
+                    {
+                        return true;
+                    }
                 }
 
                 float visibleFor = Time.time - enemy.VisibleStartTime;

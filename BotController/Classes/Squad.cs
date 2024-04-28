@@ -31,6 +31,21 @@ namespace SAIN.BotController.Classes
             }
         }
 
+        public bool SquadIsSuppressEnemy(string profileId, out SAINComponentClass suppressingMember)
+        {
+            foreach (var member in Members)
+            {
+                SAINEnemy enemy = member.Value?.Enemy;
+                if (enemy?.EnemyPlayer != null && enemy.EnemyPlayer.ProfileId == profileId && enemy.EnemyIsSuppressed)
+                {
+                    suppressingMember = member.Value;
+                    return true;
+                }
+            }
+            suppressingMember = null;
+            return false;
+        }
+
         public List<PlaceForCheck> GroupPlacesForCheck => EFTBotGroup?.PlacesForCheck;
 
         public bool IsPointTooCloseToLastPlaceForCheck(Vector3 position)

@@ -10,6 +10,7 @@ using UnityEngine.AI;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SAIN.Layers.Combat.Solo;
 using SAIN.Helpers;
+using SAIN.Components.MainPlayer;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -37,6 +38,15 @@ namespace SAIN.Layers.Combat.Solo.Cover
             SAIN.Steering.SteerByPriority();
             Shoot.Update();
             SAIN.Cover.DuckInCover();
+
+            if (SAIN.Enemy != null 
+                && SAIN.Player.MovementContext.CanProne
+                && SAIN.Player.PoseLevel <= 0.1 
+                && SAIN.Enemy.IsVisible 
+                && BotOwner.WeaponManager.Reload.Reloading)
+            {
+                SAIN.Mover.Prone.SetProne(true);
+            }
 
             if (SAIN.Suppression.IsSuppressed)
             {
@@ -113,6 +123,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
+            SAIN.Mover.Prone.SetProne(false);
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)

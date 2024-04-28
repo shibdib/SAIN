@@ -209,14 +209,6 @@ namespace SAIN.SAINComponent.Classes
                 {
                     range *= 0.75f;
                 }
-                if (!SAIN.Equipment.HasEarPiece)
-                {
-                    range *= 0.6f;
-                }
-                if (SAIN.Equipment.HasHeavyHelmet)
-                {
-                    range *= 0.8f;
-                }
                 if (SAIN.Memory.HealthStatus == ETagStatus.Dying)
                 {
                     range *= 0.75f;
@@ -566,7 +558,7 @@ namespace SAIN.SAINComponent.Classes
         {
             int botlocation = BotOwner.AIData.EnvironmentId;
             int enemylocation = enemy.AIData.EnvironmentId;
-            return botlocation == enemylocation ? 1f : 0.75f;
+            return botlocation == enemylocation ? 1f : 0.5f;
         }
 
         private float RaycastCheck(Vector3 botpos, Vector3 enemypos, float environmentmodifier)

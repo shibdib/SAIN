@@ -14,6 +14,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
+            NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
             FindTarget();
         }
 
@@ -62,12 +63,12 @@ namespace SAIN.Layers.Combat.Solo
                 {
                     if (ReloadTimer < Time.time && SAIN.Decision.SelfActionDecisions.LowOnAmmo(0.5f))
                     {
-                        ReloadTimer = Time.time + 10f;
+                        ReloadTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
                         SAIN.SelfActions.TryReload();
                     }
                     else if (CheckMagTimer < Time.time && NextCheckTimer < Time.time)
                     {
-                        NextCheckTimer = Time.time + 3f;
+                        NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
                         if (EFTMath.RandomBool())
                         {
                             SAIN.Player.HandsController.FirearmsAnimator.CheckAmmo();
@@ -76,7 +77,7 @@ namespace SAIN.Layers.Combat.Solo
                     }
                     else if (CheckChamberTimer < Time.time && NextCheckTimer < Time.time)
                     {
-                        NextCheckTimer = Time.time + 3f;
+                        NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
                         if (EFTMath.RandomBool())
                         {
                             SAIN.Player.HandsController.FirearmsAnimator.CheckChamber();
@@ -108,14 +109,14 @@ namespace SAIN.Layers.Combat.Solo
                     HaveTalked = true;
                     if (EFTMath.RandomBool(40))
                     {
-                        SAIN.Talk.Say(EPhraseTrigger.MumblePhrase, ETagStatus.Aware, true);
+                        SAIN.Talk.Say(EPhraseTrigger.OnMutter, ETagStatus.Aware, true);
                     }
                 }
             }
             if (SAIN.Enemy == null && (BotOwner.Position - TargetPosition.Value).sqrMagnitude < 30f * 30f)
             {
-                SAIN.Decision.ResetDecisions();
-                return;
+                //SAIN.Decision.ResetDecisions();
+                //return;
             }
             CheckShouldSprint();
             Search.Search(SprintEnabled);

@@ -13,9 +13,9 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
-                Vector3 dirEnemy = (SAIN.Position - EnemyPosition).normalized;
-                Vector3 dirBot = EnemyPerson.Transform.LookDirection.normalized;
-                float dot = Vector3.Dot(dirEnemy, dirBot);
+                Vector3 directionToBot = (SAIN.Position - EnemyPosition).normalized;
+                Vector3 enemyLookDirection = EnemyPerson.Transform.LookDirection.normalized;
+                float dot = Vector3.Dot(directionToBot, enemyLookDirection);
                 return dot >= 0.9f;
                 //Vector3 dirToEnemy = Vector.NormalizeFastSelf(BotOwner.LookSensor._headPoint - EnemyPosition);
                 //return Vector.IsAngLessNormalized(dirToEnemy, EnemyPerson.Transform.LookDirection, 0.9659258f);

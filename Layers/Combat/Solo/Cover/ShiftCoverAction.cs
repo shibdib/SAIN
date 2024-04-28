@@ -79,7 +79,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         var shiftCoverTarget = coverPoints[i];
 
                         if (shiftCoverTarget.CoverHeight > coverInUse.CoverHeight
-                            && shiftCoverTarget.CheckPathSafety(SAIN)
+                            && (!SAINPlugin.LoadedPreset.GlobalSettings.Cover.ShiftCoverMustBeSafe 
+                                ||  shiftCoverTarget.CheckPathSafety(SAIN))
                             && !UsedPoints.Contains(shiftCoverTarget))
                         {
                             for (int j = 0; j < UsedPoints.Count; j++)
@@ -105,6 +106,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
+            SAIN.Decision.EnemyDecisions.ShiftCoverComplete = false;
         }
 
         private readonly List<CoverPoint> UsedPoints = new List<CoverPoint>();

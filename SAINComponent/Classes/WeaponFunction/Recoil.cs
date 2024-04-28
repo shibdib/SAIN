@@ -85,6 +85,16 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             Vector3 newRecoil = new Vector3(randomHorizRecoil, randomvertRecoil, randomHorizRecoil);
             newRecoil = MathHelpers.VectorClamp(newRecoil, -maxrecoil, maxrecoil) * RecoilMultiplier;
 
+            if (Player.IsInPronePose)
+            {
+                newRecoil *= 0.8f;
+            }
+            var shootController = BotOwner.WeaponManager.ShootController;
+            if (shootController != null && shootController.IsAiming == true)
+            {
+                newRecoil *= 0.8f;
+            }
+
             Vector3 vector = newRecoil + currentRecoil;
             return vector;
         }
