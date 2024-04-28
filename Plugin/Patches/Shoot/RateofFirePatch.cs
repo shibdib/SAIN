@@ -72,7 +72,7 @@ namespace SAIN.Patches.Shoot
 
             var curve = settings.Curv;
             float angleTime = curve.AimAngCoef.Evaluate(angle);
-            float distanceTime = curve.AimTime2Dist.Evaluate(distance * 1.1f);
+            float distanceTime = curve.AimTime2Dist.Evaluate(distance);
 
             float calculatedAimTime = angleTime * distanceTime * settings.Current.CurrentAccuratySpeed;
             if (panicing)

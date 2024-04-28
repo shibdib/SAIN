@@ -38,7 +38,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float REACH_DIST_RUN = 0.65f;
+        public float REACH_DIST_RUN = 0.8f;
 
         [Hidden]
         [JsonIgnore]

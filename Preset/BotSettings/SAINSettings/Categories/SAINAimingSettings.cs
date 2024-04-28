@@ -52,11 +52,11 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Default(2f)]
         [MinMax(0.1f, 6f, 100f)]
         [Advanced]
-        public float COEF_IF_MOVE = 2f;
+        public float COEF_IF_MOVE = 1.5f;
 
         [Hidden]
         [JsonIgnore]
-        public float TIME_COEF_IF_MOVE = 2f;
+        public float TIME_COEF_IF_MOVE = 1.5f;
 
         [Name("Max Aim Time")]
         [Description(null)]
@@ -95,7 +95,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Default(0.5f)]
         [MinMax(0.1f, 0.99f, 100f)]
         [Advanced]
-        public float BASE_HIT_AFFECTION_DELAY_SEC = 1f;
+        public float BASE_HIT_AFFECTION_DELAY_SEC = 0.77f;
 
         [NameAndDescription(
             "Minimum Hit Reaction Angle",
@@ -115,7 +115,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float FIRST_CONTACT_ADD_SEC = 0.2f;
+        public float FIRST_CONTACT_ADD_SEC = 0.1f;
 
         [Hidden]
         [JsonIgnore]

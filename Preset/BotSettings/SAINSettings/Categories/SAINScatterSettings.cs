@@ -15,20 +15,20 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Default(1.5f)]
         [MinMax(1f, 3f, 100f)]
         [Advanced]
-        public float HandDamageRecoilMulti = 1.5f;
+        public float HandDamageRecoilMulti = 1.35f;
 
         [Name("Arm Injury Scatter Multiplier")]
         [Description("Increase scatter when a bots arms are injured.")]
         [Default(1.5f)]
         [MinMax(1f, 5f, 100f)]
         [Advanced]
-        public float HandDamageScatteringMinMax = 1.5f;
+        public float HandDamageScatteringMinMax = 1.35f;
 
         [Name("Arm Injury Aim Speed Multiplier")]
         [Description("Increase scatter when a bots arms are injured.")]
         [Default(1.5f)]
         [MinMax(1f, 5f, 100f)]
         [Advanced]
-        public float HandDamageAccuracySpeed = 1.5f;
+        public float HandDamageAccuracySpeed = 1.35f;
     }
 }

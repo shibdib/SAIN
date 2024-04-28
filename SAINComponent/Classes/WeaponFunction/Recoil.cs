@@ -94,16 +94,24 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         float CalcVertRecoil(float recoilVal)
         {
             float result = recoilVal / 100;
+            if (ModDetection.RealismLoaded)
+            {
+                result = recoilVal / 150;
+            }
             result *= SAIN.Info.WeaponInfo.FinalModifier;
-            result *= UnityEngine.Random.Range(0.66f, 1.33f);
+            result *= UnityEngine.Random.Range(0.8f, 1.2f);
             return result;
         }
 
         float CalcHorizRecoil(float recoilVal)
         {
             float result = recoilVal / 200;
+            if (ModDetection.RealismLoaded)
+            {
+                result = recoilVal / 300;
+            }
             result *= SAIN.Info.WeaponInfo.FinalModifier;
-            result *= UnityEngine.Random.Range(0.66f, 1.33f);
+            result *= UnityEngine.Random.Range(0.8f, 1.2f);
             return result;
         }
 

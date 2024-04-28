@@ -34,10 +34,10 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("Recoil Decay p/frame")]
         [Description("How much to decay the recoil impulse per frame. 0.75 means 25% of the recoil will be removed per frame.")]
-        [Default(0.4f)]
+        [Default(0.5f)]
         [Percentage01to99]
         [Advanced]
-        public float RecoilDecay = 0.45f;
+        public float RecoilDecay = 0.5f;
 
         [Name("Ammo Shootability" )]
         [Description(

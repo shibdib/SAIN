@@ -74,7 +74,7 @@ namespace SAIN
                         containedItem = mod.Slots[0].ContainedItem;
                     }
                     if (containedItem == null
-                        || IsModSuppressor((Mod)containedItem, out var suppressor))
+                        || (containedItem is Mod modItem && IsModSuppressor(modItem, out var suppressor)))
                     {
                         realismLoudness += mod.Template.Loudness;
                     }
