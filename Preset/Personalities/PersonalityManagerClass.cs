@@ -300,6 +300,7 @@ namespace SAIN.Preset.Personalities
                         SearchBaseTime = 240f,
                         PowerLevelMax = 125f,
                         AggressionMultiplier = 1f,
+                        CanRespondToVoice = false,
 
                         Sneaky = true,
                         SneakyPose = 0f,
@@ -345,6 +346,7 @@ namespace SAIN.Preset.Personalities
                         AggressionMultiplier = 1f,
                         ShiftCoverTimeMultiplier = 0.66f,
                         CanBegForLife = true,
+                        CanRespondToVoice = false,
 
                         SearchHasEnemySpeed = 0f,
                         SearchHasEnemyPose = 1f,
@@ -381,6 +383,7 @@ namespace SAIN.Preset.Personalities
                         AggressionMultiplier = 1f,
                         CanShiftCoverPosition = false,
                         CanBegForLife = true,
+                        CanRespondToVoice = false,
 
                         SearchHasEnemySpeed = 0f,
                         SearchHasEnemyPose = 1f,

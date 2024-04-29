@@ -171,6 +171,7 @@ namespace SAIN
     public enum SAINSoundType
     {
         FootStep,
+        Prone,
         Reload,
         Aim,
         GrenadePin,

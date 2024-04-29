@@ -17,9 +17,84 @@ using System;
 using System.Linq;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent;
+using Audio.Data;
 
 namespace SAIN.Patches.Generic
 {
+    public class AimSoundPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            _AimingInterruptedByOverlapField = AccessTools.Field(typeof(Player.FirearmController), "AimingInterruptedByOverlap");
+            return AccessTools.Method(typeof(Player.FirearmController), "SetAim", new[] { typeof(bool) }); ;
+        }
+
+        private static FieldInfo _AimingInterruptedByOverlapField;
+
+        [PatchPrefix]
+        public static bool PatchPrefix(ref Player.FirearmController __instance, bool value, ref Player ____player)
+        {
+            if (__instance.Blindfire)
+            {
+                return false;
+            }
+            if (__instance.Item.IsOneOff)
+            {
+                value = false;
+            }
+            _AimingInterruptedByOverlapField.SetValue(__instance, false);
+            bool isAiming = __instance.IsAiming;
+            __instance.CurrentOperation.SetAiming(value);
+            ____player.ProceduralWeaponAnimation.CheckShouldMoveWeaponCloser();
+            ____player.Boolean_0 &= !value;
+            if (isAiming == __instance.IsAiming)
+            {
+                return false;
+            }
+            float num = __instance.TotalErgonomics / 100f - 1f;
+            float volume = (1.5f * num * num + 0.25f) * (1f - ____player.Skills.DrawSound);
+            ____player.method_46(volume * SAINPlugin.LoadedPreset.GlobalSettings.General.AimSoundModifier);
+            return false;
+        }
+    }
+
+    public class TurnSoundPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "method_47");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref Player __instance, ref float ____lastTimeTurnSound, ref float ___maxLengthTurnSound)
+        {
+            if (Time.time - ____lastTimeTurnSound >= ___maxLengthTurnSound && SAINPlugin.BotController != null)
+            {
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.FootStep, __instance, 50f);
+            }
+        }
+    }
+
+    public class ProneSoundPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "PlaySoundBank");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref Player __instance, ref string soundBank)
+        {
+            if (soundBank == "Prone" 
+                && __instance.SinceLastStep >= 0.5f 
+                && SAINPlugin.BotController?.AISoundPlayed != null 
+                && __instance.CheckSurface())
+            {
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Prone, __instance, 40f);
+            }
+        }
+    }
+
     public class AimRotateSpeedPatch : ModulePatch
     {
         private static Type _aimingDataType;
