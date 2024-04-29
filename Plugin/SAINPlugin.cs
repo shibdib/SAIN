@@ -105,7 +105,6 @@ namespace SAIN
                 typeof(Patches.Generic.GetBotSpawner),
                 typeof(Patches.Generic.GrenadeThrownActionPatch),
                 typeof(Patches.Generic.GrenadeExplosionActionPatch),
-                typeof(Patches.Generic.PlayerAimSoundVolumePatch),
                 typeof(Patches.Generic.AimRotateSpeedPatch),
                 typeof(Patches.Generic.OnMakingShotRecoilPatch),
                 typeof(Patches.Generic.GetHitPatch),

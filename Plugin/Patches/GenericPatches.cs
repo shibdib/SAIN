@@ -22,43 +22,6 @@ using EFT.UI;
 
 namespace SAIN.Patches.Generic
 {
-    public class PlayerAimSoundVolumePatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            _AimingInterruptedByOverlapField = AccessTools.Field(typeof(Player.FirearmController), "AimingInterruptedByOverlap");
-            return AccessTools.Method(typeof(Player.FirearmController), "SetAim", new[] { typeof(bool) }); ;
-        }
-
-        private static FieldInfo _AimingInterruptedByOverlapField;
-
-        [PatchPrefix]
-        public static bool PatchPrefix(ref Player.FirearmController __instance, bool value, ref Player ____player)
-        {
-            if (__instance.Blindfire)
-            {
-                return false;
-            }
-            if (__instance.Item.IsOneOff)
-            {
-                value = false;
-            }
-            _AimingInterruptedByOverlapField.SetValue(__instance, false);
-            bool isAiming = __instance.IsAiming;
-            __instance.CurrentOperation.SetAiming(value);
-            ____player.ProceduralWeaponAnimation.CheckShouldMoveWeaponCloser();
-            ____player.Boolean_0 &= !value;
-            if (isAiming == __instance.IsAiming)
-            {
-                return false;
-            }
-            float num = __instance.TotalErgonomics / 100f - 1f;
-            float volume = (1.5f * num * num + 0.25f) * (1f - ____player.Skills.DrawSound);
-            ____player.method_46(volume * SAINPlugin.LoadedPreset.GlobalSettings.General.AimSoundModifier);
-            return false;
-        }
-    }
-
     public class AimRotateSpeedPatch : ModulePatch
     {
         private static Type _aimingDataType;
