@@ -130,6 +130,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Dispose()
         {
+            SprintController?.Dispose();
         }
 
         public BlindFireController BlindFire { get; private set; }

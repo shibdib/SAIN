@@ -172,6 +172,7 @@ namespace SAIN
     {
         FootStep,
         Prone,
+        Looting,
         Reload,
         Aim,
         GrenadePin,

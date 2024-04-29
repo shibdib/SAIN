@@ -7,6 +7,9 @@ using SAIN.Helpers;
 using SAIN.SAINComponent;
 using EFT.Utilities;
 using EFT.Ballistics;
+using System;
+using Comfort.Common;
+using static ChartAndGraph.ChartItemEvents;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
@@ -44,8 +47,6 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Update()
         {
-            if (BotOwner == null || SAIN == null) return;
-
             if (CanTalk && TimeUntilCanTalk < Time.time)
             {
                 GroupTalk.Update();
@@ -145,12 +146,36 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void SendSayCommand(EPhraseTrigger type, ETagStatus mask)
         {
-            BotOwner.BotsGroup.GroupTalk.PhraseSad(BotOwner, type);
-            Player.Say(type, false, 0f, mask);
-            PersonalPhraseDict[type].TimeLastSaid = Time.time;
-            if (SAINPlugin.DebugMode)
+            Say(type, false, 0f, mask, 100, mask == ETagStatus.Combat);
+        }
+
+        private void Say(EPhraseTrigger trigger, bool demand = false, float delay = 0f, ETagStatus mask = (ETagStatus)0, int probability = 100, bool aggressive = false)
+        {
+            if (trigger == EPhraseTrigger.MumblePhrase)
             {
-                //Logger.LogDebug(type);
+                trigger = ((aggressive || Time.time < Player.Awareness) ? EPhraseTrigger.OnFight : EPhraseTrigger.OnMutter);
+            }
+            if (!Player.Speaker.OnDemandOnly || demand)
+            {
+                if (Singleton<BotEventHandler>.Instantiated)
+                {
+                    Singleton<BotEventHandler>.Instance.SayPhrase(Player, trigger);
+                }
+                if (demand || probability > 99 || probability > UnityEngine.Random.Range(0, 100))
+                {
+                    ETagStatus etagStatus = (aggressive || Player.Awareness > Time.time) ? ETagStatus.Combat : ETagStatus.Unaware;
+
+                    SAINPlugin.BotController?.PlayerTalk?.Invoke(trigger, etagStatus, Player);
+                    BotOwner.BotsGroup.GroupTalk.PhraseSad(BotOwner, trigger);
+                    PersonalPhraseDict[trigger].TimeLastSaid = Time.time;
+
+                    if (delay > 0f)
+                    {
+                        Player.Speaker.Queue(trigger, Player.HealthStatus | mask | etagStatus, delay, demand);
+                        return;
+                    }
+                    Player.Speaker.Play(trigger, Player.HealthStatus | mask | etagStatus, demand, null);
+                }
             }
         }
 

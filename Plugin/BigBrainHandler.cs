@@ -54,6 +54,8 @@ namespace SAIN
                 "Pmc",
                 "AssaultHaveEnemy",
                 "Request",
+                "FightReqNull",
+                "PeacecReqNull",
             };
 
         static BigBrainHandler()

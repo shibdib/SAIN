@@ -33,10 +33,16 @@ namespace SAIN.SAINComponent.Classes
         {
         }
 
+        public bool FirstContactOccured => Vision.FirstContactOccured;
+
+        public bool FirstContactReported = false;
+        public bool ShallReportRepeatContact => Vision.ShallReportRepeatContact;
+
         public void DeleteInfo(EDamageType _)
         {
             SAIN.EnemyController.RemoveEnemy(EnemyPlayer);
         }
+
 
         public bool EnemyIsSuppressed
         {
@@ -71,26 +77,6 @@ namespace SAIN.SAINComponent.Classes
         }
 
         private float _nextUpdateDistTime;
-
-        public float TimeSinceSquadSensed 
-        { 
-            get
-            {
-                if (_nextCheckSenseTime < Time.time)
-                {
-                    _nextCheckSenseTime = Time.time + 1f;
-                    float min = float.MaxValue;
-                    foreach (var member in SAIN.Squad.Members)
-                    {
-
-                    }
-                }
-                return _timeSinceSquadSensed;
-            } 
-        }
-
-        private float _timeSinceSquadSensed;
-        private float _nextCheckSenseTime;
 
         public void UpdateKnownPosition(Vector3 position, bool arrived = false, bool seen = false)
         {

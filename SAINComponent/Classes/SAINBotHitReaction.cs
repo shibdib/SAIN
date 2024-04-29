@@ -10,6 +10,7 @@ using SAIN.SAINComponent.SubComponents;
 using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
+using SAIN.Helpers;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -23,34 +24,43 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            if (Player != null)
-            {
-                Player.BeingHitAction += GetHit;
-            }
-            else
-            {
-                Logger.LogAndNotifyError("Player is Null in SAINBotHitReaction");
-            }
+            subscribe();
         }
+
 
         public void Update()
         {
+            subscribe();
         }
 
         public void Dispose()
         {
-            if (Player != null)
+            if (_subscribed && Player != null)
             {
                 Player.BeingHitAction -= GetHit;
             }
         }
 
+        private void subscribe()
+        {
+            if (!_subscribed && Player != null)
+            {
+                _subscribed = true;
+                Player.BeingHitAction += GetHit;
+            }
+        }
+
+        bool _subscribed;
         private float HitReceiveTime = 0.33f;
         private float HitRecoverBaseTime = 1f;
 
         public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
-            PlayerWhoLastShotMe = damageInfo.Player;
+            IPlayer player = damageInfo.Player?.iPlayer;
+            if (player != null)
+            {
+                PlayerWhoLastShotMe = EFTInfo.GetPlayer(player);
+            }
             switch (bodyPart)
             {
                 case EBodyPart.Head:
@@ -71,13 +81,13 @@ namespace SAIN.SAINComponent.Classes
                     GetHitInArms(damageInfo); 
                     break;
             }
-            if (PlayerWhoLastShotMe?.IsAI == false)
+            if (PlayerWhoLastShotMe != null && !PlayerWhoLastShotMe.IsAI)
             {
-                Logger.LogDebug($"{BotOwner.name} is hit in {HitReaction}");
+                Logger.LogAndNotifyDebug($"{BotOwner.name} is hit in {HitReaction}");
             }
         }
 
-        public GInterface94 PlayerWhoLastShotMe { get; private set; }
+        public Player PlayerWhoLastShotMe { get; private set; }
 
         private void GetHitInLegs(DamageInfo damageInfo)
         {

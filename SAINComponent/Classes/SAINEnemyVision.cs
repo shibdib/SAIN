@@ -54,6 +54,10 @@ namespace SAIN.SAINComponent.Classes
             UpdateCanShoot(canshoot);
         }
 
+        public bool FirstContactOccured { get; private set; }
+        public bool ShallReportRepeatContact { get; set; }
+        public bool ShallReportLostVisual { get; set; }
+
         private bool CheckLineOfSight(bool noDistRestrictions = false)
         {
             if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
@@ -79,14 +83,8 @@ namespace SAIN.SAINComponent.Classes
             return false;
         }
 
-        private bool CheckInVisionCone()
-        {
-            Vector3 enemyDir = EnemyPosition - BotOwner.Position;
-            Vector3 lookDir = BotOwner.LookDirection;
-            float angle = Vector3.Angle(lookDir, enemyDir);
-            float maxVisionCone = BotOwner.Settings.FileSettings.Core.VisibleAngle / 2f;
-            return angle <= maxVisionCone;
-        }
+        private const float _repeatContactMinSeenTime = 12f;
+        private const float _lostContactMinSeenTime = 12f;
 
         public void UpdateVisible(bool visible)
         {
@@ -95,22 +93,35 @@ namespace SAIN.SAINComponent.Classes
 
             if (IsVisible)
             {
-                TimeLastSeen = Time.time;
                 if (!wasVisible)
                 {
                     VisibleStartTime = Time.time;
                 }
+                if (!wasVisible 
+                    && TimeSinceSeen >= _repeatContactMinSeenTime)
+                {
+                    ShallReportRepeatContact = true;
+                }
                 if (!Seen)
                 {
+                    FirstContactOccured = true;
                     TimeFirstSeen = Time.time;
                     Seen = true;
                 }
+                TimeLastSeen = Time.time;
                 LastSeenPosition = EnemyPerson.Position;
                 Enemy.UpdateKnownPosition(EnemyPerson.Position, false, true);
             }
 
             if (!IsVisible)
             {
+                if (Seen 
+                    && TimeSinceSeen > _lostContactMinSeenTime 
+                    && _nextReportLostVisualTime < Time.time)
+                {
+                    _nextReportLostVisualTime = Time.time + 90f;
+                    ShallReportLostVisual = true;
+                }
                 VisibleStartTime = -1f;
             }
 
@@ -119,6 +130,8 @@ namespace SAIN.SAINComponent.Classes
                 LastChangeVisionTime = Time.time;
             }
         }
+
+        private float _nextReportLostVisualTime;
 
         private void CheckForAimingDelay()
         {

@@ -28,19 +28,19 @@ namespace SAIN.Patches.Talk
         public static bool PatchPrefix(ref Player __instance, ref EPhraseTrigger @event, ref ETagStatus mask, ref bool aggressive)
         {
             // If handling of bots talking is disabled, let the original method run
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.DisableBotTalkPatching)
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.DisableBotTalkPatching || __instance.HealthController?.IsAlive == false)
             {
                 return true;
             }
 
-            if (__instance.HealthController?.IsAlive == false)
+            switch (@event)
             {
-                return false;
-            }
-
-            if (__instance.IsAI && @event == EPhraseTrigger.OnEnemyShot)
-            {
-
+                case EPhraseTrigger.OnDeath:
+                case EPhraseTrigger.OnBeingHurt:
+                case EPhraseTrigger.OnAgony:
+                    return true;
+                default:
+                    break;
             }
 
             if (!__instance.IsAI)
@@ -48,69 +48,19 @@ namespace SAIN.Patches.Talk
                 SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
                 return true;
             }
-            else
+            else if (SAINPlugin.GetSAIN(__instance.AIData.BotOwner, out _, nameof(PlayerTalkPatch)))
             {
-                var stackTrace = Environment.StackTrace;
-                bool fromSAIN = stackTrace.Contains(nameof(SAINComponentClass.Talk)) || stackTrace.Contains(nameof(SAINBotTalkClass));
-                if (!fromSAIN && PatchHelpers.BadTriggers.Contains(@event))
-                {
-                    if (SAINPlugin.DebugMode)
-                    {
-                        //Logger.LogInfo($"PlayerTalkPatch: Blocked {@event}");
-                    }
-                    return false;
-                }
-
-                if (PatchHelpers.CheckTalkEvent(__instance, @event))
-                {
-                    if (SAINPlugin.DebugMode)
-                    {
-                        //Logger.LogInfo($"PlayerTalkPatch: Allowed {@event}");
-                    }
-
-                    BotOwner botOwner = __instance?.AIData?.BotOwner;
-                    if (botOwner != null)
-                    {
-                        switch (@event)
-                        {
-                            case EPhraseTrigger.OnEnemyShot:
-                            case EPhraseTrigger.OnWeaponReload:
-                            case EPhraseTrigger.EnemyHit:
-                            case EPhraseTrigger.OnOutOfAmmo:
-                                if (EFTMath.RandomBool(75))
-                                {
-                                    return false;
-                                }
-                                break;
-
-                            default:
-                                break;
-                        }
-                    }
-
-                    SAINPlugin.BotController?.PlayerTalk(@event, mask, __instance);
-                    return true;
-                }
-
-                if (SAINPlugin.DebugMode)
-                {
-                    //Logger.LogInfo($"PlayerTalkPatch: Blocked {@event}");
-                }
-
                 return false;
             }
-
+            return true;
         }
     }
 
-    public class TalkDisablePatch1 : ModulePatch
+    public class BotTalkPatch : ModulePatch
     {
-        private static PropertyInfo BotTalk;
-
         protected override MethodBase GetTargetMethod()
         {
-            BotTalk = AccessTools.Property(typeof(BotOwner), "BotTalk");
-            return AccessTools.Method(BotTalk.PropertyType, "Say");
+            return AccessTools.Method(typeof(BotTalk), "Say");
         }
 
         [PatchPrefix]
@@ -121,151 +71,41 @@ namespace SAIN.Patches.Talk
             {
                 return true;
             }
-
             if (___botOwner_0.HealthController?.IsAlive == false)
             {
                 return false;
             }
-
-            return PatchHelpers.AllowDefaultBotTalk(___botOwner_0, type, additionalMask);
+            if (SAINPlugin.GetSAIN(___botOwner_0, out _, nameof(BotTalkPatch)))
+            {
+                return false;
+            }
+            return true;
         }
     }
 
-    public class TalkDisablePatch2 : ModulePatch
+    public class BotTalkManualUpdatePatch : ModulePatch
     {
         private static PropertyInfo BotTalk;
 
         protected override MethodBase GetTargetMethod()
         {
             BotTalk = AccessTools.Property(typeof(BotOwner), "BotTalk");
-            return AccessTools.Method(BotTalk.PropertyType, "method_5");
+            return AccessTools.Method(BotTalk.PropertyType, "ManualUpdate");
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix()
+        public static bool PatchPrefix(ref BotOwner ___botOwner_0)
         {
             // If handling of bots talking is disabled, let the original method run
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.DisableBotTalkPatching)
             {
                 return true;
             }
-
-            return false;
-        }
-    }
-
-    public class TalkDisablePatch3 : ModulePatch
-    {
-        private static PropertyInfo BotTalk;
-
-        protected override MethodBase GetTargetMethod()
-        {
-            BotTalk = AccessTools.Property(typeof(BotOwner), "BotTalk");
-            return AccessTools.Method(BotTalk.PropertyType, "method_4");
-        }
-
-        [PatchPrefix]
-        public static bool PatchPrefix()
-        {
-            // If handling of bots talking is disabled, let the original method run
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.DisableBotTalkPatching)
+            if (SAINPlugin.GetSAIN(___botOwner_0, out _, nameof(BotTalkPatch)))
             {
-                return true;
+                return false;
             }
-
-            return false;
+            return true;
         }
-    }
-
-    public class TalkDisablePatch4 : ModulePatch
-    {
-        private static PropertyInfo BotTalk;
-
-        protected override MethodBase GetTargetMethod()
-        {
-            BotTalk = AccessTools.Property(typeof(BotOwner), "BotTalk");
-            return AccessTools.Method(BotTalk.PropertyType, "TrySay", new Type[] { typeof(EPhraseTrigger), typeof(ETagStatus?), typeof(bool) });
-        }
-
-        [PatchPrefix]
-        public static bool PatchPrefix()
-        {
-            // If handling of bots talking is disabled, let the original method run
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.DisableBotTalkPatching)
-            {
-                return true;
-            }
-
-            return false;
-        }
-    }
-
-    public class PatchHelpers
-    {
-        public static bool BotInGroup(BotOwner botOwner)
-        {
-            return botOwner?.BotsGroup?.MembersCount > 1;
-        }
-
-        public static bool CheckTalkEvent(Player player, EPhraseTrigger trigger)
-        {
-            bool result = player.IsAI && (BotInGroup(player.AIData.BotOwner) || GoodSoloTriggers.Contains(trigger));
-
-            return result;
-        }
-
-        public static bool AllowDefaultBotTalk(BotOwner botOwner, EPhraseTrigger trigger, ETagStatus? mask)
-        {
-            var component = botOwner.GetComponent<SAINComponentClass>();
-            if (component == null)
-            {
-                return true;
-            }
-            if (BotInGroup(botOwner))
-            {
-                if (GoodGroupTriggers.Contains(trigger))
-                {
-                    component?.Talk.Say(trigger, mask);
-                }
-            }
-            else
-            {
-                if (GoodSoloTriggers.Contains(trigger))
-                {
-                    component?.Talk.Say(trigger, mask);
-                }
-            }
-
-            return false;
-        }
-
-        public static List<EPhraseTrigger> GoodGroupTriggers = new List<EPhraseTrigger>()
-        {
-            EPhraseTrigger.OnEnemyGrenade,
-            EPhraseTrigger.OnFriendlyDown,
-            EPhraseTrigger.OnFirstContact,
-            EPhraseTrigger.FriendlyFire,
-            EPhraseTrigger.EnemyDown,
-            EPhraseTrigger.OnAgony,
-            EPhraseTrigger.SniperPhrase,
-            EPhraseTrigger.MumblePhrase,
-            EPhraseTrigger.OnDeath
-        };
-
-        public static List<EPhraseTrigger> GoodSoloTriggers = new List<EPhraseTrigger>()
-        {
-            EPhraseTrigger.OnAgony,
-            EPhraseTrigger.OnFight,
-            EPhraseTrigger.OnDeath
-        };
-
-        public static List<EPhraseTrigger> BadTriggers = new List<EPhraseTrigger>()
-        {
-            EPhraseTrigger.OnWeaponReload,
-            EPhraseTrigger.OnOutOfAmmo,
-            EPhraseTrigger.NeedAmmo,
-            EPhraseTrigger.EnemyHit,
-            EPhraseTrigger.OnEnemyShot,
-        };
     }
 }

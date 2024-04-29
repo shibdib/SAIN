@@ -18,10 +18,11 @@ using System.Linq;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent;
 using Audio.Data;
+using EFT.UI;
 
 namespace SAIN.Patches.Generic
 {
-    public class AimSoundPatch : ModulePatch
+    public class PlayerAimSoundVolumePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -55,43 +56,6 @@ namespace SAIN.Patches.Generic
             float volume = (1.5f * num * num + 0.25f) * (1f - ____player.Skills.DrawSound);
             ____player.method_46(volume * SAINPlugin.LoadedPreset.GlobalSettings.General.AimSoundModifier);
             return false;
-        }
-    }
-
-    public class TurnSoundPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(Player), "method_47");
-        }
-
-        [PatchPrefix]
-        public static void PatchPrefix(ref Player __instance, ref float ____lastTimeTurnSound, ref float ___maxLengthTurnSound)
-        {
-            if (Time.time - ____lastTimeTurnSound >= ___maxLengthTurnSound && SAINPlugin.BotController != null)
-            {
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.FootStep, __instance, 50f);
-            }
-        }
-    }
-
-    public class ProneSoundPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(Player), "PlaySoundBank");
-        }
-
-        [PatchPrefix]
-        public static void PatchPrefix(ref Player __instance, ref string soundBank)
-        {
-            if (soundBank == "Prone" 
-                && __instance.SinceLastStep >= 0.5f 
-                && SAINPlugin.BotController?.AISoundPlayed != null 
-                && __instance.CheckSurface())
-            {
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Prone, __instance, 40f);
-            }
         }
     }
 
@@ -149,21 +113,6 @@ namespace SAIN.Patches.Generic
             if (SAINPlugin.GetSAIN(___botOwner_0, out var sain, nameof(GetHitPatch)))
             {
             }
-        }
-    }
-
-    internal class ForceAIBrainPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod() => typeof(StandartBotBrain).GetMethod("Activate");
-        [PatchPrefix]
-        public static bool PatchPrefix(ref BotOwner ___botOwner_0)
-        {
-            if (HelpersGClass.UpdateBaseBrain(___botOwner_0))
-            {
-                SAIN.Logger.NotifyWarning("Updated BaseBrain");
-                return false;
-            }
-            return true;
         }
     }
 

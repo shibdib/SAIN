@@ -15,22 +15,17 @@ namespace SAIN.SAINComponent.Classes.Talk
     {
         public EnemyTalk(SAINComponentClass bot) : base(bot)
         {
-            _randomizationFactor = Random.Range(0.66f, 1.33f);
         }
 
         public void Init()
         {
+            _randomizationFactor = Random.Range(0.66f, 1.33f);
             UpdateSettings();
             PresetHandler.PresetsUpdated += UpdateSettings;
         }
 
         public void Update()
         {
-            if (PersonalitySettings == null || FileSettings == null)
-            {
-                return;
-            }
-
             float time = Time.time;
             if (_nextCheckTime < time)
             {
@@ -197,7 +192,14 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             if (tauntEnemy)
             {
-                SAIN.Talk.Say(EPhraseTrigger.OnFight, ETagStatus.Combat, true);
+                if (enemy != null && !enemy.IsVisible && enemy.TimeSinceSeen > 4f && EFTMath.RandomBool())
+                {
+                    SAIN.Talk.Say(EPhraseTrigger.OnLostVisual, null, true);
+                }
+                else
+                {
+                    SAIN.Talk.Say(EPhraseTrigger.OnFight, ETagStatus.Combat, true);
+                }
             }
 
             return tauntEnemy;

@@ -238,6 +238,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool PathToEnemy(NavMeshPath path)
         {
+            SAINEnemy enemy = SAIN.Enemy;
+            if (enemy != null 
+                && enemy.Path.PathToEnemy != null 
+                && !SAINBotSpaceAwareness.ArePathsDifferent(path, enemy.Path.PathToEnemy, 0.5f, 0.1f))
+            {
+                return false;
+            }
             for (int i = 1; i < path.corners.Length - 1; i++)
             {
                 var corner = path.corners[i];

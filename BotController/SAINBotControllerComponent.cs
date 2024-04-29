@@ -1,16 +1,20 @@
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
+using Interpolation;
 using SAIN.BotController.Classes;
 using SAIN.Components.BotController;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
+using static RootMotion.FinalIK.AimPoser;
+using static RootMotion.FinalIK.InteractionTrigger;
 
 namespace SAIN.Components
 {
@@ -33,7 +37,7 @@ namespace SAIN.Components
         public WeatherVisionClass WeatherVision { get; private set; } = new WeatherVisionClass();
         public BotSpawnController BotSpawnController { get; private set; } = new BotSpawnController();
         public BotSquads BotSquads { get; private set; } = new BotSquads();
-        
+
         private void Awake()
         {
             GameWorld.OnDispose += Dispose;
@@ -75,6 +79,12 @@ namespace SAIN.Components
             //PathManager.Update();
             //AddNavObstacles();
             //UpdateObstacles();
+        }
+
+        public IEnumerator PlayShootSoundCoroutine(Player player)
+        {
+            yield return null;
+            AudioHelpers.TryPlayShootSound(player);
         }
 
         private void PlayerTalked(EPhraseTrigger phrase, ETagStatus mask, Player player)
@@ -228,31 +238,31 @@ namespace SAIN.Components
 
         private void GrenadeExplosion(Vector3 explosionPosition, string playerProfileID, bool isSmoke, float smokeRadius, float smokeLifeTime)
         {
-            if (playerProfileID == null)
+            if (!Singleton<BotEventHandler>.Instantiated || playerProfileID == null)
             {
                 return;
             }
             Player player = EFTInfo.GetPlayer(playerProfileID);
-            if (player == null)
+            if (player != null)
             {
-                return;
-            }
-            Vector3 position = player.Position;
-            if (isSmoke)
-            {
-                HelpersGClass.PlaySound(player, explosionPosition, 50f, AISoundType.gun);
-                float radius = smokeRadius * HelpersGClass.SMOKE_GRENADE_RADIUS_COEF;
-                foreach (var keyValuePair in DefaultController.Groups())
+                if (!isSmoke)
                 {
-                    foreach (BotsGroup botGroupClass in keyValuePair.Value.GetGroups(true))
+                    Singleton<BotEventHandler>.Instance?.PlaySound(player, explosionPosition, 200f, AISoundType.gun);
+                }
+                else
+                {
+                    Singleton<BotEventHandler>.Instance?.PlaySound(player, explosionPosition, 50f, AISoundType.gun);
+
+                    float radius = smokeRadius * HelpersGClass.SMOKE_GRENADE_RADIUS_COEF;
+                    Vector3 position = player.Position;
+                    foreach (var keyValuePair in DefaultController.Groups())
                     {
-                        botGroupClass.AddSmokePlace(explosionPosition, smokeLifeTime, radius, position);
+                        foreach (BotsGroup botGroupClass in keyValuePair.Value.GetGroups(true))
+                        {
+                            botGroupClass.AddSmokePlace(explosionPosition, smokeLifeTime, radius, position);
+                        }
                     }
                 }
-            }
-            if (!isSmoke)
-            {
-                HelpersGClass.PlaySound(player, explosionPosition, 200f, AISoundType.gun);
             }
         }
 

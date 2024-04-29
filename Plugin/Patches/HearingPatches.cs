@@ -7,6 +7,7 @@ using SAIN.Components.Helpers;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -16,12 +17,9 @@ namespace SAIN.Patches.Hearing
 {
     public class HearingSensorPatch : ModulePatch
     {
-        private static PropertyInfo HearingSensor;
-
         protected override MethodBase GetTargetMethod()
         {
-            HearingSensor = AccessTools.Property(typeof(BotOwner), "HearingSensor");
-            return AccessTools.Method(HearingSensor.PropertyType, "method_0");
+            return AccessTools.Method(typeof(BotHearingSensor), "method_0");
         }
 
         [PatchPrefix]
@@ -63,11 +61,15 @@ namespace SAIN.Patches.Hearing
         [PatchPrefix]
         public static void PatchPrefix(Player __instance)
         {
-            AudioHelpers.TryPlayShootSound(__instance);
+            var botController = SAINPlugin.BotController;
+            if (botController != null)
+            {
+                botController.StartCoroutine(botController.PlayShootSoundCoroutine(__instance));
+            }
         }
     }
 
-    public class BetterAudioPatch : ModulePatch
+    public class SoundClipNameCheckerPatch : ModulePatch
     {
         private static MethodInfo _Player;
         private static FieldInfo _PlayerBridge;
@@ -86,7 +88,63 @@ namespace SAIN.Patches.Hearing
             {
                 object playerBridge = _PlayerBridge.GetValue(__instance);
                 Player player = _Player.Invoke(playerBridge, null) as Player;
-                SAINSoundTypeHandler.AISoundPlayer(soundName, player);
+                SAINSoundTypeHandler.AISoundFileChecker(soundName, player);
+            }
+        }
+    }
+
+    public class LootingSoundPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "method_39");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(ref Player __instance, int count)
+        {
+            if (count > 0
+                && __instance != null
+                && SAINPlugin.BotController != null)
+            {
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Looting, __instance, 50f);
+            }
+        }
+    }
+
+    public class TurnSoundPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "method_47");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref Player __instance, ref float ____lastTimeTurnSound, ref float ___maxLengthTurnSound)
+        {
+            if (Time.time - ____lastTimeTurnSound >= ___maxLengthTurnSound && SAINPlugin.BotController != null)
+            {
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.FootStep, __instance, 50f);
+            }
+        }
+    }
+
+    public class ProneSoundPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "PlaySoundBank");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref Player __instance, ref string soundBank)
+        {
+            if (soundBank == "Prone"
+                && __instance.SinceLastStep >= 0.5f
+                && SAINPlugin.BotController?.AISoundPlayed != null
+                && __instance.CheckSurface())
+            {
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Prone, __instance, 40f);
             }
         }
     }
@@ -108,19 +166,6 @@ namespace SAIN.Patches.Hearing
         }
     }
 
-    public class LootingSoundPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(GClass2869), "vmethod_0");
-        }
-
-        [PatchPostfix]
-        public static void PatchPostfix()
-        {
-        }
-    }
-
     public class SetInHandsGrenadePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -138,6 +183,7 @@ namespace SAIN.Patches.Hearing
             }
         }
     }
+
     public class SetInHandsFoodPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

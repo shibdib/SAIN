@@ -27,26 +27,17 @@ namespace SAIN
 
         public void PlayAISound(float range, AISoundType soundType)
         {
-            if (Player?.AIData != null && nextShootTime < Time.time)
+            if (Player?.AIData != null 
+                && _nextShootSoundTime < Time.time 
+                && Singleton<BotEventHandler>.Instantiated)
             {
-                float timeAdd;
-                if (!Player.AIData.IsAI)
-                {
-                    timeAdd = 0.1f;
-                }
-                else
-                {
-                    timeAdd = 1f;
-                }
-                if (Singleton<BotEventHandler>.Instantiated)
-                {
-                    nextShootTime = Time.time + timeAdd;
-                    Singleton<BotEventHandler>.Instance.PlaySound(Player, Player.WeaponRoot.position, range, soundType);
-                }
+                float timeAdd = Player.AIData.IsAI ? 1f : 0.1f;
+                _nextShootSoundTime = Time.time + timeAdd;
+                Singleton<BotEventHandler>.Instance.PlaySound(Player, Player.WeaponRoot.position, range, soundType);
             }
         }
 
-        private float nextShootTime;
+        private float _nextShootSoundTime;
 
         public void CheckForNewWeapons()
         {

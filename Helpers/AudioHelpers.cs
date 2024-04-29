@@ -14,7 +14,7 @@ namespace SAIN.Helpers
     {
         public static void TryPlayShootSound(Player player)
         {
-            if (player != null)
+            if (player != null && player.HealthController.IsAlive)
             {
                 float range = 125f;
                 AISoundType soundType = AISoundType.gun;

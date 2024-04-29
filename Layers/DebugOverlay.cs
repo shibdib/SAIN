@@ -11,10 +11,6 @@ namespace SAIN.Layers
 {
     public static class DebugOverlay
     {
-        private static readonly int OverlayCount = 11;
-
-        private static int Selected = 0;
-
         public static void Update()
         {
         }

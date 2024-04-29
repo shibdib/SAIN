@@ -161,6 +161,11 @@ namespace SAIN.SAINComponent
 
         private void Update()
         {
+            if (BotOwner == null || this == null || Player == null)
+            {
+                Dispose();
+                return;
+            }
             if (IsDead || Singleton<GameWorld>.Instance == null)
             {
                 Dispose();

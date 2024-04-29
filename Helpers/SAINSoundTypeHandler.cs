@@ -15,12 +15,8 @@ namespace SAIN.Components.Helpers
         protected static ManualLogSource Logger;
         protected static SAINBotControllerComponent BotController => SAINPlugin.BotController;
 
-        public static void AISoundPlayer(string sound, Player player)
+        public static void AISoundFileChecker(string sound, Player player)
         {
-            if (Logger == null)
-            {
-                Logger = BepInEx.Logging.Logger.CreateLogSource("SAIN: Sound Manager");
-            }
             if (BotController == null || BotController.Bots == null || BotController.Bots.Count == 0)
             {
                 return;
@@ -66,7 +62,7 @@ namespace SAIN.Components.Helpers
                     }
                 }
             }
-            //Logger.LogInfo($"soundType: {soundType} : Sound {sound}");
+
             BotController?.AISoundPlayed?.Invoke(soundType, player, soundDist);
         }
     }
