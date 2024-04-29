@@ -38,9 +38,12 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
-            EPhraseTrigger trigger = EPhraseTrigger.OnBeingHurt | EPhraseTrigger.Hit;
-            ETagStatus mask = ETagStatus.Combat | ETagStatus.Aware | ETagStatus.Unaware;
-            SendSayCommand(trigger, mask);
+            if (EFTMath.RandomBool(33))
+            {
+                EPhraseTrigger trigger = EPhraseTrigger.OnBeingHurt | EPhraseTrigger.OnAgony;
+                ETagStatus mask = ETagStatus.Combat | ETagStatus.Aware;
+                SendSayCommand(trigger, mask);
+            }
         }
 
         private float TimeUntilCanTalk;

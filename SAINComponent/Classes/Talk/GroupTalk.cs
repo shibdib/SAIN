@@ -16,6 +16,15 @@ using UnityEngineInternal;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
+    public enum ISquadOrder
+    {
+        None = 0,
+        HoldPosition = 1,
+        Search = 2,
+        Rush = 3,
+        Suppress = 4,
+        Help = 5,
+    }
     public class GroupTalk : SAINBase, ISAINClass
     {
         public GroupTalk(SAINComponentClass bot) : base(bot)
@@ -422,7 +431,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 var trigger = EPhraseTrigger.PhraseNone;
                 HurtTalkTimer = Time.time + SAIN.Info.FileSettings.Mind.SquadMemberTalkFreq * 5f * Random.Range(0.66f, 1.33f);
 
-                if (SAIN.HasEnemy && SAIN.Enemy.RealDistance < 20f)
+                if (SAIN.HasEnemy && SAIN.Enemy.RealDistance < 25f)
                 {
                     return false;
                 }
@@ -431,18 +440,29 @@ namespace SAIN.SAINComponent.Classes.Talk
                 switch (health)
                 {
                     case ETagStatus.Injured:
-                        if (EFTMath.RandomBool(25))
+                        if (EFTMath.RandomBool(60))
                         {
-                            trigger = EFTMath.RandomBool() ? EPhraseTrigger.HurtMedium : EPhraseTrigger.HurtLight;
+                            trigger = EFTMath.RandomBool() ? EPhraseTrigger.Hit : EPhraseTrigger.HurtLight;
                         }
                         break;
 
                     case ETagStatus.BadlyInjured:
-                        trigger = EPhraseTrigger.HurtHeavy; break;
+                        if (EFTMath.RandomBool(75))
+                        {
+                            trigger = EFTMath.RandomBool() ? EPhraseTrigger.HurtLight : EPhraseTrigger.HurtHeavy;
+                        }
+                        break;
+
                     case ETagStatus.Dying:
-                        trigger = EPhraseTrigger.HurtNearDeath; break;
+                        if (EFTMath.RandomBool(75))
+                        {
+                            trigger = EPhraseTrigger.HurtNearDeath;
+                        }
+                        break;
+
                     default:
-                        trigger = EPhraseTrigger.PhraseNone; break;
+                        trigger = EPhraseTrigger.PhraseNone; 
+                        break;
                 }
 
                 if (trigger != EPhraseTrigger.PhraseNone)

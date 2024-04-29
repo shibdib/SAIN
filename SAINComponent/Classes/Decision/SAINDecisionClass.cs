@@ -56,10 +56,10 @@ namespace SAIN.SAINComponent.Classes.Decision
                 || CurrentSquadDecision != SquadDecision.None;
         }
 
-        private const int CheckDecisionFrameTarget = 6;
+        private const int CheckDecisionFrameTarget = 1;
         private int CheckDecisionFrameCount = 0;
 
-        private const int CheckEnemyFrameTarget = 6;
+        private const int CheckEnemyFrameTarget = 1;
         private int CheckEnemyFrameCount = 0;
 
         public void Dispose()
