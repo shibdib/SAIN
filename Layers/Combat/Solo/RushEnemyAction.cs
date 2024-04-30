@@ -111,7 +111,7 @@ namespace SAIN.Layers.Combat.Solo
                 */
                 if (SAIN.Enemy.Path.PathDistance > 5f)
                 {
-                    BotOwner.BotRun.Run(Destination, false);
+                    BotOwner.BotRun.Run(Destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
                 }
                 else
                 {

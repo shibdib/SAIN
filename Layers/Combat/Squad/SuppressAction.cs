@@ -41,7 +41,7 @@ namespace SAIN.Layers.Combat.Squad
                         SAIN.Mover.Prone.SetProne(true);
                     }
 
-                    SAIN.Steering.LookToPoint(pos.Value);
+                    //SAIN.Steering.LookToPoint(pos.Value);
 
                     if (!BotOwner.WeaponManager.HaveBullets)
                     {
@@ -49,7 +49,7 @@ namespace SAIN.Layers.Combat.Squad
                     }
                     else if (
                         WaitShootTimer < Time.time 
-                        && SAIN.Shoot(true, true, SAINComponentClass.EShootReason.SquadSuppressing))
+                        && SAIN.Shoot(true, pos.Value, true, SAINComponentClass.EShootReason.SquadSuppressing))
                     {
                         enemy.EnemyIsSuppressed = true;
                         float waitTime = hasMachineGun ? 0.1f : 0.5f;
@@ -58,7 +58,7 @@ namespace SAIN.Layers.Combat.Squad
                 }
                 else
                 {
-                    SAIN.Shoot(false);
+                    SAIN.Shoot(false, Vector3.zero);
                     if (needReload)
                     {
                         SAIN.SelfActions.TryReload();

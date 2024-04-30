@@ -100,7 +100,7 @@ namespace SAIN.SAINComponent
                 AimDownSightsController = new AimDownSightsController(this);
                 BotHitReaction = new SAINBotHitReaction(this);
                 SpaceAwareness = new SAINBotSpaceAwareness(this);
-                DoorOpener = new SAINDoorOpener(person.BotOwner);
+                DoorOpener = new SAINDoorOpener(this, person.BotOwner);
 
                 NavMeshAgent = this.GetComponent<NavMeshAgent>();
                 if (NavMeshAgent == null)
@@ -220,6 +220,11 @@ namespace SAIN.SAINComponent
 
                 //BotOwner.DoorOpener.Update(); 
                 UpdateGoalTarget();
+
+                if (ManualShootReason != EShootReason.None && (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 1f < Time.time))
+                {
+                    Shoot(false, Vector3.zero);
+                }
             }
         }
 
@@ -295,24 +300,38 @@ namespace SAIN.SAINComponent
             }
         }
 
-        public bool Shoot(bool value, bool checkFF = true, EShootReason reason = EShootReason.None)
+        public bool Shoot(bool value, Vector3 targetPos, bool checkFF = true, EShootReason reason = EShootReason.None)
         {
+            ManualShootTargetPosition = targetPos;
             ManualShootReason = value ? reason : EShootReason.None;
 
             if (value)
             {
                 if (checkFF && !FriendlyFireClass.ClearShot)
                 {
+                    ManualShootReason = EShootReason.None;
                     BotOwner.ShootData.EndShoot();
                     return false;
                 }
+                else if (BotOwner.ShootData.Shoot())
+                {
+                    _timeStartManualShoot = Time.time;
+                    ManualShootReason = reason;
+                    return true;
+                }
                 else
                 {
-                    return BotOwner.ShootData.Shoot();
+                    ManualShootReason = EShootReason.None;
+                    return false;
                 }
             }
+            ManualShootReason = EShootReason.None;
             return false;
         }
+
+        private float _timeStartManualShoot;
+
+        public Vector3 ManualShootTargetPosition { get; private set; }
 
         public EShootReason ManualShootReason { get; private set; }
 

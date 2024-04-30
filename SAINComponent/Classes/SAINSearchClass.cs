@@ -204,7 +204,7 @@ namespace SAIN.SAINComponent.Classes
             if (shallSprint)
             {
                 //return SAIN.Mover.GoToPoint(destination, out _);
-                return BotOwner.BotRun.Run(destination, false);
+                return BotOwner.BotRun.Run(destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
             }
             else
             {

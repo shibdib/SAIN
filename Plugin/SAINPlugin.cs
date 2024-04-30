@@ -100,8 +100,7 @@ namespace SAIN
         private void Patches()
         {
             var patches = new List<Type>() {
-                typeof(Patches.Generic.KickPatch),
-                typeof(Patches.Generic.KickPatch2),
+                typeof(Patches.Generic.DoorOpenerPatch),
                 typeof(Patches.Generic.GetBotController),
                 typeof(Patches.Generic.GetBotSpawner),
                 typeof(Patches.Generic.GrenadeThrownActionPatch),

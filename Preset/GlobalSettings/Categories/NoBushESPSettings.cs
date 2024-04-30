@@ -29,11 +29,11 @@ namespace SAIN.Preset.GlobalSettings
         [Name("No Bush ESP Enhanced Raycasts Ratio")]
         [Description("Experimental: Increased Accuracy and extra checks. " +
             "Sets the ratio of visible to not visible body parts to not block vision. " +
-            "0.5 means half the body parts of the player must be visible to not block vision.")]
-        [Default(0.5f)]
-        [MinMax(0.2f, 1f, 10f)]
+            "0.75 means half the body parts of the player must be visible to not block vision.")]
+        [Default(0.75f)]
+        [MinMax(0.1f, 1f, 100f)]
         [Advanced]
-        public float NoBushESPEnhancedRatio = 0.5f;
+        public float NoBushESPEnhancedRatio = 0.75f;
 
         [Name("No Bush ESP Debug")]
         [Default(false)]

@@ -49,7 +49,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 float timeAdd = 0.01f;
                 if (LastSteerPriority != CurrentSteerPriority)
                 {
-                    timeAdd = 0.1f;
+                    //timeAdd = 0.1f;
                 }
                 updateSteerTimer = Time.time + timeAdd;
             }
@@ -71,11 +71,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             HeardSoundSanityCheck();
 
-            if (BotOwner.ShootData.Shooting && CurrentSteerPriority != SteerPriority.Shooting)
-            {
-                CurrentSteerPriority = SteerPriority.Shooting;
-            }
-
             switch (CurrentSteerPriority)
             {
                 case SteerPriority.None: 
@@ -86,6 +81,13 @@ namespace SAIN.SAINComponent.Classes.Mover
                     else if (SAIN.EnemyController.ClosestHeardEnemy != null)
                     {
                         LookToPoint(SAIN.EnemyController.ClosestHeardEnemy.LastKnownPosition);
+                    }
+                    break;
+
+                case SteerPriority.ManualShooting:
+                    if (SAIN.ManualShootTargetPosition != Vector3.zero)
+                    {
+                        LookToPoint(SAIN.ManualShootTargetPosition, 400f);
                     }
                     break;
 
@@ -157,8 +159,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                     LookToLastKnownEnemyPosition();
                     break;
 
+                case SteerPriority.Sprinting:
                 case SteerPriority.MoveDirection:
-                    LookToMovingDirection();
+                    LookToMovingDirection(800);
                     break;
 
                 case SteerPriority.Search:
@@ -201,6 +204,15 @@ namespace SAIN.SAINComponent.Classes.Mover
         public SteerPriority FindSteerPriority()
         {
             // return values are ordered by priority, so the targets get less "important" as they descend down this function.
+            if (SAIN.Mover.IsSprinting || Player.IsSprintEnabled)
+            {
+                return SteerPriority.Sprinting;
+            }
+            if (SAIN.ManualShootReason != SAINComponentClass.EShootReason.None 
+                && SAIN.ManualShootTargetPosition != Vector3.zero)
+            {
+                return SteerPriority.ManualShooting;
+            }
             if (LookToAimTarget())
             {
                 return SteerPriority.Shooting;
@@ -279,7 +291,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
                 if (blindCornerToEnemy != null && (blindCornerToEnemy.Value - SAIN.Transform.Head).sqrMagnitude > 1f)
                 {
-                    LookToPoint(blindCornerToEnemy.Value, 150f);
+                    LookToPoint(blindCornerToEnemy.Value, 250f);
                     return true;
                 }
             }
@@ -288,15 +300,15 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (LastKnownPosition != null)
             {
                 Vector3 pos = LastKnownPosition.Value;
-                LookToPoint(pos, 150f);
+                LookToPoint(pos, 250f);
                 return true;
             }
             return false;
         }
 
-        public void LookToMovingDirection()
+        public void LookToMovingDirection(float rotateSpeed = 400f)
         {
-            BotOwner.Steering.LookToMovingDirection();
+            BotOwner.Steering.LookToMovingDirection(rotateSpeed);
         }
 
         public void LookToPoint(Vector3 point, float rotateSpeed = -1)
@@ -370,7 +382,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (enemy != null)
             {
-                LookToPoint(enemy.EnemyPosition + Vector3.up);
+                LookToPoint(enemy.EnemyPosition + Vector3.up, 250f);
             }
         }
 
@@ -383,7 +395,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             var pos = SAIN.Memory.UnderFireFromPosition;
             pos.y += 1f;
-            LookToPoint(pos);
+            LookToPoint(pos, 250f);
         }
 
         public void LookToHearPos(Vector3 soundPos, bool visionCheck = false)
@@ -396,12 +408,12 @@ namespace SAIN.SAINComponent.Classes.Mover
 
                 if (!Physics.Raycast(headPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
                 {
-                    LookToPoint(soundPos);
+                    LookToPoint(soundPos, 180f);
                     return;
                 }
             }
 
-            float turnSpeed = SAIN.HasEnemy ? 200f : 100f;
+            float turnSpeed = SAIN.HasEnemy ? 250f : 100f;
             if ((soundPos - SAIN.Position).sqrMagnitude > 75f * 75f)
             {
                 LookToPoint(soundPos, turnSpeed);
@@ -458,7 +470,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             var pos = BotOwner.Memory.LastHitPos;
             pos.y += 1f;
-            LookToPoint(pos, 150f);
+            LookToPoint(pos, 250f);
         }
 
         private bool LookRandom;
@@ -515,7 +527,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 if (pointToLook != Vector3.zero)
                 {
                     _lastRandomLookPos = pointToLook;
-                    LookToPoint(pointToLook, Random.Range(50f, 90f));
+                    LookToPoint(pointToLook, Random.Range(75f, 110f));
                 }
             }
         }
@@ -533,7 +545,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     {
                         Vector3 pos = enemy.PathToEnemy.corners[1];
                         pos += Vector3.up * 1f;
-                        LookToPoint(pos, 80f);
+                        LookToPoint(pos, 150);
                         return true;
                     }
                 }
@@ -548,6 +560,7 @@ namespace SAIN.SAINComponent.Classes.Mover
     {
         None,
         Shooting,
+        ManualShooting,
         Enemy,
         Hear,
         LastSeenEnemy,
@@ -556,6 +569,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         LastHit,
         UnderFire,
         MoveDirection,
+        Sprinting,
         LastKnownLocation,
         ClosestHeardEnemy,
         Search

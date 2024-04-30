@@ -12,8 +12,36 @@ using static GClass738;
 
 namespace SAIN.BotController.Classes
 {
+    public enum ESquadPersonality
+    {
+        None = 0,
+        TimmyTeam6 = 1,
+        Rats = 2,
+        GigaChads = 3,
+        Elite = 4,
+    }
+
+    public enum ESquadRole
+    {
+        None = 0,
+        Assault = 1,
+        Support = 2,
+        Sniper = 3,
+        Leader = 4,
+    }
+
+    public class SquadPersonalitySettings
+    {
+        public float VocalizationLevel = 3;
+        public float CoordinationLevel = 3;
+        public float AggressionLevel = 1;
+    }
+
     public class Squad
     {
+        public readonly Dictionary<ESquadRole, SAINComponentClass> Roles 
+            = new Dictionary<ESquadRole, SAINComponentClass>();
+
         public Squad()
         {
             CheckSquadTimer = Time.time + 10f;

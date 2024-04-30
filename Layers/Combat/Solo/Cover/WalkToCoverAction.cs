@@ -27,7 +27,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (CoverDestination != null)
             {
-                if (!SAIN.Cover.CoverPoints.Contains(CoverDestination) || CoverDestination.GetSpotted(SAIN))
+                if (!SAIN.Cover.CoverPoints.Contains(CoverDestination) || CoverDestination.Spotted(SAIN))
                 {
                     CoverDestination.SetBotIsUsingThis(false);
                     CoverDestination = null;
@@ -41,7 +41,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 var coverPoint = SAIN.Cover.ClosestPoint;
                 if (coverPoint != null 
-                    && !coverPoint.GetSpotted(SAIN) 
+                    && !coverPoint.Spotted(SAIN) 
                     && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out bool calculating, -1, false, false))
                 {
                     CoverDestination = coverPoint;
@@ -77,7 +77,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private bool FindTargetCover()
         {
             var coverPoint = SAIN.Cover.ClosestPoint;
-            if (coverPoint != null && !coverPoint.GetSpotted(SAIN))
+            if (coverPoint != null && !coverPoint.Spotted(SAIN))
             {
                 coverPoint.SetBotIsUsingThis(true);
                 CoverDestination = coverPoint;
@@ -115,10 +115,10 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 Vector3 corner = SAIN.Enemy.LastCornerToEnemy.Value;
                 corner += Vector3.up * 1f;
-                SAIN.Steering.LookToPoint(corner);
+                //SAIN.Steering.LookToPoint(corner);
                 if (SuppressTimer < Time.time 
                     && BotOwner.WeaponManager.HaveBullets 
-                    && SAIN.Shoot(true, true, SAINComponentClass.EShootReason.WalkToCoverSuppress))
+                    && SAIN.Shoot(true, corner, true, SAINComponentClass.EShootReason.WalkToCoverSuppress))
                 {
                     SAIN.Enemy.EnemyIsSuppressed = true;
                     if (SAIN.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
@@ -133,7 +133,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             }
             else
             {
-                SAIN.Shoot(false);
+                SAIN.Shoot(false, Vector3.zero);
                 if (!BotOwner.ShootData.Shooting)
                 {
                     SAIN.Steering.SteerByPriority(false);
@@ -154,7 +154,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 CoverDestination.SetBotIsUsingThis(false);
                 CoverDestination = null;
             }
-            SAIN.Shoot(false, true, SAINComponentClass.EShootReason.None);
+            SAIN.Shoot(false, Vector3.zero);
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)

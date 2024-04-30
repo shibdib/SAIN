@@ -277,7 +277,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return GetCoverStatus(info) == CoverStatus.InCover;
         }
 
-        public bool GetSpotted(SAINComponentClass sain)
+        public bool Spotted(SAINComponentClass sain)
         {
             var info = GetInfo(sain);
             return BotSpotted(info);

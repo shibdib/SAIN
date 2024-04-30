@@ -277,6 +277,7 @@
     <Compile Include="Helpers\SAINWeaponInfoHandler.cs" />
     <Compile Include="Helpers\UpdateSettingClass.cs" />
     <Compile Include="Layers\Combat\Solo\FlankAction.cs" />
+    <Compile Include="Layers\Combat\Squad\AssaultAction.cs" />
     <Compile Include="Layers\DebugOverlay.cs" />
     <Compile Include="Layers\Extract\LootingBotsInterop.cs" />
     <Compile Include="Layers\Extract\SAINLootingBotsIntegration.cs" />

@@ -558,7 +558,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     return true;
                 }
             }
-            bool spotted = point.GetSpotted(SAIN);
+            bool spotted = point.Spotted(SAIN);
             if (spotted)
             {
                 SpottedCoverPoints.Add(new SpottedCoverPoint(point));

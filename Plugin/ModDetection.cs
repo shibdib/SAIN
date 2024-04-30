@@ -25,9 +25,15 @@ namespace SAIN
         public static bool LootingBotsLoaded { get; private set; }
         public static bool RealismLoaded { get; private set; }
         public static bool QuestingBotsLoaded { get; private set; }
+        public static bool ProjectFikaLoaded { get; private set; }
 
         public static void CheckPlugins()
         {
+            if (Chainloader.PluginInfos.ContainsKey(FikaKey))
+            {
+                ProjectFikaLoaded = true;
+                Logger.LogInfo($"SAIN: Project Fika Detected.");
+            }
             if (Chainloader.PluginInfos.ContainsKey(QuestingBotsKey))
             {
                 QuestingBotsLoaded = true;

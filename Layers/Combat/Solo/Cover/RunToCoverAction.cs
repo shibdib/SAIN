@@ -45,7 +45,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 {
                     if ((CoverDestination.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude > 4f)
                     {
-                        MoveSuccess = BotOwner.BotRun.Run(CoverDestination.GetPosition(SAIN), false, 0.6f);
+                        MoveSuccess = BotOwner.BotRun.Run(CoverDestination.GetPosition(SAIN), false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
                     }
                     else
                     {
@@ -81,7 +81,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             }
 
             CoverPoint coverPoint = SelectPoint();
-            if (coverPoint != null && !coverPoint.GetSpotted(SAIN))
+            if (coverPoint != null && !coverPoint.Spotted(SAIN))
             {
                 if (SAIN.Mover.CanGoToPoint(coverPoint.GetPosition(SAIN), out Vector3 pointToGo, true, 1f))
                 {
@@ -104,7 +104,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 return fallback;
             }
-            else if (coverInUse != null && !coverInUse.GetSpotted(SAIN))
+            else if (coverInUse != null && !coverInUse.Spotted(SAIN))
             {
                 return coverInUse;
             }

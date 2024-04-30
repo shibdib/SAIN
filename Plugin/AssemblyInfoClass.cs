@@ -32,5 +32,6 @@
         public const string LootingBotsKey = "me.skwizzy.lootingbots";
         public const string RealismModKey = "RealismMod";
         public const string QuestingBotsKey = "com.DanW.QuestingBots";
+        public const string FikaKey = "com.fika.core";
     }
 }

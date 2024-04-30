@@ -1,21 +1,28 @@
 ﻿using EFT;
 using EFT.Interactive;
 using JetBrains.Annotations;
+using SAIN.Helpers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Class824;
+using static RootMotion.FinalIK.InteractionTrigger.Range;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
     public class SAINDoorOpener
     {
-        public SAINDoorOpener(BotOwner bot)
+        public SAINDoorOpener(SAINComponentClass sain, BotOwner bot)
         {
+            SAIN = sain;
             this.BotOwner = bot;
         }
+
+        private SAINComponentClass SAIN;
 
         public void Init()
         {
@@ -31,6 +38,11 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool Update()
         {
+            if (ModDetection.ProjectFikaLoaded)
+            {
+                return BotOwner.DoorOpener.Update();
+            }
+
             List<NavMeshDoorLink> list = this.BotOwner.CellData.CurrentDoorLinks();
             if (BotOwner.DoorOpener.Interacting)
             {
@@ -38,6 +50,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 if (this._traversingEnd < Time.time)
                 {
                     BotOwner.DoorOpener.Interacting = false;
+                    BotOwner.Mover.MovementResume();
                 }
                 return this._lastFrameLink;
             }
@@ -98,6 +111,34 @@ namespace SAIN.SAINComponent.Classes.Mover
             this.TryInteract();
         }
 
+        private IEnumerator InteractWithDoor(Door door, EInteractionType Etype, float delay = 1f)
+        {
+            BotOwner.DoorOpener.Interacting = true;
+            _traversingEnd = Time.time + 0.25f;
+
+            bool inverted = false;
+            if (Etype == EInteractionType.Open 
+                && ShallInvertDoorAngle(door))
+            {
+                inverted = true;
+                Logger.LogAndNotifyWarning("Angle Inverted");
+                door.OpenAngle = -door.OpenAngle;
+            }
+
+            InteractionResult interactionResult = new InteractionResult(Etype);
+            BotOwner.GetPlayer.CurrentManagedState.StartDoorInteraction(door, interactionResult, null);
+
+            if (inverted)
+            {
+                yield return new WaitForSeconds(delay);
+                if (door != null)
+                {
+                    Logger.LogAndNotifyWarning("Angle Reset");
+                    door.OpenAngle = -door.OpenAngle;
+                }
+            }
+        }
+
         public void Interact(Door door, EInteractionType Etype)
         {
             EDoorState state = EDoorState.None;
@@ -118,19 +159,40 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (state != EDoorState.None)
             {
+                bool inverted = false;
+                if (ShallInvertDoorAngle(door))
+                {
+                    inverted = true;
+                    door.OpenAngle = -door.OpenAngle;
+                }
+
                 door.method_3(state, false);
+                if (inverted)
+                {
+                    door.OpenAngle = -door.OpenAngle;
+                }
             }
             else
             {
-                InteractionResult interactionResult = new InteractionResult(Etype);
-                BotOwner.GetPlayer.CurrentManagedState.StartDoorInteraction(door, interactionResult, null);
+               InteractionResult interactionResult = new InteractionResult(Etype);
+               BotOwner.GetPlayer.CurrentManagedState.StartDoorInteraction(door, interactionResult, null);
             }
+        }
+
+        private bool ShallInvertDoorAngle(Door door)
+        {
+            var interactionParameters = door.GetInteractionParameters(BotOwner.Position);
+            if (interactionParameters.AnimationId == door.PushID)
+            {
+                return false;
+            }
+            return true;
         }
 
         public GStruct18? method_0(List<NavMeshDoorLink> list, [CanBeNull] GStruct18? exclude)
         {
             GStruct18? result = null;
-            float num = 4f;
+            float num = 6f;
             for (int i = 0; i < list.Count; i++)
             {
                 NavMeshDoorLink navMeshDoorLink = list[i];
@@ -164,8 +226,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool method_1(NavMeshDoorLink link)
         {
-            return true;
-
             GClass297 gclass = null;
             EDoorState doorState = link.Door.DoorState;
             if (doorState != EDoorState.Shut)
@@ -188,14 +248,17 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 vector = -vector;
             }
-            return !GClass759.IsAngLessNormalized(GClass759.NormalizeFastSelf(this.BotOwner.LookDirection), GClass759.NormalizeFastSelf(vector), 0.9396926f);
+            return !Vector.IsAngLessNormalized(Vector.NormalizeFastSelf(this.BotOwner.LookDirection), Vector.NormalizeFastSelf(vector), 0.9396926f);
         }
 
         public void TryInteract()
         {
+            const float pauseTime = 0.5f;
+
             float time = Time.time;
             float num = time - this._comeToDoorLast;
-            this.BotOwner.Mover.SprintPause(1f);
+            this.BotOwner.Mover.SprintPause(pauseTime * 2f);
+            //this.BotOwner.Mover.MovementPause(pauseTime);
 
             //____owner.MovementPause(this.Single_0__traversingEndFreq);
             if (num > 3f)
@@ -209,7 +272,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (_currentDoor.DoorState == EDoorState.Interacting)
             {
-                _nextPosibleDoorOpenTime = Time.time + 0.25f;
+                _nextPosibleDoorOpenTime = Time.time + pauseTime;
                 return;
             }
             _shallStartInteract = false;
@@ -222,7 +285,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
                 return;
             }
-            _nextPosibleDoorOpenTime = Time.time + 1f;
+            _nextPosibleDoorOpenTime = Time.time + pauseTime;
             Interact(_currentDoor, EInteractionType.Open);
         }
 
@@ -273,7 +336,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             DoorActionType doorActionType2 = DoorActionType.none;
             Vector3 v = vector - goTo;
             v.y = 0f;
-            Vector3 a = GClass759.NormalizeFastSelf(v);
+            Vector3 a = Vector.NormalizeFastSelf(v);
             Vector3 b = a * 0.25f;
             Vector3 b2 = a * 0.5f;
             Vector3 a2 = vector + b;
@@ -298,9 +361,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             return false;
         }
-
-        public const float DIR_SIDE_MAX_SQRT = 4f;
-        public const float MAX_DIST_SQRT = 4f;
 
         public bool NearDoor;
         public bool _lastFrameLink;

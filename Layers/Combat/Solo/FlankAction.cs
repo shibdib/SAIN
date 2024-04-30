@@ -17,7 +17,7 @@ namespace SAIN.Layers.Combat.Solo
 {
     internal class FlankAction : SAINAction
     {
-        public FlankAction(BotOwner bot) : base(bot, nameof(DogFightAction))
+        public FlankAction(BotOwner bot) : base(bot, nameof(FlankAction))
         {
         }
 

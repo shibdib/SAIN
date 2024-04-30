@@ -9,6 +9,15 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class GeneralSettings
     {
+        [MinMax(0.1f, 1f, 100f)]
+        [Hidden]
+        [JsonIgnore]
+        public float SprintReachDistance = 0.9f;
+        [MinMax(0.1f, 1f, 100f)]
+        [Hidden]
+        [JsonIgnore]
+        public float BaseReachDistance = 0.45f;
+
         [Name("Performance Mode")]
         [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN. Can cause bots to take too long to find cover to go to.")]
         [Default(false)]

@@ -311,7 +311,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             var pathStatus = enemy.CheckPathDistance();
-            return (pathStatus == EnemyPathDistance.VeryClose && SAIN.Enemy.IsVisible) || SAIN.Cover.CoverInUse?.GetSpotted(SAIN) == true;
+            return (pathStatus == EnemyPathDistance.VeryClose && SAIN.Enemy.IsVisible) || SAIN.Cover.CoverInUse?.Spotted(SAIN) == true;
         }
 
         private bool StartMoveToEngage(SAINEnemy enemy)
@@ -464,7 +464,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             var cover = SAIN.Cover.CoverInUse;
             if (cover != null 
-                && !cover.GetSpotted(SAIN) 
+                && !cover.Spotted(SAIN) 
                 && (cover.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude < HoldInCoverMaxCoverDist)
             {
                 return true;

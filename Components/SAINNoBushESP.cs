@@ -71,8 +71,8 @@ namespace SAIN.Components
         private static NoBushESPSettings Settings => SAINPlugin.LoadedPreset?.GlobalSettings?.NoBushESP;
         private static bool UserToggle => Settings?.NoBushESPToggle == true;
         private static bool EnhancedChecks => Settings?.NoBushESPEnhanced == true;
-        private static float EnhancedRatio => Settings == null ? 0.5f : Settings.NoBushESPEnhancedRatio;
-        private static float Frequency => Settings == null ? 0.1f : Settings.NoBushESPFrequency;
+        private static float EnhancedRatio => Settings == null ? 0.75f : Settings.NoBushESPEnhancedRatio;
+        private static float Frequency => Settings == null ? 0.2f : Settings.NoBushESPFrequency;
         private static bool DebugMode => Settings?.NoBushESPDebugMode == true;
 
         private static readonly ManualLogSource Logger;
@@ -104,7 +104,7 @@ namespace SAIN.Components
             if (enemy != null && (enemy.IsVisible || enemy.CanShoot))
             {
                 Player player = enemy?.Person as Player;
-                if (player?.IsYourPlayer == true)
+                if (player?.IsAI == false)
                 {
                     if (EnhancedChecks)
                     {
@@ -185,11 +185,12 @@ namespace SAIN.Components
                     }
 
                     enemy.SetCanShoot(false);
+                    enemy.SetVisible(false);
 
                     IsVisibleProp.SetValue(enemy, false);
 
                     BotOwner.AimingData?.LoseTarget();
-                    BotOwner.ShootData?.EndShoot();
+                    //BotOwner.ShootData?.EndShoot();
 
                     // Use reflection to set the blockShoot of the property
                     var shoot = BotOwner.ShootData;

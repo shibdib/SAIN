@@ -63,7 +63,7 @@ namespace SAIN.Layers.Combat.Solo
                 if (RecalcPathTimer < Time.time)
                 {
                     RecalcPathTimer = Time.time + 4f;
-                    BotOwner.BotRun.Run(movePos, false);
+                    BotOwner.BotRun.Run(movePos, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
                 }
             }
             else
