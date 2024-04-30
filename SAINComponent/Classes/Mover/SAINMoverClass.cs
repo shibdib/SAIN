@@ -172,7 +172,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     {
                         Prone.SetProne(true);
                     }
-                    BotOwner.DoorOpener?.Update();
+                    SAIN.DoorOpener.Update();
                     calculating = false;
                     return true;
                 }
@@ -207,7 +207,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     {
                         Prone.SetProne(true);
                     }
-                    BotOwner.DoorOpener?.Update();
+                    SAIN.DoorOpener.Update();
                     _coroutineRunning = false;
                     yield break;
                 }
@@ -269,7 +269,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     Prone.SetProne(true);
                 }
-                BotOwner.DoorOpener.Update();
+                SAIN.DoorOpener.Update();
                 return true;
             }
             return false;

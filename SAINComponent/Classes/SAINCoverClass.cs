@@ -185,11 +185,12 @@ namespace SAIN.SAINComponent.Classes
                     CheckLimbTimer = Time.time + 0.1f;
                     bool cover = false;
                     var target = enemy.EnemyIPlayer.WeaponRoot.position;
-                    if (CheckLimbForCover(BodyPartType.leftLeg, target, 4f) || CheckLimbForCover(BodyPartType.leftArm, target, 4f))
+                    const float rayDistance = 10f;
+                    if (CheckLimbForCover(BodyPartType.leftLeg, target, rayDistance) || CheckLimbForCover(BodyPartType.leftArm, target, rayDistance))
                     {
                         cover = true;
                     }
-                    else if (CheckLimbForCover(BodyPartType.rightLeg, target, 4f) || CheckLimbForCover(BodyPartType.rightArm, target, 4f))
+                    else if (CheckLimbForCover(BodyPartType.rightLeg, target, rayDistance) || CheckLimbForCover(BodyPartType.rightArm, target, rayDistance))
                     {
                         cover = true;
                     }

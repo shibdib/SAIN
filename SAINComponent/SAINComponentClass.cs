@@ -100,6 +100,7 @@ namespace SAIN.SAINComponent
                 AimDownSightsController = new AimDownSightsController(this);
                 BotHitReaction = new SAINBotHitReaction(this);
                 SpaceAwareness = new SAINBotSpaceAwareness(this);
+                DoorOpener = new SAINDoorOpener(person.BotOwner);
 
                 NavMeshAgent = this.GetComponent<NavMeshAgent>();
                 if (NavMeshAgent == null)
@@ -188,6 +189,11 @@ namespace SAIN.SAINComponent
                     return;
                 }
 
+                if (BotOwner.Mover.IsMoving)
+                {
+                    DoorOpener.Update();
+                }
+
                 Search.Update();
                 Memory.Update();
                 EnemyController.Update();
@@ -212,10 +218,12 @@ namespace SAIN.SAINComponent
                 BotHitReaction.Update();
                 SpaceAwareness.Update();
 
-                BotOwner.DoorOpener.Update(); 
+                //BotOwner.DoorOpener.Update(); 
                 UpdateGoalTarget();
             }
         }
+
+        public SAINDoorOpener DoorOpener { get; private set; }
 
         private Stopwatch Stopwatch = new Stopwatch();
 

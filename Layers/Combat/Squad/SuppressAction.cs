@@ -26,12 +26,12 @@ namespace SAIN.Layers.Combat.Squad
             {
                 if (enemy.IsVisible && enemy.CanShoot)
                 {
-                    BotOwner.StopMove();
+                    //BotOwner.StopMove();
                     Shoot.Update();
                 }
                 else if (CanSeeLastCorner(out var pos))
                 {
-                    BotOwner.StopMove();
+                    //BotOwner.StopMove();
 
                     bool hasMachineGun = SAIN.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun;
                     if (hasMachineGun 

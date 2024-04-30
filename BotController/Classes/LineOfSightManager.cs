@@ -13,9 +13,41 @@ using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.Classes.Mover;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents;
+using System.Collections;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace SAIN.Components
 {
+    public class LineOfSightComponent : MonoBehaviour
+    {
+        private SAINBotControllerComponent BotController;
+
+        public void Awake()
+        {
+            BotController = GetComponent<SAINBotControllerComponent>();
+        }
+
+        public void Update()
+        {
+
+        }
+
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+            BotList.Clear();
+        }
+
+        private IEnumerator CheckLineOfSightForBots()
+        {
+            
+            yield return null;
+        }
+
+        private readonly List<SAINComponentClass> BotList = new List<SAINComponentClass>();
+
+    }
+
     public class LineOfSightManager : SAINControl
     {
         public void Update()

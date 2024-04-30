@@ -22,7 +22,6 @@ namespace SAIN.Layers.Combat.Solo
 
             if (SAIN.Cover.DuckInCover())
             {
-                BotOwner.StopMove();
                 SAIN.Mover.StopMove();
             }
 
