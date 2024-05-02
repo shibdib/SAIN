@@ -20,15 +20,15 @@ namespace SAIN.SAINComponent.Classes
             bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode;
             if (!isCurrentEnemy && Enemy.IsAI)
             {
-                timeToAdd = performanceMode ? 6f : 4f;
+                timeToAdd = performanceMode ? 4f : 2f;
             }
             else if (performanceMode)
             {
-                timeToAdd = isCurrentEnemy ? 0.15f : 2f;
+                timeToAdd = isCurrentEnemy ? 0.15f : 1f;
             }
             else
             {
-                timeToAdd = isCurrentEnemy ? 0.1f : 1f;
+                timeToAdd = isCurrentEnemy ? 0.1f : 0.5f;
             }
 
             bool visible = false;
@@ -37,7 +37,7 @@ namespace SAIN.SAINComponent.Classes
             if (CheckLosTimer + timeToAdd < Time.time)
             {
                 CheckLosTimer = Time.time;
-                InLineOfSight = CheckLineOfSight(true);
+                InLineOfSight = CheckLineOfSight(true, !isCurrentEnemy);
             }
 
             var enemyInfo = EnemyInfo;
@@ -58,7 +58,7 @@ namespace SAIN.SAINComponent.Classes
         public bool ShallReportRepeatContact { get; set; }
         public bool ShallReportLostVisual { get; set; }
 
-        private bool CheckLineOfSight(bool noDistRestrictions = false)
+        private bool CheckLineOfSight(bool noDistRestrictions = false, bool simpleCheck = false)
         {
             if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
             {
@@ -70,13 +70,38 @@ namespace SAIN.SAINComponent.Classes
             }
             if (noDistRestrictions || Enemy.RealDistance <= BotOwner.Settings.Current.CurrentVisibleDistance)
             {
-                foreach (var part in EnemyPlayer.MainParts.Values)
+                if (simpleCheck)
                 {
-                    Vector3 headPos = BotOwner.LookSensor._headPoint;
-                    Vector3 direction = part.Position - headPos;
-                    if (!Physics.Raycast(headPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
+                    if (SAIN.SightChecker != null)
                     {
-                        return true;
+                        return SAIN.SightChecker.SimpleSightCheck(Enemy.EnemyChestPosition, BotOwner.LookSensor._headPoint);
+                    }
+                    else
+                    {
+                        Logger.LogError("SightChecker is null");
+                        Vector3 headPos = BotOwner.LookSensor._headPoint;
+                        Vector3 direction = Enemy.EnemyChestPosition - headPos;
+                        return !Physics.Raycast(headPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
+                    }
+                }
+                else
+                {
+                    if (SAIN.SightChecker != null)
+                    {
+                        return SAIN.SightChecker.CheckLineOfSight(EnemyPlayer);
+                    }
+                    else
+                    {
+                        Logger.LogError("SightChecker is null");
+                        foreach (var part in EnemyPlayer.MainParts.Values)
+                        {
+                            Vector3 headPos = BotOwner.LookSensor._headPoint;
+                            Vector3 direction = part.Position - headPos;
+                            if (!Physics.Raycast(headPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
+                            {
+                                return true;
+                            }
+                        }
                     }
                 }
             }
@@ -119,7 +144,7 @@ namespace SAIN.SAINComponent.Classes
                     && TimeSinceSeen > _lostContactMinSeenTime 
                     && _nextReportLostVisualTime < Time.time)
                 {
-                    _nextReportLostVisualTime = Time.time + 90f;
+                    _nextReportLostVisualTime = Time.time + 20f;
                     ShallReportLostVisual = true;
                 }
                 VisibleStartTime = -1f;

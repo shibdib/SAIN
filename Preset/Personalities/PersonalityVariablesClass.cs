@@ -199,12 +199,12 @@ namespace SAIN.Preset.Personalities
             [Default(20f)]
             [Advanced]
             [Percentage]
-            public float TauntFrequency = 20f;
+            public float TauntFrequency = 15f;
 
             [Default(20f)]
             [Advanced]
             [Percentage]
-            public float TauntMaxDistance = 20f;
+            public float TauntMaxDistance = 70f;
 
             [Default(false)]
             public bool SprintWhileSearch = false;

@@ -19,7 +19,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
-            _randomizationFactor = Random.Range(0.66f, 1.33f);
+            _randomizationFactor = Random.Range(0.75f, 1.25f);
             UpdateSettings();
             PresetHandler.PresetsUpdated += UpdateSettings;
         }
@@ -41,15 +41,16 @@ namespace SAIN.SAINComponent.Classes.Talk
                         _nextCheckTime = time + 15f;
                         return;
                     }
-                    if (CanTaunt && _tauntTimer < time)
+                    if (CanTaunt 
+                        && _tauntTimer < time 
+                        && TauntEnemy())
                     {
                         _nextCheckTime = time + 1f;
                         _tauntTimer = time + TauntFreq * Random.Range(0.5f, 1.5f);
-                        TauntEnemy();
                         return;
                     }
                 }
-                _nextCheckTime = time + 1f;
+                _nextCheckTime = time + 0.25f;
             }
         }
 
@@ -192,13 +193,16 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             if (tauntEnemy)
             {
-                if (enemy != null && !enemy.IsVisible && enemy.TimeSinceSeen > 4f && EFTMath.RandomBool())
+                if (enemy != null 
+                    && !enemy.IsVisible 
+                    && enemy.TimeSinceSeen > 8f 
+                    && EFTMath.RandomBool(33))
                 {
-                    SAIN.Talk.Say(EPhraseTrigger.OnLostVisual, null, true);
+                    SAIN.Talk.Say(EPhraseTrigger.OnLostVisual, ETagStatus.Combat, true);
                 }
                 else
                 {
-                    SAIN.Talk.Say(EPhraseTrigger.OnFight, ETagStatus.Combat, true);
+                    SAIN.Talk.Say(EPhraseTrigger.OnFight, ETagStatus.Combat, false);
                 }
             }
 
@@ -213,57 +217,99 @@ namespace SAIN.SAINComponent.Classes.Talk
                 && SAIN?.Player?.HealthController?.IsAlive == true 
                 && (sourcePlayer.Position - SAIN.Position).sqrMagnitude < responseDist * responseDist)
             {
+                //Logger.LogInfo("Responding To Voice! Coroutine finish");
                 if (mask == ETagStatus.Unaware && !BotOwner.Memory.IsPeace)
                 {
-                    yield break;
+                    SAIN.Talk.Say(trigger, null, true);
                 }
-                SAIN.Talk.Say(trigger, mask, true);
+                else
+                {
+                    SAIN.Talk.Say(trigger, mask, false);
+                }
             }
         }
 
         public void SetEnemyTalk(Player player)
         {
-            if (CanRespondToVoice 
-                && SAIN != null 
+            if (player == null
+                || !player.HealthController.IsAlive
+                || (player.Position - SAIN.Position).sqrMagnitude > 100f * 100f)
+            {
+                return;
+            }
+            if (SAIN != null 
                 && player != null 
-                && _nextResponseTime < Time.time 
                 && SAIN.ProfileId != player.ProfileId)
             {
-                _nextResponseTime = Time.time + 1f;
+                SAIN.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position, true);
 
-                SAIN.StartCoroutine(RespondToVoice(
-                    EPhraseTrigger.OnFight, 
-                    ETagStatus.Combat, 
-                    Random.Range(0.33f, 0.75f), 
-                    player,
-                    ResponseDist, 
-                    80f
-                    ));
+                if (CanRespondToVoice
+                    && _nextResponseTime < Time.time)
+                {
+                    //Logger.LogInfo("Responding To Voice!");
+                    _nextResponseTime = Time.time + 0.5f;
+                    SAIN.StartCoroutine(RespondToVoice(
+                        EPhraseTrigger.OnFight,
+                        ETagStatus.Combat,
+                        Random.Range(0.4f, 0.6f),
+                        player,
+                        ResponseDist,
+                        85f
+                        ));
+                }
             }
         }
 
         public void SetFriendlyTalked(Player player)
         {
-            if (CanRespondToVoice
-                && SAIN != null
+            if (player == null
+                || !player.HealthController.IsAlive
+                || (player.Position - SAIN.Position).sqrMagnitude > 100f * 100f)
+            {
+                return;
+            }
+            if (SAIN != null
                 && player != null 
-                && BotOwner.Memory.IsPeace
-                && _nextResponseTime < Time.time
                 && SAIN.ProfileId != player.ProfileId)
             {
-                _nextResponseTime = Time.time + 1f;
+                if (BotOwner.Memory.IsPeace
+                    && _nextResponseTime < Time.time)
+                {
+                    _nextResponseTime = Time.time + 0.5f;
 
-                SAIN.StartCoroutine(RespondToVoice(
-                    EPhraseTrigger.MumblePhrase,
-                    ETagStatus.Unaware,
-                    Random.Range(0.33f, 0.75f),
-                    player,
-                    _friendlyResponseDistance,
-                    _friendlyResponseChance
-                    ));
+                    SAIN.StartCoroutine(RespondToVoice(
+                        EPhraseTrigger.MumblePhrase,
+                        ETagStatus.Unaware,
+                        Random.Range(0.2f, 0.5f),
+                        player,
+                        _friendlyResponseDistance,
+                        _friendlyResponseChance
+                        ));
+                }
+                else if (SAIN?.Squad.SquadInfo != null
+                    && SAIN.Talk.GroupTalk.FriendIsClose
+                    && (SAIN.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.GigaChads
+                        || SAIN.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.Elite)
+                    && (SAIN.Info.Personality == IPersonality.GigaChad
+                        || SAIN.Info.Personality == IPersonality.Chad))
+                {
+                    if (_saySilenceTime < Time.time)
+                    {
+                        _saySilenceTime = Time.time + 30f;
+                        SAIN.StartCoroutine(RespondToVoice(
+                            EPhraseTrigger.Silence,
+                            SAIN.HasEnemy ? ETagStatus.Combat : ETagStatus.Aware,
+                            Random.Range(0.2f, 0.5f),
+                            player,
+                            _friendlyResponseDistance,
+                            33f
+                            ));
+                    }
+                }
             }
         }
 
+        private float _saySilenceTime;
         private float _beggingTimer;
         private bool _isBegging;
         private float _fakeDeathTimer = 0f;
@@ -274,8 +320,8 @@ namespace SAIN.SAINComponent.Classes.Talk
             EPhraseTrigger.HoldFire,
             EPhraseTrigger.GetBack
         };
-        private const float _friendlyResponseChance = 60f;
-        private const float _friendlyResponseDistance = 40f;
+        private const float _friendlyResponseChance = 85f;
+        private const float _friendlyResponseDistance = 65f;
         private float _nextResponseTime;
         private float _tauntTimer = 0f;
     }

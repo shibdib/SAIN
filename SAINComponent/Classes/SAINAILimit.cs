@@ -88,15 +88,15 @@ namespace SAIN.SAINComponent.Classes
             switch (CurrentAILimit)
             {
                 case AILimitSetting.Far:
-                    timeToAdd = 0.5f;
+                    timeToAdd = 0.1f;
                     break;
 
                 case AILimitSetting.VeryFar:
-                    timeToAdd = 1f;
+                    timeToAdd = 0.25f;
                     break;
 
                 case AILimitSetting.Narnia:
-                    timeToAdd = 2f;
+                    timeToAdd = 0.5f;
                     break;
 
                 default:

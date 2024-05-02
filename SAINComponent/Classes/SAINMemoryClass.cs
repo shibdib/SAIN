@@ -33,11 +33,19 @@ namespace SAIN.SAINComponent.Classes
                     HealthStatusChanged?.Invoke(HealthStatus);
                 }
             }
+            if (_checkIndoorsTime < Time.time)
+            {
+                _checkIndoorsTime = Time.time + 1f;
+                IsIndoors = !Physics.Raycast(BotOwner.LookSensor._headPoint, Vector3.up, 10f, LayerMaskClass.HighPolyWithTerrainMask);
+            }
         }
 
         public void Dispose()
         {
         }
+
+        public bool IsIndoors { get; private set; }
+        private float _checkIndoorsTime;
 
         public Collider BotZoneCollider => BotZone?.Collider;
         public AIPlaceInfo BotZone => BotOwner.AIData.PlaceInfo;

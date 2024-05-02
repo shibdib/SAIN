@@ -25,8 +25,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
         }
 
-        private const float SemiAutoSwapDist = 40f;
-        private const float FullAutoSwapDist = 30f;
+        private const float SemiAutoSwapDist = 55f;
+        private const float FullAutoSwapDist = 45f;
 
         public void CheckSwap()
         {

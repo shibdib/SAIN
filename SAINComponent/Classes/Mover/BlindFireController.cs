@@ -22,6 +22,13 @@ namespace SAIN.SAINComponent.Classes.Mover
                 ResetBlindFire();
                 return;
             }
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
+                && enemy.IsAI
+                && SAIN.CurrentAILimit != AILimitSetting.Close)
+            {
+                ResetBlindFire();
+                return;
+            }
 
             if (CurrentBlindFireSetting == 0)
             {

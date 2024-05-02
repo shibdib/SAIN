@@ -28,6 +28,13 @@ namespace SAIN.SAINComponent.Classes.Mover
                 ResetSideStep(currentSideStep);
                 return;
             }
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
+                && enemy.IsAI
+                && SAIN.CurrentAILimit != AILimitSetting.Close)
+            {
+                ResetSideStep(currentSideStep);
+                return;
+            }
 
             if (enemy.CanShoot)
             {

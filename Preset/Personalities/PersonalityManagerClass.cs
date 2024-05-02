@@ -78,9 +78,10 @@ namespace SAIN.Preset.Personalities
 
                         CanTaunt = true,
                         CanRespondToVoice = true,
-                        TauntFrequency = 8,
-                        TauntMaxDistance = 50f,
+                        TauntFrequency = 6,
+                        TauntMaxDistance = 75f,
                         ConstantTaunt = true,
+                        FrequentTaunt = true,
 
                         HoldGroundBaseTime = 1.25f,
                         HoldGroundMaxRandom = 1.5f,
@@ -88,7 +89,7 @@ namespace SAIN.Preset.Personalities
 
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = true,
-                        SearchBaseTime = 8f,
+                        SearchBaseTime = 6f,
                         SprintWhileSearch = true,
                         FrequentSprintWhileSearch = true,
 
@@ -136,7 +137,7 @@ namespace SAIN.Preset.Personalities
                         CanTaunt = true,
                         CanRespondToVoice = true,
                         TauntFrequency = 4,
-                        TauntMaxDistance = 70f,
+                        TauntMaxDistance = 90f,
                         ConstantTaunt = true,
 
                         HoldGroundBaseTime = 2.5f,
@@ -195,6 +196,7 @@ namespace SAIN.Preset.Personalities
                         TauntFrequency = 15,
                         TauntMaxDistance = 50f,
                         ConstantTaunt = false,
+                        FrequentTaunt = false,
 
                         HoldGroundBaseTime = 1.5f,
                         HoldGroundMaxRandom = 1.2f,
@@ -247,9 +249,9 @@ namespace SAIN.Preset.Personalities
 
                         CanTaunt = true,
                         CanRespondToVoice = true,
-                        TauntFrequency = 15,
-                        TauntMaxDistance = 30f,
-                        FrequentTaunt = false,
+                        TauntFrequency = 10,
+                        TauntMaxDistance = 60f,
+                        FrequentTaunt = true,
 
                         HoldGroundBaseTime = 1f,
                         HoldGroundMaxRandom = 1.5f,
@@ -257,7 +259,7 @@ namespace SAIN.Preset.Personalities
 
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = true,
-                        SearchBaseTime = 25f,
+                        SearchBaseTime = 16f,
                         SprintWhileSearch = true,
 
                         CanJumpCorners = true,
@@ -295,8 +297,8 @@ namespace SAIN.Preset.Personalities
                         RandomChanceIfMeetRequirements = 33,
                         RandomlyAssignedChance = 15,
                         HoldGroundBaseTime = 0.75f,
-                        WillSearchForEnemy = false,
-                        WillSearchFromAudio = false,
+                        WillSearchForEnemy = true,
+                        WillSearchFromAudio = true,
                         SearchBaseTime = 240f,
                         PowerLevelMax = 125f,
                         AggressionMultiplier = 1f,
@@ -320,7 +322,13 @@ namespace SAIN.Preset.Personalities
                     }
                 };
 
-                AddAllBotTypes(settings.Variables.AllowedTypes);
+                var allowedTypes = settings.Variables.AllowedTypes;
+                AddAllBotTypes(allowedTypes);
+
+                allowedTypes.Remove("Raider");
+                allowedTypes.Remove("Rogue");
+                allowedTypes.Remove("Bloodhound");
+
                 Personalities.Add(pers, settings);
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
@@ -360,7 +368,13 @@ namespace SAIN.Preset.Personalities
                     }
                 };
 
-                AddPMCTypes(settings.Variables.AllowedTypes);
+                var allowedTypes = settings.Variables.AllowedTypes;
+                AddAllBotTypes(allowedTypes);
+
+                allowedTypes.Remove("Raider");
+                allowedTypes.Remove("Rogue");
+                allowedTypes.Remove("Bloodhound");
+
                 Personalities.Add(pers, settings);
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
@@ -396,7 +410,14 @@ namespace SAIN.Preset.Personalities
                         MoveToCoverNoEnemyPose = 1f,
                     }
                 };
-                AddAllBotTypes(settings.Variables.AllowedTypes);
+
+                var allowedTypes = settings.Variables.AllowedTypes;
+                AddAllBotTypes(allowedTypes);
+
+                allowedTypes.Remove("Raider");
+                allowedTypes.Remove("Rogue");
+                allowedTypes.Remove("Bloodhound");
+
                 Personalities.Add(pers, settings);
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }

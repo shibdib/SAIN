@@ -38,7 +38,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool Update()
         {
-            if (ModDetection.ProjectFikaLoaded)
+            if (ModDetection.ProjectFikaLoaded || !SAINPlugin.LoadedPreset.GlobalSettings.General.NewDoorOpening)
             {
                 return BotOwner.DoorOpener.Update();
             }

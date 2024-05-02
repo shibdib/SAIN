@@ -14,6 +14,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
 using static RootMotion.FinalIK.AimPoser;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -78,6 +79,15 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
             if (iPlayer != null && BotOwner.ProfileId == iPlayer.ProfileId)
+            {
+                return;
+            }
+
+            if (iPlayer != null 
+                && SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
+                && iPlayer.IsAI
+                && SAIN.CurrentAILimit != AILimitSetting.Close 
+                && (iPlayer.Position - SAIN.Position).sqrMagnitude > 100f)
             {
                 return;
             }

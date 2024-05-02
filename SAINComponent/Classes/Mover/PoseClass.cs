@@ -28,7 +28,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (_updatePoseTimer < Time.time)
             {
                 _updatePoseTimer = Time.time + 0.25f;
-                if (SAIN.Mover.CurrentStamina > 0.25f)
+                if (SAIN.Mover.CurrentStamina > 0.1f)
                 {
                     BotOwner.Mover?.SetPose(_targetPoseLevel);
                 }

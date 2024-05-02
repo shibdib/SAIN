@@ -1,5 +1,6 @@
 ﻿using EFT;
 using Interpolation;
+using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
@@ -12,31 +13,6 @@ using static GClass738;
 
 namespace SAIN.BotController.Classes
 {
-    public enum ESquadPersonality
-    {
-        None = 0,
-        TimmyTeam6 = 1,
-        Rats = 2,
-        GigaChads = 3,
-        Elite = 4,
-    }
-
-    public enum ESquadRole
-    {
-        None = 0,
-        Assault = 1,
-        Support = 2,
-        Sniper = 3,
-        Leader = 4,
-    }
-
-    public class SquadPersonalitySettings
-    {
-        public float VocalizationLevel = 3;
-        public float CoordinationLevel = 3;
-        public float AggressionLevel = 1;
-    }
-
     public class Squad
     {
         public readonly Dictionary<ESquadRole, SAINComponentClass> Roles 
@@ -45,6 +21,38 @@ namespace SAIN.BotController.Classes
         public Squad()
         {
             CheckSquadTimer = Time.time + 10f;
+        }
+
+        public void ReportEnemyPosition(SAINEnemy reportedEnemy, Vector3 reportedPosition)
+        {
+            if (Members == null || Members.Count <= 1)
+            {
+                return;
+            }
+
+            float squadCoordination = 3f;
+            if (SquadPersonalitySettings != null)
+            {
+                squadCoordination = SquadPersonalitySettings.CoordinationLevel;
+                squadCoordination = Mathf.Clamp(squadCoordination, 1f, 5f);
+            }
+            float baseChance = 25f;
+            float finalChance = baseChance + (squadCoordination * 15f);
+
+            foreach (var member in Members.Values)
+            {
+                if (EFTMath.RandomBool(finalChance))
+                {
+                    if (member?.Player != null
+                        && reportedEnemy.Player != null
+                        && reportedEnemy.EnemyPlayer != null
+                        && reportedEnemy.Player.ProfileId != member.ProfileId)
+                    {
+                        member.EnemyController.GetEnemy(reportedEnemy.EnemyPlayer.ProfileId)?.EnemyPositionReported(reportedPosition);
+                    }
+                }
+            }
+
         }
 
         public string GetId()
@@ -393,6 +401,15 @@ namespace SAIN.BotController.Classes
             }
         }
 
+        public ESquadPersonality SquadPersonality { get; private set; }
+        public SquadPersonalitySettings SquadPersonalitySettings { get; private set; }
+
+        private void GetSquadPersonality()
+        {
+            SquadPersonality = SquadPersonalityManager.GetSquadPersonality(Members, out var settings);
+            SquadPersonalitySettings = settings;
+        }
+
         public void Update()
         {
             // After 10 seconds since squad is originally created,
@@ -400,10 +417,14 @@ namespace SAIN.BotController.Classes
             // since it can be staggered over a few seconds.
             if (!SquadReady && CheckSquadTimer < Time.time && Members.Count > 0)
             {
-                FindSquadLeader(); 
                 SquadReady = true;
+                FindSquadLeader(); 
                 // Timer before starting to recheck
-                RecheckSquadTimer = Time.time + 10f;
+                RecheckSquadTimer = Time.time + 10f; 
+                if (Members.Count > 1)
+                {
+                    GetSquadPersonality();
+                }
             }
 
             // Check happens once the squad is originally "activated" and created
@@ -570,6 +591,10 @@ namespace SAIN.BotController.Classes
 
                     // Subscribe when this member is killed
                     sain.Player.OnPlayerDead += MemberWasKilled;
+                    if (Members.Count > 1)
+                    {
+                        GetSquadPersonality();
+                    }
                 }
             }
         }

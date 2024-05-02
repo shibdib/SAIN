@@ -59,6 +59,11 @@ namespace SAIN.SAINComponent.Classes
                 }
             }
 
+            if (SearchedAllKnownLocations && KnownPlaces.Count > 0)
+            {
+                KnownPlaces.Clear();
+            }
+
             if (SAINPlugin.DebugMode)
             {
                 foreach (var obj in GUIObjects)
@@ -266,7 +271,7 @@ namespace SAIN.SAINComponent.Classes
             KnownPlaces.Add(lastKnown);
         }
 
-        private const int MaxKnownPlaces = 5;
+        private const int MaxKnownPlaces = 10;
 
         public List<EnemyPlace> KnownPlaces = new List<EnemyPlace>(MaxKnownPlaces);
         public EnemyPlace LastKnownPlace => KnownPlaces.Count > 0 ? KnownPlaces[KnownPlaces.Count - 1] : null;

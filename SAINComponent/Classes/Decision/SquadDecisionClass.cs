@@ -73,15 +73,11 @@ namespace SAIN.SAINComponent.Classes.Decision
                     continue;
                 }
                 var myEnemy = SAIN.Enemy;
-                if (myEnemy != null && member.HasEnemy)
+                if (myEnemy != null 
+                    && member.HasEnemy)
                 {
                     if (myEnemy.EnemyIPlayer == member.Enemy.EnemyIPlayer)
                     {
-                        if (StartSuppression(member))
-                        {
-                            Decision = SquadDecision.Suppress;
-                            return true;
-                        }
                         if (StartPushSuppressedEnemy(myEnemy))
                         {
                             Decision = SquadDecision.PushSuppressedEnemy;
@@ -89,6 +85,11 @@ namespace SAIN.SAINComponent.Classes.Decision
                         if (myEnemy.IsVisible || myEnemy.TimeSinceSeen < SquadDecision_MyEnemySeenRecentTime)
                         {
                             return false;
+                        }
+                        if (StartSuppression(member))
+                        {
+                            Decision = SquadDecision.Suppress;
+                            return true;
                         }
                         if (StartGroupSearch(member))
                         {
@@ -157,6 +158,11 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartSuppression(SAINComponentClass member)
         {
+            if (SAIN.Enemy?.IsVisible == true)
+            {
+                return false;
+            }
+
             bool memberRetreat = member.Memory.Decisions.Main.Current == SoloDecision.Retreat;
             float memberDistance = (member.Transform.Position - BotOwner.Position).magnitude;
             float ammo = SAIN.Decision.SelfActionDecisions.AmmoRatio;

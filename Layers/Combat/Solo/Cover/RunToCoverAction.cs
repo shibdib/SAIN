@@ -62,10 +62,13 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     RecalcTimer = Time.time + 0.2f;
                 }
             }
-            if (!MoveSuccess)
+
+            if (CoverDestination == null)
             {
-                EngageEnemy();
+                SAIN.Mover.DogFight.DogFightMove();
             }
+
+            EngageEnemy();
         }
 
         private bool MoveSuccess;
@@ -76,10 +79,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (CoverDestination != null)
             {
-                CoverDestination.SetBotIsUsingThis(false);
-                CoverDestination = null;
+                return true;
             }
-
             CoverPoint coverPoint = SelectPoint();
             if (coverPoint != null && !coverPoint.Spotted(SAIN))
             {

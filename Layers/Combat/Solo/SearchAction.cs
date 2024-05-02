@@ -183,7 +183,7 @@ namespace SAIN.Layers.Combat.Solo
                     Vector3 direction = point - SAIN.Position;
                     Vector3 targetDirection = SAIN.CurrentTargetPosition.Value - SAIN.Position;
                     float dot = Vector3.Dot(direction, targetDirection);
-                    if (dot > 0.25f)
+                    if (dot > 0.25f && (point - SAIN.Position).sqrMagnitude > 0.5f)
                     {
                         SAIN.Steering.LookToPoint(point);
                     }

@@ -26,7 +26,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ____owner)
         {
-            if (____owner == null || ModDetection.ProjectFikaLoaded)
+            if (____owner == null || ModDetection.ProjectFikaLoaded || !SAINPlugin.LoadedPreset.GlobalSettings.General.NewDoorOpening)
             {
                 return true;
             }

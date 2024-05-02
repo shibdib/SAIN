@@ -19,9 +19,9 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Name("Talk Frequency")]
         [Description("How often this bot can say voicelines.")]
-        [Default(2f)]
+        [Default(1f)]
         [MinMax(0f, 30f)]
-        public float TalkFrequency = 2f;
+        public float TalkFrequency = 1f;
 
         [Default(true)]
         public bool CanTalk = true;

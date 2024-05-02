@@ -98,7 +98,7 @@ namespace SAIN.Components
                 SAINComponentClass sain = bot.Value;
                 if (sain != null && sain.BotOwner != null && bot.Key != player.ProfileId)
                 {
-                    if (sain.BotOwner.EnemiesController.IsEnemy(player))
+                    if (sain.BotOwner.BotsGroup.IsPlayerEnemyByRole(player.Profile.Info.Settings.Role))
                     {
                         sain.Talk.EnemyTalk.SetEnemyTalk(player);
                     }

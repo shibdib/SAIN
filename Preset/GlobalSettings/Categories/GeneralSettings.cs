@@ -18,6 +18,16 @@ namespace SAIN.Preset.GlobalSettings
         [JsonIgnore]
         public float BaseReachDistance = 0.45f;
 
+        [Name("Bots Open Doors Fast")]
+        [Description("WIP. Can cause bots to get stuck on doors sometimes.")]
+        [Default(true)]
+        public bool NewDoorOpening = true;
+
+        [Name("Limit SAIN Function in AI vs AI")]
+        [Description("Disables certains functions when ai are fighting other ai, and they aren't close to a human player. Turn off if you are spectating ai in free-cam.")]
+        [Default(true)]
+        public bool LimitAIvsAI = true;
+
         [Name("Performance Mode")]
         [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN. Can cause bots to take too long to find cover to go to.")]
         [Default(false)]

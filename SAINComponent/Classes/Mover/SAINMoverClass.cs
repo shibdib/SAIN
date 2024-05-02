@@ -71,8 +71,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             Prone = new ProneClass(sain);
             Pose = new PoseClass(sain);
             SprintController = new SprintController(sain);
+            DogFight = new DogFight(sain);
         }
 
+        public DogFight DogFight { get; private set; }
         private SprintController SprintController;
 
         public void Init()

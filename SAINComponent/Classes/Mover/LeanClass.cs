@@ -30,6 +30,13 @@ namespace SAIN.SAINComponent.Classes.Mover
                 ResetLean();
                 return;
             }
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI 
+                && enemy.IsAI 
+                && SAIN.CurrentAILimit != AILimitSetting.Close)
+            {
+                ResetLean();
+                return;
+            }
             if (CurrentDecision == SoloDecision.HoldInCover)
             {
                 return;
