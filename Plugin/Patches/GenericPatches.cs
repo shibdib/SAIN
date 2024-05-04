@@ -105,7 +105,6 @@ namespace SAIN.Patches.Generic
 
     internal class ShallKnowEnemyPatch : ModulePatch
     {
-
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(EnemyInfo), "ShallKnowEnemy");

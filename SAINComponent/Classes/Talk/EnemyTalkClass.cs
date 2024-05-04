@@ -254,7 +254,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                         Random.Range(0.4f, 0.6f),
                         player,
                         ResponseDist,
-                        85f
+                        60f
                         ));
                 }
             }
@@ -270,17 +270,18 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
             if (SAIN != null
                 && player != null 
-                && SAIN.ProfileId != player.ProfileId)
+                && SAIN.ProfileId != player.ProfileId 
+                && SAIN.Info.Profile.IsScav)
             {
                 if (BotOwner.Memory.IsPeace
                     && _nextResponseTime < Time.time)
                 {
-                    _nextResponseTime = Time.time + 0.5f;
+                    _nextResponseTime = Time.time + 0.75f;
 
                     SAIN.StartCoroutine(RespondToVoice(
                         EPhraseTrigger.MumblePhrase,
                         ETagStatus.Unaware,
-                        Random.Range(0.2f, 0.5f),
+                        Random.Range(0.33f, 0.75f),
                         player,
                         _friendlyResponseDistance,
                         _friendlyResponseChance
@@ -301,7 +302,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                             SAIN.HasEnemy ? ETagStatus.Combat : ETagStatus.Aware,
                             Random.Range(0.2f, 0.5f),
                             player,
-                            _friendlyResponseDistance,
+                            20f,
                             33f
                             ));
                     }
@@ -320,8 +321,8 @@ namespace SAIN.SAINComponent.Classes.Talk
             EPhraseTrigger.HoldFire,
             EPhraseTrigger.GetBack
         };
+        private const float _friendlyResponseDistance = 30f;
         private const float _friendlyResponseChance = 85f;
-        private const float _friendlyResponseDistance = 65f;
         private float _nextResponseTime;
         private float _tauntTimer = 0f;
     }

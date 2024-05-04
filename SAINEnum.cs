@@ -188,6 +188,24 @@ namespace SAIN
         Food,
     }
 
+    public enum ELocation
+    {
+        None = 0,
+        Factory = 1,
+        FactoryNight = 2,
+        Customs = 3,
+        GroundZero = 4,
+        Reserve = 5,
+        Streets = 6,
+        Lighthouse = 7,
+        Shoreline = 8,
+        Labs = 9,
+        Woods = 10,
+        Interchange = 11,
+        Terminal = 12,
+        Town = 13,
+    }
+
     public enum EnemyPathDistance
     {
         VeryClose,

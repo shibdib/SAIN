@@ -27,8 +27,94 @@ namespace SAIN.Components
                 SAINMainPlayer = ComponentHelpers.AddOrDestroyComponent(SAINMainPlayer, GameWorld?.MainPlayer);
             }
 
+            FindLocation();
             findSpawnPointMarkers();
         }
+
+        private bool _locationInitialized;
+        private void FindLocation()
+        {
+            if (GameWorld == null || (!_locationInitialized && GameWorld.LocationId.IsNullOrEmpty()))
+            {
+                return;
+            }
+            else
+            {
+                _locationInitialized = true;
+            }
+
+            if (Location == ELocation.None)
+            {
+                string location = GameWorld.LocationId;
+                switch (location.ToLower())
+                {
+                    case "bigmap":
+                        Location = ELocation.Customs;
+                        break;
+                    case "factory4_day":
+                        Location = ELocation.Factory;
+                        break;
+                    case "factory4_night":
+                        Location = ELocation.FactoryNight;
+                        break;
+                    case "interchange":
+                        Location = ELocation.Interchange;
+                        break;
+                    case "laboratory":
+                        Location = ELocation.Labs;
+                        break;
+                    case "lighthouse":
+                        Location = ELocation.Lighthouse;
+                        break;
+                    case "rezervbase":
+                        Location = ELocation.Reserve;
+                        break;
+                    case "sandbox":
+                        Location = ELocation.GroundZero;
+                        break;
+                    case "shoreline":
+                        Location = ELocation.Shoreline;
+                        break;
+                    case "tarkovstreets":
+                        Location = ELocation.Streets;
+                        break;
+                    case "terminal":
+                        Location = ELocation.Terminal;
+                        break;
+                    case "town":
+                        Location = ELocation.Town;
+                        break;
+                    default:
+                        Location = ELocation.None;
+                        break;
+                }
+
+                if (Location != ELocation.None)
+                {
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                    Logger.LogDebug(Location);
+                }
+            }
+        }
+
+        public ELocation Location { get; private set; }
 
         private void OnDestroy()
         {

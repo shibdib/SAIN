@@ -22,6 +22,9 @@ namespace SAIN.Preset.Personalities
             [Default(true)]
             public bool Enabled = true;
 
+            [Default(true)]
+            public bool WillChaseDistantGunshots = true;
+
             [NameAndDescription("Can Be Randomly Assigned", "A percentage chance that this personality can be applied to any bot, regardless of bot stats, power, player level, or anything else.")]
             [Default(true)]
             public bool CanBeRandomlyAssigned = true;

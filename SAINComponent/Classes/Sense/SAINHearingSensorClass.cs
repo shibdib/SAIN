@@ -285,12 +285,12 @@ namespace SAIN.SAINComponent.Classes
             return false;
         }
 
-        private void ReactToSound(IPlayer person, Vector3 pos, float power, bool wasHeard, bool bulletFelt, AISoundType type)
+        private void ReactToSound(IPlayer person, Vector3 soundPosition, float power, bool wasHeard, bool bulletFelt, AISoundType type)
         {
             bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
-            float shooterDistance = (BotOwner.Transform.position - pos).magnitude;
+            float shooterDistance = (BotOwner.Transform.position - soundPosition).magnitude;
 
-            Vector3 vector = GetSoundDispersion(person, pos, type);
+            Vector3 vector = GetSoundDispersion(person, soundPosition, type);
 
             if ((wasHeard || bulletFelt) && shooterDistance < BotOwner.Settings.FileSettings.Hearing.RESET_TIMER_DIST)
             {
@@ -324,11 +324,18 @@ namespace SAIN.SAINComponent.Classes
                 }
             }
 
+            if (!firedAtMe
+                && !SAIN.Info.PersonalitySettings.WillChaseDistantGunshots
+                && (SAIN.Position - soundPosition).sqrMagnitude > 100f * 100f)
+            {
+                return;
+            }
+
             if (wasHeard)
             {
                 try
                 {
-                    SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, pos, person);
+                    SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, soundPosition, person);
                 }
                 catch (Exception e)
                 {
@@ -343,7 +350,7 @@ namespace SAIN.SAINComponent.Classes
 
                 try
                 {
-                    SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, pos, person);
+                    SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, soundPosition, person);
                 }
                 catch (Exception e)
                 {
