@@ -151,9 +151,11 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
             if (_nextGrenadeCheckTime < Time.time 
+                && enemy.LastKnownPosition != null
                 && !enemy.IsVisible 
-                && enemy.TimeSinceSeen > SAIN.Info.FileSettings.Grenade.TimeSinceSeenBeforeThrow 
-                && enemy.RealDistance < GrenadeMaxEnemyDistance)
+                && enemy.TimeSinceSeen > SAIN.Info.FileSettings.Grenade.TimeSinceSeenBeforeThrow
+                && enemy.TimeSinceLastKnownUpdated < 60f
+                && (enemy.LastKnownPosition.Value - SAIN.Position).sqrMagnitude < GrenadeMaxEnemyDistance * GrenadeMaxEnemyDistance)
             {
                 _nextGrenadeCheckTime = Time.time + 0.5f;
                 if (grenades.ReadyToThrow && grenades.AIGreanageThrowData.IsUpToDate())
@@ -161,7 +163,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     grenades.DoThrow();
                     return true;
                 }
-                grenades.CanThrowGrenade(enemy.EnemyPosition + Vector3.up);
+                grenades.CanThrowGrenade(enemy.LastKnownPosition.Value + Vector3.up * 0.5f);
             }
             return false;
         }
@@ -403,29 +405,6 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
         }
-
-        private bool StartAmbush()
-        {
-            bool startCheck = false;
-            if (SAIN.Info.PersonalitySettings.Sneaky)
-            {
-                startCheck = true;
-            }
-            else if (AmbushCheckTimer < Time.time)
-            {
-                AmbushCheckTimer = Time.time + 5f;
-                startCheck = EFTMath.RandomBool(25);
-            }
-
-            if (startCheck)
-            {
-
-            }
-
-            return false;
-        }
-
-        private float AmbushCheckTimer;
 
         private bool StartSearch(SAINEnemy enemy)
         {
