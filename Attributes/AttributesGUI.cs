@@ -214,7 +214,7 @@ namespace SAIN.Attributes
             }
             else if (attributes.ValueType == typeof(int))
             {
-                Logger.LogError("Int Not Implemented!");
+                //Logger.LogError("Int Not Implemented!");
             }
             if (showResult && value != null)
             {

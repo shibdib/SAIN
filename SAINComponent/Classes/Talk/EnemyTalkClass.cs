@@ -291,8 +291,8 @@ namespace SAIN.SAINComponent.Classes.Talk
                     && SAIN.Talk.GroupTalk.FriendIsClose
                     && (SAIN.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.GigaChads
                         || SAIN.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.Elite)
-                    && (SAIN.Info.Personality == IPersonality.GigaChad
-                        || SAIN.Info.Personality == IPersonality.Chad))
+                    && (SAIN.Info.Personality == EPersonality.GigaChad
+                        || SAIN.Info.Personality == EPersonality.Chad))
                 {
                     if (_saySilenceTime < Time.time)
                     {

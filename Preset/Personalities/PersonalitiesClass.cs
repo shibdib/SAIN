@@ -11,14 +11,14 @@ namespace SAIN.Preset.Personalities
         public PersonalitySettingsClass()
         { }
 
-        public PersonalitySettingsClass(IPersonality personality, string name, string description)
+        public PersonalitySettingsClass(EPersonality personality, string name, string description)
         {
             SAINPersonality = personality;
             Name = name;
             Description = description;
         }
 
-        public IPersonality SAINPersonality;
+        public EPersonality SAINPersonality;
         public string Name;
         public string Description;
 

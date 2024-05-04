@@ -29,6 +29,8 @@ namespace SAIN
     [BepInDependency(WaypointsGUID, WaypointsVersion)]
     [BepInDependency(SPTGUID, SPTVersion)]
     [BepInProcess(EscapeFromTarkov)]
+    [BepInIncompatibility("com.dvize.BushNoESP")]
+    [BepInIncompatibility("com.dvize.NoGrenadeESP")]
     public class SAINPlugin : BaseUnityPlugin
     {
         public static bool GetSAIN(BotOwner botOwner, out SAINComponentClass sain, string patchName)

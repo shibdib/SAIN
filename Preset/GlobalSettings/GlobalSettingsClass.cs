@@ -67,6 +67,10 @@ namespace SAIN.Preset.GlobalSettings
         [Name("Shoot")]
         public ShootSettings Shoot = new ShootSettings();
 
+        [Name("Bot Power Level")]
+        [Hidden]
+        public PowerCalcSettings PowerCalc = new PowerCalcSettings();
+
         [Hidden]
         public EFTCoreSettings EFTCoreSettings = new EFTCoreSettings();
     }

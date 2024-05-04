@@ -11,6 +11,17 @@ namespace SAIN.Editor.Util
 {
     public static class ModifyLists
     {
+        public static void EditDictionary(Dictionary<ELocation, float> dictionary, out bool wasEdited)
+        {
+            wasEdited = false;
+            if (dictionary != null)
+            {
+                foreach (var item in EnumValues.GetEnum<ELocation>())
+                {
+                }
+            }
+        }
+
         public static void AddOrRemove(List<WildSpawnType> list, out bool wasEdited, int optionsPerLine = 4)
         {
             wasEdited = false;

@@ -9,7 +9,7 @@ namespace SAIN.BotController.Classes
         public static ESquadPersonality GetSquadPersonality(Dictionary<string, SAINComponentClass> Members, out SquadPersonalitySettings settings)
         {
             GetMemberPersonalities(Members);
-            IPersonality mostFrequentPersonality =  GetMostFrequentPersonality(PersonalityCounts, out int count);
+            EPersonality mostFrequentPersonality =  GetMostFrequentPersonality(PersonalityCounts, out int count);
             ESquadPersonality result = PickSquadPersonality(mostFrequentPersonality);
             settings = GetSquadSettings(result);
             return result;
@@ -47,10 +47,10 @@ namespace SAIN.BotController.Classes
 
         }
 
-        private static IPersonality GetMostFrequentPersonality(Dictionary<IPersonality, int> PersonalityCounts, out int count)
+        private static EPersonality GetMostFrequentPersonality(Dictionary<EPersonality, int> PersonalityCounts, out int count)
         {
             count = 0;
-            IPersonality mostFrequent = IPersonality.Normal;
+            EPersonality mostFrequent = EPersonality.Normal;
             foreach (var personalityCount in PersonalityCounts)
             {
                 if (personalityCount.Value > count)
@@ -64,24 +64,24 @@ namespace SAIN.BotController.Classes
             return mostFrequent;
         }
 
-        private static ESquadPersonality PickSquadPersonality(IPersonality mostFrequentPersonality)
+        private static ESquadPersonality PickSquadPersonality(EPersonality mostFrequentPersonality)
         {
             ESquadPersonality result = ESquadPersonality.None;
             switch (mostFrequentPersonality)
             {
-                case IPersonality.GigaChad:
-                case IPersonality.Chad:
-                case IPersonality.Wreckless:
+                case EPersonality.GigaChad:
+                case EPersonality.Chad:
+                case EPersonality.Wreckless:
                     result = Helpers.EFTMath.RandomBool(66) ? ESquadPersonality.GigaChads : ESquadPersonality.Elite;
                     break;
 
-                case IPersonality.Timmy:
-                case IPersonality.Coward:
+                case EPersonality.Timmy:
+                case EPersonality.Coward:
                     result = ESquadPersonality.TimmyTeam6;
                     break;
 
-                case IPersonality.Rat:
-                case IPersonality.SnappingTurtle:
+                case EPersonality.Rat:
+                case EPersonality.SnappingTurtle:
                     result = ESquadPersonality.Rats;
                     break;
 
@@ -130,8 +130,8 @@ namespace SAIN.BotController.Classes
             return SquadSettings[squadPersonality];
         }
 
-        private static readonly List<IPersonality> MemberPersonalities = new List<IPersonality>();
-        private static readonly Dictionary<IPersonality, int> PersonalityCounts = new Dictionary<IPersonality, int>();
+        private static readonly List<EPersonality> MemberPersonalities = new List<EPersonality>();
+        private static readonly Dictionary<EPersonality, int> PersonalityCounts = new Dictionary<EPersonality, int>();
         private static readonly Dictionary<ESquadPersonality, SquadPersonalitySettings> SquadSettings = new Dictionary<ESquadPersonality, SquadPersonalitySettings>();
     }
 }

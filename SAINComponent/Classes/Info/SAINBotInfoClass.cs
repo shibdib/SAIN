@@ -208,28 +208,28 @@ namespace SAIN.SAINComponent.Classes.Info
             }
         }
 
-        public IPersonality GetPersonality()
+        public EPersonality GetPersonality()
         {
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Personality.CheckForForceAllPers(out IPersonality result))
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Personality.CheckForForceAllPers(out EPersonality result))
             {
                 return result;
             }
             string nickname = Player.Profile.Nickname.ToLower();
             if (nickname.Contains("solarint"))
             {
-                return IPersonality.GigaChad;
+                return EPersonality.GigaChad;
             }
             if (nickname.Contains("chomp") || nickname.Contains("senko"))
             {
-                return IPersonality.Chad;
+                return EPersonality.Chad;
             }
             if (nickname.Contains("kaeno") || nickname.Contains("justnu"))
             {
-                return IPersonality.Timmy;
+                return EPersonality.Timmy;
             }
             if (!BotTypeDefinitions.BotTypes.ContainsKey(WildSpawnType))
             {
-                return IPersonality.Chad;
+                return EPersonality.Chad;
             }
             foreach (PersonalitySettingsClass setting in SAINPlugin.LoadedPreset.PersonalityManager.Personalities.Values)
             {
@@ -238,7 +238,7 @@ namespace SAIN.SAINComponent.Classes.Info
                     return setting.SAINPersonality;
                 }
             }
-            return IPersonality.Normal;
+            return EPersonality.Normal;
         }
 
         public WildSpawnType WildSpawnType => Profile.WildSpawnType;
@@ -246,7 +246,7 @@ namespace SAIN.SAINComponent.Classes.Info
         public int PlayerLevel => Profile.PlayerLevel;
         public BotDifficulty BotDifficulty => Profile.BotDifficulty;
 
-        public IPersonality Personality { get; private set; }
+        public EPersonality Personality { get; private set; }
         public PersonalityVariablesClass PersonalitySettings => PersonalitySettingsClass?.Variables;
         public PersonalitySettingsClass PersonalitySettingsClass { get; private set; }
 

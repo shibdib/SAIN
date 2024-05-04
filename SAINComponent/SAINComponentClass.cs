@@ -68,6 +68,11 @@ namespace SAIN.SAINComponent
                 return false;
             }
 
+            if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(person.Player, out float power))
+            {
+                _powerCalcd = true;
+            }
+
             Person = person;
 
             try
@@ -197,6 +202,15 @@ namespace SAIN.SAINComponent
                     DoorOpener.Update();
                 }
 
+                if (!_powerCalcd && BotOwner?.WeaponManager?.IsWeaponReady == true)
+                {
+                    if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(Player, out float power))
+                    {
+                        Power = power;
+                        _powerCalcd = true;
+                    }
+                }
+
                 Search.Update();
                 Memory.Update();
                 EnemyController.Update();
@@ -231,6 +245,8 @@ namespace SAIN.SAINComponent
             }
         }
 
+        private float Power;
+        private bool _powerCalcd;
         public SightCheckerComponent SightChecker { get; private set; }
         public SAINDoorOpener DoorOpener { get; private set; }
 
@@ -438,10 +454,17 @@ namespace SAIN.SAINComponent
                 {
                     if ((Target.Value - Position).sqrMagnitude < 2f)
                     {
-                        if (EFTMath.RandomBool(33))
+                        if (EFTMath.RandomBool(20))
                         {
                             Talk.Say(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true);
                         }
+                        BotOwner.Memory.GoalTarget.Clear();
+                        BotOwner.CalcGoal();
+                    }
+                    else if (!Info.PersonalitySettings.WillSearchFromAudio 
+                        && BotOwner.Memory.GoalTarget.CreatedTime > 60f 
+                        && Enemy == null)
+                    {
                         BotOwner.Memory.GoalTarget.Clear();
                         BotOwner.CalcGoal();
                     }
@@ -454,7 +477,7 @@ namespace SAIN.SAINComponent
                 {
                     if (place != null)
                     {
-                        DebugGizmos.Line(place.Position, Position, 0.025f, Time.deltaTime, true);
+                        //DebugGizmos.Line(place.Position, Position, 0.025f, Time.deltaTime, true);
                     }
                 }
             }

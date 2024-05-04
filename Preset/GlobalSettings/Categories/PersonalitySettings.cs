@@ -13,22 +13,22 @@ namespace SAIN.Preset.GlobalSettings
         [Default(false)]
         public bool AllRats = false;
 
-        public bool CheckForForceAllPers(out IPersonality result)
+        public bool CheckForForceAllPers(out EPersonality result)
         {
-            result = IPersonality.Normal;
+            result = EPersonality.Normal;
             if (AllGigaChads)
             {
-                result = IPersonality.GigaChad;
+                result = EPersonality.GigaChad;
                 return true;
             }
             if (AllChads)
             {
-                result = IPersonality.Chad;
+                result = EPersonality.Chad;
                 return true;
             }
             if (AllRats)
             {
-                result = IPersonality.Rat;
+                result = EPersonality.Rat;
                 return true;
             }
             return false;

@@ -191,21 +191,28 @@ namespace SAIN
                 Type modType = mod.GetType();
                 if (!HasSuppressor && IsSilencer(modType))
                 {
+                    Suppressor = mod;
                     HasSuppressor = true;
                 }
                 else if (!sightFound)
                 {
                     if (IsOptic(modType))
                     {
+                        Optic = mod;
                         HasOptic = true;
                     }
                     else if (IsRedDot(modType))
                     {
+                        RedDot = mod;
                         HasRedDot = true;
                     }
                 }
             }
         }
+
+        public Mod Suppressor { get; private set; }
+        public Mod Optic { get; private set; }
+        public Mod RedDot { get; private set; }
 
         private bool sightFound => HasRedDot || HasOptic;
 

@@ -36,7 +36,7 @@ namespace SAIN.Preset.Personalities
                 if (item.Value.Variables.AllowedTypes.Count == 0)
                 {
                     hadToFix = true;
-                    if (item.Key == IPersonality.Chad || item.Key == IPersonality.GigaChad)
+                    if (item.Key == EPersonality.Chad || item.Key == EPersonality.GigaChad)
                     {
                         AddPMCTypes(item.Value.Variables.AllowedTypes);
                     }
@@ -62,7 +62,7 @@ namespace SAIN.Preset.Personalities
 
         private void InitDefaults()
         {
-            var pers = IPersonality.GigaChad;
+            var pers = EPersonality.GigaChad;
             if (!Personalities.ContainsKey(pers))
             {
                 string name = pers.ToString();
@@ -74,7 +74,7 @@ namespace SAIN.Preset.Personalities
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 60,
                         RandomlyAssignedChance = 3,
-                        PowerLevelMin = 250f,
+                        PowerLevelMin = 200f,
 
                         CanTaunt = true,
                         CanRespondToVoice = true,
@@ -121,7 +121,7 @@ namespace SAIN.Preset.Personalities
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
-            pers = IPersonality.Wreckless;
+            pers = EPersonality.Wreckless;
             if (!Personalities.ContainsKey(pers))
             {
                 string name = pers.ToString();
@@ -133,6 +133,7 @@ namespace SAIN.Preset.Personalities
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 3,
                         RandomlyAssignedChance = 1,
+                        PowerLevelMin = 150f,
 
                         CanTaunt = true,
                         CanRespondToVoice = true,
@@ -177,7 +178,7 @@ namespace SAIN.Preset.Personalities
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
-            pers = IPersonality.SnappingTurtle;
+            pers = EPersonality.SnappingTurtle;
             if (!Personalities.ContainsKey(pers))
             {
                 string name = pers.ToString();
@@ -189,7 +190,7 @@ namespace SAIN.Preset.Personalities
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 30,
                         RandomlyAssignedChance = 1,
-                        PowerLevelMin = 250f,
+                        PowerLevelMin = 200f,
 
                         CanTaunt = true,
                         CanRespondToVoice = false,
@@ -232,7 +233,7 @@ namespace SAIN.Preset.Personalities
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
-            pers = IPersonality.Chad;
+            pers = EPersonality.Chad;
             if (!Personalities.ContainsKey(pers))
             {
                 string name = pers.ToString();
@@ -245,7 +246,7 @@ namespace SAIN.Preset.Personalities
 
                         RandomChanceIfMeetRequirements = 60,
                         RandomlyAssignedChance = 5,
-                        PowerLevelMin = 200f,
+                        PowerLevelMin = 150f,
 
                         CanTaunt = true,
                         CanRespondToVoice = true,
@@ -284,7 +285,7 @@ namespace SAIN.Preset.Personalities
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
-            pers = IPersonality.Rat;
+            pers = EPersonality.Rat;
             if (!Personalities.ContainsKey(pers))
             {
                 string name = pers.ToString();
@@ -294,13 +295,13 @@ namespace SAIN.Preset.Personalities
                     Variables =
                     {
                         Enabled = true,
-                        RandomChanceIfMeetRequirements = 33,
+                        RandomChanceIfMeetRequirements = 25,
                         RandomlyAssignedChance = 15,
                         HoldGroundBaseTime = 0.75f,
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = true,
                         SearchBaseTime = 240f,
-                        PowerLevelMax = 125f,
+                        PowerLevelMax = 100f,
                         AggressionMultiplier = 1f,
                         CanRespondToVoice = false,
                         WillChaseDistantGunshots = false,
@@ -334,7 +335,7 @@ namespace SAIN.Preset.Personalities
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
-            pers = IPersonality.Timmy;
+            pers = EPersonality.Timmy;
             if (!Personalities.ContainsKey(pers))
             {
                 string name = pers.ToString();
@@ -345,8 +346,9 @@ namespace SAIN.Preset.Personalities
                     Variables =
                     {
                         Enabled = true,
-                        RandomlyAssignedChance = 25,
-                        PowerLevelMax = 80f,
+                        RandomChanceIfMeetRequirements = 70f,
+                        RandomlyAssignedChance = 5,
+                        PowerLevelMax = 100f,
                         MaxLevel = 10,
                         HoldGroundBaseTime = 0.5f,
                         WillSearchForEnemy = true,
@@ -381,7 +383,7 @@ namespace SAIN.Preset.Personalities
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
-            pers = IPersonality.Coward;
+            pers = EPersonality.Coward;
             if (!Personalities.ContainsKey(pers))
             {
                 string name = pers.ToString();
@@ -391,7 +393,8 @@ namespace SAIN.Preset.Personalities
                     Variables =
                     {
                         Enabled = true,
-                        RandomlyAssignedChance = 25,
+                        RandomlyAssignedChance = 5,
+                        PowerLevelMax = 150f,
                         HoldGroundBaseTime = 0.5f,
                         WillSearchForEnemy = false,
                         WillSearchFromAudio = false,
@@ -425,7 +428,7 @@ namespace SAIN.Preset.Personalities
                 SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
             }
 
-            pers = IPersonality.Normal;
+            pers = EPersonality.Normal;
             if (!Personalities.ContainsKey(pers))
             {
                 string name = pers.ToString();
@@ -472,6 +475,6 @@ namespace SAIN.Preset.Personalities
             allowedTypes.Add(BotTypeDefinitions.BotTypes[WildSpawn.Bear].Name);
         }
 
-        public Dictionary<IPersonality, PersonalitySettingsClass> Personalities = new Dictionary<IPersonality, PersonalitySettingsClass>();
+        public Dictionary<EPersonality, PersonalitySettingsClass> Personalities = new Dictionary<EPersonality, PersonalitySettingsClass>();
     }
 }

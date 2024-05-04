@@ -63,7 +63,7 @@ namespace SAIN.Helpers
         public static readonly ICaliber[] AmmoCalibers = GetEnum<ICaliber>();
         public static readonly IWeaponClass[] WeaponClasses = GetEnum<IWeaponClass>();
 
-        public static readonly IPersonality[] Personalities = GetEnum<IPersonality>();
+        public static readonly EPersonality[] Personalities = GetEnum<EPersonality>();
 
         public static readonly SoloDecision[] SoloDecisions = GetEnum<SoloDecision>();
         public static readonly SquadDecision[] SquadDecisions = GetEnum<SquadDecision>();
