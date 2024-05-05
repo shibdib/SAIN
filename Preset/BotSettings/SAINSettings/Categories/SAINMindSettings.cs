@@ -64,7 +64,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float PART_PERCENT_TO_HEAL = 0.9f;
+        public float PART_PERCENT_TO_HEAL = 0.6f;
 
         [Hidden]
         [JsonIgnore]

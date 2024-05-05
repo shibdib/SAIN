@@ -10,13 +10,12 @@ namespace SAIN.Preset.GlobalSettings
     public class GeneralSettings
     {
         [MinMax(0.1f, 1f, 100f)]
-        [Hidden]
         [JsonIgnore]
-        public float SprintReachDistance = 0.9f;
+        public float SprintReachDistance = 0.25f;
+
         [MinMax(0.1f, 1f, 100f)]
-        [Hidden]
         [JsonIgnore]
-        public float BaseReachDistance = 0.45f;
+        public float BaseReachDistance = 0.25f;
 
         [Name("Bots Open Doors Fast")]
         [Description("WIP. Can cause bots to get stuck on doors sometimes.")]

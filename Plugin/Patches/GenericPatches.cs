@@ -19,9 +19,42 @@ using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent;
 using Audio.Data;
 using EFT.UI;
+using System.Collections;
 
 namespace SAIN.Patches.Generic
 {
+    public class HealCancelPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(GClass410), "CancelCurrent");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref bool ___bool_1, ref bool ___bool_0, ref float ___float_0)
+        {
+            if (___bool_1)
+            {
+                return false;
+            }
+            if (___bool_0)
+            {
+                if (___float_0 < Time.time + 3f)
+                {
+                    ___float_0 += 5f;
+                }
+                ___bool_1 = true;
+                ___botOwner_0.WeaponManager.Selector.TakePrevWeapon();
+                ___botOwner_0.StartCoroutine(TakePrevWeapon(___botOwner_0));
+            }
+            return false;
+        }
+        private static IEnumerator TakePrevWeapon(BotOwner bot)
+        {
+            yield return new WaitForSeconds(0.5f);
+            bot.WeaponManager.Selector.TakePrevWeapon();
+        }
+    }
     public class AimRotateSpeedPatch : ModulePatch
     {
         private static Type _aimingDataType;

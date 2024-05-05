@@ -340,9 +340,9 @@ namespace SAIN.SAINComponent.Classes.Mover
         private void SetStamina()
         {
             var stamina = Player.Physical.Stamina;
-            if (SAIN.CombatLayersActive && stamina.NormalValue < 0.1f)
+            if (SAIN.CombatLayersActive && stamina.NormalValue < 0.05f)
             {
-                Player.Physical.Stamina.UpdateStamina(stamina.TotalCapacity / 8f);
+                Player.Physical.Stamina.UpdateStamina(stamina.TotalCapacity / 4f);
             }
         }
 
@@ -355,12 +355,18 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void SetTargetMoveSpeed(float speed)
         {
-            BotOwner.Mover?.SetTargetMoveSpeed(speed);
+            if (IsSprinting || Player.IsSprintEnabled)
+            {
+                BotOwner.Mover?.SetTargetMoveSpeed(1f);
+            }
+            else
+            {
+                BotOwner.Mover?.SetTargetMoveSpeed(speed);
+            }
         }
 
         public void StopMove()
         {
-            BotOwner.Mover?.Stop();
             if (IsSprinting)
             {
                 Sprint(false);
@@ -369,18 +375,33 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 Sprint(false);
             }
-            UpdateBodyNavObstacle(true);
+            if (!_stopping && BotOwner.Mover.IsMoving)
+            {
+                _stopping = true;
+                SAIN.StartCoroutine(StopAfterDelay(0.33f));
+            }
         }
+
+        private float _nextStopMoveTime;
+
+        private IEnumerator StopAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            BotOwner.Mover?.Stop();
+            _stopping = false;
+        }
+
+        private bool _stopping;
 
         public void Sprint(bool value)
         {
-            IsSprinting = value;
-            BotOwner.Mover?.Sprint(value);
             if (value)
             {
                 SAIN.Steering.LookToMovingDirection();
                 FastLean(0f);
             }
+            IsSprinting = value;
+            BotOwner.Mover?.Sprint(value);
         }
 
         public bool IsSprinting { get; private set; }

@@ -21,6 +21,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private float _jumpTimer;
         private bool _shallJumpToCover;
+        private bool _sprinting;
+        private float _nextTryReloadTime;
 
         public override void Update()
         {
@@ -28,6 +30,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             SAIN.Mover.SetTargetPose(1f);
 
             if (_shallJumpToCover 
+                && _sprinting
                 && BotOwner.GetPlayer.IsSprintEnabled 
                 && MoveSuccess 
                 && BotOwner.Mover.DistDestination < 2f 
@@ -40,12 +43,22 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (RecalcTimer < Time.time)
             {
                 MoveSuccess = false;
+                _sprinting = false;
                 bool shallProne = SAIN.Mover.Prone.ShallProneHide();
                 if (FindTargetCover())
                 {
                     if ((CoverDestination.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude > 4f)
                     {
                         MoveSuccess = BotOwner.BotRun.Run(CoverDestination.GetPosition(SAIN), false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
+                        if (MoveSuccess)
+                        {
+                            _sprinting = true;
+                            if (_nextTryReloadTime < Time.time && SAIN.Decision.SelfActionDecisions.LowOnAmmo(0.5f))
+                            {
+                                _nextTryReloadTime = Time.time + 2f;
+                                SAIN.SelfActions.TryReload();
+                            }
+                        }
                     }
                     else
                     {
@@ -55,7 +68,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
                 if (MoveSuccess)
                 {
-                    RecalcTimer = Time.time + 4f;
+                    RecalcTimer = Time.time + 1f;
                 }
                 else
                 {
@@ -129,13 +142,13 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 SAIN.Talk.TalkAfterDelay(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat, 0.5f);
             }
+            _shallJumpToCover = EFTMath.RandomBool(12) 
+                && BotOwner.Memory.IsUnderFire 
+                && SAIN.Info.Profile.IsPMC;
         }
 
         public override void Stop()
         {
-            _shallJumpToCover = EFTMath.RandomBool(20) 
-                && BotOwner.Memory.IsUnderFire 
-                && SAIN.Info.Profile.IsPMC;
 
             CoverDestination = null;
         }

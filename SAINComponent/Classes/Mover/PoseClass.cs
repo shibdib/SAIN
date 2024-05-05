@@ -18,6 +18,10 @@ namespace SAIN.SAINComponent.Classes.Mover
         public void Update()
         {
             FindObjectsInFront();
+            if (SAIN.Mover.IsSprinting || Player.IsSprintEnabled)
+            {
+                _targetPoseLevel = 1f;
+            }
 
             if (_targetPoseLevel == 1f && BotOwner.Mover.TargetPose != 1f)
             {

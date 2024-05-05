@@ -363,24 +363,30 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
-            bool underFire = BotOwner.Memory.IsUnderFire;
-            if (underFire 
-                && SAIN.Enemy != null 
+
+            bool runNow = SAIN.Enemy != null
                 && SAIN.Enemy.Seen
-                && !SAIN.Enemy.IsVisible 
-                && SAIN.Enemy.TimeSinceSeen > 3f)
+                && !SAIN.Enemy.IsVisible
+                && SAIN.Enemy.TimeSinceSeen > 3f
+                && SAIN.Cover.CoverPoints.Count > 0;
+
+            if (StartRunCoverTimer < Time.time || runNow)
             {
-                return true;
-            }
-            if (StartRunCoverTimer < Time.time)
-            {
-                CoverPoint closestCover = SAIN.Cover.ClosestPoint;
-                if (closestCover != null)
+                CoverPoint coverInUse = null;
+                foreach (var coverPoint in SAIN.Cover.CoverPoints)
                 {
-                    return (closestCover.GetPosition(SAIN) - SAIN.Position).sqrMagnitude > 1f;
+                    if (coverPoint?.GetBotIsUsingThis() == true)
+                    {
+                        coverInUse = coverPoint;
+                        break;
+                    }
+                }
+                if (coverInUse != null)
+                {
+                    return (coverInUse.GetPosition(SAIN) - SAIN.Position).sqrMagnitude > 2f;
                 }
             }
-            return StartRunCoverTimer < Time.time;
+            return false;
         }
 
         private static readonly float RunToCoverTime = 1.5f;
@@ -389,9 +395,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartMoveToCover()
         {
-            bool inCover = SAIN.Cover.BotIsAtCoverInUse();
-
-            if (!inCover)
+            var coverInUse = SAIN.Cover.CoverInUse;
+            if (coverInUse == null)
             {
                 var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
                 if (CurrentDecision != SoloDecision.WalkToCover && CurrentDecision != SoloDecision.RunToCover)

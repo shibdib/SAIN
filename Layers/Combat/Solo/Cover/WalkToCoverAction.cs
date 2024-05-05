@@ -40,32 +40,27 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (_nextUpdateCoverTime < Time.time)
             {
-                _nextUpdateCoverTime = Time.time + 0.25f;
+                _nextUpdateCoverTime = Time.time + 0.1f;
 
                 if (CoverDestination == null)
                 {
                     var coverPoint = SAIN.Cover.ClosestPoint;
                     if (coverPoint != null
                         && !coverPoint.Spotted(SAIN)
-                        && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out bool calculating, -1, false, false))
+                        && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out _, 0.25f, false, false))
                     {
                         CoverDestination = coverPoint;
                         CoverDestination.SetBotIsUsingThis(true);
-                        RecalcPathTimer = Time.time + 2f;
+                        RecalcPathTimer = Time.time + 1f;
                         SAIN.Mover.SetTargetMoveSpeed(1f);
                         SAIN.Mover.SetTargetPose(1f);
                     }
                 }
                 if (CoverDestination != null && RecalcPathTimer < Time.time)
                 {
-                    if (SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out bool calculating))
+                    if (SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out _, 0.25f, false, false))
                     {
-                        RecalcPathTimer = Time.time + 2f;
-
-                        var personalitySettings = SAIN.Info.PersonalitySettings;
-                        float moveSpeed = personalitySettings.Sneaky ? personalitySettings.SneakySpeed : 1f;
-                        SAIN.Mover.SetTargetMoveSpeed(1f);
-                        SAIN.Mover.SetTargetPose(1f);
+                        RecalcPathTimer = Time.time + 1f;
                     }
                     else
                     {
@@ -85,50 +80,18 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private float FindTargetCoverTimer = 0f;
         private float RecalcPathTimer = 0f;
 
-        private bool FindTargetCover()
-        {
-            var coverPoint = SAIN.Cover.ClosestPoint;
-            if (coverPoint != null && !coverPoint.Spotted(SAIN))
-            {
-                coverPoint.SetBotIsUsingThis(true);
-                CoverDestination = coverPoint;
-                DestinationPosition = coverPoint.GetPosition(SAIN);
-            }
-            return false;
-        }
-
-        private bool MoveTo(Vector3 position)
-        {
-            if (SAIN.Mover.GoToPoint(position, out bool calculating))
-            {
-                CoverDestination.SetBotIsUsingThis(true);
-                if (SAIN.HasEnemy || BotOwner.Memory.IsUnderFire)
-                {
-                    SAIN.Mover.SetTargetMoveSpeed(1f);
-                }
-                else
-                {
-                    SAIN.Mover.SetTargetMoveSpeed(0.75f);
-                }
-                SAIN.Mover.SetTargetPose(1f);
-                return true;
-            }
-            return false;
-        }
-
         private CoverPoint CoverDestination;
         private Vector3 DestinationPosition;
         private float SuppressTimer;
 
         private void EngageEnemy()
         {
-            if (SAIN.Enemy?.IsVisible == false && SAIN.Enemy.Seen && SAIN.Enemy.TimeSinceSeen < 5f && SAIN.Enemy.LastCornerToEnemy != null && SAIN.Enemy.CanSeeLastCornerToEnemy)
+            if (SAIN.Enemy?.IsVisible == false && BotOwner.WeaponManager.HaveBullets && SAIN.Enemy.Seen && SAIN.Enemy.TimeSinceSeen < 5f && SAIN.Enemy.LastCornerToEnemy != null && SAIN.Enemy.CanSeeLastCornerToEnemy)
             {
                 Vector3 corner = SAIN.Enemy.LastCornerToEnemy.Value;
                 corner += Vector3.up * 1f;
                 //SAIN.Steering.LookToPoint(corner);
                 if (SuppressTimer < Time.time 
-                    && BotOwner.WeaponManager.HaveBullets 
                     && SAIN.Shoot(true, corner, true, SAINComponentClass.EShootReason.WalkToCoverSuppress))
                 {
                     SAIN.Enemy.EnemyIsSuppressed = true;
@@ -145,17 +108,14 @@ namespace SAIN.Layers.Combat.Solo.Cover
             else
             {
                 SAIN.Shoot(false, Vector3.zero);
-                if (!BotOwner.ShootData.Shooting)
-                {
-                    SAIN.Steering.SteerByPriority(false);
-                }
+                SAIN.Steering.SteerByPriority(false);
                 Shoot.Update();
             }
         }
 
         public override void Start()
         {
-            SAIN.Mover.Sprint(false);
+            //SAIN.Mover.Sprint(false);
         }
 
         public override void Stop()

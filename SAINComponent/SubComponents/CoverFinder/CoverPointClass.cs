@@ -323,7 +323,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         {
             if (info.nextCalcPathTime < Time.time)
             {
-                info.nextCalcPathTime = Time.time + 2;
+                info.nextCalcPathTime = Time.time + 1;
 
                 PathToPoint.ClearCorners();
                 if (NavMesh.CalculatePath(info.SAIN.Position, info.Position, -1, PathToPoint))
@@ -385,9 +385,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return info.Status;
         }
 
-        private const float InCoverDist = 0.75f;
-        private const float InCoverStayDist = 1f;
-        private const float CloseCoverDist = 8f;
+        private const float InCoverDist = 1f;
+        private const float InCoverStayDist = 1.25f;
+        private const float CloseCoverDist = 10f;
         private const float MidCoverDist = 20f;
 
         public Collider Collider { get; private set; }

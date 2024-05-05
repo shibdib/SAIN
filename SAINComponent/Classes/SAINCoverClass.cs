@@ -257,17 +257,13 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
-                if (FallBackPoint != null 
-                    && (FallBackPoint.GetBotIsUsingThis() 
-                    || BotIsAtCoverPoint(FallBackPoint)))
+                if (BotIsAtCoverPoint(FallBackPoint))
                 {
                     return FallBackPoint;
                 }
                 foreach (var point in CoverPoints)
                 {
-                    if (point != null 
-                        && (point.GetBotIsUsingThis() 
-                        || BotIsAtCoverPoint(point)))
+                    if (BotIsAtCoverPoint(point))
                     {
                         return point;
                     }

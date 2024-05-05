@@ -97,8 +97,8 @@ namespace SAIN.Layers.Combat.Solo
                 float targetDistSqr = (BotOwner.Position - TargetPosition.Value).sqrMagnitude;
                 if (targetDistSqr < 2f)
                 {
-                    SAIN.Decision.ResetDecisions();
-                    return;
+                    //SAIN.Decision.ResetDecisions();
+                    //return;
                 }
 
                 // Scavs will speak out and be more vocal
@@ -136,18 +136,18 @@ namespace SAIN.Layers.Combat.Solo
             var persSettings = SAIN.Info.PersonalitySettings;
             if (RandomSprintTimer < Time.time && persSettings.SprintWhileSearch)
             {
+                float chance = persSettings.FrequentSprintWhileSearch ? 40f : 10f;
+                SprintEnabled = EFTMath.RandomBool(chance);
                 float timeAdd;
                 if (SprintEnabled)
                 {
-                    timeAdd = 1.5f * Random.Range(0.75f, 1.5f);
+                    timeAdd = 1f * Random.Range(0.75f, 4.00f);
                 }
                 else
                 {
-                    timeAdd = 2f * Random.Range(0.33f, 1.5f);
+                    timeAdd = 3f * Random.Range(0.5f, 1.25f);
                 }
                 RandomSprintTimer = Time.time + timeAdd;
-                float chance = persSettings.FrequentSprintWhileSearch ? 40f : 20f;
-                SprintEnabled = EFTMath.RandomBool(chance);
             }
         }
 
@@ -221,7 +221,7 @@ namespace SAIN.Layers.Combat.Solo
 
                 if (canSeePoint)
                 {
-                    LookPoint = Search.SearchMovePoint.DangerPoint;
+                    LookPoint = Search.SearchMovePoint.DangerPoint + Vector3.up;
                 }
                 else
                 {
@@ -230,14 +230,14 @@ namespace SAIN.Layers.Combat.Solo
                         LayerMaskClass.HighPolyWithTerrainMaskAI);
                     if (canSeePoint)
                     {
-                        LookPoint = Search.SearchMovePoint.Corner;
+                        LookPoint = Search.SearchMovePoint.Corner + Vector3.up;
                     }
                 }
                 
                 if (LookPoint != Vector3.zero)
                 {
-                    LookPoint.y = 0;
-                    LookPoint += headPosition;
+                    //LookPoint.y = 0;
+                    //LookPoint += headPosition;
                 }
             }
             

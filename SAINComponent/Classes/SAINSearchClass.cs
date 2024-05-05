@@ -152,7 +152,7 @@ namespace SAIN.SAINComponent.Classes
         {
             if (RecalcPathTimer < Time.time)
             {
-                RecalcPathTimer = Time.time + 2;
+                RecalcPathTimer = Time.time + 1;
                 return true;
             }
             return false;
@@ -199,18 +199,23 @@ namespace SAIN.SAINComponent.Classes
         {
             RecalcPathTimer = Time.time + 2;
 
-            SAIN.Mover.Sprint(shallSprint);
-            
-            if (shallSprint)
+            //SAIN.Mover.Sprint(shallSprint);
+
+            _Running = false;
+            if (shallSprint 
+                && BotOwner.BotRun.Run(destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance))
             {
-                //return SAIN.Mover.GoToPoint(destination, out _);
-                return BotOwner.BotRun.Run(destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
+                _Running = true;
+                return true;
             }
             else
             {
                 return SAIN.Mover.GoToPoint(destination, out _);
             }
         }
+
+        private bool _Running;
+        private bool _setMaxSpeedPose;
 
         private float DecideSpeed(Vector3 targetPosition, out float poseLevel)
         {
@@ -239,9 +244,15 @@ namespace SAIN.SAINComponent.Classes
             var persSettings = SAIN.Info.PersonalitySettings;
             float speed;
             float pose;
+            _setMaxSpeedPose = false;
             // Environment id of 0 means a bot is outside.
-            if (shallSprint 
-                || Player.AIData.EnvironmentId == 0 || !SAIN.Memory.IsIndoors)
+            if (shallSprint || SAIN.Mover.IsSprinting || Player.IsSprintEnabled || _Running)
+            {
+                _setMaxSpeedPose = true;
+                speed = 1f;
+                pose = 1f;
+            }
+            else if (Player.AIData.EnvironmentId == 0 || !SAIN.Memory.IsIndoors)
             {
                 if (SAIN.Cover.CoverPoints.Count > 5 && Time.time - BotOwner.Memory.UnderFireTime > 30f)
                 {
@@ -315,8 +326,16 @@ namespace SAIN.SAINComponent.Classes
 
                 case ESearchMove.MoveToStartPeek:
 
-                    SAIN.Mover.SetTargetMoveSpeed(speed);
-                    SAIN.Mover.SetTargetPose(pose);
+                    if (_setMaxSpeedPose)
+                    {
+                        SAIN.Mover.SetTargetMoveSpeed(1f);
+                        SAIN.Mover.SetTargetPose(1f);
+                    }
+                    else
+                    {
+                        SAIN.Mover.SetTargetMoveSpeed(speed);
+                        SAIN.Mover.SetTargetPose(pose);
+                    }
 
                     if (BotIsAtPoint(ActiveDestination) 
                         && MoveToPoint(SearchMovePoint.EndPeekPosition, shallSprint))
@@ -333,8 +352,16 @@ namespace SAIN.SAINComponent.Classes
 
                 case ESearchMove.MoveToEndPeak:
 
-                    SAIN.Mover.SetTargetMoveSpeed(0.1f);
-                    SAIN.Mover.SetTargetPose((pose * 0.75f).Round100());
+                    if (_setMaxSpeedPose)
+                    {
+                        SAIN.Mover.SetTargetMoveSpeed(1f);
+                        SAIN.Mover.SetTargetPose(1f);
+                    }
+                    else
+                    {
+                        SAIN.Mover.SetTargetMoveSpeed(0.1f);
+                        SAIN.Mover.SetTargetPose(pose);
+                    }
 
                     if (BotIsAtPoint(ActiveDestination) && MoveToPoint(SearchMovePoint.DangerPoint, shallSprint))
                     {
@@ -350,8 +377,16 @@ namespace SAIN.SAINComponent.Classes
 
                 case ESearchMove.MoveToDangerPoint:
 
-                    SAIN.Mover.SetTargetMoveSpeed((speed / 2f).Round100());
-                    SAIN.Mover.SetTargetPose(pose);
+                    if (_setMaxSpeedPose)
+                    {
+                        SAIN.Mover.SetTargetMoveSpeed(1f);
+                        SAIN.Mover.SetTargetPose(1f);
+                    }
+                    else
+                    {
+                        SAIN.Mover.SetTargetMoveSpeed((speed / 2f).Round100());
+                        SAIN.Mover.SetTargetPose(pose);
+                    }
 
                     Vector3 start = SAIN.Position;
                     Vector3 cornerDir = SearchMovePoint.Corner - start;
@@ -424,7 +459,12 @@ namespace SAIN.SAINComponent.Classes
             CurrentState = ESearchMove.None;
             LastState = ESearchMove.None;
             NextState = ESearchMove.None;
+            _targetMoveSpeed = 1f;
+            _targetPose = 1f;
         }
+
+        private float _targetMoveSpeed = 1f;
+        private float _targetPose = 1f;
 
         public NavMeshPathStatus CalculatePath(Vector3 point, bool MustHavePath = true, float reachDist = 0.5f)
         {
