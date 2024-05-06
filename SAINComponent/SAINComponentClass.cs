@@ -59,6 +59,7 @@ namespace SAIN.SAINComponent
 
         public Action<string, BotOwner> OnSAINDisposed { get; set; }
         public SAINPersonClass Person { get; private set; }
+        public SAINMedical Medical { get; private set; }
 
         public bool Init(SAINPersonClass person)
         {
@@ -109,6 +110,7 @@ namespace SAIN.SAINComponent
                 BotHitReaction = new SAINBotHitReaction(this);
                 SpaceAwareness = new SAINBotSpaceAwareness(this);
                 DoorOpener = new SAINDoorOpener(this, person.BotOwner);
+                Medical = new SAINMedical(this);
 
                 NavMeshAgent = this.GetComponent<NavMeshAgent>();
                 if (NavMeshAgent == null)
@@ -148,6 +150,7 @@ namespace SAIN.SAINComponent
             AimDownSightsController.Init();
             BotHitReaction.Init();
             SpaceAwareness.Init();
+            Medical.Init();
 
             try
             {
@@ -206,7 +209,6 @@ namespace SAIN.SAINComponent
                 {
                     if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(Player, out float power))
                     {
-                        Power = power;
                         _powerCalcd = true;
                     }
                 }
@@ -234,6 +236,7 @@ namespace SAIN.SAINComponent
                 AimDownSightsController.Update();
                 BotHitReaction.Update();
                 SpaceAwareness.Update();
+                Medical.Update();
 
                 //BotOwner.DoorOpener.Update(); 
                 UpdateGoalTarget();
@@ -245,7 +248,6 @@ namespace SAIN.SAINComponent
             }
         }
 
-        private float Power;
         private bool _powerCalcd;
         public SightCheckerComponent SightChecker { get; private set; }
         public SAINDoorOpener DoorOpener { get; private set; }
@@ -430,6 +432,7 @@ namespace SAIN.SAINComponent
                 AimDownSightsController?.Dispose();
                 BotHitReaction?.Dispose();
                 SpaceAwareness?.Dispose();
+                Medical?.Dispose();
 
                 try
                 {

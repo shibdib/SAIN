@@ -24,8 +24,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Update()
         {
-            RefreshMeds();
-
             if (!UsingMeds && Player != null)
             {
                 if (SAIN.Memory.Decisions.Self.Current == SelfDecision.Reload)
@@ -66,17 +64,6 @@ namespace SAIN.SAINComponent.Classes.Decision
                 }
             }
         }
-
-        private void RefreshMeds()
-        {
-            if (_refreshMedsTimer < Time.time)
-            {
-                _refreshMedsTimer = Time.time + 5f;
-                BotOwner.Medecine.RefreshCurMeds();
-            }
-        }
-
-        private float _refreshMedsTimer;
 
         public void Dispose()
         {
@@ -120,16 +107,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private void Refresh()
-        {
-            Player getPlayer = Player;
-            MedicalItems.Clear();
-
-            getPlayer.GClass2761_0.GetAcceptableItemsNonAlloc<MedsClass>(anySlots, MedicalItems, null);
-            foreach (var item in MedicalItems)
-            {
-            }
-        }
 
         public static readonly EquipmentSlot[] anySlots = new EquipmentSlot[]
         {

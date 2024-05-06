@@ -102,6 +102,7 @@ namespace SAIN
         private void Patches()
         {
             var patches = new List<Type>() {
+                typeof(Patches.Generic.HealCancelPatch),
                 typeof(Patches.Generic.DoorOpenerPatch),
                 typeof(Patches.Generic.GetBotController),
                 typeof(Patches.Generic.GetBotSpawner),

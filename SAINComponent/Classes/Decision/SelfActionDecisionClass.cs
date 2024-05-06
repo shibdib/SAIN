@@ -66,7 +66,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                         {
                             Decision = SelfDecision.FirstAid;
                         }
-                        else if (StartSurgery())
+                        else if (SAIN.Medical.Surgery.ShallTrySurgery())
                         {
                             Decision = SelfDecision.Surgery;
                         }
@@ -101,6 +101,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return;
             }
             BusyHandsTimer = Time.time + 1f;
+
             var selector = BotOwner.WeaponManager?.Selector;
             if (selector == null)
             {
@@ -132,17 +133,23 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             if (CurrentSelfAction != SelfDecision.None)
             {
-                float timesinceChange = Time.time - SAIN.Decision.ChangeDecisionTime;
-                if (timesinceChange > 5f)
+                if (CurrentSelfAction == SelfDecision.Surgery 
+                    && SAIN.Medical.Surgery.ShallTrySurgery())
                 {
-                    Decision = SelfDecision.None;
+                    Decision = CurrentSelfAction;
+                    return true;
+                }
+                else if (Time.time - SAIN.Decision.ChangeDecisionTime > 5f)
+                {
                     if (CurrentSelfAction != SelfDecision.Surgery)
                     {
+                        Decision = SelfDecision.None;
                         TryFixBusyHands();
                         return false;
                     }
-                    else if (timesinceChange > 30f)
+                    else if (Time.time - SAIN.Decision.ChangeDecisionTime > 30f)
                     {
+                        Decision = SelfDecision.None;
                         TryFixBusyHands();
                         return false;
                     }

@@ -14,25 +14,13 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
-            NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
-            FindTarget();
         }
 
-        private void FindTarget()
-        {
-            Vector3 pos = Search.SearchMovePos();
-            if (Search?.CalculatePath(pos, false) != NavMeshPathStatus.PathInvalid)
-            {
-                TargetPosition = Search.FinalDestination;
-            }
-        }
-
-        private Vector3? TargetPosition;
+        private Vector3 TargetPosition => Search.FinalDestination;
 
         public override void Stop()
         {
             Search.Reset();
-            TargetPosition = null;
         }
 
         private float CheckMagTimer;
@@ -42,16 +30,15 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            Shoot.Update();
-            CheckWeapon();
+            tryTalk();
+            CheckShouldSprint();
+            Search.Search(SprintEnabled);
+            Steer();
 
-            if (TargetPosition != null)
+            if (!SprintEnabled)
             {
-                MoveToEnemy();
-            }
-            else
-            {
-                FindTarget();
+                Shoot.Update();
+                CheckWeapon();
             }
         }
 
@@ -94,7 +81,7 @@ namespace SAIN.Layers.Combat.Solo
         {
             if (SAIN.Enemy == null)
             {
-                float targetDistSqr = (BotOwner.Position - TargetPosition.Value).sqrMagnitude;
+                float targetDistSqr = (BotOwner.Position - TargetPosition).sqrMagnitude;
                 if (targetDistSqr < 2f)
                 {
                     //SAIN.Decision.ResetDecisions();
@@ -113,7 +100,7 @@ namespace SAIN.Layers.Combat.Solo
                     }
                 }
             }
-            if (SAIN.Enemy == null && (BotOwner.Position - TargetPosition.Value).sqrMagnitude < 30f * 30f)
+            if (SAIN.Enemy == null && (BotOwner.Position - TargetPosition).sqrMagnitude < 30f * 30f)
             {
                 //SAIN.Decision.ResetDecisions();
                 //return;
@@ -121,6 +108,21 @@ namespace SAIN.Layers.Combat.Solo
             CheckShouldSprint();
             Search.Search(SprintEnabled);
             Steer();
+        }
+
+        private void tryTalk()
+        {
+            // Scavs will speak out and be more vocal
+            if (!HaveTalked
+                && SAIN.Info.WildSpawnType == WildSpawnType.assault
+                && (BotOwner.Position - TargetPosition).sqrMagnitude < 30f * 30f)
+            {
+                HaveTalked = true;
+                if (EFTMath.RandomBool(60))
+                {
+                    SAIN.Talk.Say(EPhraseTrigger.OnMutter, ETagStatus.Aware, true);
+                }
+            }
         }
 
         private SAINSearchClass Search => SAIN.Search;

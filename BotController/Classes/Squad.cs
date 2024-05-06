@@ -284,7 +284,26 @@ namespace SAIN.BotController.Classes
             }
             else
             {
+                player.OnIPlayerDeadOrUnspawn += clearPlayerPlace;
                 PlayerPlaceChecks.Add(player, place);
+            }
+        }
+
+        private void clearPlayerPlace(IPlayer player)
+        {
+            player.OnIPlayerDeadOrUnspawn -= clearPlayerPlace;
+            if (PlayerPlaceChecks.ContainsKey(player))
+            {
+                GroupPlacesForCheck.Remove(PlayerPlaceChecks[player]);
+                PlayerPlaceChecks.Remove(player);
+
+                foreach (var bot in Members.Values)
+                {
+                    if (bot != null && bot.BotOwner != null)
+                    {
+                        EFTBotGroup.CalcGoalForBot(bot.BotOwner);
+                    }
+                }
             }
         }
 

@@ -54,29 +54,15 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
 
-            var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
-
-            //if (StartInvestigate() && !shallNotSearch)
-            //{
-            //    Decision = SoloDecision.Investigate;
-            //}
-            if (StartAmbush())
+            if (startSearch())
             {
-
-            }
-            else if (!ShallNotSearch() && StartSearch())
-            {
-                if (CurrentDecision != SoloDecision.Search)
-                {
-                    SAIN.Info.CalcTimeBeforeSearch();
-                }
                 Decision = SoloDecision.Search;
             }
             else if (SAIN.Decision.EnemyDecisions.StartHoldInCover())
             {
                 Decision = SoloDecision.HoldInCover;
             }
-            if (BotOwner.Memory.IsUnderFire)
+            else if (BotOwner.Memory.IsUnderFire)
             {
                 Decision = SoloDecision.RunToCover;
             }
@@ -132,9 +118,9 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private bool StartSearch()
+        private bool startSearch()
         {
-            return Time.time - FoundTargetTimer > SAIN.Info.TimeBeforeSearch;
+            return SAIN.Search.ShallStartSearch(out _, true);
         }
     }
 }

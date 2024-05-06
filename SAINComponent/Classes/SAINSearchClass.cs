@@ -41,6 +41,147 @@ namespace SAIN.SAINComponent.Classes
         public MoveDangerPoint SearchMovePoint { get; private set; }
         public Vector3 ActiveDestination { get; private set; }
 
+        public bool ShallStartSearch(out Vector3 destination, bool mustHaveTarget = false)
+        {
+            if (SAIN.Decision.CurrentSoloDecision != SoloDecision.Search
+                && _nextRecalcSearchTime < Time.time)
+            {
+                _nextRecalcSearchTime = Time.time + 30f;
+                SAIN.Info.CalcTimeBeforeSearch();
+            }
+            destination = Vector3.zero;
+
+            return WantToSearch() && CanStartSearch(out destination, mustHaveTarget);
+        }
+
+        private float _nextRecalcSearchTime;
+
+        public bool WantToSearch()
+        {
+            bool wantToSearch = false;
+            float timeBeforeSearch = SAIN.Info.TimeBeforeSearch;
+
+            SAINEnemy enemy = SAIN.Enemy;
+
+            if (enemy != null)
+            {
+                if (SAIN.Info.PersonalitySettings.WillSearchForEnemy
+                    && !SAIN.Suppression.IsSuppressed
+                    && !enemy.IsVisible
+                    && !BotOwner.Memory.IsUnderFire
+                    && Time.time - BotOwner.Memory.UnderFireTime > timeBeforeSearch * 0.25f)
+                {
+                    if (enemy.Seen && enemy.TimeSinceSeen >= timeBeforeSearch)
+                    {
+                        wantToSearch = true;
+                    }
+                    else if ((enemy.Seen || enemy.Heard)
+                        && enemy.TimeSinceLastKnownUpdated >= timeBeforeSearch)
+                    {
+                        wantToSearch = true;
+                    }
+                }
+            }
+            else if (SAIN.Info.PersonalitySettings.WillSearchFromAudio)
+            {
+                Vector3? target = SAIN.CurrentTargetPosition;
+                if (target != null)
+                {
+                    if (SAIN.Info.Profile.IsPMC)
+                    {
+                        wantToSearch = true;
+                    }
+                    else if (SAIN.Memory.BotZoneCollider == null
+                            || checkBotZone(target.Value))
+                    {
+                        wantToSearch = true;
+                    }
+                }
+            }
+            return wantToSearch;
+        }
+
+        public bool CanStartSearch(out Vector3 finalDestination, bool needTarget = false)
+        {
+            if (_nextCheckSearchTime < Time.time)
+            {
+                _nextCheckSearchTime = Time.time + 1f;
+                Vector3? destination = SearchMovePos(out bool hasTarget);
+                if (destination == null)
+                {
+                    _canStartSearch = false;
+                }
+                else if (needTarget && !hasTarget)
+                {
+                    _canStartSearch = false;
+                }
+                else if (CalculatePath(destination.Value) == NavMeshPathStatus.PathComplete)
+                {
+                    _canStartSearch = true;
+                    FinalDestination = destination.Value;
+                }
+                else
+                {
+                    _canStartSearch = false;
+                }
+            }
+            finalDestination = FinalDestination;
+            return _canStartSearch;
+        }
+
+        private bool checkBotZone(Vector3 target)
+        {
+            if (SAIN.Memory.BotZoneCollider != null)
+            {
+                Vector3 closestPointInZone = SAIN.Memory.BotZoneCollider.ClosestPointOnBounds(target);
+                float distance = (target - closestPointInZone).sqrMagnitude;
+                if (distance > 50f * 50f)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool _canStartSearch;
+        private float _nextCheckSearchTime;
+        private Vector3 _finalDestination;
+
+        private void updateSearchDestination()
+        {
+            if (SearchedTargetPosition)
+            {
+                // Vector3? newTarget = SearchMovePos(out bool hasTarget, true);
+                // 
+                // if (newTarget != null
+                //     && CalculatePath(newTarget.Value) == NavMeshPathStatus.PathComplete)
+                // {
+                //     SearchedTargetPosition = false;
+                //     FinalDestination = newTarget.Value;
+                // }
+            }
+
+            if (_nextCheckPosTime < Time.time)
+            {
+                _nextCheckPosTime = Time.time + 2f;
+
+                Vector3? newTarget = SearchMovePos(out bool hasTarget);
+
+                if (newTarget != null 
+                    && hasTarget 
+                    && CalculatePath(newTarget.Value) == NavMeshPathStatus.PathComplete)
+                {
+                    Reset();
+                    FinalDestination = newTarget.Value;
+                }
+                if (!SearchedTargetPosition && (FinalDestination - SAIN.Position).sqrMagnitude < 1f)
+                {
+                    SearchedTargetPosition = true;
+                }
+            }
+
+        }
+
         public void Search(bool shallSprint, float reachDist = -1f)
         {
             if (reachDist > 0)
@@ -48,20 +189,24 @@ namespace SAIN.SAINComponent.Classes
                 ReachDistance = reachDist;
             }
 
+            updateSearchDestination();
             CheckIfStuck();
-
             SwitchSearchModes(shallSprint);
-
             SearchMovePoint?.DrawDebug();
         }
 
-        public Vector3 SearchMovePos()
+        private float _nextCheckPosTime;
+
+        public bool SearchedTargetPosition { get; private set; }
+
+        public Vector3? SearchMovePos(out bool hasTarget, bool randomSearch = false)
         {
             var enemy = SAIN.Enemy;
             if (enemy != null && (enemy.Seen || enemy.Heard))
             {
                 if (enemy.IsVisible)
                 {
+                    hasTarget = true;
                     return SAIN.Enemy.EnemyPosition;
                 }
                 else
@@ -72,10 +217,16 @@ namespace SAIN.SAINComponent.Classes
                         EnemyPlace enemyPlace = knownPlaces[i];
                         if (enemyPlace?.Position != null && !enemyPlace.HasArrived && !enemyPlace.HasSeen)
                         {
+                            hasTarget = true;
                             return enemyPlace.Position.Value;
                         }
                     }
-                    return RandomSearch();
+                    hasTarget = false;
+                    if (randomSearch)
+                    {
+                        return RandomSearch();
+                    }
+                    return null;
                 }
             }
             else
@@ -83,9 +234,10 @@ namespace SAIN.SAINComponent.Classes
                 var Target = BotOwner.Memory.GoalTarget;
                 if (Target != null && Target?.Position != null)
                 {
+                    hasTarget = true;
                     return Target.Position.Value;
                 }
-
+                /*
                 var sound = BotOwner.BotsGroup.YoungestPlace(BotOwner, 200f, true);
                 if (sound != null && !sound.IsCome)
                 {
@@ -103,17 +255,23 @@ namespace SAIN.SAINComponent.Classes
                         return sound.Position;
                     }
                 }
+                */
             }
 
-            return RandomSearch();
+            hasTarget = false;
+            if (randomSearch)
+            {
+                return RandomSearch();
+            }
+            return null;
         }
 
-        private const float ComeToRandomDist = 3f;
+        private const float ComeToRandomDist = 1f;
 
         private Vector3 RandomSearch()
         {
             float dist = (RandomSearchPoint - BotOwner.Position).sqrMagnitude;
-            if (dist < ComeToRandomDist || dist > 60f * 60f)
+            if (dist < ComeToRandomDist * ComeToRandomDist || dist > 60f * 60f)
             {
                 RandomSearchPoint = GenerateSearchPoint();
             }
@@ -199,7 +357,10 @@ namespace SAIN.SAINComponent.Classes
         {
             RecalcPathTimer = Time.time + 2;
 
-            //SAIN.Mover.Sprint(shallSprint);
+            if (!shallSprint)
+            {
+                //SAIN.Mover.Sprint(false);
+            }
 
             _Running = false;
             if (shallSprint 
@@ -210,6 +371,7 @@ namespace SAIN.SAINComponent.Classes
             }
             else
             {
+                SAIN.Mover.Sprint(false);
                 return SAIN.Mover.GoToPoint(destination, out _);
             }
         }
@@ -239,11 +401,13 @@ namespace SAIN.SAINComponent.Classes
             return Mathf.Clamp(speedRatio, minSpeed, 1f);
         }
 
+        private float _nextGenSearchTime;
+
         private bool SwitchSearchModes(bool shallSprint)
         {
             var persSettings = SAIN.Info.PersonalitySettings;
-            float speed;
-            float pose;
+            float speed = 1f;
+            float pose = 1f;
             _setMaxSpeedPose = false;
             // Environment id of 0 means a bot is outside.
             if (shallSprint || SAIN.Mover.IsSprinting || Player.IsSprintEnabled || _Running)
@@ -272,48 +436,47 @@ namespace SAIN.SAINComponent.Classes
             }
             else
             {
-                Vector3 targetPosition = SearchMovePos();
-                speed = DecideSpeed(targetPosition, out pose);
+                speed = DecideSpeed(FinalDestination, out pose);
             }
 
-            if (CurrentState != ESearchMove.None && !shallSprint && (ActiveDestination - SAIN.Position).magnitude < 5f)
+            if (SearchMovePoint == null)
             {
-                //speed = (speed * 0.6f).Round100();
+
             }
 
             LastState = CurrentState;
             switch (LastState)
             {
                 case ESearchMove.None:
-                    if (SearchMovePoint == null || shallSprint)
+                    if ((shallSprint || SearchMovePoint == null) 
+                        && MoveToPoint(FinalDestination, shallSprint))
                     {
-                        FinalDestination = SearchMovePos();
-                        Vector3 nextCorner = NextCorner();
-                        if (MoveToPoint(nextCorner, shallSprint))
-                        {
-                            FinalDestination = SearchMovePos();
-                            ActiveDestination = nextCorner;
-                            CurrentState = ESearchMove.DirectMove;
-                            NextState = ESearchMove.None;
-                        }
+                        ActiveDestination = FinalDestination;
+                        CurrentState = ESearchMove.DirectMove;
+                        NextState = ESearchMove.None;
                     }
-                    else
+                    else if (SearchMovePoint != null && MoveToPoint(SearchMovePoint.StartPeekPosition, shallSprint))
                     {
-                        if (MoveToPoint(SearchMovePoint.StartPeekPosition, shallSprint))
-                        {
-                            ActiveDestination = SearchMovePoint.StartPeekPosition;
-                            CurrentState = ESearchMove.MoveToStartPeek;
-                            NextState = ESearchMove.Wait;
-                        }
+                        ActiveDestination = SearchMovePoint.StartPeekPosition;
+                        CurrentState = ESearchMove.MoveToStartPeek;
+                        NextState = ESearchMove.Wait;
                     }
                     break;
 
                 case ESearchMove.DirectMove:
 
-                    SAIN.Mover.SetTargetMoveSpeed(speed);
-                    SAIN.Mover.SetTargetPose(pose);
+                    if (_setMaxSpeedPose)
+                    {
+                        SAIN.Mover.SetTargetMoveSpeed(1f);
+                        SAIN.Mover.SetTargetPose(1f);
+                    }
+                    else
+                    {
+                        SAIN.Mover.SetTargetMoveSpeed(speed);
+                        SAIN.Mover.SetTargetPose(pose);
+                    }
 
-                    if (BotIsAtPoint(ActiveDestination))
+                    if (BotIsAtPoint(ActiveDestination) || BotIsAtPoint(FinalDestination))
                     {
                         ActiveDestination = NextCorner();
                         MoveToPoint(ActiveDestination, shallSprint);
@@ -461,6 +624,7 @@ namespace SAIN.SAINComponent.Classes
             NextState = ESearchMove.None;
             _targetMoveSpeed = 1f;
             _targetPose = 1f;
+            SearchedTargetPosition = false;
         }
 
         private float _targetMoveSpeed = 1f;
@@ -476,7 +640,7 @@ namespace SAIN.SAINComponent.Classes
 
             Reset();
 
-            if (NavMesh.SamplePosition(point, out var hit, 10f, -1))
+            if (NavMesh.SamplePosition(point, out var hit, 2f, -1))
             {
                 Path = new NavMeshPath();
                 if (NavMesh.CalculatePath(Start, hit.position, -1, Path))

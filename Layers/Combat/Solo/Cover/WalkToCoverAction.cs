@@ -25,14 +25,30 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private float _nextCheckSpottedTime;
         private float _nextUpdateCoverTime;
+        private float _nextCheckMissingCoverPointTime;
 
         public override void Update()
         {
-            if (_nextCheckSpottedTime < Time.time && CoverDestination != null && CoverDestination.Spotted(SAIN))
+            if (CoverDestination != null)
             {
-                _nextCheckSpottedTime = Time.time + 0.25f;
-                CoverDestination.SetBotIsUsingThis(false);
-                CoverDestination = null;
+                if (_nextCheckMissingCoverPointTime < Time.time)
+                {
+                    _nextCheckMissingCoverPointTime = Time.time + 3f;
+                    if (!SAIN.Cover.CoverPoints.Contains(CoverDestination))
+                    {
+                        CoverDestination.SetBotIsUsingThis(false);
+                        CoverDestination = null;
+                    }
+                }
+                else if (_nextCheckSpottedTime < Time.time)
+                {
+                    _nextCheckSpottedTime = Time.time + 0.25f;
+                    if (CoverDestination.Spotted(SAIN))
+                    {
+                        CoverDestination.SetBotIsUsingThis(false);
+                        CoverDestination = null;
+                    }
+                }
             }
 
             SAIN.Mover.SetTargetMoveSpeed(1f);
@@ -44,27 +60,30 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
                 if (CoverDestination == null)
                 {
-                    var coverPoint = SAIN.Cover.ClosestPoint;
-                    if (coverPoint != null
-                        && !coverPoint.Spotted(SAIN)
-                        && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out _, 0.25f, false, false))
+                    var points = SAIN.Cover.CoverPoints;
+                    for (int i = 0; i < points.Count; i++)
                     {
-                        CoverDestination = coverPoint;
-                        CoverDestination.SetBotIsUsingThis(true);
-                        RecalcPathTimer = Time.time + 1f;
-                        SAIN.Mover.SetTargetMoveSpeed(1f);
-                        SAIN.Mover.SetTargetPose(1f);
+                        var coverPoint = points[i];
+                        if (coverPoint != null
+                            && !coverPoint.Spotted(SAIN)
+                            && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out _, -1, false, false))
+                        {
+                            coverPoint.SetBotIsUsingThis(true);
+                            CoverDestination = coverPoint;
+                            RecalcPathTimer = Time.time + 2f;
+                            _nextCheckMissingCoverPointTime = Time.time + 5f;
+                            _nextCheckSpottedTime = Time.time + 2f;
+                        }
                     }
                 }
-                if (CoverDestination != null && RecalcPathTimer < Time.time)
+                if (CoverDestination != null 
+                    && RecalcPathTimer < Time.time)
                 {
-                    if (SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out _, 0.25f, false, false))
+                    RecalcPathTimer = Time.time + 1f;
+                    if (!SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out _, -1, false, false))
                     {
-                        RecalcPathTimer = Time.time + 1f;
-                    }
-                    else
-                    {
-                        RecalcPathTimer = Time.time + 0.25f;
+                        CoverDestination = null;
+                        _nextUpdateCoverTime = -1f;
                     }
                 }
             }

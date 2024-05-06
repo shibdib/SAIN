@@ -280,6 +280,7 @@
     <Compile Include="Helpers\SAINWeaponInfo.cs" />
     <Compile Include="Helpers\SAINWeaponInfoHandler.cs" />
     <Compile Include="Helpers\UpdateSettingClass.cs" />
+    <Compile Include="Layers\Combat\Solo\Cover\DoSurgeryAction.cs" />
     <Compile Include="Layers\Combat\Solo\FlankAction.cs" />
     <Compile Include="Layers\Combat\Squad\AssaultAction.cs" />
     <Compile Include="Layers\DebugOverlay.cs" />
@@ -319,7 +320,7 @@
     <Compile Include="SAINComponent\Classes\Mover\SprintController.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINVaultClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINAILimit.cs" />
-    <Compile Include="SAINComponent\Classes\SAINBotMedicine.cs" />
+    <Compile Include="SAINComponent\Classes\SAINMedical.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotHitReaction.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotUnstuckClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINEnemyPath.cs" />

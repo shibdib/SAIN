@@ -71,12 +71,8 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 Decision = SoloDecision.RushEnemy;
             }
-            else if (StartSearch(enemy))
+            else if (startSearch())
             {
-                if (CurrentDecision != SoloDecision.Search)
-                {
-                    SAIN.Info.CalcTimeBeforeSearch();
-                }
                 Decision = SoloDecision.Search;
             }
             else if (StartShiftCover(enemy))
@@ -411,35 +407,12 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
         }
 
-        private bool StartSearch(SAINEnemy enemy)
+        private bool startSearch()
         {
-            if (!SAIN.Info.PersonalitySettings.WillSearchForEnemy)
-            {
-                return false;
-            }
-            if (SAIN.Suppression.IsSuppressed)
-            {
-                return false;
-            }
-            if (enemy.IsVisible == true)
-            {
-                return false;
-            }
-            if (BotOwner.Memory.IsUnderFire || Time.time - BotOwner.Memory.UnderFireTime < TimeBeforeSearch * 0.33f)
-            {
-                return false;
-            }
-            if (enemy.Seen && enemy.TimeSinceSeen >= TimeBeforeSearch)
-            {
-                return true;
-            }
-            if (!enemy.Seen && enemy.TimeSinceEnemyCreated >= TimeBeforeSearch)
-            {
-                return true;
-            }
-            return false;
+            return SAIN.Search.ShallStartSearch(out _, true);
         }
 
+        private float _nextRecalcSearchTime;
         private float TimeBeforeSearch => SAIN.Info.TimeBeforeSearch;
 
         private static readonly float HoldInCoverMaxCoverDist = 0.75f * 0.75f;

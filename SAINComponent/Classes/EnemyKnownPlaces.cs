@@ -38,8 +38,11 @@ namespace SAIN.SAINComponent.Classes
                         && (myPosition - place.Position.Value).sqrMagnitude < 2f)
                     {
                         place.HasArrived = true;
+                        place.HasSeen = true;
 
-                        if (EFTMath.RandomBool(15))
+                        if (EFTMath.RandomBool(15) 
+                            && _enemy.SAIN.Squad.BotInGroup 
+                            && _enemy.SAIN.Talk.GroupTalk.FriendIsClose)
                         {
                             _enemy.SAIN.Talk.Say(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true);
                         }
@@ -51,11 +54,11 @@ namespace SAIN.SAINComponent.Classes
                 lastPlace = GetPlaceHaventSeen();
                 if (lastPlace?.Position != null)
                 {
-                    _nextCheckSeen = Time.time + 1f;
+                    _nextCheckSeen = Time.time + 0.5f;
                     Vector3 lastknown = lastPlace.Position.Value + Vector3.up;
                     Vector3 botPos = _enemy.SAIN.Person.Transform.Head;
                     Vector3 direction = lastknown - botPos;
-                    lastPlace.HasSeen = !Physics.Raycast(botPos, direction.normalized, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMaskAI);
+                    lastPlace.HasSeen = !Physics.Raycast(botPos, direction.normalized, direction.magnitude * 0.95f, LayerMaskClass.HighPolyWithTerrainMaskAI);
                 }
             }
 

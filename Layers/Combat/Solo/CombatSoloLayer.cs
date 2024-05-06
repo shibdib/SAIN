@@ -49,6 +49,11 @@ namespace SAIN.Layers.Combat.Solo
                 case SoloDecision.Retreat:
                     if (SAIN.Cover.CoverPoints.Count > 0)
                     {
+                        if (SelfDecision == SelfDecision.Surgery 
+                            && SAIN.Cover.BotIsAtCoverInUse())
+                        {
+                            return new Action(typeof(DoSurgeryAction), $"Do Surgery");
+                        }
                         return new Action(typeof(RunToCoverAction), $"{Decision} + {SelfDecision}");
                     }
                     else

@@ -400,21 +400,8 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void LookToHearPos(Vector3 soundPos, bool visionCheck = false)
         {
-            if (visionCheck)
-            {
-                soundPos.y += 0.1f;
-                Vector3 headPos = SAIN.Transform.Head;
-                var direction = soundPos - headPos;
-
-                if (!Physics.Raycast(headPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
-                {
-                    LookToPoint(soundPos, 180f);
-                    return;
-                }
-            }
-
             float turnSpeed = SAIN.HasEnemy ? 250f : 100f;
-            if ((soundPos - SAIN.Position).sqrMagnitude > 75f * 75f)
+            if ((soundPos - SAIN.Position).sqrMagnitude > 100f * 100f)
             {
                 LookToPoint(soundPos, turnSpeed);
                 return;
@@ -474,7 +461,6 @@ namespace SAIN.SAINComponent.Classes.Mover
         }
 
         private bool LookRandom;
-        private bool LookRandom2;
 
         public void LookToRandomPosition()
         {
@@ -493,7 +479,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     {
                         var random = Random.onUnitSphere * 5f;
                         random.y = 0f;
-                        if (!Physics.Raycast(headPos, random, out var hit, 4f, Mask))
+                        if (!Physics.Raycast(headPos, random, out var hit, 10f, Mask))
                         {
                             pointToLook = random + headPos;
                             break;
@@ -510,29 +496,23 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
                 else
                 {
-                    LookRandom2 = !LookRandom2;
-                    if (LookRandom2 && BotOwner.Memory.LastEnemy != null)
+                    Vector3? targetPos = SAIN.CurrentTargetPosition;
+                    if (targetPos != null)
                     {
-                        pointToLook = BotOwner.Memory.LastEnemy.PersonalLastPos;
-                    }
-                    else if (SAIN.CurrentTargetPosition != null)
-                    {
-                        pointToLook = SAIN.CurrentTargetPosition.Value;
+                        pointToLook = targetPos.Value;
                     }
                 }
+
                 if (pointToLook == Vector3.zero)
                 {
-                    pointToLook = _lastRandomLookPos;
+                    LookToMovingDirection();
                 }
-                if (pointToLook != Vector3.zero)
+                else
                 {
-                    _lastRandomLookPos = pointToLook;
                     LookToPoint(pointToLook, Random.Range(75f, 110f));
                 }
             }
         }
-
-        private Vector3 _lastRandomLookPos;
 
         public bool LookToPathToEnemy()
         {

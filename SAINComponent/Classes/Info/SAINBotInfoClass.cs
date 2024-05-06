@@ -145,9 +145,13 @@ namespace SAIN.SAINComponent.Classes.Info
         public void CalcTimeBeforeSearch()
         {
             float searchTime;
-            if (Profile.IsFollower && SAIN.Squad.BotInGroup)
+            if (WildSpawnType == WildSpawnType.bossKilla || WildSpawnType == WildSpawnType.bossTagilla)
             {
-                searchTime = 5f;
+                searchTime = 0.1f;
+            }
+            else if (Profile.IsFollower && SAIN.Squad.BotInGroup)
+            {
+                searchTime = 10f;
             }
             else
             {
@@ -155,17 +159,17 @@ namespace SAIN.SAINComponent.Classes.Info
             }
 
             searchTime = (searchTime.Randomize(0.66f, 1.33f) / AggressionMultiplier).Round100();
-            if (searchTime < 0.2f)
+            if (searchTime < 0.1f)
             {
-                searchTime = 0.2f;
+                searchTime = 0.1f;
             }
 
             TimeBeforeSearch = searchTime;
             float random = 30f.Randomize(0.75f, 1.25f).Round100();
             float forgetTime = searchTime + random;
-            if (forgetTime < 45f)
+            if (forgetTime < 60f)
             {
-                forgetTime = 45f.Randomize(0.85f, 1.15f).Round100();
+                forgetTime = 60f.Randomize(0.9f, 1.1f).Round100();
             }
             BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = forgetTime;
             ForgetEnemyTime = forgetTime;
@@ -230,6 +234,10 @@ namespace SAIN.SAINComponent.Classes.Info
             if (!BotTypeDefinitions.BotTypes.ContainsKey(WildSpawnType))
             {
                 return EPersonality.Chad;
+            }
+            if (WildSpawnType == WildSpawnType.bossKilla || WildSpawnType == WildSpawnType.bossTagilla)
+            {
+                return EFTMath.RandomBool() ? EPersonality.Wreckless : EPersonality.GigaChad;
             }
             foreach (PersonalitySettingsClass setting in SAINPlugin.LoadedPreset.PersonalityManager.Personalities.Values)
             {
