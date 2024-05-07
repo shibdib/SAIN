@@ -395,7 +395,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 if (member?.BotIsAlive == true 
                     && SAIN.Squad.LeaderComponent != null 
                     && !member.Squad.IAmLeader 
-                    && member.Squad.DistanceToSquadLeader <= 20f)
+                    && member.Squad.DistanceToSquadLeader <= 30f)
                 {
                     if (EFTMath.RandomBool(chance))
                     {
@@ -427,7 +427,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                             CheckFriendliesTimer = Time.time + SAIN.Info.FileSettings.Mind.SquadLeadTalkFreq * 5f;
 
                             SAIN.Talk.Say(trigger);
-                            AllMembersSay(EPhraseTrigger.Roger, ETagStatus.Aware, Random.Range(0.65f, 1.25f), 40f);
+                            AllMembersSay(EPhraseTrigger.Roger, ETagStatus.Aware, Random.Range(0.65f, 1.25f), 50f);
                             return true;
                         }
                     }
@@ -495,9 +495,9 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (_nextCheckTalkRetreatTime < Time.time && TalkRetreat)
             {
                 _nextCheckTalkRetreatTime = Time.time + 10f;
-                if (EFTMath.RandomBool(40))
+                if (EFTMath.RandomBool(60))
                 {
-                    SAIN.Talk.Say(EFTMath.RandomBool(50) ? EPhraseTrigger.NeedHelp : EPhraseTrigger.CoverMe, ETagStatus.Combat, true);
+                    SAIN.Talk.Say(EFTMath.RandomBool(30) ? EPhraseTrigger.NeedHelp : EPhraseTrigger.CoverMe, ETagStatus.Combat, true);
                     return true;
                 }
             }
@@ -511,7 +511,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (SAIN.Enemy != null
                 && BotOwner.Memory.IsUnderFire)
             {
-                if (EFTMath.RandomBool(25))
+                if (EFTMath.RandomBool(45))
                 {
                     SAIN.Talk.Say(EPhraseTrigger.NeedHelp, ETagStatus.Combat, true);
                     return true;
@@ -668,13 +668,16 @@ namespace SAIN.SAINComponent.Classes.Talk
                 var mask = ETagStatus.Aware;
 
                 var enemy = SAIN.Enemy;
-                if (SAIN.Enemy.IsVisible && enemy.EnemyLookingAtMe && EFTMath.RandomBool(33))
+                if (SAIN.Enemy.IsVisible && enemy.EnemyLookingAtMe && EFTMath.RandomBool(40))
                 {
                     mask = ETagStatus.Combat;
                     bool injured = !SAIN.Memory.Healthy && !SAIN.Memory.Injured;
                     trigger = injured ? EPhraseTrigger.NeedHelp : EPhraseTrigger.OnRepeatedContact;
                 }
-                else if (enemy.IsVisible && EFTMath.RandomBool(40))
+                else if (
+                    (enemy.IsVisible 
+                    || (enemy.Seen && enemy.TimeSinceSeen < 3f)) 
+                    && EFTMath.RandomBool(60))
                 {
                     EnemyDirectionCheck(enemy.EnemyPosition, out trigger, out mask);
                 }
@@ -741,6 +744,12 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool CheckFriendlyLocation(out EPhraseTrigger trigger)
         {
             trigger = EPhraseTrigger.PhraseNone;
+            if (SAIN.Squad.SquadInfo?.MemberIsRegrouping == true)
+            {
+                trigger = EPhraseTrigger.Regroup;
+                return true;
+            }
+            return false;
 
             int tooClose = 0;
             int total = 0;
@@ -762,7 +771,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 trigger = EPhraseTrigger.Spreadout;
             }
-            else if (SAIN.Squad.SquadInfo?.MemberIsRegrouping == true)
+            if (SAIN.Squad.SquadInfo?.MemberIsRegrouping == true)
             {
                 trigger = EPhraseTrigger.Regroup;
             }

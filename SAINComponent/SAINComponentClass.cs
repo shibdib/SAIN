@@ -241,12 +241,23 @@ namespace SAIN.SAINComponent
                 //BotOwner.DoorOpener.Update(); 
                 UpdateGoalTarget();
 
+                if (_nextCheckReloadTime < Time.time)
+                {
+                    _nextCheckReloadTime = Time.time + 0.5f;
+                    if (!BotOwner.WeaponManager.HaveBullets)
+                    {
+                        SelfActions.TryReload();
+                    }
+                }
+
                 if (ManualShootReason != EShootReason.None && (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 1f < Time.time))
                 {
                     Shoot(false, Vector3.zero);
                 }
             }
         }
+
+        private float _nextCheckReloadTime;
 
         private bool _powerCalcd;
         public SightCheckerComponent SightChecker { get; private set; }

@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using SAIN.Helpers;
 using SAIN.SAINComponent.BaseClasses;
 using UnityEngine;
 using UnityEngine.AI;
@@ -43,6 +44,7 @@ namespace SAIN.SAINComponent.Classes
             SAIN.EnemyController.RemoveEnemy(EnemyPlayer);
         }
 
+        public bool SearchStarted { get; set; }
 
         public bool EnemyIsSuppressed
         {
@@ -52,7 +54,7 @@ namespace SAIN.SAINComponent.Classes
             }
             set
             {
-                _suppressEndTimer = value ? Time.time + 3f : 0f;
+                _suppressEndTimer = value ? Time.time + 2f : 0f;
             }
         }
 
@@ -65,16 +67,22 @@ namespace SAIN.SAINComponent.Classes
                 SAIN.EnemyController.ClearEnemy();
                 return;
             }
+            if (EnemyPlayer == null)
+            {
+                DeleteInfo(default);
+                return;
+            }
 
-            if (EnemyInfo?.ShallKnowEnemy() == true)
+            if (EnemyInfo?.ShallKnowEnemy() == true || EnemyPlayer.IsAI == false)
             {
                 bool isCurrent = IsCurrentEnemy;
                 Vision.Update(isCurrent);
                 Path.Update(isCurrent);
+                KnownPlaces.Update();
 
                 if (isCurrent)
                 {
-                    KnownPlaces.Update();
+                    //KnownPlaces.Update();
                 }
             }
             else
@@ -121,7 +129,10 @@ namespace SAIN.SAINComponent.Classes
                         || SAIN.Enemy.TimeSinceSeen > 10f))
                 {
                     _nextSayNoise = Time.time + 8f;
-                    SAIN.Talk.TalkAfterDelay(isTalked ? EPhraseTrigger.OnEnemyConversation : EPhraseTrigger.NoisePhrase);
+                    if (EFTMath.RandomBool(40))
+                    {
+                        SAIN.Talk.TalkAfterDelay(isTalked ? EPhraseTrigger.OnEnemyConversation : EPhraseTrigger.NoisePhrase);
+                    }
                 }
             }
         }

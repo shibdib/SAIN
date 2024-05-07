@@ -64,6 +64,7 @@ namespace SAIN.Layers.Combat.Solo
                 {
                     RecalcPathTimer = Time.time + 4f;
                     BotOwner.BotRun.Run(movePos, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
+                    SAIN.Steering.LookToMovingDirection(500f, true);
                 }
             }
             else

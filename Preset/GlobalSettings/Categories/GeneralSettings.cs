@@ -11,11 +11,23 @@ namespace SAIN.Preset.GlobalSettings
     {
         [MinMax(0.1f, 1f, 100f)]
         [JsonIgnore]
-        public float SprintReachDistance = 0.25f;
+        [Hidden]
+        public float SprintReachDistance = 0.5f;
 
         [MinMax(0.1f, 1f, 100f)]
         [JsonIgnore]
-        public float BaseReachDistance = 0.25f;
+        [Hidden]
+        public float BaseReachDistance = 0.5f;
+
+        [Name("Performance Mode")]
+        [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN. Can cause bots to take too long to find cover to go to.")]
+        [Default(false)]
+        public bool PerformanceMode = false;
+
+        [Name("Talkative Scavs")]
+        [Description("When at peace, scavs will talk to each other and be noisy. Revealing their location to PMCs.")]
+        [Default(true)]
+        public bool TalkativeScavs = true;
 
         [Name("Bots Open Doors Fast")]
         [Description("WIP. Can cause bots to get stuck on doors sometimes.")]
@@ -27,10 +39,6 @@ namespace SAIN.Preset.GlobalSettings
         [Default(true)]
         public bool LimitAIvsAI = true;
 
-        [Name("Performance Mode")]
-        [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN. Can cause bots to take too long to find cover to go to.")]
-        [Default(false)]
-        public bool PerformanceMode = false;
 
         [Name("Global Difficulty Modifier")]
         [Description("Higher number = harder bots. Affects bot accuracy, recoil, fire-rate, full auto burst lenght, scatter, reaction-time")]

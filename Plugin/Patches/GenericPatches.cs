@@ -23,6 +23,38 @@ using System.Collections;
 
 namespace SAIN.Patches.Generic
 {
+    public class ShallRunAwayGrenadePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotBewareGrenade), "ShallRunAway");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(ref bool __result)
+        {
+            __result = false;
+            return false;
+        }
+    }
+
+    public class RotateClampPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "Rotate");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref Player __instance, ref bool ignoreClamp)
+        {
+            if (__instance?.IsAI == true)
+            {
+                ignoreClamp = true;
+            }
+        }
+    }
+
     public class HealCancelPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -49,10 +81,14 @@ namespace SAIN.Patches.Generic
             }
             return false;
         }
+
         private static IEnumerator TakePrevWeapon(BotOwner bot)
         {
             yield return new WaitForSeconds(0.5f);
-            bot.WeaponManager.Selector.TakePrevWeapon();
+            if (bot != null && bot.GetPlayer != null && bot.GetPlayer.HealthController.IsAlive)
+            {
+                bot.WeaponManager?.Selector?.TakePrevWeapon();
+            }
         }
     }
     public class AimRotateSpeedPatch : ModulePatch

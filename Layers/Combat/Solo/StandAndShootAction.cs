@@ -22,7 +22,10 @@ namespace SAIN.Layers.Combat.Solo
 
             if (SAIN.Cover.DuckInCover())
             {
-                SAIN.Mover.StopMove();
+                if (_stopMoveTime < Time.time)
+                {
+                    SAIN.Mover.StopMove();
+                }
             }
 
             Shoot.Update();
@@ -43,7 +46,9 @@ namespace SAIN.Layers.Combat.Solo
         public override void Start()
         {
             SAIN.Mover.Sprint(false);
+            _stopMoveTime = Time.time + 0.5f;
         }
+        private float _stopMoveTime;
 
         public override void Stop()
         {

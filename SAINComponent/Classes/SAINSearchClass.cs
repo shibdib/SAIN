@@ -51,7 +51,7 @@ namespace SAIN.SAINComponent.Classes
             }
             destination = Vector3.zero;
 
-            return WantToSearch() && CanStartSearch(out destination, mustHaveTarget);
+            return WantToSearch() && HasPathToSearchTarget(out destination, mustHaveTarget);
         }
 
         private float _nextRecalcSearchTime;
@@ -65,22 +65,7 @@ namespace SAIN.SAINComponent.Classes
 
             if (enemy != null)
             {
-                if (SAIN.Info.PersonalitySettings.WillSearchForEnemy
-                    && !SAIN.Suppression.IsSuppressed
-                    && !enemy.IsVisible
-                    && !BotOwner.Memory.IsUnderFire
-                    && Time.time - BotOwner.Memory.UnderFireTime > timeBeforeSearch * 0.25f)
-                {
-                    if (enemy.Seen && enemy.TimeSinceSeen >= timeBeforeSearch)
-                    {
-                        wantToSearch = true;
-                    }
-                    else if ((enemy.Seen || enemy.Heard)
-                        && enemy.TimeSinceLastKnownUpdated >= timeBeforeSearch)
-                    {
-                        wantToSearch = true;
-                    }
-                }
+                wantToSearch = shallSearch(enemy, timeBeforeSearch);
             }
             else if (SAIN.Info.PersonalitySettings.WillSearchFromAudio)
             {
@@ -101,7 +86,64 @@ namespace SAIN.SAINComponent.Classes
             return wantToSearch;
         }
 
-        public bool CanStartSearch(out Vector3 finalDestination, bool needTarget = false)
+        private bool shallSearch(SAINEnemy enemy, float timeBeforeSearch)
+        {
+            if (enemy.SearchStarted)
+            {
+                return shallContinueSearch(enemy, timeBeforeSearch);
+            }
+            else
+            {
+                return shallBeginSearch(enemy, timeBeforeSearch);
+            }
+        }
+
+        private bool shallBeginSearch(SAINEnemy enemy, float timeBeforeSearch)
+        {
+            if (SAIN.Info.PersonalitySettings.WillSearchForEnemy
+                && !SAIN.Suppression.IsSuppressed
+                && !enemy.IsVisible
+                && !BotOwner.Memory.IsUnderFire
+                && Time.time - BotOwner.Memory.UnderFireTime > 30f)
+            {
+                if (enemy.Seen && enemy.TimeSinceSeen >= timeBeforeSearch)
+                {
+                    enemy.SearchStarted = true;
+                    return true;
+                }
+                else if ((enemy.Seen || enemy.Heard)
+                    && enemy.TimeSinceLastKnownUpdated >= timeBeforeSearch)
+                {
+                    enemy.SearchStarted = true;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool shallContinueSearch(SAINEnemy enemy, float timeBeforeSearch)
+        {
+            if (SAIN.Info.PersonalitySettings.WillSearchForEnemy
+                && !SAIN.Suppression.IsSuppressed
+                && !enemy.IsVisible
+                && !BotOwner.Memory.IsUnderFire)
+            {
+                timeBeforeSearch = Mathf.Clamp(timeBeforeSearch / 4f, 0.2f, 30f);
+
+                if (enemy.Seen && enemy.TimeSinceSeen >= timeBeforeSearch)
+                {
+                    return true;
+                }
+                else if ((enemy.Seen || enemy.Heard)
+                    && enemy.TimeSinceLastKnownUpdated >= timeBeforeSearch)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool HasPathToSearchTarget(out Vector3 finalDestination, bool needTarget = false)
         {
             if (_nextCheckSearchTime < Time.time)
             {
@@ -359,13 +401,14 @@ namespace SAIN.SAINComponent.Classes
 
             if (!shallSprint)
             {
-                //SAIN.Mover.Sprint(false);
+                SAIN.Mover.Sprint(false);
             }
 
             _Running = false;
             if (shallSprint 
                 && BotOwner.BotRun.Run(destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance))
             {
+                SAIN.Steering.LookToMovingDirection(500f, true);
                 _Running = true;
                 return true;
             }

@@ -45,6 +45,7 @@ namespace SAIN.Layers.Combat.Squad
 
                         if (sprint && BotOwner.BotRun.Run(destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance))
                         {
+                            SAIN.Steering.LookToMovingDirection(500f, true);
                             _recalcPathTime = Time.time + 1f;
                         }
                         else if (SAIN.Mover.GoToPoint(destination, out _))

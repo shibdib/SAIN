@@ -1,4 +1,5 @@
 ﻿using EFT;
+using EFT.InventoryLogic;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
@@ -21,16 +22,136 @@ namespace SAIN.SAINComponent.Classes
 
         public override void Update()
         {
-            if (SAIN.Player.IsSprintEnabled)
+            if (BotOwner == null || BotOwner.GetPlayer == null)
             {
                 return;
             }
+            if (SAIN.Player.IsSprintEnabled)
+            {
+                BotOwner.AimingData?.LoseTarget();
+                return;
+            }
 
-            SAIN.AimDownSightsController.UpdateADSstatus();
-            AimAtEnemy();
+            if (BotOwner.WeaponManager.Selector.EquipmentSlot == EquipmentSlot.Holster 
+                && !BotOwner.WeaponManager.HaveBullets 
+                && !BotOwner.WeaponManager.Selector.TryChangeToMain())
+            {
+                selectWeapon();
+            }
+
+            if (changeAimTimer < Time.time)
+            {
+                changeAimTimer = Time.time + 0.5f;
+                SAIN.AimDownSightsController.UpdateADSstatus();
+            }
+            aimAtEnemy();
         }
 
-        private void AimAtEnemy()
+        private void selectWeapon()
+        {
+            if (WeaponInfo == null)
+            {
+                WeaponInfo = SAINWeaponInfoHandler.GetPlayerWeaponInfo(BotOwner.GetPlayer);
+            }
+            if (WeaponInfo != null)
+            {
+                EquipmentSlot optimalSlot = findOptimalWeaponForDistance(WeaponInfo, getDistance());
+                if (currentSlot != optimalSlot)
+                {
+                    tryChangeWeapon(optimalSlot);
+                }
+            }
+        }
+
+        private EquipmentSlot currentSlot => BotOwner.WeaponManager.Selector.EquipmentSlot;
+
+        private void tryChangeWeapon(EquipmentSlot slot)
+        {
+            if (_nextChangeWeaponTime < Time.time)
+            {
+                var selector = BotOwner?.WeaponManager?.Selector;
+                if (selector != null)
+                {
+                    _nextChangeWeaponTime = Time.time + 3f;
+                    switch (slot)
+                    {
+                        case EquipmentSlot.FirstPrimaryWeapon:
+                            selector.TryChangeToMain();
+                            break;
+
+                        case EquipmentSlot.SecondPrimaryWeapon:
+                            selector.ChangeToSecond();
+                            break;
+
+                        case EquipmentSlot.Holster:
+                            selector.TryChangeWeapon(true);
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        private float _nextChangeWeaponTime;
+
+        private float getDistance()
+        {
+            if (_nextGetDistTime < Time.time)
+            {
+                _nextGetDistTime = Time.time + 0.5f;
+                Vector3? target = SAIN.CurrentTargetPosition;
+                if (target != null)
+                {
+                    _lastDistance = (target.Value - SAIN.Position).magnitude;
+                }
+            }
+            return _lastDistance;
+        }
+
+        private float _lastDistance;
+        private float _nextGetDistTime;
+
+        private EquipmentSlot findOptimalWeaponForDistance(PlayerWeaponInfoContainer weaponInfo, float distance)
+        {
+            if (_nextCheckOptimalTime < Time.time)
+            {
+                _nextCheckOptimalTime = Time.time + 1f;
+
+                float? primaryEngageDist = weaponInfo.Primary?.EngagementDistance();
+                float? secondaryEngageDist = weaponInfo.Secondary?.EngagementDistance();
+                float? holsterEngageDist = weaponInfo.Holster?.EngagementDistance();
+
+                float minDifference = Mathf.Abs(distance - primaryEngageDist ?? 0);
+                optimalSlot = EquipmentSlot.FirstPrimaryWeapon;
+
+                float difference = Mathf.Abs(distance - secondaryEngageDist ?? 0);
+                if (difference < minDifference)
+                {
+                    minDifference = difference;
+                    optimalSlot = EquipmentSlot.SecondPrimaryWeapon;
+                }
+
+                if (!BotOwner.WeaponManager.HaveBullets)
+                {
+                    difference = Mathf.Abs(distance - holsterEngageDist ?? 0);
+                    if (difference < minDifference)
+                    {
+                        minDifference = difference;
+                        optimalSlot = EquipmentSlot.Holster;
+                    }
+                }
+            }
+            return optimalSlot;
+        }
+
+        private EquipmentSlot optimalSlot;
+        private float _nextCheckOptimalTime;
+
+        private PlayerWeaponInfoContainer WeaponInfo;
+
+        private void aimAtEnemy()
         {
             if (!BotOwner.WeaponManager.HaveBullets)
             {

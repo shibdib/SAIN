@@ -29,7 +29,7 @@ namespace SAIN
 
         public static void CheckPlugins()
         {
-            if (Chainloader.PluginInfos.ContainsKey(FikaKey))
+            if (Chainloader.PluginInfos.ContainsKey(FikaKey) || Chainloader.PluginInfos.ContainsKey("com.mpt.core"))
             {
                 ProjectFikaLoaded = true;
                 Logger.LogInfo($"SAIN: Project Fika Detected.");

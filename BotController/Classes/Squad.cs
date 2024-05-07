@@ -291,6 +291,10 @@ namespace SAIN.BotController.Classes
 
         private void clearPlayerPlace(IPlayer player)
         {
+            if (player == null)
+            {
+                return;
+            }
             player.OnIPlayerDeadOrUnspawn -= clearPlayerPlace;
             if (PlayerPlaceChecks.ContainsKey(player))
             {
@@ -299,9 +303,17 @@ namespace SAIN.BotController.Classes
 
                 foreach (var bot in Members.Values)
                 {
-                    if (bot != null && bot.BotOwner != null)
+                    if (bot != null 
+                        && bot.BotOwner != null)
                     {
-                        EFTBotGroup.CalcGoalForBot(bot.BotOwner);
+                        try
+                        {
+                            EFTBotGroup?.CalcGoalForBot(bot.BotOwner);
+                        }
+                        catch
+                        {
+                            //
+                        }
                     }
                 }
             }

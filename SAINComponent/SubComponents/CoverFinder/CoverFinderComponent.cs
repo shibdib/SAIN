@@ -71,8 +71,41 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool GetTargetPosition(out Vector3? target)
         {
-            target = SAIN.Grenade.GrenadeDangerPoint ?? SAIN.CurrentTargetPosition;
+            if (SAIN.Grenade.GrenadeDangerPoint != null)
+            {
+                target = SAIN.Grenade.GrenadeDangerPoint;
+                return true;
+            }
+            target = SAIN.CurrentTargetPosition;
+            if (target != null)
+            {
+                switch (SAIN.Decision.CurrentSoloDecision)
+                {
+                    case SoloDecision.Search:
+                    case SoloDecision.MoveToEngage:
+                        target = FindPointBetween(target.Value, OriginPoint);
+                        break;
+                    case SoloDecision.Retreat:
+                        target = FindPointAway(target.Value, OriginPoint);
+                        break;
+                    default:
+                        break;
+                }
+            }
             return target != null;
+        }
+
+        private Vector3 FindPointBetween(Vector3 target, Vector3 origin)
+        {
+            Vector3 direction = target - origin;
+            Vector3 midPoint = Vector3.Lerp(origin, target, 0.25f);
+            return midPoint;
+        }
+        private Vector3 FindPointAway(Vector3 target, Vector3 origin)
+        {
+            Vector3 direction = target - origin;
+            Vector3 away = -direction.normalized * 5f;
+            return origin + away;
         }
 
         public CoverPoint FindNeutralCoverPoint()

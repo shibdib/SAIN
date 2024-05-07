@@ -306,9 +306,16 @@ namespace SAIN.SAINComponent.Classes.Mover
             return false;
         }
 
-        public void LookToMovingDirection(float rotateSpeed = 400f)
+        public void LookToMovingDirection(float rotateSpeed = 150f, bool sprint = false)
         {
-            BotOwner.Steering.LookToMovingDirection(rotateSpeed);
+            if (sprint || Player.IsSprintEnabled)
+            {
+                BotOwner.Steering.LookToMovingDirection(500f);
+            }
+            else
+            {
+                BotOwner.Steering.LookToMovingDirection(rotateSpeed);
+            }
         }
 
         public void LookToPoint(Vector3 point, float rotateSpeed = -1)

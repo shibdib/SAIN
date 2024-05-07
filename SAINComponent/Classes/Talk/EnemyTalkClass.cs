@@ -278,14 +278,17 @@ namespace SAIN.SAINComponent.Classes.Talk
                 {
                     _nextResponseTime = Time.time + 0.75f;
 
-                    SAIN.StartCoroutine(RespondToVoice(
-                        EPhraseTrigger.MumblePhrase,
-                        ETagStatus.Unaware,
-                        Random.Range(0.33f, 0.75f),
-                        player,
-                        _friendlyResponseDistance,
-                        _friendlyResponseChance
+                    if (SAINPlugin.LoadedPreset.GlobalSettings.General.TalkativeScavs || player.IsAI == false)
+                    {
+                        SAIN.StartCoroutine(RespondToVoice(
+                            EPhraseTrigger.MumblePhrase,
+                            ETagStatus.Unaware,
+                            Random.Range(0.33f, 0.75f),
+                            player,
+                            _friendlyResponseDistance,
+                            _friendlyResponseChance
                         ));
+                    }
                 }
                 else if (SAIN?.Squad.SquadInfo != null
                     && SAIN.Talk.GroupTalk.FriendIsClose
@@ -296,7 +299,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 {
                     if (_saySilenceTime < Time.time)
                     {
-                        _saySilenceTime = Time.time + 30f;
+                        _saySilenceTime = Time.time + 20f;
                         SAIN.StartCoroutine(RespondToVoice(
                             EPhraseTrigger.Silence,
                             SAIN.HasEnemy ? ETagStatus.Combat : ETagStatus.Aware,

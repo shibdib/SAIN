@@ -47,9 +47,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 bool shallProne = SAIN.Mover.Prone.ShallProneHide();
                 if (FindTargetCover())
                 {
-                    if ((CoverDestination.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude > 4f)
+                    if ((CoverDestination.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude > 1f)
                     {
-                        MoveSuccess = BotOwner.BotRun.Run(CoverDestination.GetPosition(SAIN), false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
+                        MoveSuccess = BotOwner.BotRun.Run(CoverDestination.GetPosition(SAIN), false);
                         if (MoveSuccess)
                         {
                             _sprinting = true;
@@ -68,11 +68,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
                 if (MoveSuccess)
                 {
-                    RecalcTimer = Time.time + 1f;
+                    RecalcTimer = Time.time + 0.5f;
                 }
                 else
                 {
-                    RecalcTimer = Time.time + 0.2f;
+                    RecalcTimer = Time.time + 0.1f;
                 }
             }
 
@@ -81,7 +81,14 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 SAIN.Mover.DogFight.DogFightMove();
             }
 
-            EngageEnemy();
+            if (!_sprinting || !BotOwner.Mover.IsMoving)
+            {
+                EngageEnemy();
+            }
+            else
+            {
+                SAIN.Steering.LookToMovingDirection(500f, true);
+            }
         }
 
         private bool MoveSuccess;

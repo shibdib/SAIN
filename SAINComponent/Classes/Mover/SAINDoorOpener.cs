@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AI;
 using static Class824;
 using static RootMotion.FinalIK.InteractionTrigger.Range;
 
@@ -36,6 +37,15 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool CanOpenDoorNow => _nextPosibleDoorOpenTime > Time.time;
 
+        public List<NavMeshDoorLink> FindDoorsOnPath(NavMeshPath path)
+        {
+            doorsOnPath.Clear();
+            List<NavMeshDoorLink> list = this.BotOwner.CellData.CurrentDoorLinks();
+            return null;
+        }
+
+        private readonly List<NavMeshDoorLink> doorsOnPath = new List<NavMeshDoorLink>();
+
         public bool Update()
         {
             if (ModDetection.ProjectFikaLoaded || !SAINPlugin.LoadedPreset.GlobalSettings.General.NewDoorOpening)
@@ -57,7 +67,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (this._searchCloseDoorTime < Time.time)
             {
                 this.NearDoor = false;
-                GStruct18? gstruct = this.method_0(list, null);
+                GStruct18? gstruct = this.findDoorToInteract(list, null);
                 if (gstruct == null)
                 {
                     return true;
@@ -76,7 +86,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     bool wantToOpen;
                     if (!(wantToOpen = this.CheckWantToOpen(this.BotOwner.Mover.RealDestPoint, gstruct.Value)) && list.Count > 1)
                     {
-                        gstruct = this.method_0(list, new GStruct18?(gstruct.Value));
+                        gstruct = this.findDoorToInteract(list, new GStruct18?(gstruct.Value));
                         if (gstruct == null)
                         {
                             return true;
@@ -167,6 +177,8 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
 
                 door.method_3(state, false);
+
+                //BotOwner.GetPlayer.vmethod_0(door, new InteractionResult(Etype), null);
                 if (inverted)
                 {
                     door.OpenAngle = -door.OpenAngle;
@@ -189,7 +201,42 @@ namespace SAIN.SAINComponent.Classes.Mover
             return true;
         }
 
-        public GStruct18? method_0(List<NavMeshDoorLink> list, [CanBeNull] GStruct18? exclude)
+        public GStruct18? findDoorToInteract(List<NavMeshDoorLink> list, [CanBeNull] GStruct18? exclude)
+        {
+            GStruct18? result = null;
+            float num = 2f;
+            for (int i = 0; i < list.Count; i++)
+            {
+                NavMeshDoorLink navMeshDoorLink = list[i];
+                Vector3 a;
+                if (navMeshDoorLink.Door.DoorState == EDoorState.Open)
+                {
+                    a = navMeshDoorLink.MidClose;
+                }
+                else
+                {
+                    a = navMeshDoorLink.MidOpen;
+                }
+                if (exclude == null || navMeshDoorLink.Id != exclude.Value.LinkDoor.Id)
+                {
+                    float sqrMagnitude = (a - this.BotOwner.Transform.position).sqrMagnitude;
+                    if (sqrMagnitude < num)
+                    {
+                        num = sqrMagnitude;
+                        this._currLink = navMeshDoorLink;
+                        GStruct18 value = new GStruct18
+                        {
+                            LinkDoor = navMeshDoorLink,
+                            CurDist = sqrMagnitude
+                        };
+                        result = new GStruct18?(value);
+                    }
+                }
+            }
+            return result;
+        }
+
+        private GStruct18? findDoors(List<NavMeshDoorLink> list, [CanBeNull] GStruct18? exclude)
         {
             GStruct18? result = null;
             float num = 6f;
@@ -280,8 +327,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 if (_currentDoor.DoorState == EDoorState.Open)
                 {
-                    //____nextPosibleDoorOpenTime = Time.time + 0.75f;
-                    //Interact(____currentDoor, EInteractionType.Close);
+                    _nextPosibleDoorOpenTime = Time.time + pauseTime;
+                    Interact(_currentDoor, EInteractionType.Close);
                 }
                 return;
             }

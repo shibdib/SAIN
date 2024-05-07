@@ -36,6 +36,15 @@ namespace SAIN
             }
         }
 
+        public float EngagementDistance()
+        {
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Shoot.EngagementDistance.TryGetValue( WeaponClass, out float distance ))
+            {
+                return distance;
+            }
+            return 50f;
+        }
+
         public bool TryCalculate(bool skipTimer = false)
         {
             if (Weapon == null)

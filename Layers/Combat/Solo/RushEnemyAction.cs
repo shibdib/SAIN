@@ -112,6 +112,7 @@ namespace SAIN.Layers.Combat.Solo
                 if (SAIN.Enemy.Path.PathDistance > 5f)
                 {
                     BotOwner.BotRun.Run(Destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
+                    SAIN.Steering.LookToMovingDirection(500f, true);
                 }
                 else
                 {

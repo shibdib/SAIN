@@ -69,7 +69,7 @@ namespace SAIN.Preset.GlobalSettings
             power += RolePower(player.Profile.Info.Settings.Role);
             power += ArmorPower(player);
 
-            Logger.LogAndNotifyInfo($"Calculated Power: [{power}] for [{player.Profile.Nickname}]");
+            //Logger.LogAndNotifyInfo($"Calculated Power: [{power}] for [{player.Profile.Nickname}]");
 
             player.AIData.PowerOfEquipment = power;
 
@@ -148,7 +148,7 @@ namespace SAIN.Preset.GlobalSettings
                     }
                 }
             }
-            Logger.LogInfo($"Weapon Power Result: [{result}]");
+            //Logger.LogInfo($"Weapon Power Result: [{result}]");
             return result;
         }
 
@@ -164,7 +164,7 @@ namespace SAIN.Preset.GlobalSettings
                 {
                     armorVest.GetItemComponentsInChildrenNonAlloc(armorComponents, true);
                     float highestArmorClass = FindHighestArmorClass(armorComponents);
-                    Logger.LogInfo($"Armor Components in Vest: [{armorComponents.Count}] Highest Armor Class: [{highestArmorClass}] Class Coef: [{ArmorClassCoef}] Combined: [{highestArmorClass * ArmorClassCoef}]");
+                    //Logger.LogInfo($"Armor Components in Vest: [{armorComponents.Count}] Highest Armor Class: [{highestArmorClass}] Class Coef: [{ArmorClassCoef}] Combined: [{highestArmorClass * ArmorClassCoef}]");
                     result += highestArmorClass * ArmorClassCoef;
                     armorComponents.Clear();
                 }
@@ -177,7 +177,7 @@ namespace SAIN.Preset.GlobalSettings
                         if (armorComponents.Count > 0)
                         {
                             float highestArmorClass = FindHighestArmorClass(armorComponents);
-                            Logger.LogInfo($"Armor Components in Rig: [{armorComponents.Count}] Highest Armor Class: [{highestArmorClass}] Class Coef: [{ArmorClassCoef}] Combined: [{highestArmorClass * ArmorClassCoef}]");
+                            //Logger.LogInfo($"Armor Components in Rig: [{armorComponents.Count}] Highest Armor Class: [{highestArmorClass}] Class Coef: [{ArmorClassCoef}] Combined: [{highestArmorClass * ArmorClassCoef}]");
                             result += highestArmorClass * ArmorClassCoef;
                             armorComponents.Clear();
                         }
@@ -199,7 +199,7 @@ namespace SAIN.Preset.GlobalSettings
                         {
                             result += HELMET_POWER;
                         }
-                        Logger.LogInfo($"Armor Components in Helmet: [{armorComponents.Count}] Highest Armor Class: [{highestArmorClass}]");
+                        //Logger.LogInfo($"Armor Components in Helmet: [{armorComponents.Count}] Highest Armor Class: [{highestArmorClass}]");
                         armorComponents.Clear();
                     }
                 }
@@ -220,7 +220,7 @@ namespace SAIN.Preset.GlobalSettings
                 }
             }
             armorComponents.Clear();
-            Logger.LogInfo($"Armor Power Result: [{result}]");
+            //Logger.LogInfo($"Armor Power Result: [{result}]");
             return result;
         }
 

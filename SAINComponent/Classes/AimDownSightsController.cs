@@ -33,6 +33,16 @@ namespace SAIN.SAINComponent.Classes
 
         public void UpdateADSstatus()
         {
+            Vector3? targetPos = SAIN.CurrentTargetPosition;
+
+            // If a bot is sneaky, don't change ADS if their enemy is close to avoid alerting them.
+            if (SAIN.Info.PersonalitySettings.Sneaky && targetPos != null 
+                && SAIN.Enemy?.IsVisible != true 
+                && (targetPos.Value - SAIN.Position).sqrMagnitude < 30f * 30f)
+            {
+                return;
+            }
+
             bool shallADS = ShallAimDownSights(SAIN.CurrentTargetPosition);
             SetADS(shallADS);
         }
