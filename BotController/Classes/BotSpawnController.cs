@@ -115,7 +115,7 @@ namespace SAIN.Components.BotController
 
             if ( result == null && debugString != null )
             {
-                Logger.LogAndNotifyError( debugString, EFT.Communications.ENotificationDurationType.Long );
+                //Logger.LogAndNotifyError( debugString, EFT.Communications.ENotificationDurationType.Long );
             }
             return result;
         }
@@ -132,7 +132,7 @@ namespace SAIN.Components.BotController
                 if (debugString != null)
                 {
                     debugString.AppendLine("Player is Null, cannot get SAIN!");
-                    Logger.LogAndNotifyError(debugString, EFT.Communications.ENotificationDurationType.Long);
+                    //Logger.LogAndNotifyError(debugString, EFT.Communications.ENotificationDurationType.Long);
                 }
                 return null;
             }

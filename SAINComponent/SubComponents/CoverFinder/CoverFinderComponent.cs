@@ -77,6 +77,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 return true;
             }
             target = SAIN.CurrentTargetPosition;
+            return target != null;
             if (target != null)
             {
                 switch (SAIN.Decision.CurrentSoloDecision)
@@ -93,6 +94,25 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 }
             }
             return target != null;
+        }
+
+        public CoverPoint FindPointTowardTarget(float dotMin = 0.33f)
+        {
+            Vector3 botPos = SAIN.Position;
+            Vector3 checkingTarget = TargetPoint;
+            Vector3 directionToTarget = checkingTarget - botPos;
+
+            foreach (var coverPoint in CoverPoints)
+            {
+                Vector3 coverPos = coverPoint.GetPosition(SAIN);
+                Vector3 directionToCover = coverPos - botPos;
+
+                if (Vector3.Dot(directionToCover, directionToTarget) > dotMin)
+                {
+                    return coverPoint;
+                }
+            }
+            return null;
         }
 
         private Vector3 FindPointBetween(Vector3 target, Vector3 origin)
@@ -327,6 +347,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                             yield return null;
                         }
                     }
+                }
+
+
+                CoverPoint pointTowardTarget = FindPointTowardTarget();
+                if (pointTowardTarget != null)
+                {
+                    DebugGizmos.Line(pointTowardTarget.GetPosition(SAIN), SAIN.Position, Color.red, 0.1f, true, 2f, true);
                 }
 
                 //yield return RecheckCoverPoints();

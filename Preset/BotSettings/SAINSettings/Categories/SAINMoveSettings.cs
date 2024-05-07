@@ -11,12 +11,12 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         
         //[Hidden]
         //[JsonIgnore]
-        //public float FIRST_TURN_SPEED = 500;
+        public float FIRST_TURN_SPEED = 300;
         // 160 default
 
         //[Hidden]
         //[JsonIgnore]
-        //public float FIRST_TURN_BIG_SPEED = 500;
+        public float FIRST_TURN_BIG_SPEED = 400;
         // 320 default
         
         [Hidden]

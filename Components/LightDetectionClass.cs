@@ -2,6 +2,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using SAIN.Helpers;
+using SAIN.SAINComponent;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -127,7 +128,7 @@ namespace SAIN.Components
         {
             debugHitPos = Vector3.zero;
 
-            if (NavMesh.SamplePosition(estimatedPosition, out NavMeshHit hit, 1.0f, -1))
+            if (NavMesh.SamplePosition(estimatedPosition, out NavMeshHit hit, 3f, -1))
             {
                 NavMeshPath searchpath = new NavMeshPath();
                 NavMesh.CalculatePath(bot.Transform.position, hit.position, -1, searchpath);
@@ -147,8 +148,21 @@ namespace SAIN.Components
 
                     debugHitPos = hit.position;
 
-                    
-                    bot.BotsGroup.AddPointToSearch(hit.position, 20f, bot, true);
+                    if (bot.TryGetComponent(out SAINComponentClass sain))
+                    {
+                        sain.Squad.SquadInfo.AddPointToSearch
+                            (hit.position,
+                            25f,
+                            bot,
+                            AISoundType.step,
+                            estimatedPosition,
+                            Singleton<GameWorld>.Instance.MainPlayer,
+                            SAIN.BotController.Classes.Squad.ESearchPointType.Flashlight);
+                    }
+                    else
+                    {
+                        bot.BotsGroup.AddPointToSearch(hit.position, 20f, bot, true, false);
+                    }
                 }
             }
         }

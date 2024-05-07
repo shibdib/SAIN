@@ -45,13 +45,15 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
-            SAIN.Mover.Sprint(false);
+            BotOwner.Mover.SprintPause(0.5f);
             _stopMoveTime = Time.time + 0.5f;
         }
+
         private float _stopMoveTime;
 
         public override void Stop()
         {
+            BotOwner.Mover.MovementResume();
         }
     }
 }

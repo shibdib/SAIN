@@ -128,8 +128,20 @@ namespace SAIN.Layers
             }
 
             SAINLootingBotsIntegration?.Update();
-            return FullOnLoot && HasActiveThreat() == false;
+
+            if (FullOnLoot && HasActiveThreat() == false)
+            {
+                if (!_loggedExtractLoot)
+                {
+                    _loggedExtractLoot = true;
+                    Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because of Loot found in raid. Net Loot Value: [{SAINLootingBotsIntegration?.NetLootValue}]");
+                }
+                return true;
+            }
+            return false;
         }
+
+        private bool _loggedExtractLoot;
 
         private bool FullOnLoot => SAINLootingBotsIntegration?.FullOnLoot == true;
 
@@ -153,9 +165,15 @@ namespace SAIN.Layers
 
         private bool ExtractFromExternal()
         {
+            if (SAIN.Info.ForceExtract && !_loggedExtractExternal)
+            {
+                _loggedExtractExternal = true;
+                Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because of external call.");
+            }
             return SAIN.Info.ForceExtract;
         }
 
+        private bool _loggedExtractExternal;
         private bool Logged = false;
 
         public override bool IsCurrentActionEnding()

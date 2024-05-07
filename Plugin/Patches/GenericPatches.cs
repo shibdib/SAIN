@@ -23,6 +23,20 @@ using System.Collections;
 
 namespace SAIN.Patches.Generic
 {
+    public class IsSameWayPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(PathControllerClass), "IsSameWay", new[] { typeof(Vector3), typeof(Vector3) });
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(ref bool __result)
+        {
+            __result = false;
+            return false;
+        }
+    }
     public class ShallRunAwayGrenadePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
