@@ -112,6 +112,37 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private Coroutine FindPathCoroutine;
 
+        private IEnumerator TrackPosition()
+        {
+            var wait = new WaitForSeconds(0.5f);
+            while (BotOwner != null)
+            {
+                _isOnNavMesh = CheckBotIsOnNavMesh();
+                if (_isOnNavMesh)
+                {
+                    Vector3 newPos = SAIN.Position;
+                    int count = _positions.Count;
+                    if (count > 0)
+                    {
+                        Vector3 last = _positions[count - 1];
+                        if ((newPos - last).sqrMagnitude > 2f)
+                        {
+                            count++;
+                            _positions.Add(newPos);
+                        }
+                    }
+                }
+                if (_positions.Count > _positions.Capacity)
+                {
+                    _positions.RemoveAt(0);
+                }
+                yield return wait;
+            }
+        }
+
+        private readonly List<Vector3> _positions = new List<Vector3>(10);
+        private readonly List<Vector3> _preVaultPositions = new List<Vector3>(10);
+
         private IEnumerator FindPathBackToNavMesh()
         {
             while (!_isOnNavMesh && BotOwner != null && BotOwner.Mover != null)
@@ -196,6 +227,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                             {
                                 yield break;
                             }
+                            yield return null;
                         }
                     }
                 }
@@ -216,7 +248,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                 && Time.time - TimeStartedMoving > 0.5f 
                 && _recalcPathVault < Time.time)
             {
-                if (Player.MovementContext.TryVaulting())
+                if (tryVault())
                 {
                     _botVaulted = true;
                     _recalcPathVault = Time.time + 2f;
@@ -265,6 +297,64 @@ namespace SAIN.SAINComponent.Classes.Debug
             }
         }
 
+        private IEnumerator trackPostVault()
+        {
+            yield return new WaitForSeconds(1f);
+
+            if (SAIN == null || BotOwner == null || Player == null || Player.HealthController.IsAlive == false)
+            {
+                yield break;
+            }
+
+            NavMeshPath path = new NavMeshPath();
+            if (!NavMesh.CalculatePath(SAIN.Position, preVaultPosition, -1, path) || path.status != NavMeshPathStatus.PathComplete)
+            {
+                float timeStart = Time.time;
+
+                while (timeStart + 5f < Time.time 
+                    && Player != null 
+                    && SAIN != null 
+                    && Player.HealthController.IsAlive)
+                {
+                    Vector3 direction = preVaultPosition - SAIN.Position;
+                    Player.Move(findMoveDirection(direction.normalized));
+                    if (direction.sqrMagnitude < 0.25f)
+                    {
+                        if (BotOwner?.Mover != null)
+                        {
+                            BotOwner.Mover.RecalcWay();
+                        }
+                        break;
+                    }
+                    yield return null;
+                }
+            }
+        }
+
+        private Coroutine postVaultTracker;
+
+        private bool tryVault()
+        {
+            Vector3 currentPos = SAIN.Position;
+            if (Player.MovementContext.TryVaulting())
+            {
+                preVaultPosition = currentPos;
+                if (postVaultTracker == null)
+                {
+                    postVaultTracker = SAIN.StartCoroutine(trackPostVault());
+                }
+                else
+                {
+                    SAIN.StopCoroutine(postVaultTracker);
+                    postVaultTracker = SAIN.StartCoroutine(trackPostVault());
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private Vector3 preVaultPosition;
+
         private float _nextVaultCheckTime;
         private bool DontUnstuckMe;
 
@@ -283,7 +373,7 @@ namespace SAIN.SAINComponent.Classes.Debug
             }
 
             if (_botVaultedTime != -1f 
-                && _botVaultedTime + 0.75f < Time.time)
+                && _botVaultedTime + 1f < Time.time)
             {
                 _botVaultedTime = -1f;
                 BotOwner.Mover.RecalcWay();
@@ -313,7 +403,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                     _nextVaultCheckTime = Time.time + 0.5f;
                     if (SAIN.Decision.CurrentSoloDecision != SoloDecision.HoldInCover)
                     {
-                        if (Player.MovementContext.TryVaulting())
+                        if (tryVault())
                         {
                             _botVaulted = true;
                             _nextVaultCheckTime = Time.time + 2f;
@@ -388,7 +478,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                         {
                             JumpTimer = Time.time + 1f;
 
-                            if (!Player.MovementContext.TryVaulting())
+                            if (!tryVault())
                             {
                                 HasTriedJumpOrVault = true;
                                 TimeSinceTriedJumpOrVault = Time.time;
