@@ -85,21 +85,23 @@ namespace SAIN.SAINComponent.Classes.Debug
                 _nextCheckNavMeshTime = Time.time + 1f;
                 _isOnNavMesh = CheckBotIsOnNavMesh();
 
-                if (!_isOnNavMesh && FindPathCoroutine == null)
+                if (!_isOnNavMesh 
+                    && FindPathCoroutine == null)
                 {
                     FindPathCoroutine = SAIN.StartCoroutine(FindPathBackToNavMesh());
                 }
-                else if (_isOnNavMesh && FindPathCoroutine != null)
+                else if (_isOnNavMesh 
+                    && FindPathCoroutine != null)
                 {
                     BotOwner.MovementResume();
                     BotOwner.Mover.RecalcWay();
                     SAIN.StopCoroutine(FindPathCoroutine);
                     FindPathCoroutine = null;
                 }
-
             }
             return _isOnNavMesh;
         }
+
         public Vector2 findMoveDirection(Vector3 direction)
         {
             Vector2 v = new Vector2(direction.x, direction.z);
@@ -112,14 +114,8 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private IEnumerator FindPathBackToNavMesh()
         {
-            while (true)
+            while (!_isOnNavMesh && BotOwner != null && BotOwner.Mover != null)
             {
-                if (_isOnNavMesh)
-                {
-                    yield return null;
-                    continue;
-                }
-
                 Vector3 currentPosition = SAIN.Position;
                 Vector3 lookDirection = SAIN.Transform.LookDirection;
                 Vector3 headPosition = SAIN.Transform.Head;
@@ -129,9 +125,13 @@ namespace SAIN.SAINComponent.Classes.Debug
 
                 Vector3 pointToLook = Vector3.zero;
                 float furthestHitDist = 0f;
+
+                int count = 0;
                 // Find direction to look for navmesh
                 for (int i = 0; i < max; i++)
                 {
+                    count++;
+
                     float rotation = rotationAngle * (i + 1);
                     Quaternion rotate = Quaternion.Euler(0, rotation, 0f);
                     Vector3 direction = rotate * lookDirection;
@@ -149,6 +149,12 @@ namespace SAIN.SAINComponent.Classes.Debug
                             furthestHitDist = sqrMag;
                             pointToLook = hit.point;
                         }
+                    }
+
+                    if (count >= 5)
+                    {
+                        count = 0;
+                        yield return null;
                     }
                 }
 
