@@ -22,6 +22,10 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
+            if (!SAIN.PatrolDataPaused)
+            {
+                return;
+            }
             if (UpdateHealthTimer < Time.time)
             {
                 UpdateHealthTimer = Time.time + 0.5f;
@@ -36,7 +40,7 @@ namespace SAIN.SAINComponent.Classes
             if (_checkIndoorsTime < Time.time)
             {
                 _checkIndoorsTime = Time.time + 1f;
-                IsIndoors = !Physics.Raycast(BotOwner.LookSensor._headPoint, Vector3.up, 10f, LayerMaskClass.HighPolyWithTerrainMask);
+                IsIndoors = !Physics.SphereCast(BotOwner.LookSensor._headPoint, 0.5f, Vector3.up, out _, 10f, LayerMaskClass.HighPolyWithTerrainMask);
             }
         }
 

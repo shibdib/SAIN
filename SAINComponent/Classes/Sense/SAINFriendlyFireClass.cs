@@ -22,6 +22,11 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
+            if (!SAIN.PatrolDataPaused)
+            {
+                FriendlyFireStatus = FriendlyFireStatus.None;
+                return;
+            }
             if (CheckFriendlyFireTimer < Time.time)
             {
                 CheckFriendlyFireTimer = Time.time + 0.25f;

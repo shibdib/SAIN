@@ -5,6 +5,7 @@ using SAIN.Helpers;
 using System.Collections.Generic;
 using static UnityEngine.UI.Image;
 using UnityEngine.UI;
+using System.Linq;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
@@ -17,13 +18,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private CoverFinderComponent CoverFinderComponent;
         private Vector3 OriginPoint => CoverFinderComponent.OriginPoint;
-        private Vector3 TargetPoint => CoverFinderComponent.TargetPoint;
-
         public void GetNewColliders(out int hits, Collider[] array, int iterationMax = 10, float startRadius = 2f, int hitThreshold = 100, LayerMask colliderMask = default)
         {
             const float StartBoxHeight = 0.25f;
-            const float HeightIncreasePerIncrement = 1f;
-            const float HeightDecreasePerIncrement = 1f;
+            const float HeightIncreasePerIncrement = 0.66f;
+            const float HeightDecreasePerIncrement = 0.66f;
             const float LengthIncreasePerIncrement = 3f;
 
             ClearColliders(array);
@@ -105,17 +104,100 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             int hitReduction = 0;
             for (int i = 0; i < hits; i++)
             {
-                Vector3 size = array[i].bounds.size;
-                if (size.y < CoverFinderComponent.CoverMinHeight
-                    || size.x < minX && size.z < minZ 
-                    || ColliderAlreadyUsed(array[i], CoverFinderComponent.CoverPoints))
+                Collider collider = array[i];
+                Vector3 size = collider.bounds.size;
+                if (_excludedColliders.Contains(collider) || ColliderAlreadyUsed(collider, CoverFinderComponent.CoverPoints))
                 {
                     array[i] = null;
                     hitReduction++;
                 }
+                else if (size.y < CoverFinderComponent.CoverMinHeight
+                        || size.x < minX && size.z < minZ)
+                {
+                    array[i] = null;
+                    hitReduction++;
+                    _excludedColliders.Add(collider);
+                }
+                else if (_excludedColliderNames.Contains(collider.name)
+                    || _excludedColliderNames.Contains(collider.gameObject?.name)
+                    || _excludedColliderNames.Contains(collider.attachedRigidbody?.name))
+                {
+                    array[i] = null;
+                    hitReduction++;
+                    _excludedColliders.Add(collider);
+                }
             }
+
+            if (SAINPlugin.DebugMode)
+            {
+                foreach (Collider collider in array)
+                {
+                    if (collider == null) continue;
+
+                    if (!debugGUIObjects.ContainsKey(collider))
+                    {
+                        var obj = DebugGizmos.CreateLabel(collider.transform.position, collider.name);
+                        if (obj != null)
+                        {
+                            debugGUIObjects.Add(collider, obj);
+                        }
+                    }
+                    if (!debugColliders.ContainsKey(collider))
+                    {
+                        var marker = DebugGizmos.Sphere(collider.transform.position, 0f);
+                        if (marker != null)
+                        {
+                            debugColliders.Add(collider, marker);
+                        }
+                    }
+
+                }
+            }
+            else if (debugGUIObjects.Count > 0 || debugColliders.Count > 0)
+            {
+                foreach (var obj in debugGUIObjects)
+                {
+                    DebugGizmos.DestroyLabel(obj.Value);
+                }
+                foreach (var obj in debugColliders)
+                {
+                    GameObject.Destroy(obj.Value);
+                }
+                debugGUIObjects.Clear();
+                debugColliders.Clear();
+            }
+
             return hits - hitReduction;
         }
+
+        public static void ClearStaticColliderLists()
+        {
+            _excludedColliders.Clear();
+        }
+
+        private static Dictionary<Collider, GUIObject> debugGUIObjects = new Dictionary<Collider, GUIObject>();
+        private static Dictionary<Collider, GameObject> debugColliders = new Dictionary<Collider, GameObject>();
+
+        private static readonly List<Collider> _excludedColliders = new List<Collider>();
+
+        private static readonly List<string> _excludedColliderNames = new List<string> 
+        { 
+            "metall_fence_2",
+            "metallstolb",
+            "stolb",
+            "fonar_stolb",
+            "fence_grid",
+            "metall_fence_new",
+            "ladder_platform",
+            "frame_L",
+            "frame_small_collider",
+            "bump2x_p3_set4x",
+            "bytovka_ladder",
+            "sign",
+            "sign17_lod",
+            "ograda1",
+            "ladder_metal"
+        };
 
         private bool ColliderAlreadyUsed(Collider collider, List<CoverPoint> coverPoints)
         {

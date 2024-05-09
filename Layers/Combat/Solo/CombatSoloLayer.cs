@@ -21,6 +21,13 @@ namespace SAIN.Layers.Combat.Solo
             SoloDecision Decision = CurrentDecision;
             var SelfDecision = SAIN.Decision.CurrentSelfDecision;
             LastActionDecision = Decision;
+
+            if (_doSurgeryAction)
+            {
+                _doSurgeryAction = false;
+                return new Action(typeof(DoSurgeryAction), $"Do Surgery");
+            }
+
             switch (Decision)
             {
                 case SoloDecision.MoveToEngage:
@@ -49,11 +56,6 @@ namespace SAIN.Layers.Combat.Solo
                 case SoloDecision.Retreat:
                     if (SAIN.Cover.CoverPoints.Count > 0)
                     {
-                        if (SelfDecision == SelfDecision.Surgery 
-                            && SAIN.Cover.BotIsAtCoverInUse())
-                        {
-                            return new Action(typeof(DoSurgeryAction), $"Do Surgery");
-                        }
                         return new Action(typeof(RunToCoverAction), $"{Decision} + {SelfDecision}");
                     }
                     else
@@ -125,8 +127,19 @@ namespace SAIN.Layers.Combat.Solo
                 return true;
             }
 
+            // this is dumb im sorry
+            if (!_doSurgeryAction 
+                && SAIN.Decision.CurrentSelfDecision == SelfDecision.Surgery 
+                && SAIN.Cover.BotIsAtCoverInUse())
+            {
+                _doSurgeryAction = true;
+                return true;
+            }
+
             return CurrentDecision != LastActionDecision;
         }
+
+        bool _doSurgeryAction;
 
         private SoloDecision LastActionDecision = SoloDecision.None;
         public SoloDecision CurrentDecision => SAIN.Memory.Decisions.Main.Current;

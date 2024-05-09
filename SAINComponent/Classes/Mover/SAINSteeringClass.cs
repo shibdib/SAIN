@@ -35,6 +35,25 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
+            var moveSettings = BotOwner.Settings.FileSettings.Move;
+            if (SAIN.HasEnemy)
+            {
+                moveSettings.BASE_ROTATE_SPEED = 280f;
+                moveSettings.FIRST_TURN_SPEED = 225f;
+                moveSettings.FIRST_TURN_BIG_SPEED = 360f;
+            }
+            else if (SAIN.CurrentTargetPosition != null)
+            {
+                moveSettings.BASE_ROTATE_SPEED = 240f;
+                moveSettings.FIRST_TURN_SPEED = 180f;
+                moveSettings.FIRST_TURN_BIG_SPEED = 300f;
+            }
+            else
+            {
+                moveSettings.BASE_ROTATE_SPEED = 150f;
+                moveSettings.FIRST_TURN_SPEED = 135f;
+                moveSettings.FIRST_TURN_BIG_SPEED = 240f;
+            }
         }
 
         private float updateSteerTimer;

@@ -21,6 +21,12 @@ namespace SAIN.SAINComponent.Classes.Mover
                 SideStepSetting = SideStepSetting.None;
             }
 
+            if (!SAIN.PatrolDataPaused)
+            {
+                ResetSideStep(currentSideStep);
+                return;
+            }
+
             var enemy = SAIN.Enemy;
             var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
             if (enemy == null || CurrentDecision != SoloDecision.HoldInCover)

@@ -12,7 +12,7 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0.1f, 1f, 100f)]
         [JsonIgnore]
         [Hidden]
-        public float SprintReachDistance = 0.5f;
+        public float SprintReachDistance = 1f;
 
         [MinMax(0.1f, 1f, 100f)]
         [JsonIgnore]

@@ -3,6 +3,7 @@ using EFT;
 using EFT.Game.Spawning;
 using SAIN.Components.BotController;
 using SAIN.Helpers;
+using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -120,12 +121,13 @@ namespace SAIN.Components
         {
             try
             {
+                ColliderFinder.ClearStaticColliderLists();
                 ComponentHelpers.DestroyComponent(SAINBotController);
                 ComponentHelpers.DestroyComponent(SAINMainPlayer);
             }
-            catch
+            catch (Exception e)
             {
-                Logger.LogError("Dispose Component Error");
+                Logger.LogError("Dispose Component Error: " + e.ToString());
             }
         }
 

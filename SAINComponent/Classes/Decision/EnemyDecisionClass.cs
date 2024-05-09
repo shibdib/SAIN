@@ -73,6 +73,11 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             else if (startSearch())
             {
+                enemy.TimesSearchedStarted++;
+                if (!enemy.SearchStarted)
+                {
+                    enemy.SearchStarted = true;
+                }
                 Decision = SoloDecision.Search;
             }
             else if (StartShiftCover(enemy))

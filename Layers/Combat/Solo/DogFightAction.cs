@@ -161,10 +161,12 @@ namespace SAIN.Layers.Combat.Solo
         public override void Start()
         {
             SAIN.Mover.Sprint(false);
+            BotOwner.Mover.SprintPause(1f);
         }
 
         public override void Stop()
         {
+            BotOwner.MovementResume();
         }
     }
 }

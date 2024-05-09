@@ -24,6 +24,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Update()
         {
+            if (!SAIN.PatrolDataPaused)
+            {
+                return;
+            }
             if (!UsingMeds && Player != null)
             {
                 if (SAIN.Memory.Decisions.Self.Current == SelfDecision.Reload)

@@ -115,7 +115,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float FIRST_CONTACT_ADD_SEC = 0.1f;
+        public float FIRST_CONTACT_ADD_SEC = 0.3f;
 
         [Hidden]
         [JsonIgnore]

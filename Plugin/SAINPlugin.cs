@@ -103,7 +103,7 @@ namespace SAIN
         {
             var patches = new List<Type>() {
                 //typeof(Patches.Generic.ShallRunAwayGrenadePatch),
-                typeof(Patches.Generic.IsSameWayPatch),
+                //typeof(Patches.Generic.IsSameWayPatch),
                 typeof(Patches.Generic.RotateClampPatch),
                 typeof(Patches.Generic.HealCancelPatch),
                 typeof(Patches.Generic.DoorOpenerPatch),

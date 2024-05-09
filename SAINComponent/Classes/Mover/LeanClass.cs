@@ -23,6 +23,11 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
+            if (!SAIN.PatrolDataPaused)
+            {
+                ResetLean();
+                return;
+            }
             var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
             var enemy = SAIN.Enemy;
             if (enemy == null || SAIN.Mover.IsSprinting || DontLean.Contains(CurrentDecision) || SAIN.Suppression.IsSuppressed)

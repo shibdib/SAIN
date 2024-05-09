@@ -245,10 +245,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     {
                         CoverPoints.RemoveAt(i);
                     }
-                    else if (coverPoint.TimeLastUpdated + 0.1f < time)
+                    else if (coverPoint.TimeLastUpdated + 0.5f < time)
                     {
                         if (PointStillGood(coverPoint) == false)
                         {
+                            coverPoint.IsBad = true;
                             CoverPoints.RemoveAt(i);
                         }
 
@@ -342,6 +343,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                         {
                             if (!PointStillGood(coverPoint))
                             {
+                                coverPoint.IsBad = true;
                                 CoverPoints.RemoveAt(i);
                             }
                             yield return null;

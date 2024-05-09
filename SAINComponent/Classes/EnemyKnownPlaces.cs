@@ -40,12 +40,7 @@ namespace SAIN.SAINComponent.Classes
                         place.HasArrived = true;
                         place.HasSeen = true;
 
-                        if (EFTMath.RandomBool(15) 
-                            && _enemy.SAIN.Squad.BotInGroup 
-                            && _enemy.SAIN.Talk.GroupTalk.FriendIsClose)
-                        {
-                            _enemy.SAIN.Talk.Say(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true);
-                        }
+                        _enemy.SAIN.Talk.GroupSay(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 40);
                     }
                 }
             }

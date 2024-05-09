@@ -44,7 +44,8 @@ namespace SAIN.SAINComponent.Classes
             SAIN.EnemyController.RemoveEnemy(EnemyPlayer);
         }
 
-        public bool SearchStarted { get; set; }
+        public bool SearchStarted { get; set; } = false;
+        public int TimesSearchedStarted { get; set; } = 0;
 
         public bool EnemyIsSuppressed
         {

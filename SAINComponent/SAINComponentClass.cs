@@ -99,7 +99,6 @@ namespace SAIN.SAINComponent
                 Grenade = new SAINBotGrenadeClass(this);
                 Mover = new SAINMoverClass(this);
                 EnemyController = new SAINEnemyController(this);
-                Sounds = new SAINSoundsController(this);
                 FriendlyFireClass = new SAINFriendlyFireClass(this);
                 Vision = new SAINVisionClass(this);
                 Search = new SAINSearchClass(this);
@@ -130,7 +129,6 @@ namespace SAIN.SAINComponent
             Memory.Init();
             EnemyController.Init();
             FriendlyFireClass.Init();
-            Sounds.Init();
             Vision.Init();
             Equipment.Init();
             Mover.Init();
@@ -213,18 +211,18 @@ namespace SAIN.SAINComponent
                     }
                 }
 
+                Decision.Update();
+
                 Search.Update();
                 Memory.Update();
                 EnemyController.Update();
                 FriendlyFireClass.Update();
-                Sounds.Update();
                 Vision.Update();
                 Equipment.Update();
                 Mover.Update();
                 BotStuck.Update();
                 Hearing.Update();
                 Talk.Update();
-                Decision.Update();
                 Cover.Update();
                 Info.Update();
                 Squad.Update();
@@ -301,13 +299,28 @@ namespace SAIN.SAINComponent
         {
             if (CurrentTargetPosition == null)
             {
+                PatrolDataPaused = false;
                 BotOwner.PatrollingData?.Unpause();
+                if (!_speedReset)
+                {
+                    _speedReset = true;
+                    BotOwner.SetTargetMoveSpeed(1f);
+                    BotOwner.Mover.SetPose(1f);
+                }
             }
             else
             {
+                PatrolDataPaused = true;
                 BotOwner.PatrollingData?.Pause();
+                if (_speedReset)
+                {
+                    _speedReset = false;
+                }
             }
         }
+
+        private bool _speedReset;
+        public bool PatrolDataPaused { get; private set; }
 
         public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
 
@@ -422,7 +435,6 @@ namespace SAIN.SAINComponent
                 Memory.Dispose();
                 EnemyController.Dispose();
                 FriendlyFireClass.Dispose();
-                Sounds.Dispose();
                 Vision.Dispose();
                 Equipment.Dispose();
                 Mover.Dispose();
@@ -468,15 +480,12 @@ namespace SAIN.SAINComponent
                 {
                     if ((Target.Value - Position).sqrMagnitude < 2f)
                     {
-                        if (EFTMath.RandomBool(20))
-                        {
-                            Talk.Say(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true);
-                        }
+                        Talk.GroupSay(EPhraseTrigger.Clear, null, true, 40);
                         BotOwner.Memory.GoalTarget.Clear();
                         BotOwner.CalcGoal();
                     }
                     else if (!Info.PersonalitySettings.WillSearchFromAudio 
-                        && BotOwner.Memory.GoalTarget.CreatedTime > 60f 
+                        && BotOwner.Memory.GoalTarget.CreatedTime > 90f 
                         && Enemy == null)
                     {
                         BotOwner.Memory.GoalTarget.Clear();
@@ -505,47 +514,60 @@ namespace SAIN.SAINComponent
         {
             get
             {
-                if (HasEnemy && Enemy.IsVisible)
+                if (_nextGetTargetTime < Time.time)
                 {
-                    return Enemy.EnemyPosition;
+                    _nextGetTargetTime = Time.time + 0.05f;
+                    _currentTarget = getTarget();
                 }
-                if (BotOwner.Memory.IsUnderFire)
-                {
-                    return Memory.UnderFireFromPosition;
-                }
-
-                    // This is incredibly inefficient, need to limit the times this is called per frame.
-                if (HasEnemy)
-                {
-                    Vector3? lastPlaceHaventSeen = Enemy.KnownPlaces.GetPlaceHaventSeen()?.Position;
-                    if (lastPlaceHaventSeen != null)
-                    {
-                        return lastPlaceHaventSeen;
-                    }
-
-                    lastPlaceHaventSeen = Enemy.KnownPlaces.GetPlaceHaventArrived()?.Position;
-                    if (lastPlaceHaventSeen != null)
-                    {
-                        return lastPlaceHaventSeen;
-                    }
-
-                    if (Enemy.LastKnownPosition != null)
-                    {
-                        return Enemy.LastKnownPosition;
-                    }
-                    return Enemy.EnemyPosition;
-                }
-                var placeForCheck = BotOwner.Memory.GoalTarget?.GoalTarget;
-                if (placeForCheck != null)
-                {
-                    return placeForCheck.Position;
-                }
-                if (Time.time - BotOwner.Memory.LastTimeHit < 10f)
-                {
-                    return BotOwner.Memory.LastHitPos;
-                }
-                return null;
+                return _currentTarget;
             }
+        }
+
+        private float _nextGetTargetTime;
+        private Vector3? _currentTarget;
+
+        private Vector3? getTarget()
+        {
+            if (HasEnemy && Enemy.IsVisible)
+            {
+                return Enemy.EnemyPosition;
+            }
+            if (BotOwner.Memory.IsUnderFire)
+            {
+                return Memory.UnderFireFromPosition;
+            }
+
+            // This is incredibly inefficient, need to limit the times this is called per frame.
+            if (HasEnemy)
+            {
+                Vector3? lastPlaceHaventSeen = Enemy.KnownPlaces.GetPlaceHaventSeen()?.Position;
+                if (lastPlaceHaventSeen != null)
+                {
+                    return lastPlaceHaventSeen;
+                }
+
+                lastPlaceHaventSeen = Enemy.KnownPlaces.GetPlaceHaventArrived()?.Position;
+                if (lastPlaceHaventSeen != null)
+                {
+                    return lastPlaceHaventSeen;
+                }
+
+                if (Enemy.LastKnownPosition != null)
+                {
+                    return Enemy.LastKnownPosition;
+                }
+                return Enemy.EnemyPosition;
+            }
+            var placeForCheck = BotOwner.Memory.GoalTarget?.GoalTarget;
+            if (placeForCheck != null)
+            {
+                return placeForCheck.Position;
+            }
+            if (Time.time - BotOwner.Memory.LastTimeHit < 10f)
+            {
+                return BotOwner.Memory.LastHitPos;
+            }
+            return null;
         }
 
         public SAINBotSpaceAwareness SpaceAwareness { get; private set; }
@@ -561,7 +583,6 @@ namespace SAIN.SAINComponent
         public SAINEnemyController EnemyController { get; private set; }
         public SAINNoBushESP NoBushESP { get; private set; }
         public SAINFriendlyFireClass FriendlyFireClass { get; private set; }
-        public SAINSoundsController Sounds { get; private set; }
         public SAINVisionClass Vision { get; private set; }
         public SAINBotEquipmentClass Equipment { get; private set; }
         public SAINMoverClass Mover { get; private set; }

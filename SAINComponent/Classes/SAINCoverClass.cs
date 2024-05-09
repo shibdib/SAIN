@@ -207,7 +207,7 @@ namespace SAIN.SAINComponent.Classes
                     CheckLimbTimer = Time.time + 0.1f;
                     bool cover = false;
                     var target = enemy.EnemyIPlayer.WeaponRoot.position;
-                    const float rayDistance = 10f;
+                    const float rayDistance = 3f;
                     if (CheckLimbForCover(BodyPartType.leftLeg, target, rayDistance) || CheckLimbForCover(BodyPartType.leftArm, target, rayDistance))
                     {
                         cover = true;

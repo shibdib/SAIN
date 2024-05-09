@@ -62,7 +62,8 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static void PatchPrefix(ref Player __instance, ref bool ignoreClamp)
         {
-            if (__instance?.IsAI == true)
+            if (__instance?.IsAI == true 
+                && __instance.IsSprintEnabled)
             {
                 ignoreClamp = true;
             }
@@ -122,7 +123,7 @@ namespace SAIN.Patches.Generic
         public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref Vector3 ___vector3_2, ref Vector3 ___vector3_0, Vector3 dir)
         {
             ___vector3_2 = dir;
-            ___botOwner_0.Steering.LookToDirection(dir, 300);
+            ___botOwner_0.Steering.LookToDirection(dir, 250);
             ___botOwner_0.Steering.SetYByDir(___vector3_0);
             return false;
         }

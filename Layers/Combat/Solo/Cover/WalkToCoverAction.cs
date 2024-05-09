@@ -36,17 +36,17 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     _nextCheckMissingCoverPointTime = Time.time + 3f;
                     if (!SAIN.Cover.CoverPoints.Contains(CoverDestination))
                     {
-                        CoverDestination.SetBotIsUsingThis(false);
-                        CoverDestination = null;
+                        //CoverDestination.SetBotIsUsingThis(false);
+                        //CoverDestination = null;
                     }
                 }
-                else if (_nextCheckSpottedTime < Time.time)
+                if (_nextCheckSpottedTime < Time.time)
                 {
                     _nextCheckSpottedTime = Time.time + 0.25f;
                     if (CoverDestination.Spotted(SAIN))
                     {
-                        CoverDestination.SetBotIsUsingThis(false);
-                        CoverDestination = null;
+                        //CoverDestination.SetBotIsUsingThis(false);
+                        //CoverDestination = null;
                     }
                 }
             }
@@ -66,7 +66,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         var coverPoint = points[i];
                         if (coverPoint != null
                             && !coverPoint.Spotted(SAIN)
-                            && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out _, -1, false, false))
+                            && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out _, -1, false, true))
                         {
                             coverPoint.SetBotIsUsingThis(true);
                             CoverDestination = coverPoint;
@@ -80,7 +80,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     && RecalcPathTimer < Time.time)
                 {
                     RecalcPathTimer = Time.time + 1f;
-                    if (!SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out _, -1, false, false))
+                    if (!SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out _, -1, false, true))
                     {
                         CoverDestination = null;
                         _nextUpdateCoverTime = -1f;
@@ -105,7 +105,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private void EngageEnemy()
         {
-            if (SAIN.Enemy?.IsVisible == false && BotOwner.WeaponManager.HaveBullets && SAIN.Enemy.Seen && SAIN.Enemy.TimeSinceSeen < 5f && SAIN.Enemy.LastCornerToEnemy != null && SAIN.Enemy.CanSeeLastCornerToEnemy)
+            if (SAIN.Enemy?.IsVisible == false 
+                && BotOwner.WeaponManager.HaveBullets 
+                && SAIN.Enemy.Seen && SAIN.Enemy.TimeSinceSeen < 5f 
+                && SAIN.Enemy.LastCornerToEnemy != null 
+                && SAIN.Enemy.CanSeeLastCornerToEnemy)
             {
                 Vector3 corner = SAIN.Enemy.LastCornerToEnemy.Value;
                 corner += Vector3.up * 1f;

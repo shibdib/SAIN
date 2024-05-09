@@ -110,7 +110,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public bool CanTalk => SAIN.Info.FileSettings.Mind.CanTalk;
 
-        public void Say(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false)
+        public bool Say(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false)
         {
             if ((CanTalk && TimeUntilCanTalk < Time.time) 
                 || phrase == EPhraseTrigger.OnDeath 
@@ -119,13 +119,23 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 if (withGroupDelay && !BotOwner.BotsGroup.GroupTalk.CanSay(BotOwner, phrase))
                 {
-                    return;
+                    return false;
                 }
 
                 //SendSayCommand(phrase, SetETagMask(additionalMask));
 
                 CheckPhrase(phrase, SetETagMask(additionalMask));
+                return true;
             }
+            return false;
+        }
+
+        public bool GroupSay(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false, float chance = 60)
+        {
+            return EFTMath.RandomBool(chance) 
+                && GroupTalk.FriendIsClose 
+                && SAIN.Squad.Members.Count > 1 
+                && Say(phrase, additionalMask, withGroupDelay);
         }
 
         private float TalkAfterDelayTimer = 0f;

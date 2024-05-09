@@ -108,13 +108,11 @@ namespace SAIN.SAINComponent.Classes
             {
                 if (enemy.Seen && enemy.TimeSinceSeen >= timeBeforeSearch)
                 {
-                    enemy.SearchStarted = true;
                     return true;
                 }
                 else if ((enemy.Seen || enemy.Heard)
                     && enemy.TimeSinceLastKnownUpdated >= timeBeforeSearch)
                 {
-                    enemy.SearchStarted = true;
                     return true;
                 }
             }
@@ -191,17 +189,24 @@ namespace SAIN.SAINComponent.Classes
 
         private void updateSearchDestination()
         {
-            if (SearchedTargetPosition)
+            if (!SearchedTargetPosition && (FinalDestination - SAIN.Position).sqrMagnitude < 1f)
             {
-                // Vector3? newTarget = SearchMovePos(out bool hasTarget, true);
-                // 
-                // if (newTarget != null
-                //     && CalculatePath(newTarget.Value) == NavMeshPathStatus.PathComplete)
-                // {
-                //     SearchedTargetPosition = false;
-                //     FinalDestination = newTarget.Value;
-                // }
+                SearchedTargetPosition = true;
             }
+
+            if (SearchedTargetPosition || _finishedSearchPath)
+            {
+                Vector3? newTarget = SearchMovePos(out bool hasTarget, true);
+                
+                if (newTarget != null
+                    && CalculatePath(newTarget.Value) == NavMeshPathStatus.PathComplete)
+                {
+                    SearchedTargetPosition = false;
+                    _finishedSearchPath = false;
+                    FinalDestination = newTarget.Value;
+                }
+            }
+
 
             if (_nextCheckPosTime < Time.time)
             {
@@ -209,16 +214,14 @@ namespace SAIN.SAINComponent.Classes
 
                 Vector3? newTarget = SearchMovePos(out bool hasTarget);
 
-                if (newTarget != null 
+                if (newTarget != null
                     && hasTarget 
+                    && (newTarget.Value - FinalDestination).sqrMagnitude > 5f * 5f
                     && CalculatePath(newTarget.Value) == NavMeshPathStatus.PathComplete)
                 {
-                    Reset();
+                    SearchedTargetPosition = false;
+                    _finishedSearchPath = false;
                     FinalDestination = newTarget.Value;
-                }
-                if (!SearchedTargetPosition && (FinalDestination - SAIN.Position).sqrMagnitude < 1f)
-                {
-                    SearchedTargetPosition = true;
                 }
             }
 
@@ -352,7 +355,7 @@ namespace SAIN.SAINComponent.Classes
         {
             if (RecalcPathTimer < Time.time)
             {
-                RecalcPathTimer = Time.time + 1;
+                RecalcPathTimer = Time.time + 0.5f;
                 return true;
             }
             return false;
@@ -362,13 +365,13 @@ namespace SAIN.SAINComponent.Classes
         {
             if (WaitPointTimer < 0)
             {
-                float baseTime = 3;
+                float baseTime = 4;
                 var personalitySettings = SAIN.Info.PersonalitySettings;
                 if (personalitySettings != null)
                 {
                     baseTime /= personalitySettings.AggressionMultiplier;
                 }
-                WaitPointTimer = Time.time + baseTime * Random.Range(0.33f, 2.00f);
+                WaitPointTimer = Time.time + baseTime * Random.Range(0.25f, 1.5f);
             }
             if (WaitPointTimer < Time.time)
             {
@@ -401,7 +404,7 @@ namespace SAIN.SAINComponent.Classes
 
             if (!shallSprint)
             {
-                SAIN.Mover.Sprint(false);
+                //SAIN.Mover.Sprint(false);
             }
 
             _Running = false;
@@ -446,7 +449,7 @@ namespace SAIN.SAINComponent.Classes
 
         private float _nextGenSearchTime;
 
-        private bool SwitchSearchModes(bool shallSprint)
+        private void SwitchSearchModes(bool shallSprint)
         {
             var persSettings = SAIN.Info.PersonalitySettings;
             float speed = 1f;
@@ -459,12 +462,12 @@ namespace SAIN.SAINComponent.Classes
                 speed = 1f;
                 pose = 1f;
             }
-            else if (Player.AIData.EnvironmentId == 0 || !SAIN.Memory.IsIndoors)
+            else if (Player.AIData.EnvironmentId == 0 && !SAIN.Memory.IsIndoors)
             {
-                if (SAIN.Cover.CoverPoints.Count > 5 && Time.time - BotOwner.Memory.UnderFireTime > 30f)
+                if (persSettings.Sneaky && SAIN.Cover.CoverPoints.Count > 2 && Time.time - BotOwner.Memory.UnderFireTime > 30f)
                 {
-                    speed = 0.5f;
-                    pose = 0.5f;
+                    speed = 0.7f;
+                    pose = 1f;
                 }
                 else
                 {
@@ -479,7 +482,7 @@ namespace SAIN.SAINComponent.Classes
             }
             else
             {
-                speed = DecideSpeed(FinalDestination, out pose);
+                //speed = DecideSpeed(FinalDestination, out pose);
             }
 
             if (SearchMovePoint == null)
@@ -519,7 +522,7 @@ namespace SAIN.SAINComponent.Classes
                         SAIN.Mover.SetTargetPose(pose);
                     }
 
-                    if (BotIsAtPoint(ActiveDestination) || BotIsAtPoint(FinalDestination))
+                    if (BotIsAtPoint(ActiveDestination))
                     {
                         ActiveDestination = NextCorner();
                         MoveToPoint(ActiveDestination, shallSprint);
@@ -606,11 +609,8 @@ namespace SAIN.SAINComponent.Classes
                     // Reset 
                     if (BotIsAtPoint(ActiveDestination))
                     {
-                        var TargetPosition = SAIN.CurrentTargetPosition;
-                        if (TargetPosition != null)
-                        {
-                            CalculatePath(TargetPosition.Value, false);
-                        }
+                        _finishedSearchPath = true;
+                        return;
                     }
                     else if (ShallRecalcPath())
                     {
@@ -630,8 +630,9 @@ namespace SAIN.SAINComponent.Classes
                     }
                     break;
             }
-            return true;
         }
+
+        private bool _finishedSearchPath;
 
         private bool CheckIfStuck()
         {

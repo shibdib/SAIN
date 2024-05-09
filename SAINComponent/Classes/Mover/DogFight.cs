@@ -17,24 +17,20 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-
         }
 
         public void Update()
         {
-
         }
 
         public void Dispose()
         {
-
         }
 
         public void DogFightMove()
         {
             if (_updateDogFightTimer < Time.time)
             {
-                _updateDogFightTimer = Time.time + 0.5f;
                 Vector3 targetPos = Vector3.zero;
                 if (SAIN.Enemy != null)
                 {
@@ -48,13 +44,12 @@ namespace SAIN.SAINComponent.Classes.Mover
                 if (targetPos != Vector3.zero 
                     && SAIN.Mover.GoToPoint(targetPos, out _ , -1, false, false))
                 {
-                    _updatePathTimer = Time.time + 1f;
+                    _updateDogFightTimer = Time.time + 0.66f;
                 }
             }
         }
 
         private float _updateDogFightTimer;
-        private float _updatePathTimer;
 
         private bool BackUp(out Vector3 trgPos)
         {

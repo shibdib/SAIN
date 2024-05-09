@@ -17,6 +17,11 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
+            if (!SAIN.PatrolDataPaused)
+            {
+                return;
+            }
+
             FindObjectsInFront();
             if (SAIN.Mover.IsSprinting || Player.IsSprintEnabled)
             {
