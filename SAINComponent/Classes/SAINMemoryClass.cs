@@ -56,8 +56,6 @@ namespace SAIN.SAINComponent.Classes
 
         public List<Player> VisiblePlayers = new List<Player>();
 
-        public List<string> VisiblePlayerIds = new List<string>();
-
         private float UpdateHealthTimer = 0f;
 
         public Vector3? ExfilPosition { get; set; }

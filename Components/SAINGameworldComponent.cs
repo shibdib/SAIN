@@ -121,7 +121,6 @@ namespace SAIN.Components
         {
             try
             {
-                ColliderFinder.ClearStaticColliderLists();
                 ComponentHelpers.DestroyComponent(SAINBotController);
                 ComponentHelpers.DestroyComponent(SAINMainPlayer);
             }

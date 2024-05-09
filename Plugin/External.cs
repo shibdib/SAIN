@@ -70,6 +70,14 @@ namespace SAIN.Plugin
                 return true;
             }
 
+            if (IsBotSearching(component))
+            {
+                if (DebugExternal)
+                    Logger.LogInfo($"{bot.name} is currently searching and hasn't cleared last known position, cannot reset its decisions.");
+
+                return false;
+            }
+
             if (DebugExternal)
                 Logger.LogInfo($"Forcing {bot.name} to reset its decisions...");
 
@@ -137,6 +145,61 @@ namespace SAIN.Plugin
             }
 
             return true;
+        }
+
+        public static bool CanBotQuest(BotOwner botOwner, Vector3 questPosition, float dotProductThresh = 0.33f)
+        {
+            var component = botOwner.GetComponent<SAINComponentClass>();
+            if (component == null)
+            {
+                return false;
+            }
+            if (isBotInCombat(component, out var reason))
+            {
+                if (DebugExternal)
+                    Logger.LogInfo($"{botOwner.name} is currently engaging an enemy, cannot quest. Reason: [{reason}]");
+
+                return false;
+            }
+            if (IsBotSearching(component))
+            {
+                if (DebugExternal)
+                    Logger.LogInfo($"{botOwner.name} is currently searching and hasn't cleared last known position, cannot quest.");
+
+                return false;
+            }
+            if (IsQuestTowardTarget(component, questPosition, dotProductThresh))
+            {
+                if (DebugExternal)
+                    Logger.LogInfo($"{botOwner.name} quest target is in direction of target, cannot quest.");
+
+                return false;
+            }
+            return true;
+        }
+
+        private static bool IsQuestTowardTarget(SAINComponentClass component, Vector3 questPosition, float dotProductThresh)
+        {
+            Vector3? currentTarget = component.CurrentTargetPosition;
+            if (currentTarget == null)
+            {
+                return false;
+            }
+
+            Vector3 botPosition = component.Position;
+            Vector3 targetDirection = currentTarget.Value - botPosition;
+            Vector3 questDirection = questPosition - botPosition;
+
+            return Vector3.Dot(targetDirection.normalized, questDirection.normalized) > dotProductThresh;
+        }
+
+        private static bool IsBotSearching(SAINComponentClass component)
+        {
+            if (component.Decision.CurrentSoloDecision == SoloDecision.Search || component.Decision.CurrentSquadDecision == SquadDecision.Search)
+            {
+                return !component.Search.SearchedTargetPosition;
+            }
+            return false;
         }
 
         private static bool isBotInCombat(SAINComponentClass component, out ECombatReason reason)

@@ -104,27 +104,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             int hitReduction = 0;
             for (int i = 0; i < hits; i++)
             {
-                Collider collider = array[i];
-                Vector3 size = collider.bounds.size;
-                if (_excludedColliders.Contains(collider) || ColliderAlreadyUsed(collider, CoverFinderComponent.CoverPoints))
-                {
-                    array[i] = null;
-                    hitReduction++;
-                }
-                else if (size.y < CoverFinderComponent.CoverMinHeight
+                Vector3 size = array[i].bounds.size;
+                if (size.y < CoverFinderComponent.CoverMinHeight
                         || size.x < minX && size.z < minZ)
                 {
                     array[i] = null;
                     hitReduction++;
-                    _excludedColliders.Add(collider);
-                }
-                else if (_excludedColliderNames.Contains(collider.name)
-                    || _excludedColliderNames.Contains(collider.gameObject?.name)
-                    || _excludedColliderNames.Contains(collider.attachedRigidbody?.name))
-                {
-                    array[i] = null;
-                    hitReduction++;
-                    _excludedColliders.Add(collider);
+                    //_excludedColliders.Add(collider);
                 }
             }
 
@@ -170,46 +156,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return hits - hitReduction;
         }
 
-        public static void ClearStaticColliderLists()
-        {
-            _excludedColliders.Clear();
-        }
-
         private static Dictionary<Collider, GUIObject> debugGUIObjects = new Dictionary<Collider, GUIObject>();
         private static Dictionary<Collider, GameObject> debugColliders = new Dictionary<Collider, GameObject>();
-
-        private static readonly List<Collider> _excludedColliders = new List<Collider>();
-
-        private static readonly List<string> _excludedColliderNames = new List<string> 
-        { 
-            "metall_fence_2",
-            "metallstolb",
-            "stolb",
-            "fonar_stolb",
-            "fence_grid",
-            "metall_fence_new",
-            "ladder_platform",
-            "frame_L",
-            "frame_small_collider",
-            "bump2x_p3_set4x",
-            "bytovka_ladder",
-            "sign",
-            "sign17_lod",
-            "ograda1",
-            "ladder_metal"
-        };
-
-        private bool ColliderAlreadyUsed(Collider collider, List<CoverPoint> coverPoints)
-        {
-            for (int i = 0; i < coverPoints.Count;i++)
-            {
-                if (collider == coverPoints[i].Collider)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
 
         public int ColliderArrayBotDistComparer(Collider A, Collider B)
         {

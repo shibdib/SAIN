@@ -104,9 +104,14 @@ namespace SAIN.Components
 
                 for (int j = 0; j < Players.Count; j++)
                 {
-                    Vector3 target = BodyPos(Players[j]);
+                    Player player = Players[j];
+                    Vector3 target = BodyPos(player);
                     Vector3 direction = target - head;
-                    float max = 300f;
+                    float max = player.IsAI ? player.AIData.BotOwner.LookSensor.VisibleDist : 400f;
+                    if (!player.HealthController.IsAlive || (player.IsAI && player.AIData.BotOwner.BotState != EBotState.Active))
+                    {
+                        max = 1f;
+                    }
                     //float max = bot.BotOwner.Settings.Current.CurrentVisibleDistance;
                     float rayDistance = Mathf.Clamp(direction.magnitude, 0f, max);
 
@@ -133,7 +138,6 @@ namespace SAIN.Components
             for (int i = 0; i < TempBotList.Count; i++)
             {
                 var visPlayers = TempBotList[i].Memory.VisiblePlayers;
-                var idList = TempBotList[i].Memory.VisiblePlayerIds;
                 visPlayers.Clear();
                 for (int j = 0; j < Players.Count; j++)
                 {
@@ -142,10 +146,6 @@ namespace SAIN.Components
                     {
                         visPlayers.Add(player);
                         string id = player.ProfileId;
-                        if (!idList.Contains(id))
-                        {
-                            idList.Add(id);
-                        }
                     }
                     total++;
                 }
@@ -156,7 +156,7 @@ namespace SAIN.Components
         }
 
         private readonly float SpherecastRadius = 0.025f;
-        private LayerMask SightLayers => LayerMaskClass.HighPolyWithTerrainMaskAI;
+        private LayerMask SightLayers => LayerMaskClass.HighPolyWithTerrainMask;
         private readonly int MinJobSize = 6;
         private List<Player> Players => EFTInfo.AlivePlayers;
         private readonly List<SAINComponentClass> TempBotList = new List<SAINComponentClass>();

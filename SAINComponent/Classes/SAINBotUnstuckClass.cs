@@ -393,10 +393,10 @@ namespace SAIN.SAINComponent.Classes.Debug
                     return;
                 }
 
-                if (!FixOffMeshBot())
-                {
-                    return;
-                }
+                // if (!FixOffMeshBot())
+                // {
+                //     return;
+                // }
 
                 if (_nextVaultCheckTime < Time.time && BotOwner.Mover.IsMoving && TimeStartedMoving + 1f < Time.time)
                 {

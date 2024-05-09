@@ -11,6 +11,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using UnityEngine.AI;
+using RootMotion.FinalIK;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
@@ -320,6 +321,48 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return ProcessingLimited;
         }
 
+        private static readonly List<string> _excludedColliderNames = new List<string>
+        {
+            "metall_fence_2",
+            "metallstolb",
+            "stolb",
+            "fonar_stolb",
+            "fence_grid",
+            "metall_fence_new",
+            "ladder_platform",
+            "frame_L",
+            "frame_small_collider",
+            "bump2x_p3_set4x",
+            "bytovka_ladder",
+            "sign",
+            "sign17_lod",
+            "ograda1",
+            "ladder_metal"
+        };
+
+        private bool ColliderAlreadyUsed(Collider collider)
+        {
+            for (int i = 0; i < CoverPoints.Count; i++)
+            {
+                if (collider == CoverPoints[i].Collider)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool filterCollider(Collider collider)
+        {
+            if (_excludedColliderNames.Contains(collider.name)
+                    || _excludedColliderNames.Contains(collider.gameObject?.name)
+                    || _excludedColliderNames.Contains(collider.attachedRigidbody?.name))
+            {
+                return true;
+            }
+            return false;
+        }
+
         private IEnumerator FindCover()
         {
             while (true)
@@ -352,11 +395,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 }
 
 
-                CoverPoint pointTowardTarget = FindPointTowardTarget();
-                if (pointTowardTarget != null)
-                {
-                    DebugGizmos.Line(pointTowardTarget.GetPosition(SAIN), SAIN.Position, Color.red, 0.1f, true, 2f, true);
-                }
+                //CoverPoint pointTowardTarget = FindPointTowardTarget();
+                //if (pointTowardTarget != null)
+                //{
+                //    DebugGizmos.Line(pointTowardTarget.GetPosition(SAIN), SAIN.Position, Color.red, 0.1f, true, 2f, true);
+                //}
 
                 //yield return RecheckCoverPoints();
                 CurrentStatus = CoverFinderStatus.Idle;
@@ -396,10 +439,14 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                         waitCount++;
 
                         // The main Calculations
-                        if (CoverAnalyzer.CheckCollider(colliders[i], out var newPoint))
+                        Collider collider = colliders[i];
+                        if (!filterCollider(collider) 
+                            && !ColliderAlreadyUsed(collider)
+                            && CoverAnalyzer.CheckCollider(collider, out var newPoint))
                         {
                             CoverPoints.Add(newPoint);
                             coverCount++;
+
                             // Limit the cpu time per frame. Generic optimization
                             if (ShallLimitProcessing())
                             {
@@ -429,6 +476,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                             if ((targetPositionAtStart - TargetPoint).sqrMagnitude > 1f)
                             {
                                 targetPositionAtStart = TargetPoint;
+
                                 yield return RecheckCoverPoints(false);
                             }
                         }
