@@ -35,6 +35,7 @@ namespace SAIN.Layers
         public override void Stop()
         {
             BotOwner.PatrollingData.Unpause();
+            BotOwner.Mover.MovementResume();
         }
 
         public override void Update()
@@ -43,11 +44,11 @@ namespace SAIN.Layers
 
             float stamina = SAIN.Player.Physical.Stamina.NormalValue;
             // Environment id of 0 means a bot is outside.
-            if (SAIN.Player.AIData.EnvironmentId == 0)
+            if (SAIN.Player.AIData.EnvironmentId != 0)
             {
                 NoSprint = true;
             }
-            else if (SAIN.Enemy != null && SAIN.Enemy.Seen && (SAIN.Enemy.Path.PathDistance < 50f || SAIN.Enemy.IsVisible))
+            else if (SAIN.Enemy != null && SAIN.Enemy.Seen && (SAIN.Enemy.Path.PathDistance < 50f || SAIN.Enemy.InLineOfSight))
             {
                 NoSprint = true;
             }
@@ -171,6 +172,7 @@ namespace SAIN.Layers
 
                 float timeRemaining = ExtractTimer - Time.time;
                 Logger.LogInfo($"{BotOwner.name} Starting Extract Timer of {timeRemaining}");
+                BotOwner.Mover.MovementPause(timeRemaining);
             }
 
             if (ExtractTimer < Time.time)

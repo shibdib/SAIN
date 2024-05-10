@@ -145,6 +145,41 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool GoToPoint(Vector3 point, out bool calculating, float reachDist = -1f, bool crawl = false, bool slowAtEnd = true)
         {
+            calculating = false;
+            if (reachDist < 0f)
+            {
+                //reachDist = SAINPlugin.LoadedPreset.GlobalSettings.General.BaseReachDistance;
+            }
+            CurrentPathStatus = BotOwner.Mover.GoToPoint(point, slowAtEnd, reachDist, false, false, true);
+            if (CurrentPathStatus == NavMeshPathStatus.PathComplete)
+            {
+                if (crawl)
+                {
+                    Prone.SetProne(true);
+                }
+                SAIN.DoorOpener.Update();
+                return true;
+            }
+            return CurrentPathStatus != NavMeshPathStatus.PathInvalid;
+        }
+
+        public bool GoToPoint2(Vector3 point, bool mustHaveCompletePath = false, bool crawl = false)
+        {
+            if (CanGoToPoint(point, out NavMeshPath path, mustHaveCompletePath))
+            {
+                BotOwner.Mover.GoToByWay(path.corners, 1f);
+                if (crawl)
+                {
+                    Prone.SetProne(true);
+                }
+                SAIN.DoorOpener.Update();
+                return true;
+            }
+            return false;
+        }
+
+        public bool GoToPoint3(Vector3 point, out bool calculating, float reachDist = -1f, bool crawl = false, bool slowAtEnd = true)
+        {
             if (GoToPointCoroutine != null && _coroutineRunning)
             {
                 calculating = true;
@@ -187,11 +222,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             calculating = false;
             return CurrentPathStatus != NavMeshPathStatus.PathInvalid;
-        }
-
-        public void RecalcWay()
-        {
-            this.BotOwner.GoToPoint(this.BotOwner.Mover.LastDestination(), false, -1f, false, false, false, true);
         }
 
         private IEnumerator TryGoToPoint(Vector3 point, float reachDist = -1f, bool crawl = false)
@@ -258,6 +288,25 @@ namespace SAIN.SAINComponent.Classes.Mover
                     return true;
                 }
             }
+            return false;
+        }
+
+        public bool CanGoToPoint(Vector3 point, out NavMeshPath path, bool mustHaveCompletePath = false, float navSampleRange = 1f)
+        {
+            if (NavMesh.SamplePosition(point, out NavMeshHit navHit, navSampleRange, -1))
+            {
+                path = new NavMeshPath();
+                if (NavMesh.CalculatePath(SAIN.Transform.Position, navHit.position, -1, path) && path.corners.Length > 1)
+                {
+                    if (mustHaveCompletePath 
+                        && path.status != NavMeshPathStatus.PathComplete)
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            path = null;
             return false;
         }
 

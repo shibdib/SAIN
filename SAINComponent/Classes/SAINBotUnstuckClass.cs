@@ -299,6 +299,12 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private IEnumerator trackPostVault()
         {
+            Vector3? currentPathDestination = null;
+            if (BotOwner.Mover.HavePath)
+            {
+                currentPathDestination = BotOwner?.Mover?.LastDestination();
+            }
+
             yield return new WaitForSeconds(1f);
 
             if (SAIN == null || BotOwner == null || Player == null || Player.HealthController.IsAlive == false)
@@ -309,22 +315,22 @@ namespace SAIN.SAINComponent.Classes.Debug
             NavMeshPath path = new NavMeshPath();
             if (!NavMesh.CalculatePath(SAIN.Position, preVaultPosition, -1, path) || path.status != NavMeshPathStatus.PathComplete)
             {
-                float timeStart = Time.time;
+                Logger.LogWarning($"{BotOwner.name} has vaulted to somewhere they can't get down from! Trying to fix...");
 
-                while (timeStart + 5f < Time.time 
-                    && Player != null 
-                    && SAIN != null 
-                    && Player.HealthController.IsAlive)
+                BotOwner.Mover.GoToByWay(
+                    new Vector3[] { SAIN.Position, preVaultPosition }, 0.1f);
+
+                float startTime = Time.time;
+                while (startTime + 3f < Time.time)
                 {
-                    Vector3 direction = preVaultPosition - SAIN.Position;
-                    Player.Move(findMoveDirection(direction.normalized));
-                    if (direction.sqrMagnitude < 0.25f)
+                    if ((SAIN.Position - preVaultPosition).sqrMagnitude < 0.25f)
                     {
-                        if (BotOwner?.Mover != null)
+                        Logger.LogWarning($"{BotOwner.name} has returned back to their pre-vault position.");
+                        if (currentPathDestination != null)
                         {
-                            BotOwner.Mover.RecalcWay();
+                            SAIN.Mover.GoToPoint(currentPathDestination.Value, out _);
                         }
-                        break;
+                        yield break;
                     }
                     yield return null;
                 }

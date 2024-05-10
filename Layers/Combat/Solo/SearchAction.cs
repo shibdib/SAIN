@@ -20,7 +20,9 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Stop()
         {
+            BotOwner.Mover.MovementResume();
             Search.Reset();
+            HaveTalked = false;
         }
 
         private float CheckMagTimer;
@@ -30,7 +32,22 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            tryTalk();
+            if (SAIN.Enemy == null)
+            {
+                float targetDistSqr = (BotOwner.Position - TargetPosition).sqrMagnitude;
+                // Scavs will speak out and be more vocal
+                if (!HaveTalked
+                    && SAIN.Info.WildSpawnType == WildSpawnType.assault
+                    && targetDistSqr < 30f * 30f)
+                {
+                    HaveTalked = true;
+                    if (EFTMath.RandomBool(40))
+                    {
+                        SAIN.Talk.Say(EPhraseTrigger.OnMutter, ETagStatus.Aware, true);
+                    }
+                }
+            }
+
             CheckShouldSprint();
             Search.Search(SprintEnabled);
             Steer();
@@ -77,59 +94,17 @@ namespace SAIN.Layers.Combat.Solo
 
         private bool HaveTalked = false;
 
-        private void MoveToEnemy()
-        {
-            if (SAIN.Enemy == null)
-            {
-                float targetDistSqr = (BotOwner.Position - TargetPosition).sqrMagnitude;
-                if (targetDistSqr < 2f)
-                {
-                    //SAIN.Decision.ResetDecisions();
-                    //return;
-                }
-
-                // Scavs will speak out and be more vocal
-                if (!HaveTalked 
-                    && SAIN.Info.WildSpawnType == WildSpawnType.assault 
-                    && targetDistSqr < 30f * 30f)
-                {
-                    HaveTalked = true;
-                    if (EFTMath.RandomBool(40))
-                    {
-                        SAIN.Talk.Say(EPhraseTrigger.OnMutter, ETagStatus.Aware, true);
-                    }
-                }
-            }
-            if (SAIN.Enemy == null && (BotOwner.Position - TargetPosition).sqrMagnitude < 30f * 30f)
-            {
-                //SAIN.Decision.ResetDecisions();
-                //return;
-            }
-            CheckShouldSprint();
-            Search.Search(SprintEnabled);
-            Steer();
-        }
-
-        private void tryTalk()
-        {
-            // Scavs will speak out and be more vocal
-            if (!HaveTalked
-                && SAIN.Info.WildSpawnType == WildSpawnType.assault
-                && (BotOwner.Position - TargetPosition).sqrMagnitude < 30f * 30f)
-            {
-                HaveTalked = true;
-                if (EFTMath.RandomBool(60))
-                {
-                    SAIN.Talk.Say(EPhraseTrigger.OnMutter, ETagStatus.Aware, true);
-                }
-            }
-        }
-
         private SAINSearchClass Search => SAIN.Search;
 
         private void CheckShouldSprint()
         {
             if (Search.CurrentState == ESearchMove.MoveToEndPeak || Search.CurrentState == ESearchMove.Wait || Search.CurrentState == ESearchMove.MoveToDangerPoint || Search.CurrentState == ESearchMove.DirectMovePeek)
+            {
+                SprintEnabled = false;
+                return;
+            }
+
+            if (SAIN.Enemy?.IsVisible == true || SAIN.Enemy?.InLineOfSight == true)
             {
                 SprintEnabled = false;
                 return;
@@ -160,39 +135,20 @@ namespace SAIN.Layers.Combat.Solo
         {
             if (BotOwner.Memory.IsUnderFire)
             {
-                SAIN.Mover.Sprint(false);
-                SteerByPriority(false);
-                return;
+                //SAIN.Mover.Sprint(false);
+                //SteerByPriority(false);
+                //return;
             }
             if (SprintEnabled)
             {
                 LookToMovingDirection();
                 return;
             }
-            if (Search.CurrentState == ESearchMove.MoveToDangerPoint)
-            {
-                float distance = (Search.SearchMovePoint.DangerPoint - SAIN.Position).sqrMagnitude;
-                if (distance > 2f)
-                {
-                    LookToMovingDirection();
-                    return;
-                }
-            }
             if (SteerByPriority(false) == false)
             {
-                if (CanSeeDangerOrCorner(out Vector3 point) && SAIN.CurrentTargetPosition != null)
+                if (SAIN.CurrentTargetPosition != null)
                 {
-                    Vector3 direction = point - SAIN.Position;
-                    Vector3 targetDirection = SAIN.CurrentTargetPosition.Value - SAIN.Position;
-                    float dot = Vector3.Dot(direction, targetDirection);
-                    if (dot > 0.25f && (point - SAIN.Position).sqrMagnitude > 0.5f)
-                    {
-                        SAIN.Steering.LookToPoint(point);
-                    }
-                    else
-                    {
-                        SAIN.Steering.LookToPoint(SAIN.CurrentTargetPosition.Value);
-                    }
+                    SAIN.Steering.LookToPoint(SAIN.CurrentTargetPosition.Value);
                 }
                 else
                 {

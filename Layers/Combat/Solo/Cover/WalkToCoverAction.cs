@@ -66,7 +66,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         var coverPoint = points[i];
                         if (coverPoint != null
                             && !coverPoint.Spotted(SAIN)
-                            && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out _, -1, false, true))
+                            && SAIN.Mover.GoToPoint(coverPoint.GetPosition(SAIN), out _))
                         {
                             coverPoint.SetBotIsUsingThis(true);
                             CoverDestination = coverPoint;
@@ -80,8 +80,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     && RecalcPathTimer < Time.time)
                 {
                     RecalcPathTimer = Time.time + 1f;
-                    if (!SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out _, -1, false, true))
+                    if (!SAIN.Mover.GoToPoint(CoverDestination.GetPosition(SAIN), out _))
                     {
+                        CoverDestination.SetBotIsUsingThis(false);
                         CoverDestination = null;
                         _nextUpdateCoverTime = -1f;
                     }

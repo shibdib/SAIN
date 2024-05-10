@@ -185,7 +185,6 @@ namespace SAIN.SAINComponent.Classes
 
         private bool _canStartSearch;
         private float _nextCheckSearchTime;
-        private Vector3 _finalDestination;
 
         private void updateSearchDestination()
         {
@@ -371,7 +370,9 @@ namespace SAIN.SAINComponent.Classes
                 {
                     baseTime /= personalitySettings.AggressionMultiplier;
                 }
-                WaitPointTimer = Time.time + baseTime * Random.Range(0.25f, 1.5f);
+                float waitTime = baseTime * Random.Range(0.25f, 1.5f);
+                WaitPointTimer = Time.time + waitTime;
+                BotOwner.Mover.MovementPause(waitTime, false);
             }
             if (WaitPointTimer < Time.time)
             {
@@ -597,16 +598,6 @@ namespace SAIN.SAINComponent.Classes
                         SAIN.Mover.SetTargetPose(pose);
                     }
 
-                    Vector3 start = SAIN.Position;
-                    Vector3 cornerDir = SearchMovePoint.Corner - start;
-                    Vector3 dangerDir = SearchMovePoint.DangerPoint - start;
-                    float dot = Vector3.Dot(cornerDir.normalized, dangerDir.normalized);
-                    if (dot < 0)
-                    {
-                        // bot is past corner
-                    }
-
-                    // Reset 
                     if (BotIsAtPoint(ActiveDestination))
                     {
                         _finishedSearchPath = true;
@@ -619,11 +610,7 @@ namespace SAIN.SAINComponent.Classes
                     break;
 
                 case ESearchMove.Wait:
-                    if (WaitAtPoint())
-                    {
-                        SAIN.Mover.StopMove();
-                    }
-                    else
+                    if (!WaitAtPoint())
                     {
                         CurrentState = NextState;
                         NextState = ESearchMove.None;

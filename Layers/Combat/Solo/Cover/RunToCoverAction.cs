@@ -142,12 +142,13 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     && _coverDestination.GetCoverStatus(SAIN) == CoverStatus.FarFromCover
                     && shallProne;
 
-                result = SAIN.Mover.GoToPoint(destination, out _, -1, shallCrawl, true);
+                //result = SAIN.Mover.GoToPoint(destination, out _, -1, shallCrawl, true);
+                result = SAIN.Mover.GoToPoint(destination, out _, -1, shallCrawl);
             }
             return result;
         }
 
-        private bool shallRun(Vector3 destination) => (destination - SAIN.Position).sqrMagnitude > SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN * 1.25f;
+        private bool shallRun(Vector3 destination) => (destination - SAIN.Position).sqrMagnitude > SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN * SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN * 2f;
 
         private bool _moveSuccess;
         private float _recalcMoveTimer;
