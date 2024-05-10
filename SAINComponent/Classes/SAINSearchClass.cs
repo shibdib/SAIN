@@ -364,13 +364,13 @@ namespace SAIN.SAINComponent.Classes
         {
             if (WaitPointTimer < 0)
             {
-                float baseTime = 4;
+                float baseTime = 3;
                 var personalitySettings = SAIN.Info.PersonalitySettings;
                 if (personalitySettings != null)
                 {
                     baseTime /= personalitySettings.AggressionMultiplier;
                 }
-                float waitTime = baseTime * Random.Range(0.25f, 1.5f);
+                float waitTime = baseTime * Random.Range(0.25f, 1.25f);
                 WaitPointTimer = Time.time + waitTime;
                 BotOwner.Mover.MovementPause(waitTime, false);
             }
@@ -610,6 +610,8 @@ namespace SAIN.SAINComponent.Classes
                     break;
 
                 case ESearchMove.Wait:
+                    SAIN.Mover.SetTargetMoveSpeed(0f);
+                    SAIN.Mover.SetTargetPose(0.75f);
                     if (!WaitAtPoint())
                     {
                         CurrentState = NextState;

@@ -51,7 +51,7 @@ namespace SAIN.SAINComponent.Classes
         {
             if (WeaponInfo == null)
             {
-                WeaponInfo = SAINWeaponInfoHandler.GetPlayerWeaponInfo(BotOwner.GetPlayer);
+                WeaponInfo = SAINGearInfoHandler.GetGearInfo(BotOwner.GetPlayer);
             }
             if (WeaponInfo != null)
             {
@@ -113,7 +113,7 @@ namespace SAIN.SAINComponent.Classes
         private float _lastDistance;
         private float _nextGetDistTime;
 
-        private EquipmentSlot findOptimalWeaponForDistance(PlayerWeaponInfoContainer weaponInfo, float distance)
+        private EquipmentSlot findOptimalWeaponForDistance(GearInfoContainer weaponInfo, float distance)
         {
             if (_nextCheckOptimalTime < Time.time)
             {
@@ -149,7 +149,7 @@ namespace SAIN.SAINComponent.Classes
         private EquipmentSlot optimalSlot;
         private float _nextCheckOptimalTime;
 
-        private PlayerWeaponInfoContainer WeaponInfo;
+        private GearInfoContainer WeaponInfo;
 
         private void aimAtEnemy()
         {

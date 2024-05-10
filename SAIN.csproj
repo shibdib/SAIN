@@ -276,9 +276,9 @@
     <Compile Include="Components\Extract\ExtractPositionFinder.cs" />
     <Compile Include="Helpers\ListHelpers.cs" />
     <Compile Include="Helpers\NavMeshHelpers.cs" />
-    <Compile Include="Helpers\PlayerWeaponInfoContainer.cs" />
+    <Compile Include="Helpers\GearInfoContainer.cs" />
     <Compile Include="Helpers\SAINWeaponInfo.cs" />
-    <Compile Include="Helpers\SAINWeaponInfoHandler.cs" />
+    <Compile Include="Helpers\SAINGearInfoHandler.cs" />
     <Compile Include="Helpers\UpdateSettingClass.cs" />
     <Compile Include="Layers\Combat\Solo\Cover\DoSurgeryAction.cs" />
     <Compile Include="Layers\Combat\Solo\FlankAction.cs" />

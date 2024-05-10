@@ -268,14 +268,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return SteerPriority.LastSeenEnemyLong;
             }
-            if (SAIN.Memory.Decisions.Main.Current == SoloDecision.Investigate)
-            {
-                return SteerPriority.MoveDirection;
-            }
-            if (SAIN.Memory.Decisions.Main.Current == SoloDecision.Search)
-            {
-                return SteerPriority.Search;
-            }
             if (SAIN.EnemyController.FindClosestHeardEnemy() != null)
             {
                 return SteerPriority.ClosestHeardEnemy;

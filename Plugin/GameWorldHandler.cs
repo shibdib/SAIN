@@ -20,7 +20,7 @@ namespace SAIN
                 SAINGameWorld = gameWorld.GetOrAddComponent<SAINGameworldComponent>();
             }
 
-            SAINWeaponInfoHandler.Update();
+            SAINGearInfoHandler.Update();
         }
 
         public static SAINGameworldComponent SAINGameWorld { get; private set; }

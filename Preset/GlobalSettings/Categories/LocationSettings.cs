@@ -95,7 +95,7 @@ namespace SAIN.Preset.GlobalSettings
             FirearmController controller = player.HandsController as FirearmController;
             if (controller?.Item != null)
             {
-                PlayerWeaponInfoContainer info = SAINWeaponInfoHandler.GetPlayerWeaponInfo(player);
+                GearInfoContainer info = SAINGearInfoHandler.GetGearInfo(player);
                 if (info != null)
                 {
                     var weaponInfo = info.GetWeaponInfo(controller.Item);

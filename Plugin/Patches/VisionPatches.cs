@@ -142,12 +142,16 @@ namespace SAIN.Patches.Vision
                 Player player = EFTInfo.GetPlayer(__instance.Person.ProfileId);
                 if (player != null)
                 {
+                    var gearInfo = SAINGearInfoHandler.GetGearInfo(player);
+                    if (gearInfo != null)
+                    {
+                        __result *= gearInfo.GetGainSightModifierFromGear(__instance.Distance);
+                    }
                     // if player is using suppressed weapon, and has shot recently, don't increase vis speed as much.
                     bool suppressedFlare = false;
                     if (player.HandsController.Item is Weapon weapon)
                     {
-                        var weaponInfo = SAINWeaponInfoHandler.GetPlayerWeaponInfo(player);
-                        suppressedFlare = person.AIData.GetFlare && weaponInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
+                        suppressedFlare = person.AIData.GetFlare && gearInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
                     }
                     if (!person.AIData.GetFlare || suppressedFlare)
                     {
@@ -202,7 +206,7 @@ namespace SAIN.Patches.Vision
                     bool suppressedFlare = false;
                     if (player.HandsController.Item is Weapon weapon)
                     {
-                        var weaponInfo = SAINWeaponInfoHandler.GetPlayerWeaponInfo(player);
+                        var weaponInfo = SAINGearInfoHandler.GetGearInfo(player);
                         suppressedFlare = weaponInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
                     }
 

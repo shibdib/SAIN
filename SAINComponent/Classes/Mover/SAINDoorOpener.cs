@@ -1,4 +1,5 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.Interactive;
 using JetBrains.Annotations;
 using SAIN.Helpers;
@@ -50,10 +51,9 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (ModDetection.ProjectFikaLoaded || !SAINPlugin.LoadedPreset.GlobalSettings.General.NewDoorOpening)
             {
-                return BotOwner.DoorOpener.Update();
+                //return BotOwner.DoorOpener.Update();
             }
 
-            List<NavMeshDoorLink> list = this.BotOwner.CellData.CurrentDoorLinks();
             if (BotOwner.DoorOpener.Interacting)
             {
                 //this.BotOwner.Steering.SetYAngle(0f);
@@ -66,6 +66,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (this._searchCloseDoorTime < Time.time)
             {
+                List<NavMeshDoorLink> list = this.BotOwner.CellData.CurrentDoorLinks();
                 this.NearDoor = false;
                 GStruct18? gstruct = this.findDoorToInteract(list, null);
                 if (gstruct == null)
@@ -121,36 +122,34 @@ namespace SAIN.SAINComponent.Classes.Mover
             this.TryInteract();
         }
 
-        private IEnumerator InteractWithDoor(Door door, EInteractionType Etype, float delay = 1f)
+        public void Interact(Door door, EInteractionType Etype)
         {
             BotOwner.DoorOpener.Interacting = true;
             _traversingEnd = Time.time + 0.25f;
 
             bool inverted = false;
-            if (Etype == EInteractionType.Open 
-                && ShallInvertDoorAngle(door))
+            if (ShallInvertDoorAngle(door))
             {
                 inverted = true;
-                Logger.LogAndNotifyWarning("Angle Inverted");
                 door.OpenAngle = -door.OpenAngle;
             }
 
-            InteractionResult interactionResult = new InteractionResult(Etype);
-            BotOwner.GetPlayer.CurrentManagedState.StartDoorInteraction(door, interactionResult, null);
+            bool noAnimation = door.interactWithoutAnimation;
+            door.interactWithoutAnimation = true;
+            //BotOwner.GetPlayer.CurrentManagedState.StartDoorInteraction(door, interactionResult, null); 
+            BotOwner.GetPlayer.vmethod_0(door, new InteractionResult(Etype), null);
+            if (Singleton<BotEventHandler>.Instantiated)
+            {
+                Singleton<BotEventHandler>.Instance.PlaySound(SAIN.Player, SAIN.Position, 30f, AISoundType.step);
+            }
+            door.interactWithoutAnimation = noAnimation;
 
             if (inverted)
             {
-                yield return new WaitForSeconds(delay);
-                if (door != null)
-                {
-                    Logger.LogAndNotifyWarning("Angle Reset");
-                    door.OpenAngle = -door.OpenAngle;
-                }
+                door.OpenAngle = -door.OpenAngle;
             }
-        }
+            return;
 
-        public void Interact(Door door, EInteractionType Etype)
-        {
             EDoorState state = EDoorState.None;
             switch (Etype)
             {
@@ -164,30 +163,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                     break;
             }
 
-            BotOwner.DoorOpener.Interacting = true;
-            _traversingEnd = Time.time + 0.25f;
-
             if (state != EDoorState.None)
             {
-                bool inverted = false;
-                if (ShallInvertDoorAngle(door))
-                {
-                    inverted = true;
-                    door.OpenAngle = -door.OpenAngle;
-                }
-
-                door.method_3(state, false);
-
-                //BotOwner.GetPlayer.vmethod_0(door, new InteractionResult(Etype), null);
-                if (inverted)
-                {
-                    door.OpenAngle = -door.OpenAngle;
-                }
-            }
-            else
-            {
-               InteractionResult interactionResult = new InteractionResult(Etype);
-               BotOwner.GetPlayer.CurrentManagedState.StartDoorInteraction(door, interactionResult, null);
+                //door.method_3(state, false);
             }
         }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SAIN
 {
-    public class SAINWeaponInfoHandler
+    public class SAINGearInfoHandler
     {
         public static void Update()
         {
@@ -17,13 +17,14 @@ namespace SAIN
             }
         }
 
-        public static PlayerWeaponInfoContainer GetPlayerWeaponInfo(Player player)
+        public static GearInfoContainer GetGearInfo(Player player)
         {
             if (!WeaponInfos.ContainsKey(player))
             {
-                WeaponInfos.Add(player, new PlayerWeaponInfoContainer(player));
+                WeaponInfos.Add(player, new GearInfoContainer(player));
                 player.OnPlayerDeadOrUnspawn += RemovePlayer;
             }
+            WeaponInfos[player].CheckForNewGear();
             return WeaponInfos[player];
         }
 
@@ -53,6 +54,6 @@ namespace SAIN
             WeaponInfos.Clear();
         }
 
-        public static Dictionary<Player, PlayerWeaponInfoContainer> WeaponInfos = new Dictionary<Player, PlayerWeaponInfoContainer>();
+        public static Dictionary<Player, GearInfoContainer> WeaponInfos = new Dictionary<Player, GearInfoContainer>();
     }
 }

@@ -169,6 +169,10 @@ namespace SAIN.SAINComponent.Classes
                         result = EAimDownSightsStatus.DogFight;
                         break;
 
+                    case SoloDecision.Search:
+                        result = SAIN.Search.CurrentState != ESearchMove.DirectMove ? EAimDownSightsStatus.SearchPeekWait : EAimDownSightsStatus.None;
+                        break;
+
                     default:
                         result = EAimDownSightsStatus.None;
                         break;
@@ -189,6 +193,7 @@ namespace SAIN.SAINComponent.Classes
             DogFight = 7,
             EnemySeenRecent = 8,
             EnemyHeardRecent = 9,
+            SearchPeekWait = 10,
         }
 
         public bool AimingDownSights { get; private set; }

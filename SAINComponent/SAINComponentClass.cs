@@ -257,7 +257,7 @@ namespace SAIN.SAINComponent
         }
 
         private float _nextCheckFlashlightTime;
-        private PlayerWeaponInfoContainer WeaponInfoContainer;
+        private GearInfoContainer WeaponInfoContainer;
 
         private float _nextCheckReloadTime;
 
