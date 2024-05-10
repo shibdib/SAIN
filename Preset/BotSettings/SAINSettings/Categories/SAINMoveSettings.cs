@@ -21,12 +21,12 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         
         [Hidden]
         [JsonIgnore]
-        public float TURN_SPEED_ON_SPRINT = 360;
+        public float TURN_SPEED_ON_SPRINT = 300;
         // 200 default
 
         [Hidden]
         [JsonIgnore]
-        public float RUN_TO_COVER_MIN = 1.5f;
+        public float RUN_TO_COVER_MIN = 2f;
 
         // [Hidden]
         // [JsonIgnore]
@@ -34,7 +34,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float REACH_DIST = 0.5f;
+        public float REACH_DIST = 0.4f;
         
         [Hidden]
         [JsonIgnore]
@@ -42,14 +42,14 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float BASESTART_SLOW_DIST = 0.5f;
+        public float BASESTART_SLOW_DIST = 0.65f;
 
         [Hidden]
         [JsonIgnore]
-        public float START_SLOW_DIST = 1f;
+        public float START_SLOW_DIST = 1.25f;
 
         [Hidden]
         [JsonIgnore]
-        public float SLOW_COEF = 12;
+        public float SLOW_COEF = 10;
     }
 }

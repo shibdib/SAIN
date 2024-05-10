@@ -1,8 +1,11 @@
 ﻿using EFT;
 using EFT.Interactive;
+using HarmonyLib;
+using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.Decision;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
@@ -40,9 +43,52 @@ namespace SAIN.SAINComponent.Classes
             if (_checkIndoorsTime < Time.time)
             {
                 _checkIndoorsTime = Time.time + 1f;
-                IsIndoors = !Physics.SphereCast(BotOwner.LookSensor._headPoint, 0.5f, Vector3.up, out _, 10f, LayerMaskClass.HighPolyWithTerrainMask);
+                IsIndoors = Physics.SphereCast(BotOwner.LookSensor._headPoint, 0.5f, Vector3.up, out _, 10f, LayerMaskClass.HighPolyWithTerrainMask);
             }
+
+            checkResetUnderFire();
         }
+
+        public void SetUnderFire(IPlayer source, Vector3 position)
+        {
+            if (source != null)
+            {
+                try
+                {
+                    BotOwner.Memory.SetUnderFire(source);
+                }
+                catch { }
+
+                LastUnderFireSource = source;
+            }
+            UnderFireFromPosition = position;
+        }
+
+        private void checkResetUnderFire()
+        {
+            if (_nextCheckDeadTime < Time.time)
+            {
+                _nextCheckDeadTime = Time.time + 0.5f;
+
+                if (BotOwner.Memory.IsUnderFire
+                    && LastUnderFireSource != null 
+                    && !LastUnderFireSource.HealthController.IsAlive)
+                {
+                    if (underFireTimeField == null)
+                    {
+                        underFireTimeField = AccessTools.Field(typeof(BotMemoryClass), "float_4");
+                    }
+                    underFireTimeField.SetValue(BotOwner.Memory, Time.time);
+                }
+            }
+
+        }
+
+        private float _nextCheckDeadTime;
+
+        private static FieldInfo underFireTimeField;
+
+        public IPlayer LastUnderFireSource { get; private set; }
 
         public void Dispose()
         {

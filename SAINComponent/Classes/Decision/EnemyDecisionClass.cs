@@ -331,15 +331,22 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
-            if (BotOwner.Memory.IsUnderFire || Time.time - BotOwner.Memory.UnderFireTime < TimeBeforeSearch * 0.25f)
+            var decision = SAIN.Decision.CurrentSoloDecision;
+            if (BotOwner.Memory.IsUnderFire && decision != SoloDecision.MoveToEngage)
             {
                 return false;
             }
-            if (SAIN.Decision.CurrentSoloDecision == SoloDecision.HoldInCover)
+            if (decision == SoloDecision.Retreat || decision == SoloDecision.WalkToCover || decision == SoloDecision.RunToCover)
             {
                 return false;
             }
-            if (enemy.RealDistance > SAIN.Info.WeaponInfo.EffectiveWeaponDistance)
+            if (enemy.RealDistance > SAIN.Info.WeaponInfo.EffectiveWeaponDistance 
+                && decision != SoloDecision.MoveToEngage)
+            {
+                return true;
+            }
+            if (enemy.RealDistance > SAIN.Info.WeaponInfo.EffectiveWeaponDistance * 0.8f 
+                && decision == SoloDecision.MoveToEngage)
             {
                 return true;
             }

@@ -161,31 +161,29 @@ namespace SAIN.SAINComponent.Classes
             var enemy = SAIN.Enemy;
             if (enemy != null)
             {
-                if (enemy.IsVisible)
+                if (enemy.IsVisible && enemy.RealDistance < 40f)
                 {
-                    BotOwner.BotLight?.TurnOn(enemy.RealDistance < 30f);
+                    BotOwner.BotLight?.TurnOn(true);
                 }
-
-                Vector3? pointToShoot = null;
-                if (enemy.IsVisible && enemy.CanShoot)
+                else if (!enemy.IsVisible && enemy.Seen)
                 {
-                    pointToShoot = GetPointToShoot();
-                }
-                else if (!enemy.IsVisible 
-                    && enemy.HeardRecently 
-                    && enemy.InLineOfSight)
-                {
-                    EnemyPlace lastKnown = enemy.KnownPlaces.LastKnownPlace;
-                    if (lastKnown != null 
-                        && lastKnown.HasSeen)
+                    if (enemy.TimeSinceSeen > 3f)
                     {
-                        pointToShoot = lastKnown.Position + Vector3.up;
+                        BotOwner.BotLight?.TurnOff(false);
                     }
                 }
+                else
+                {
+                    BotOwner.BotLight?.TurnOff(false);
+                }
+
+                Vector3? pointToShoot = GetPointToShoot(enemy);
                 if (pointToShoot != null)
                 {
                     Target = pointToShoot.Value;
-                    if (BotOwner.AimingData.IsReady && !SAIN.NoBushESP.NoBushESPActive && FriendlyFire.ClearShot)
+                    if (BotOwner.AimingData.IsReady 
+                        && !SAIN.NoBushESP.NoBushESPActive 
+                        && FriendlyFire.ClearShot)
                     {
                         ReadyToShoot();
                         Shoot.Update();
@@ -196,8 +194,46 @@ namespace SAIN.SAINComponent.Classes
             {
                 float lightOnVisDist = BotOwner.Settings.FileSettings.Look.LightOnVisionDistance;
                 float sqrMagnitude = (SAIN.Position - SAIN.CurrentTargetPosition.Value).sqrMagnitude;
-                BotOwner.BotLight?.TurnOn(sqrMagnitude < lightOnVisDist * lightOnVisDist);
+                if (sqrMagnitude < lightOnVisDist * lightOnVisDist)
+                {
+                    BotOwner.BotLight?.TurnOn(true);
+                }
+                else
+                {
+                    BotOwner.BotLight?.TurnOff(false);
+                }
             }
+        }
+
+        private Vector3? blindShootTarget(SAINEnemy enemy)
+        {
+            Vector3? result = null;
+            if (!enemy.IsVisible
+                    && enemy.HeardRecently
+                    && enemy.InLineOfSight)
+            {
+                var places = enemy.KnownPlaces?.KnownPlaces;
+                if (places != null)
+                {
+                    for (int i = places.Count - 1; i >= 0; i--)
+                    {
+                        var place = places[i];
+                        if (place.HasSeen && !place.HasArrived)
+                        {
+                            result = place.Position + Vector3.up;
+                            break;
+                        }
+                    }
+                }
+
+                EnemyPlace lastKnown = enemy.KnownPlaces.LastKnownPlace;
+                if (result == null
+                    && lastKnown != null)
+                {
+                    result = lastKnown.Position + Vector3.up;
+                }
+            }
+            return result;
         }
 
         protected virtual void ReadyToShoot()
@@ -210,35 +246,35 @@ namespace SAIN.SAINComponent.Classes
             if (enemy != null)
             {
                 Vector3 value;
-                if (enemy.Distance < 10f)
+                if (enemy.Distance < 6f)
                 {
                     value = enemy.GetCenterPart();
                 }
                 else
                 {
                     value = enemy.GetPartToShoot();
-                    if (SAINPlugin.LoadedPreset.GlobalSettings.General.HeadShotProtection)
-                    {
-                        var transform = SAIN?.Enemy?.EnemyPerson?.Transform;
-                        if (transform != null && (value - transform.Head).magnitude < 0.1f)
-                        {
-                            value = transform.Stomach;
-                        }
-                    }
                 }
                 return new Vector3?(value);
             }
             Vector3? result = null;
             if (BotOwner.Memory.LastEnemy != null)
             {
-                result = new Vector3?(BotOwner.Memory.LastEnemy.CurrPosition + Vector3.up * BotOwner.Settings.FileSettings.Aiming.DANGER_UP_POINT);
+                // result = new Vector3?(BotOwner.Memory.LastEnemy.CurrPosition + Vector3.up * BotOwner.Settings.FileSettings.Aiming.DANGER_UP_POINT);
             }
             return result;
         }
 
-        protected virtual Vector3? GetPointToShoot()
+        protected virtual Vector3? GetPointToShoot(SAINEnemy enemy)
         {
-            Vector3? target = GetTarget();
+            Vector3? target = null;
+            if (enemy.IsVisible && enemy.CanShoot)
+            {
+                target = GetTarget();
+            }
+            if (target == null)
+            {
+                target = blindShootTarget(enemy);
+            }
             if (target != null)
             {
                 Target = target.Value;

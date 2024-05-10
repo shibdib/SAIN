@@ -419,12 +419,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
                 float DistanceThreshold = 4;
                 int startFinderCount = 3;
+                int max = 6;
                 if (SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode)
                 {
                     DistanceThreshold = 6f;
                     startFinderCount = 1;
+                    max = 4;
                 }
-
 
                 if (coverCount <= startFinderCount
                     || (LastPositionChecked - OriginPoint).sqrMagnitude > DistanceThreshold * DistanceThreshold)
@@ -489,7 +490,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
 
                         // Main Optimization, scales with the amount of points a bot currently has, and slows down the rate as it grows.
-                        if (coverCount >= 10)
+                        if (coverCount >= max)
                         {
                             break;
                         }
@@ -506,8 +507,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                                 if (_debugTimer < Time.time)
                                 {
                                     _debugTimer = Time.time + 5;
-                                    Logger.LogDebug($"Time to Find First CoverPoint: [{findFirstPointStopWatch.ElapsedMilliseconds}ms]");
-                                    Logger.NotifyDebug($"Time to Find First CoverPoint: [{findFirstPointStopWatch.ElapsedMilliseconds}ms]");
+                                    Logger.LogAndNotifyDebug($"Time to Find First CoverPoint: [{findFirstPointStopWatch.ElapsedMilliseconds}ms]");
                                 }
                             }
                             if (waitCount >= 3)
@@ -561,8 +561,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 if (_debugTimer2 < Time.time && SAINPlugin.DebugMode)
                 {
                     _debugTimer2 = Time.time + 5;
-                    Logger.LogDebug($"Time to Complete Coverfinder Loop: [{fullStopWatch.ElapsedMilliseconds}ms]");
-                    Logger.NotifyDebug($"Time to Complete Coverfinder Loop: [{fullStopWatch.ElapsedMilliseconds}ms]");
+                    Logger.LogAndNotifyDebug($"Time to Complete Coverfinder Loop: [{fullStopWatch.ElapsedMilliseconds}ms]");
                 }
                 CurrentStatus = CoverFinderStatus.None;
                 yield return new WaitForSeconds(CoverUpdateFrequency);

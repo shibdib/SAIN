@@ -723,9 +723,9 @@ namespace SAIN.SAINComponent.Classes
 
         private Vector3 GetPeekStartAndEnd(Vector3 blindCorner, Vector3 dangerPoint, Vector3 dirToBlindCorner, Vector3 dirToBlindDest, out Vector3 peekEnd)
         {
-            const float maxMagnitude = 6f;
-            const float minMagnitude = 1.5f;
-            const float OppositePointMagnitude = 6f;
+            const float maxMagnitude = 10f;
+            const float minMagnitude = 3f;
+            const float OppositePointMagnitude = 10f;
 
             Vector3 directionToStart = BotOwner.Position - blindCorner;
 

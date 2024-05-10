@@ -23,6 +23,20 @@ using System.Collections;
 
 namespace SAIN.Patches.Generic
 {
+    public class TurnDamnLightOffPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotWeaponSelector), "method_1");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref BotOwner ___botOwner_0)
+        {
+            // Try to turn a gun's light off before swapping weapon.
+            ___botOwner_0?.BotLight?.TurnOff(false, true);
+        }
+    }
     public class IsSameWayPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

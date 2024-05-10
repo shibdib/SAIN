@@ -38,7 +38,7 @@ namespace SAIN.Layers.Combat.Solo
                 // Scavs will speak out and be more vocal
                 if (!HaveTalked
                     && SAIN.Info.WildSpawnType == WildSpawnType.assault
-                    && targetDistSqr < 30f * 30f)
+                    && targetDistSqr < 40f * 40f)
                 {
                     HaveTalked = true;
                     if (EFTMath.RandomBool(40))
@@ -107,6 +107,12 @@ namespace SAIN.Layers.Combat.Solo
             if (SAIN.Enemy?.IsVisible == true || SAIN.Enemy?.InLineOfSight == true)
             {
                 SprintEnabled = false;
+                return;
+            }
+
+            if (SAIN.Decision.CurrentSquadDecision == SquadDecision.Help)
+            {
+                SprintEnabled = true;
                 return;
             }
 

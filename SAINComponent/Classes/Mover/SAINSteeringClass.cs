@@ -38,21 +38,21 @@ namespace SAIN.SAINComponent.Classes.Mover
             var moveSettings = BotOwner.Settings.FileSettings.Move;
             if (SAIN.HasEnemy)
             {
-                moveSettings.BASE_ROTATE_SPEED = 280f;
-                moveSettings.FIRST_TURN_SPEED = 225f;
-                moveSettings.FIRST_TURN_BIG_SPEED = 360f;
+                moveSettings.BASE_ROTATE_SPEED = 240f;
+                moveSettings.FIRST_TURN_SPEED = 215f;
+                moveSettings.FIRST_TURN_BIG_SPEED = 320f;
             }
             else if (SAIN.CurrentTargetPosition != null)
             {
-                moveSettings.BASE_ROTATE_SPEED = 240f;
+                moveSettings.BASE_ROTATE_SPEED = 200f;
                 moveSettings.FIRST_TURN_SPEED = 180f;
-                moveSettings.FIRST_TURN_BIG_SPEED = 300f;
+                moveSettings.FIRST_TURN_BIG_SPEED = 280f;
             }
             else
             {
                 moveSettings.BASE_ROTATE_SPEED = 150f;
                 moveSettings.FIRST_TURN_SPEED = 135f;
-                moveSettings.FIRST_TURN_BIG_SPEED = 240f;
+                moveSettings.FIRST_TURN_BIG_SPEED = 220f;
             }
         }
 
@@ -97,16 +97,16 @@ namespace SAIN.SAINComponent.Classes.Mover
                     {
                         LookToPathToEnemy();
                     }
-                    else if (SAIN.EnemyController.ClosestHeardEnemy != null)
+                    else if (SAIN.CurrentTargetPosition != null)
                     {
-                        LookToPoint(SAIN.EnemyController.ClosestHeardEnemy.LastKnownPosition);
+                        LookToPoint(SAIN.CurrentTargetPosition);
                     }
                     break;
 
                 case SteerPriority.ManualShooting:
                     if (SAIN.ManualShootTargetPosition != Vector3.zero)
                     {
-                        LookToPoint(SAIN.ManualShootTargetPosition, 400f);
+                        LookToPoint(SAIN.ManualShootTargetPosition, baseTurnSpeed);
                     }
                     break;
 
@@ -147,12 +147,12 @@ namespace SAIN.SAINComponent.Classes.Mover
                             Vector3? blindCornerToEnemy = SAIN.Enemy.Path.BlindCornerToEnemy;
                             if (blindCornerToEnemy != null && (blindCornerToEnemy.Value - SAIN.Transform.Head).sqrMagnitude > 1f)
                             {
-                                LookToPoint(blindCornerToEnemy.Value, 150f);
+                                LookToPoint(blindCornerToEnemy.Value, baseTurnSpeed);
                                 break;
                             }
                             if (lastKnownPlace.Position != null)
                             {
-                                LookToPoint(lastKnownPlace.Position.Value, 150f);
+                                LookToPoint(lastKnownPlace.Position.Value, baseTurnSpeed);
                                 break;
                             }
                         }
@@ -180,7 +180,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
                 case SteerPriority.Sprinting:
                 case SteerPriority.MoveDirection:
-                    LookToMovingDirection(800);
+                    LookToMovingDirection(400);
                     break;
 
                 case SteerPriority.Search:
@@ -310,7 +310,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
                 if (blindCornerToEnemy != null && (blindCornerToEnemy.Value - SAIN.Transform.Head).sqrMagnitude > 1f)
                 {
-                    LookToPoint(blindCornerToEnemy.Value, 250f);
+                    LookToPoint(blindCornerToEnemy.Value, baseTurnSpeed);
                     return true;
                 }
             }
@@ -319,7 +319,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (LastKnownPosition != null)
             {
                 Vector3 pos = LastKnownPosition.Value;
-                LookToPoint(pos, 250f);
+                LookToPoint(pos, baseTurnSpeed);
                 return true;
             }
             return false;
@@ -408,7 +408,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (enemy != null)
             {
-                LookToPoint(enemy.EnemyPosition + Vector3.up, 250f);
+                LookToPoint(enemy.EnemyPosition + Vector3.up, baseTurnSpeed);
             }
         }
 
@@ -421,12 +421,12 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             var pos = SAIN.Memory.UnderFireFromPosition;
             pos.y += 1f;
-            LookToPoint(pos, 250f);
+            LookToPoint(pos, baseTurnSpeed);
         }
 
         public void LookToHearPos(Vector3 soundPos, bool visionCheck = false)
         {
-            float turnSpeed = SAIN.HasEnemy ? 250f : 100f;
+            float turnSpeed = SAIN.HasEnemy ? baseTurnSpeed : baseTurnSpeedNoEnemy;
             if ((soundPos - SAIN.Position).sqrMagnitude > 100f * 100f)
             {
                 LookToPoint(soundPos, turnSpeed);
@@ -483,8 +483,11 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             var pos = BotOwner.Memory.LastHitPos;
             pos.y += 1f;
-            LookToPoint(pos, 250f);
+            LookToPoint(pos, baseTurnSpeed);
         }
+
+        public float baseTurnSpeed = 220f;
+        public float baseTurnSpeedNoEnemy = 100f;
 
         private bool LookRandom;
 
@@ -492,7 +495,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (RandomLookTimer < Time.time)
             {
-                RandomLookTimer = Time.time + 3f * Random.Range(0.66f, 1.33f);
+                RandomLookTimer = Time.time + 2f * Random.Range(0.66f, 1.33f);
                 Vector3 pointToLook = Vector3.zero;
 
                 LookRandom = !LookRandom;
@@ -535,7 +538,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
                 else
                 {
-                    LookToPoint(pointToLook, Random.Range(75f, 110f));
+                    LookToPoint(pointToLook, Random.Range(60f, 90f));
                 }
             }
         }

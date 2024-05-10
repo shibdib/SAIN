@@ -313,13 +313,7 @@ namespace SAIN.SAINComponent.Classes
                     catch { }
 
                     SAIN?.Suppression?.AddSuppression();
-                    SAIN.Memory.UnderFireFromPosition = vector;
-                    try
-                    {
-                        BotOwner.Memory.SetUnderFire(person);
-                    }
-                    catch { }
-
+                    SAIN.Memory.SetUnderFire(person, vector);
                     SAIN.EnemyController.CheckAddEnemy(person)?.SetEnemyAsSniper(shooterDistance > 100f);
                 }
             }
@@ -346,7 +340,7 @@ namespace SAIN.SAINComponent.Classes
             else if (isGunSound && bulletFelt)
             {
                 Vector3 estimate = GetEstimatedPoint(vector);
-                SAIN.Memory.UnderFireFromPosition = estimate;
+                SAIN.Memory.SetUnderFire(person, vector);
 
                 try
                 {
@@ -362,9 +356,9 @@ namespace SAIN.SAINComponent.Classes
 
         private Vector3 GetSoundDispersion(IPlayer person, Vector3 pos, AISoundType soundType)
         {
-            const float dispGun = 15f;
-            const float dispSuppGun = 10;
-            const float dispStep = 5;
+            const float dispGun = 20f;
+            const float dispSuppGun = 15;
+            const float dispStep = 10;
 
             Vector3 shooterDirectionToBot = BotOwner.Transform.position - pos;
             float shooterDistance = shooterDirectionToBot.magnitude;

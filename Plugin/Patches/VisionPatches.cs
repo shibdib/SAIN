@@ -13,6 +13,8 @@ using SAIN.SAINComponent.Classes;
 using SAIN.Helpers;
 using System.Collections.Generic;
 using static UnityEngine.EventSystems.EventTrigger;
+using UnityEngine.UIElements;
+using EFT.InventoryLogic;
 
 namespace SAIN.Patches.Vision
 {
@@ -129,34 +131,48 @@ namespace SAIN.Patches.Vision
                 BotDifficulty diff = __instance.Owner.Profile.Info.Settings.BotDifficulty;
                 __result *= Math.CalcVisSpeed(dist, botType.Settings[diff]);
             }
-            if (dist > 20f)
+
+            var person = __instance?.Person;
+            if (person != null)
             {
-                __result *= inverseWeatherModifier;
-            }
-
-            Player player = EFTInfo.GetPlayer(__instance?.Person?.ProfileId);
-            if (player != null && !player.IsAI)
-            {
-                float visibility = SAINVisionClass.GetVisibilityModifier(player);
-                __result /= visibility;
-
-                float elevationDifference = enemy.position.y - BotTransform.position.y;
-
-                if (elevationDifference > 2f)
+                if (!person.AIData.GetFlare)
                 {
-                    __result *= 1.15f;
+                    __result *= inverseWeatherModifier;
                 }
-                if (elevationDifference < -2f)
+                Player player = EFTInfo.GetPlayer(__instance.Person.ProfileId);
+                if (player != null)
                 {
-                    __result *= 0.85f;
-                }
-                //Logger.LogDebug($"Elevation Difference: {elevationDifference}");
-            }
+                    // if player is using suppressed weapon, and has shot recently, don't increase vis speed as much.
+                    bool suppressedFlare = false;
+                    if (player.HandsController.Item is Weapon weapon)
+                    {
+                        var weaponInfo = SAINWeaponInfoHandler.GetPlayerWeaponInfo(player);
+                        suppressedFlare = person.AIData.GetFlare && weaponInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
+                    }
+                    if (!person.AIData.GetFlare || suppressedFlare)
+                    {
+                        __result *= inverseWeatherModifier;
+                    }
 
-            // Not Looking Implementation
-            if (__instance?.Person?.IsYourPlayer == true && !__instance.IsVisible)
-            {
-                __result *= SAINNotLooking.GetVisionSpeedIncrease(__instance.Owner);
+                    if (player.IsSprintEnabled)
+                    {
+                        __result *= 0.66f;
+                    }
+
+                    float elevationDifference = enemy.position.y - BotTransform.position.y;
+                    if (elevationDifference > 2f)
+                    {
+                        __result *= 1.33f;
+                    }
+                    if (elevationDifference < -2f)
+                    {
+                        __result *= 0.85f;
+                    }
+                    if (!player.IsAI)
+                    {
+                        __result *= SAINNotLooking.GetVisionSpeedIncrease(__instance.Owner);
+                    }
+                }
             }
 
             __result = Mathf.Round(__result * 100f) / 100f; ;
@@ -176,16 +192,28 @@ namespace SAIN.Patches.Vision
             Player player = EFTInfo.GetPlayer(__instance?.Person?.ProfileId);
             if (player != null)
             {
+                // Increase or decrease vis distance based on pose and if sprinting.
                 float visibility = SAINVisionClass.GetVisibilityModifier(player);
+
+                // if player shot a weapon recently
+                if (player.AIData.GetFlare)
+                {
+                    // if player is using suppressed weapon, and has shot recently, don't increase vis distance as much.
+                    bool suppressedFlare = false;
+                    if (player.HandsController.Item is Weapon weapon)
+                    {
+                        var weaponInfo = SAINWeaponInfoHandler.GetPlayerWeaponInfo(player);
+                        suppressedFlare = weaponInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
+                    }
+
+                    // increase visiblity
+                    visibility *= suppressedFlare ? 1.1f : 1.2f;
+                }
+
                 float defaultVisDist = __instance.Owner.LookSensor.VisibleDist;
                 float visionDist = (defaultVisDist * visibility) - defaultVisDist;
 
-                Vector3 botLookDir = __instance.Owner.LookDirection.normalized;
                 addVisibility = visionDist;
-                if (player.IsYourPlayer)
-                {
-                    //Logger.LogWarning(addVisibility);
-                }
             }
         }
     }

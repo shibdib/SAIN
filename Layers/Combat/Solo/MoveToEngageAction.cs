@@ -22,6 +22,7 @@ namespace SAIN.Layers.Combat.Solo
             SAINEnemy enemy = SAIN.Enemy;
             if (enemy == null)
             {
+                SAIN.Steering.SteerByPriority();
                 return;
             }
 
@@ -56,13 +57,18 @@ namespace SAIN.Layers.Combat.Solo
                 Shoot.Update();
                 return;
             }
+            var cover = SAIN.Cover.FindPointInDirection(movePos - SAIN.Position, 0.5f, 3f);
+            if (cover != null)
+            {
+                movePos = cover.GetPosition(SAIN);
+            }
 
             float distance = enemy.RealDistance;
             if (distance > 40f && !BotOwner.Memory.IsUnderFire)
             {
                 if (RecalcPathTimer < Time.time)
                 {
-                    RecalcPathTimer = Time.time + 4f;
+                    RecalcPathTimer = Time.time + 2f;
                     BotOwner.BotRun.Run(movePos, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
                     SAIN.Steering.LookToMovingDirection(500f, true);
                 }
@@ -73,7 +79,7 @@ namespace SAIN.Layers.Combat.Solo
 
                 if (RecalcPathTimer < Time.time)
                 {
-                    RecalcPathTimer = Time.time + 4f;
+                    RecalcPathTimer = Time.time + 2f;
                     BotOwner.MoveToEnemyData.TryMoveToEnemy(movePos);
                 }
 

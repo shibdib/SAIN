@@ -36,39 +36,38 @@ namespace SAIN.SAINComponent.Classes
                 return result;
             }
             var pose = player.Pose;
-            float speed = player.MovementContext.ClampedSpeed / player.MovementContext.MaxSpeed;
+            float speed = player.Velocity.magnitude / player.MovementContext.MaxSpeed;
             if (player.MovementContext.IsSprintEnabled)
             {
                 result *= 1.33f;
             }
-            else
+            else switch (pose)
             {
-                if (speed <= 0.2f)
-                {
-                    result *= 0.75f;
-                }
-                switch (pose)
-                {
-                    case EPlayerPose.Stand:
-                        result *= 1.1f;
-                        break;
-                    case EPlayerPose.Duck:
-                        result *= 0.9f;
-                        break;
-                    case EPlayerPose.Prone:
-                        result *= 0.6f;
-                        break;
-                }
+                case EPlayerPose.Stand:
+                    //result *= 1.15f;
+                    break;
+
+                case EPlayerPose.Duck:
+                    result *= 0.85f;
+                    break;
+
+                case EPlayerPose.Prone:
+                    result *= 0.6f;
+                    break;
+
+                default:
+                    break;
             }
+
             result = result.Round100();
             //Logger.LogInfo($"Result: {result} Speed: {speed} Pose: {pose} Sprint? {player.MovementContext.IsSprintEnabled}");
             return result;
         }
 
-        public void Dispose()
-        {
-        }
-
-        public DazzleClass FlashLightDazzle { get; private set; }
+    public void Dispose()
+    {
     }
+
+    public DazzleClass FlashLightDazzle { get; private set; }
+}
 }

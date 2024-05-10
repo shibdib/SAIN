@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.SAINComponent.BaseClasses;
@@ -255,6 +256,9 @@ namespace SAIN.SAINComponent
             }
         }
 
+        private float _nextCheckFlashlightTime;
+        private PlayerWeaponInfoContainer WeaponInfoContainer;
+
         private float _nextCheckReloadTime;
 
         private bool _powerCalcd;
@@ -295,8 +299,15 @@ namespace SAIN.SAINComponent
             }
         }
 
+        public bool Extracting { get; set; }
+
         private void HandlePatrolData()
         {
+            if (Extracting)
+            {
+                PatrolDataPaused = true;
+                return;
+            }
             if (CurrentTargetPosition == null)
             {
                 PatrolDataPaused = false;
@@ -537,7 +548,6 @@ namespace SAIN.SAINComponent
                 return Memory.UnderFireFromPosition;
             }
 
-            // This is incredibly inefficient, need to limit the times this is called per frame.
             if (HasEnemy)
             {
                 Vector3? lastPlaceHaventSeen = Enemy.KnownPlaces.GetPlaceHaventSeen()?.Position;
@@ -562,10 +572,6 @@ namespace SAIN.SAINComponent
             if (placeForCheck != null)
             {
                 return placeForCheck.Position;
-            }
-            if (Time.time - BotOwner.Memory.LastTimeHit < 10f)
-            {
-                return BotOwner.Memory.LastHitPos;
             }
             return null;
         }

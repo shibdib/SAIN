@@ -29,11 +29,13 @@ namespace SAIN.Layers
 
         public override void Start()
         {
+            SAIN.Extracting = true;
             BotOwner.PatrollingData.Pause();
         }
 
         public override void Stop()
         {
+            SAIN.Extracting = false;
             BotOwner.PatrollingData.Unpause();
             BotOwner.Mover.MovementResume();
         }
@@ -46,19 +48,19 @@ namespace SAIN.Layers
             // Environment id of 0 means a bot is outside.
             if (SAIN.Player.AIData.EnvironmentId != 0)
             {
-                NoSprint = true;
+                shallSprint = false;
             }
             else if (SAIN.Enemy != null && SAIN.Enemy.Seen && (SAIN.Enemy.Path.PathDistance < 50f || SAIN.Enemy.InLineOfSight))
             {
-                NoSprint = true;
+                shallSprint = false;
             }
             else if (stamina > 0.5f)
             {
-                NoSprint = false;
+                shallSprint = true;
             }
             else if (stamina < 0.1f)
             {
-                NoSprint = true;
+                shallSprint = false;
             }
 
             if (!Exfil.HasValue)
@@ -69,10 +71,13 @@ namespace SAIN.Layers
             Vector3 point = Exfil.Value;
             float distance = (point - BotOwner.Position).sqrMagnitude;
 
+            if (distance < 4f)
+            {
+                shallSprint = false;
+            }
             if (distance < 1f)
             {
                 SAIN.Mover.SetTargetPose(0f);
-                NoSprint = true;
             }
             else
             {
@@ -91,20 +96,19 @@ namespace SAIN.Layers
 
             if (BotOwner.BotState == EBotState.Active)
             {
-                if (NoSprint)
+                if (!shallSprint)
                 {
-                    SAIN.Mover.Sprint(false);
                     SAIN.Steering.SteerByPriority();
                     Shoot.Update();
                 }
                 else
                 {
-                    SAIN.Steering.LookToMovingDirection();
+                    SAIN.Steering.LookToMovingDirection(500f, true);
                 }
             }
         }
 
-        private bool NoSprint;
+        private bool shallSprint;
 
         private void MoveToExtract(float distance, Vector3 point)
         {
@@ -113,14 +117,7 @@ namespace SAIN.Layers
                 return;
             }
 
-            if (NoSprint)
-            {
-                BotOwner.Mover.Sprint(false);
-            }
-            else
-            {
-                BotOwner.Mover.Sprint(true);
-            }
+            SAIN.Mover.Sprint(shallSprint);
 
             if (distance > MinDistanceToStartExtract * 2)
             {

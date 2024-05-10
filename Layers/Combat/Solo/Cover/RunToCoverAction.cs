@@ -63,11 +63,20 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
                     _recalcMoveTimer = Time.time + 0.5f;
                     _coverDestination = coverDestination;
+                    _runDestination = coverDestination.GetPosition(SAIN);
                 }
                 else
                 {
                     //RecalcTimer = Time.time + 0.1f;
                 }
+            }
+
+            if (_moveSuccess 
+                && _sprinting 
+                && (_runDestination - SAIN.Position).sqrMagnitude < SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN * SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN)
+            {
+                SAIN.Mover.Sprint(false);
+                _sprinting = false;
             }
 
             if (!_moveSuccess)
@@ -85,6 +94,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 SAIN.Steering.LookToMovingDirection(500f, true);
             }
         }
+
+        private Vector3 _runDestination;
 
         private bool moveToCover(out bool sprinting, out CoverPoint coverDestination)
         {

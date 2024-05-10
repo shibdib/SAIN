@@ -60,6 +60,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
+        public float UNDER_FIRE_PERIOD = 6f;
+
+        [Hidden]
+        [JsonIgnore]
         public float CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
 
         [Hidden]
@@ -69,6 +73,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Hidden]
         [JsonIgnore]
         public bool SURGE_KIT_ONLY_SAFE_CONTAINER = false;
+
+        [Hidden]
+        [JsonIgnore]
+        public float FOOD_DRINK_DELAY_SEC = 120f;
 
         [Hidden]
         [JsonIgnore]
