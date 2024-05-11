@@ -141,7 +141,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             calculating = false;
             if (reachDist < 0f)
             {
-                //reachDist = SAINPlugin.LoadedPreset.GlobalSettings.General.BaseReachDistance;
+                reachDist = SAINPlugin.LoadedPreset.GlobalSettings.General.BaseReachDistance;
             }
             CurrentPathStatus = BotOwner.Mover.GoToPoint(point, slowAtEnd, reachDist, false, false, true);
             if (CurrentPathStatus == NavMeshPathStatus.PathComplete)

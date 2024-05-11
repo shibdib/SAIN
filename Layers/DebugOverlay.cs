@@ -148,20 +148,6 @@ namespace SAIN.Layers
             }
         }
 
-        public static void AddCoverInfo(SAINComponentClass SAIN, StringBuilder stringBuilder)
-        {
-            stringBuilder.AppendLine(nameof(SAINComponentClass.Cover));
-            var cover = SAIN.Cover;
-            stringBuilder.AppendLabeledValue("CoverFinder State", $"{cover.CurrentCoverFinderState}", Color.white, Color.yellow, true);
-            stringBuilder.AppendLabeledValue("Closest Point Status", $"{cover.ClosestPoint?.GetCoverStatus(SAIN)}", Color.white, Color.yellow, true);
-            
-            stringBuilder.AppendLabeledValue("Cover Count", $"{cover.CoverPoints.Count}", Color.white, Color.yellow, true);
-            foreach (var point in cover.CoverPoints)
-            {
-                DisplayPropertyAndFieldValues(point.GetInfo(SAIN), stringBuilder);
-            }
-        }
-
         public static void AddAimData(BotOwner BotOwner, StringBuilder stringBuilder)
         {
             var aimData = BotOwner.AimingData;

@@ -29,12 +29,12 @@ namespace SAIN.Layers.Combat.Solo.Cover
             Shoot.Update();
             if (NewPoint == null 
                 && FindPointToGo() 
-                && SAIN.Mover.GoToPoint(NewPoint.GetPosition(SAIN), out bool calculating))
+                && SAIN.Mover.GoToPoint(NewPoint.Position, out bool calculating))
             {
                 SAIN.Mover.SetTargetMoveSpeed(GetSpeed());
                 SAIN.Mover.SetTargetPose(GetPose());
             }
-            else if (NewPoint != null && NewPoint.GetCoverStatus(SAIN) == CoverStatus.InCover)
+            else if (NewPoint != null && NewPoint.Status == CoverStatus.InCover)
             {
                 SAIN.Decision.EnemyDecisions.ShiftCoverComplete = true;
             }
@@ -80,15 +80,14 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
                         if (shiftCoverTarget.CoverHeight > coverInUse.CoverHeight
                             && (!SAINPlugin.LoadedPreset.GlobalSettings.Cover.ShiftCoverMustBeSafe 
-                                ||  shiftCoverTarget.CheckPathSafety(SAIN))
+                                ||  shiftCoverTarget.IsSafePath)
                             && !UsedPoints.Contains(shiftCoverTarget))
                         {
                             for (int j = 0; j < UsedPoints.Count; j++)
                             {
-                                if ((UsedPoints[j].GetPosition(SAIN) - shiftCoverTarget.GetPosition(SAIN)).sqrMagnitude > 5f)
+                                if ((UsedPoints[j].Position - shiftCoverTarget.Position).sqrMagnitude > 5f)
                                 {
-                                    coverInUse.SetBotIsUsingThis(false);
-                                    shiftCoverTarget.SetBotIsUsingThis(true);
+                                    SAIN.Cover.CoverInUse = shiftCoverTarget;
                                     NewPoint = shiftCoverTarget;
                                     return true;
                                 }
@@ -114,6 +113,13 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
+            SoloDecision decision = SAIN.Decision.CurrentSoloDecision;
+            if (decision != SoloDecision.WalkToCover
+                && decision != SoloDecision.RunToCover
+                && decision != SoloDecision.Retreat)
+            {
+                SAIN.Cover.CoverInUse = null;
+            }
             NewPoint = null;
             UsedPoints.Clear();
         }
@@ -136,11 +142,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (NewPoint != null)
             {
                 stringBuilder.AppendLine("Cover In Use");
-                stringBuilder.AppendLabeledValue("Status", $"{NewPoint.GetCoverStatus(SAIN)}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Status", $"{NewPoint.Status}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Height / Value", $"{NewPoint.CoverHeight} {NewPoint.CoverValue}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Path Length", $"{NewPoint.CalcPathLength(SAIN)}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Straight Distance", $"{(NewPoint.GetPosition(SAIN) - SAIN.Position).magnitude}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Safe Path?", $"{NewPoint.CheckPathSafety(SAIN)}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Path Length", $"{NewPoint.PathLength}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Straight Distance", $"{(NewPoint.Position - SAIN.Position).magnitude}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Safe Path?", $"{NewPoint.IsSafePath}", Color.white, Color.yellow, true);
             }
         }
     }

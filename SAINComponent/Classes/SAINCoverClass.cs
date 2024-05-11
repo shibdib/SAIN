@@ -30,9 +30,9 @@ namespace SAIN.SAINComponent.Classes
             for (int i = 0; i < CoverPoints.Count; i++)
             {
                 CoverPoint point = CoverPoints[i];
-                if (point != null && !point.Spotted(SAIN))
+                if (point != null && !point.Spotted)
                 {
-                    Vector3 coverPosition = point.GetPosition(SAIN);
+                    Vector3 coverPosition = point.Position;
                     Vector3 directionToPoint = botPosition - coverPosition;
 
                     if (directionToPoint.sqrMagnitude > minDistance * minDistance 
@@ -100,26 +100,24 @@ namespace SAIN.SAINComponent.Classes
         {
             LastHitTime = Time.time;
 
-            SAINEnemy enemy = SAIN.Enemy;
-            bool HitInCoverKnown = enemy != null && damage.Player != null && enemy.EnemyPlayer.ProfileId == damage.Player.iPlayer.ProfileId;
-            bool HitInCoverCantSee = enemy != null && enemy.IsVisible == false;
-
-            foreach (var coverPoint in CoverPoints)
+            CoverPoint coverInUse = CoverInUse;
+            if (coverInUse != null)
             {
-                if (coverPoint.GetCoverStatus(SAIN) == CoverStatus.InCover)
+                SAINEnemy enemy = SAIN.Enemy;
+                bool HitInCoverKnown = enemy != null && damage.Player != null && enemy.EnemyPlayer.ProfileId == damage.Player.iPlayer.ProfileId;
+                bool HitInCoverCantSee = enemy != null && enemy.IsVisible == false;
+
+                if (HitInCoverCantSee)
                 {
-                    if (HitInCoverCantSee)
-                    {
-                        coverPoint.GetHit(SAIN, 0, 1, 0);
-                    }
-                    else if (HitInCoverKnown)
-                    {
-                        coverPoint.GetHit(SAIN, 0, 0, 1);
-                    }
-                    else
-                    {
-                        coverPoint.GetHit(SAIN, 1, 0, 0);
-                    }
+                    coverInUse.HitInCoverCantSeeCount++;
+                }
+                else if (HitInCoverKnown)
+                {
+                    coverInUse.HitInCoverCount++;
+                }
+                else
+                {
+                    coverInUse.HitInCoverUnknownCount++;
                 }
             }
         }
@@ -142,19 +140,20 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
+                // Call path length to trigger recalc if timer allows.
                 foreach (var point in CoverPoints)
                 {
-                    point?.CalcPathLength(SAIN);
+                    float dist = point.PathLength;
                 }
 
-                CoverFinderComponent.OrderPointsByPathDist(CoverPoints, SAIN);
+                SortPointsByPathDist();
 
                 for (int i = 0; i < CoverPoints.Count; i++)
                 {
                     CoverPoint point = CoverPoints[i];
                     if (point != null)
                     {
-                        if (point != null && point.Spotted(SAIN) == false)
+                        if (point != null && point.Spotted == false)
                         {
                             return point;
                         }
@@ -162,6 +161,11 @@ namespace SAIN.SAINComponent.Classes
                 }
                 return null;
             }
+        }
+
+        public void SortPointsByPathDist()
+        {
+            CoverFinderComponent.OrderPointsByPathDist(CoverPoints, SAIN);
         }
 
         private bool GetPointToHideFrom(out Vector3? target)
@@ -236,45 +240,20 @@ namespace SAIN.SAINComponent.Classes
             return Physics.Raycast(position, direction, dist, LayerMaskClass.HighPolyWithTerrainMask);
         }
 
-        public bool BotIsAtCoverInUse(out CoverPoint coverInUse)
-        {
-            coverInUse = CoverInUse;
-            return coverInUse != null && coverInUse.BotInThisCover(SAIN);
-        }
-
         public bool BotIsAtCoverPoint(CoverPoint coverPoint)
         {
-            return coverPoint != null && coverPoint.BotInThisCover(SAIN);
+            return coverPoint?.BotInThisCover() == true;
         }
 
         public bool BotIsAtCoverInUse()
         {
-            var coverPoint = CoverInUse;
-            return coverPoint != null && coverPoint.BotInThisCover(SAIN);
+            return CoverInUse?.BotInThisCover() == true;
         }
 
-        public CoverPoint CoverInUse
-        {
-            get
-            {
-                if (BotIsAtCoverPoint(FallBackPoint))
-                {
-                    return FallBackPoint;
-                }
-                foreach (var point in CoverPoints)
-                {
-                    if (BotIsAtCoverPoint(point))
-                    {
-                        return point;
-                    }
-                }
-                return null;
-            }
-        }
+        public CoverPoint CoverInUse { get; set; }
 
         public List<CoverPoint> CoverPoints => CoverFinder.CoverPoints;
         public CoverFinderComponent CoverFinder { get; private set; }
-        public CoverPoint CurrentCoverPoint => ClosestPoint;
         public CoverPoint FallBackPoint => CoverFinder.FallBackPoint;
 
         public float LastHitTime { get; private set; }

@@ -314,7 +314,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             var pathStatus = enemy.CheckPathDistance();
-            return (pathStatus == EnemyPathDistance.VeryClose && SAIN.Enemy.IsVisible) || SAIN.Cover.CoverInUse?.Spotted(SAIN) == true;
+            return (pathStatus == EnemyPathDistance.VeryClose && SAIN.Enemy.IsVisible) || SAIN.Cover.CoverInUse?.Spotted == true;
         }
 
         private bool StartMoveToEngage(SAINEnemy enemy)
@@ -373,25 +373,16 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             bool runNow = SAIN.Enemy != null
-                && SAIN.Enemy.Seen
                 && !SAIN.Enemy.IsVisible
-                && SAIN.Enemy.TimeSinceSeen > 3f
+                && (!SAIN.Enemy.Seen || SAIN.Enemy.TimeSinceSeen > 3f)
                 && SAIN.Cover.CoverPoints.Count > 0;
 
             if (StartRunCoverTimer < Time.time || runNow)
             {
-                CoverPoint coverInUse = null;
-                foreach (var coverPoint in SAIN.Cover.CoverPoints)
-                {
-                    if (coverPoint?.GetBotIsUsingThis() == true)
-                    {
-                        coverInUse = coverPoint;
-                        break;
-                    }
-                }
+                CoverPoint coverInUse = SAIN.Cover.CoverInUse;
                 if (coverInUse != null)
                 {
-                    return (coverInUse.GetPosition(SAIN) - SAIN.Position).sqrMagnitude > 2f;
+                    return (coverInUse.Position - SAIN.Position).sqrMagnitude >= SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN;
                 }
             }
             return false;
@@ -403,8 +394,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartMoveToCover()
         {
-            var coverInUse = SAIN.Cover.CoverInUse;
-            if (coverInUse == null)
+            CoverPoint coverInUse = SAIN.Cover.CoverInUse;
+            if (coverInUse == null || coverInUse.Status != CoverStatus.InCover || coverInUse.Spotted)
             {
                 var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
                 if (CurrentDecision != SoloDecision.WalkToCover && CurrentDecision != SoloDecision.RunToCover)
@@ -433,8 +424,8 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             var cover = SAIN.Cover.CoverInUse;
             if (cover != null 
-                && !cover.Spotted(SAIN) 
-                && (cover.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude < HoldInCoverMaxCoverDist)
+                && !cover.Spotted
+                && cover.Status == CoverStatus.InCover)
             {
                 return true;
             }
@@ -459,7 +450,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 if (!enemy.EnemyLookingAtMe)
                 {
                     CoverPoint closestPoint = SAIN.Cover.ClosestPoint;
-                    if (!enemy.EnemyLookingAtMe && closestPoint != null && closestPoint.GetCoverStatus(SAIN) <= CoverStatus.CloseToCover)
+                    if (!enemy.EnemyLookingAtMe && closestPoint != null && closestPoint.Status <= CoverStatus.CloseToCover)
                     {
                         return true;
                     }

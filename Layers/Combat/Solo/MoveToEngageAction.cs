@@ -60,7 +60,7 @@ namespace SAIN.Layers.Combat.Solo
             var cover = SAIN.Cover.FindPointInDirection(movePos - SAIN.Position, 0.5f, 3f);
             if (cover != null)
             {
-                movePos = cover.GetPosition(SAIN);
+                movePos = cover.Position;
             }
 
             float distance = enemy.RealDistance;

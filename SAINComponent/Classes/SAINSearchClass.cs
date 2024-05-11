@@ -673,7 +673,7 @@ namespace SAIN.SAINComponent.Classes
 
             Reset();
 
-            if (NavMesh.SamplePosition(point, out var hit, 2f, -1))
+            if (NavMesh.SamplePosition(point, out var hit, 10f, -1))
             {
                 Path = new NavMeshPath();
                 if (NavMesh.CalculatePath(Start, hit.position, -1, Path))
@@ -726,8 +726,8 @@ namespace SAIN.SAINComponent.Classes
         private Vector3 GetPeekStartAndEnd(Vector3 blindCorner, Vector3 dangerPoint, Vector3 dirToBlindCorner, Vector3 dirToBlindDest, out Vector3 peekEnd)
         {
             const float maxMagnitude = 10f;
-            const float minMagnitude = 3f;
-            const float OppositePointMagnitude = 10f;
+            const float minMagnitude = 1f;
+            const float OppositePointMagnitude = 5f;
 
             Vector3 directionToStart = BotOwner.Position - blindCorner;
 
@@ -748,7 +748,7 @@ namespace SAIN.SAINComponent.Classes
             Vector3 PeekStartPosition = blindCorner + cornerStartDir;
             Vector3 dirFromStart = dangerPoint - PeekStartPosition;
 
-            // Rotate to the opposite side depending on the angle of the danger point to the start DrawPosition.
+            // Rotate to the opposite side depending on the angle of the danger point to the start.
             float signAngle = GetSignedAngle(dirToBlindCorner.normalized, dirFromStart.normalized);
             float rotationAngle = signAngle > 0 ? -90f : 90f;
             Quaternion rotation = Quaternion.Euler(0f, rotationAngle, 0f);
@@ -767,7 +767,7 @@ namespace SAIN.SAINComponent.Classes
             }
             else
             {
-                // Modify the startPeekPos to be the result if no objects are in the way. TypeofThis is resulting wide peek startPeekPos.
+                // Modify the startPeekPos to be the result if no objects are in the way.
                 PeekEndPosition = result;
             }
 

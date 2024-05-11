@@ -51,7 +51,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool ShallProne(CoverPoint point, bool withShoot)
         {
-            var status = point.GetCoverStatus(SAIN);
+            var status = point.Status;
             if (status == CoverStatus.FarFromCover || status == CoverStatus.None)
             {
                 if (Player.MovementContext.CanProne)

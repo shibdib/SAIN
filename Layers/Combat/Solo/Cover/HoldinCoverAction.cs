@@ -29,7 +29,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 return;
             }
 
-            if (!Stopped && !CoverInUse.Spotted(SAIN) && (CoverInUse.GetPosition(SAIN) - BotOwner.Position).sqrMagnitude < 0.33f)
+            if (!Stopped && !CoverInUse.Spotted && (CoverInUse.Position - BotOwner.Position).sqrMagnitude < 0.1f)
             {
                 SAIN.Mover.StopMove();
                 Stopped = true;
@@ -133,7 +133,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             stringBuilder.AppendLabeledValue("CoverFinder State", $"{cover.CurrentCoverFinderState}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("Cover Count", $"{cover.CoverPoints.Count}", Color.white, Color.yellow, true);
 
-            stringBuilder.AppendLabeledValue("Current Cover Status", $"{CoverInUse?.GetCoverStatus(SAIN)}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Current Cover Status", $"{CoverInUse?.Status}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("Current Cover Height", $"{CoverInUse?.CoverHeight}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("Current Cover Value", $"{CoverInUse?.CoverValue}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("CoverFinder State", $"{cover.CurrentCoverFinderState}", Color.white, Color.yellow, true);
@@ -150,11 +150,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (CoverInUse != null)
             {
                 stringBuilder.AppendLine("Cover In Use");
-                stringBuilder.AppendLabeledValue("Status", $"{CoverInUse.GetCoverStatus(SAIN)}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Status", $"{CoverInUse.Status}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Height / Value", $"{CoverInUse.CoverHeight} {CoverInUse.CoverValue}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Path Length", $"{CoverInUse.CalcPathLength(SAIN)}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Straight Distance", $"{(CoverInUse.GetPosition(SAIN) - SAIN.Position).magnitude}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Safe Path?", $"{CoverInUse.CheckPathSafety(SAIN)}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Path Length", $"{CoverInUse.PathLength}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Straight Distance", $"{(CoverInUse.Position - SAIN.Position).magnitude}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Safe Path?", $"{CoverInUse.IsSafePath}", Color.white, Color.yellow, true);
             }
 
         }

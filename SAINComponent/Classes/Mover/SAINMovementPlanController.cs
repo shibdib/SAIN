@@ -113,12 +113,12 @@ namespace SAIN.SAINComponent.Classes.Mover
                     Vector3 pointB = Path[i + 1].PathNodePosition;
 
                     CoverPoint coverPoint = Path[i].GetCoverPoint(Goal);
-                    if (coverPoint != null && CheckPositionVsOtherCover(coverPoint.GetPosition(SAIN)))
+                    if (coverPoint != null && CheckPositionVsOtherCover(coverPoint.Position))
                     {
-                        CoverPositions.Add(coverPoint.GetPosition(SAIN));
-                        DebugGizmos.Sphere(coverPoint.GetPosition(SAIN), 0.1f, Color.red, true, 30f);
-                        DebugGizmos.Ray(coverPoint.GetPosition(SAIN), Vector3.up, Color.red, 1f, 0.1f, true, 30f);
-                        DebugGizmos.Line(pointA, coverPoint.GetPosition(SAIN), Color.red, 0.1f, true, 30f);
+                        CoverPositions.Add(coverPoint.Position);
+                        DebugGizmos.Sphere(coverPoint.Position, 0.1f, Color.red, true, 30f);
+                        DebugGizmos.Ray(coverPoint.Position, Vector3.up, Color.red, 1f, 0.1f, true, 30f);
+                        DebugGizmos.Line(pointA, coverPoint.Position, Color.red, 0.1f, true, 30f);
                     }
 
                     DebugGizmos.Sphere(pointA, 0.1f, Color.white, true, 30f);

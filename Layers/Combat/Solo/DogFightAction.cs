@@ -35,7 +35,7 @@ namespace SAIN.Layers.Combat.Solo
                     if (SAIN.Cover.ClosestPoint != null)
                     {
                         UpdateMovementTimer = Time.time + 0.25f;
-                        BotOwner.GoToPoint(SAIN.Cover.ClosestPoint.GetPosition(SAIN), true, -1, false, false, false, true);
+                        BotOwner.GoToPoint(SAIN.Cover.ClosestPoint.Position, true, -1, false, false, false, true);
                     }
                     else if (BackUpNoEnemy(out Vector3 noEnemyMovePos))
                     {

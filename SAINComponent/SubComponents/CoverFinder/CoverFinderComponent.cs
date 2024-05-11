@@ -61,7 +61,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             {
                 if (CoverPoints.Count > 0)
                 {
-                    DebugGizmos.Line(CoverPoints.PickRandom().GetPosition(SAIN), SAIN.Transform.Head, Color.yellow, 0.035f, true, 0.1f);
+                    DebugGizmos.Line(CoverPoints.PickRandom().Position, SAIN.Transform.Head, Color.yellow, 0.035f, true, 0.1f);
                 }
             }
             if (GetTargetPosition(out Vector3? target))
@@ -105,7 +105,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
             foreach (var coverPoint in CoverPoints)
             {
-                Vector3 coverPos = coverPoint.GetPosition(SAIN);
+                Vector3 coverPos = coverPoint.Position;
                 Vector3 directionToCover = coverPos - botPos;
 
                 if (Vector3.Dot(directionToCover, directionToTarget) > dotMin)
@@ -573,7 +573,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public static void OrderPointsByPathDist(List<CoverPoint> points, SAINComponentClass sain)
         {
-            points.Sort((x, y) => x.GetPathLength(sain).CompareTo(y.GetPathLength(sain)));
+            points.Sort((x, y) => x.PathLength.CompareTo(y.PathLength));
         }
 
         private static float CoverUpdateFrequency => SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverUpdateFrequency;
@@ -590,7 +590,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 if (result == null
                     || point.Collider.bounds.size.y > result.Collider.bounds.size.y)
                 {
-                    if (point.IsSafePath(SAIN))
+                    if (point.IsSafePath)
                     {
                         safestResult = point;
                     }
@@ -611,7 +611,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 return false;
             }
 
-            if ((BotOwner.Position - FallBackPoint.GetPosition(SAIN)).sqrMagnitude > FallBackPointResetDistance * FallBackPointResetDistance)
+            if ((BotOwner.Position - FallBackPoint.Position).sqrMagnitude > FallBackPointResetDistance * FallBackPointResetDistance)
             {
                 if (SAINPlugin.DebugMode)
                     Logger.LogInfo($"Resetting fallback point for {BotOwner.name}...");
@@ -661,18 +661,17 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
             foreach (var spottedPoint in SpottedCoverPoints)
             {
-                Vector3 spottedPointPos = spottedPoint.CoverPoint.GetPosition(SAIN);
-                if (spottedPoint.TooClose(spottedPointPos, point.GetPosition(SAIN)))
+                Vector3 spottedPointPos = spottedPoint.CoverPoint.Position;
+                if (spottedPoint.TooClose(spottedPointPos, point.Position))
                 {
                     return true;
                 }
             }
-            bool spotted = point.Spotted(SAIN);
-            if (spotted)
+            if (point.Spotted)
             {
                 SpottedCoverPoints.Add(new SpottedCoverPoint(point));
             }
-            return spotted;
+            return point.Spotted;
         }
 
         private Collider[] GetColliders(out int hits)

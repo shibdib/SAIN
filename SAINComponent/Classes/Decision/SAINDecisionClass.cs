@@ -201,15 +201,15 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
             CoverPoint pointInUse = SAIN.Cover.CoverInUse;
-            if (pointInUse != null && pointInUse.BotInThisCover(SAIN))
+            if (pointInUse != null)
             {
-                return false;
+                if (pointInUse.Status == CoverStatus.InCover)
+                {
+                    return false;
+                }
+                return BotOwner.Mover.IsMoving && timeChangeDec < 30f;
             }
-
-            bool CheckTime = timeChangeDec < 30f; 
-            bool Moving = BotOwner.Mover.HasPathAndNoComplete;
-             
-            return Running && BotOwner.Mover.HasPathAndNoComplete && CheckTime;
+            return false;
         }
 
         private bool CheckStuckDecision(out SoloDecision Decision)

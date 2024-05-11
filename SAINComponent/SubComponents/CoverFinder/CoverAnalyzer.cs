@@ -40,7 +40,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             if (CheckColliderForCover(collider, out Vector3 place, out bool isSafe, path))
             {
                 newPoint = new CoverPoint(SAIN, place, collider, path);
-                newPoint.SetIsSafePath(isSafe, SAIN);
+                newPoint.IsSafePath = isSafe;
                 return true;
             }
             return false;
@@ -52,8 +52,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             NavMeshPath path = new NavMeshPath();
             if (CheckColliderForCover(coverPoint.Collider, out Vector3 place, out bool isSafe, coverPoint.PathToPoint))
             {
-                coverPoint.SetIsSafePath(isSafe, SAIN);
-                coverPoint.SetPosition(SAIN, place);
+                coverPoint.IsSafePath = isSafe;
+                coverPoint.Position = place;
             }
 
             return false;
@@ -175,7 +175,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             {
                 foreach (var point in CoverFinder.SpottedCoverPoints)
                 {
-                    Vector3 coverPos = point.CoverPoint.GetPosition(SAIN);
+                    Vector3 coverPos = point.CoverPoint.Position;
                     if (!point.IsValidAgain && point.TooClose(coverPos, position))
                     {
                         return false;
@@ -307,10 +307,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             {
                 if (member != null && member.BotOwner != BotOwner)
                 {
-                    CoverPoint currentCover = member.Cover.CurrentCoverPoint;
+                    CoverPoint currentCover = member.Cover.CoverInUse;
                     if (currentCover != null)
                     {
-                        Vector3 coverPos = currentCover.GetPosition(SAIN);
+                        Vector3 coverPos = currentCover.Position;
                         if ((position - coverPos).sqrMagnitude < DistanceToBotCoverThresh * DistanceToBotCoverThresh)
                         {
                             return false;
@@ -318,7 +318,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     }
                     else if (member.Cover.FallBackPoint != null)
                     {
-                        Vector3 coverPos = member.Cover.FallBackPoint.GetPosition(SAIN);
+                        Vector3 coverPos = member.Cover.FallBackPoint.Position;
                         if ((position - coverPos).sqrMagnitude < DistanceToBotCoverThresh * DistanceToBotCoverThresh)
                         {
                             return false;

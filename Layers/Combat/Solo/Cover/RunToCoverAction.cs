@@ -29,30 +29,49 @@ namespace SAIN.Layers.Combat.Solo.Cover
             SAIN.Mover.SetTargetMoveSpeed(1f);
             SAIN.Mover.SetTargetPose(1f);
 
-            if (_shallJumpToCover 
-                && _sprinting
-                && _moveSuccess 
-                && _coverDestination != null
-                && BotOwner.GetPlayer.IsSprintEnabled 
-                && BotOwner.Mover.DistDestination < 2f 
-                && _jumpTimer < Time.time)
+            if (SAIN.Cover.CoverInUse != null)
             {
-                _jumpTimer = Time.time + 5f;
-                SAIN.Mover.TryJump();
+                // Jump into cover!
+                float sqrMag = (SAIN.Cover.CoverInUse.Position - SAIN.Position).sqrMagnitude;
+                if (_shallJumpToCover
+                    && _sprinting
+                    && SAIN.Player.IsSprintEnabled
+                    && _moveSuccess
+                    && SAIN.Cover.CoverInUse != null
+                    && sqrMag < SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN * SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN * 1.2f
+                    && _jumpTimer < Time.time)
+                {
+                    _jumpTimer = Time.time + 5f;
+                    SAIN.Mover.TryJump();
+                }
+                // Stop sprinting if close enough so you can navigate properly
+                else if (_moveSuccess
+                    && (_sprinting || SAIN.Player.IsSprintEnabled)
+                    && sqrMag < SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN * SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN)
+                {
+                    SAIN.Mover.Sprint(false);
+                    _sprinting = false;
+                }
             }
 
             if (!BotOwner.Mover.IsMoving)
             {
-                _coverDestination = null;
+                //_coverDestination = null;
             }
 
-            if (_recalcMoveTimer < Time.time && _coverDestination == null)
+            if (_recalcMoveTimer < Time.time && SAIN.Cover.CoverInUse == null)
             {
+                _recalcMoveTimer = Time.time + 0.25f;
                 _moveSuccess = moveToCover(out bool sprinting, out CoverPoint coverDestination);
                 _sprinting = sprinting;
 
                 if (_moveSuccess)
                 {
+                    _shallJumpToCover = EFTMath.RandomBool(8) 
+                        && _sprinting
+                        && BotOwner.Memory.IsUnderFire
+                        && SAIN.Info.Profile.IsPMC;
+
                     if (_sprinting 
                         && _nextTryReloadTime < Time.time 
                         && SAIN.Decision.SelfActionDecisions.LowOnAmmo(0.5f))
@@ -61,22 +80,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         SAIN.SelfActions.TryReload();
                     }
 
-                    _recalcMoveTimer = Time.time + 0.5f;
-                    _coverDestination = coverDestination;
-                    _runDestination = coverDestination.GetPosition(SAIN);
+                    SAIN.Cover.CoverInUse = coverDestination;
+                    _runDestination = coverDestination.Position;
                 }
-                else
-                {
-                    //RecalcTimer = Time.time + 0.1f;
-                }
-            }
-
-            if (_moveSuccess 
-                && _sprinting 
-                && (_runDestination - SAIN.Position).sqrMagnitude < SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN * SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN)
-            {
-                SAIN.Mover.Sprint(false);
-                _sprinting = false;
             }
 
             if (!_moveSuccess)
@@ -104,7 +110,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (currentDecision == SoloDecision.Retreat
                 && fallback != null
-                && fallback.CheckPathSafety(SAIN))
+                && fallback.IsSafePath)
             {
                 if (tryRun(fallback, out sprinting))
                 {
@@ -112,6 +118,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     return true;
                 }
             }
+
+            SAIN.Cover.SortPointsByPathDist();
 
             sprinting = false;
             var coverPoints = SAIN.Cover.CoverPoints;
@@ -135,7 +143,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             bool result = false;
             sprinting = false;
-            Vector3 destination = coverPoint.GetPosition(SAIN);
+            Vector3 destination = coverPoint.Position;
 
             if (shallRun(destination))
             {
@@ -150,7 +158,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 bool shallProne = SAIN.Mover.Prone.ShallProneHide();
                 bool shallCrawl = SAIN.Decision.CurrentSelfDecision != SelfDecision.None
-                    && _coverDestination.GetCoverStatus(SAIN) == CoverStatus.FarFromCover
+                    && coverPoint.Status == CoverStatus.FarFromCover
                     && shallProne;
 
                 //result = SAIN.Mover.GoToPoint(destination, out _, -1, shallCrawl, true);
@@ -163,7 +171,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private bool _moveSuccess;
         private float _recalcMoveTimer;
-        private CoverPoint _coverDestination;
 
         private void EngageEnemy()
         {
@@ -178,14 +185,18 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 SAIN.Talk.TalkAfterDelay(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat, 0.25f);
             }
 
-            _shallJumpToCover = EFTMath.RandomBool(8) 
-                && BotOwner.Memory.IsUnderFire 
-                && SAIN.Info.Profile.IsPMC;
+            _shallJumpToCover = false;
         }
 
         public override void Stop()
         {
-            _coverDestination = null;
+            SoloDecision decision = SAIN.Decision.CurrentSoloDecision;
+            if (decision != SoloDecision.WalkToCover
+                && decision != SoloDecision.RunToCover
+                && decision != SoloDecision.Retreat)
+            {
+                SAIN.Cover.CoverInUse = null;
+            }
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)
@@ -203,14 +214,15 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 stringBuilder.AppendLabeledValue("Current Target Position", null, Color.white, Color.yellow, true);
             }
 
+            var _coverDestination = SAIN.Cover.CoverInUse;
             if (_coverDestination != null)
             {
                 stringBuilder.AppendLine("Cover Destination");
-                stringBuilder.AppendLabeledValue("Status", $"{_coverDestination.GetCoverStatus(SAIN)}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Status", $"{_coverDestination.Status}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Height / Value", $"{_coverDestination.CoverHeight} {_coverDestination.CoverValue}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Path Length", $"{_coverDestination.CalcPathLength(SAIN)}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Straight Distance", $"{(_coverDestination.GetPosition(SAIN) - SAIN.Position).magnitude}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Safe Path?", $"{_coverDestination.CheckPathSafety(SAIN)}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Path Length", $"{_coverDestination.PathLength}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Straight Distance", $"{(_coverDestination.Position - SAIN.Position).magnitude}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Safe Path?", $"{_coverDestination.IsSafePath}", Color.white, Color.yellow, true);
             }
         }
     }

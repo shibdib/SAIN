@@ -32,7 +32,7 @@ namespace SAIN.Layers.Combat.Squad
                 }
                 if (PointDestination != null)
                 {
-                    Vector3 destination = PointDestination.GetPosition(SAIN);
+                    Vector3 destination = PointDestination.Position;
 
                     if ((destination - SAIN.Position).sqrMagnitude < 1f)
                     {
@@ -41,7 +41,7 @@ namespace SAIN.Layers.Combat.Squad
                     }
                     if (_recalcPathTime < Time.time)
                     {
-                        bool sprint = !PointDestination.IsSafePath(SAIN);
+                        bool sprint = !PointDestination.IsSafePath;
 
                         if (sprint && BotOwner.BotRun.Run(destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance))
                         {
