@@ -104,6 +104,7 @@ namespace SAIN
             var patches = new List<Type>() {
                 //typeof(Patches.Generic.ShallRunAwayGrenadePatch),
                 //typeof(Patches.Generic.IsSameWayPatch),
+                typeof(Patches.Generic.StopSetToNavMeshPatch),
                 typeof(Patches.Generic.TurnDamnLightOffPatch),
                 typeof(Patches.Generic.RotateClampPatch),
                 typeof(Patches.Generic.HealCancelPatch),

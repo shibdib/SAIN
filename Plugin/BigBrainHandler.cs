@@ -3,6 +3,7 @@ using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using SAIN.Helpers;
 using SAIN.Layers;
+using SAIN.Layers.Combat.Run;
 using SAIN.Layers.Combat.Solo;
 using SAIN.Layers.Combat.Squad;
 using SAIN.Preset.GlobalSettings.Categories;
@@ -123,6 +124,7 @@ namespace SAIN
                 stringList.Add(brains[i].ToString());
             }
 
+            //BrainManager.AddCustomLayer(typeof(BotRunLayer), stringList, 99);
             BrainManager.AddCustomLayer(typeof(CombatSquadLayer), stringList, settings.SAINCombatSquadLayerPriority);
             BrainManager.AddCustomLayer(typeof(ExtractLayer), stringList, settings.SAINExtractLayerPriority);
             BrainManager.AddCustomLayer(typeof(CombatSoloLayer), stringList, settings.SAINCombatSoloLayerPriority);
@@ -156,12 +158,14 @@ namespace SAIN
             CombatSquadLayer.Name,
             ExtractLayer.Name,
             CombatSoloLayer.Name,
+            BotRunLayer.Name,
         };
 
         public static readonly List<string> SAINCombatLayers = new List<string>
         {
             CombatSquadLayer.Name,
             CombatSoloLayer.Name,
+            BotRunLayer.Name,
         };
 
         public static bool BigBrainInitialized;

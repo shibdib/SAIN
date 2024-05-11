@@ -39,7 +39,6 @@ namespace SAIN.Preset.GlobalSettings
         [Default(true)]
         public bool LimitAIvsAI = true;
 
-
         [Name("Global Difficulty Modifier")]
         [Description("Higher number = harder bots. Affects bot accuracy, recoil, fire-rate, full auto burst lenght, scatter, reaction-time")]
         [Default(1f)]
@@ -111,18 +110,21 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [Default(24)]
         [MinMax(0, 100)]
+        [Hidden]
         public int SAINCombatSquadLayerPriority = 24;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
         [Default(22)]
         [MinMax(0, 100)]
+        [Hidden]
         public int SAINExtractLayerPriority = 22;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
         [Default(20)]
         [MinMax(0, 100)]
+        [Hidden]
         public int SAINCombatSoloLayerPriority = 20;
     }
 }

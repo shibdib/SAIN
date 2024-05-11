@@ -317,8 +317,12 @@ namespace SAIN.SAINComponent.Classes.Mover
             return false;
         }
 
-        public void LookToMovingDirection(float rotateSpeed = 150f, bool sprint = false)
+        public void LookToMovingDirection(float rotateSpeed = 150f, bool sprint = false, bool forceSteer = false)
         {
+            if (SteeringLocked && !forceSteer)
+            {
+                return;
+            }
             if (sprint || Player.IsSprintEnabled)
             {
                 BotOwner.Steering.LookToMovingDirection(500f);
@@ -329,11 +333,23 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
-        public void LookToPoint(Vector3 point, float rotateSpeed = -1)
+        public bool SteeringLocked => SteerLockTime > Time.time;
+        public float SteerLockTime { get; private set; }
+
+        public void LockSteering(float duration)
         {
+            SteerLockTime = Time.time + duration;
+        }
+
+        public void LookToPoint(Vector3 point, float rotateSpeed = -1, bool forceSteer = false)
+        {
+            if (SteeringLocked && !forceSteer)
+            {
+                return;
+            }
             if (rotateSpeed < 0)
             {
-                BotOwner.Steering.LookToPoint(point);
+                BotOwner.Steering.LookToPoint(point, SAIN.HasEnemy ? baseTurnSpeed : baseTurnSpeedNoEnemy);
             }
             else
             {
@@ -349,14 +365,14 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
-        public void LookToDirection(Vector3 direction, bool flat)
+        public void LookToDirection(Vector3 direction, bool flat, float rotateSpeed = -1f)
         {
             if (flat)
             {
                 direction.y = 0f;
             }
             Vector3 pos = SAIN.Transform.Head + direction;
-            LookToPoint(pos);
+            LookToPoint(pos, rotateSpeed);
         }
 
         public bool LookToAimTarget()

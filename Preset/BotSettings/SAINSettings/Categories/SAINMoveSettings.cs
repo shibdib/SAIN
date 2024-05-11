@@ -9,19 +9,19 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         //[JsonIgnore]
         //public float BASE_ROTATE_SPEED = 300;
         
-        [Hidden]
-        [JsonIgnore]
-        public float FIRST_TURN_SPEED = 160;
-        // 160 default
-
-        [Hidden]
-        [JsonIgnore]
-        public float FIRST_TURN_BIG_SPEED = 320;
-        // 320 default
-        
-        [Hidden]
-        [JsonIgnore]
-        public float TURN_SPEED_ON_SPRINT = 300;
+        //[Hidden]
+        //[JsonIgnore]
+        //public float FIRST_TURN_SPEED = 160;
+        //// 160 default
+        //
+        //[Hidden]
+        //[JsonIgnore]
+        //public float FIRST_TURN_BIG_SPEED = 320;
+        //// 320 default
+        //
+        //[Hidden]
+        //[JsonIgnore]
+        //public float TURN_SPEED_ON_SPRINT = 300;
         // 200 default
 
         [Hidden]
@@ -32,24 +32,24 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         // [JsonIgnore]
         // public float BOT_MOVE_IF_DELTA = 0.025f;
 
-        [Hidden]
-        [JsonIgnore]
-        public float REACH_DIST = 0.4f;
-        
-        [Hidden]
-        [JsonIgnore]
-        public float REACH_DIST_RUN = 1f;
-
-        [Hidden]
-        [JsonIgnore]
-        public float BASESTART_SLOW_DIST = 0.65f;
-
-        [Hidden]
-        [JsonIgnore]
-        public float START_SLOW_DIST = 1.25f;
-
-        [Hidden]
-        [JsonIgnore]
-        public float SLOW_COEF = 10;
+        //[Hidden]
+        //[JsonIgnore]
+        //public float REACH_DIST = 0.4f;
+        //
+        //[Hidden]
+        //[JsonIgnore]
+        //public float REACH_DIST_RUN = 1f;
+        //
+        //[Hidden]
+        //[JsonIgnore]
+        //public float BASESTART_SLOW_DIST = 0.65f;
+        //
+        //[Hidden]
+        //[JsonIgnore]
+        //public float START_SLOW_DIST = 1.25f;
+        //
+        //[Hidden]
+        //[JsonIgnore]
+        //public float SLOW_COEF = 10;
     }
 }

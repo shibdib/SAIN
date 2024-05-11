@@ -70,12 +70,12 @@ namespace SAIN.SAINComponent.Classes.Mover
             Lean = new LeanClass(sain);
             Prone = new ProneClass(sain);
             Pose = new PoseClass(sain);
-            SprintController = new SprintController(sain);
+            SprintController = new SAINSprint(sain);
             DogFight = new DogFight(sain);
         }
 
         public DogFight DogFight { get; private set; }
-        private SprintController SprintController;
+        public SAINSprint SprintController { get; private set; }
 
         public void Init()
         {
@@ -109,6 +109,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             SideStep.Update();
             Prone.Update();
             BlindFire.Update();
+            SprintController.Update();
 
             if (Vector3.Distance(LastPosition, SAIN.Position) > CarvingMoveThreshold)
             {
@@ -119,14 +120,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 //SAIN.NavMeshAgent.enabled = false;
                 //BotBodyObstacle.enabled = true;
-            }
-            try
-            {
-                SprintController.Update();
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e);
             }
         }
 
@@ -436,7 +429,14 @@ namespace SAIN.SAINComponent.Classes.Mover
         private IEnumerator StopAfterDelay(float delay)
         {
             yield return new WaitForSeconds(delay);
-            BotOwner.Mover?.Stop();
+            if (BotOwner?.Mover?.IsMoving == true)
+            {
+                BotOwner.Mover?.Stop();
+            }
+            if (SAIN?.Mover?.SprintController?.Running == true)
+            {
+                SAIN.Mover.SprintController.Stop();
+            }
             _stopping = false;
         }
 
@@ -444,6 +444,10 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Sprint(bool value)
         {
+            if (BotOwner.DoorOpener.Interacting)
+            {
+                value = false;
+            }
             if (value)
             {
                 SAIN.Steering.LookToMovingDirection();

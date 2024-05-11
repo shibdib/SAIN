@@ -23,6 +23,23 @@ using System.Collections;
 
 namespace SAIN.Patches.Generic
 {
+    public class StopSetToNavMeshPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotMover), "method_0");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(ref BotOwner ___botOwner_0)
+        {
+            if (SAINPlugin.GetSAIN(___botOwner_0, out var sain, nameof(StopSetToNavMeshPatch)) && sain.Mover.SprintController.Running)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
     public class TurnDamnLightOffPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

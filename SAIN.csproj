@@ -286,6 +286,8 @@
     <Compile Include="Layers\DebugOverlay.cs" />
     <Compile Include="Layers\Extract\LootingBotsInterop.cs" />
     <Compile Include="Layers\Extract\SAINLootingBotsIntegration.cs" />
+    <Compile Include="Layers\Run\BotRunLayer.cs" />
+    <Compile Include="Layers\Run\RunningAction.cs" />
     <Compile Include="Layers\SAINAction.cs" />
     <Compile Include="Layers\SAINLayer.cs" />
     <Compile Include="Plugin\AssemblyInfoClass.cs" />
@@ -306,6 +308,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\LootingBotsSettings.cs" />
     <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
+    <Compile Include="SAINComponent\Classes\TargetController.cs" />
     <Compile Include="SAINComponent\Classes\AimDownSightsController.cs" />
     <Compile Include="SAINComponent\Classes\Decision\DecisionWrapper.cs" />
     <Compile Include="Interfaces.cs" />
@@ -315,10 +318,9 @@
     <Compile Include="SAINComponent\Classes\EnemyPlace.cs" />
     <Compile Include="SAINComponent\Classes\ESearchMove.cs" />
     <Compile Include="SAINComponent\Classes\Mover\DogFight.cs" />
-    <Compile Include="SAINComponent\Classes\Mover\SAINDoorOpener - Copy.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINDoorOpener.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINMovementPlanController.cs" />
-    <Compile Include="SAINComponent\Classes\Mover\SprintController.cs" />
+    <Compile Include="SAINComponent\Classes\Mover\SAINSprint.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINVaultClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINAILimit.cs" />
     <Compile Include="SAINComponent\Classes\SAINMedical.cs" />
