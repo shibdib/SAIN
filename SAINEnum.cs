@@ -123,14 +123,14 @@ namespace SAIN
 
     public enum EPersonality
     {
+        Wreckless,
+        SnappingTurtle,
         GigaChad,
         Chad,
+        Rat,
         Timmy,
         Coward,
-        Rat,
         Normal,
-        SnappingTurtle,
-        Wreckless,
         Custom1,
         Custom2,
         Custom3,

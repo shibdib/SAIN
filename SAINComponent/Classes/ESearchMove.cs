@@ -6,7 +6,7 @@
         DirectMove,
         DirectMovePeek,
         MoveToStartPeek,
-        MoveToEndPeak,
+        MoveToEndPeek,
         MoveToDangerPoint,
         MoveToCorner,
         Wait,

@@ -28,7 +28,7 @@ namespace SAIN.Patches.Talk
         public static bool PatchPrefix(ref Player __instance, ref EPhraseTrigger @event, ref ETagStatus mask, ref bool aggressive)
         {
             // If handling of bots talking is disabled, let the original method run
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.DisableBotTalkPatching || __instance.HealthController?.IsAlive == false)
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching || __instance.HealthController?.IsAlive == false)
             {
                 return true;
             }
@@ -67,7 +67,7 @@ namespace SAIN.Patches.Talk
         public static bool PatchPrefix(ref BotOwner ___botOwner_0, EPhraseTrigger type, ETagStatus? additionalMask = null)
         {
             // If handling of bots talking is disabled, let the original method run
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.DisableBotTalkPatching)
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
             {
                 return true;
             }
@@ -97,7 +97,7 @@ namespace SAIN.Patches.Talk
         public static bool PatchPrefix(ref BotOwner ___botOwner_0)
         {
             // If handling of bots talking is disabled, let the original method run
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.DisableBotTalkPatching)
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
             {
                 return true;
             }

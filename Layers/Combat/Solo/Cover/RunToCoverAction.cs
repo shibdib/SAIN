@@ -90,15 +90,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 SAIN.Mover.DogFight.DogFightMove();
             }
 
-            if (!_sprinting || !BotOwner.Mover.IsMoving)
-            {
-                SAIN.Steering.SteerByPriority();
-                Shoot.Update();
-            }
-            else
-            {
-                SAIN.Steering.LookToMovingDirection(500f, true);
-            }
+            SAIN.Steering.SteerByPriority();
+            Shoot.Update();
         }
 
         private Vector3 _runDestination;
@@ -147,7 +140,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (shallRun(destination))
             {
-                result = BotOwner.BotRun.Run(destination, false);
+                result = BotOwner.BotRun.Run(destination, false, 0.25f);
                 if (result)
                 {
                     sprinting = true;
@@ -162,7 +155,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     && shallProne;
 
                 //result = SAIN.Mover.GoToPoint(destination, out _, -1, shallCrawl, true);
-                result = SAIN.Mover.GoToPoint(destination, out _, -1, shallCrawl);
+                result = SAIN.Mover.GoToPoint(destination, out _, 0.25f, shallCrawl);
             }
             return result;
         }
@@ -190,13 +183,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
-            SoloDecision decision = SAIN.Decision.CurrentSoloDecision;
-            if (decision != SoloDecision.WalkToCover
-                && decision != SoloDecision.RunToCover
-                && decision != SoloDecision.Retreat)
-            {
-                SAIN.Cover.CoverInUse = null;
-            }
+            SAIN.Cover.CheckResetCoverInUse();
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)

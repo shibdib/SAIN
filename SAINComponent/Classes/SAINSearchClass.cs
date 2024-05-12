@@ -72,6 +72,8 @@ namespace SAIN.SAINComponent.Classes
                 Vector3? target = SAIN.CurrentTargetPosition;
                 if (target != null)
                 {
+                    wantToSearch = true;
+                    /*
                     if (SAIN.Info.Profile.IsPMC)
                     {
                         wantToSearch = true;
@@ -81,6 +83,7 @@ namespace SAIN.SAINComponent.Classes
                     {
                         wantToSearch = true;
                     }
+                    */
                 }
             }
             return wantToSearch;
@@ -215,7 +218,7 @@ namespace SAIN.SAINComponent.Classes
 
                 if (newTarget != null
                     && hasTarget 
-                    && (newTarget.Value - FinalDestination).sqrMagnitude > 5f * 5f
+                    && (newTarget.Value - FinalDestination).sqrMagnitude > 2f * 2f
                     && CalculatePath(newTarget.Value) == NavMeshPathStatus.PathComplete)
                 {
                     SearchedTargetPosition = false;
@@ -259,7 +262,7 @@ namespace SAIN.SAINComponent.Classes
                     for (int i = knownPlaces.Count - 1; i >= 0; i--)
                     {
                         EnemyPlace enemyPlace = knownPlaces[i];
-                        if (enemyPlace?.Position != null && !enemyPlace.HasArrived && !enemyPlace.HasSeen)
+                        if (enemyPlace?.Position != null && !enemyPlace.HasArrived)
                         {
                             hasTarget = true;
                             return enemyPlace.Position.Value;
@@ -368,7 +371,7 @@ namespace SAIN.SAINComponent.Classes
                 var personalitySettings = SAIN.Info.PersonalitySettings;
                 if (personalitySettings != null)
                 {
-                    baseTime /= personalitySettings.AggressionMultiplier;
+                    baseTime /= personalitySettings.SearchWaitMultiplier;
                 }
                 float waitTime = baseTime * Random.Range(0.25f, 1.25f);
                 WaitPointTimer = Time.time + waitTime;
@@ -495,6 +498,11 @@ namespace SAIN.SAINComponent.Classes
             switch (LastState)
             {
                 case ESearchMove.None:
+                    if (_finishedPeek && HasPathToSearchTarget(out Vector3 finalDestination, false))
+                    {
+                        _finishedPeek = false;
+                        FinalDestination = finalDestination;
+                    }
                     if ((shallSprint || SearchMovePoint == null) 
                         && MoveToPoint(FinalDestination, shallSprint))
                     {
@@ -506,7 +514,7 @@ namespace SAIN.SAINComponent.Classes
                     {
                         ActiveDestination = SearchMovePoint.StartPeekPosition;
                         CurrentState = ESearchMove.MoveToStartPeek;
-                        NextState = ESearchMove.Wait;
+                        NextState = ESearchMove.MoveToEndPeek;
                     }
                     break;
 
@@ -551,8 +559,8 @@ namespace SAIN.SAINComponent.Classes
                         && MoveToPoint(SearchMovePoint.EndPeekPosition, shallSprint))
                     {
                         ActiveDestination = SearchMovePoint.EndPeekPosition;
-                        CurrentState = ESearchMove.Wait;
-                        NextState = ESearchMove.MoveToEndPeak;
+                        CurrentState = NextState;
+                        NextState = ESearchMove.Wait;
                     }
                     else if (ShallRecalcPath())
                     {
@@ -560,7 +568,7 @@ namespace SAIN.SAINComponent.Classes
                     }
                     break;
 
-                case ESearchMove.MoveToEndPeak:
+                case ESearchMove.MoveToEndPeek:
 
                     if (_setMaxSpeedPose)
                     {
@@ -573,10 +581,10 @@ namespace SAIN.SAINComponent.Classes
                         SAIN.Mover.SetTargetPose(pose);
                     }
 
-                    if (BotIsAtPoint(ActiveDestination) && MoveToPoint(SearchMovePoint.DangerPoint, shallSprint))
+                    if (BotIsAtPoint(ActiveDestination))
                     {
                         ActiveDestination = SearchMovePoint.DangerPoint;
-                        CurrentState = ESearchMove.Wait;
+                        CurrentState = NextState;
                         NextState = ESearchMove.MoveToDangerPoint;
                     }
                     else if (ShallRecalcPath())
@@ -600,7 +608,9 @@ namespace SAIN.SAINComponent.Classes
 
                     if (BotIsAtPoint(ActiveDestination))
                     {
-                        _finishedSearchPath = true;
+                        CurrentState = ESearchMove.None;
+                        NextState = ESearchMove.None;
+                        _finishedPeek = true;
                         return;
                     }
                     else if (ShallRecalcPath())
@@ -621,6 +631,7 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
+        private bool _finishedPeek;
         private bool _finishedSearchPath;
 
         private bool CheckIfStuck()
@@ -791,7 +802,7 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        public bool BotIsAtPoint(Vector3 point, float reachDist = 1f, bool Sqr = true)
+        public bool BotIsAtPoint(Vector3 point, float reachDist = 0.5f, bool Sqr = true)
         {
             if (Sqr)
             {

@@ -60,6 +60,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
+            SAIN.Cover.CheckResetCoverInUse();
             SAIN.Medical.Surgery.SurgeryStarted = false;
             BotOwner.MovementResume();
         }

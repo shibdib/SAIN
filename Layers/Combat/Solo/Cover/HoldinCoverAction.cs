@@ -123,6 +123,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
+            SAIN.Cover.CheckResetCoverInUse();
             SAIN.Mover.Prone.SetProne(false);
         }
 

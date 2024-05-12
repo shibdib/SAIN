@@ -83,24 +83,35 @@ namespace SAIN.SAINComponent.Classes.Debug
             if (_nextCheckNavMeshTime < Time.time)
             {
                 _nextCheckNavMeshTime = Time.time + 1f;
+                bool wasOnNavMesh = _isOnNavMesh;
                 _isOnNavMesh = CheckBotIsOnNavMesh();
 
-                if (!_isOnNavMesh 
-                    && FindPathCoroutine == null)
+                if (!_isOnNavMesh)
                 {
-                    FindPathCoroutine = SAIN.StartCoroutine(FindPathBackToNavMesh());
+                    if (wasOnNavMesh)
+                    {
+                        _timeOffMeshStart = Time.time;
+                    }
+                    if (Time.time - _timeOffMeshStart > 3f && _nextResetTime < Time.time)
+                    {
+                        _nextResetTime = Time.time + 5f;
+                        Logger.LogWarning($"{BotOwner.name} is off navmesh! Trying to fix...");
+                        SAIN.Mover.ResetPath(0.33f);
+                    }
                 }
-                else if (_isOnNavMesh 
-                    && FindPathCoroutine != null)
+                if (_isOnNavMesh)
                 {
-                    BotOwner.MovementResume();
-                    BotOwner.Mover.RecalcWay();
-                    SAIN.StopCoroutine(FindPathCoroutine);
-                    FindPathCoroutine = null;
+                    if (_timeOffMeshStart > 0)
+                    {
+                        _timeOffMeshStart = -1f;
+                    }
                 }
             }
             return _isOnNavMesh;
         }
+
+        private float _timeOffMeshStart;
+        private float _nextResetTime;
 
         public Vector2 findMoveDirection(Vector3 direction)
         {
@@ -239,7 +250,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private bool CheckBotIsOnNavMesh()
         {
-            return NavMesh.SamplePosition(SAIN.Position, out _, 0.05f, -1);
+            return NavMesh.SamplePosition(SAIN.Position, out _, 0.15f, -1);
         }
 
         private void CheckRecalcPath()
@@ -266,7 +277,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                 && Time.time - TimeStartedMoving > 1f)
             {
                 _recalcPathTimer = Time.time + 2f;
-                //SAIN.Mover.RecalcWay();
+                SAIN.Mover.ResetPath(0.33f);
             }
         }
 
@@ -316,6 +327,8 @@ namespace SAIN.SAINComponent.Classes.Debug
             if (!NavMesh.CalculatePath(SAIN.Position, preVaultPosition, -1, path) || path.status != NavMeshPathStatus.PathComplete)
             {
                 Logger.LogWarning($"{BotOwner.name} has vaulted to somewhere they can't get down from! Trying to fix...");
+
+                BotOwner.Mover.Stop();
 
                 BotOwner.Mover.GoToByWay(
                     new Vector3[] { SAIN.Position, preVaultPosition }, 0.1f);
@@ -382,6 +395,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                 && _botVaultedTime + 1f < Time.time)
             {
                 _botVaultedTime = -1f;
+                SAIN.Mover.StopMove();
                 BotOwner.Mover.RecalcWay();
             }
         }
@@ -399,10 +413,10 @@ namespace SAIN.SAINComponent.Classes.Debug
                     return;
                 }
 
-                // if (!FixOffMeshBot())
-                // {
-                //     return;
-                // }
+                if (!FixOffMeshBot())
+                {
+                    return;
+                }
 
                 if (_nextVaultCheckTime < Time.time && BotOwner.Mover.IsMoving && TimeStartedMoving + 1f < Time.time)
                 {

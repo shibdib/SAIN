@@ -40,10 +40,12 @@ namespace SAIN.SAINComponent.Classes
                     HealthStatusChanged?.Invoke(HealthStatus);
                 }
             }
+
             if (_checkIndoorsTime < Time.time)
             {
-                _checkIndoorsTime = Time.time + 1f;
-                IsIndoors = Physics.SphereCast(BotOwner.LookSensor._headPoint, 0.5f, Vector3.up, out _, 10f, LayerMaskClass.HighPolyWithTerrainMask);
+                _checkIndoorsTime = Time.time + 0.2f;
+                IsIndoors = Player.AIData.EnvironmentId != 0;
+                //IsIndoors = Physics.SphereCast(BotOwner.LookSensor._headPoint, 0.5f, Vector3.up, out _, 20f, LayerMaskClass.HighPolyWithTerrainMask);
             }
 
             checkResetUnderFire();

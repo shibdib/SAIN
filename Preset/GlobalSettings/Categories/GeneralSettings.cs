@@ -9,25 +9,24 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class GeneralSettings
     {
-        [MinMax(0.1f, 1f, 100f)]
         [JsonIgnore]
         [Hidden]
         public float SprintReachDistance = 1f;
 
-        [MinMax(0.1f, 1f, 100f)]
         [JsonIgnore]
         [Hidden]
         public float BaseReachDistance = 0.5f;
+
+        [Name("Global Difficulty Modifier")]
+        [Description("Higher number = harder bots. Affects bot accuracy, recoil, fire-rate, full auto burst lenght, scatter, reaction-time")]
+        [Default(1f)]
+        [MinMax(0.1f, 5f, 100f)]
+        public float GlobalDifficultyModifier = 1f;
 
         [Name("Performance Mode")]
         [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN. Can cause bots to take too long to find cover to go to.")]
         [Default(false)]
         public bool PerformanceMode = false;
-
-        [Name("Talkative Scavs")]
-        [Description("When at peace, scavs will talk to each other and be noisy. Revealing their location to PMCs.")]
-        [Default(true)]
-        public bool TalkativeScavs = true;
 
         [Name("Bots Open Doors Fast")]
         [Description("WIP. Can cause bots to get stuck on doors sometimes.")]
@@ -38,12 +37,6 @@ namespace SAIN.Preset.GlobalSettings
         [Description("Disables certains functions when ai are fighting other ai, and they aren't close to a human player. Turn off if you are spectating ai in free-cam.")]
         [Default(true)]
         public bool LimitAIvsAI = true;
-
-        [Name("Global Difficulty Modifier")]
-        [Description("Higher number = harder bots. Affects bot accuracy, recoil, fire-rate, full auto burst lenght, scatter, reaction-time")]
-        [Default(1f)]
-        [MinMax(0.1f, 5f, 100f)]
-        public float GlobalDifficultyModifier = 1f;
 
         [Name("Bot Grenades")]
         [Default(true)]
@@ -100,11 +93,6 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0.1f, 1.5f, 100f)]
         [Advanced]
         public float NotLookingAccuracyAmount = 0.33f;
-
-        [Name("Disable Talking Patches")]
-        [Description("Disable all SAIN based handling of bot talking. No more squad chatter, no more quiet bots, completely disables SAIN's handling of bot voices")]
-        [Default(false)]
-        public bool DisableBotTalkPatching = false;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]

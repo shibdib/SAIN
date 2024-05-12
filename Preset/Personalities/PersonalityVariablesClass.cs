@@ -60,6 +60,12 @@ namespace SAIN.Preset.Personalities
             [MinMax(0.01f, 5f, 100)]
             public float AggressionMultiplier = 1f;
 
+            [Name("Search Wait Multiplier")]
+            [Description("Linearly increases or decreases the time a bot pauses while searching.")]
+            [Default(1f)]
+            [MinMax(0.01f, 5f, 100)]
+            public float SearchWaitMultiplier = 1f;
+
             [Name("Hold Ground Base Time")]
             [Description("The base time, before modifiers, that a personality will stand their ground and shoot or return fire on an enemy if caught out of cover.")]
             [Default(1f)]

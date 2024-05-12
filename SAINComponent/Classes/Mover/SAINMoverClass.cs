@@ -440,6 +440,17 @@ namespace SAIN.SAINComponent.Classes.Mover
             _stopping = false;
         }
 
+        public void ResetPath(float delay)
+        {
+            SAIN.StartCoroutine(resetPath(0.33f));
+        }
+
+        private IEnumerator resetPath(float delay)
+        {
+            yield return StopAfterDelay(delay);
+            BotOwner?.Mover?.RecalcWay();
+        }
+
         private bool _stopping;
 
         public void Sprint(bool value)

@@ -5,6 +5,7 @@ using EFT.Ballistics;
 using EFT.Utilities;
 using SAIN.Components;
 using SAIN.Helpers;
+using SAIN.Plugin;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
@@ -16,28 +17,39 @@ using UnityEngineInternal;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
-    public enum ISquadOrder
-    {
-        None = 0,
-        HoldPosition = 1,
-        Search = 2,
-        Rush = 3,
-        Suppress = 4,
-        Help = 5,
-    }
     public class GroupTalk : SAINBase, ISAINClass
     {
         public GroupTalk(SAINComponentClass bot) : base(bot)
         {
         }
 
+        public bool FriendIsClose
+        {
+            get
+            {
+                if (Player == null)
+                {
+                    return false;
+                }
+                if (_nextCheckFriendsTime > Time.time)
+                {
+                    return _friendIsClose;
+                }
+
+                _nextCheckFriendsTime = Time.time + 1f; 
+                updateFriendClose();
+                return _friendIsClose;
+            }
+        }
+
         public void Init()
         {
+            updateConfigSettings();
         }
 
         public void Update()
         {
-            if (!SAIN.BotActive || SAIN.GameIsEnding || !SAIN.Talk.CanTalk || !BotSquad.BotInGroup)
+            if (!SAIN.BotActive || SAIN.GameIsEnding || !SAIN.Talk.CanTalk || !BotSquad.BotInGroup || !SAIN.Info.FileSettings.Mind.SquadTalk || SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
             {
                 if (Subscribed)
                 {
@@ -46,27 +58,28 @@ namespace SAIN.SAINComponent.Classes.Talk
                 return;
             }
 
-            if (!SAIN.Info.FileSettings.Mind.SquadTalk)
-            {
-                return;
-            }
-
             if (!Subscribed)
             {
                 Subscribe();
             }
+            else
+            {
+                checkGroupTalk();
+            }
+        }
 
+        private void checkGroupTalk()
+        {
             if (TalkTimer < Time.time)
             {
-                TalkTimer = Time.time + 1f;
-                FriendIsClose = AreFriendsClose();
+                TalkTimer = Time.time + _groupTalkFreq;
                 if (FriendIsClose)
                 {
                     if (ShallReportReloading())
                     {
                         return;
                     }
-                    if (SAIN.Squad.IAmLeader 
+                    if (SAIN.Squad.IAmLeader
                         && UpdateLeaderCommand())
                     {
                         return;
@@ -99,16 +112,10 @@ namespace SAIN.SAINComponent.Classes.Talk
                     {
                         return;
                     }
-                    if (HearNoise())
+                    if (EFTMath.RandomBool(25)
+                        && TalkBotDecision(out var trigger, out _))
                     {
-                        return;
-                    }
-                    if (TalkBotDecision(out var trigger, out _))
-                    {
-                        if (EFTMath.RandomBool(25))
-                        {
-                            SAIN.Talk.Say(trigger, null, false);
-                        }
+                        SAIN.Talk.Say(trigger, null, false);
                     }
                 }
             }
@@ -119,15 +126,11 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (_nextReportReloadTime < Time.time
                 && SAIN.Memory.Decisions.Self.Current == SelfDecision.Reload)
             {
-                _nextReportReloadTime = Time.time + 1f;
-                return SAIN.Talk.GroupSay(reloadPhrases.PickRandom(), null, false, 33);
+                _nextReportReloadTime = Time.time + _reportReloadingFreq;
+                return SAIN.Talk.GroupSay(reloadPhrases.PickRandom(), null, false, _reportReloadingChance);
             }
             return false;
         }
-
-        private readonly List<EPhraseTrigger> reloadPhrases = new List<EPhraseTrigger> { EPhraseTrigger.OnWeaponReload, EPhraseTrigger.NeedAmmo, EPhraseTrigger.OnOutOfAmmo };
-
-        private float _nextReportReloadTime;
 
         private bool ShallReportLostVisual()
         {
@@ -135,12 +138,12 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (enemy != null && enemy.Vision.ShallReportLostVisual)
             {
                 enemy.Vision.ShallReportLostVisual = false;
-                if (EFTMath.RandomBool(40))
+                if (EFTMath.RandomBool(_reportLostVisualChance))
                 {
                     ETagStatus mask = PersonIsClose(enemy.EnemyPlayer) ? ETagStatus.Combat : ETagStatus.Aware;
-                    if (enemy.TimeSinceSeen > 60 && EFTMath.RandomBool(33))
+                    if (enemy.TimeSinceSeen > _reportRatTimeSinceSeen && EFTMath.RandomBool(_reportRatChance))
                     {
-                        return SAIN.Talk.GroupSay(EPhraseTrigger.Rat, null, false, 33);
+                        return SAIN.Talk.GroupSay(EPhraseTrigger.Rat, null, false, 100);
                     }
                     else
                     {
@@ -166,12 +169,12 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
-            if ((player.Position - SAIN.Position).sqrMagnitude > 50f * 50f)
+            if ((player.Position - SAIN.Position).sqrMagnitude > _reportEnemyMaxDist * _reportEnemyMaxDist)
             {
                 return;
             }
             SAIN.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position, true);
-            SAIN.Talk.GroupSay(EPhraseTrigger.OnEnemyConversation, null, false, 5);
+            SAIN.Talk.GroupSay(EPhraseTrigger.OnEnemyConversation, null, false, _reportEnemyConversationChance);
         }
 
         public void TalkEnemySniper()
@@ -186,26 +189,48 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             if (Subscribed)
             {
-                SAIN.Squad.SquadInfo.MemberKilled -= OnFriendlyDown;
-                SAINPlugin.BotController.PlayerTalk -= EnemyConversation;
-                BotOwner.BotsGroup.OnReportEnemy -= OnAddEnemy;
-                BotOwner.DeadBodyWork.OnStartLookToBody -= OnLootBody;
-                BotOwner.BotsGroup.OnEnemyRemove -= OnEnemyDown;
                 Subscribed = false;
+                PresetHandler.PresetsUpdated -= updateConfigSettings;
+
+                var squad = SAIN?.Squad?.SquadInfo;
+                if (squad != null)
+                {
+                    squad.MemberKilled -= OnFriendlyDown;
+                    squad.OnSoundHeard -= onNoiseHeard;
+                }
+                var botController = SAINPlugin.BotController;
+                if (botController != null)
+                {
+                    botController.PlayerTalk -= EnemyConversation;
+                }
+
+                if (BotOwner != null)
+                {
+                    BotOwner.DeadBodyWork.OnStartLookToBody -= OnLootBody;
+                    var botsGroup = BotOwner.BotsGroup;
+                    if (botsGroup != null)
+                    {
+                        botsGroup.OnEnemyRemove -= OnEnemyDown;
+                    }
+                }
             }
         }
 
         private void Subscribe()
         {
-            if (!Subscribed)
+            var squad = SAIN?.Squad?.SquadInfo;
+            if (!Subscribed && squad != null)
             {
                 Subscribed = true;
 
-                SAIN.Squad.SquadInfo.MemberKilled += OnFriendlyDown;
+                PresetHandler.PresetsUpdated += updateConfigSettings;
+
+                squad.MemberKilled += OnFriendlyDown;
+                squad.OnSoundHeard += onNoiseHeard;
                 SAINPlugin.BotController.PlayerTalk += EnemyConversation;
-                BotOwner.BotsGroup.OnReportEnemy += OnAddEnemy;
                 BotOwner.DeadBodyWork.OnStartLookToBody += OnLootBody;
                 BotOwner.BotsGroup.OnEnemyRemove += OnEnemyDown;
+
             }
         }
 
@@ -213,19 +238,16 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             if (_nextCheckEnemyHPTime < Time.time && SAIN.Enemy != null)
             {
-                _nextCheckEnemyHPTime = Time.time + 8f;
-                if (EFTMath.RandomBool(40))
+                _nextCheckEnemyHPTime = Time.time + _reportEnemyHealthFreq;
+                if (EFTMath.RandomBool(_reportEnemyHealthChance))
                 {
                     ETagStatus health = SAIN.Enemy.EnemyPlayer.HealthStatus;
-                    return SAIN.Enemy != null
-                        && (health == ETagStatus.Dying || health == ETagStatus.BadlyInjured)
+                    return (health == ETagStatus.Dying || health == ETagStatus.BadlyInjured)
                         && SAIN.Talk.GroupSay(EPhraseTrigger.OnEnemyShot, null, false, 100);
                 }
             }
             return false;
         }
-
-        private float _nextCheckEnemyHPTime;
 
         private bool CheckEnemyContact()
         {
@@ -264,18 +286,21 @@ namespace SAIN.SAINComponent.Classes.Talk
                 return;
             }
 
-            var settings = person?.Profile?.Info?.Settings;
-            if (settings == null || !BotOwner.BotsGroup.IsPlayerEnemyByRole(settings.Role))
+            if (!_reportEnemyKilledToxicSquadLeader)
             {
-                return;
+                var settings = person?.Profile?.Info?.Settings;
+                if (settings == null || !BotOwner.BotsGroup.IsPlayerEnemyByRole(settings.Role))
+                {
+                    return;
+                }
+
+                if (!FriendIsClose || !PersonIsClose(person))
+                {
+                    return;
+                }
             }
 
-            if (!FriendIsClose || !PersonIsClose(person))
-            {
-                return;
-            }
-
-            if (EFTMath.RandomBool(60))
+            if (EFTMath.RandomBool(_reportEnemyKilledChance))
             {
                 float randomTime = UnityEngine.Random.Range(0.2f, 0.6f);
                 SAIN.Talk.TalkAfterDelay(EPhraseTrigger.EnemyDown, ETagStatus.Aware, randomTime);
@@ -283,7 +308,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 var leader = SAIN.Squad.SquadInfo?.LeaderComponent;
                 if (leader?.Person?.IPlayer != null 
                     && !SAIN.Squad.IAmLeader 
-                    && EFTMath.RandomBool(60) 
+                    && EFTMath.RandomBool(_reportEnemyKilledSquadLeadChance) 
                     && PersonIsClose(leader.Person.IPlayer))
                 {
                     leader.Talk.TalkAfterDelay(EPhraseTrigger.GoodWork, ETagStatus.Aware, randomTime + 0.75f);
@@ -301,40 +326,36 @@ namespace SAIN.SAINComponent.Classes.Talk
             return player != null && BotOwner != null && (player.Position - BotOwner.Position).magnitude < 30f;
         }
 
-        public bool FriendIsClose;
-
-        private const float LeaderFreq = 1f;
-        private const float TalkFreq = 0.5f;
-        private const float FriendTooFar = 30f;
-        private const float FriendTooClose = 5f;
-        private const float EnemyTooClose = 5f;
-
-        private void OnFriendlyDown(IPlayer player, DamageInfo damage, float time)
+        private void updateFriendClose()
         {
-            if (BotOwner.IsDead || BotOwner.BotState != EBotState.Active)
+            _friendIsClose = false;
+            foreach (var member in SAIN.Squad.Members.Values)
             {
-                return;
-            }
-            if (!FriendIsClose || !PersonIsClose(player))
-            {
-                return;
-            }
-            if (EFTMath.RandomBool(60))
-            {
-                SAIN.Talk.TalkAfterDelay(EPhraseTrigger.OnFriendlyDown, ETagStatus.Combat, UnityEngine.Random.Range(0.33f, 0.66f));
+                if (member != null
+                    && member.Player != null
+                    && member.Player.ProfileId != Player.ProfileId
+                    && member.BotIsAlive
+                    && (member.Position - BotOwner.Position).sqrMagnitude < _friendCloseDist * _friendCloseDist)
+                {
+                    _friendIsClose = true;
+                    break;
+                }
             }
         }
 
-        private void OnAddEnemy(IPlayer person, Vector3 enemyPos, Vector3 weaponRootLast, EEnemyPartVisibleType isVisibleOnlyBySense)
+        private void OnFriendlyDown(IPlayer player, DamageInfo damage, float time)
         {
-            if (BotOwner.IsDead || BotOwner.BotState != EBotState.Active)
+            if (BotOwner.IsDead || BotOwner.BotState != EBotState.Active || !EFTMath.RandomBool(_reportFriendKilledChance))
             {
                 return;
             }
-            if (!FriendIsClose)
+
+            updateFriendClose();
+            if (!_friendIsClose || !PersonIsClose(player))
             {
                 return;
             }
+            SAIN.Talk.TalkAfterDelay(EPhraseTrigger.OnFriendlyDown, ETagStatus.Combat, UnityEngine.Random.Range(0.33f, 0.66f));
         }
 
         private void OnLootBody(float num)
@@ -349,25 +370,6 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             EPhraseTrigger trigger = LootPhrases.PickRandom();
             SAIN.Talk.Say(trigger, null, true);
-        }
-
-        private readonly List<EPhraseTrigger> LootPhrases = new List<EPhraseTrigger> { EPhraseTrigger.LootBody, EPhraseTrigger.LootGeneric, EPhraseTrigger.OnLoot };
-
-        private const float _friendCloseDist = 20f;
-
-        private bool AreFriendsClose()
-        {
-            foreach (var member in SAIN.Squad.Members.Values)
-            {
-                if (member.Player != null 
-                    && member.Player.ProfileId != Player.ProfileId 
-                    && member.BotIsAlive 
-                    && (member.Position - BotOwner.Position).sqrMagnitude < _friendCloseDist * _friendCloseDist)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private void AllMembersSay(EPhraseTrigger trigger, ETagStatus mask, float delay = 1.5f, float chance = 100f)
@@ -416,7 +418,8 @@ namespace SAIN.SAINComponent.Classes.Talk
 
                             if (SAIN.Talk.Say(trigger))
                             {
-                                AllMembersSay(EPhraseTrigger.Roger, ETagStatus.Aware, Random.Range(0.65f, 1.25f), 50f);
+                                var mask = EFTMath.RandomBool() ? ETagStatus.Aware : ETagStatus.Unaware;
+                                AllMembersSay(EPhraseTrigger.Roger, mask, Random.Range(0.65f, 1.25f), 50f);
                                 return true;
                             }
                         }
@@ -425,8 +428,6 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
             return false;
         }
-
-        private float CheckFriendliesTimer = 0f;
 
         private bool TalkHurt()
         {
@@ -477,65 +478,54 @@ namespace SAIN.SAINComponent.Classes.Talk
             return false;
         }
 
-        public bool TalkRetreat => SAIN.Enemy?.IsVisible == true && SAIN.Decision.RetreatDecisions.Contains(SAIN.Memory.Decisions.Main.Current);
-
         private bool ShallTalkRetreat()
         {
-            if (_nextCheckTalkRetreatTime < Time.time && TalkRetreat)
+            if (_nextCheckTalkRetreatTime < Time.time
+                && EFTMath.RandomBool(_talkRetreatChance)
+                && SAIN.HasEnemy
+                && (SAIN.Enemy.IsVisible == true || SAIN.Enemy.InLineOfSight)
+                && SAIN.Decision.RetreatDecisions.Contains(SAIN.Memory.Decisions.Main.Current))
             {
-                _nextCheckTalkRetreatTime = Time.time + 10f;
-                if (EFTMath.RandomBool(60))
-                {
-                    return SAIN.Talk.Say(EFTMath.RandomBool(30) ? EPhraseTrigger.NeedHelp : EPhraseTrigger.CoverMe, ETagStatus.Combat, true);
-                }
+                _nextCheckTalkRetreatTime = Time.time + _talkRetreatFreq;
+                return SAIN.Talk.Say(_talkRetreatTrigger, _talkRetreatMask, _talkRetreatGroupDelay);
             }
             return false;
         }
-
-        private float _nextCheckTalkRetreatTime;
 
         private bool ShallReportNeedHelp()
         {
-            if (SAIN.Enemy != null
-                && BotOwner.Memory.IsUnderFire)
+            if (_underFireNeedHelpTime < Time.time 
+                && EFTMath.RandomBool(_underFireNeedHelpChance) 
+                && SAIN.Enemy != null
+                && BotOwner.Memory.IsUnderFire 
+                && SAIN.Memory.LastUnderFireSource == SAIN.Enemy.EnemyIPlayer)
             {
-                if (EFTMath.RandomBool(45))
-                {
-                    return SAIN.Talk.Say(EPhraseTrigger.NeedHelp, ETagStatus.Combat, true);
-                }
+                _underFireNeedHelpTime = Time.time + _underFireNeedHelpFreq;
+                return SAIN.Talk.Say(_underFireNeedHelpTrigger, _underFireNeedHelpMask, _underFireNeedHelpGroupDelay);
             }
             return false;
         }
 
-        private bool HearNoise()
+        private void onNoiseHeard(PlaceForCheck heardNoise)
         {
-            if (SAIN.Enemy != null)
+            float time = Time.time;
+            if (BotOwner == null || !BotOwner.Memory.IsPeace || _hearNoiseTime > time || !EFTMath.RandomBool(_hearNoiseChance))
             {
-                return false;
+                return;
             }
 
-            var hear = BotOwner.BotsGroup.YoungestPlace(BotOwner, 50f, true);
+            _hearNoiseTime = time + _hearNoiseFreq;
 
-            if (hear != null)
+            if (heardNoise == null || heardNoise.IsDanger)
             {
-                if (hear.CheckingPlayer != null && hear.CheckingPlayer.ProfileId != BotOwner.ProfileId)
-                {
-                    return false;
-                }
-                if (!hear.IsDanger)
-                {
-                    if (hear.CreatedTime + 0.5f < Time.time && hear.CreatedTime + 1f > Time.time)
-                    {
-                        if (EFTMath.RandomBool(60))
-                        {
-                            SAIN.Talk.Say(EPhraseTrigger.NoisePhrase, ETagStatus.Aware, true);
-                            return true;
-                        }
-                    }
-                }
+                return;
+            }
+            if (heardNoise.CheckingPlayer != null && heardNoise.CheckingPlayer.ProfileId != BotOwner.ProfileId)
+            {
+                return;
             }
 
-            return false;
+            SAIN.Talk.TalkAfterDelay(EPhraseTrigger.NoisePhrase, ETagStatus.Aware, 0.33f);
         }
 
         private bool TalkBotDecision(out EPhraseTrigger trigger, out ETagStatus mask)
@@ -644,27 +634,26 @@ namespace SAIN.SAINComponent.Classes.Talk
             return false;
         }
 
-        private float EnemyPosTimer = 0f;
-
         public bool TalkEnemyLocation()
         {
             if (EnemyPosTimer < Time.time && SAIN.Enemy != null)
             {
-                EnemyPosTimer = Time.time + 1f;
+                EnemyPosTimer = Time.time + _enemyLocationTalkFreq;
                 var trigger = EPhraseTrigger.PhraseNone;
                 var mask = ETagStatus.Aware;
 
                 var enemy = SAIN.Enemy;
-                if (SAIN.Enemy.IsVisible && enemy.EnemyLookingAtMe && EFTMath.RandomBool(40))
+
+                if (SAIN.Enemy.IsVisible 
+                    && enemy.EnemyLookingAtMe 
+                    && EFTMath.RandomBool(_enemyNeedHelpChance))
                 {
                     mask = ETagStatus.Combat;
                     bool injured = !SAIN.Memory.Healthy && !SAIN.Memory.Injured;
                     trigger = injured ? EPhraseTrigger.NeedHelp : EPhraseTrigger.OnRepeatedContact;
                 }
-                else if (
-                    (enemy.IsVisible 
-                    || (enemy.Seen && enemy.TimeSinceSeen < 3f)) 
-                    && EFTMath.RandomBool(60))
+                else if ((enemy.IsVisible || (enemy.Seen && enemy.TimeSinceSeen < _enemyLocationTalkTimeSinceSeen)) 
+                    && EFTMath.RandomBool(_enemyLocationTalkChance))
                 {
                     EnemyDirectionCheck(enemy.EnemyPosition, out trigger, out mask);
                 }
@@ -681,7 +670,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool EnemyDirectionCheck(Vector3 enemyPosition, out EPhraseTrigger trigger, out ETagStatus mask)
         {
             // Check Behind
-            if (IsEnemyInDirection(enemyPosition, 180f, AngleToDot(75f)))
+            if (IsEnemyInDirection(enemyPosition, 180f, AngleToDot(_enemyLocationBehindAngle)))
             {
                 mask = ETagStatus.Aware;
                 trigger = EPhraseTrigger.OnSix;
@@ -689,7 +678,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
 
             // Check Left Flank
-            if (IsEnemyInDirection(enemyPosition, -90f, AngleToDot(33f)))
+            if (IsEnemyInDirection(enemyPosition, -90f, AngleToDot(_enemyLocationSideAngle)))
             {
                 mask = ETagStatus.Aware;
                 trigger = EPhraseTrigger.LeftFlank;
@@ -697,7 +686,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
 
             // Check Right Flank
-            if (IsEnemyInDirection(enemyPosition, 90f, AngleToDot(33f)))
+            if (IsEnemyInDirection(enemyPosition, 90f, AngleToDot(_enemyLocationSideAngle)))
             {
                 mask = ETagStatus.Aware;
                 trigger = EPhraseTrigger.RightFlank;
@@ -705,7 +694,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
 
             // Check Front
-            if (IsEnemyInDirection(enemyPosition, 0f, AngleToDot(33f)))
+            if (IsEnemyInDirection(enemyPosition, 0f, AngleToDot(_enemyLocationFrontAngle)))
             {
                 mask = ETagStatus.Combat;
                 trigger = EPhraseTrigger.InTheFront;
@@ -736,33 +725,6 @@ namespace SAIN.SAINComponent.Classes.Talk
                 return true;
             }
             return false;
-
-            int tooClose = 0;
-            int total = 0;
-
-            foreach (var member in SAIN.Squad.Members.Values)
-            {
-                if (member == null) continue;
-
-                total++;
-                if ((member.Position - SAIN.Position).sqrMagnitude <= FriendTooClose * FriendTooClose)
-                {
-                    tooClose++;
-                }
-            }
-
-            float tooCloseRatio = (float)tooClose / (float)total;
-
-            if (tooCloseRatio > 0.5f)
-            {
-                trigger = EPhraseTrigger.Spreadout;
-            }
-            if (SAIN.Squad.SquadInfo?.MemberIsRegrouping == true)
-            {
-                trigger = EPhraseTrigger.Regroup;
-            }
-
-            return trigger != EPhraseTrigger.PhraseNone;
         }
 
         private bool IsEnemyInDirection(Vector3 enemyPosition, float angle, float threshold)
@@ -777,14 +739,103 @@ namespace SAIN.SAINComponent.Classes.Talk
             return Vector3.Dot(enemyDirectionNormalized, direction) > threshold;
         }
 
+        public void updateConfigSettings()
+        {
+            var squadTalk = SAINPlugin.LoadedPreset?.GlobalSettings?.SquadTalk;
+            if (squadTalk != null)
+            {
+                _reportReloadingChance = squadTalk._reportReloadingChance;
+                _reportReloadingFreq = squadTalk._reportReloadingFreq;
+                _reportLostVisualChance = squadTalk._reportLostVisualChance;
+                _reportRatChance = squadTalk._reportRatChance;
+                _reportRatTimeSinceSeen = squadTalk._reportRatTimeSinceSeen;
+                _reportEnemyConversationChance = squadTalk._reportEnemyConversationChance;
+                _reportEnemyMaxDist = squadTalk._reportEnemyMaxDist;
+                _reportEnemyHealthChance = squadTalk._reportEnemyHealthChance;
+                _reportEnemyHealthFreq = squadTalk._reportEnemyHealthFreq;
+                _reportEnemyKilledChance = squadTalk._reportEnemyKilledChance;
+                _reportEnemyKilledSquadLeadChance = squadTalk._reportEnemyKilledSquadLeadChance;
+                _reportEnemyKilledToxicSquadLeader = squadTalk._reportEnemyKilledToxicSquadLeader;
+                _friendCloseDist = squadTalk._friendCloseDist;
+                _reportFriendKilledChance = squadTalk._reportFriendKilledChance;
+                _talkRetreatChance = squadTalk._talkRetreatChance;
+                _talkRetreatFreq = squadTalk._talkRetreatFreq;
+                _talkRetreatTrigger = squadTalk._talkRetreatTrigger;
+                _talkRetreatMask = squadTalk._talkRetreatMask;
+                _talkRetreatGroupDelay = squadTalk._talkRetreatGroupDelay;
+                _underFireNeedHelpChance = squadTalk._underFireNeedHelpChance;
+                _underFireNeedHelpTrigger = squadTalk._underFireNeedHelpTrigger;
+                _underFireNeedHelpMask = squadTalk._underFireNeedHelpMask;
+                _underFireNeedHelpGroupDelay = squadTalk._underFireNeedHelpGroupDelay;
+                _underFireNeedHelpFreq = squadTalk._underFireNeedHelpFreq;
+                _hearNoiseChance = squadTalk._hearNoiseChance;
+                _hearNoiseMaxDist = squadTalk._hearNoiseMaxDist;
+                _hearNoiseFreq = squadTalk._hearNoiseFreq;
+                _enemyLocationTalkChance = squadTalk._enemyLocationTalkChance;
+                _enemyLocationTalkTimeSinceSeen = squadTalk._enemyLocationTalkTimeSinceSeen;
+                _enemyNeedHelpChance = squadTalk._enemyNeedHelpChance;
+                _enemyLocationTalkFreq = squadTalk._enemyLocationTalkFreq;
+                _enemyLocationBehindAngle = squadTalk._enemyLocationBehindAngle;
+                _enemyLocationSideAngle = squadTalk._enemyLocationSideAngle;
+                _enemyLocationFrontAngle = squadTalk._enemyLocationFrontAngle;
+            }
+        }
+
         public SAINBotTalkClass LeaderComponent => SAIN.Squad.LeaderComponent?.Talk;
         private float Randomized => Random.Range(0.75f, 1.25f);
         private SAINSquadClass BotSquad => SAIN.Squad;
 
+        private float _groupTalkFreq = 0.5f;
+        private readonly List<EPhraseTrigger> LootPhrases = new List<EPhraseTrigger> { EPhraseTrigger.LootBody, EPhraseTrigger.LootGeneric, EPhraseTrigger.OnLoot, EPhraseTrigger.CheckHim };
+        private readonly List<EPhraseTrigger> reloadPhrases = new List<EPhraseTrigger> { EPhraseTrigger.OnWeaponReload, EPhraseTrigger.NeedAmmo, EPhraseTrigger.OnOutOfAmmo };
+        private float _nextReportReloadTime;
+        private float _nextCheckEnemyHPTime;
+        private bool _friendIsClose;
+        private float _nextCheckFriendsTime;
+        private float CheckFriendliesTimer = 0f;
+        private float EnemyPosTimer = 0f;
+        private float _nextCheckTalkRetreatTime;
+        private float _underFireNeedHelpTime;
+        private float _hearNoiseTime;
         private float CommandSayTimer = 0f;
         private float LeaderTimer = 0f;
         private float TalkTimer = 0f;
         private float HurtTalkTimer = 0f;
         private bool Subscribed = false;
+
+        private float _reportReloadingChance = 33f;
+        private float _reportReloadingFreq = 1f;
+        private float _reportLostVisualChance = 40f;
+        private float _reportRatChance = 33f;
+        private float _reportRatTimeSinceSeen = 60f;
+        private float _reportEnemyConversationChance = 10f;
+        private float _reportEnemyMaxDist = 70f;
+        private float _reportEnemyHealthChance = 40f;
+        private float _reportEnemyHealthFreq = 8f;
+        private float _reportEnemyKilledChance = 60f;
+        private float _reportEnemyKilledSquadLeadChance = 60f;
+        private bool _reportEnemyKilledToxicSquadLeader = false;
+        private float _friendCloseDist = 40f;
+        private float _reportFriendKilledChance = 60f;
+        private float _talkRetreatChance = 60f;
+        private float _talkRetreatFreq = 10f;
+        private EPhraseTrigger _talkRetreatTrigger = EPhraseTrigger.CoverMe;
+        private ETagStatus _talkRetreatMask = ETagStatus.Combat;
+        private bool _talkRetreatGroupDelay = true;
+        private float _underFireNeedHelpChance = 45f;
+        private EPhraseTrigger _underFireNeedHelpTrigger = EPhraseTrigger.NeedHelp;
+        private ETagStatus _underFireNeedHelpMask = ETagStatus.Combat;
+        private bool _underFireNeedHelpGroupDelay = true;
+        private float _underFireNeedHelpFreq = 1f;
+        private float _hearNoiseChance = 40f;
+        private float _hearNoiseMaxDist = 60f;
+        private float _hearNoiseFreq = 1f;
+        private float _enemyLocationTalkChance = 60f;
+        private float _enemyLocationTalkTimeSinceSeen = 3f;
+        private float _enemyNeedHelpChance = 40f;
+        private float _enemyLocationTalkFreq = 1f;
+        private float _enemyLocationBehindAngle = 90f;
+        private float _enemyLocationSideAngle = 45f;
+        private float _enemyLocationFrontAngle = 90f;
     }
 }

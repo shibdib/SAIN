@@ -67,10 +67,18 @@ namespace SAIN.Preset.GlobalSettings
         [Name("Shoot")]
         public ShootSettings Shoot = new ShootSettings();
 
-        [Name("Bot Power Level")]
+        [Name("Talk")]
+        public TalkSettings Talk = new TalkSettings();
+
+        [Name("Squad Talk")]
+        public SquadTalkSettings SquadTalk = new SquadTalkSettings();
+
+        [Name("Power Level Calculation")]
+        [Advanced]
         [Hidden]
         public PowerCalcSettings PowerCalc = new PowerCalcSettings();
 
+        [Advanced]
         [Hidden]
         public EFTCoreSettings EFTCoreSettings = new EFTCoreSettings();
     }

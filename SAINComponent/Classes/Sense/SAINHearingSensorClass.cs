@@ -177,7 +177,18 @@ namespace SAIN.SAINComponent.Classes
                 {
                     return true;
                 }
+
                 // Checks if the player is an enemy by their role.
+                var role = iPlayer.Profile.Info.Settings.Role;
+                var enemyTypes = BotOwner.Settings.FileSettings.Mind.ENEMY_BOT_TYPES;
+                for (int i = 0; i < enemyTypes.Length; i++)
+                {
+                    if (role == enemyTypes[i])
+                    {
+                        return false;
+                    }
+                }
+
                 if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer))
                 {
                     return true;
@@ -340,7 +351,6 @@ namespace SAIN.SAINComponent.Classes
             else if (isGunSound && bulletFelt)
             {
                 Vector3 estimate = GetEstimatedPoint(vector);
-                SAIN.Memory.SetUnderFire(person, vector);
 
                 try
                 {

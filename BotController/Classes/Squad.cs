@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
-using static GClass738;
 
 namespace SAIN.BotController.Classes
 {
@@ -52,7 +51,6 @@ namespace SAIN.BotController.Classes
                     }
                 }
             }
-
         }
 
         public string GetId()
@@ -84,26 +82,13 @@ namespace SAIN.BotController.Classes
 
         public List<PlaceForCheck> GroupPlacesForCheck => EFTBotGroup?.PlacesForCheck;
 
-        public bool IsPointTooCloseToLastPlaceForCheck(Vector3 position)
-        {
-            PlaceForCheck mostRecentPlace = null;
-            if (GroupPlacesForCheck != null && GroupPlacesForCheck.Count > 0)
-            {
-                mostRecentPlace = GroupPlacesForCheck[GroupPlacesForCheck.Count - 1];
-
-                if (mostRecentPlace != null && (position - mostRecentPlace.Position).sqrMagnitude < 2)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public enum ESearchPointType
         {
             Hearing,
             Flashlight,
         }
+
+        public Action<PlaceForCheck> OnSoundHeard;
 
         public void AddPointToSearch(Vector3 position, float soundPower, BotOwner botOwner, AISoundType soundType, Vector3 originalPosition, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
         {
@@ -132,14 +117,18 @@ namespace SAIN.BotController.Classes
 
             bool isDanger = soundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
-            AddNewPlaceForCheck(botOwner, position, checkType, player);
+            PlaceForCheck newPlace = AddNewPlaceForCheck(botOwner, position, checkType, player);
+            if (newPlace != null && searchType == ESearchPointType.Hearing)
+            {
+                OnSoundHeard?.Invoke(newPlace);
+            }
         }
 
         public readonly Dictionary<IPlayer, PlaceForCheck> PlayerPlaceChecks = new Dictionary<IPlayer, PlaceForCheck>();
 
         private void SetVisibleAndHeard(IPlayer player, Vector3 position)
         {
-            const float SoundAggroDist = 75f;
+            const float SoundAggroDist = 125f;
 
             bool playerIsHuman = player.IsAI == false;
 
@@ -153,11 +142,6 @@ namespace SAIN.BotController.Classes
                     }
                     SAINEnemy sainEnemy = member.Value?.EnemyController?.CheckAddEnemy(player);
                     sainEnemy?.SetHeardStatus(true, position);
-
-                    if (playerIsHuman)
-                    {
-                        member.Value.Cover.ForceCoverFinderState(true, 30f);
-                    }
 
                     if (sainEnemy != null 
                         && member.Value?.Info?.Profile?.IsPMC == true)
@@ -187,9 +171,9 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        private void AddNewPlaceForCheck(BotOwner botOwner, Vector3 position, PlaceForCheckType checkType, IPlayer player)
+        private PlaceForCheck AddNewPlaceForCheck(BotOwner botOwner, Vector3 position, PlaceForCheckType checkType, IPlayer player)
         {
-            const float navSampleDist = 5f;
+            const float navSampleDist = 10f;
             const float dontLerpDist = 50f;
 
             if (FindNavMesh(position, out Vector3 hitPosition, navSampleDist))
@@ -197,7 +181,6 @@ namespace SAIN.BotController.Classes
                 // Too many places were being sent to a bot, causing confused behavior.
                 // This way I'm tying 1 placeforcheck to each player and updating it based on new info.
                 PlaceForCheck oldPlace = null;
-                bool placeUpdated = false;
                 if (PlayerPlaceChecks.ContainsKey(player))
                 {
                     oldPlace = PlayerPlaceChecks[player];
@@ -207,7 +190,7 @@ namespace SAIN.BotController.Classes
                         Vector3 averagePosition = averagePosition = Vector3.Lerp(oldPlace.BasePoint, hitPosition, 0.5f);
 
                         if (FindNavMesh(averagePosition, out hitPosition, navSampleDist) 
-                            && CanPathToPoint(hitPosition, botOwner) == NavMeshPathStatus.PathComplete)
+                            && CanPathToPoint(hitPosition, botOwner) != NavMeshPathStatus.PathInvalid)
                         {
                             //bool isOldPlaceActive = botOwner.Memory.GoalTarget.GoalTarget == oldPlace;
 
@@ -221,20 +204,21 @@ namespace SAIN.BotController.Classes
                             GroupPlacesForCheck.Add(replacementPlace);
                             PlayerPlaceChecks[player] = replacementPlace;
                             CalcGoalForBot(botOwner);
-                            placeUpdated = true;
+                            return replacementPlace;
                         }
                     }
                 }
 
-                if (!placeUpdated 
-                    && CanPathToPoint(hitPosition, botOwner) == NavMeshPathStatus.PathComplete)
+                if (CanPathToPoint(hitPosition, botOwner) != NavMeshPathStatus.PathInvalid)
                 {
                     PlaceForCheck newPlace = new PlaceForCheck(position, checkType);
                     GroupPlacesForCheck.Add(newPlace);
                     AddOrUpdatePlaceForPlayer(newPlace, player);
                     CalcGoalForBot(botOwner);
+                    return newPlace;
                 }
             }
+            return null;
         }
 
         private bool FindNavMesh(Vector3 position, out Vector3 hitPosition, float navSampleDist = 5f)
@@ -242,12 +226,6 @@ namespace SAIN.BotController.Classes
             if (NavMesh.SamplePosition(position, out NavMeshHit hit, navSampleDist, -1))
             {
                 hitPosition = hit.position;
-                return true;
-            }
-            Vector3 rayEnd = position + (Vector3.down * navSampleDist * navSampleDist);
-            if (NavMesh.Raycast(position, rayEnd, out NavMeshHit hit2, NavMesh.AllAreas))
-            {
-                hitPosition = hit2.position;
                 return true;
             }
             hitPosition = Vector3.zero;
@@ -312,7 +290,7 @@ namespace SAIN.BotController.Classes
                         }
                         catch
                         {
-                            //
+                            // Was throwing error with Project fika, causing players to not be able to extract
                         }
                     }
                 }

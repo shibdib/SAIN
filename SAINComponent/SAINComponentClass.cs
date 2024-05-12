@@ -208,6 +208,7 @@ namespace SAIN.SAINComponent
                 {
                     if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(Player, out float power))
                     {
+                        Info.CalcPersonality();
                         _powerCalcd = true;
                     }
                 }
@@ -495,9 +496,9 @@ namespace SAIN.SAINComponent
                         BotOwner.Memory.GoalTarget.Clear();
                         BotOwner.CalcGoal();
                     }
-                    else if (!Info.PersonalitySettings.WillSearchFromAudio 
-                        && BotOwner.Memory.GoalTarget.CreatedTime > 90f 
-                        && Enemy == null)
+                    else if (BotOwner.Memory.GoalTarget.CreatedTime > 120f 
+                        && Enemy == null
+                        && Decision.CurrentSoloDecision != SoloDecision.Search)
                     {
                         BotOwner.Memory.GoalTarget.Clear();
                         BotOwner.CalcGoal();

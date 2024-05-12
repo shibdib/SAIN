@@ -89,12 +89,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (SAIN.Enemy?.IsVisible == false 
                 && BotOwner.WeaponManager.HaveBullets 
                 && SAIN.Enemy.Seen && SAIN.Enemy.TimeSinceSeen < 10f 
-                && SAIN.Enemy.LastCornerToEnemy != null 
-                && SAIN.Enemy.CanSeeLastCornerToEnemy)
+                && SAIN.Enemy.Path.BlindCornerToEnemy != null)
             {
-                Vector3 corner = SAIN.Enemy.LastCornerToEnemy.Value;
-                corner += Vector3.up * 1f; 
-                SuppressPosition(corner);
+                SuppressPosition(SAIN.Enemy.Path.BlindCornerToEnemy.Value);
             }
             else
             {
@@ -128,13 +125,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
-            SoloDecision decision = SAIN.Decision.CurrentSoloDecision;
-            if (decision != SoloDecision.WalkToCover 
-                && decision != SoloDecision.RunToCover 
-                && decision != SoloDecision.Retreat)
-            {
-                SAIN.Cover.CoverInUse = null;
-            }
+            SAIN.Cover.CheckResetCoverInUse();
             SAIN.Shoot(false, Vector3.zero);
         }
 

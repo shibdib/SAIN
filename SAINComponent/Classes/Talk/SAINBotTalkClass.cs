@@ -38,26 +38,32 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
-            if (EFTMath.RandomBool(33))
+            if (EFTMath.RandomBool(33) && _nextGetHitTime < Time.time)
             {
+                _nextGetHitTime = Time.time + 1f;
                 EPhraseTrigger trigger = EPhraseTrigger.OnBeingHurt | EPhraseTrigger.OnAgony;
                 ETagStatus mask = ETagStatus.Combat | ETagStatus.Aware;
                 SendSayCommand(trigger, mask);
             }
         }
 
+        private float _nextGetHitTime;
+
         private float TimeUntilCanTalk;
 
         public void Update()
         {
+            GroupTalk.Update();
+
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
+            {
+                return;
+            }
+
             if (CanTalk 
                 && TimeUntilCanTalk < Time.time)
             {
-                GroupTalk.Update();
-
                 EnemyTalk.Update();
-
-
                 if (allTalkDelay < Time.time)
                 {
                     BotTalkPackage TalkPack = null;
@@ -112,6 +118,10 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public bool Say(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false)
         {
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
+            {
+                return false;
+            }
             if ((CanTalk && TimeUntilCanTalk < Time.time) 
                 || phrase == EPhraseTrigger.OnDeath 
                 || phrase == EPhraseTrigger.OnAgony 
@@ -134,7 +144,6 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             return EFTMath.RandomBool(chance) 
                 && GroupTalk.FriendIsClose 
-                && SAIN.Squad.Members.Count > 1 
                 && Say(phrase, additionalMask, withGroupDelay);
         }
 

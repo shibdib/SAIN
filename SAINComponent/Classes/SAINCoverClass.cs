@@ -136,6 +136,18 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
+        public void CheckResetCoverInUse()
+        {
+            SoloDecision decision = SAIN.Decision.CurrentSoloDecision;
+            if (decision != SoloDecision.WalkToCover
+                && decision != SoloDecision.RunToCover
+                && decision != SoloDecision.Retreat
+                && decision != SoloDecision.HoldInCover)
+            {
+                SAIN.Cover.CoverInUse = null;
+            }
+        }
+
         public CoverPoint ClosestPoint
         {
             get

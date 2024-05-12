@@ -113,13 +113,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
-            SoloDecision decision = SAIN.Decision.CurrentSoloDecision;
-            if (decision != SoloDecision.WalkToCover
-                && decision != SoloDecision.RunToCover
-                && decision != SoloDecision.Retreat)
-            {
-                SAIN.Cover.CoverInUse = null;
-            }
+            SAIN.Cover.CheckResetCoverInUse();
             NewPoint = null;
             UsedPoints.Clear();
         }

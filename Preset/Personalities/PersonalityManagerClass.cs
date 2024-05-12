@@ -92,6 +92,7 @@ namespace SAIN.Preset.Personalities
                         SearchBaseTime = 6f,
                         SprintWhileSearch = true,
                         FrequentSprintWhileSearch = true,
+                        SearchWaitMultiplier = 3f,
 
                         CanJumpCorners = true,
                         JumpCornerChance = 40f,
@@ -144,6 +145,7 @@ namespace SAIN.Preset.Personalities
                         HoldGroundBaseTime = 2.5f,
                         HoldGroundMaxRandom = 1.5f,
                         HoldGroundMinRandom = 0.65f,
+                        SearchWaitMultiplier = 4f,
 
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = true,
@@ -190,7 +192,7 @@ namespace SAIN.Preset.Personalities
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 30,
                         RandomlyAssignedChance = 1,
-                        PowerLevelMin = 200f,
+                        PowerLevelMin = 350f,
 
                         CanTaunt = true,
                         CanRespondToVoice = false,
@@ -202,6 +204,7 @@ namespace SAIN.Preset.Personalities
                         HoldGroundBaseTime = 1.5f,
                         HoldGroundMaxRandom = 1.2f,
                         HoldGroundMinRandom = 0.8f,
+                        SearchWaitMultiplier = 0.8f,
 
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = true,
@@ -246,7 +249,7 @@ namespace SAIN.Preset.Personalities
 
                         RandomChanceIfMeetRequirements = 60,
                         RandomlyAssignedChance = 5,
-                        PowerLevelMin = 150f,
+                        PowerLevelMin = 250f,
 
                         CanTaunt = true,
                         CanRespondToVoice = true,
@@ -257,6 +260,7 @@ namespace SAIN.Preset.Personalities
                         HoldGroundBaseTime = 1f,
                         HoldGroundMaxRandom = 1.5f,
                         HoldGroundMinRandom = 0.65f,
+                        SearchWaitMultiplier = 1.5f,
 
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = true,
@@ -301,7 +305,8 @@ namespace SAIN.Preset.Personalities
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = true,
                         SearchBaseTime = 240f,
-                        PowerLevelMax = 100f,
+                        SearchWaitMultiplier = 0.8f,
+                        PowerLevelMax = 150f,
                         AggressionMultiplier = 1f,
                         CanRespondToVoice = false,
                         WillChaseDistantGunshots = false,
@@ -346,14 +351,15 @@ namespace SAIN.Preset.Personalities
                     Variables =
                     {
                         Enabled = true,
-                        RandomChanceIfMeetRequirements = 70f,
+                        RandomChanceIfMeetRequirements = 50f,
                         RandomlyAssignedChance = 5,
-                        PowerLevelMax = 100f,
+                        PowerLevelMax = 150f,
                         MaxLevel = 10,
                         HoldGroundBaseTime = 0.5f,
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = false,
                         SearchBaseTime = 90f,
+                        SearchWaitMultiplier = 0.75f,
                         AggressionMultiplier = 1f,
                         ShiftCoverTimeMultiplier = 0.66f,
                         CanBegForLife = true,
@@ -394,11 +400,13 @@ namespace SAIN.Preset.Personalities
                     {
                         Enabled = true,
                         RandomlyAssignedChance = 5,
-                        PowerLevelMax = 150f,
+                        RandomChanceIfMeetRequirements = 20f,
+                        PowerLevelMax = 200f,
                         HoldGroundBaseTime = 0.5f,
                         WillSearchForEnemy = false,
                         WillSearchFromAudio = false,
                         SearchBaseTime = 110f,
+                        SearchWaitMultiplier = 0.4f,
                         AggressionMultiplier = 1f,
                         CanShiftCoverPosition = false,
                         CanBegForLife = true,

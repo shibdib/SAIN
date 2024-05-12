@@ -53,14 +53,19 @@ namespace SAIN.SAINComponent.Classes.Info
         {
             FileSettings = SAINPlugin.LoadedPreset.BotSettings.GetSAINSettings(WildSpawnType, BotDifficulty);
 
-            Personality = GetPersonality();
-            PersonalitySettingsClass = SAINPlugin.LoadedPreset.PersonalityManager.Personalities[Personality];
+            CalcPersonality();
 
             UpdateExtractTime();
-            CalcTimeBeforeSearch();
-            CalcHoldGroundDelay();
 
             SetConfigValues(FileSettings);
+        }
+
+        public void CalcPersonality()
+        {
+            Personality = GetPersonality();
+            PersonalitySettingsClass = SAINPlugin.LoadedPreset.PersonalityManager.Personalities[Personality];
+            CalcTimeBeforeSearch();
+            CalcHoldGroundDelay();
         }
 
         private void SetConfigValues(SAINSettingsClass sainFileSettings)

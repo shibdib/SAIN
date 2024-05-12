@@ -195,6 +195,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 if (enemy != null 
                     && !enemy.IsVisible 
+                    && (enemy.Seen || enemy.Heard)
                     && enemy.TimeSinceSeen > 8f 
                     && EFTMath.RandomBool(33))
                 {
@@ -209,21 +210,31 @@ namespace SAIN.SAINComponent.Classes.Talk
             return tauntEnemy;
         }
 
-        private IEnumerator RespondToVoice(EPhraseTrigger trigger, ETagStatus mask, float delay, Player sourcePlayer, float responseDist, float chance = 100f)
+        private IEnumerator RespondToVoice(EPhraseTrigger trigger, ETagStatus mask, float delay, Player sourcePlayer, float responseDist, float chance = 100f, bool friendly = false)
         {
             yield return new WaitForSeconds(delay);
 
-            if (sourcePlayer?.HealthController?.IsAlive == true 
-                && SAIN?.Player?.HealthController?.IsAlive == true 
+            if (sourcePlayer == null || BotOwner == null || Player == null || SAIN == null)
+            {
+                yield break;
+            }
+
+            if (sourcePlayer.HealthController.IsAlive
+                && Player.HealthController.IsAlive 
                 && (sourcePlayer.Position - SAIN.Position).sqrMagnitude < responseDist * responseDist)
             {
                 //Logger.LogInfo("Responding To Voice! Coroutine finish");
-                if (mask == ETagStatus.Unaware && !BotOwner.Memory.IsPeace)
+                if (friendly && !BotOwner.Memory.IsPeace)
                 {
                     SAIN.Talk.Say(trigger, null, true);
                 }
                 else
                 {
+                    if (friendly && _nextGestureTime < Time.time)
+                    {
+                        _nextGestureTime = Time.time + 3f;
+                        Player.HandsController.ShowGesture(EGesture.Hello);
+                    }
                     SAIN.Talk.Say(trigger, mask, false);
                 }
             }
@@ -233,7 +244,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             if (player == null
                 || !player.HealthController.IsAlive
-                || (player.Position - SAIN.Position).sqrMagnitude > 100f * 100f)
+                || (player.Position - SAIN.Position).sqrMagnitude > 80f * 80f)
             {
                 return;
             }
@@ -260,55 +271,76 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
         }
 
+        private float _nextGestureTime;
+
+        private bool shallBeChatty()
+        {
+            if (SAIN.Info.Profile.IsScav)
+            {
+                return SAINPlugin.LoadedPreset.GlobalSettings.Talk.TalkativeScavs;
+            }
+            if (SAIN.Info.Profile.IsPMC)
+            {
+                return SAINPlugin.LoadedPreset.GlobalSettings.Talk.TalkativePMCs;
+            }
+            var role = SAIN.Info.Profile.WildSpawnType;
+            if ((SAIN.Info.Profile.IsBoss || SAIN.Info.Profile.IsFollower))
+            {
+                if ((role == WildSpawnType.bossKnight || role == WildSpawnType.followerBirdEye || role == WildSpawnType.followerBigPipe))
+                {
+                    return SAINPlugin.LoadedPreset.GlobalSettings.Talk.TalkativeGoons;
+                }
+                return SAINPlugin.LoadedPreset.GlobalSettings.Talk.TalkativeBosses;
+            }
+            if ((role == WildSpawnType.pmcBot || role == WildSpawnType.exUsec))
+            {
+                return SAINPlugin.LoadedPreset.GlobalSettings.Talk.TalkativeRaidersRogues;
+            }
+            return false;
+        }
+
         public void SetFriendlyTalked(Player player)
         {
-            if (player == null
-                || !player.HealthController.IsAlive
-                || (player.Position - SAIN.Position).sqrMagnitude > 100f * 100f)
+            if (player == null || SAIN == null || !player.HealthController.IsAlive || (player.Position - SAIN.Position).sqrMagnitude > 80f * 80f || SAIN.ProfileId == player.ProfileId)
             {
                 return;
             }
-            if (SAIN != null
-                && player != null 
-                && SAIN.ProfileId != player.ProfileId 
-                && SAIN.Info.Profile.IsScav)
-            {
-                if (BotOwner.Memory.IsPeace
-                    && _nextResponseTime < Time.time)
-                {
-                    _nextResponseTime = Time.time + 0.75f;
 
-                    if (SAINPlugin.LoadedPreset.GlobalSettings.General.TalkativeScavs || player.IsAI == false)
-                    {
-                        SAIN.StartCoroutine(RespondToVoice(
-                            EPhraseTrigger.MumblePhrase,
-                            ETagStatus.Unaware,
-                            Random.Range(0.33f, 0.75f),
-                            player,
-                            _friendlyResponseDistance,
-                            _friendlyResponseChance
-                        ));
-                    }
-                }
-                else if (SAIN?.Squad.SquadInfo != null
-                    && SAIN.Talk.GroupTalk.FriendIsClose
-                    && (SAIN.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.GigaChads
-                        || SAIN.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.Elite)
-                    && (SAIN.Info.Personality == EPersonality.GigaChad
-                        || SAIN.Info.Personality == EPersonality.Chad))
+            if (BotOwner.Memory.IsPeace
+                && _nextResponseTime < Time.time)
+            {
+                _nextResponseTime = Time.time + 0.75f;
+
+                if (player.IsAI == false || shallBeChatty())
                 {
-                    if (_saySilenceTime < Time.time)
-                    {
-                        _saySilenceTime = Time.time + 20f;
-                        SAIN.StartCoroutine(RespondToVoice(
-                            EPhraseTrigger.Silence,
-                            SAIN.HasEnemy ? ETagStatus.Combat : ETagStatus.Aware,
-                            Random.Range(0.2f, 0.5f),
-                            player,
-                            20f,
-                            33f
-                            ));
-                    }
+                    SAIN.StartCoroutine(RespondToVoice(
+                        EPhraseTrigger.MumblePhrase,
+                        ETagStatus.Unaware,
+                        Random.Range(0.33f, 0.75f),
+                        player,
+                        _friendlyResponseDistance,
+                        _friendlyResponseChance
+                    ));
+                }
+            }
+            else if (SAIN?.Squad.SquadInfo != null
+                && SAIN.Talk.GroupTalk.FriendIsClose
+                && (SAIN.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.GigaChads
+                    || SAIN.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.Elite)
+                && (SAIN.Info.Personality == EPersonality.GigaChad
+                    || SAIN.Info.Personality == EPersonality.Chad))
+            {
+                if (_saySilenceTime < Time.time)
+                {
+                    _saySilenceTime = Time.time + 20f;
+                    SAIN.StartCoroutine(RespondToVoice(
+                        EPhraseTrigger.Silence,
+                        SAIN.HasEnemy ? ETagStatus.Combat : ETagStatus.Aware,
+                        Random.Range(0.2f, 0.5f),
+                        player,
+                        20f,
+                        33f
+                        ));
                 }
             }
         }
