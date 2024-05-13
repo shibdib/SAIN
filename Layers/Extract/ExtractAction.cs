@@ -54,11 +54,11 @@ namespace SAIN.Layers
             {
                 shallSprint = false;
             }
-            else if (stamina > 0.5f)
+            else if (stamina > 0.75f)
             {
                 shallSprint = true;
             }
-            else if (stamina < 0.1f)
+            else if (stamina < 0.2f)
             {
                 shallSprint = false;
             }

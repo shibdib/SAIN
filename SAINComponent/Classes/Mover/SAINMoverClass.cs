@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Preset.GlobalSettings.Categories;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -381,10 +382,10 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void SetStamina()
         {
-            var stamina = Player.Physical.Stamina;
-            if (SAIN.CombatLayersActive && stamina.NormalValue < 0.05f)
+            if (SAIN.CombatLayersActive 
+                && CurrentStamina < 0.05f)
             {
-                Player.Physical.Stamina.UpdateStamina(stamina.TotalCapacity / 4f);
+                Player.Physical.Stamina.UpdateStamina(Player.Physical.Stamina.TotalCapacity / 4f);
             }
         }
 

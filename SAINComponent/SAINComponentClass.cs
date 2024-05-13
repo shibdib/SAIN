@@ -190,7 +190,8 @@ namespace SAIN.SAINComponent
 
             if (BotActive)
             {
-                HandlePatrolData();
+                checkLayerActive();
+                handlePatrolData();
 
                 AILimit.UpdateAILimit();
 
@@ -266,11 +267,6 @@ namespace SAIN.SAINComponent
         public SightCheckerComponent SightChecker { get; private set; }
         public SAINDoorOpener DoorOpener { get; private set; }
 
-        private Stopwatch Stopwatch = new Stopwatch();
-
-        private void LateUpdate()
-        {
-        }
 
         private static float LogTimer;
 
@@ -302,14 +298,10 @@ namespace SAIN.SAINComponent
 
         public bool Extracting { get; set; }
 
-        private void HandlePatrolData()
+        private void handlePatrolData()
         {
-            if (Extracting)
-            {
-                PatrolDataPaused = true;
-                return;
-            }
-            if (CurrentTargetPosition == null)
+            if (CurrentTargetPosition == null 
+                && !Extracting)
             {
                 PatrolDataPaused = false;
                 BotOwner.PatrollingData?.Unpause();
@@ -319,15 +311,14 @@ namespace SAIN.SAINComponent
                     BotOwner.SetTargetMoveSpeed(1f);
                     BotOwner.Mover.SetPose(1f);
                 }
+                return;
             }
-            else
+
+            PatrolDataPaused = true;
+            BotOwner.PatrollingData?.Pause();
+            if (_speedReset)
             {
-                PatrolDataPaused = true;
-                BotOwner.PatrollingData?.Pause();
-                if (_speedReset)
-                {
-                    _speedReset = false;
-                }
+                _speedReset = false;
             }
         }
 
@@ -403,25 +394,21 @@ namespace SAIN.SAINComponent
 
         private bool SAINActive => BigBrainHandler.IsBotUsingSAINLayer(BotOwner);
 
-        public bool LayersActive
+        public void checkLayerActive()
         {
-            get
+            if (RecheckTimer < Time.time)
             {
-                if (RecheckTimer < Time.time)
+                CombatLayersActive = BigBrainHandler.IsBotUsingSAINCombatLayer(BotOwner);
+                if (SAINActive)
                 {
-                    CombatLayersActive = BigBrainHandler.IsBotUsingSAINCombatLayer(BotOwner);
-                    if (SAINActive)
-                    {
-                        RecheckTimer = Time.time + 0.5f;
-                        Active = true;
-                    }
-                    else
-                    {
-                        RecheckTimer = Time.time + 0.05f;
-                        Active = false;
-                    }
+                    RecheckTimer = Time.time + 0.5f;
+                    Active = true;
                 }
-                return Active;
+                else
+                {
+                    RecheckTimer = Time.time + 0.05f;
+                    Active = false;
+                }
             }
         }
         public bool CombatLayersActive { get; private set; }

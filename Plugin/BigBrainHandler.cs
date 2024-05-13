@@ -28,6 +28,7 @@ namespace SAIN
             }
             return false;
         }
+
         public static bool IsBotUsingSAINCombatLayer(BotOwner bot)
         {
             if (bot?.Brain?.Agent != null)
@@ -131,26 +132,7 @@ namespace SAIN
 
             BrainManager.RemoveLayers(LayersToRemove, stringList);
 
-            //AddAnnoyingLayerNames();
-            //BrainManager.RemoveLayers(AnnoyingLayerNameThanksBSG, new List<string> { Brain.PMC.ToString(), Brain.Assault.ToString(), });
-
             BigBrainInitialized = true;
-        }
-
-        private static readonly List<string> AnnoyingLayerNameThanksBSG = new List<string>
-        {
-            "PeacecReqNull",
-            "FightReqNull",
-        };
-
-        private static void AddAnnoyingLayerNames()
-        {
-            BotRequestType[] types = EnumValues.GetEnum<BotRequestType>();
-            foreach (BotRequestType type in types)
-            {
-                AnnoyingLayerNameThanksBSG.Add("PcReq:" + type.ToString());
-                AnnoyingLayerNameThanksBSG.Add("FiReq:" + type.ToString());
-            }
         }
 
         public static readonly List<string> SAINLayers = new List<string>
@@ -158,14 +140,12 @@ namespace SAIN
             CombatSquadLayer.Name,
             ExtractLayer.Name,
             CombatSoloLayer.Name,
-            BotRunLayer.Name,
         };
 
         public static readonly List<string> SAINCombatLayers = new List<string>
         {
             CombatSquadLayer.Name,
             CombatSoloLayer.Name,
-            BotRunLayer.Name,
         };
 
         public static bool BigBrainInitialized;

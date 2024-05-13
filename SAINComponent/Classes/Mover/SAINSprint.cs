@@ -3,6 +3,7 @@ using HarmonyLib;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
+using System;
 using System.Collections;
 using System.IO;
 using System.Reflection;
@@ -34,17 +35,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (Running)
-            {
-                SAIN.DoorOpener.Update();
-                var stamina = Player.Physical.Stamina;
-                if (stamina.NormalValue < 0.5f)
-                {
-                    Player.Physical.Stamina.UpdateStamina(stamina.TotalCapacity);
-                }
-
-                trackMovement();
-            }
         }
 
         public bool Running => _runToPointCoroutine != null;
@@ -62,6 +52,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (SAIN.Mover.CanGoToPoint(point, out NavMeshPath path))
             {
+                LastRunDestination = path.corners[path.corners.Length - 1];
                 if (_runToPointCoroutine != null)
                 {
                     SAIN.StopCoroutine(_runToPointCoroutine);
@@ -72,6 +63,11 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return _runToPointCoroutine != null;
             }
             return false;
+        }
+
+        public bool RunToCoverPoint(CoverPoint point)
+        {
+            return point != null && RunToPoint(point.Position);
         }
 
         public NavMeshPath CurrentPath;
@@ -85,6 +81,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (SAIN.Mover.CanGoToPoint(CurrentPath.corners[CurrentPath.corners.Length - 1], out NavMeshPath path))
             {
+                LastRunDestination = path.corners[path.corners.Length - 1];
                 if (_runToPointCoroutine != null)
                 {
                     SAIN.StopCoroutine(_runToPointCoroutine);
@@ -97,6 +94,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             return false;
         }
 
+        public Vector3 LastRunDestination { get; private set; }
+
         private Coroutine _runToPointCoroutine;
 
         public enum RunStatus
@@ -105,6 +104,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             FirstTurn = 1,
             Running = 2,
             Turning = 3,
+            NoStamina = 4,
+            InteractingWithDoor = 5,
         }
 
         public RunStatus CurrentRunStatus { get; private set; }
@@ -136,6 +137,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             // Start running!
             yield return runPath(path);
 
+            OnRunComplete?.Invoke();
+
             CurrentRunStatus = RunStatus.None;
         }
 
@@ -147,6 +150,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             return currentCorner();
         }
+
+        public Action OnRunComplete;
 
         private int totalCorners()
         {
@@ -163,8 +168,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             // config variables
             const float reachDist = 0.1f;
-            const float reachDistRunning = 1f;
-            const float reachDistRunningBuffer = 1.5f;
             const float turnSpeedSprint = 200f;
             const float turnSpeedTurning = 360f;
 
@@ -175,36 +178,16 @@ namespace SAIN.SAINComponent.Classes.Mover
                 float distToCurrent = distanceToCurrentCornerSqr();
                 while (distToCurrent > reachDist)
                 {
+                    SAIN.DoorOpener.Update();
+                    trackMovement();
+
                     // Start or stop sprinting with a buffer
+                    handleSprinting(distToCurrent);
+
                     if (BotOwner.DoorOpener.Interacting)
                     {
-                        SAIN.Mover.Sprint(false);
                         yield return null;
                         continue;
-                    }
-                    else if (distToCurrent < reachDistRunning 
-                        && SAIN.Mover.IsSprinting)
-                    {
-                        SAIN.Mover.Sprint(false);
-                    }
-                    else if (distToCurrent > reachDistRunningBuffer)
-                    {
-                        SAIN.Mover.Sprint(true);
-                    }
-
-                    if (SAIN.Mover.IsSprinting)
-                    {
-                        Player.MovementContext.SprintSpeed = 2f;
-                    }
-
-                    // Update status
-                    if (distToCurrent < reachDistRunning)
-                    {
-                        CurrentRunStatus = RunStatus.Turning;
-                    }
-                    else
-                    {
-                        CurrentRunStatus = RunStatus.Running;
                     }
 
                     if (timeSinceNotMoving > 1f)
@@ -217,16 +200,51 @@ namespace SAIN.SAINComponent.Classes.Mover
                         Player.MovementContext.TryVaulting();
                     }
 
-                    if (!BotOwner.DoorOpener.Interacting)
-                    {
-                        steer(currentCorner(), SAIN.Mover.IsSprinting ? turnSpeedSprint : turnSpeedTurning);
-                        move((currentCorner() - SAIN.Position).normalized);
-                    }
+                    steer(currentCorner(), SAIN.Mover.IsSprinting ? turnSpeedSprint : turnSpeedTurning);
+                    move((currentCorner() - SAIN.Position).normalized);
 
                     distToCurrent = distanceToCurrentCornerSqr();
                     yield return null;
                 }
                 nextCorner(path);
+            }
+        }
+
+        const float reachDistRunning = 1f;
+        const float reachDistRunningBuffer = 1.5f;
+
+        private void handleSprinting(float distToCurrent)
+        {
+            if (BotOwner.DoorOpener.Interacting)
+            {
+                CurrentRunStatus = RunStatus.InteractingWithDoor;
+                SAIN.Mover.Sprint(false);
+                return;
+            }
+            var stamina = Player.Physical.Stamina;
+            float staminaValue = stamina.NormalValue / stamina.TotalCapacity;
+            if (staminaValue < 0.1f)
+            {
+                CurrentRunStatus = RunStatus.NoStamina;
+                SAIN.Mover.Sprint(false);
+            }
+            else if (staminaValue > 0.5f)
+            {
+                if (distToCurrent < reachDistRunning)
+                {
+                    SAIN.Mover.Sprint(false);
+                    CurrentRunStatus = RunStatus.Turning;
+                }
+                else if (distToCurrent > reachDistRunningBuffer)
+                {
+                    SAIN.Mover.Sprint(true);
+                    CurrentRunStatus = RunStatus.Running;
+                }
+            }
+
+            if (SAIN.Mover.IsSprinting)
+            {
+                Player.MovementContext.SprintSpeed = 2f;
             }
         }
 
@@ -320,15 +338,11 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void move(Vector3 direction)
         {
+            trackMovement();
             updateVoxel();
             Player.CharacterController.SetSteerDirection(direction);
             BotOwner.AimingData?.Move(Player.Speed);
             Player.Move(findMoveDirection(direction));
-        }
-
-        public bool RunToCoverPoint(CoverPoint point)
-        {
-            return false;
         }
 
         public Vector2 findMoveDirection(Vector3 direction)

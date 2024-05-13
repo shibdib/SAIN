@@ -46,10 +46,10 @@ namespace SAIN.Components
             {
                 VisibleLight = visibleLight;
                 FlashLightPoint = hit.point;
-                ExpireDetectionPoint(0.1f);
+                player.StartCoroutine(ExpireDetectionPoint(0.1f));
 
                 PlayerPosition = player.Transform.position;
-                ExpirePlayerPoint(0.1f);
+                player.StartCoroutine(ExpirePlayerPoint(0.1f));
 
                 if (DebugFlash)
                 {

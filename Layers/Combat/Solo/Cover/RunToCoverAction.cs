@@ -138,9 +138,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
             sprinting = false;
             Vector3 destination = coverPoint.Position;
 
-            if (shallRun(destination))
+            // Testing new pathfinder for running
+            if (true || shallRun(destination))
             {
-                result = BotOwner.BotRun.Run(destination, false, 0.25f);
+                result = SAIN.Mover.SprintController.RunToPoint(destination);
+                //result = BotOwner.BotRun.Run(destination, false, 0.25f);
                 if (result)
                 {
                     sprinting = true;
@@ -173,9 +175,10 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
-            if (SAIN.Decision.CurrentSelfDecision == SelfDecision.RunAwayGrenade)
+            if (SAIN.Decision.CurrentSelfDecision == SelfDecision.RunAwayGrenade 
+                && SAIN.Talk.GroupTalk.FriendIsClose)
             {
-                SAIN.Talk.TalkAfterDelay(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat, 0.25f);
+                SAIN.Talk.TalkAfterDelay(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat, 0.33f);
             }
 
             _shallJumpToCover = false;
