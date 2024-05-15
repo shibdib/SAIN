@@ -176,7 +176,7 @@ namespace SAIN.Layers.Combat.Solo
             if (CheckSeeTimer < Time.time)
             {
                 LookPoint = Vector3.zero;
-                CheckSeeTimer = Time.time + 0.5f * Random.Range(0.66f, 1.33f);
+                CheckSeeTimer = Time.time + 0.5f;
                 var headPosition = SAIN.Transform.Head;
 
                 var canSeePoint = !Vector.Raycast(headPosition,

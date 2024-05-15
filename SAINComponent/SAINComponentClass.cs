@@ -444,6 +444,7 @@ namespace SAIN.SAINComponent
 
                 try
                 {
+                    GameObject.Destroy(SightChecker);
                     GameObject.Destroy(SteeringController);
                     GameObject.Destroy(NoBushESP);
                     GameObject.Destroy(FlashLight);
@@ -478,17 +479,6 @@ namespace SAIN.SAINComponent
                     }
                 }
             }
-            var placesForCheck = Squad.SquadInfo?.GroupPlacesForCheck;
-            if (placesForCheck != null)
-            {
-                foreach (var place in placesForCheck)
-                {
-                    if (place != null)
-                    {
-                        //DebugGizmos.Line(place.Position, Position, 0.025f, Time.deltaTime, true);
-                    }
-                }
-            }
         }
 
         private float updateGoalTargetTimer;
@@ -503,10 +493,21 @@ namespace SAIN.SAINComponent
                 {
                     _nextGetTargetTime = Time.time + 0.05f;
                     _currentTarget = getTarget();
+
+                    if (_currentTarget != null)
+                    {
+                        CurrentTargetDistance = (_currentTarget.Value - Position).magnitude;
+                    }
+                    else
+                    {
+                        CurrentTargetDistance = 0f;
+                    }
                 }
                 return _currentTarget;
             }
         }
+
+        public float CurrentTargetDistance { get; private set; }
 
         private float _nextGetTargetTime;
         private Vector3? _currentTarget;

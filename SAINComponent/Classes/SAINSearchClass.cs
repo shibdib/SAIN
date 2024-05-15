@@ -406,16 +406,15 @@ namespace SAIN.SAINComponent.Classes
         {
             RecalcPathTimer = Time.time + 2;
 
-            if (!shallSprint)
+            if (!shallSprint && SAIN.Mover.SprintController.Running)
             {
-                //SAIN.Mover.Sprint(false);
+                SAIN.Mover.SprintController.CancelRun();
             }
 
             _Running = false;
             if (shallSprint 
-                && BotOwner.BotRun.Run(destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance))
+                && SAIN.Mover.SprintController.RunToPoint(destination))
             {
-                SAIN.Steering.LookToMovingDirection(500f, true);
                 _Running = true;
                 return true;
             }
@@ -489,9 +488,9 @@ namespace SAIN.SAINComponent.Classes
                 //speed = DecideSpeed(FinalDestination, out pose);
             }
 
-            if (SearchMovePoint == null)
+            if (!shallSprint && SAIN.Mover.SprintController.Running)
             {
-
+                SAIN.Mover.SprintController.CancelRun();
             }
 
             LastState = CurrentState;

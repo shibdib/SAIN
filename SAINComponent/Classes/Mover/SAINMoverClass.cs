@@ -437,7 +437,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (SAIN?.Mover?.SprintController?.Running == true)
             {
-                SAIN.Mover.SprintController.Stop();
+                SAIN.Mover.SprintController.CancelRun();
             }
             _stopping = false;
         }

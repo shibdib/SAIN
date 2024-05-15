@@ -40,7 +40,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool Running => _runToPointCoroutine != null;
 
-        public void Stop()
+        public void CancelRun()
         {
             if (Running)
             {

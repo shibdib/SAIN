@@ -7,8 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Profiling;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.SubComponents
 {
@@ -38,6 +36,11 @@ namespace SAIN.SAINComponent.SubComponents
             {
                 HumanSightChecker = StartCoroutine(checkSightForHumanEnemies());
             }
+        }
+
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
         }
 
         private Coroutine AISightChecker;

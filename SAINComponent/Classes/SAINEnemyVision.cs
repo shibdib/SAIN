@@ -41,7 +41,7 @@ namespace SAIN.SAINComponent.Classes
 
         public bool CheckLineOfSight(bool useVisibleDistance, bool simpleCheck)
         {
-            if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
+            if (Enemy == null || BotOwner == null || BotOwner?.Settings?.Current == null || EnemyPlayer == null || SightChecker == null)
             {
                 return false;
             }

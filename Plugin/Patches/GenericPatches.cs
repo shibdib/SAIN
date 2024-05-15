@@ -20,9 +20,45 @@ using SAIN.SAINComponent;
 using Audio.Data;
 using EFT.UI;
 using System.Collections;
+using static SonicBulletSoundPlayer;
 
 namespace SAIN.Patches.Generic
 {
+    public class SuppressedSoundRolloffPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(WeaponSoundPlayer), "FireBullet");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(WeaponSoundPlayer __instance, ref GClass792 ____queue)
+        {
+            if (__instance.IsSilenced && __instance.TailSilenced.Rolloff != 250f)
+            {
+                Logger.LogInfo($"TailSilenced: [{__instance.TailSilenced.Rolloff}] Tail: [{__instance.Tail.Rolloff}]");
+                __instance.TailSilenced.Rolloff = 250f;
+                Logger.LogInfo($"BodySilenced: [{__instance.BodySilenced.Rolloff}] Body: [{__instance.Body.Rolloff}]");
+                __instance.BodySilenced.Rolloff *= 2f;
+                ____queue?.SetRolloff(__instance.BodySilenced.Rolloff);
+
+                __instance.BodySilenced.BlendValues[0] *= 1.5f;
+                __instance.BodySilenced.BlendValues[1] *= 1.75f;
+                __instance.BodySilenced.BlendValues[2] *= 2f;
+                __instance.BodySilenced.BlendValues[3] *= 2.25f;
+                if (__instance.BodySilenced.BlendValues[3] < 250f)
+                {
+                    __instance.BodySilenced.BlendValues[3] = 250f;
+                }
+
+                foreach (var blend in __instance.BodySilenced.BlendValues)
+                {
+                    Logger.LogInfo(blend);
+                }
+            }
+        }
+    }
+
     public class HaveSeenEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

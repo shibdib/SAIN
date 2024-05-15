@@ -69,7 +69,7 @@ namespace SAIN.Layers.Combat.Run
 
         public override void Stop()
         {
-            SAIN.Mover.SprintController.Stop();
+            SAIN.Mover.SprintController.CancelRun();
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)

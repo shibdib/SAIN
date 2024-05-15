@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
 
             FindObjectsInFront();
-            if (SAIN.Mover.IsSprinting || Player.IsSprintEnabled)
+            if (Player.IsSprintEnabled)
             {
                 _targetPoseLevel = 1f;
             }

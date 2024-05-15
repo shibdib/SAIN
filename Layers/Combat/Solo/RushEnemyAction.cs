@@ -53,7 +53,7 @@ namespace SAIN.Layers.Combat.Solo
                 }
 
                 SAIN.Mover.Sprint(false);
-                SAIN.Mover.SprintController.Stop();
+                SAIN.Mover.SprintController.CancelRun();
 
                 SAIN.Mover.DogFight.DogFightMove();
                 if (SAIN.Enemy.IsVisible && SAIN.Enemy.CanShoot)
@@ -123,7 +123,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Stop()
         {
-            SAIN.Mover.SprintController.Stop();
+            SAIN.Mover.SprintController.CancelRun();
         }
     }
 }
