@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.SAINComponent.Classes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,8 +25,70 @@ namespace SAIN.SAINComponent.SubComponents
 
         private void Update()
         {
-
+            if (SAIN == null || !SAIN.BotActive || SAIN.GameIsEnding)
+            {
+                StopAllCoroutines();
+                return;
+            }
+            if (AISightChecker == null)
+            {
+                AISightChecker = StartCoroutine(checkSightForAIEnemies());
+            }
+            if (HumanSightChecker == null)
+            {
+                HumanSightChecker = StartCoroutine(checkSightForHumanEnemies());
+            }
         }
+
+        private Coroutine AISightChecker;
+        private Coroutine HumanSightChecker;
+
+        private IEnumerator checkSightForAIEnemies()
+        {
+            while (true)
+            {
+                var enemies = SAIN?.EnemyController?.Enemies;
+                if (enemies != null)
+                {
+                    _localAIEnemyList.AddRange(enemies);
+                    foreach (var enemy in _localAIEnemyList.Values)
+                    {
+                        if (enemy.IsAI)
+                        {
+                            enemy.Vision.CheckLineOfSight(true, enemy != SAIN.Enemy);
+                            yield return null;
+                        }
+                    }
+                    _localAIEnemyList.Clear();
+                }
+                yield return null;
+            }
+        }
+
+        private IEnumerator checkSightForHumanEnemies()
+        {
+            while (true)
+            {
+                var enemies = SAIN?.EnemyController?.Enemies;
+                if (enemies != null)
+                {
+                    _localHumanEnemyList.AddRange(enemies);
+                    foreach (var enemy in _localHumanEnemyList.Values)
+                    {
+                        if (!enemy.IsAI)
+                        {
+                            enemy.Vision.CheckLineOfSight(false, false);
+                            yield return null;
+                        }
+                    }
+                    _localHumanEnemyList.Clear();
+                }
+                yield return null;
+            }
+        }
+
+        private Dictionary<string, SAINEnemy> _localAIEnemyList = new Dictionary<string, SAINEnemy>();
+        private Dictionary<string, SAINEnemy> _localHumanEnemyList = new Dictionary<string, SAINEnemy>();
 
         public void Dispose()
         {
@@ -47,25 +110,22 @@ namespace SAIN.SAINComponent.SubComponents
                 return false;
             }
 
-            if (info.NextCheckTime < Time.time)
+            info.PartHits = 0;
+            info.TotalParts = 0;
+            info.InSight = false;
+
+            foreach (var part in player.MainParts.Values)
             {
-                info.NextCheckTime = Time.time + 0.1f;
-                info.PartHits = 0;
-                info.TotalParts = 0;
-                info.InSight = false;
+                info.TotalParts++;
 
-                foreach (var part in player.MainParts.Values)
+                Vector3 headPos = BotOwner.LookSensor._headPoint;
+                Vector3 direction = part.Position - headPos;
+                if (!Physics.Raycast(headPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
                 {
-                    info.TotalParts++;
-
-                    Vector3 headPos = BotOwner.LookSensor._headPoint;
-                    Vector3 direction = part.Position - headPos;
-                    if (!Physics.Raycast(headPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
-                    {
-                        info.PartHits++;
-                    }
+                    info.PartHits++;
+                    info.InSight = true;
+                    break;
                 }
-                info.InSight = info.PartHits > 0;
             }
             return info.InSight;
         }
@@ -96,7 +156,6 @@ namespace SAIN.SAINComponent.SubComponents
 
     public sealed class PlayerSightResult
     {
-        public float NextCheckTime;
         public int PartHits;
         public int TotalParts;
         public bool InSight;

@@ -11,6 +11,7 @@ using SAIN.Layers;
 using SAIN.Patches.Generic;
 using SAIN.Patches.Hearing;
 using SAIN.Patches.Shoot;
+using SAIN.Patches.Vision;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.SAINComponent;
@@ -104,6 +105,7 @@ namespace SAIN
             var patches = new List<Type>() {
                 //typeof(Patches.Generic.ShallRunAwayGrenadePatch),
                 //typeof(Patches.Generic.IsSameWayPatch),
+                typeof(Patches.Generic.HaveSeenEnemyPatch),
                 typeof(Patches.Generic.StopSetToNavMeshPatch),
                 typeof(Patches.Generic.TurnDamnLightOffPatch),
                 typeof(Patches.Generic.RotateClampPatch),
@@ -143,9 +145,10 @@ namespace SAIN
                 //typeof(Patches.Talk.TalkDisablePatch3),
                 //typeof(Patches.Talk.TalkDisablePatch4),
 
+                typeof(Patches.Vision.AIVisionUpdateLimitPatch),
+                typeof(Patches.Vision.WeatherTimeVisibleDistancePatch),
                 typeof(Patches.Vision.NoAIESPPatch),
                 typeof(Patches.Vision.VisionSpeedPatch),
-                typeof(Patches.Vision.WeatherTimeVisibleDistancePatch),
                 typeof(Patches.Vision.VisionDistancePosePatch),
                 typeof(Patches.Vision.CheckFlashlightPatch),
 

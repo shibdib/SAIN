@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.SAINComponent.SubComponents;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
@@ -7,6 +8,7 @@ namespace SAIN.SAINComponent.Classes
     {
         public SAINEnemyVision(SAINEnemy enemy) : base(enemy)
         {
+            SightChecker = SAIN.SightChecker;
         }
 
         public void Update(bool isCurrentEnemy)
@@ -16,29 +18,8 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            float timeToAdd;
-            bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode;
-            if (!isCurrentEnemy && Enemy.IsAI)
-            {
-                timeToAdd = performanceMode ? 4f : 2f;
-            }
-            else if (performanceMode)
-            {
-                timeToAdd = isCurrentEnemy ? 0.15f : 1f;
-            }
-            else
-            {
-                timeToAdd = isCurrentEnemy ? 0.1f : 0.5f;
-            }
-
             bool visible = false;
             bool canshoot = false;
-
-            if (CheckLosTimer + timeToAdd < Time.time)
-            {
-                CheckLosTimer = Time.time;
-                InLineOfSight = CheckLineOfSight(true, !isCurrentEnemy);
-            }
 
             var enemyInfo = EnemyInfo;
             if (enemyInfo?.IsVisible == true && InLineOfSight)
@@ -58,55 +39,83 @@ namespace SAIN.SAINComponent.Classes
         public bool ShallReportRepeatContact { get; set; }
         public bool ShallReportLostVisual { get; set; }
 
-        private bool CheckLineOfSight(bool noDistRestrictions = false, bool simpleCheck = false)
+        public bool CheckLineOfSight(bool useVisibleDistance, bool simpleCheck)
         {
             if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
             {
                 return false;
             }
-            if (SAINPlugin.DebugMode && EnemyPlayer.IsYourPlayer)
+
+            bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode;
+            bool currentEnemy = SAIN.Enemy == Enemy;
+
+            if (_checkLosTime + LOSCheckFreq > Time.time)
             {
-                //Logger.LogInfo($"EnemyDistance [{Enemy.RealDistance}] Vision Distance [{BotOwner.Settings.Current.CurrentVisibleDistance}]");
+                return InLineOfSight;
             }
-            if (noDistRestrictions || Enemy.RealDistance <= BotOwner.Settings.Current.CurrentVisibleDistance)
+            _checkLosTime = Time.time;
+
+            float maxDist = float.MaxValue;
+            if (useVisibleDistance)
+            {
+                maxDist = BotOwner.Settings.Current.CurrentVisibleDistance;
+            }
+
+            InLineOfSight = false;
+            if (Enemy.RealDistance <= maxDist)
             {
                 if (simpleCheck)
                 {
-                    if (SAIN.SightChecker != null)
-                    {
-                        return SAIN.SightChecker.SimpleSightCheck(Enemy.EnemyChestPosition, BotOwner.LookSensor._headPoint);
-                    }
-                    else
-                    {
-                        Logger.LogError("SightChecker is null");
-                        Vector3 headPos = BotOwner.LookSensor._headPoint;
-                        Vector3 direction = Enemy.EnemyChestPosition - headPos;
-                        return !Physics.Raycast(headPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
-                    }
+                    InLineOfSight = SightChecker.SimpleSightCheck(Enemy.EnemyChestPosition, BotOwner.LookSensor._headPoint);
                 }
                 else
                 {
-                    if (SAIN.SightChecker != null)
-                    {
-                        return SAIN.SightChecker.CheckLineOfSight(EnemyPlayer);
-                    }
-                    else
-                    {
-                        Logger.LogError("SightChecker is null");
-                        foreach (var part in EnemyPlayer.MainParts.Values)
-                        {
-                            Vector3 headPos = BotOwner.LookSensor._headPoint;
-                            Vector3 direction = part.Position - headPos;
-                            if (!Physics.Raycast(headPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
-                            {
-                                return true;
-                            }
-                        }
-                    }
+                    InLineOfSight = SightChecker.CheckLineOfSight(EnemyPlayer);
                 }
             }
-            return false;
+            return InLineOfSight;
         }
+
+        private float LOSCheckFreq
+        {
+            get
+            {
+                bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode;
+                bool currentEnemy = SAIN.Enemy == Enemy;
+                bool isAI = Enemy.IsAI;
+                float timeAdd;
+
+                // Is the person a human and my current enemy?
+                if (!isAI
+                    && currentEnemy)
+                {
+                    timeAdd = 0.05f;
+                }
+                // Is the person a human but not my current enemy?
+                else if (!isAI)
+                {
+                    timeAdd = 0.15f;
+                }
+                // Is the person a bot and my current enemy?
+                else if (currentEnemy)
+                {
+                    timeAdd = 0.1f;
+                }
+                // the person is a bot and not my current active enemy
+                else
+                {
+                    timeAdd = 1f;
+                }
+
+                if (SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode)
+                {
+                    timeAdd *= 2f;
+                }
+                return timeAdd;
+            }
+        }
+
+        private SightCheckerComponent SightChecker;
 
         private const float _repeatContactMinSeenTime = 12f;
         private const float _lostContactMinSeenTime = 12f;
@@ -179,6 +188,6 @@ namespace SAIN.SAINComponent.Classes
         public float TimeLastSeen { get; private set; }
         public float LastChangeVisionTime { get; private set; }
 
-        private float CheckLosTimer;
+        private float _checkLosTime;
     }
 }

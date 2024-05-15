@@ -23,6 +23,29 @@ using System.Collections;
 
 namespace SAIN.Patches.Generic
 {
+    public class HaveSeenEnemyPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.PropertyGetter(typeof(EnemyInfo), "HaveSeen");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(ref bool __result, EnemyInfo __instance)
+        {
+            if (__result == true)
+            {
+                return;
+            }
+            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(HaveSeenEnemyPatch)) 
+                && sain.Info.Profile.IsPMC 
+                && sain.EnemyController.CheckAddEnemy(__instance.Person)?.Heard == true)
+            {
+                __result = true;
+            }
+        }
+    }
+
     public class StopSetToNavMeshPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

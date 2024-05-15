@@ -305,6 +305,8 @@ namespace SAIN.Components
 
                 GameWorld.OnDispose -= Dispose;
 
+                Patches.Vision.AIVisionUpdateLimitPatch.LookUpdates.Clear();
+
                 AISoundPlayed -= SoundPlayed;
                 PlayerTalk -= PlayerTalked;
                 Singleton<BotEventHandler>.Instance.OnGrenadeThrow -= GrenadeThrown;

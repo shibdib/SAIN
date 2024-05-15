@@ -17,23 +17,6 @@ namespace SAIN
 {
     public class BigBrainHandler
     {
-        public class BrainPatches
-        {
-            public class BossKnightPatch : ModulePatch
-            {
-                protected override MethodBase GetTargetMethod()
-                {
-                    return AccessTools.Method(typeof(BotMover), "method_0");
-                }
-
-                [PatchPrefix]
-                public static bool PatchPrefix(ref BotOwner ___botOwner_0)
-                {
-                    return false;
-                }
-            }
-        }
-
         public static bool IsBotUsingSAINLayer(BotOwner bot)
         {
             return isBotUsingLayer(bot, SAINLayers);
@@ -57,6 +40,7 @@ namespace SAIN
             {
                 BrainAssignment.Init();
                 BigBrainInitialized = true;
+
             }
         }
 
@@ -93,7 +77,7 @@ namespace SAIN
                     stringList.Add(brain);
                 }
 
-                BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
+                //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
                 BrainManager.AddCustomLayer(typeof(BotRunLayer), stringList, 99);
                 BrainManager.AddCustomLayer(typeof(ExtractLayer), stringList, settings.SAINExtractLayerPriority);
                 BrainManager.AddCustomLayer(typeof(CombatSquadLayer), stringList, settings.SAINCombatSquadLayerPriority);
@@ -109,7 +93,7 @@ namespace SAIN
                 var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
 
                 BrainManager.AddCustomLayer(typeof(BotRunLayer), goons, 99);
-                BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), goons, 98);
+                //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), goons, 98);
                 BrainManager.AddCustomLayer(typeof(CombatSquadLayer), goons, 64);
                 BrainManager.AddCustomLayer(typeof(CombatSoloLayer), goons, 62);
             }

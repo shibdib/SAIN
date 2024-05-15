@@ -98,19 +98,19 @@ namespace SAIN.Components.BotController
 
             if ( result == null )
             {
-                debugString?.AppendLine( $"[{name}] not found in SAIN Bot Dictionary. Getting Component Manually..." );
+                //debugString?.AppendLine( $"[{name}] not found in SAIN Bot Dictionary. Getting Component Manually..." );
 
                 result = botOwner.gameObject.GetComponent<SAINComponentClass>();
 
                 if (result != null)
                 {
-                    debugString?.AppendLine($"[{name}] found after using GetComponent.");
+                    //debugString?.AppendLine($"[{name}] found after using GetComponent.");
                 }
             }
 
             if ( result == null )
             {
-                debugString?.AppendLine( $"[{name}] could not be retrieved from SAIN Bots. WildSpawnType: [{botOwner.Profile.Info.Settings.Role}] Returning Null" );
+                //debugString?.AppendLine( $"[{name}] could not be retrieved from SAIN Bots. WildSpawnType: [{botOwner.Profile.Info.Settings.Role}] Returning Null" );
             }
 
             if ( result == null && debugString != null )
@@ -131,7 +131,7 @@ namespace SAIN.Components.BotController
             {
                 if (debugString != null)
                 {
-                    debugString.AppendLine("Player is Null, cannot get SAIN!");
+                    //debugString.AppendLine("Player is Null, cannot get SAIN!");
                     //Logger.LogAndNotifyError(debugString, EFT.Communications.ENotificationDurationType.Long);
                 }
                 return null;
@@ -158,7 +158,7 @@ namespace SAIN.Components.BotController
             }
             if ( result == null )
             {
-                debugString?.AppendLine( $"[{botName}] not found in SAIN Bot Dictionary. Comparing names manually to find the bot..." );
+                //debugString?.AppendLine( $"[{botName}] not found in SAIN Bot Dictionary. Comparing names manually to find the bot..." );
 
                 foreach ( var bot in SAINBotDictionary )
                 {
@@ -172,14 +172,14 @@ namespace SAIN.Components.BotController
             }
             if ( result == null )
             {
-                debugString?.AppendLine( $"[{botName}] Still not found in SAIN Bot Dictionary. Comparing Profile Id instead..." );
+                //debugString?.AppendLine( $"[{botName}] Still not found in SAIN Bot Dictionary. Comparing Profile Id instead..." );
 
                 foreach ( var bot in SAINBotDictionary )
                 {
                     if ( bot.Value != null && bot.Value.ProfileId == botName )
                     {
                         result = bot.Value;
-                        debugString?.AppendLine($"[{botName}] found after comparing profileID. Bot Name was [{bot.Value.name}]");
+                        //debugString?.AppendLine($"[{botName}] found after comparing profileID. Bot Name was [{bot.Value.name}]");
                         break;
                     }
                 }

@@ -37,6 +37,89 @@ namespace SAIN.Patches.Vision
         }
     }
 
+    public class AIVisionUpdateLimitPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(LookSensor), "CheckAllEnemies");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(ref BotOwner ____botOwner, GClass522 lookAll)
+        {
+            if (____botOwner != null)
+            {
+                if (!LookUpdates.ContainsKey(____botOwner.ProfileId))
+                {
+                    LookUpdates.Add(____botOwner.ProfileId, new AIVisionInfo(____botOwner));
+                }
+                LookUpdates[____botOwner.ProfileId].CheckEnemies(lookAll);
+            }
+            return false;
+        }
+
+        public static Dictionary<string, AIVisionInfo> LookUpdates = new Dictionary<string, AIVisionInfo>();
+
+        public class AIVisionInfo
+        {
+            public AIVisionInfo(BotOwner bot)
+            {
+                BotOwner = bot;
+            }
+
+            public void CheckEnemies(GClass522 lookAll)
+            {
+                float time = Time.time;
+                var enemyInfos = this.BotOwner.EnemiesController.EnemyInfos.Values;
+                this._cacheToLookEnemyInfos.AddRange(enemyInfos);
+                foreach (EnemyInfo enemyInfo in this._cacheToLookEnemyInfos)
+                {
+                    try
+                    {
+                        IPlayer person = enemyInfo.Person;
+                        if (!NextUpdateTimes.ContainsKey(person.ProfileId))
+                        {
+                            NextUpdateTimes.Add(person.ProfileId, 0f);
+                        }
+
+                        float timeAdd;
+                        if (!person.IsAI)
+                        {
+                            timeAdd = 0.1f;
+                        }
+                        else
+                        {
+                            if (BotOwner.Memory.GoalEnemy == enemyInfo)
+                            {
+                                timeAdd = 0.2f;
+                            }
+                            else
+                            {
+                                timeAdd = 0.33f;
+                            }
+                        }
+
+                        if (NextUpdateTimes[person.ProfileId] + timeAdd < time)
+                        {
+                            NextUpdateTimes[person.ProfileId] = time;
+                            enemyInfo.CheckLookEnemy(lookAll);
+                        }
+                    }
+                    catch (Exception e) 
+                    {
+                        Logger.LogError(e);
+                        BotOwner.EnemiesController.EnemyInfos.Remove(enemyInfo.Person);
+                    }
+                }
+                this._cacheToLookEnemyInfos.Clear();
+            }
+
+            private readonly BotOwner BotOwner;
+            public Dictionary<string, float> NextUpdateTimes = new Dictionary<string, float>();
+            private readonly List<EnemyInfo> _cacheToLookEnemyInfos = new List<EnemyInfo>();
+        }
+    }
+
     public class WeatherTimeVisibleDistancePatch : ModulePatch
     {
         private static PropertyInfo _clearVisibleDistProperty;
@@ -139,7 +222,7 @@ namespace SAIN.Patches.Vision
             float inverseWeatherModifier = Mathf.Sqrt(2f - weatherModifier);
 
             WildSpawnType wildSpawnType = __instance.Owner.Profile.Info.Settings.Role;
-            if (PresetHandler.LoadedPreset.BotSettings.SAINSettings.TryGetValue(wildSpawnType, out var botType) )
+            if (PresetHandler.LoadedPreset.BotSettings.SAINSettings.TryGetValue(wildSpawnType, out var botType))
             {
                 BotDifficulty diff = __instance.Owner.Profile.Info.Settings.BotDifficulty;
                 __result *= Math.CalcVisSpeed(dist, botType.Settings[diff]);
@@ -261,6 +344,7 @@ namespace SAIN.Patches.Vision
     {
         private static FieldInfo _tacticalModesField;
         private static MethodInfo _UsingLight;
+
         protected override MethodBase GetTargetMethod()
         {
             _UsingLight = AccessTools.PropertySetter(typeof(AIData), "UsingLight");

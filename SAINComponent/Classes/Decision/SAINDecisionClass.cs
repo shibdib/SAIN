@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,7 +20,10 @@ namespace SAIN.SAINComponent.Classes.Decision
         public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnDecisionMade;
         public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnSAINStart;
         public event Action<float> OnSAINEnd;
-        public bool SAINActive { get; private set; }
+
+        public bool SAINActive => CurrentSoloDecision != SoloDecision.None
+                || CurrentSelfDecision != SelfDecision.None
+                || CurrentSquadDecision != SquadDecision.None;
 
         public void Init()
         {
@@ -27,40 +31,41 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Update()
         {
-            if (BotOwner == null || SAIN == null) return;
-            if (!SAIN.BotActive || SAIN.GameIsEnding)
+            if (mainDecisionCoroutine == null)
             {
-                CurrentSoloDecision = SoloDecision.None;
-                CurrentSquadDecision = SquadDecision.None;
-                CurrentSelfDecision = SelfDecision.None;
-                return;
+                mainDecisionCoroutine = SAIN.StartCoroutine(mainDecisionLoop());
             }
-
-            CheckDecisionFrameCount++;
-
-            if (CheckDecisionFrameCount >= CheckDecisionFrameTarget)
-            {
-                CheckEnemyFrameCount++;
-                if (CheckEnemyFrameCount >= CheckEnemyFrameTarget)
-                {
-                    CheckEnemyFrameCount = 0;
-                    EnemyDistance = SAIN.HasEnemy ? SAIN.Enemy.CheckPathDistance() : EnemyPathDistance.NoEnemy;
-                }
-
-                CheckDecisionFrameCount = 0;
-                GetDecision();
-            }
-
-            SAINActive = CurrentSoloDecision != SoloDecision.None 
-                || CurrentSelfDecision != SelfDecision.None 
-                || CurrentSquadDecision != SquadDecision.None;
         }
 
-        private const int CheckDecisionFrameTarget = 1;
-        private int CheckDecisionFrameCount = 0;
+        private Coroutine mainDecisionCoroutine;
 
-        private const int CheckEnemyFrameTarget = 1;
-        private int CheckEnemyFrameCount = 0;
+        private IEnumerator mainDecisionLoop()
+        {
+            while (true)
+            {
+                if (BotOwner == null || SAIN == null || !SAIN.BotActive || SAIN.GameIsEnding)
+                {
+                    CurrentSoloDecision = SoloDecision.None;
+                    CurrentSquadDecision = SquadDecision.None;
+                    CurrentSelfDecision = SelfDecision.None;
+                    yield break;
+                }
+
+                float delay = SAINActive ? getDecisionFreq : getDecisionFreqAtPeace;
+
+                if (_nextGetDecisionTime + delay < Time.time)
+                {
+                    _nextGetDecisionTime = Time.time;
+                    EnemyDistance = SAIN.HasEnemy ? SAIN.Enemy.CheckPathDistance() : EnemyPathDistance.NoEnemy;
+                    GetDecision();
+                }
+                yield return null;
+            }
+        }
+
+        private float _nextGetDecisionTime;
+        private const float getDecisionFreq = 0.0f;
+        private const float getDecisionFreqAtPeace = 0.25f;
 
         public void Dispose()
         {

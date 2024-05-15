@@ -424,13 +424,6 @@ namespace SAIN.SAINComponent.Classes.Debug
                             _botVaulted = true;
                             _nextVaultCheckTime = Time.time + 2f;
                         }
-                        else
-                        {
-                            _nextVaultCheckTime = Time.time + 0.5f;
-                        }
-                    }
-                    if (SAIN.Decision.CurrentSoloDecision != SoloDecision.HoldInCover)
-                    {
                     }
                 }
 

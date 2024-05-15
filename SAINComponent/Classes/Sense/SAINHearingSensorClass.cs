@@ -348,7 +348,7 @@ namespace SAIN.SAINComponent.Classes
 
         private IEnumerator delayAddSearch(Vector3 vector, float power, AISoundType type, Vector3 soundPosition, IPlayer person)
         {
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.33f);
             SAIN?.Squad?.SquadInfo?.AddPointToSearch(vector, power, BotOwner, type, soundPosition, person);
             CheckCalcGoal();
         }

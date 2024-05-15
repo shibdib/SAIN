@@ -1,4 +1,5 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
@@ -48,10 +49,11 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         public float CoverMinEnemyDistance = 8f;
 
-        [Default(0.25f)]
+        [Default(0.1f)]
         [MinMax(0.01f, 1f, 100f)]
         [Advanced]
-        public float CoverUpdateFrequency = 0.25f;
+        [JsonIgnore]
+        public float CoverUpdateFrequency = 0.1f;
 
         [Default(false)]
         [Advanced]
