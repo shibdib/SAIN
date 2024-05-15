@@ -105,13 +105,11 @@ namespace SAIN
                     switch (Backpack.TemplateId)
                     {
                         case backpack_pilgrim:
-                            //Logger.LogWarning("Found Pilgrim");
-                            gainVisionTime *= 0.8f;
+                            gainVisionTime *= 0.875f;
                             break;
 
                         case backpack_raid:
-                            //Logger.LogWarning("Found Couch backpack (Raid)");
-                            gainVisionTime *= 0.875f;
+                            gainVisionTime *= 0.925f;
                             break;
 
                         default:
@@ -130,18 +128,15 @@ namespace SAIN
                         case boonie_MILTEC:
                         case boonie_CHIMERA:
                         case boonie_DOORKICKER:
-                            //Logger.LogWarning("Found Boonie Hat");
                             gainVisionTime *= 1.2f;
                             break;
 
                         case helmet_TAN_ULACH:
-                            // Logger.LogWarning("Found Tan Ulach");
-                            gainVisionTime *= 0.9f;
+                            gainVisionTime *= 0.925f;
                             break;
 
                         case helmet_UNTAR_BLUE:
-                            // Logger.LogWarning("Found BlueBerry Helmet");
-                            gainVisionTime *= 0.85f;
+                            gainVisionTime *= 0.9f;
                             break;
 
                         default:
@@ -150,10 +145,8 @@ namespace SAIN
                 }
                 if (FaceCover != null)
                 {
-                    //Logger.LogWarning("Found FaceCover");
                     gainVisionTime *= 1.05f;
                 }
-                //Logger.LogWarning(gainVisionTime);
             }
             return gainVisionTime;
         }

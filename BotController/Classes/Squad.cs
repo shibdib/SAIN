@@ -103,11 +103,20 @@ namespace SAIN.BotController.Classes
                 return;
             }
 
+            try
+            {
+                SetVisibleAndHeard(player, position);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e);
+            }
+
             if (searchType  == ESearchPointType.Hearing)
             {
                 try
                 {
-                    SetVisibleAndHeard(player, position);
+                    //SetVisibleAndHeard(player, position);
                 }
                 catch (Exception e)
                 {
@@ -126,11 +135,9 @@ namespace SAIN.BotController.Classes
 
         public readonly Dictionary<IPlayer, PlaceForCheck> PlayerPlaceChecks = new Dictionary<IPlayer, PlaceForCheck>();
 
-        private void SetVisibleAndHeard(IPlayer player, Vector3 position)
+        public void SetVisibleAndHeard(IPlayer player, Vector3 position)
         {
-            const float SoundAggroDist = 125f;
-
-            bool playerIsHuman = player.IsAI == false;
+            const float SoundAggroDist = 400f;
 
             if (player != null && Members != null)
             {
@@ -160,9 +167,11 @@ namespace SAIN.BotController.Classes
                                     // By default bots won't set a goal enemy until actually seen.
                                     // We need PMCs to do this purely on audio, and it seems like this is the simplest way to do so.
                                     // SAIN won't allow them to shoot even if they are set visible here momentarily, so it should be harmless.
-                                    sainEnemy.EnemyInfo.SetVisible(true);
-                                    botOwner.Memory.GoalEnemy = goalEnemy;
-                                    sainEnemy.EnemyInfo.SetVisible(false);
+
+                                    // Fairly sure this was causing bots to see an enemy again almost instantly from far distances, due to how visibility gets reset
+                                    // sainEnemy.EnemyInfo.SetVisible(true);
+                                    // botOwner.Memory.GoalEnemy = sainEnemy.EnemyInfo;
+                                    // sainEnemy.EnemyInfo.SetVisible(false);
                                 }
                             }
                         }
@@ -192,15 +201,8 @@ namespace SAIN.BotController.Classes
                         if (FindNavMesh(averagePosition, out hitPosition, navSampleDist) 
                             && CanPathToPoint(hitPosition, botOwner) != NavMeshPathStatus.PathInvalid)
                         {
-                            //bool isOldPlaceActive = botOwner.Memory.GoalTarget.GoalTarget == oldPlace;
-
+                            GroupPlacesForCheck.Remove(oldPlace);
                             PlaceForCheck replacementPlace = new PlaceForCheck(hitPosition, checkType);
-
-                            if (GroupPlacesForCheck.Contains(oldPlace))
-                            {
-                                GroupPlacesForCheck.Remove(oldPlace);
-                            }
-
                             GroupPlacesForCheck.Add(replacementPlace);
                             PlayerPlaceChecks[player] = replacementPlace;
                             CalcGoalForBot(botOwner);
@@ -464,6 +466,29 @@ namespace SAIN.BotController.Classes
                             FindSquadLeader();
                         }
                     }
+                }
+            }
+        }
+
+        public void UpdateSharedEnemyStatus(IPlayer player, EEnemyAction action, SAINComponentClass sain)
+        {
+            if (sain == null)
+            {
+                return;
+            }
+            foreach (var member in Members.Values)
+            {
+                if (member == sain || member == null) { continue; }
+
+                if (!member.Equipment.HasEarPiece && (member.Position - sain.Position).sqrMagnitude > 50f * 50f)
+                {
+                    continue;
+                }
+
+                SAINEnemy memberEnemy = member.EnemyController.CheckAddEnemy(player);
+                if (memberEnemy != null)
+                {
+                    memberEnemy.EnemyStatus.EnemyAction = action;
                 }
             }
         }

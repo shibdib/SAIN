@@ -3,8 +3,59 @@ using Random = UnityEngine.Random;
 
 namespace SAIN.SAINComponent.Classes
 {
+    public enum EEnemyAction
+    {
+        None = 0,
+        Reloading = 1,
+        HasGrenade = 2,
+        Healing = 3,
+    }
+
     public class SAINEnemyStatus : EnemyBase
     {
+        public EEnemyAction EnemyAction
+        {
+            get
+            {
+                if (EnemyIsReloading)
+                {
+                    return EEnemyAction.Reloading;
+                }
+                else if (EnemyHasGrenadeOut)
+                {
+                    return EEnemyAction.HasGrenade;
+                }
+                else if (EnemyIsHealing)
+                {
+                    return EEnemyAction.Healing;
+                }
+                else
+                {
+                    return EEnemyAction.None;
+                }
+            }
+            set
+            {
+                switch (value)
+                {
+                    case EEnemyAction.None:
+                        break;
+
+                    case EEnemyAction.Reloading:
+                        EnemyIsReloading = true;
+                        break;
+
+                    case EEnemyAction.HasGrenade:
+                        EnemyHasGrenadeOut = true;
+                        break;
+
+                    case EEnemyAction.Healing:
+                        EnemyIsHealing = true;
+                        break;
+                }
+            }
+        }
+
         public SAINEnemyStatus(SAINEnemy enemy) : base(enemy)
         {
         }

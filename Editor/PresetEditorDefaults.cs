@@ -35,6 +35,10 @@ namespace SAIN.Editor
         [Default(false)]
         public bool GlobalDebugMode;
 
+        [Default(false)]
+        [Debug]
+        public bool ForceBotsToRunAround;
+
         [Name("Debug External")]
         [Default(false)]
         public bool DebugExternal;

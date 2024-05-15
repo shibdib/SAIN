@@ -17,25 +17,25 @@ namespace SAIN.Layers.Combat.Squad
         {
             var enemy = SAIN.Enemy;
 
-            bool needReload = !BotOwner.WeaponManager.HaveBullets || SAIN.Decision.SelfActionDecisions.LowOnAmmo();
-            if (!BotOwner.WeaponManager.HaveBullets || SAIN.Decision.SelfActionDecisions.LowOnAmmo())
+            if (!BotOwner.WeaponManager.HaveBullets 
+                || (!BotOwner.ShootData.Shooting && SAIN.Decision.SelfActionDecisions.LowOnAmmo(0.5f)))
             {
                 SAIN.SelfActions.TryReload();
             }
+
             if (enemy != null)
             {
                 if (enemy.IsVisible && enemy.CanShoot)
                 {
-                    //BotOwner.StopMove();
+                    SAIN.Mover.StopMove();
                     Shoot.Update();
                 }
-                else if (CanSeeLastCorner(out var pos))
+                else if (FindSuppressionTarget(out var target) && CanSeeSuppressionTarget(target))
                 {
-                    //BotOwner.StopMove();
+                    SAIN.Mover.StopMove();
 
                     bool hasMachineGun = SAIN.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun;
                     if (hasMachineGun 
-                        && BotOwner.GetPlayer?.IsInPronePose == false
                         && SAIN.Mover.Prone.ShallProne(true))
                     {
                         SAIN.Mover.Prone.SetProne(true);
@@ -49,7 +49,7 @@ namespace SAIN.Layers.Combat.Squad
                     }
                     else if (
                         WaitShootTimer < Time.time 
-                        && SAIN.Shoot(true, pos.Value, true, SAINComponentClass.EShootReason.SquadSuppressing))
+                        && SAIN.Shoot(true, target.Value, true, SAINComponentClass.EShootReason.SquadSuppressing))
                     {
                         enemy.EnemyIsSuppressed = true;
                         float waitTime = hasMachineGun ? 0.1f : 0.5f;
@@ -59,24 +59,11 @@ namespace SAIN.Layers.Combat.Squad
                 else
                 {
                     SAIN.Shoot(false, Vector3.zero);
-                    if (needReload)
+                    SAIN.Steering.SteerByPriority();
+
+                    if (enemy.LastKnownPosition != null)
                     {
-                        SAIN.SelfActions.TryReload();
-                    }
-                    if (!BotOwner.ShootData.Shooting)
-                    {
-                        SAIN.Steering.SteerByPriority();
-                    }
-                    if (_recalcPathTimer < Time.time)
-                    {
-                        if (SAIN.Mover.GoToPoint(enemy.EnemyPosition, out _))
-                        {
-                            _recalcPathTimer = Time.time + 4f;
-                        }
-                        else
-                        {
-                            _recalcPathTimer = Time.time + 1f;
-                        }
+                        SAIN.Mover.GoToPoint(enemy.LastKnownPosition.Value, out _);
                     }
                 }
             }
@@ -86,11 +73,30 @@ namespace SAIN.Layers.Combat.Squad
 
         private float WaitShootTimer;
 
-        private bool CanSeeLastCorner(out Vector3? pos)
+        private bool FindSuppressionTarget(out Vector3? pos)
         {
-            pos = SAIN.Enemy?.Path.LastCornerToEnemy;
-            return SAIN.Enemy?.Path.CanSeeLastCornerToEnemy == true;
+            pos = SAIN.Enemy?.SuppressionTarget;
+            return pos != null;
         }
+
+        private bool CanSeeSuppressionTarget(Vector3? target)
+        {
+            if (target == null)
+            {
+                _canSeeSuppTarget = false;
+            }
+            else if (_nextCheckVisTime < Time.time)
+            {
+                _nextCheckVisTime = Time.time + 0.5f;
+                Vector3 myHead = SAIN.Transform.Head;
+                _canSeeSuppTarget = !Physics.Raycast(myHead, target.Value - myHead, (target.Value - myHead).magnitude * 0.8f);
+            }
+            return _canSeeSuppTarget;
+        }
+
+        private bool _canSeeSuppTarget;
+
+        private float _nextCheckVisTime;
 
         public override void Start()
         {

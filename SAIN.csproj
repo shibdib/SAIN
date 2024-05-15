@@ -290,6 +290,8 @@
     <Compile Include="Layers\Run\RunningAction.cs" />
     <Compile Include="Layers\SAINAction.cs" />
     <Compile Include="Layers\SAINLayer.cs" />
+    <Compile Include="Layers\Unstuck\BotUnstuckLayer.cs" />
+    <Compile Include="Layers\Unstuck\GetUnstuckAction.cs" />
     <Compile Include="Plugin\AssemblyInfoClass.cs" />
     <Compile Include="Plugin\DependencyChecker.cs" />
     <Compile Include="Plugin\External.cs" />

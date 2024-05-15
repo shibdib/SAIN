@@ -216,20 +216,27 @@ namespace SAIN.Components
                 {
                     if (Enemy.RealDistance <= range)
                     {
+                        bool shallUpdateSquad = true;
                         if (soundType == SAINSoundType.GrenadePin || soundType == SAINSoundType.GrenadeDraw)
                         {
                             Enemy.EnemyStatus.EnemyHasGrenadeOut = true;
-                            return;
                         }
-                        if (soundType == SAINSoundType.Reload)
+                        else if (soundType == SAINSoundType.Reload)
                         {
                             Enemy.EnemyStatus.EnemyIsReloading = true;
-                            return;
                         }
-                        if (soundType == SAINSoundType.Heal)
+                        else if (soundType == SAINSoundType.Heal)
                         {
                             Enemy.EnemyStatus.EnemyIsHealing = true;
-                            return;
+                        }
+                        else
+                        {
+                            shallUpdateSquad = false;
+                        }
+
+                        if (shallUpdateSquad)
+                        {
+                            bot.Squad.SquadInfo.UpdateSharedEnemyStatus(Enemy.EnemyIPlayer, Enemy.EnemyStatus.EnemyAction, bot);
                         }
                     }
                 }

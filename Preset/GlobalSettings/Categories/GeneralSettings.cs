@@ -99,20 +99,23 @@ namespace SAIN.Preset.GlobalSettings
         [Default(24)]
         [MinMax(0, 100)]
         [Hidden]
-        public int SAINCombatSquadLayerPriority = 24;
+        [JsonIgnore]
+        public int SAINCombatSquadLayerPriority = 22;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
         [Default(22)]
         [MinMax(0, 100)]
         [Hidden]
-        public int SAINExtractLayerPriority = 22;
+        [JsonIgnore]
+        public int SAINExtractLayerPriority = 24;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
         [Default(20)]
         [MinMax(0, 100)]
         [Hidden]
+        [JsonIgnore]
         public int SAINCombatSoloLayerPriority = 20;
     }
 }

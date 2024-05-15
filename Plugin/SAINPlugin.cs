@@ -119,8 +119,8 @@ namespace SAIN
                 typeof(Patches.Generic.BotGroupAddEnemyPatch),
                 typeof(Patches.Generic.ForceNoHeadAimPatch),
                 typeof(Patches.Generic.NoTeleportPatch),
-                //typeof(Patches.Generic.ShallKnowEnemyPatch),
-                //typeof(Patches.Generic.ShallKnowEnemyLatePatch),
+                typeof(Patches.Generic.ShallKnowEnemyPatch),
+                typeof(Patches.Generic.ShallKnowEnemyLatePatch),
                 typeof(Patches.Generic.SkipLookForCoverPatch),
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
 
@@ -200,7 +200,7 @@ namespace SAIN
             //SAINVaultClass.DebugVaultPointCount();
 
             LoadedPreset.GlobalSettings.Personality.Update();
-            BigBrainHandler.CheckLayers();
+            //BigBrainHandler.CheckLayers();
         }
 
         private void Start() => SAINEditor.Init();

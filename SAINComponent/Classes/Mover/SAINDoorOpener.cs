@@ -87,8 +87,17 @@ namespace SAIN.SAINComponent.Classes.Mover
                 this._lastFrameLink = lastFrameLink;
                 if (gstruct.Value.CurDist < 16f)
                 {
+                    Vector3 targetDest;
+                    if (SAIN.Mover.SprintController.Running)
+                    {
+                        targetDest = SAIN.Mover.SprintController.currentCorner();
+                    }
+                    else
+                    {
+                        targetDest = BotOwner.Mover.RealDestPoint;
+                    }
                     bool wantToOpen;
-                    if (!(wantToOpen = this.CheckWantToOpen(this.BotOwner.Mover.RealDestPoint, gstruct.Value)) && list.Count > 1)
+                    if (!(wantToOpen = this.CheckWantToOpen(targetDest, gstruct.Value)) && list.Count > 1)
                     {
                         gstruct = this.findDoorToInteract(list, new GStruct18?(gstruct.Value));
                         if (gstruct == null)
@@ -96,7 +105,8 @@ namespace SAIN.SAINComponent.Classes.Mover
                             return true;
                         }
                         this._currLink = gstruct.Value.LinkDoor;
-                        wantToOpen = this.CheckWantToOpen(this.BotOwner.Mover.RealDestPoint, gstruct.Value);
+
+                        wantToOpen = this.CheckWantToOpen(targetDest, gstruct.Value);
                     }
                     if (wantToOpen)
                     {
@@ -165,12 +175,9 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 //Logger.LogWarning("Opening Door");
                 var result = new InteractionResult(Etype);
-                door.method_3(state, false);
+                door.method_3(state);
                 BotOwner.GetPlayer.vmethod_0(door, result, null);
-                if (Singleton<BotEventHandler>.Instantiated)
-                {
-                    Singleton<BotEventHandler>.Instance.PlaySound(SAIN.Player, SAIN.Position, 30f, AISoundType.step);
-                }
+                Singleton<BotEventHandler>.Instance?.PlaySound(SAIN.Player, SAIN.Position, 30f, AISoundType.step);
             }
             //door.interactWithoutAnimation = noAnimation;
 

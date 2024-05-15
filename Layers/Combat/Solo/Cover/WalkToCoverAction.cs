@@ -88,7 +88,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (SAIN.Enemy?.IsVisible == false 
                 && BotOwner.WeaponManager.HaveBullets 
-                && SAIN.Enemy.Seen && SAIN.Enemy.TimeSinceSeen < 10f 
+                && SAIN.Enemy.Seen && SAIN.Enemy.TimeSinceSeen < 60f 
                 && SAIN.Enemy.Path.BlindCornerToEnemy != null)
             {
                 SuppressPosition(SAIN.Enemy.Path.BlindCornerToEnemy.Value);

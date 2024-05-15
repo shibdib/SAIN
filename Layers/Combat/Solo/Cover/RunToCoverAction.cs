@@ -186,6 +186,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
+            SAIN.Mover.SprintController.Stop();
             SAIN.Cover.CheckResetCoverInUse();
         }
 

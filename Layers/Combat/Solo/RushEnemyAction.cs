@@ -53,7 +53,9 @@ namespace SAIN.Layers.Combat.Solo
                 }
 
                 SAIN.Mover.Sprint(false);
+                SAIN.Mover.SprintController.Stop();
 
+                SAIN.Mover.DogFight.DogFightMove();
                 if (SAIN.Enemy.IsVisible && SAIN.Enemy.CanShoot)
                 {
                     SAIN.Steering.SteerByPriority();
@@ -69,54 +71,19 @@ namespace SAIN.Layers.Combat.Solo
             Vector3 EnemyPos = SAIN.Enemy.EnemyPosition;
             if (NewDestTimer < Time.time)
             {
-                NewDestTimer = Time.time + 1f;
                 Vector3 Destination = EnemyPos;
-                /*
-                if (SAIN.Info.Personality == Personality.GigaChad)
+                if (SAIN.Enemy.Path.PathDistance > 5f 
+                    && SAIN.Mover.SprintController.RunToPoint(Destination))
                 {
-                    if (PathToEnemy.Length > 2)
-                    {
-                        Vector3 SecondToLastCorner = PathToEnemy[PathToEnemy.Length - 3];
-                        Vector3 LastCornerDirection = LastCorner - SecondToLastCorner;
-                        Vector3 AddToLast = LastCornerDirection.normalized * 3f;
-                        Vector3 widePush = LastCorner + AddToLast;
-                        if (SAIN.Mover.CanGoToPoint(widePush, out Vector3 PointToGo))
-                        {
-                            Destination = PointToGo;
-                        }
-                    }
-                    else
-                    {
-                        Destination = Vector3.Lerp(EnemyPos, LastCorner, 0.75f);
-                    }
+                    NewDestTimer = Time.time + 2f;
+                }
+                else if (SAIN.Mover.GoToPoint(Destination, out _))
+                {
+                    NewDestTimer = Time.time + 1f;
                 }
                 else
                 {
-                    if (PathToEnemy.Length > 2)
-                    {
-                        Vector3 SecondToLastCorner = PathToEnemy[PathToEnemy.Length - 3];
-                        Vector3 LastCornerDirection = LastCorner - SecondToLastCorner;
-                        Vector3 AddToLast = LastCornerDirection.normalized * 0.15f;
-                        Vector3 shortPush = LastCorner - AddToLast;
-                        if (SAIN.Mover.CanGoToPoint(shortPush, out Vector3 PointToGo))
-                        {
-                            Destination = PointToGo;
-                        }
-                    }
-                    else
-                    {
-                        Destination = LastCorner;
-                    }
-                }
-                */
-                if (SAIN.Enemy.Path.PathDistance > 5f)
-                {
-                    BotOwner.BotRun.Run(Destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
-                    SAIN.Steering.LookToMovingDirection(500f, true);
-                }
-                else
-                {
-                    SAIN.Mover.GoToPoint(Destination, out bool calculating);
+                    NewDestTimer = Time.time + 0.25f;
                 }
             }
 
@@ -156,6 +123,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Stop()
         {
+            SAIN.Mover.SprintController.Stop();
         }
     }
 }

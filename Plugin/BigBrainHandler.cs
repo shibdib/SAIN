@@ -1,6 +1,8 @@
-﻿using Comfort.Common;
+﻿using Aki.Reflection.Patching;
+using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using HarmonyLib;
 using SAIN.Helpers;
 using SAIN.Layers;
 using SAIN.Layers.Combat.Run;
@@ -8,46 +10,130 @@ using SAIN.Layers.Combat.Solo;
 using SAIN.Layers.Combat.Squad;
 using SAIN.Preset.GlobalSettings.Categories;
 using System.Collections.Generic;
+using System.Reflection;
+using static EFT.SpeedTree.TreeWind;
 
 namespace SAIN
 {
     public class BigBrainHandler
     {
-        public static bool IsBotUsingSAINLayer(BotOwner bot)
+        public class BrainPatches
         {
-            if (bot?.Brain?.Agent != null)
+            public class BossKnightPatch : ModulePatch
             {
-                if (BrainManager.IsCustomLayerActive(bot))
+                protected override MethodBase GetTargetMethod()
                 {
-                    string layer = bot.Brain.ActiveLayerName();
-                    if (SAINLayers.Contains(layer))
-                    {
-                        return true;
-                    }
+                    return AccessTools.Method(typeof(BotMover), "method_0");
+                }
+
+                [PatchPrefix]
+                public static bool PatchPrefix(ref BotOwner ___botOwner_0)
+                {
+                    return false;
                 }
             }
-            return false;
+        }
+
+        public static bool IsBotUsingSAINLayer(BotOwner bot)
+        {
+            return isBotUsingLayer(bot, SAINLayers);
         }
 
         public static bool IsBotUsingSAINCombatLayer(BotOwner bot)
         {
-            if (bot?.Brain?.Agent != null)
-            {
-                if (BrainManager.IsCustomLayerActive(bot))
-                {
-                    string layer = bot.Brain.ActiveLayerName();
-                    if (SAINCombatLayers.Contains(layer))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return isBotUsingLayer(bot, SAINCombatLayers);
         }
 
-        public static List<string> BotBrainList = new List<string>();
-        public static List<string> BotLayerList = new List<string>();
-        public static readonly List<string> LayersToRemove = new List<string>
+        private static bool isBotUsingLayer(BotOwner bot, List<string> layers)
+        {
+            return bot?.Brain?.Agent != null
+                && BrainManager.IsCustomLayerActive(bot)
+                && layers.Contains(bot.Brain.ActiveLayerName());
+        }
+
+        public static void Init()
+        {
+            if (!BigBrainInitialized)
+            {
+                BrainAssignment.Init();
+                BigBrainInitialized = true;
+            }
+        }
+
+        public static readonly List<string> SAINLayers = new List<string>
+        {
+            CombatSquadLayer.Name,
+            ExtractLayer.Name,
+            CombatSoloLayer.Name,
+            BotUnstuckLayer.Name,
+        };
+
+        public static readonly List<string> SAINCombatLayers = new List<string>
+        {
+            CombatSquadLayer.Name,
+            CombatSoloLayer.Name,
+        };
+
+        public static bool BigBrainInitialized;
+
+        public class BrainAssignment
+        {
+            public static void Init()
+            {
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
+                List<Brain> brains = BotBrains.AllBrainsList;
+                List<string> stringList = new List<string>();
+                for (int i = 0; i < brains.Count; i++)
+                {
+                    var brain = brains[i].ToString();
+                    if (goons.Contains(brain))
+                    {
+                        continue;
+                    }
+                    stringList.Add(brain);
+                }
+
+                BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
+                BrainManager.AddCustomLayer(typeof(BotRunLayer), stringList, 99);
+                BrainManager.AddCustomLayer(typeof(ExtractLayer), stringList, settings.SAINExtractLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), stringList, settings.SAINCombatSquadLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), stringList, settings.SAINCombatSoloLayerPriority);
+
+                assignBosses();
+
+                BrainManager.RemoveLayers(LayersToRemove, stringList);
+            }
+
+            private static void assignBosses()
+            {
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
+
+                BrainManager.AddCustomLayer(typeof(BotRunLayer), goons, 99);
+                BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), goons, 98);
+                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), goons, 64);
+                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), goons, 62);
+            }
+
+            private static readonly List<string> goons = new List<string>()
+            {
+                Brain.BigPipe.ToString(),
+                Brain.BirdEye.ToString(),
+                Brain.Knight.ToString()
+            };
+
+            private static void assignPMCs()
+            {
+            }
+
+            private static void assignScavs()
+            {
+            }
+
+            private static void assignOtherBots()
+            {
+            }
+
+            public static readonly List<string> LayersToRemove = new List<string>
             {
                 "Help",
                 "AdvAssaultTarget",
@@ -58,96 +144,11 @@ namespace SAIN
                 "Request",
                 "FightReqNull",
                 "PeacecReqNull",
+                "Assault Building",
+                "Enemy Building",
+                "KnightFight",
+                "PtrlBirdEye"
             };
-
-        static BigBrainHandler()
-        {
-            if (JsonUtility.Load.LoadObject(out List<string> layersList, "DefaultBotLayers"))
-            {
-                //AllLayersList = layersList;
-                AllLayersList = new List<string>(LayersToRemove);
-            }
-            else
-            {
-                AllLayersList = new List<string>(LayersToRemove);
-                //JsonUtility.SaveObjectToJson(AllLayersList, "DefaultBotLayers");
-            }
         }
-
-        public static List<string> AllLayersList;
-
-        public static void CheckLayers()
-        {
-            if (!SAINPlugin.EditorDefaults.CollectBotLayerBrainInfo)
-            {
-                return;
-            }
-
-            GameWorld gameWorld = Singleton<GameWorld>.Instance;
-            if (gameWorld != null)
-            {
-                var players = gameWorld.AllAlivePlayersList;
-                foreach (var player in players)
-                {
-                    if (player != null && player.AIData?.BotOwner != null)
-                    {
-                        UpdateLayersList(player.AIData.BotOwner);
-                    }
-                }
-            }
-        }
-
-        public static void UpdateLayersList(BotOwner bot)
-        {
-            if (BrainManager.IsCustomLayerActive(bot))
-            {
-                return;
-            }
-
-            string layerName = BrainManager.GetActiveLayerName(bot);
-
-            if (!AllLayersList.Contains(layerName))
-            {
-                AllLayersList.Add(layerName);
-                JsonUtility.SaveObjectToJson(AllLayersList, "DefaultBotLayers");
-            }
-        }
-
-        public static void Init()
-        {
-            var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
-            List<Brain> brains = BotBrains.AllBrainsList;
-
-            List<string> stringList = new List<string>();
-
-            for (int i = 0; i < brains.Count; i++)
-            {
-                stringList.Add(brains[i].ToString());
-            }
-
-            //BrainManager.AddCustomLayer(typeof(BotRunLayer), stringList, 99);
-            BrainManager.AddCustomLayer(typeof(CombatSquadLayer), stringList, settings.SAINCombatSquadLayerPriority);
-            BrainManager.AddCustomLayer(typeof(ExtractLayer), stringList, settings.SAINExtractLayerPriority);
-            BrainManager.AddCustomLayer(typeof(CombatSoloLayer), stringList, settings.SAINCombatSoloLayerPriority);
-
-            BrainManager.RemoveLayers(LayersToRemove, stringList);
-
-            BigBrainInitialized = true;
-        }
-
-        public static readonly List<string> SAINLayers = new List<string>
-        {
-            CombatSquadLayer.Name,
-            ExtractLayer.Name,
-            CombatSoloLayer.Name,
-        };
-
-        public static readonly List<string> SAINCombatLayers = new List<string>
-        {
-            CombatSquadLayer.Name,
-            CombatSoloLayer.Name,
-        };
-
-        public static bool BigBrainInitialized;
     }
 }

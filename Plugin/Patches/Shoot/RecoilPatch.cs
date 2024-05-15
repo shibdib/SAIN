@@ -46,7 +46,8 @@ namespace SAIN.Patches.Shoot
 
             if (person != null)
             {
-                if (SAINPlugin.LoadedPreset.GlobalSettings.General.HeadShotProtection)
+                if (SAINPlugin.LoadedPreset.GlobalSettings.General.HeadShotProtection 
+                    && !person.IsAI)
                 {
                     realTargetPoint = FindCenterMass(person);
                     finalOffset += CheckHeadShotOffset(finalOffset, realTargetPoint, ___botOwner_0, person);
@@ -66,7 +67,7 @@ namespace SAIN.Patches.Shoot
         {
             Vector3 headPos = person.MainParts[BodyPartType.head].Position;
             Vector3 floorPos = person.Position;
-            Vector3 centerMass = Vector3.Lerp(headPos, floorPos, 0.35f);
+            Vector3 centerMass = Vector3.Lerp(headPos, floorPos, 0.3125f);
 
             if (person.IsYourPlayer && SAINPlugin.DebugMode && _debugCenterMassTimer < Time.time)
             {

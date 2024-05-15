@@ -40,6 +40,7 @@ namespace SAIN.Patches.Generic
             return true;
         }
     }
+
     public class TurnDamnLightOffPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -54,6 +55,7 @@ namespace SAIN.Patches.Generic
             ___botOwner_0?.BotLight?.TurnOff(false, true);
         }
     }
+
     public class IsSameWayPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -68,6 +70,7 @@ namespace SAIN.Patches.Generic
             return false;
         }
     }
+
     public class ShallRunAwayGrenadePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -137,6 +140,7 @@ namespace SAIN.Patches.Generic
             }
         }
     }
+
     public class AimRotateSpeedPatch : ModulePatch
     {
         private static Type _aimingDataType;
@@ -231,31 +235,12 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            BotOwner botOwner = __instance?.Owner;
-
             if (BotsGroupSenseRecently(__instance))
             {
                 __result = true;
-                return;
-            }
-
-            if (__instance.Person != null
-                && SAINPlugin.GetSAIN(botOwner, out SAINComponentClass sain, nameof(ShallKnowEnemyPatch)))
-            {
-                if (SquadSensedRecently(sain, __instance))
-                {
-                    __result = true;
-                }
-                else if (EnemySenseRecently(sain, __instance))
-                {
-                    __result = true;
-                }
-                else
-                {
-                    __result = false;
-                }
             }
         }
+
         public static bool BotsGroupSenseRecently(EnemyInfo enemyInfo)
         {
             BotsGroup group = enemyInfo.GroupOwner;
@@ -271,56 +256,15 @@ namespace SAIN.Patches.Generic
             return false;
         }
 
-        public static bool SquadSensedRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
-        {
-            // Check each of a sain bots members to see if they heard them recently, if so, we should know this enemy
-            bool senseRecently = false;
-            var members = sain.Squad?.Members;
-            if (members != null && members.Count > 0)
-            {
-                foreach (var member in members)
-                {
-                    if (member.Value != null && member.Value.Player?.HealthController.IsAlive == true && EnemySenseRecently(member.Value, enemyInfo))
-                    {
-                        senseRecently = true;
-                        break;
-                    }
-                }
-            }
-            return senseRecently;
-        }
-
         public static bool EnemySenseRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
         {
             SAINEnemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
             if (myEnemy != null)
             {
-                if (!myEnemy.Seen 
-                    && myEnemy.Heard 
-                    && myEnemy.TimeSinceHeard <= TimeToForgetEnemyNotSeen)
+                if (myEnemy.LastKnownPosition != null && myEnemy.TimeSinceLastKnownUpdated <= sain.BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC)
                 {
                     return true;
                 }
-                if (myEnemy.Seen 
-                    && myEnemy.Heard 
-                    && myEnemy.TimeSinceHeard <= TimeToForgetEnemySeen 
-                    && myEnemy.TimeSinceSeen <= sain.Info.ForgetEnemyTime)
-                {
-                    return true;
-                }
-                if (myEnemy.KnownPlaces.SearchedAllKnownLocations)
-                {
-                    //return false;
-                }
-                if (myEnemy.Seen
-                    && myEnemy.TimeSinceSeen <= sain.Info.ForgetEnemyTime)
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                Logger.LogWarning($"{enemyInfo?.Person?.Profile.Nickname} is not in Enemy List.");
             }
             return false;
         }
@@ -337,41 +281,17 @@ namespace SAIN.Patches.Generic
 
     internal class ShallKnowEnemyLatePatch : ModulePatch
     {
-
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(EnemyInfo), "ShallKnowEnemyLate");
         }
 
-        const float TimeToForgetEnemyNotSeen = 30f;
-        const float TimeToForgetEnemySeen = 60f;
-
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            BotOwner botOwner = __instance?.Owner;
-
             if (ShallKnowEnemyPatch.BotsGroupSenseRecently(__instance))
             {
                 __result = true;
-                return;
-            }
-
-            if (__instance.Person != null
-                && SAINPlugin.GetSAIN(botOwner, out SAINComponentClass sain, nameof(ShallKnowEnemyPatch)))
-            {
-                if (ShallKnowEnemyPatch.SquadSensedRecently(sain, __instance))
-                {
-                    __result = true;
-                }
-                else if (ShallKnowEnemyPatch.EnemySenseRecently(sain, __instance))
-                {
-                    __result = true;
-                }
-                else
-                {
-                    __result = false;
-                }
             }
         }
     }

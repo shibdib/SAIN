@@ -24,6 +24,11 @@ namespace SAIN.Layers.Combat.Run
             SAIN.Mover.SetTargetPose(1f);
             SAIN.Mover.SetTargetMoveSpeed(1f);
 
+            if (nextRandomRunTime > Time.time && (_runDestination - SAIN.Position).sqrMagnitude < 1f)
+            {
+                nextRandomRunTime = 0f;
+            }
+
             if ((nextRandomRunTime < Time.time 
                 || !SAIN.Mover.SprintController.Running)
                 && findRandomPlace(out var path) 
@@ -64,6 +69,7 @@ namespace SAIN.Layers.Combat.Run
 
         public override void Stop()
         {
+            SAIN.Mover.SprintController.Stop();
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)

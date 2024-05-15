@@ -1,4 +1,5 @@
 ﻿using EFT;
+using EFT.Interactive;
 using HarmonyLib;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
@@ -45,6 +46,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 SAIN.StopCoroutine(_runToPointCoroutine);
                 _runToPointCoroutine = null;
+                SAIN.Mover.Sprint(false);
             }
         }
 
@@ -63,6 +65,33 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return _runToPointCoroutine != null;
             }
             return false;
+        }
+
+        private void checkForDoors()
+        {
+            Vector3 botPosition = SAIN.Position + Vector3.up;
+            Vector3 lookDirection = SAIN.LookDirection;
+
+            if (Physics.Raycast(botPosition, lookDirection, out var doorHit, 2f, LayerMaskClass.DoorLayer))
+            {
+                Door door = doorHit.collider?.gameObject?.GetComponent<Door>();
+                if (door == null)
+                {
+                    door = doorHit.collider?.gameObject?.GetComponentInParent<Door>();
+                }
+                if (door != null)
+                {
+                    Logger.LogAndNotifyInfo("Found Door");
+                    if (door.DoorState == EDoorState.Shut)
+                    {
+                        door.method_3(EDoorState.Open);
+                    }
+                }
+                else
+                {
+                    Logger.LogAndNotifyInfo("No Door");
+                }
+            }
         }
 
         public bool RunToCoverPoint(CoverPoint point)
@@ -110,7 +139,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public RunStatus CurrentRunStatus { get; private set; }
 
-        private Vector3 currentCorner()
+        public Vector3 currentCorner()
         {
             if (_currentPath == null)
             {
@@ -221,8 +250,8 @@ namespace SAIN.SAINComponent.Classes.Mover
                 SAIN.Mover.Sprint(false);
                 return;
             }
-            var stamina = Player.Physical.Stamina;
-            float staminaValue = stamina.NormalValue / stamina.TotalCapacity;
+
+            float staminaValue = Player.Physical.Stamina.NormalValue;
             if (staminaValue < 0.1f)
             {
                 CurrentRunStatus = RunStatus.NoStamina;
@@ -338,6 +367,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void move(Vector3 direction)
         {
+            //checkForDoors();
             trackMovement();
             updateVoxel();
             Player.CharacterController.SetSteerDirection(direction);

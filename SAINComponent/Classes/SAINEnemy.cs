@@ -94,6 +94,63 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
+        public Collider HidingBehindObject
+        {
+            get
+            {
+                float time = Time.time;
+                if (_nextCheckHidingTime < time)
+                {
+                    _nextCheckHidingTime = time + _checkHidingFreq;
+                    _hidingBehindObject = null;
+                    Vector3? lastKnown = LastKnownPosition;
+                    if (lastKnown != null 
+                        && Physics.Raycast(lastKnown.Value + Vector3.up, SAIN.Position + Vector3.up, out RaycastHit hit, _checkHidingRayDist))
+                    {
+                        _hidingBehindObject = hit.collider;
+                    }
+                }
+                return _hidingBehindObject;
+            }
+        }
+
+        public Vector3? SuppressionTarget
+        {
+            get
+            {
+                if (CanSeeLastCornerToEnemy && LastCornerToEnemy != null)
+                {
+                    return LastCornerToEnemy.Value;
+                }
+                if (HidingBehindObject != null)
+                {
+                    return HidingBehindObject.transform.position + Vector3.up;
+                }
+                return null;
+            }
+        }
+
+        private Collider _hidingBehindObject;
+
+        private const float _checkHidingRayDist = 3f;
+        private const float _checkHidingFreq = 1f;
+        private float _nextCheckHidingTime;
+
+        private float _maxDistFromPosFlareEnabled = 10f;
+
+        public bool FlareEnabled
+        {
+            get
+            {
+                if (LastKnownPosition != null
+                    && (LastKnownPosition.Value - EnemyPlayer.Position).sqrMagnitude < _maxDistFromPosFlareEnabled * _maxDistFromPosFlareEnabled)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
         private float _nextUpdateDistTime;
 
         public void UpdateKnownPosition(Vector3 position, bool arrived = false, bool seen = false)

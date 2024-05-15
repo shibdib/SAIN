@@ -194,7 +194,6 @@ namespace SAIN.SAINComponent
                 handlePatrolData();
 
                 AILimit.UpdateAILimit();
-
                 if (AILimit.LimitAIThisFrame)
                 {
                     return;
@@ -259,17 +258,12 @@ namespace SAIN.SAINComponent
         }
 
         private float _nextCheckFlashlightTime;
-        private GearInfoContainer WeaponInfoContainer;
-
+        private GearInfoContainer GearInfoContainer;
         private float _nextCheckReloadTime;
-
         private bool _powerCalcd;
         public SightCheckerComponent SightChecker { get; private set; }
         public SAINDoorOpener DoorOpener { get; private set; }
-
-
-        private static float LogTimer;
-
+        public bool PatrolDataPaused { get; private set; }
         public bool IsHumanACareEnemy
         {
             get
@@ -295,7 +289,6 @@ namespace SAIN.SAINComponent
                 return false;
             }
         }
-
         public bool Extracting { get; set; }
 
         private void handlePatrolData()
@@ -323,12 +316,8 @@ namespace SAIN.SAINComponent
         }
 
         private bool _speedReset;
-        public bool PatrolDataPaused { get; private set; }
-
         public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
-
         public bool BotIsAlive => Player?.HealthController?.IsAlive == true;
-
         public float DistanceToAimTarget
         {
             get
@@ -402,18 +391,15 @@ namespace SAIN.SAINComponent
                 if (SAINActive)
                 {
                     RecheckTimer = Time.time + 0.5f;
-                    Active = true;
                 }
                 else
                 {
                     RecheckTimer = Time.time + 0.05f;
-                    Active = false;
                 }
             }
         }
         public bool CombatLayersActive { get; private set; }
 
-        private bool Active;
         private float RecheckTimer = 0f;
 
         public void Dispose()

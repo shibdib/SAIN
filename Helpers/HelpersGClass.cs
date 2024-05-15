@@ -109,9 +109,10 @@ namespace SAIN.Helpers
             core.SOUND_DOOR_BREACH_METERS = 60f;
             core.JUMP_SPREAD_DIST = 70f;
             core.BASE_WALK_SPEREAD2 = 70f;
-            core.FLARE_TIME = 2.5f;
             core.PRONE_POSE = 0.5f;
             core.MOVE_COEF = 1.3f;
+            core.FLARE_POWER = 1.75f;
+            core.FLARE_TIME = 2.5f;
         }
 
         public static void UpdateArmorClassCoef(float coef)

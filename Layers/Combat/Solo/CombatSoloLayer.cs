@@ -80,6 +80,7 @@ namespace SAIN.Layers.Combat.Solo
                 case SoloDecision.UnstuckDogFight:
                     return new Action(typeof(DogFightAction), $"{Decision}");
 
+                case SoloDecision.ShootDistantEnemy:
                 case SoloDecision.StandAndShoot:
                     return new Action(typeof(StandAndShootAction), $"{Decision}");
 

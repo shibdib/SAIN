@@ -8,7 +8,9 @@ using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
@@ -160,6 +162,7 @@ namespace SAIN.SAINComponent.Classes
         {
             if (iPlayer != null)
             {
+
                 // Checks if the player is not an active enemy and that they are a neutral party
                 if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer)
                     && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
@@ -177,16 +180,11 @@ namespace SAIN.SAINComponent.Classes
                 {
                     return true;
                 }
-
                 // Checks if the player is an enemy by their role.
                 var role = iPlayer.Profile.Info.Settings.Role;
-                var enemyTypes = BotOwner.Settings.FileSettings.Mind.ENEMY_BOT_TYPES;
-                for (int i = 0; i < enemyTypes.Length; i++)
+                if (BotOwner.Settings.FileSettings.Mind.ENEMY_BOT_TYPES.Contains(role))
                 {
-                    if (role == enemyTypes[i])
-                    {
-                        return false;
-                    }
+                    return false;
                 }
 
                 if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer))
@@ -236,7 +234,7 @@ namespace SAIN.SAINComponent.Classes
                 }
                 if (Player.IsSprintEnabled)
                 {
-                    range *= 0.66f;
+                    range *= 0.85f;
                 }
 
                 range *= SAIN.Info.FileSettings.Core.HearingSense;
@@ -313,7 +311,7 @@ namespace SAIN.SAINComponent.Classes
             if (person != null && bulletFelt && isGunSound)
             {
                 Vector3 to = vector + person.LookDirection;
-                firedAtMe = DidShotFlyByMe(vector, to, 10f);
+                firedAtMe = DidShotFlyByMe(vector, to, 15f);
 
                 if (firedAtMe)
                 {
@@ -331,37 +329,28 @@ namespace SAIN.SAINComponent.Classes
 
             if (!firedAtMe
                 && !SAIN.Info.PersonalitySettings.WillChaseDistantGunshots
-                && (SAIN.Position - soundPosition).sqrMagnitude > 100f * 100f)
+                && (SAIN.Position - soundPosition).sqrMagnitude > 150f * 150f)
             {
                 return;
             }
 
             if (wasHeard)
             {
-                try
-                {
-                    SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, soundPosition, person);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e);
-                }
-                CheckCalcGoal();
+                SAIN.StartCoroutine(delayAddSearch(vector, power, type, soundPosition, person));
             }
             else if (isGunSound && bulletFelt)
             {
-                Vector3 estimate = GetEstimatedPoint(vector);
+                Vector3 estimate = firedAtMe ? vector : GetEstimatedPoint(vector);
 
-                try
-                {
-                    SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, BotOwner, type, soundPosition, person);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e);
-                }
-                CheckCalcGoal();
+                SAIN.StartCoroutine(delayAddSearch(estimate, power, type, soundPosition, person));
             }
+        }
+
+        private IEnumerator delayAddSearch(Vector3 vector, float power, AISoundType type, Vector3 soundPosition, IPlayer person)
+        {
+            yield return new WaitForSeconds(0.2f);
+            SAIN?.Squad?.SquadInfo?.AddPointToSearch(vector, power, BotOwner, type, soundPosition, person);
+            CheckCalcGoal();
         }
 
         private Vector3 GetSoundDispersion(IPlayer person, Vector3 pos, AISoundType soundType)

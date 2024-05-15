@@ -205,7 +205,7 @@ namespace SAIN.Plugin
                 {
                     setting.Value.Core.VisibleAngle = 120f;
                     setting.Value.Shoot.FireratMulti *= 0.75f;
-                    setting.Value.Core.VisibleDistance *= 1.25f;
+                    //setting.Value.Core.VisibleDistance *= 1.25f;
                 }
             }
 
@@ -232,7 +232,7 @@ namespace SAIN.Plugin
                 foreach (var setting in bot.Value.Settings)
                 {
                     setting.Value.Core.VisibleAngle = 150f;
-                    setting.Value.Core.VisibleDistance *= 1.25f;
+                    //setting.Value.Core.VisibleDistance *= 1.25f;
                 }
             }
 
@@ -249,7 +249,7 @@ namespace SAIN.Plugin
             {
                 foreach (var diff in botsetting.Value.Settings)
                 {
-                    diff.Value.Core.VisibleDistance *= 1.25f;
+                    //diff.Value.Core.VisibleDistance *= 1.25f;
                 }
             }
             SAINPresetClass.ExportAll(preset);
@@ -276,7 +276,7 @@ namespace SAIN.Plugin
                 {
                     setting.Value.Core.VisibleAngle = 170f;
                     setting.Value.Shoot.FireratMulti *= 1.2f;
-                    setting.Value.Core.VisibleDistance *= 1.25f;
+                    //setting.Value.Core.VisibleDistance *= 1.25f;
                 }
             }
 
@@ -305,7 +305,7 @@ namespace SAIN.Plugin
                 {
                     setting.Value.Core.VisibleAngle = 180f;
                     setting.Value.Shoot.FireratMulti *= 2f;
-                    setting.Value.Core.VisibleDistance *= 1.25f;
+                    //setting.Value.Core.VisibleDistance *= 1.25f;
                 }
             }
 

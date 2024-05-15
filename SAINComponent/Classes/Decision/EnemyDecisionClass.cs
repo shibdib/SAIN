@@ -67,6 +67,10 @@ namespace SAIN.SAINComponent.Classes.Decision
                 }
                 Decision = SoloDecision.StandAndShoot;
             }
+            else if (shallShootDistantEnemy(enemy))
+            {
+                Decision = SoloDecision.ShootDistantEnemy;
+            }
             else if (StartRushEnemy(enemy))
             {
                 Decision = SoloDecision.RushEnemy;
@@ -352,6 +356,31 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             return false;
         }
+
+        private bool shallShootDistantEnemy(SAINEnemy enemy)
+        {
+            if (_endShootDistTargetTime > Time.time 
+                && SAIN.Decision.CurrentSoloDecision == SoloDecision.ShootDistantEnemy 
+                && SAIN.Memory.HealthStatus != ETagStatus.Dying)
+            {
+                return true;
+            }
+            if (_nextShootDistTargetTime < Time.time 
+                && enemy.RealDistance > SAIN.Info.FileSettings.Shoot.MaxPointFireDistance 
+                && enemy.IsVisible 
+                && enemy.CanShoot 
+                && (SAIN.Memory.HealthStatus == ETagStatus.Healthy || SAIN.Memory.HealthStatus == ETagStatus.Injured))
+            {
+                float timeAdd = 3f * UnityEngine.Random.Range(0.75f, 1.25f); ;
+                _nextShootDistTargetTime = Time.time + timeAdd;
+                _endShootDistTargetTime = Time.time + timeAdd / 2f;
+                return true;
+            }
+            return false;
+        }
+
+        private float _nextShootDistTargetTime;
+        private float _endShootDistTargetTime;
 
         private float EndThrowTimer = 0f;
 

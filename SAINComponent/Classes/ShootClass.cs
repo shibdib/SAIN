@@ -44,6 +44,15 @@ namespace SAIN.SAINComponent.Classes
                 changeAimTimer = Time.time + 0.5f;
                 SAIN.AimDownSightsController.UpdateADSstatus();
             }
+
+            if (SAIN.Enemy != null 
+                && SAIN.Enemy.RealDistance > SAIN.Info.FileSettings.Shoot.MaxPointFireDistance 
+                && !BotOwner.ShootData.ShootController.IsAiming)
+            {
+                BotOwner.AimingData?.LoseTarget();
+                return;
+            }
+
             aimAtEnemy();
         }
 

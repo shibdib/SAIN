@@ -132,6 +132,10 @@ namespace SAIN.SAINComponent.Classes
             {
                 result = EAimDownSightsStatus.Sprinting;
             }
+            else if (decisions.Main.Current == SoloDecision.ShootDistantEnemy)
+            {
+                result = EAimDownSightsStatus.StandAndShoot;
+            }
             else if (enemy != null && enemy.CanShoot && enemy.IsVisible && enemy.RealDistance > 20f)
             {
                 result = EAimDownSightsStatus.EnemyVisible;

@@ -189,7 +189,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 if (Singleton<BotEventHandler>.Instantiated)
                 {
-                    Singleton<BotEventHandler>.Instance.SayPhrase(Player, trigger);
+                    //Singleton<BotEventHandler>.Instance.SayPhrase(Player, trigger);
                 }
                 if (demand || probability > 99 || probability > UnityEngine.Random.Range(0, 100))
                 {

@@ -111,6 +111,19 @@ namespace SAIN.Patches.Vision
         }
     }
 
+    public class EnemyPartDataVisionPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.PropertyGetter(typeof(AIData), "FlarePower");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref float visibleCoef, BotOwner owner)
+        {
+        }
+    }
+
     public class VisionSpeedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -135,10 +148,6 @@ namespace SAIN.Patches.Vision
             var person = __instance?.Person;
             if (person != null)
             {
-                if (!person.AIData.GetFlare)
-                {
-                    __result *= inverseWeatherModifier;
-                }
                 Player player = EFTInfo.GetPlayer(__instance.Person.ProfileId);
                 if (player != null)
                 {
@@ -153,6 +162,7 @@ namespace SAIN.Patches.Vision
                     {
                         suppressedFlare = person.AIData.GetFlare && gearInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
                     }
+
                     if (!person.AIData.GetFlare || suppressedFlare)
                     {
                         __result *= inverseWeatherModifier;
@@ -176,10 +186,17 @@ namespace SAIN.Patches.Vision
                     {
                         __result *= SAINNotLooking.GetVisionSpeedIncrease(__instance.Owner);
                     }
+
+                    if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPatch)))
+                    {
+                        SAINEnemy sainEnemy = sain.EnemyController.GetEnemy(player.ProfileId);
+                        if (sainEnemy?.FlareEnabled == true && sainEnemy.Heard)
+                        {
+                            __result *= 0.9f;
+                        }
+                    }
                 }
             }
-
-            __result = Mathf.Round(__result * 100f) / 100f; ;
         }
     }
 
@@ -199,25 +216,43 @@ namespace SAIN.Patches.Vision
                 // Increase or decrease vis distance based on pose and if sprinting.
                 float visibility = SAINVisionClass.GetVisibilityModifier(player);
 
-                // if player shot a weapon recently
-                if (player.AIData.GetFlare)
+                var gearInfo = SAINGearInfoHandler.GetGearInfo(player);
+                if (gearInfo != null)
                 {
-                    // if player is using suppressed weapon, and has shot recently, don't increase vis distance as much.
-                    bool suppressedFlare = false;
-                    if (player.HandsController.Item is Weapon weapon)
-                    {
-                        var weaponInfo = SAINGearInfoHandler.GetGearInfo(player);
-                        suppressedFlare = weaponInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
-                    }
+                    visibility *= gearInfo.GetGainSightModifierFromGear(__instance.Distance);
+                }
 
-                    // increase visiblity
-                    visibility *= suppressedFlare ? 1.1f : 1.2f;
+                if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionDistancePosePatch)))
+                {
+                    SAINEnemy sainEnemy = sain.EnemyController.GetEnemy(player.ProfileId);
+                    if (sainEnemy?.FlareEnabled == true)
+                    {
+                        visibility *= 1.25f;
+                    }
+                    if (player.AIData.GetFlare && sainEnemy?.Heard == true)
+                    {
+                        // if player shot a weapon recently
+                        // if player is using suppressed weapon, and has shot recently, don't increase vis distance as much.
+                        bool suppressedFlare = false;
+                        if (player.HandsController.Item is Weapon weapon)
+                        {
+                            var weaponInfo = SAINGearInfoHandler.GetGearInfo(player);
+                            suppressedFlare = weaponInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
+                        }
+
+                        // increase visiblity
+                        visibility *= suppressedFlare ? 1.1f : 1.25f;
+                    }
+                }
+                if (player.IsSprintEnabled)
+                {
+                    visibility *= 1.25f;
                 }
 
                 float defaultVisDist = __instance.Owner.LookSensor.VisibleDist;
                 float visionDist = (defaultVisDist * visibility) - defaultVisDist;
 
-                addVisibility = visionDist;
+                addVisibility += visionDist;
             }
         }
     }

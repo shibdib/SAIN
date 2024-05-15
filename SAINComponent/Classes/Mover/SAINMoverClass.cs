@@ -382,8 +382,9 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void SetStamina()
         {
-            if (SAIN.CombatLayersActive 
-                && CurrentStamina < 0.05f)
+            if (SAIN.CurrentTargetPosition != null 
+                && !SAIN.Extracting 
+                && CurrentStamina < 0.1f)
             {
                 Player.Physical.Stamina.UpdateStamina(Player.Physical.Stamina.TotalCapacity / 4f);
             }
