@@ -1,6 +1,7 @@
 ﻿using Aki.Reflection.Patching;
 using Comfort.Common;
 using EFT;
+using EFT.Weather;
 using HarmonyLib;
 using Interpolation;
 using SAIN.Components.Helpers;
@@ -61,11 +62,7 @@ namespace SAIN.Patches.Hearing
         [PatchPrefix]
         public static void PatchPrefix(Player __instance)
         {
-            var botController = SAINPlugin.BotController;
-            if (botController != null)
-            {
-                botController.StartCoroutine(botController.PlayShootSoundCoroutine(__instance));
-            }
+            SAINPlugin.BotController?.StartCoroutine(SAINPlugin.BotController.PlayShootSoundCoroutine(__instance));
         }
     }
 

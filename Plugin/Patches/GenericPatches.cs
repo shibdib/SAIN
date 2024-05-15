@@ -149,7 +149,7 @@ namespace SAIN.Patches.Generic
                 }
                 ___bool_1 = true;
                 ___botOwner_0.WeaponManager.Selector.TakePrevWeapon();
-                ___botOwner_0.StartCoroutine(TakePrevWeapon(___botOwner_0));
+                SAINPlugin.BotController?.StartCoroutine(TakePrevWeapon(___botOwner_0));
             }
             return false;
         }

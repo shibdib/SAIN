@@ -18,7 +18,7 @@ namespace SAIN.Components
 
         public void CreateDetectionPoints(Player player, bool visibleLight)
         {
-            if (player == null || !player.HealthController.IsAlive)
+            if (player == null || !player.HealthController.IsAlive || !player.isActiveAndEnabled)
             {
                 return;
             }
@@ -46,10 +46,10 @@ namespace SAIN.Components
             {
                 VisibleLight = visibleLight;
                 FlashLightPoint = hit.point;
-                player.StartCoroutine(ExpireDetectionPoint(0.1f));
+                SAINPlugin.BotController?.StartCoroutine(ExpireDetectionPoint(0.1f));
 
                 PlayerPosition = player.Transform.position;
-                player.StartCoroutine(ExpirePlayerPoint(0.1f));
+                SAINPlugin.BotController?.StartCoroutine(ExpirePlayerPoint(0.1f));
 
                 if (DebugFlash)
                 {
