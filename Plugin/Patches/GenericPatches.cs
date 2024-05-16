@@ -32,28 +32,35 @@ namespace SAIN.Patches.Generic
         }
 
         [PatchPrefix]
-        public static void PatchPrefix(WeaponSoundPlayer __instance, ref GClass792 ____queue)
+        public static void PatchPrefix(WeaponSoundPlayer __instance)
         {
-            if (__instance.IsSilenced && __instance.TailSilenced.Rolloff != 250f)
+            const float maxDist = 225f;
+
+            if (__instance?.IsSilenced == true)
             {
-                Logger.LogInfo($"TailSilenced: [{__instance.TailSilenced.Rolloff}] Tail: [{__instance.Tail.Rolloff}]");
-                __instance.TailSilenced.Rolloff = 250f;
-                Logger.LogInfo($"BodySilenced: [{__instance.BodySilenced.Rolloff}] Body: [{__instance.Body.Rolloff}]");
-                __instance.BodySilenced.Rolloff *= 2f;
-                ____queue?.SetRolloff(__instance.BodySilenced.Rolloff);
+                SetRolloff(__instance.TailSilenced, maxDist);
+                SetRolloff(__instance.BodySilenced, maxDist);
+            }
+        }
 
-                __instance.BodySilenced.BlendValues[0] *= 1.5f;
-                __instance.BodySilenced.BlendValues[1] *= 1.75f;
-                __instance.BodySilenced.BlendValues[2] *= 2f;
-                __instance.BodySilenced.BlendValues[3] *= 2.25f;
-                if (__instance.BodySilenced.BlendValues[3] < 250f)
-                {
-                    __instance.BodySilenced.BlendValues[3] = 250f;
-                }
+        private static void SetRolloff(SoundBank soundBank, float maxDist)
+        {
+            if (soundBank != null
+                && soundBank.Rolloff != maxDist)
+            {
+                soundBank.Rolloff = maxDist;
 
-                foreach (var blend in __instance.BodySilenced.BlendValues)
+                if (soundBank.BlendValues != null)
                 {
-                    Logger.LogInfo(blend);
+                    soundBank.BlendValues[0] *= 1.5f;
+                    soundBank.BlendValues[1] *= 1.75f;
+                    soundBank.BlendValues[2] *= 2f;
+                    soundBank.BlendValues[3] *= 2.25f;
+
+                    if (soundBank.BlendValues[3] < maxDist)
+                    {
+                        soundBank.BlendValues[3] = maxDist;
+                    }
                 }
             }
         }
