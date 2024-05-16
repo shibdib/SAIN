@@ -24,48 +24,6 @@ using static SonicBulletSoundPlayer;
 
 namespace SAIN.Patches.Generic
 {
-    public class SuppressedSoundRolloffPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(WeaponSoundPlayer), "FireBullet");
-        }
-
-        [PatchPrefix]
-        public static void PatchPrefix(WeaponSoundPlayer __instance)
-        {
-            const float maxDist = 225f;
-
-            if (__instance?.IsSilenced == true)
-            {
-                SetRolloff(__instance.TailSilenced, maxDist);
-                SetRolloff(__instance.BodySilenced, maxDist);
-            }
-        }
-
-        private static void SetRolloff(SoundBank soundBank, float maxDist)
-        {
-            if (soundBank != null
-                && soundBank.Rolloff != maxDist)
-            {
-                soundBank.Rolloff = maxDist;
-
-                if (soundBank.BlendValues != null)
-                {
-                    soundBank.BlendValues[0] *= 1.5f;
-                    soundBank.BlendValues[1] *= 1.75f;
-                    soundBank.BlendValues[2] *= 2f;
-                    soundBank.BlendValues[3] *= 2.25f;
-
-                    if (soundBank.BlendValues[3] < maxDist)
-                    {
-                        soundBank.BlendValues[3] = maxDist;
-                    }
-                }
-            }
-        }
-    }
-
     public class HaveSeenEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

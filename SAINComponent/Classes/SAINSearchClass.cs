@@ -6,6 +6,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.AI;
 using static EFT.SpeedTree.TreeWind;
+using static UnityEngine.Rendering.PostProcessing.HistogramMonitor;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -106,9 +107,13 @@ namespace SAIN.SAINComponent.Classes
             if (SAIN.Info.PersonalitySettings.WillSearchForEnemy
                 && !SAIN.Suppression.IsSuppressed
                 && !enemy.IsVisible
-                && !BotOwner.Memory.IsUnderFire
-                && Time.time - BotOwner.Memory.UnderFireTime > 30f)
+                && !BotOwner.Memory.IsUnderFire)
             {
+                float myPower = SAIN.Info.PowerLevel;
+                if (enemy.EnemyPlayer.AIData.PowerOfEquipment < myPower * 0.5f)
+                {
+                    return true;
+                }
                 if (enemy.Seen && enemy.TimeSinceSeen >= timeBeforeSearch)
                 {
                     return true;

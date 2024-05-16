@@ -167,6 +167,7 @@ namespace SAIN
         HoldPositions,
         Help,
         Search,
+        GroupSearch,
     }
 
     public enum SAINSoundType

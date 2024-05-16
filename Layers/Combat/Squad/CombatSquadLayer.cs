@@ -26,6 +26,13 @@ namespace SAIN.Layers.Combat.Squad
                 case SquadDecision.Search:
                     return new Action(typeof(SearchAction), $"{Decision}");
 
+                case SquadDecision.GroupSearch:
+                    if (SAIN.Squad.IAmLeader)
+                    {
+                        return new Action(typeof(SearchAction), $"{Decision} : Lead Search Party");
+                    }
+                    return new Action(typeof(FollowSearchParty), $"{Decision} : Follow Squad Leader");
+
                 case SquadDecision.Help:
                     return new Action(typeof(SearchAction), $"{Decision}");
 

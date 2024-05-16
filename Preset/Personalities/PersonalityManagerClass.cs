@@ -56,7 +56,14 @@ namespace SAIN.Preset.Personalities
 
         public void ResetToDefaults()
         {
-            Personalities.Clear();
+            Personalities.Remove(EPersonality.Wreckless);
+            Personalities.Remove(EPersonality.SnappingTurtle);
+            Personalities.Remove(EPersonality.GigaChad);
+            Personalities.Remove(EPersonality.Chad);
+            Personalities.Remove(EPersonality.Rat);
+            Personalities.Remove(EPersonality.Coward);
+            Personalities.Remove(EPersonality.Timmy);
+            Personalities.Remove(EPersonality.Normal);
             InitDefaults();
         }
 
@@ -74,7 +81,7 @@ namespace SAIN.Preset.Personalities
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 60,
                         RandomlyAssignedChance = 3,
-                        PowerLevelMin = 200f,
+                        PowerLevelMin = 250f,
 
                         CanTaunt = true,
                         CanRespondToVoice = true,
@@ -249,7 +256,7 @@ namespace SAIN.Preset.Personalities
 
                         RandomChanceIfMeetRequirements = 60,
                         RandomlyAssignedChance = 5,
-                        PowerLevelMin = 250f,
+                        PowerLevelMin = 200f,
 
                         CanTaunt = true,
                         CanRespondToVoice = true,

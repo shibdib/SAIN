@@ -120,6 +120,13 @@ namespace SAIN.Layers.Combat.Solo
             if (RandomSprintTimer < Time.time && persSettings.SprintWhileSearch)
             {
                 float chance = persSettings.FrequentSprintWhileSearch ? 40f : 10f;
+
+                float myPower = SAIN.Info.PowerLevel;
+                if (SAIN.Enemy?.EnemyPlayer != null && SAIN.Enemy.EnemyPlayer.AIData.PowerOfEquipment < myPower * 0.5f)
+                {
+                    chance = 100f;
+                }
+
                 SprintEnabled = EFTMath.RandomBool(chance);
                 float timeAdd;
                 if (SprintEnabled)
