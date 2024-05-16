@@ -18,12 +18,44 @@ namespace SAIN.SAINComponent.Classes
             EnemyPerson = person;
             EnemyInfo = enemyInfo;
             IsAI = enemyInfo.Person?.IsAI == true;
+            EnemyProfileId = person.ProfileId;
 
             EnemyStatus = new SAINEnemyStatus(this);
             Vision = new SAINEnemyVision(this);
             Path = new SAINEnemyPath(this);
             KnownPlaces = new EnemyKnownPlaces(this);
         }
+
+        public bool IsValid
+        {
+            get
+            {
+                if (EnemyPerson?.PlayerNull == true)
+                {
+                    return false;
+                }
+                // Redundant Checks
+                // Common checks between PMC and bots
+                if (EnemyPlayer == null || EnemyPlayer?.HealthController?.IsAlive != true)
+                {
+                    return false;
+                }
+                // Checks specific to bots
+                if (EnemyPlayer?.IsAI == true && (
+                    EnemyPlayer.AIData?.BotOwner == null ||
+                    EnemyPlayer.AIData.BotOwner.ProfileId == BotOwner.ProfileId ||
+                    EnemyPlayer.AIData.BotOwner.BotState != EBotState.Active))
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        private readonly string EnemyProfileId;
 
         public EnemyInfo EnemyInfo { get; private set; }
         public SAINPersonClass EnemyPerson { get; private set; }
@@ -41,7 +73,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void DeleteInfo(EDamageType _)
         {
-            SAIN.EnemyController.RemoveEnemy(EnemyPlayer);
+            SAIN.EnemyController.RemoveEnemy(EnemyProfileId);
         }
 
         public bool SearchStarted { get; set; } = false;

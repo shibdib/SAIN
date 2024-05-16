@@ -51,44 +51,22 @@ namespace SAIN.SAINComponent.Classes
             UpdateDebug();
         }
 
+        private readonly Dictionary<string, SAINEnemy> _localEnemiesList = new Dictionary<string, SAINEnemy>();
+
         private void UpdateEnemies()
         {
-            foreach (var keyPair in Enemies)
+            _localEnemiesList.AddRange(Enemies);
+            foreach (var keyPair in _localEnemiesList)
             {
-                string id = keyPair.Key;
                 var enemy = keyPair.Value;
-                var enemyPerson = enemy?.EnemyPerson;
-
-                if (enemyPerson?.PlayerNull == true)
+                if (enemy.IsValid == false)
                 {
-                    EnemyIDsToRemove.Add(id);
+                    RemoveEnemy(keyPair.Key);
+                    continue;
                 }
-                // Redundant Checks
-                // Common checks between PMC and bots
-                else if (enemy == null || enemy.EnemyPlayer == null || enemy.EnemyPlayer.HealthController?.IsAlive == false)
-                {
-                    EnemyIDsToRemove.Add(id);
-                }
-                // Checks specific to bots
-                else if (enemy.EnemyPlayer.IsAI && (
-                    enemy.EnemyPlayer.AIData?.BotOwner == null ||
-                    enemy.EnemyPlayer.AIData.BotOwner.ProfileId == BotOwner.ProfileId ||
-                    enemy.EnemyPlayer.AIData.BotOwner.BotState != EBotState.Active))
-                {
-                    EnemyIDsToRemove.Add(id);
-                }
-                else
-                {
-                    enemy.Update();
-                }
+                enemy.Update();
             }
-
-            foreach (string idToRemove in EnemyIDsToRemove)
-            {
-                Enemies.Remove(idToRemove);
-            }
-
-            EnemyIDsToRemove.Clear();
+            _localEnemiesList.Clear();
         }
 
         public SAINEnemy FindClosestHeardEnemy()
@@ -195,6 +173,18 @@ namespace SAIN.SAINComponent.Classes
                 Enemies.Remove(iPlayer.ProfileId);
             }
         }
+        public void RemoveEnemy(string id)
+        {
+            if (ActiveEnemy?.EnemyPerson != null && ActiveEnemy.EnemyPerson.ProfileId == id)
+            {
+                ActiveEnemy = null;
+            }
+            if (Enemies.TryGetValue(id, out SAINEnemy enemy))
+            {
+                enemy.Dispose();
+                Enemies.Remove(id);
+            }
+        }
 
         private void CheckAddEnemy()
         {
@@ -249,29 +239,6 @@ namespace SAIN.SAINComponent.Classes
                 Enemies.Add(player.ProfileId, newEnemy);
             }
         }
-
-        private bool CheckPlayerNull(IPlayer player)
-        {
-            bool isNull = false;
-            if (player == null)
-            {
-                isNull = true;
-            }
-            else if (player.IsAI && (player.AIData?.BotOwner == null || player.AIData.BotOwner.BotState != EBotState.Active))
-            {
-                isNull = true;
-            }
-            else if (player.ProfileId == SAIN.ProfileId)
-            {
-                isNull = true;
-            }
-            else if (!player.HealthController.IsAlive)
-            {
-                isNull = true;
-            }
-            return isNull;
-        }
-
 
         public bool IsHumanPlayerLookAtMe(out Player lookingPlayer)
         {
@@ -343,7 +310,5 @@ namespace SAIN.SAINComponent.Classes
 
             return _SAINPersonComponent?.SAINPerson;
         }
-
-        private readonly List<string> EnemyIDsToRemove = new List<string>();
     }
 }

@@ -56,7 +56,7 @@ namespace SAIN.SAINComponent.SubComponents
                     _localAIEnemyList.AddRange(enemies);
                     foreach (var enemy in _localAIEnemyList.Values)
                     {
-                        if (enemy.IsAI)
+                        if (enemy.IsValid && enemy.IsAI)
                         {
                             enemy.Vision.CheckLineOfSight(true, enemy != SAIN.Enemy);
                             yield return null;
@@ -78,7 +78,7 @@ namespace SAIN.SAINComponent.SubComponents
                     _localHumanEnemyList.AddRange(enemies);
                     foreach (var enemy in _localHumanEnemyList.Values)
                     {
-                        if (!enemy.IsAI)
+                        if (enemy.IsValid && !enemy.IsAI)
                         {
                             enemy.Vision.CheckLineOfSight(false, false);
                             yield return null;

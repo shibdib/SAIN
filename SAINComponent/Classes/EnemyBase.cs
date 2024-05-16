@@ -9,18 +9,25 @@ namespace SAIN.SAINComponent.Classes
         public EnemyBase(SAINEnemy enemy)
         {
             Enemy = enemy;
+            SAIN = enemy.SAIN;
+            BotOwner = enemy.SAIN.BotOwner;
+            EnemyPerson = enemy.EnemyPerson;
+            EnemyInfo = enemy.EnemyInfo;
+            EnemyPlayer = enemy.EnemyPerson.Player;
+            EnemyIPlayer = enemy.EnemyPerson.IPlayer;
+            EnemyTransform = enemy.EnemyPerson.Transform;
         }
 
-        public SAINComponentClass SAIN => Enemy?.SAIN;
-        public EnemyInfo EnemyInfo => Enemy?.EnemyInfo;
-        public Player EnemyPlayer => Enemy?.EnemyPlayer;
-        public IPlayer EnemyIPlayer => Enemy?.EnemyPerson?.IPlayer;
-        public BotOwner BotOwner => Enemy?.BotOwner;
         public SAINEnemy Enemy { get; private set; }
-        public SAINPersonClass EnemyPerson => Enemy?.EnemyPerson;
-        public SAINPersonTransformClass EnemyTransform => Enemy?.EnemyTransform;
-        public Vector3 EnemyPosition => Enemy.EnemyPosition;
-        public Vector3 EnemyDirection => Enemy.EnemyDirection;
+        public SAINComponentClass SAIN { get; private set; }
+        public EnemyInfo EnemyInfo { get; private set; }
+        public Player EnemyPlayer { get; private set; }
+        public IPlayer EnemyIPlayer { get; private set; }
+        public BotOwner BotOwner { get; private set; }
+        public SAINPersonClass EnemyPerson { get; private set; }
+        public SAINPersonTransformClass EnemyTransform { get; private set; }
+        public Vector3 EnemyPosition => EnemyTransform.Position;
+        public Vector3 EnemyDirection => EnemyTransform.Direction(SAIN.Position);
         public bool IsCurrentEnemy => Enemy?.IsCurrentEnemy == true;
     }
 }

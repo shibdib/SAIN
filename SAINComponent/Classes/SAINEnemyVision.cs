@@ -13,10 +13,10 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update(bool isCurrentEnemy)
         {
-            if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
-            {
-                return;
-            }
+            //if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
+            //{
+            //    return;
+            //}
 
             bool visible = false;
             bool canshoot = false;
@@ -41,10 +41,10 @@ namespace SAIN.SAINComponent.Classes
 
         public bool CheckLineOfSight(bool useVisibleDistance, bool simpleCheck)
         {
-            if (Enemy == null || BotOwner == null || BotOwner?.Settings?.Current == null || EnemyPlayer == null || SightChecker == null)
-            {
-                return false;
-            }
+            //if (Enemy == null || BotOwner == null || BotOwner?.Settings?.Current == null || EnemyPlayer == null || SightChecker == null)
+            //{
+            //    return false;
+            //}
 
             bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode;
             bool currentEnemy = SAIN.Enemy == Enemy;

@@ -58,16 +58,19 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool EnemyDecision(out SquadDecision Decision)
         {
             Decision = SquadDecision.None;
-                var myEnemy = SAIN.Enemy;
+            SAINEnemy myEnemy = SAIN.Enemy;
 
             if (shallPushSuppressedEnemy(myEnemy))
             {
                 Decision = SquadDecision.PushSuppressedEnemy;
                 return true;
             }
-            if (myEnemy.IsVisible || myEnemy.TimeSinceSeen < SquadDecision_MyEnemySeenRecentTime)
+            if (myEnemy != null)
             {
-                return false;
+                if (myEnemy.IsVisible || myEnemy.TimeSinceSeen < SquadDecision_MyEnemySeenRecentTime)
+                {
+                    return false;
+                }
             }
             if (shallGroupSearch())
             {
