@@ -34,6 +34,7 @@ namespace SAIN
                 float timeAdd = Player.AIData.IsAI ? 1f : 0.1f;
                 _nextShootSoundTime = Time.time + timeAdd;
                 Singleton<BotEventHandler>.Instance.PlaySound(Player, Player.WeaponRoot.position, range, soundType);
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(soundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot, Player.WeaponRoot.position, Player, range);
             }
         }
 

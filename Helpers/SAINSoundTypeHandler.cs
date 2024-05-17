@@ -63,7 +63,7 @@ namespace SAIN.Components.Helpers
                 }
             }
 
-            BotController?.AISoundPlayed?.Invoke(soundType, player, soundDist);
+            BotController?.AISoundPlayed?.Invoke(soundType, player.Position, player, soundDist);
         }
     }
 }

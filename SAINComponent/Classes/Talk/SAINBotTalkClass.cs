@@ -142,6 +142,12 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public bool GroupSay(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false, float chance = 60)
         {
+            var squadSettings = SAIN.Squad.SquadInfo?.SquadPersonalitySettings;
+            if (squadSettings != null)
+            {
+                float vocalization = squadSettings.VocalizationLevel * 8f - 20f;
+                chance += vocalization;
+            }
             return EFTMath.RandomBool(chance) 
                 && GroupTalk.FriendIsClose 
                 && Say(phrase, additionalMask, withGroupDelay);

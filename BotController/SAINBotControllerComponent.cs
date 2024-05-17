@@ -20,7 +20,7 @@ namespace SAIN.Components
 {
     public class SAINBotControllerComponent : MonoBehaviour
     {
-        public Action<SAINSoundType, Player, float> AISoundPlayed { get; set; }
+        public Action<SAINSoundType, Vector3, Player, float> AISoundPlayed { get; set; }
         public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; set; }
 
         public Dictionary<string, SAINComponentClass> Bots => BotSpawnController.Bots;
@@ -195,7 +195,7 @@ namespace SAIN.Components
             }
         }
 
-        public void SoundPlayed(SAINSoundType soundType, Player player, float range)
+        public void SoundPlayed(SAINSoundType soundType, Vector3 position, Player player, float range)
         {
             if (Bots.Count == 0 || player == null)
             {

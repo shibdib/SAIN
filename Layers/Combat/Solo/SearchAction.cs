@@ -61,32 +61,29 @@ namespace SAIN.Layers.Combat.Solo
 
         private void CheckWeapon()
         {
-            if (SAIN.Enemy != null)
+            if (SAIN.Enemy != null && SAIN.Enemy.TimeSinceLastKnownUpdated > 10f)
             {
-                if (SAIN.Enemy.Seen && SAIN.Enemy.TimeSinceSeen > 10f || !SAIN.Enemy.Seen && SAIN.Enemy.TimeSinceEnemyCreated > 10f)
+                if (ReloadTimer < Time.time && SAIN.Decision.SelfActionDecisions.LowOnAmmo(0.7f))
                 {
-                    if (ReloadTimer < Time.time && SAIN.Decision.SelfActionDecisions.LowOnAmmo(0.5f))
+                    ReloadTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
+                    SAIN.SelfActions.TryReload();
+                }
+                else if (CheckMagTimer < Time.time && NextCheckTimer < Time.time)
+                {
+                    NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
+                    if (EFTMath.RandomBool())
                     {
-                        ReloadTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
-                        SAIN.SelfActions.TryReload();
+                        SAIN.Player.HandsController.FirearmsAnimator.CheckAmmo();
+                        CheckMagTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
                     }
-                    else if (CheckMagTimer < Time.time && NextCheckTimer < Time.time)
+                }
+                else if (CheckChamberTimer < Time.time && NextCheckTimer < Time.time)
+                {
+                    NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
+                    if (EFTMath.RandomBool())
                     {
-                        NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
-                        if (EFTMath.RandomBool())
-                        {
-                            SAIN.Player.HandsController.FirearmsAnimator.CheckAmmo();
-                            CheckMagTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
-                        }
-                    }
-                    else if (CheckChamberTimer < Time.time && NextCheckTimer < Time.time)
-                    {
-                        NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
-                        if (EFTMath.RandomBool())
-                        {
-                            SAIN.Player.HandsController.FirearmsAnimator.CheckChamber();
-                            CheckChamberTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
-                        }
+                        SAIN.Player.HandsController.FirearmsAnimator.CheckChamber();
+                        CheckChamberTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
                     }
                 }
             }

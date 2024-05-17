@@ -99,7 +99,7 @@ namespace SAIN.BotController.Classes
             switch (squadPersonality)
             {
                 case ESquadPersonality.Elite:
-                    return CreateSettings(squadPersonality, 3, 5, 4);
+                    return CreateSettings(squadPersonality, 2, 5, 4);
 
                 case ESquadPersonality.GigaChads:
                     return CreateSettings(squadPersonality, 5, 4, 5);

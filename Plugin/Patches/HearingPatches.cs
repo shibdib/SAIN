@@ -104,7 +104,7 @@ namespace SAIN.Patches.Hearing
                 && __instance != null
                 && SAINPlugin.BotController != null)
             {
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Looting, __instance, 50f);
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Looting, __instance.Position, __instance, 50f);
             }
         }
     }
@@ -121,7 +121,7 @@ namespace SAIN.Patches.Hearing
         {
             if (Time.time - ____lastTimeTurnSound >= ___maxLengthTurnSound && SAINPlugin.BotController != null)
             {
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.FootStep, __instance, 50f);
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.FootStep, __instance.Position, __instance, 50f);
             }
         }
     }
@@ -141,7 +141,7 @@ namespace SAIN.Patches.Hearing
                 && SAINPlugin.BotController?.AISoundPlayed != null
                 && __instance.CheckSurface())
             {
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Prone, __instance, 40f);
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Prone, __instance.Position, __instance, 40f);
             }
         }
     }
@@ -158,7 +158,7 @@ namespace SAIN.Patches.Hearing
         {
             if (SAINPlugin.BotController != null)
             {
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Aim, __instance, 30f * volume);
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Aim, __instance.Position, __instance, 30f * volume);
             }
         }
     }
@@ -176,7 +176,7 @@ namespace SAIN.Patches.Hearing
         {
             if (SAINPlugin.BotController != null)
             {
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.GrenadeDraw, __instance, 30f);
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.GrenadeDraw, __instance.Position, __instance, 30f);
             }
         }
     }
@@ -194,7 +194,7 @@ namespace SAIN.Patches.Hearing
         {
             if (SAINPlugin.BotController != null)
             {
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Food, __instance, 20f);
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Food, __instance.Position, __instance, 20f);
             }
         }
     }
@@ -212,7 +212,7 @@ namespace SAIN.Patches.Hearing
         {
             if (SAINPlugin.BotController != null)
             {
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Heal, __instance, 30f);
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Heal, __instance.Position, __instance, 30f);
             }
         }
     }

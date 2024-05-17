@@ -109,56 +109,26 @@ namespace SAIN.SAINComponent.Classes
 
         private readonly Dictionary<string, SAINSoundCollection> SoundsHeardFromPlayer = new Dictionary<string, SAINSoundCollection>();
 
-        private void EnemySoundHeard(IPlayer iPlayer, Vector3 soundPosition, float power, AISoundType type)
+        public bool EnemySoundHeard(IPlayer iPlayer, Vector3 soundPosition, float power, AISoundType type)
         {
-            bool wasHeard = ProcessSound(iPlayer, soundPosition, power, type, out float distance);
-
             if (IsPlayerFriendly(iPlayer))
             {
-                if (wasHeard && type != AISoundType.step)
-                {
-                    try { BotOwner.BotsGroup.LastSoundsController.AddNeutralSound(iPlayer, soundPosition); }
-                    catch { /* empty because bsgs code is bad */ }
-                }
-                return;
+                return false;
             }
 
+            bool wasHeard = ProcessSound(iPlayer, soundPosition, power, type, out float distance);
             bool bulletFelt = BulletFelt(iPlayer, type, soundPosition);
 
             if (iPlayer == null)
             {
-                ReactToSound(null, soundPosition, power, wasHeard, bulletFelt, type);
-                return;
+                return ReactToSound(null, soundPosition, power, wasHeard, bulletFelt, type);
             }
 
-            if (wasHeard || bulletFelt)
-            {
-                string profileID = iPlayer.ProfileId;
-
-                if (!SoundsHeardFromPlayer.ContainsKey(profileID))
-                {
-                    SoundsHeardFromPlayer.Add(profileID, new SAINSoundCollection(iPlayer));
-                }
-
-                SAINSound sainSound = new SAINSound
-                {
-                    Position = soundPosition,
-                    SourcePlayerProfileId = profileID,
-                    SoundPower = power,
-                    WasHeard = wasHeard,
-                    BulletFelt = bulletFelt,
-                    DistanceAtCreation = distance,
-                    AISoundType = type,
-                };
-
-                SAINSoundCollection collection = SoundsHeardFromPlayer[profileID];
-                collection.SoundList.Add(sainSound);
-
-                ReactToSound(iPlayer, soundPosition, distance, wasHeard, bulletFelt, type);
-            }
+            return (wasHeard || bulletFelt) 
+                && ReactToSound(iPlayer, soundPosition, distance, wasHeard, bulletFelt, type);
         }
 
-        private bool IsPlayerFriendly(IPlayer iPlayer)
+        public bool IsPlayerFriendly(IPlayer iPlayer)
         {
             if (iPlayer != null)
             {
@@ -293,17 +263,13 @@ namespace SAIN.SAINComponent.Classes
             return false;
         }
 
-        private void ReactToSound(IPlayer person, Vector3 soundPosition, float power, bool wasHeard, bool bulletFelt, AISoundType type)
+        public bool ReactToSound(IPlayer person, Vector3 soundPosition, float power, bool wasHeard, bool bulletFelt, AISoundType type)
         {
+            bool reacted = false;
             bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
             float shooterDistance = (BotOwner.Transform.position - soundPosition).magnitude;
 
             Vector3 vector = GetSoundDispersion(person, soundPosition, type);
-
-            if ((wasHeard || bulletFelt) && shooterDistance < BotOwner.Settings.FileSettings.Hearing.RESET_TIMER_DIST)
-            {
-                BotOwner.LookData.ResetUpdateTime();
-            }
 
             bool firedAtMe = false;
 
@@ -323,6 +289,7 @@ namespace SAIN.SAINComponent.Classes
                     SAIN?.Suppression?.AddSuppression();
                     SAIN.Memory.SetUnderFire(person, vector);
                     SAIN.EnemyController.CheckAddEnemy(person)?.SetEnemyAsSniper(shooterDistance > 100f);
+                    reacted = true;
                 }
             }
 
@@ -330,19 +297,22 @@ namespace SAIN.SAINComponent.Classes
                 && !SAIN.Info.PersonalitySettings.WillChaseDistantGunshots
                 && (SAIN.Position - soundPosition).sqrMagnitude > 150f * 150f)
             {
-                return;
+                return reacted;
             }
 
             if (wasHeard)
             {
                 SAIN.StartCoroutine(delayAddSearch(vector, power, type, person));
+                reacted = true;
             }
             else if (isGunSound && bulletFelt)
             {
                 Vector3 estimate = firedAtMe ? vector : GetEstimatedPoint(vector);
 
                 SAIN.StartCoroutine(delayAddSearch(estimate, power, type, person));
+                reacted = true;
             }
+            return reacted;
         }
 
         private IEnumerator delayAddSearch(Vector3 vector, float power, AISoundType type, IPlayer person)
