@@ -16,7 +16,7 @@ namespace SAIN.Components
             Logger = BepInEx.Logging.Logger.CreateLogSource(GetType().Name);
         }
 
-        public void CreateDetectionPoints(Player player, bool visibleLight)
+        public void CreateDetectionPoints(Player player, bool visibleLight, bool onlyLaser)
         {
             if (player == null || !player.HealthController.IsAlive || !player.isActiveAndEnabled)
             {
@@ -27,22 +27,30 @@ namespace SAIN.Components
 
             Vector3 playerLookDirection = player.LookDirection;
 
-            float detectionDistance = 60f;
+            float detectionDistance = 100f;
 
-            // Define the cone angle (in degrees)
-            float coneAngle = 10f;
+            Vector3 direction;
+            if (!onlyLaser)
+            {
+                // Define the cone angle (in degrees)
+                float coneAngle = 10f;
 
-            // Generate random angles within the cone range for yaw and pitch
-            float randomYawAngle = Random.Range(-coneAngle * 0.5f, coneAngle * 0.5f);
-            float randomPitchAngle = Random.Range(-coneAngle * 0.5f, coneAngle * 0.5f);
+                // Generate random angles within the cone range for yaw and pitch
+                float randomYawAngle = Random.Range(-coneAngle * 0.5f, coneAngle * 0.5f);
+                float randomPitchAngle = Random.Range(-coneAngle * 0.5f, coneAngle * 0.5f);
 
-            // AddColor a Quaternion rotation based on the random yaw and pitch angles
-            Quaternion randomRotation = Quaternion.Euler(randomPitchAngle, randomYawAngle, 0);
+                // AddColor a Quaternion rotation based on the random yaw and pitch angles
+                Quaternion randomRotation = Quaternion.Euler(randomPitchAngle, randomYawAngle, 0);
 
-            // Rotate the player's look direction by the Quaternion rotation
-            Vector3 rotatedLookDirection = randomRotation * playerLookDirection;
+                // Rotate the player's look direction by the Quaternion rotation
+                direction = randomRotation * playerLookDirection;
+            }
+            else
+            {
+                direction = playerLookDirection;
+            }
 
-            if (Physics.Raycast(playerPosition, rotatedLookDirection, out RaycastHit hit, detectionDistance, LayerMaskClass.HighPolyWithTerrainMask))
+            if (Physics.Raycast(playerPosition, direction, out RaycastHit hit, detectionDistance, LayerMaskClass.HighPolyWithTerrainMask))
             {
                 VisibleLight = visibleLight;
                 FlashLightPoint = hit.point;
@@ -153,9 +161,8 @@ namespace SAIN.Components
                         sain.Squad.SquadInfo.AddPointToSearch
                             (hit.position,
                             25f,
-                            bot,
+                            sain,
                             AISoundType.step,
-                            estimatedPosition,
                             Singleton<GameWorld>.Instance.MainPlayer,
                             SAIN.BotController.Classes.Squad.ESearchPointType.Flashlight);
                     }

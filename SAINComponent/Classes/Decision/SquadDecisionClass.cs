@@ -72,7 +72,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     return false;
                 }
             }
-            if (shallGroupSearch())
+            if (SAIN.Squad.LeaderComponent != null && shallGroupSearch())
             {
                 Decision = SquadDecision.GroupSearch;
                 return true;

@@ -162,7 +162,6 @@ namespace SAIN.SAINComponent.Classes
         {
             if (iPlayer != null)
             {
-
                 // Checks if the player is not an active enemy and that they are a neutral party
                 if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer)
                     && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
@@ -222,15 +221,15 @@ namespace SAIN.SAINComponent.Classes
             {
                 if (!SAIN.Equipment.HasEarPiece)
                 {
-                    range *= 0.6f;
+                    range *= 0.675f;
                 }
                 if (SAIN.Equipment.HasHeavyHelmet)
                 {
-                    range *= 0.75f;
+                    range *= 0.8f;
                 }
                 if (SAIN.Memory.HealthStatus == ETagStatus.Dying)
                 {
-                    range *= 0.75f;
+                    range *= 0.8f;
                 }
                 if (Player.IsSprintEnabled)
                 {
@@ -336,20 +335,20 @@ namespace SAIN.SAINComponent.Classes
 
             if (wasHeard)
             {
-                SAIN.StartCoroutine(delayAddSearch(vector, power, type, soundPosition, person));
+                SAIN.StartCoroutine(delayAddSearch(vector, power, type, person));
             }
             else if (isGunSound && bulletFelt)
             {
                 Vector3 estimate = firedAtMe ? vector : GetEstimatedPoint(vector);
 
-                SAIN.StartCoroutine(delayAddSearch(estimate, power, type, soundPosition, person));
+                SAIN.StartCoroutine(delayAddSearch(estimate, power, type, person));
             }
         }
 
-        private IEnumerator delayAddSearch(Vector3 vector, float power, AISoundType type, Vector3 soundPosition, IPlayer person)
+        private IEnumerator delayAddSearch(Vector3 vector, float power, AISoundType type, IPlayer person)
         {
-            yield return new WaitForSeconds(0.33f);
-            SAIN?.Squad?.SquadInfo?.AddPointToSearch(vector, power, BotOwner, type, soundPosition, person);
+            yield return new WaitForSeconds(0.2f);
+            SAIN?.Squad?.SquadInfo?.AddPointToSearch(vector, power, SAIN, type, person);
             CheckCalcGoal();
         }
 
@@ -472,26 +471,26 @@ namespace SAIN.SAINComponent.Classes
             return new Vector3(-(num3 + num2 * num5) / num, p1.y, num5);
         }
 
-        private bool CheckFootStepDetectChance(float d)
+        private bool CheckFootStepDetectChance(float distance)
         {
             float closehearing = 10f;
             float farhearing = SAIN.Info.FileSettings.Hearing.MaxFootstepAudioDistance;
 
-            if (d <= closehearing)
+            if (distance <= closehearing)
             {
                 return true;
             }
 
-            if (d > farhearing)
+            if (distance > farhearing)
             {
                 return false;
             }
 
             float num = farhearing - closehearing;
-            float num2 = d - closehearing;
+            float num2 = distance - closehearing;
             float num3 = 1f - num2 / num;
 
-            return EFTMath.Random(0f, 1f) < num3;
+            return EFTMath.Random(0f, 1f) < num3 + 0.1f;
         }
 
         public bool DoIHearSound(IPlayer iPlayer, Vector3 position, float power, AISoundType type, out float soundDistance, bool withOcclusionCheck)

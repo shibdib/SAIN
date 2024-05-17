@@ -107,21 +107,10 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             Pose.Update();
             Lean.Update();
-            SideStep.Update();
+            //SideStep.Update();
             Prone.Update();
             BlindFire.Update();
             SprintController.Update();
-
-            if (Vector3.Distance(LastPosition, SAIN.Position) > CarvingMoveThreshold)
-            {
-                //LastMoveTime = Time.time;
-                //LastPosition = SAIN.Position;
-            }
-            if (LastMoveTime + CarvingTime < Time.time)
-            {
-                //SAIN.NavMeshAgent.enabled = false;
-                //BotBodyObstacle.enabled = true;
-            }
         }
 
         public void Dispose()

@@ -19,12 +19,7 @@ namespace SAIN.Layers.Combat.Squad
             if (!SAIN.Mover.SprintController.Running)
             {
                 Shoot.Update();
-
-                if (!SAIN.Steering.SteerByPriority(false) 
-                    && SAIN.CurrentTargetPosition != null)
-                {
-                    SAIN.Steering.LookToPoint(SAIN.CurrentTargetPosition.Value);
-                }
+                SAIN.Steering.SteerByPriority();
             }
 
             var leader = SAIN.Squad.SquadInfo?.LeaderComponent;

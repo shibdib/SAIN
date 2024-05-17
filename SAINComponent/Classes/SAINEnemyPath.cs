@@ -14,35 +14,46 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update(bool isCurrentEnemy)
         {
-            if (Enemy.IsAI && Enemy.RealDistance > 300)
-            {
-                return;
-            }
-            if (!Enemy.IsAI && Enemy.RealDistance > 500)
-            {
-                return;
-            }
-            float timeAdd = 1f;
+            float timeAdd = 0.5f;
             if (!isCurrentEnemy && Enemy.IsAI)
             {
-                timeAdd = 8f;
+                timeAdd = 4f;
             }
             if (!isCurrentEnemy && !Enemy.IsAI)
             {
-                timeAdd = 2f;
+                timeAdd = 0.5f;
             }
             if (isCurrentEnemy && !Enemy.IsAI)
             {
-                timeAdd = 0.5f;
+                timeAdd = 0.2f;
             }
 
             if (CheckPathTimer + timeAdd < Time.time)
             {
                 CheckPathTimer = Time.time;
+                if (!isCurrentEnemy)
+                {
+                    bool clearPath = false;
+                    if (Enemy.Seen == false && Enemy.Heard == false)
+                    {
+                        clearPath = true;
+                    }
+                    else if (Enemy.TimeSinceLastKnownUpdated > BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC)
+                    {
+                        clearPath = true;
+                    }
+                    else if (Enemy.IsAI && Enemy.RealDistance > 300 || !Enemy.IsAI && Enemy.RealDistance > 500)
+                    {
+                        clearPath = true;
+                    }
+                    if (clearPath)
+                    {
+                        Clear();
+                        return;
+                    }
+                }
                 CalcPath(isCurrentEnemy);
             }
-
-            //var blindCorner = BlindCornerToEnemy;
         }
 
         public NavMeshPathStatus PathToEnemyStatus { get; private set; }
@@ -73,34 +84,23 @@ namespace SAIN.SAINComponent.Classes
 
         private void CalcPath(bool isCurrentEnemy)
         {
-            if (!isCurrentEnemy)
-            {
-                bool clearPath = false;
-
-                if (Enemy.Seen == false && Enemy.Heard == false)
-                {
-                    clearPath = true;
-                }
-                else if (Enemy.TimeSinceLastKnownUpdated < BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC)
-                {
-                    clearPath = true;
-                }
-
-                if (clearPath)
-                {
-                    Clear();
-                    return;
-                }
-            }
-
             // We should always have a not null LastKnownPosition here, but have the real position as a fallback just in case
-            Vector3? enemyPosition = Enemy.LastKnownPosition ?? new Vector3?(EnemyPosition);
+            Vector3 enemyPosition;
+            EnemyPlace lastKnown = Enemy.KnownPlaces.LastKnownPlace;
+            if (lastKnown !=  null)
+            {
+                enemyPosition = lastKnown.Position;
+            }
+            else
+            {
+                enemyPosition = EnemyPosition;
+            }
 
             Vector3 botPosition = SAIN.Position;
 
             // Did we already check the current enemy position and has the bot not moved? dont recalc path then
             if (_enemyLastPosChecked != null 
-                && (_enemyLastPosChecked.Value - enemyPosition.Value).sqrMagnitude < 0.1f
+                && (_enemyLastPosChecked.Value - enemyPosition).sqrMagnitude < 0.1f
                 && (_botLastPosChecked - botPosition).sqrMagnitude < 0.1f)
             {
                 return;
@@ -112,7 +112,7 @@ namespace SAIN.SAINComponent.Classes
 
             // calculate a path to the enemys position
             ClearCorners();
-            if (NavMesh.CalculatePath(botPosition, enemyPosition.Value, -1, PathToEnemy))
+            if (NavMesh.CalculatePath(botPosition, enemyPosition, -1, PathToEnemy))
             {
                 PathDistance = PathToEnemy.CalculatePathLength();
             }

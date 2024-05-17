@@ -59,14 +59,15 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 //_coverDestination = null;
             }
 
-            if (_recalcMoveTimer < Time.time && SAIN.Cover.CoverInUse == null)
+            if (_recalcMoveTimer < Time.time)
             {
-                _recalcMoveTimer = Time.time + 0.25f;
                 _moveSuccess = moveToCover(out bool sprinting, out CoverPoint coverDestination);
                 _sprinting = sprinting;
+                SAIN.Cover.CoverInUse = coverDestination;
 
                 if (_moveSuccess)
                 {
+                    _recalcMoveTimer = Time.time + 2f;
                     _shallJumpToCover = EFTMath.RandomBool(8) 
                         && _sprinting
                         && BotOwner.Memory.IsUnderFire
@@ -80,13 +81,17 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         SAIN.SelfActions.TryReload();
                     }
 
-                    SAIN.Cover.CoverInUse = coverDestination;
                     _runDestination = coverDestination.Position;
+                }
+                else
+                {
+                    _recalcMoveTimer = Time.time + 0.25f;
                 }
             }
 
             if (!_moveSuccess)
             {
+                SAIN.Cover.CoverInUse = null;
                 SAIN.Mover.DogFight.DogFightMove();
             }
 
@@ -95,9 +100,26 @@ namespace SAIN.Layers.Combat.Solo.Cover
         }
 
         private Vector3 _runDestination;
+        private CoverPoint _coverDestination;
 
         private bool moveToCover(out bool sprinting, out CoverPoint coverDestination)
         {
+            CoverPoint coverInUse = SAIN.Cover.CoverInUse;
+            if (coverInUse != null)
+            {
+                if (_coverDestination != null && _coverDestination == coverInUse)
+                {
+                    coverDestination = _coverDestination;
+                    sprinting = _sprinting;
+                    return true;
+                }
+                if (tryRun(coverInUse, out sprinting))
+                {
+                    coverDestination = coverInUse;
+                    return true;
+                }
+            }
+
             CoverPoint fallback = SAIN.Cover.FallBackPoint;
             SoloDecision currentDecision = SAIN.Memory.Decisions.Main.Current;
 
@@ -139,7 +161,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             Vector3 destination = coverPoint.Position;
 
             // Testing new pathfinder for running
-            if (true || shallRun(destination))
+            if (shallRun(destination))
             {
                 result = SAIN.Mover.SprintController.RunToPoint(destination);
                 //result = BotOwner.BotRun.Run(destination, false, 0.25f);

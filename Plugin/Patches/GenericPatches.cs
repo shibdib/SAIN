@@ -20,7 +20,6 @@ using SAIN.SAINComponent;
 using Audio.Data;
 using EFT.UI;
 using System.Collections;
-using static SonicBulletSoundPlayer;
 
 namespace SAIN.Patches.Generic
 {
@@ -38,8 +37,8 @@ namespace SAIN.Patches.Generic
             {
                 return;
             }
-            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(HaveSeenEnemyPatch)) 
-                && sain.Info.Profile.IsPMC 
+            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(HaveSeenEnemyPatch))
+                && sain.Info.Profile.IsPMC
                 && sain.EnemyController.CheckAddEnemy(__instance.Person)?.Heard == true)
             {
                 __result = true;
@@ -120,7 +119,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static void PatchPrefix(ref Player __instance, ref bool ignoreClamp)
         {
-            if (__instance?.IsAI == true 
+            if (__instance?.IsAI == true
                 && __instance.IsSprintEnabled)
             {
                 ignoreClamp = true;
@@ -191,6 +190,7 @@ namespace SAIN.Patches.Generic
     internal class OnMakingShotRecoilPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(Player).GetMethod("OnMakingShot");
+
         [PatchPrefix]
         public static void PatchPrefix(ref Player __instance)
         {
@@ -225,6 +225,7 @@ namespace SAIN.Patches.Generic
     internal class ForceNoHeadAimPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(EnemyInfo).GetMethod("method_7");
+
         [PatchPrefix]
         public static void PatchPrefix(ref bool withLegs, ref bool canBehead)
         {
@@ -253,8 +254,8 @@ namespace SAIN.Patches.Generic
             return AccessTools.Method(typeof(EnemyInfo), "ShallKnowEnemy");
         }
 
-        const float TimeToForgetEnemyNotSeen = 30f;
-        const float TimeToForgetEnemySeen = 60f;
+        private const float TimeToForgetEnemyNotSeen = 30f;
+        private const float TimeToForgetEnemySeen = 60f;
 
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
@@ -270,7 +271,7 @@ namespace SAIN.Patches.Generic
             BotsGroup group = enemyInfo.GroupOwner;
             for (int i = 0; i < group.MembersCount; i++)
             {
-                if (SAINPlugin.GetSAIN(group.Member(i), out SAINComponentClass sain, nameof(ShallKnowEnemyPatch)) 
+                if (SAINPlugin.GetSAIN(group.Member(i), out SAINComponentClass sain, nameof(ShallKnowEnemyPatch))
                     && EnemySenseRecently(sain, enemyInfo))
                 {
                     return true;
@@ -323,6 +324,7 @@ namespace SAIN.Patches.Generic
     internal class SkipLookForCoverPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(BotCoversData).GetMethod("GetClosestPoint");
+
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0)
         {
@@ -337,6 +339,7 @@ namespace SAIN.Patches.Generic
     internal class BotGroupAddEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(BotsGroup).GetMethod("AddEnemy");
+
         [PatchPrefix]
         public static bool PatchPrefix(IPlayer person)
         {
@@ -352,6 +355,7 @@ namespace SAIN.Patches.Generic
     internal class BotMemoryAddEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(BotMemoryClass).GetMethod("AddEnemy");
+
         [PatchPrefix]
         public static bool PatchPrefix(IPlayer enemy)
         {

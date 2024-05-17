@@ -8,16 +8,10 @@ namespace SAIN.SAINComponent.Classes
     {
         public SAINEnemyVision(SAINEnemy enemy) : base(enemy)
         {
-            SightChecker = SAIN.SightChecker;
         }
 
         public void Update(bool isCurrentEnemy)
         {
-            //if (Enemy == null || BotOwner == null || BotOwner.Settings?.Current == null || EnemyPlayer == null)
-            //{
-            //    return;
-            //}
-
             bool visible = false;
             bool canshoot = false;
 
@@ -38,84 +32,6 @@ namespace SAIN.SAINComponent.Classes
         public bool FirstContactOccured { get; private set; }
         public bool ShallReportRepeatContact { get; set; }
         public bool ShallReportLostVisual { get; set; }
-
-        public bool CheckLineOfSight(bool useVisibleDistance, bool simpleCheck)
-        {
-            //if (Enemy == null || BotOwner == null || BotOwner?.Settings?.Current == null || EnemyPlayer == null || SightChecker == null)
-            //{
-            //    return false;
-            //}
-
-            bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode;
-            bool currentEnemy = SAIN.Enemy == Enemy;
-
-            if (_checkLosTime + LOSCheckFreq > Time.time)
-            {
-                return InLineOfSight;
-            }
-            _checkLosTime = Time.time;
-
-            float maxDist = float.MaxValue;
-            if (useVisibleDistance)
-            {
-                maxDist = BotOwner.Settings.Current.CurrentVisibleDistance;
-            }
-
-            InLineOfSight = false;
-            if (Enemy.RealDistance <= maxDist)
-            {
-                if (simpleCheck)
-                {
-                    InLineOfSight = SightChecker.SimpleSightCheck(Enemy.EnemyChestPosition, BotOwner.LookSensor._headPoint);
-                }
-                else
-                {
-                    InLineOfSight = SightChecker.CheckLineOfSight(EnemyPlayer);
-                }
-            }
-            return InLineOfSight;
-        }
-
-        private float LOSCheckFreq
-        {
-            get
-            {
-                bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode;
-                bool currentEnemy = SAIN.Enemy == Enemy;
-                bool isAI = Enemy.IsAI;
-                float timeAdd;
-
-                // Is the person a human and my current enemy?
-                if (!isAI
-                    && currentEnemy)
-                {
-                    timeAdd = 0.05f;
-                }
-                // Is the person a human but not my current enemy?
-                else if (!isAI)
-                {
-                    timeAdd = 0.15f;
-                }
-                // Is the person a bot and my current enemy?
-                else if (currentEnemy)
-                {
-                    timeAdd = 0.1f;
-                }
-                // the person is a bot and not my current active enemy
-                else
-                {
-                    timeAdd = 1f;
-                }
-
-                if (SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode)
-                {
-                    timeAdd *= 2f;
-                }
-                return timeAdd;
-            }
-        }
-
-        private SightCheckerComponent SightChecker;
 
         private const float _repeatContactMinSeenTime = 12f;
         private const float _lostContactMinSeenTime = 12f;
@@ -167,17 +83,12 @@ namespace SAIN.SAINComponent.Classes
 
         private float _nextReportLostVisualTime;
 
-        private void CheckForAimingDelay()
-        {
-
-        }
-
         public void UpdateCanShoot(bool value)
         {
             CanShoot = value;
         }
 
-        public bool InLineOfSight { get; private set; }
+        public bool InLineOfSight { get; set; }
         public bool IsVisible { get; private set; }
         public bool CanShoot { get; private set; }
         public Vector3? LastSeenPosition { get; set; }
@@ -187,7 +98,5 @@ namespace SAIN.SAINComponent.Classes
         public float TimeFirstSeen { get; private set; }
         public float TimeLastSeen { get; private set; }
         public float LastChangeVisionTime { get; private set; }
-
-        private float _checkLosTime;
     }
 }

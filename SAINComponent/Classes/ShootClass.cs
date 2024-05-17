@@ -221,25 +221,10 @@ namespace SAIN.SAINComponent.Classes
                     && enemy.HeardRecently
                     && enemy.InLineOfSight)
             {
-                var places = enemy.KnownPlaces?.KnownPlaces;
-                if (places != null)
-                {
-                    for (int i = places.Count - 1; i >= 0; i--)
-                    {
-                        var place = places[i];
-                        if (place.HasSeen && !place.HasArrived)
-                        {
-                            result = place.Position + Vector3.up;
-                            break;
-                        }
-                    }
-                }
-
                 EnemyPlace lastKnown = enemy.KnownPlaces.LastKnownPlace;
-                if (result == null
-                    && lastKnown != null)
+                if (lastKnown != null && lastKnown.ClearLineOfSight(BotOwner.LookSensor._headPoint, LayerMaskClass.HighPolyWithTerrainMask))
                 {
-                    result = lastKnown.Position + Vector3.up;
+                    result = lastKnown.Position + Vector3.up + UnityEngine.Random.onUnitSphere;
                 }
             }
             return result;

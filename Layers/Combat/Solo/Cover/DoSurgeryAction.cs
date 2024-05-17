@@ -22,12 +22,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Update()
         {
-            SAIN.Mover.SetTargetMoveSpeed(0f);
-            SAIN.Mover.SetTargetPose(0f);
-
             _allClear = SAIN.Medical.Surgery.ShallTrySurgery();
             if (_allClear)
             {
+                SAIN.Mover.SetTargetMoveSpeed(0f);
+                SAIN.Mover.SetTargetPose(0f);
                 tryStartSurgery();
             }
 

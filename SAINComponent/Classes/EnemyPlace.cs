@@ -10,7 +10,7 @@ namespace SAIN.SAINComponent.Classes
             Position = position;
         }
 
-        public Vector3? Position
+        public Vector3 Position
         {
             get
             {
@@ -18,16 +18,15 @@ namespace SAIN.SAINComponent.Classes
             }
             set
             {
-                HasArrived = false;
-                HasSeen = false;
                 TimePositionUpdated = Time.time;
                 _position = value;
             }
         }
 
-        private Vector3? _position;
+        private Vector3 _position;
 
         public float TimePositionUpdated;
+        public float TimeSincePositionUpdated => Time.time - TimePositionUpdated;
 
         public bool HasArrived
         {
@@ -40,6 +39,7 @@ namespace SAIN.SAINComponent.Classes
                 if (value)
                 {
                     TimeArrived = Time.time;
+                    HasSeen = true;
                 }
                 _hasArrived = value;
             }
@@ -68,5 +68,24 @@ namespace SAIN.SAINComponent.Classes
         private bool _hasSeen;
 
         public float TimeSeen;
+
+        public bool ClearLineOfSight(Vector3 origin, LayerMask mask)
+        {
+            if (_nextCheckSightTime < Time.time)
+            {
+                _nextCheckSightTime = Time.time + 1f;
+                Vector3 pos = Position + Vector3.up;
+                Vector3 direction = pos - origin;
+                _inSight = !Physics.Raycast(pos, direction, direction.magnitude, mask);
+                if (_inSight)
+                {
+                    HasSeen = true;
+                }
+            }
+            return _inSight;
+        }
+
+        private bool _inSight;
+        private float _nextCheckSightTime;
     }
 }

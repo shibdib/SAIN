@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.BotController.Classes
 {
@@ -90,11 +91,11 @@ namespace SAIN.BotController.Classes
 
         public Action<PlaceForCheck> OnSoundHeard;
 
-        public void AddPointToSearch(Vector3 position, float soundPower, BotOwner botOwner, AISoundType soundType, Vector3 originalPosition, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
+        public void AddPointToSearch(Vector3 position, float soundPower, SAINComponentClass sain, AISoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
         {
             if (EFTBotGroup == null)
             {
-                EFTBotGroup = botOwner.BotsGroup;
+                EFTBotGroup = sain.BotOwner.BotsGroup;
                 Logger.LogError("Botsgroup null");
             }
             if (GroupPlacesForCheck == null)
@@ -103,30 +104,11 @@ namespace SAIN.BotController.Classes
                 return;
             }
 
-            try
-            {
-                SetVisibleAndHeard(player, position);
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e);
-            }
-
-            if (searchType  == ESearchPointType.Hearing)
-            {
-                try
-                {
-                    //SetVisibleAndHeard(player, position);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e);
-                }
-            }
+            sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, position);
 
             bool isDanger = soundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
-            PlaceForCheck newPlace = AddNewPlaceForCheck(botOwner, position, checkType, player);
+            PlaceForCheck newPlace = AddNewPlaceForCheck(sain.BotOwner, position, checkType, player);
             if (newPlace != null && searchType == ESearchPointType.Hearing)
             {
                 OnSoundHeard?.Invoke(newPlace);
@@ -134,51 +116,6 @@ namespace SAIN.BotController.Classes
         }
 
         public readonly Dictionary<IPlayer, PlaceForCheck> PlayerPlaceChecks = new Dictionary<IPlayer, PlaceForCheck>();
-
-        public void SetVisibleAndHeard(IPlayer player, Vector3 position)
-        {
-            const float SoundAggroDist = 400f;
-
-            if (player != null && Members != null)
-            {
-                foreach (var member in Members)
-                {
-                    if (member.Value == null)
-                    {
-                        continue;
-                    }
-                    SAINEnemy sainEnemy = member.Value?.EnemyController?.CheckAddEnemy(player);
-                    sainEnemy?.SetHeardStatus(true, position);
-
-                    if (sainEnemy != null 
-                        && member.Value?.Info?.Profile?.IsPMC == true)
-                    {
-                        float sqrMagnitude = (player.Position - position).sqrMagnitude;
-                        if (sqrMagnitude < SoundAggroDist * SoundAggroDist)
-                        {
-                            BotOwner botOwner = member.Value.BotOwner;
-                            if (botOwner != null)
-                            {
-                                EnemyInfo goalEnemy = botOwner.Memory?.GoalEnemy;
-                                if (goalEnemy == null 
-                                    && sainEnemy.EnemyInfo != null 
-                                    && !sainEnemy.EnemyInfo.HaveSeen)
-                                {
-                                    // By default bots won't set a goal enemy until actually seen.
-                                    // We need PMCs to do this purely on audio, and it seems like this is the simplest way to do so.
-                                    // SAIN won't allow them to shoot even if they are set visible here momentarily, so it should be harmless.
-
-                                    // Fairly sure this was causing bots to see an enemy again almost instantly from far distances, due to how visibility gets reset
-                                    // sainEnemy.EnemyInfo.SetVisible(true);
-                                    // botOwner.Memory.GoalEnemy = sainEnemy.EnemyInfo;
-                                    // sainEnemy.EnemyInfo.SetVisible(false);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         private PlaceForCheck AddNewPlaceForCheck(BotOwner botOwner, Vector3 position, PlaceForCheckType checkType, IPlayer player)
         {

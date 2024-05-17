@@ -40,27 +40,22 @@ namespace SAIN.Components
                 return;
             }
 
-            if (FrameCount >= 5)
+            if (_nextPointCheckTime < Time.time)
             {
-                FrameCount = 0;
+                _nextPointCheckTime = Time.time + 0.1f;
                 if (Player.IsAI)
                 {
                     _lightDetection.DetectAndInvestigateFlashlight(Player);
                 }
-                else
+                else if ( WhiteLight || Laser || IRLight || IRLaser )
                 {
-                    bool visibleLight = (WhiteLight || Laser);
-                    bool irLight = (IRLight || IRLaser);
-                    if (visibleLight || irLight)
-                    {
-                        _lightDetection.CreateDetectionPoints(Player, visibleLight);
-                    }
+                    bool onlyLaser = !WhiteLight && !IRLight && (Laser || IRLaser);
+                    _lightDetection.CreateDetectionPoints(Player, WhiteLight || Laser, onlyLaser);
                 }
             }
-            FrameCount++;
         }
 
-        private float FrameCount = 0;
+        private float _nextPointCheckTime;
 
         public void Dispose()
         {

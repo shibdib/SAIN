@@ -479,7 +479,6 @@
     <Compile Include="SAINComponent\Classes\Info\BotSquadClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINEnemy.cs" />
     <Compile Include="SAINComponent\Classes\Info\SAINBotInfoClass.cs" />
-    <Compile Include="SAINComponent\SubComponents\SightCheckerComponent.cs" />
     <Compile Include="SAINEnum.cs" />
     <Compile Include="SAINComponent\SubComponents\GrenadeTrackerComponent.cs" />
     <Compile Include="SAINComponent\Classes\Mover\LeanClass.cs" />

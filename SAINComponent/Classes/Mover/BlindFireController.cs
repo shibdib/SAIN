@@ -46,9 +46,9 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 targetPos = enemy.EnemyChestPosition;
             }
-            else if (enemy.LastSeenPosition != null)
+            else if (enemy.KnownPlaces.LastKnownPlace != null)
             {
-                targetPos = enemy.LastSeenPosition.Value + Vector3.up * 1f;
+                targetPos = enemy.KnownPlaces.LastKnownPlace.Position + Vector3.up;
             }
             else
             {

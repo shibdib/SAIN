@@ -71,20 +71,9 @@ namespace SAIN.SAINComponent.Classes
             else if (SAIN.Info.PersonalitySettings.WillSearchFromAudio)
             {
                 Vector3? target = SAIN.CurrentTargetPosition;
-                if (target != null)
+                if (target != null && SAIN.TimeSinceTargetFound > timeBeforeSearch)
                 {
                     wantToSearch = true;
-                    /*
-                    if (SAIN.Info.Profile.IsPMC)
-                    {
-                        wantToSearch = true;
-                    }
-                    else if (SAIN.Memory.BotZoneCollider == null
-                            || checkBotZone(target.Value))
-                    {
-                        wantToSearch = true;
-                    }
-                    */
                 }
             }
             return wantToSearch;
@@ -263,14 +252,14 @@ namespace SAIN.SAINComponent.Classes
                 }
                 else
                 {
-                    var knownPlaces = enemy.KnownPlaces.KnownPlaces;
-                    for (int i = knownPlaces.Count - 1; i >= 0; i--)
+                    var knownPlaces = enemy.KnownPlaces.EnemyPlaces;
+                    for (int i = 0; i < knownPlaces.Count; i++)
                     {
                         EnemyPlace enemyPlace = knownPlaces[i];
-                        if (enemyPlace?.Position != null && !enemyPlace.HasArrived)
+                        if (!enemyPlace.HasArrived)
                         {
                             hasTarget = true;
-                            return enemyPlace.Position.Value;
+                            return enemyPlace.Position;
                         }
                     }
                     hasTarget = false;
@@ -284,30 +273,11 @@ namespace SAIN.SAINComponent.Classes
             else
             {
                 var Target = BotOwner.Memory.GoalTarget;
-                if (Target != null && Target?.Position != null)
+                if (Target?.Position != null)
                 {
                     hasTarget = true;
                     return Target.Position.Value;
                 }
-                /*
-                var sound = BotOwner.BotsGroup.YoungestPlace(BotOwner, 200f, true);
-                if (sound != null && !sound.IsCome)
-                {
-                    if ((sound.Position - BotOwner.Position).sqrMagnitude < 2f)
-                    {
-                        if (EFTMath.RandomBool(33))
-                        {
-                            SAIN.Talk.Say(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true);
-                        }
-                        sound.IsCome = true;
-                        BotOwner.CalcGoal();
-                    }
-                    else
-                    {
-                        return sound.Position;
-                    }
-                }
-                */
             }
 
             hasTarget = false;
@@ -433,30 +403,6 @@ namespace SAIN.SAINComponent.Classes
         private bool _Running;
         private bool _setMaxSpeedPose;
 
-        private float DecideSpeed(Vector3 targetPosition, out float poseLevel)
-        {
-            const float slowDownDist = 50;
-            const float minSpeedThreshold = 10f;
-
-            float sqrMag = (targetPosition - SAIN.Position).sqrMagnitude;
-
-            if (sqrMag > slowDownDist * slowDownDist)
-            {
-                poseLevel = 1f;
-                return 1f;
-            }
-
-            float speedRatio = ( sqrMag - minSpeedThreshold * minSpeedThreshold ) / ( (slowDownDist * slowDownDist) - (minSpeedThreshold * minSpeedThreshold) );
-
-            var persSettings = SAIN.Info.PersonalitySettings;
-            float minSpeed = SAIN.HasEnemy ? persSettings.SearchHasEnemySpeed : persSettings.SearchNoEnemySpeed;
-
-            poseLevel = 1f;
-            return Mathf.Clamp(speedRatio, minSpeed, 1f);
-        }
-
-        private float _nextGenSearchTime;
-
         private void SwitchSearchModes(bool shallSprint)
         {
             var persSettings = SAIN.Info.PersonalitySettings;
@@ -470,7 +416,7 @@ namespace SAIN.SAINComponent.Classes
                 speed = 1f;
                 pose = 1f;
             }
-            else if (Player.AIData.EnvironmentId == 0 && !SAIN.Memory.IsIndoors)
+            else if (!SAIN.Memory.IsIndoors)
             {
                 if (persSettings.Sneaky && SAIN.Cover.CoverPoints.Count > 2 && Time.time - BotOwner.Memory.UnderFireTime > 30f)
                 {
@@ -487,7 +433,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 speed = persSettings.SneakySpeed;
                 pose = persSettings.SneakyPose;
-            }
+            } 
             else
             {
                 //speed = DecideSpeed(FinalDestination, out pose);
@@ -535,14 +481,14 @@ namespace SAIN.SAINComponent.Classes
                         SAIN.Mover.SetTargetPose(pose);
                     }
 
-                    if (BotIsAtPoint(ActiveDestination))
+                    MoveToPoint(FinalDestination, shallSprint);
+                    //if (BotIsAtPoint(FinalDestination))
+                    //{
+                    //    SearchedTargetPosition = true;
+                    //} else
+                    if (ShallRecalcPath())
                     {
-                        ActiveDestination = NextCorner();
-                        MoveToPoint(ActiveDestination, shallSprint);
-                    }
-                    else if (ShallRecalcPath())
-                    {
-                        MoveToPoint(ActiveDestination, shallSprint);
+                        //MoveToPoint(FinalDestination, shallSprint);
                     }
                     break;
 
@@ -695,8 +641,8 @@ namespace SAIN.SAINComponent.Classes
                 {
                     ReachDistance = reachDist > 0 ? reachDist : 0.5f;
                     FinalDestination = hit.position;
+                    /*
                     int cornerLength = Path.corners.Length;
-
                     List<Vector3> newCorners = new List<Vector3>();
                     for (int i = 0; i < cornerLength - 1; i++)
                     {
@@ -731,6 +677,7 @@ namespace SAIN.SAINComponent.Classes
                             }
                         }
                     }
+                    */
                 }
                 return Path.status;
             }

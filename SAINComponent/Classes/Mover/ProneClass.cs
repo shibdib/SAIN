@@ -19,17 +19,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (_updatePoseTimer < Time.time)
-            {
-                _updatePoseTimer = Time.time + 0.25f;
-                if (SAIN.Mover.CurrentStamina > 0.25f)
-                {
-
-                }
-            }
         }
-
-        private float _updatePoseTimer;
 
         public void Dispose()
         {

@@ -48,7 +48,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (LeanTimer < Time.time)
             {
-                FindLeanDirectionRayCast(enemy.EnemyPosition);
+                var lastKnownPlace = enemy.KnownPlaces.LastKnownPlace;
+                if (lastKnownPlace != null)
+                {
+                    FindLeanDirectionRayCast(lastKnownPlace.Position);
+                }
                 float timeAdd = LeanDirection == LeanSetting.None ? 0.25f : 1f;
                 LeanTimer = Time.time + timeAdd;
             }

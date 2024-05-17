@@ -146,7 +146,7 @@ namespace SAIN
                 //typeof(Patches.Talk.TalkDisablePatch3),
                 //typeof(Patches.Talk.TalkDisablePatch4),
 
-                typeof(Patches.Vision.AIVisionUpdateLimitPatch),
+                //typeof(Patches.Vision.AIVisionUpdateLimitPatch),
                 typeof(Patches.Vision.WeatherTimeVisibleDistancePatch),
                 typeof(Patches.Vision.NoAIESPPatch),
                 typeof(Patches.Vision.VisionSpeedPatch),
