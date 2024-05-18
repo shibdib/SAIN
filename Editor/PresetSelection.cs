@@ -3,7 +3,9 @@ using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using static Mono.Security.X509.X520;
@@ -13,6 +15,8 @@ namespace SAIN.Editor.GUISections
 {
     public static class PresetSelection
     {
+        private static readonly List<SAINPresetDefinition> defaultPresets = SAINDifficultyClass.DefaultPresetDefinitions.Values.ToList();
+
         public static bool Menu()
         {
             const float LabelHeight = 55f;
@@ -43,30 +47,32 @@ namespace SAIN.Editor.GUISections
             Box("Presets", "Select an Installed preset for SAIN Settings", Height(LabelHeight), Width(150));
             if (Button("Refresh", "Refresh installed Presets", EUISoundType.ButtonClick, Height(LabelHeight), Width(150)))
             {
-                PresetHandler.LoadPresetOptions();
+                PresetHandler.LoadCustomPresetOptions();
             }
             OpenNewPresetMenu = Toggle(OpenNewPresetMenu, new GUIContent("Create New Preset"), EUISoundType.ButtonClick, Height(LabelHeight), Width(150));
             EndVertical();
 
             BeginVertical();
             Label("Default Presets", Width(presetWidth));
-            for (int i = 0; i < PresetHandler.PresetOptions.Count; i++)
+
+            for (int i = 0; i < defaultPresets.Count; i++)
             {
-                var preset = PresetHandler.PresetOptions[i];
-                if (preset.IsCustom == false)
+                var preset = defaultPresets[i];
+                if (SAINDifficultyClass.DefaultPresetDefinitions.TryGetKey(preset, out var sainDifficulty))
                 {
-                    bool selected = selectedPreset.Name == preset.Name;
+                    bool selected = SAINPlugin.EditorDefaults.SelectedDefaultPreset == sainDifficulty;
 
                     if (Toggle(
                         selected,
-                        $"{preset.Name} for SAIN {preset.SAINVersion}",
-                        preset.Description, 
-                        EUISoundType.MenuCheckBox, 
+                        $"{preset.Name}",
+                        preset.Description,
+                        EUISoundType.MenuCheckBox,
                         Height(optionHeight), Width(presetWidth)
                         ))
                     {
                         if (!selected)
                         {
+                            SAINPlugin.EditorDefaults.SelectedDefaultPreset = sainDifficulty;
                             selectedPreset = preset;
                         }
                     }
@@ -76,16 +82,17 @@ namespace SAIN.Editor.GUISections
 
             BeginVertical();
             Label("Custom Presets", Width(presetWidth));
-            for (int i = 0; i < PresetHandler.PresetOptions.Count; i++)
+            for (int i = 0; i < PresetHandler.CustomPresetOptions.Count; i++)
             {
-                var preset = PresetHandler.PresetOptions[i];
+                var preset = PresetHandler.CustomPresetOptions[i];
                 if (preset.IsCustom == true)
                 {
-                    bool selected = selectedPreset.Name == preset.Name;
+                    bool selected = SAINPlugin.EditorDefaults.SelectedDefaultPreset == SAINDifficulty.none 
+                        && selectedPreset.Name == preset.Name;
 
                     if (Toggle(
                         selected,
-                        $"{preset.Name} for SAIN {preset.SAINVersion}",
+                        $"{preset.Name}",
                         preset.Description,
                         EUISoundType.MenuCheckBox,
                         Height(optionHeight), Width(presetWidth)
@@ -99,7 +106,6 @@ namespace SAIN.Editor.GUISections
                 }
             }
             EndVertical();
-
 
             if (OpenNewPresetMenu)
             {
@@ -116,13 +122,12 @@ namespace SAIN.Editor.GUISections
                     newInfo.Name = NewName;
                     newInfo.Description = NewDescription;
                     newInfo.Creator = NewCreator;
-                    newInfo.PresetCopiedFrom = info.Name;
 
                     DeletePreset(info);
 
                     PresetHandler.SavePresetDefinition(newInfo);
                     PresetHandler.InitPresetFromDefinition(newInfo, true);
-                    PresetHandler.LoadPresetOptions();
+                    PresetHandler.LoadCustomPresetOptions();
                 }
                 if (Button("Save A New Preset", EFT.UI.EUISoundType.InsuranceInsured, Height(30f)))
                 {
@@ -174,7 +179,7 @@ namespace SAIN.Editor.GUISections
                     Logger.NotifyDebug($"Deleted: {foldersPath}");
                 }
             }
-            PresetHandler.PresetOptions.Remove(preset);
+            PresetHandler.CustomPresetOptions.Remove(preset);
         }
 
         private static string LabeledTextField(string value, string label)

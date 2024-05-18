@@ -12,12 +12,15 @@ namespace SAIN.Editor
 
         public PresetEditorDefaults(string selectedPreset)
         {
-            SelectedPreset = selectedPreset;
+            SelectedCustomPreset = selectedPreset;
             DefaultPreset = PresetHandler.DefaultPreset;
         }
 
         [Hidden]
-        public string SelectedPreset;
+        public SAINDifficulty SelectedDefaultPreset = SAINDifficulty.none;
+
+        [Hidden]
+        public string SelectedCustomPreset;
 
         [Hidden]
         public string DefaultPreset;

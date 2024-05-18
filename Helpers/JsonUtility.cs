@@ -83,7 +83,7 @@ namespace SAIN.Helpers
                 LoadAllFiles(list, "*.json", folders);
             }
 
-            public static void GetPresetOptions(List<SAINPresetDefinition> list)
+            public static void LoadCustommPresetOptions(List<SAINPresetDefinition> list)
             {
                 list.Clear();
                 if (!GetFoldersPath(out string foldersPath, PresetsFolder))
@@ -98,7 +98,10 @@ namespace SAIN.Helpers
                     {
                         string json = File.ReadAllText(path);
                         var obj = DeserializeObject<SAINPresetDefinition>(json);
-                        list.Add(obj);
+                        if (obj.IsCustom)
+                        {
+                            list.Add(obj);
+                        }
                     }
                     else
                     {

@@ -40,10 +40,10 @@ namespace SAIN.Editor
 
             string toolTip = $"Apply Values set below to selected Bot Type. " +
                 $"Exports edited values to SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}/BotSettings folder";
-            ;
+            
             if (BuilderClass.SaveChanges(BotSettingsWereEdited, toolTip, 35f))
             {
-                SAINPresetClass.ExportBotSettings(SAINPlugin.LoadedPreset.BotSettings, SAINPlugin.LoadedPreset.Info.Name);
+                SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
 
             FlexibleSpace();

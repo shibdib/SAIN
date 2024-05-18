@@ -73,14 +73,15 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         UsedPoints.Add(coverInUse);
                     }
 
-                    var coverPoints = SAIN.Cover.CoverFinder.CoverPoints;
+                    List<CoverPoint> coverPoints = SAIN.Cover.CoverFinder.CoverPoints;
+
                     for (int i = 0; i < coverPoints.Count; i++)
                     {
-                        var shiftCoverTarget = coverPoints[i];
+                        CoverPoint shiftCoverTarget = coverPoints[i];
 
                         if (shiftCoverTarget.CoverHeight > coverInUse.CoverHeight
                             && (!SAINPlugin.LoadedPreset.GlobalSettings.Cover.ShiftCoverMustBeSafe 
-                                ||  shiftCoverTarget.IsSafePath)
+                                || shiftCoverTarget.IsSafePath)
                             && !UsedPoints.Contains(shiftCoverTarget))
                         {
                             for (int j = 0; j < UsedPoints.Count; j++)

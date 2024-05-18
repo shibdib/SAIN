@@ -5,7 +5,7 @@ using SAIN.SAINComponent.Classes.Info;
 
 namespace SAIN.Preset.Personalities
 {
-    public sealed partial class PersonalitySettingsClass
+    public class PersonalitySettingsClass
     {
         [JsonConstructor]
         public PersonalitySettingsClass()
@@ -39,12 +39,10 @@ namespace SAIN.Preset.Personalities
             {
                 return true;
             }
-
             if (!BotTypeDefinitions.BotTypes.ContainsKey(wildSpawnType))
             {
                 return false;
             }
-
             string name = BotTypeDefinitions.BotTypes[wildSpawnType].Name;
             if (!Variables.AllowedTypes.Contains(name))
             {

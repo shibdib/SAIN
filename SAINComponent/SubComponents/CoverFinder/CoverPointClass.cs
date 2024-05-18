@@ -5,6 +5,7 @@ using SAIN.Helpers;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -185,25 +186,34 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public bool ShallUpdate => Time.time - TimeLastUpdated > coverUpdateFreq;
 
         private float nextCalcPathTime = 0f;
+
+        public int RoundedPathLength;
+
         public float PathLength
         {
             get
             {
-                if (nextCalcPathTime < Time.time)
-                {
-                    nextCalcPathTime = Time.time + 1;
-
-                    PathToPoint.ClearCorners();
-                    if (NavMesh.CalculatePath(SAIN.Position, Position, -1, PathToPoint))
-                    {
-                        _pathLength = PathToPoint.CalculatePathLength();
-                    }
-                    else
-                    {
-                        _pathLength = float.MaxValue;
-                    }
-                }
                 return _pathLength;
+            }
+        }
+
+        public void CalcPathLength()
+        {
+            if (nextCalcPathTime < Time.time)
+            {
+                nextCalcPathTime = Time.time + 1;
+
+                PathToPoint.ClearCorners();
+                if (NavMesh.CalculatePath(SAIN.Position, Position, -1, PathToPoint))
+                {
+                    _pathLength = PathToPoint.CalculatePathLength();
+                }
+                else
+                {
+                    _pathLength = float.MaxValue;
+                }
+
+                RoundedPathLength = Mathf.RoundToInt(_pathLength);
             }
         }
 
@@ -303,6 +313,19 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 _isSafePath = SAINBotSpaceAwareness.CheckPathSafety(PathToPoint, SAIN.CurrentTargetPosition.Value + Vector3.up);
             }
             return _isSafePath;
+        }
+
+        public IEnumerator CheckPathSafety()
+        {
+            if (!_isSafePath && SAIN.CurrentTargetPosition == null)
+            {
+                _isSafePath = true;
+            }
+            else if (nextPathSafetyTime < Time.time)
+            {
+                nextPathSafetyTime = Time.time + 2f;
+                yield return SAINBotSpaceAwareness.CheckPathSafety(this, SAIN.CurrentTargetPosition.Value + Vector3.up);
+            }
         }
 
         public bool IsSafePath

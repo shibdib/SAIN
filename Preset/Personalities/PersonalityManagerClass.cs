@@ -20,41 +20,47 @@ namespace SAIN.Preset.Personalities
 
         private void ImportPersonalities()
         {
-            foreach (var item in EnumValues.Personalities)
+            if (Preset.Info.IsCustom == true)
             {
-                if (SAINPresetClass.Import(out PersonalitySettingsClass personality, Preset.Info.Name, item.ToString(), nameof(Personalities)))
+                foreach (var item in EnumValues.Personalities)
                 {
-                    Personalities.Add(item, personality);
+                    if (SAINPresetClass.Import(out PersonalitySettingsClass personality, Preset.Info.Name, item.ToString(), nameof(Personalities)))
+                    {
+                        Personalities.Add(item, personality);
+                    }
                 }
             }
 
             InitDefaults();
 
-            bool hadToFix = false;
-            foreach (var item in Personalities)
+            if (Preset.Info.IsCustom == true)
             {
-                if (item.Value.Variables.AllowedTypes.Count == 0)
+                bool hadToFix = false;
+                foreach (var item in Personalities)
                 {
-                    hadToFix = true;
-                    if (item.Key == EPersonality.Chad || item.Key == EPersonality.GigaChad)
+                    if (item.Value.Variables.AllowedTypes.Count == 0)
                     {
-                        AddPMCTypes(item.Value.Variables.AllowedTypes);
-                    }
-                    else
-                    {
-                        AddAllBotTypes(item.Value.Variables.AllowedTypes);
+                        hadToFix = true;
+                        if (item.Key == EPersonality.Chad || item.Key == EPersonality.GigaChad)
+                        {
+                            AddPMCTypes(item.Value.Variables.AllowedTypes);
+                        }
+                        else
+                        {
+                            AddAllBotTypes(item.Value.Variables.AllowedTypes);
+                        }
                     }
                 }
-            }
-            if (hadToFix)
-            {
-                string message = "The Preset you are using is out of date, and required manual fixing. Its recommended you create a new one.";
-                NotificationManagerClass.DisplayMessageNotification(message);
-                Logger.LogWarning(message);
+                if (hadToFix)
+                {
+                    string message = "The Preset you are using is out of date, and required manual fixing. Its recommended you create a new one.";
+                    NotificationManagerClass.DisplayMessageNotification(message);
+                    Logger.LogWarning(message);
+                }
             }
         }
 
-        public void ResetToDefaults()
+        public void ResetAllToDefaults()
         {
             Personalities.Remove(EPersonality.Wreckless);
             Personalities.Remove(EPersonality.SnappingTurtle);
@@ -64,6 +70,12 @@ namespace SAIN.Preset.Personalities
             Personalities.Remove(EPersonality.Coward);
             Personalities.Remove(EPersonality.Timmy);
             Personalities.Remove(EPersonality.Normal);
+            InitDefaults();
+        }
+
+        public void ResetToDefault(EPersonality personality)
+        {
+            Personalities.Remove(personality);
             InitDefaults();
         }
 
@@ -126,7 +138,10 @@ namespace SAIN.Preset.Personalities
 
                 AddPMCTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                if (Preset.Info.IsCustom == true)
+                {
+                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                }
             }
 
             pers = EPersonality.Wreckless;
@@ -184,7 +199,10 @@ namespace SAIN.Preset.Personalities
 
                 AddAllBotTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                if (Preset.Info.IsCustom == true)
+                {
+                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                }
             }
 
             pers = EPersonality.SnappingTurtle;
@@ -240,7 +258,10 @@ namespace SAIN.Preset.Personalities
 
                 AddPMCTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                if (Preset.Info.IsCustom == true)
+                {
+                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                }
             }
 
             pers = EPersonality.Chad;
@@ -293,7 +314,10 @@ namespace SAIN.Preset.Personalities
 
                 AddAllBotTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                if (Preset.Info.IsCustom == true)
+                {
+                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                }
             }
 
             pers = EPersonality.Rat;
@@ -344,7 +368,10 @@ namespace SAIN.Preset.Personalities
                 allowedTypes.Remove("Bloodhound");
 
                 Personalities.Add(pers, settings);
-                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                if (Preset.Info.IsCustom == true)
+                {
+                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                }
             }
 
             pers = EPersonality.Timmy;
@@ -393,7 +420,10 @@ namespace SAIN.Preset.Personalities
                 allowedTypes.Remove("Bloodhound");
 
                 Personalities.Add(pers, settings);
-                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                if (Preset.Info.IsCustom == true)
+                {
+                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                }
             }
 
             pers = EPersonality.Coward;
@@ -440,7 +470,10 @@ namespace SAIN.Preset.Personalities
                 allowedTypes.Remove("Bloodhound");
 
                 Personalities.Add(pers, settings);
-                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                if (Preset.Info.IsCustom == true)
+                {
+                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                }
             }
 
             pers = EPersonality.Normal;
@@ -474,7 +507,10 @@ namespace SAIN.Preset.Personalities
 
                 AddAllBotTypes(settings.Variables.AllowedTypes);
                 Personalities.Add(pers, settings);
-                SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                if (Preset.Info.IsCustom == true)
+                {
+                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                }
             }
         }
 

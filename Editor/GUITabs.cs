@@ -58,7 +58,7 @@ namespace SAIN.Editor
             }
             if (saved)
             {
-                SAINPresetClass.ExportGlobalSettings(SAINPlugin.LoadedPreset.GlobalSettings, SAINPlugin.LoadedPreset.Info.Name);
+                SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
         }
 

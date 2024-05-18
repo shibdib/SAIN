@@ -1,15 +1,10 @@
-﻿using Aki.Common.Utils;
-using Comfort.Common;
-using EFT;
-using Newtonsoft.Json;
-using SAIN.Editor;
+﻿using SAIN.Editor;
 using SAIN.Editor.GUISections;
-using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset.BotSettings;
 using SAIN.Preset.BotSettings.SAINSettings;
 using SAIN.Preset.GlobalSettings;
 using SAIN.Preset.Personalities;
-using SAIN.Preset.BotSettings;
 using System;
 using static SAIN.Helpers.JsonUtility;
 
@@ -19,6 +14,7 @@ namespace SAIN.Preset
     {
         public SAINPresetClass(SAINPresetDefinition preset, bool isCopy = false)
         {
+            SAINPlugin.EditorDefaults.SelectedDefaultPreset = SAINDifficulty.none;
             if (isCopy && SAINPlugin.LoadedPreset != null)
             {
                 SAINPresetDefinition oldDefinition = SAINPlugin.LoadedPreset.Info;
@@ -32,26 +28,48 @@ namespace SAIN.Preset
             PersonalityManager = new PersonalityManagerClass(this);
         }
 
-        public static void ExportAll(SAINPresetClass preset)
+        public SAINPresetClass(SAINDifficulty sainDifficulty)
         {
-            ExportDefinition(preset.Info);
+            SAINPlugin.EditorDefaults.SelectedCustomPreset = string.Empty;
+            SAINPlugin.EditorDefaults.SelectedDefaultPreset = sainDifficulty;
+            PresetHandler.ExportEditorDefaults();
 
-            ExportGlobalSettings(preset.GlobalSettings, preset.Info.Name, false);
-            ExportPersonalities(preset.PersonalityManager, preset.Info.Name, false);
-            ExportBotSettings(preset.BotSettings, preset.Info.Name, false);
-
-            try
-            {
-                PresetHandler.UpdateExistingBots();
-            }
-            catch (Exception updateEx)
-            {
-                Logger.LogError(updateEx);
-            }
+            Info = SAINDifficultyClass.DefaultPresetDefinitions[sainDifficulty];
+            GlobalSettings = new GlobalSettingsClass();
+            BotSettings = new BotSettings.SAINBotSettingsClass(this);
+            PersonalityManager = new PersonalityManagerClass(this);
         }
 
-        public static void ExportDefinition(SAINPresetDefinition info)
+        public static void ExportAll(SAINPresetClass preset)
         {
+            if (preset.Info.IsCustom == false)
+            {
+                SAINPresetDefinition newPreset = preset.Info.Clone();
+
+                newPreset.Name += " [Modified]";
+                newPreset.Creator = "user";
+                newPreset.Description = "[Modified] " + newPreset.Description;
+                newPreset.DateCreated = DateTime.Today.ToString();
+
+                PresetHandler.SavePresetDefinition(newPreset);
+                PresetHandler.InitPresetFromDefinition(newPreset, true);
+                PresetHandler.UpdateExistingBots();
+                return;
+            }
+
+            ExportDefinition(preset.Info);
+            ExportGlobalSettings(preset.GlobalSettings, preset.Info.Name);
+            ExportPersonalities(preset.PersonalityManager, preset.Info.Name);
+            ExportBotSettings(preset.BotSettings, preset.Info.Name);
+            PresetHandler.UpdateExistingBots();
+        }
+
+        private static void ExportDefinition(SAINPresetDefinition info)
+        {
+            if (info.IsCustom == false)
+            {
+                return;
+            }
             try
             {
                 Export(info, info.Name, "Info");
@@ -62,16 +80,12 @@ namespace SAIN.Preset
             }
         }
 
-        public static bool ExportGlobalSettings(GlobalSettingsClass globalSettings, string presetName, bool sendToBots = true)
+        private static bool ExportGlobalSettings(GlobalSettingsClass globalSettings, string presetName)
         {
             bool success = false;
             try
             {
                 Export(globalSettings, presetName, "GlobalSettings");
-                if (sendToBots)
-                {
-                    PresetHandler.UpdateExistingBots();
-                }
                 success = true;
                 GUITabs.GlobalSettingsWereEdited = false;
             }
@@ -82,7 +96,7 @@ namespace SAIN.Preset
             return success;
         }
 
-        public static bool ExportPersonalities(PersonalityManagerClass personClass, string presetName, bool sendToBots = true)
+        private static bool ExportPersonalities(PersonalityManagerClass personClass, string presetName)
         {
             bool success = false;
             try
@@ -102,10 +116,6 @@ namespace SAIN.Preset
                         Logger.LogError($"Failed to Export {pers.Key}");
                     }
                 }
-                if (sendToBots)
-                {
-                    PresetHandler.UpdateExistingBots();
-                }
                 success = true;
                 BotPersonalityEditor.PersonalitiesWereEdited = false;
             }
@@ -116,7 +126,7 @@ namespace SAIN.Preset
             return success;
         }
 
-        public static bool ExportBotSettings(SAINBotSettingsClass botSettings, string presetName, bool sendToBots = true)
+        private static bool ExportBotSettings(SAINBotSettingsClass botSettings, string presetName)
         {
             bool success = false;
             try
@@ -124,10 +134,6 @@ namespace SAIN.Preset
                 foreach (SAINSettingsGroupClass settings in botSettings.SAINSettings.Values)
                 {
                     Export(settings, presetName, settings.Name, "BotSettings");
-                }
-                if (sendToBots)
-                {
-                    PresetHandler.UpdateExistingBots();
                 }
                 success = true;
                 BotSelectionClass.BotSettingsWereEdited = false;

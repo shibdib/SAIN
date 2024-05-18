@@ -33,7 +33,8 @@ namespace SAIN.Components.BotController
             WildSpawnType.followerZryachiy,
             WildSpawnType.peacefullZryachiyEvent,
             WildSpawnType.ravangeZryachiyEvent,
-            WildSpawnType.shooterBTR
+            WildSpawnType.shooterBTR,
+            WildSpawnType.marksman
         };
 
         public void Update()

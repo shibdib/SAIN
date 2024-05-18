@@ -22,7 +22,7 @@ namespace SAIN.Editor.GUISections
 
             if (BuilderClass.SaveChanges(PersonalitiesWereEdited, toolTip, 35))
             {
-                SAINPresetClass.ExportPersonalities(SAINPlugin.LoadedPreset.PersonalityManager, SAINPlugin.LoadedPreset.Info.Name);
+                SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
 
             foreach (var personality in SAINPlugin.LoadedPreset.PersonalityManager.Personalities.Values)

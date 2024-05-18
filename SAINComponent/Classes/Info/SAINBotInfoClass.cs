@@ -223,7 +223,34 @@ namespace SAIN.SAINComponent.Classes.Info
             {
                 return result;
             }
-            string nickname = Player.Profile.Nickname.ToLower();
+
+            result = setNicknamePersonality(Player.Profile.Nickname.ToLower());
+            if (result != EPersonality.Normal)
+            {
+                return result;
+            }
+            result = setBossPersonality(WildSpawnType);
+            if (result != EPersonality.Normal)
+            {
+                return result;
+            }
+
+            if (BotTypeDefinitions.BotTypes.ContainsKey(WildSpawnType))
+            {
+                var personalities = SAINPlugin.LoadedPreset.PersonalityManager.Personalities.Values;
+                foreach (PersonalitySettingsClass setting in personalities)
+                {
+                    if (setting.CanBePersonality(this))
+                    {
+                        return setting.SAINPersonality;
+                    }
+                }
+            }
+            return EPersonality.Normal;
+        }
+
+        private EPersonality setNicknamePersonality(string nickname)
+        {
             if (nickname.Contains("solarint"))
             {
                 return EPersonality.GigaChad;
@@ -236,22 +263,42 @@ namespace SAIN.SAINComponent.Classes.Info
             {
                 return EPersonality.Timmy;
             }
-            if (!BotTypeDefinitions.BotTypes.ContainsKey(WildSpawnType))
+            if (nickname.Contains("ratthew") || nickname.Contains("choccy"))
             {
-                return EPersonality.Chad;
-            }
-            if (WildSpawnType == WildSpawnType.bossKilla || WildSpawnType == WildSpawnType.bossTagilla)
-            {
-                return EFTMath.RandomBool() ? EPersonality.Wreckless : EPersonality.GigaChad;
-            }
-            foreach (PersonalitySettingsClass setting in SAINPlugin.LoadedPreset.PersonalityManager.Personalities.Values)
-            {
-                if (setting.CanBePersonality(this))
-                {
-                    return setting.SAINPersonality;
-                }
+                return EPersonality.Rat;
             }
             return EPersonality.Normal;
+        }
+
+        private EPersonality setBossPersonality(WildSpawnType wildSpawnType)
+        {
+            switch (wildSpawnType)
+            {
+                case WildSpawnType.bossKilla:
+                case WildSpawnType.bossTagilla:
+                    return EFTMath.RandomBool() ? EPersonality.Wreckless : EPersonality.GigaChad;
+
+                case WildSpawnType.bossKnight:
+                    return EPersonality.GigaChad;
+
+                case WildSpawnType.followerBigPipe:
+                    return EPersonality.Chad;
+
+                case WildSpawnType.followerBirdEye:
+                case WildSpawnType.bossKojaniy:
+                    return EPersonality.Rat;
+
+                case WildSpawnType.bossBully:
+                case WildSpawnType.bossSanitar:
+                    return EPersonality.Coward;
+
+                case WildSpawnType.bossBoar:
+                case WildSpawnType.bossKolontay:
+                    return EPersonality.SnappingTurtle;
+
+                default:
+                    return EPersonality.Normal;
+            }
         }
 
         public WildSpawnType WildSpawnType => Profile.WildSpawnType;

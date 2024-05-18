@@ -198,6 +198,10 @@ namespace SAIN.SAINComponent.Classes
                         Shoot.Update();
                     }
                 }
+                else
+                {
+                    BotOwner.AimingData.LoseTarget();
+                }
             }
             else if (SAIN.CurrentTargetPosition != null)
             {
@@ -236,7 +240,22 @@ namespace SAIN.SAINComponent.Classes
 
         protected virtual Vector3? GetTarget()
         {
-            var enemy = BotOwner.Memory.GoalEnemy;
+            Vector3? target = getEnemyPartToShoot(BotOwner.Memory.GoalEnemy);
+            if (target == null)
+            {
+                EnemyInfo lastEnemy = BotOwner.Memory.LastEnemy;
+                if (lastEnemy != null 
+                    && lastEnemy.IsVisible 
+                    && lastEnemy.CanShoot)
+                {
+                    target = getEnemyPartToShoot(lastEnemy);
+                }
+            }
+            return target;
+        }
+
+        private Vector3? getEnemyPartToShoot(EnemyInfo enemy)
+        {
             if (enemy != null)
             {
                 Vector3 value;
@@ -250,12 +269,7 @@ namespace SAIN.SAINComponent.Classes
                 }
                 return new Vector3?(value);
             }
-            Vector3? result = null;
-            if (BotOwner.Memory.LastEnemy != null)
-            {
-                // result = new Vector3?(BotOwner.Memory.LastEnemy.CurrPosition + Vector3.up * BotOwner.Settings.FileSettings.Aiming.DANGER_UP_POINT);
-            }
-            return result;
+            return null;
         }
 
         protected virtual Vector3? GetPointToShoot(SAINEnemy enemy)
@@ -267,7 +281,7 @@ namespace SAIN.SAINComponent.Classes
             }
             if (target == null)
             {
-                target = blindShootTarget(enemy);
+                //target = blindShootTarget(enemy);
             }
             if (target != null)
             {

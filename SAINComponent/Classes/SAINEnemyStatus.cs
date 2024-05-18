@@ -9,6 +9,9 @@ namespace SAIN.SAINComponent.Classes
         Reloading = 1,
         HasGrenade = 2,
         Healing = 3,
+        UsingSurgery = 4,
+        TryingToExtract = 5,
+        Looting = 6,
     }
 
     public class SAINEnemyStatus : EnemyBase
@@ -56,6 +59,7 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
+
         public SAINEnemyStatus(SAINEnemy enemy) : base(enemy)
         {
         }
@@ -68,76 +72,99 @@ namespace SAIN.SAINComponent.Classes
                 Vector3 enemyLookDirection = EnemyPerson.Transform.LookDirection.normalized;
                 float dot = Vector3.Dot(directionToBot, enemyLookDirection);
                 return dot >= 0.9f;
-                //Vector3 dirToEnemy = Vector.NormalizeFastSelf(BotOwner.LookSensor._headPoint - EnemyPosition);
-                //return Vector.IsAngLessNormalized(dirToEnemy, EnemyPerson.Transform.LookDirection, 0.9659258f);
             }
         }
+
+        public bool ShotAtMeRecently
+        {
+            get
+            {
+                return _enemyShotAtMe.Value;
+            }
+            set
+            {
+                _enemyShotAtMe.Value = value;
+            }
+        }
+
+        private readonly ExpirableBool _enemyShotAtMe = new ExpirableBool(30f, 0.75f, 1.25f);
 
         public bool EnemyIsReloading
         {
             get
             {
-                if (_soundResetTimer < Time.time)
-                {
-                    _enemyIsReloading = false;
-                }
-                return _enemyIsReloading;
+                return _enemyIsReloading.Value;
             }
             set
             {
-                if (value == true)
-                {
-                    _enemyIsReloading = true;
-                    _soundResetTimer = Time.time + 3f * Random.Range(0.75f, 1.5f);
-                }
+                _enemyIsReloading.Value = value;
             }
         }
+
+        private readonly ExpirableBool _enemyIsHealing = new ExpirableBool(4f, 0.75f, 1.25f);
 
         public bool EnemyHasGrenadeOut
         {
             get
             {
-                if (_grenadeResetTimer < Time.time)
-                {
-                    _enemyHasGrenade = false;
-                }
-                return _enemyHasGrenade;
+                return _enemyHasGrenade.Value;
             }
             set
             {
-                if (value == true)
-                {
-                    _enemyHasGrenade = true;
-                    _grenadeResetTimer = Time.time + 3f * Random.Range(0.75f, 1.5f);
-                }
+                _enemyHasGrenade.Value = value;
             }
         }
+
+        private readonly ExpirableBool _enemyHasGrenade = new ExpirableBool(4f, 0.75f, 1.25f);
 
         public bool EnemyIsHealing
         {
             get
             {
-                if (_healResetTimer < Time.time)
+                return _enemyIsHealing.Value;
+            }
+            set
+            {
+                _enemyIsHealing.Value = value;
+            }
+        }
+
+        private readonly ExpirableBool _enemyIsReloading = new ExpirableBool(4f, 0.75f, 1.25f);
+    }
+
+    public class ExpirableBool
+    {
+        public ExpirableBool(float expireTime, float randomMin, float randomMax)
+        {
+            _expireTime = expireTime;
+            _randomMin = randomMin;
+            _randomMax = randomMax;
+        }
+
+        public bool Value
+        {
+            get
+            {
+                if (_value && _resetTime < Time.time)
                 {
-                    _enemyIsHeal = false;
+                    _value = false;
                 }
-                return _enemyIsHeal;
+                return _value;
             }
             set
             {
                 if (value == true)
                 {
-                    _enemyIsHeal = true;
-                    _healResetTimer = Time.time + 4f * Random.Range(0.75f, 1.25f);
+                    _resetTime = Time.time + _expireTime * Random.Range(_randomMin, _randomMax);
                 }
+                _value = value;
             }
         }
 
-        private bool _enemyIsReloading;
-        private float _soundResetTimer;
-        private bool _enemyHasGrenade;
-        private float _grenadeResetTimer;
-        private bool _enemyIsHeal;
-        private float _healResetTimer;
+        private bool _value;
+        private float _resetTime;
+        private readonly float _expireTime;
+        private readonly float _randomMin;
+        private readonly float _randomMax;
     }
 }

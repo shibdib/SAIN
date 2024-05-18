@@ -14,17 +14,6 @@ namespace SAIN.Preset.BotSettings
     {
         public SAINBotSettingsClass(SAINPresetClass preset) : base(preset)
         {
-            ImportBotSettings();
-        }
-
-        private void ImportBotSettings()
-        {
-            if (Preset == null)
-            {
-                Logger.LogError($"Preset Is Null in {GetType().Name}");
-                return;
-            }
-
             LoadEFTSettings();
             LoadSAINSettings();
         }
@@ -37,7 +26,8 @@ namespace SAIN.Preset.BotSettings
                 string name = BotType.Name;
                 WildSpawnType wildSpawnType = BotType.WildSpawnType;
 
-                if (!SAINPresetClass.Import(out SAINSettingsGroupClass sainSettingsGroup, Preset.Info.Name, name, "BotSettings"))
+                SAINSettingsGroupClass sainSettingsGroup;
+                if (Preset.Info.IsCustom == false || !SAINPresetClass.Import(out sainSettingsGroup, Preset.Info.Name, name, "BotSettings"))
                 {
                     sainSettingsGroup = new SAINSettingsGroupClass(Difficulties)
                     {
@@ -47,27 +37,13 @@ namespace SAIN.Preset.BotSettings
                     };
 
                     UpdateSAINSettingsToEFTDefault(wildSpawnType, sainSettingsGroup);
-                    SAINPresetClass.Export(sainSettingsGroup, Preset.Info.Name, name, "BotSettings");
+
+                    if (Preset.Info.IsCustom == true)
+                    {
+                        SAINPresetClass.Export(sainSettingsGroup, Preset.Info.Name, name, "BotSettings");
+                    }
                 }
                 SAINSettings.Add(wildSpawnType, sainSettingsGroup);
-            }
-        }
-
-        private void UpdateDefaultSettings(SAINSettingsGroupClass sainSettings, WildSpawnType wildSpawnType)
-        {
-            if (wildSpawnType == EnumValues.WildSpawn.Usec)
-            {
-
-            }
-            else if (wildSpawnType == EnumValues.WildSpawn.Bear)
-            {
-
-            }
-            else switch (wildSpawnType)
-            {
-                case WildSpawnType.assault:
-                        var diffSetting = sainSettings.Settings[BotDifficulty.easy];
-                    break;
             }
         }
 
@@ -207,8 +183,8 @@ namespace SAIN.Preset.BotSettings
         {
             DefaultDifficultyModifier = new Dictionary<WildSpawnType, float>
             {
-                { WildSpawnType.assault, 0.35f },
-                { WildSpawnType.marksman, 0.35f },
+                { WildSpawnType.assault, 0.3f },
+                { WildSpawnType.marksman, 0.3f },
 
                 { WildSpawnType.crazyAssaultEvent, 0.35f },
                 { WildSpawnType.cursedAssault, 0.35f },
@@ -221,21 +197,21 @@ namespace SAIN.Preset.BotSettings
                 { WildSpawnType.bossKojaniy, 0.75f },
                 { WildSpawnType.bossZryachiy, 0.75f },
                 { WildSpawnType.sectantPriest, 0.75f },
-                { WildSpawnType.bossKnight, 0.75f },
+                { WildSpawnType.bossKnight, 1f },
 
-                { WildSpawnType.sectantWarrior, 0.5f },
-                { WildSpawnType.followerBully, 0.5f },
-                { WildSpawnType.followerGluharAssault, 0.5f },
-                { WildSpawnType.followerGluharScout, 0.5f },
-                { WildSpawnType.followerGluharSecurity, 0.5f },
-                { WildSpawnType.followerGluharSnipe, 0.5f },
-                { WildSpawnType.followerKojaniy, 0.5f },
-                { WildSpawnType.followerSanitar, 0.5f },
-                { WildSpawnType.followerTagilla, 0.5f },
-                { WildSpawnType.followerZryachiy, 0.5f },
+                { WildSpawnType.sectantWarrior, 0.7f },
+                { WildSpawnType.followerBully, 0.55f },
+                { WildSpawnType.followerGluharAssault, 0.55f },
+                { WildSpawnType.followerGluharScout, 0.55f },
+                { WildSpawnType.followerGluharSecurity, 0.55f },
+                { WildSpawnType.followerGluharSnipe, 0.55f },
+                { WildSpawnType.followerKojaniy, 0.55f },
+                { WildSpawnType.followerSanitar, 0.55f },
+                { WildSpawnType.followerTagilla, 0.55f },
+                { WildSpawnType.followerZryachiy, 0.55f },
 
-                { WildSpawnType.followerBigPipe, 0.66f },
-                { WildSpawnType.followerBirdEye, 0.66f },
+                { WildSpawnType.followerBigPipe, 1f },
+                { WildSpawnType.followerBirdEye, 1f },
                 { WildSpawnType.pmcBot, 0.66f },
                 { WildSpawnType.exUsec, 0.66f },
                 { WildSpawnType.arenaFighter, 0.66f },

@@ -5,6 +5,7 @@ using SAIN.Plugin;
 using SAIN.Preset.BotSettings.SAINSettings;
 using SAIN.Preset.GlobalSettings;
 using SAIN.Preset.GlobalSettings.Categories;
+using SAIN.Preset.Personalities;
 using System.Collections;
 using UnityEngine;
 using static SAIN.Preset.Personalities.PersonalitySettingsClass;

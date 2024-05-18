@@ -4,10 +4,10 @@ using Interpolation;
 using Newtonsoft.Json;
 using SAIN.Attributes;
 using SAIN.Helpers;
+using SAIN.Preset.Personalities;
 using System.Collections.Generic;
 using System.Data;
 using static EFT.Player;
-using static RootMotion.FinalIK.InteractionTrigger;
 using static SAIN.Preset.Personalities.PersonalitySettingsClass;
 
 namespace SAIN.Preset.GlobalSettings

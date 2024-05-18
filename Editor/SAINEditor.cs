@@ -158,18 +158,6 @@ namespace SAIN.Editor
             if (GUI.Button(SaveAllRect, SaveContent, GetStyle(Style.button)))
             {
                 PlaySound(EUISoundType.InsuranceInsured);
-                if (SAINPlugin.LoadedPreset.Info.IsCustom == false)
-                {
-                    SAINPresetDefinition newPreset = SAINPlugin.LoadedPreset.Info.Clone();
-
-                    newPreset.IsCustom = true;
-                    newPreset.Creator = "user";
-                    newPreset.Description = "[Modified] " + newPreset.Description;
-                    newPreset.DateCreated = DateTime.Today.ToString();
-
-                    PresetHandler.SavePresetDefinition(newPreset);
-                    PresetHandler.InitPresetFromDefinition(newPreset, true);
-                }
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
 
