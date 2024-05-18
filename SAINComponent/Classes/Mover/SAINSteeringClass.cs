@@ -342,6 +342,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return true;
             }
+            var aimData = BotOwner.AimingData;
+            if (aimData != null && aimData.)
             if (BotOwner.ShootData.Shooting)
             {
                 return true;

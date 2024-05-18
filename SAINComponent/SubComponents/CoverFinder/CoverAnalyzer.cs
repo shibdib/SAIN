@@ -70,9 +70,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool CheckColliderForCover(Collider collider, out Vector3 place, bool checkSafety, out bool isSafe, NavMeshPath pathToPoint, out ECoverFailReason failReason)
         {
-            // the closest edge to that farPoint
             isSafe = false;
-
             if (GetPlaceToMove(collider, TargetPoint, OriginPoint, out place))
             {
                 if (CheckPosition(place) && CheckHumanPlayerVisibility(place))
@@ -346,7 +344,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         {
             const float offset = 0.1f;
 
-            if (CheckRayCast(position, target, 5f))
+            if (CheckRayCast(position, target, 3f))
             {
                 Vector3 enemyDirection = target - position;
                 enemyDirection = enemyDirection.normalized * offset;
@@ -355,13 +353,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 Vector3 rightPoint = right * enemyDirection;
                 rightPoint += position;
 
-                if (CheckRayCast(rightPoint, target, 5f))
+                if (CheckRayCast(rightPoint, target, 3f))
                 {
                     Quaternion left = Quaternion.Euler(0f, -90f, 0f);
                     Vector3 leftPoint = left * enemyDirection;
                     leftPoint += position;
 
-                    if (CheckRayCast(leftPoint, target, 5f))
+                    if (CheckRayCast(leftPoint, target, 3f))
                     {
                         return true;
                     }

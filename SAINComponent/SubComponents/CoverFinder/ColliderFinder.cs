@@ -115,7 +115,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private static List<LayerMask> _layersToCheck = new List<LayerMask>() 
         { 
-            //LayerMaskClass.HighPolyCollider,
+            LayerMaskClass.HighPolyCollider,
             LayerMaskClass.HighPolyWithTerrainMask, 
             LayerMaskClass.LowPolyColliderLayerMask, 
             LayerMaskClass.HitColliderMask 
