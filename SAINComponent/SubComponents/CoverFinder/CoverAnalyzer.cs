@@ -11,11 +11,22 @@ using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
+    public enum ECoverFailReason
+    {
+        None = 0,
+        ColliderUsed = 1,
+        ExcludedName = 2,
+        NoPlaceToMove = 3,
+        BadPosition = 4,
+        BadPath = 5,
+        NullOrBad = 6,
+        Spotted = 7,
+    }
+
     public class CoverAnalyzer : SAINBase, ISAINClass
     {
         public CoverAnalyzer(SAINComponentClass botOwner, CoverFinderComponent coverFinder) : base(botOwner)
         {
-            Path = new NavMeshPath();
             CoverFinder = coverFinder;
         }
 
@@ -33,46 +44,57 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private readonly CoverFinderComponent CoverFinder; 
 
-        public bool CheckCollider(Collider collider, out CoverPoint newPoint)
+        public bool CheckCollider(Collider collider, out CoverPoint newPoint, out ECoverFailReason failReason)
         {
-            newPoint = null;
             NavMeshPath path = new NavMeshPath();
-            if (CheckColliderForCover(collider, out Vector3 place, out bool isSafe, path))
+            if (CheckColliderForCover(collider, out Vector3 place, false, out _, path, out failReason))
             {
                 newPoint = new CoverPoint(SAIN, place, collider, path);
-                newPoint.IsSafePath = isSafe;
                 return true;
             }
+            newPoint = null;
             return false;
         }
 
-        public bool CheckCollider(CoverPoint coverPoint)
+        public bool CheckCollider(CoverPoint coverPoint, out ECoverFailReason failReason)
         {
             // the closest edge to that farPoint
             NavMeshPath path = new NavMeshPath();
-            if (CheckColliderForCover(coverPoint.Collider, out Vector3 place, out bool isSafe, coverPoint.PathToPoint))
+            if (CheckColliderForCover(coverPoint.Collider, out Vector3 place, false, out _, coverPoint.PathToPoint, out failReason))
             {
-                coverPoint.IsSafePath = isSafe;
                 coverPoint.Position = place;
             }
 
             return false;
         }
 
-        private bool CheckColliderForCover(Collider collider, out Vector3 place, out bool isSafe, NavMeshPath pathToPoint)
+        private bool CheckColliderForCover(Collider collider, out Vector3 place, bool checkSafety, out bool isSafe, NavMeshPath pathToPoint, out ECoverFailReason failReason)
         {
             // the closest edge to that farPoint
             isSafe = false;
 
-            if (GetPlaceToMove(collider, TargetPoint, BotOwner.Position, out place))
+            if (GetPlaceToMove(collider, TargetPoint, OriginPoint, out place))
             {
                 if (CheckPosition(place) && CheckHumanPlayerVisibility(place))
                 {
-                    if (CheckPath(place, out isSafe, pathToPoint))
+                    if (CheckPath(place, checkSafety, out isSafe, pathToPoint))
                     {
+                        failReason = ECoverFailReason.None;
                         return true;
                     }
+                    else
+                    {
+                        failReason = ECoverFailReason.BadPath;
+                    }
                 }
+                else
+                {
+                    failReason = ECoverFailReason.BadPosition;
+                }
+            }
+            else
+            {
+                failReason = ECoverFailReason.NoPlaceToMove;
             }
             return false;
         }
@@ -195,7 +217,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return false;
         }
 
-        private bool CheckPath(Vector3 position, out bool isSafe, NavMeshPath pathToPoint)
+        private bool CheckPath(Vector3 position, bool checkSafety, out bool isSafe, NavMeshPath pathToPoint)
         {
             if (pathToPoint == null)
             {
@@ -209,7 +231,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             {
                 if (PathToEnemy(pathToPoint))
                 {
-                    isSafe = CheckPathSafety(pathToPoint);
+                    isSafe = checkSafety ? CheckPathSafety(pathToPoint) : false;
                     return true;
                 }
             }
@@ -220,19 +242,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool CheckPathSafety(NavMeshPath path)
         {
-            Vector3 target;
-            if (SAIN.HasEnemy)
-            {
-                target = SAIN.Enemy.EnemyHeadPosition;
-            }
-            else
-            {
-                target = TargetPoint + Vector3.up;
-            }
+            Vector3 target = TargetPoint + Vector3.up;
             return SAINBotSpaceAwareness.CheckPathSafety(path, target);
         }
-
-        private readonly NavMeshPath Path;
 
         static bool DebugCoverFinder => SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder;
 

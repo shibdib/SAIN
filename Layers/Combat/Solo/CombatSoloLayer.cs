@@ -64,7 +64,7 @@ namespace SAIN.Layers.Combat.Solo
                         return new Action(typeof(DogFightAction), $"{Decision} : No Cover Found Yet! Using Dogfight");
                     }
 
-                case SoloDecision.WalkToCover:
+                case SoloDecision.MoveToCover:
                 case SoloDecision.UnstuckMoveToCover:
                     if (SAIN.Cover.CoverPoints.Count > 0)
                     {

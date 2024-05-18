@@ -181,6 +181,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public float TimeLastUpdated;
         public float TimeLastUsed = 0f;
 
+        const float coverUpdateFreq = 0.5f;
+        public bool ShallUpdate => Time.time - TimeLastUpdated > coverUpdateFreq;
+
         private float nextCalcPathTime = 0f;
         public float PathLength
         {
@@ -285,24 +288,32 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public int HitInCoverCount = 0;
 
+        public bool CheckPathSafety(out bool didCheck)
+        {
+            didCheck = false;
+            if (SAIN.CurrentTargetPosition == null)
+            {
+                _isSafePath = true;
+                return _isSafePath;
+            }
+            if (nextPathSafetyTime < Time.time)
+            {
+                nextPathSafetyTime = Time.time + 2f;
+                didCheck = true;
+                _isSafePath = SAINBotSpaceAwareness.CheckPathSafety(PathToPoint, SAIN.CurrentTargetPosition.Value + Vector3.up);
+            }
+            return _isSafePath;
+        }
+
         public bool IsSafePath
         {
             get
             {
-                if (nextPathSafetyTime < Time.time)
-                {
-                    nextPathSafetyTime = Time.time + 3f;
-
-                    _isSafePath = 
-                        SAIN.CurrentTargetPosition == null
-                        || SAINBotSpaceAwareness.CheckPathSafety(
-                            PathToPoint, 
-                            SAIN.CurrentTargetPosition.Value + Vector3.up);
-                }
                 return _isSafePath;
             }
             set
             {
+                //nextPathSafetyTime = Time.time + 2f;
                 _isSafePath = value;
             }
         }

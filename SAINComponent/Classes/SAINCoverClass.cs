@@ -50,15 +50,7 @@ namespace SAIN.SAINComponent.Classes
             CoverFinder.Init(SAIN);
         }
 
-        public void ForceCoverFinderState(bool value, float duration = 30f)
-        {
-            ForcedCoverFinderState = value ? CoverFinderState.forceOn : CoverFinderState.forceOff;
-            _forcedStateTimer = Time.time + duration;
-        }
-
         public CoverFinderState CurrentCoverFinderState { get; private set; }
-        private CoverFinderState ForcedCoverFinderState;
-        private float _forcedStateTimer;
 
         public void Update()
         {
@@ -67,22 +59,6 @@ namespace SAIN.SAINComponent.Classes
                 ActivateCoverFinder(false);
                 return;
             }
-
-            if (ForcedCoverFinderState != CoverFinderState.off && _forcedStateTimer < Time.time)
-            {
-                ForcedCoverFinderState = CoverFinderState.off;
-            }
-            if (ForcedCoverFinderState == CoverFinderState.forceOn)
-            {
-                //ActivateCoverFinder(true, true);
-                //return;
-            }
-            if (ForcedCoverFinderState == CoverFinderState.forceOff)
-            {
-                //ActivateCoverFinder(false, true);
-                //return;
-            }
-
             ActivateCoverFinder(SAIN.Decision.SAINActive);
         }
 
@@ -122,24 +98,24 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private void ActivateCoverFinder(bool value, bool forced = false)
+        private void ActivateCoverFinder(bool value)
         {
             if (value)
             {
                 CoverFinder?.LookForCover();
-                CurrentCoverFinderState = forced ? CoverFinderState.forceOn : CoverFinderState.on;
+                CurrentCoverFinderState = CoverFinderState.on;
             }
             if (!value)
             {
                 CoverFinder?.StopLooking();
-                CurrentCoverFinderState = forced ? CoverFinderState.forceOff : CoverFinderState.off;
+                CurrentCoverFinderState = CoverFinderState.off;
             }
         }
 
         public void CheckResetCoverInUse()
         {
             SoloDecision decision = SAIN.Decision.CurrentSoloDecision;
-            if (decision != SoloDecision.WalkToCover
+            if (decision != SoloDecision.MoveToCover
                 && decision != SoloDecision.RunToCover
                 && decision != SoloDecision.Retreat
                 && decision != SoloDecision.HoldInCover)

@@ -247,7 +247,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     Decision = SoloDecision.UnstuckMoveToCover;
                     return true;
                 }
-                if (current == SoloDecision.WalkToCover || current == SoloDecision.UnstuckMoveToCover)
+                if (current == SoloDecision.MoveToCover || current == SoloDecision.UnstuckMoveToCover)
                 {
                     Decision = SoloDecision.UnstuckSearch;
                     return true;

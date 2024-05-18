@@ -49,12 +49,6 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         public float CoverMinEnemyDistance = 8f;
 
-        [Default(0.1f)]
-        [MinMax(0.01f, 1f, 100f)]
-        [Advanced]
-        [JsonIgnore]
-        public float CoverUpdateFrequency = 0.1f;
-
         [Default(false)]
         [Advanced]
         public bool DebugCoverFinder = false;

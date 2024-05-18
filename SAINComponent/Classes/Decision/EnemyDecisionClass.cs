@@ -90,7 +90,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             else if (StartMoveToCover())
             {
-                Decision = SoloDecision.WalkToCover;
+                Decision = SoloDecision.MoveToCover;
 
                 if (StartRunForCover())
                 {
@@ -106,7 +106,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 Decision = SoloDecision.DebugNoDecision;
             }
 
-            if (Decision != SoloDecision.WalkToCover && Decision != SoloDecision.RunToCover)
+            if (Decision != SoloDecision.MoveToCover && Decision != SoloDecision.RunToCover)
             {
                 StartRunCoverTimer = 0f;
             }
@@ -312,7 +312,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 && currentSolo != SoloDecision.RunAway 
                 && currentSolo != SoloDecision.RunToCover
                 && currentSolo != SoloDecision.Retreat
-                && currentSolo != SoloDecision.WalkToCover)
+                && currentSolo != SoloDecision.MoveToCover)
             {
                 return true;
             }
@@ -340,7 +340,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
-            if (decision == SoloDecision.Retreat || decision == SoloDecision.WalkToCover || decision == SoloDecision.RunToCover)
+            if (decision == SoloDecision.Retreat || decision == SoloDecision.MoveToCover || decision == SoloDecision.RunToCover)
             {
                 return false;
             }
@@ -427,7 +427,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             if (coverInUse == null || coverInUse.Status != CoverStatus.InCover || coverInUse.Spotted)
             {
                 var CurrentDecision = SAIN.Memory.Decisions.Main.Current;
-                if (CurrentDecision != SoloDecision.WalkToCover && CurrentDecision != SoloDecision.RunToCover)
+                if (CurrentDecision != SoloDecision.MoveToCover && CurrentDecision != SoloDecision.RunToCover)
                 {
                     StartRunCoverTimer = Time.time + RunToCoverTime * UnityEngine.Random.Range(RunToCoverTimeRandomMin, RunToCoverTimeRandomMax);
                 }

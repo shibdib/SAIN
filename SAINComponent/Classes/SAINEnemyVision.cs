@@ -36,6 +36,9 @@ namespace SAIN.SAINComponent.Classes
         private const float _repeatContactMinSeenTime = 12f;
         private const float _lostContactMinSeenTime = 12f;
 
+        private float _realLostVisionTime;
+        private bool _realLostVisual;
+
         public void UpdateVisible(bool visible)
         {
             bool wasVisible = IsVisible;
@@ -58,9 +61,14 @@ namespace SAIN.SAINComponent.Classes
                     TimeFirstSeen = Time.time;
                     Seen = true;
                 }
+                _realLostVisionTime = Time.time;
                 TimeLastSeen = Time.time;
                 LastSeenPosition = EnemyPerson.Position;
-                Enemy.UpdateKnownPosition(EnemyPerson.Position, false, true);
+            }
+
+            if (Time.time - _realLostVisionTime < 1f)
+            {
+                Enemy.UpdateKnownPosition(EnemyPerson.Position, false, IsVisible);
             }
 
             if (!IsVisible)

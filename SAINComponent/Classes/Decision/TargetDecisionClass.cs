@@ -68,7 +68,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             else
             {
-                Decision = SoloDecision.WalkToCover;
+                Decision = SoloDecision.MoveToCover;
             }
 
             return true;

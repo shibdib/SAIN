@@ -534,18 +534,6 @@ namespace SAIN.SAINComponent
                     return lastKnownPlace.Position;
                 }
 
-                Vector3? lastPlaceHaventSeen = Enemy.KnownPlaces.GetPlaceHaventSeen()?.Position;
-                if (lastPlaceHaventSeen != null)
-                {
-                    return lastPlaceHaventSeen;
-                }
-
-                lastPlaceHaventSeen = Enemy.KnownPlaces.GetPlaceHaventArrived()?.Position;
-                if (lastPlaceHaventSeen != null)
-                {
-                    return lastPlaceHaventSeen;
-                }
-
                 return Enemy.EnemyPosition;
             }
             var placeForCheck = BotOwner.Memory.GoalTarget?.GoalTarget;

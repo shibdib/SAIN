@@ -1,7 +1,9 @@
 ﻿using Comfort.Common;
+using EFT;
 using SAIN.Helpers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,30 +21,27 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            foreach (var obj in GUIObjects)
+            foreach (var obj in _guiObjects)
             {
                 DebugGizmos.DestroyLabel(obj.Value);
             }
-            GUIObjects?.Clear();
+            _guiObjects?.Clear();
         }
 
         public void Update()
         {
-            if (_nextCheckArrived < Time.time)
-            {
-                _nextCheckArrived = Time.time + 0.25f; 
-                checkIfArrived();
-            }
-            if (_nextCheckSeen < Time.time)
-            {
-                _nextCheckSeen = Time.time + 0.5f;
-                _enemy.SAIN.StartCoroutine(checkVisionOnPlaces());
-            }
+            updatePlaces();
+            checkIfArrived();
+            checkIfSeen();
+            createDebug();
+        }
 
+        private void createDebug()
+        {
             if (SAINPlugin.DebugMode)
             {
                 var enemyPlaces = EnemyPlaces;
-                foreach (var obj in GUIObjects)
+                foreach (var obj in _guiObjects)
                 {
                     if (!enemyPlaces.Contains(obj.Key))
                     {
@@ -51,61 +50,67 @@ namespace SAIN.SAINComponent.Classes
                 }
                 foreach (var debugPlace in _debugPlacesToRemove)
                 {
-                    DebugGizmos.DestroyLabel(GUIObjects[debugPlace]);
-                    GUIObjects.Remove(debugPlace);
+                    DebugGizmos.DestroyLabel(_guiObjects[debugPlace]);
+                    _guiObjects.Remove(debugPlace);
                 }
                 _debugPlacesToRemove.Clear();
 
                 foreach (var place in enemyPlaces)
                 {
-                    if (!GUIObjects.ContainsKey(place))
+                    if (!_guiObjects.ContainsKey(place))
                     {
-                        GUIObjects.Add(place, new GUIObject());
+                        _guiObjects.Add(place, new GUIObject());
                     }
-                    GUIObject obj = GUIObjects[place];
-                    UpdateDebugString(place, obj);
+                    GUIObject obj = _guiObjects[place];
+                    updateDebugString(place, obj);
                     DebugGizmos.AddGUIObject(obj);
                 }
             }
         }
 
-        private void checkIfArrived()
+        private void checkIfSeen()
         {
-            Vector3 myPosition = _enemy.SAIN.Position;
-            foreach (var place in EnemyPlaces)
+            if (_nextCheckSeen < Time.time)
             {
-                if (place.HasArrived == false && (myPosition - place.Position).sqrMagnitude < 2f)
+                _nextCheckSeen = Time.time + 0.5f;
+
+                Vector3 lookSensor = _enemy.BotOwner.LookSensor._headPoint;
+                foreach (var place in EnemyPlaces)
                 {
-                    place.HasArrived = true;
-                    _enemy.SAIN.Talk.GroupSay(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 40);
+                    if (!place.HasSeen 
+                        && place.ClearLineOfSight(lookSensor, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                    {
+                        tryTalk();
+                    }
                 }
             }
         }
 
-        private IEnumerator checkVisionOnPlaces()
+        private void tryTalk()
         {
-            Vector3 lookSensor = _enemy.BotOwner.LookSensor._headPoint;
-            List<EnemyPlace> places = new List<EnemyPlace>();
-            places.AddRange(EnemyPlaces);
-            foreach (var place in places)
+            _enemy.SAIN?.Talk.GroupSay(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 40);
+        }
+
+        private void checkIfArrived()
+        {
+            if (_nextCheckArrived < Time.time)
             {
-                if (!place.HasSeen)
+                _nextCheckArrived = Time.time + 0.25f;
+                Vector3 myPosition = _enemy.SAIN.Position;
+                foreach (var place in EnemyPlaces)
                 {
-                    Vector3 lastknown = place.Position + Vector3.up;
-                    Vector3 direction = lastknown - lookSensor;
-                    bool canSee = place.ClearLineOfSight(lookSensor, LayerMaskClass.HighPolyWithTerrainMaskAI);
-                    if (canSee)
+                    if (place.HasArrived == false && (myPosition - place.Position).sqrMagnitude < 2f)
                     {
-                        _enemy.SAIN?.Talk.GroupSay(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 40);
+                        place.HasArrived = true;
+                        tryTalk();
                     }
-                    yield return null;
                 }
             }
         }
 
         private readonly List<EnemyPlace> _debugPlacesToRemove = new List<EnemyPlace>();
 
-        private void UpdateDebugString(EnemyPlace place, GUIObject obj)
+        private void updateDebugString(EnemyPlace place, GUIObject obj)
         {
             obj.WorldPos = place.Position;
 
@@ -129,7 +134,7 @@ namespace SAIN.SAINComponent.Classes
                 + (place.HasSeen ? $"Time Since Seen: [{Time.time - place.TimeSeen}]" : string.Empty));
         }
 
-        private readonly Dictionary<EnemyPlace, GUIObject> GUIObjects = new Dictionary<EnemyPlace, GUIObject>();
+        private readonly Dictionary<EnemyPlace, GUIObject> _guiObjects = new Dictionary<EnemyPlace, GUIObject>();
 
         public bool SearchedAllKnownLocations 
         { 
@@ -196,7 +201,18 @@ namespace SAIN.SAINComponent.Classes
         private float _nextCheckArrived;
         private float _nextCheckSeen;
 
-        public void AddPosition(Vector3 position, bool seen, bool arrived)
+        public void UpdateSeenPlace(Vector3 position)
+        {
+            if (LastSeenPlace == null)
+            {
+                LastSeenPlace = new EnemyPlace(position);
+                updatePlaces(true);
+                return;
+            }
+            LastSeenPlace.Position = position;
+        }
+
+        public void AddHeardPosition(Vector3 position, bool seen, bool arrived)
         {
             _searchedAllKnownLocations = false;
 
@@ -215,17 +231,12 @@ namespace SAIN.SAINComponent.Classes
                 HasSeen = seen 
             };
 
-            if (seen)
-            {
-                LastSeenPlace = newPlace;
-                return;
-            }
-
             if (HeardPlaces.Count >= MaxKnownPlaces)
             {
                 HeardPlaces.RemoveAt(0);
             }
             HeardPlaces.Add(newPlace);
+            sortByAge(HeardPlaces);
         }
 
         private const int MaxKnownPlaces = 10;
@@ -233,24 +244,35 @@ namespace SAIN.SAINComponent.Classes
         public EnemyPlace LastSeenPlace { get; private set; }
         public List<EnemyPlace> HeardPlaces = new List<EnemyPlace>(MaxKnownPlaces);
 
-        public List<EnemyPlace> EnemyPlaces
+        private void updatePlaces(bool force = false)
         {
-            get
+            if (force || _nextUpdatePlacesTime < Time.time)
             {
+                _nextUpdatePlacesTime = Time.time + 0.5f;
                 _enemyPlaces.Clear();
                 clearHeardPlaces();
-                if (HeardPlaces.Count > 0)
-                {
-                    _enemyPlaces.AddRange(HeardPlaces);
-                }
                 if (LastSeenPlace != null)
                 {
                     _enemyPlaces.Add(LastSeenPlace);
+                }
+                if (HeardPlaces.Count > 0)
+                {
+                    _enemyPlaces.AddRange(HeardPlaces);
                 }
                 if (_enemyPlaces.Count > 1)
                 {
                     sortByAge(_enemyPlaces);
                 }
+            }
+        }
+
+        private float _nextUpdatePlacesTime;
+
+        public List<EnemyPlace> EnemyPlaces
+        {
+            get
+            {
+                updatePlaces();
                 return _enemyPlaces;
             }
         }
@@ -264,14 +286,7 @@ namespace SAIN.SAINComponent.Classes
 
         private void clearHeardPlaces()
         {
-            for (int i = HeardPlaces.Count - 1; i >= 0; i--)
-            {
-                EnemyPlace heardPlace = HeardPlaces[i];
-                if (heardPlace.HasSeen && heardPlace.HasArrived)
-                {
-                    HeardPlaces.RemoveAt(i);
-                }
-            }
+            HeardPlaces.RemoveAll(x => x.HasSeen && x.HasArrived);
         }
 
         public EnemyPlace LastKnownPlace
@@ -279,11 +294,16 @@ namespace SAIN.SAINComponent.Classes
             get
             {
                 var places = EnemyPlaces;
-                if (places.Count > 0)
-                {
-                    return places[0];
-                }
-                return null;
+                return places.Count > 0 ? places.First() : null;
+            }
+        }
+
+        public EnemyPlace LastHeardPlace
+        {
+            get
+            {
+                sortByAge(HeardPlaces);
+                return HeardPlaces.Count > 0 ? HeardPlaces.First() : null;
             }
         }
     }

@@ -137,10 +137,10 @@ namespace SAIN.SAINComponent.Classes
                     _hidingBehindObject = null;
                     Vector3? lastKnown = LastKnownPosition;
                     if (lastKnown != null 
-                        && Physics.Raycast(lastKnown.Value + Vector3.up, SAIN.Position + Vector3.up, out RaycastHit hit, _checkHidingRayDist))
+                        && Physics.Raycast(lastKnown.Value + Vector3.up, SAIN.Position + Vector3.up, out RaycastHit hit, _checkHidingRayDist, LayerMaskClass.HighPolyCollider))
                     {
                         _hidingBehindObject = hit.collider;
-                    }
+                    } 
                 }
                 return _hidingBehindObject;
             }
@@ -156,7 +156,11 @@ namespace SAIN.SAINComponent.Classes
                 }
                 if (HidingBehindObject != null)
                 {
-                    return HidingBehindObject.transform.position + Vector3.up;
+                    Vector3 pos = HidingBehindObject.transform.position + HidingBehindObject.bounds.size.z * Vector3.up;
+                    if ((pos - EnemyPosition).sqrMagnitude < 3f * 3f)
+                    {
+                        return pos;
+                    }
                 }
                 return null;
             }
@@ -187,13 +191,18 @@ namespace SAIN.SAINComponent.Classes
 
         public void UpdateKnownPosition(Vector3 position, bool arrived = false, bool seen = false)
         {
-            KnownPlaces.AddPosition(position, arrived, seen);
+            KnownPlaces.AddHeardPosition(position, arrived, seen);
+            SAIN.Squad?.SquadInfo?.ReportEnemyPosition(this, position);
+        }
+        public void UpdateSeenPosition(Vector3 position, bool arrived = false, bool seen = false)
+        {
+            KnownPlaces.AddHeardPosition(position, arrived, seen);
             SAIN.Squad?.SquadInfo?.ReportEnemyPosition(this, position);
         }
 
         public void EnemyPositionReported(Vector3 position, bool arrived = false, bool seen = false)
         {
-            KnownPlaces.AddPosition(position, arrived, seen);
+            KnownPlaces.AddHeardPosition(position, arrived, seen);
         }
 
         public readonly bool IsAI;

@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using static UnityEngine.UI.Image;
 using UnityEngine.UI;
 using System.Linq;
+using System.Collections;
+using Newtonsoft.Json.Linq;
+using System.Windows.Forms;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
@@ -25,7 +28,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             const float HeightDecreasePerIncrement = 0.66f;
             const float LengthIncreasePerIncrement = 3f;
 
-            ClearColliders(array);
+            clearColliders(array);
 
             if (colliderMask == default)
             {
@@ -38,11 +41,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             var orientation = Quaternion.identity;
             Vector3 boxOrigin = OriginPoint + Vector3.up * StartBoxHeight;
 
-            for (int i = 0; i < debugObjects.Count; i++)
-            {
-                GameObject.Destroy(debugObjects[i]);
-            }
-            debugObjects.Clear();
+            destroyDebug();
 
             hits = 0;
             for (int i = 0; i < iterationMax; i++)
@@ -65,20 +64,86 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     continue;
                 }
             }
+        }
 
-            for (int i = 0; i < hits; i++)
+        public IEnumerator GetNewColliders(Collider[] array, int iterationMax = 10, float startBoxWidth = 2f, int hitThreshold = 50)
+        {
+            const float StartBoxHeight = 0.25f;
+            const float HeightIncreasePerIncrement = 0.66f;
+            const float HeightDecreasePerIncrement = 0.66f;
+            const float LengthIncreasePerIncrement = 3f;
+
+            clearColliders(array);
+            destroyDebug();
+
+            float boxLength = startBoxWidth;
+            float boxHeight = StartBoxHeight;
+            Vector3 boxOrigin = OriginPoint + Vector3.up * StartBoxHeight;
+
+            HitCount = 0;
+            int hits = 0;
+            int totalIterations = 0;
+            bool foundEnough = false;
+            for (int l = 0; l < _layersToCheck.Count; l++)
             {
-                Collider collider = array[i];
-                if (collider != null)
+                var layer = _layersToCheck[l];
+
+                for (int i = 0; i < iterationMax; i++)
                 {
-                    //debugObjects.Add(DebugGizmos.Line(OriginPoint + Vector3.up, collider.transform.position, DebugGizmos.RandomColor, 0.01f, false, -1));
+                    totalIterations++;
+                    hits = getCollidersInBox(boxLength, boxHeight, boxLength, boxOrigin, array, layer);
+                    foundEnough = hits >= hitThreshold;
+                    if (foundEnough)
+                    {
+                        break;
+                    }
+
+                    boxOrigin += Vector3.down * HeightDecreasePerIncrement;
+                    boxHeight += HeightIncreasePerIncrement + HeightDecreasePerIncrement;
+                    boxLength += LengthIncreasePerIncrement;
+                    yield return null;
+                }
+                if (foundEnough)
+                {
+                    Logger.LogInfo($"Found enough colliders in Layer: [{layer.MaskToString()}] after [{totalIterations}] total iterations");
+                    break;
                 }
             }
+
+            HitCount = hits;
         }
+
+        private static List<LayerMask> _layersToCheck = new List<LayerMask>() 
+        { 
+            //LayerMaskClass.HighPolyCollider,
+            LayerMaskClass.HighPolyWithTerrainMask, 
+            LayerMaskClass.LowPolyColliderLayerMask, 
+            LayerMaskClass.HitColliderMask 
+        };
+
+        private int getCollidersInBox(float x, float y, float z, Vector3 boxOrigin, Collider[] array, LayerMask colliderMask)
+        {
+            Vector3 box = new Vector3(x, y, z);
+            int rawHits = Physics.OverlapBoxNonAlloc(boxOrigin, box, array, _orientation, colliderMask);
+            return FilterColliders(array, rawHits);
+        }
+
+        private Quaternion _orientation => Quaternion.identity;
+
+        private void destroyDebug()
+        {
+            for (int i = 0; i < debugObjects.Count; i++)
+            {
+                GameObject.Destroy(debugObjects[i]);
+            }
+            debugObjects.Clear();
+        }
+
+        public int HitCount;
 
         private List<GameObject> debugObjects = new List<GameObject>();
 
-        private void ClearColliders(Collider[] array)
+        private void clearColliders(Collider[] array)
         {
             for (int i = 0; i < array.Length; i++)
             {

@@ -731,7 +731,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private bool CanBeStuckDecisions(SoloDecision decision)
         {
-            return decision == SoloDecision.Search || decision == SoloDecision.WalkToCover || decision == SoloDecision.DogFight || decision == SoloDecision.RunToCover || decision == SoloDecision.RunAway || decision == SoloDecision.UnstuckSearch || decision == SoloDecision.UnstuckDogFight || decision == SoloDecision.UnstuckMoveToCover;
+            return decision == SoloDecision.Search || decision == SoloDecision.MoveToCover || decision == SoloDecision.DogFight || decision == SoloDecision.RunToCover || decision == SoloDecision.RunAway || decision == SoloDecision.UnstuckSearch || decision == SoloDecision.UnstuckDogFight || decision == SoloDecision.UnstuckMoveToCover;
         }
 
         public bool BotStuckOnPlayer()

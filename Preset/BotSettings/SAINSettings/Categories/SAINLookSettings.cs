@@ -1,4 +1,5 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 using System.ComponentModel;
 
 namespace SAIN.Preset.BotSettings.SAINSettings.Categories
@@ -57,21 +58,21 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Default(75f)]
         [MinMax(10f, 250f)]
         [Advanced]
-        public float NIGHT_VISION_ON = 75f;
+        public float NIGHT_VISION_ON = 150f;
 
         [NameAndDescription("NightVision Off Distance",
             "After a bot is above this number in their vision distance, they will turn off night vision if enabled")]
         [Default(125f)]
         [MinMax(10f, 250f)]
         [Advanced]
-        public float NIGHT_VISION_OFF = 125f;
+        public float NIGHT_VISION_OFF = 200f;
 
         [NameAndDescription("NightVision Visible Distance",
             "How far a bot can see with NightVision Enabled")]
         [Default(125f)]
         [MinMax(10f, 250f)]
         [Advanced]
-        public float NIGHT_VISION_DIST = 125f;
+        public float NIGHT_VISION_DIST = 175f;
 
         [NameAndDescription("NightVision Visible Angle",
             "The Maximum Angle of a bot's cone of vision with NightVision Enabled")]
@@ -88,42 +89,48 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Default(40f)]
         [MinMax(10, 100f)]
         [Advanced]
-        public float LightOnVisionDistance = 40f;
+        public float LightOnVisionDistance = 80f;
 
         [NameAndDescription("FlashLight Visible Angle",
             "The Maximum Angle of a bot's cone of vision with Flashlight Enabled")]
         [Default(30f)]
         [MinMax(10, 180)]
         [Advanced]
-        public float VISIBLE_ANG_LIGHT = 30f;
+        public float VISIBLE_ANG_LIGHT = 35f;
 
         [NameAndDescription("FlashLight Visible Distance",
             "How far a bot can see with a Flashlight Enabled")]
         [Default(50f)]
         [MinMax(10, 100f)]
         [Advanced]
-        public float VISIBLE_DISNACE_WITH_LIGHT = 50f;
+        public float VISIBLE_DISNACE_WITH_LIGHT = 65f;
 
         [NameAndDescription("Lose Vision Ability Time",
             "How Long after losing vision a bot will still be able to sense an enemy")]
         [Default(0.25f)]
         [MinMax(0.01f, 3f, 100f)]
         [Advanced]
-        public float GOAL_TO_FULL_DISSAPEAR = 0.25f;
+        [JsonIgnore]
+        [Hidden]
+        public float GOAL_TO_FULL_DISSAPEAR = 0.5f;
 
         [NameAndDescription("Lose Vision Ability Foliage Time",
             "How Long after losing vision a bot will still be able to sense an enemy")]
         [Default(0.15f)]
         [MinMax(0.01f, 3f, 100f)]
         [Advanced]
-        public float GOAL_TO_FULL_DISSAPEAR_GREEN = 0.15f;
+        [JsonIgnore]
+        [Hidden]
+        public float GOAL_TO_FULL_DISSAPEAR_GREEN = 0.25f;
 
         [NameAndDescription("Lose Shoot Ability Time",
             "How Long after losing vision a bot will still be able to shoot an enemy")]
         [Default(0.01f)]
         [MinMax(0.01f, 3f, 100f)]
         [Advanced]
-        public float GOAL_TO_FULL_DISSAPEAR_SHOOT = 0.01f;
+        [JsonIgnore]
+        [Hidden]
+        public float GOAL_TO_FULL_DISSAPEAR_SHOOT = 0.1f;
 
         [NameAndDescription("Lose Shoot Ability Time",
             "How far into grass a bot will be able to see, how far the depth must be to lose visibilty")]

@@ -157,7 +157,7 @@ namespace SAIN.SAINComponent.Classes
                 switch (decisions.Main.Current)
                 {
                     case SoloDecision.RunToCover:
-                    case SoloDecision.WalkToCover:
+                    case SoloDecision.MoveToCover:
                         result = EAimDownSightsStatus.MovingToCover;
                         break;
 

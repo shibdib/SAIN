@@ -14,7 +14,7 @@ namespace SAIN
         RunAway,
         DogFight,
         Shoot,
-        WalkToCover,
+        MoveToCover,
         StandAndShoot,
         Investigate,
         ThrowGrenade,
