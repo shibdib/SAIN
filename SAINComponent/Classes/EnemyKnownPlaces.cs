@@ -197,7 +197,7 @@ namespace SAIN.SAINComponent.Classes
             return (myPosition - place.Position).sqrMagnitude < arrivedReachDistanceSqr;
         }
 
-        private const float arrivedReachDistanceSqr = 2f;
+        private const float arrivedReachDistanceSqr = 0.5f;
 
         private readonly List<EnemyPlace> _debugPlacesToRemove = new List<EnemyPlace>();
 
@@ -298,7 +298,7 @@ namespace SAIN.SAINComponent.Classes
             if (LastSeenPlace == null)
             {
                 LastSeenPlace = new EnemyPlace(position, 300f, true, _enemy.EnemyIPlayer);
-                _enemyPlaces.Add(LastSeenPlace);
+                _allEnemyPlaces.Add(LastSeenPlace);
                 updatePlaces(true);
                 OnEnemyPlaceAdded?.Invoke(LastSeenPlace, _enemy.SAIN);
             }
@@ -316,7 +316,7 @@ namespace SAIN.SAINComponent.Classes
                 if (LastSquadSeenPlace == null)
                 {
                     LastSquadSeenPlace = place;
-                    _enemyPlaces.Add(LastSquadSeenPlace);
+                    _allEnemyPlaces.Add(LastSquadSeenPlace);
                 }
                 else
                 {
@@ -333,8 +333,7 @@ namespace SAIN.SAINComponent.Classes
 
             var lastHeard = LastHeardPlace;
             if (lastHeard != null 
-                && lastHeard.ShallClear == false
-                && (lastHeard.Position - position).sqrMagnitude < 3f * 3f)
+                && (lastHeard.Position - position).sqrMagnitude < 5f * 5f)
             {
                 lastHeard.Position = position;
                 lastHeard.HasArrivedPersonal = false;
@@ -348,10 +347,11 @@ namespace SAIN.SAINComponent.Classes
 
             if (HeardPlacesPersonal.Count >= _maxHeardPlaces)
             {
-                HeardPlacesPersonal.RemoveAt(0);
+                HeardPlacesPersonal.RemoveAt(HeardPlacesPersonal.Count - 1);
             }
 
             HeardPlacesPersonal.Add(newPlace);
+            _allEnemyPlaces.Add(newPlace);
             updatePlaces(true);
             OnEnemyPlaceAdded?.Invoke(newPlace, _enemy.SAIN);
             return newPlace;
@@ -361,7 +361,7 @@ namespace SAIN.SAINComponent.Classes
         {
             if (LastSquadHeardPlace == null)
             {
-                _enemyPlaces.Add(LastSquadSeenPlace);
+                _allEnemyPlaces.Add(LastSquadSeenPlace);
             }
             LastSquadHeardPlace = place;
         }
@@ -379,11 +379,29 @@ namespace SAIN.SAINComponent.Classes
             if (force || _nextUpdatePlacesTime < Time.time)
             {
                 _nextUpdatePlacesTime = Time.time + 0.5f;
-                clearPlaces(HeardPlacesPersonal);
-                clearPlaces(_enemyPlaces);
-                if (_enemyPlaces.Count > 1)
+
+                clearPlaces(_allEnemyPlaces);
+                if (_allEnemyPlaces.Count > 1)
                 {
-                    sortByAge(_enemyPlaces);
+                    sortByAge(_allEnemyPlaces);
+                    if (_allEnemyPlaces.Count > _maxHeardPlaces + 3)
+                    {
+                        _allEnemyPlaces.RemoveAt(_allEnemyPlaces.Count - 1);
+                    }
+                }
+
+                clearPlaces(HeardPlacesPersonal);
+                if (HeardPlacesPersonal.Count > 1)
+                {
+                    sortByAge(HeardPlacesPersonal);
+                    if (HeardPlacesPersonal.Count >= _maxHeardPlaces)
+                    {
+                        HeardPlacesPersonal.RemoveAt(HeardPlacesPersonal.Count - 1);
+                    }
+                }
+                if (!_enemy.EnemyPlayer.IsAI && _allEnemyPlaces.Count > 0)
+                {
+                    //Logger.LogDebug($"[{_allEnemyPlaces.Count}] Enemy Places Count for [{_enemy.BotOwner?.name}]");
                 }
             }
         }
@@ -395,18 +413,19 @@ namespace SAIN.SAINComponent.Classes
             get
             {
                 updatePlaces();
-                return _enemyPlaces;
+                return _allEnemyPlaces;
             }
         }
-        private readonly List<EnemyPlace> _enemyPlaces = new List<EnemyPlace>();
+        private readonly List<EnemyPlace> _allEnemyPlaces = new List<EnemyPlace>();
 
         private void sortByAge(List<EnemyPlace> places)
         {
+            places.RemoveAll(x => x == null);
             places.Sort((x, y) => x.TimeSincePositionUpdated.CompareTo(y.TimeSincePositionUpdated));
         }
         private void clearPlaces(List<EnemyPlace> places)
         {
-            places.RemoveAll(x => x?.ShallClear == true);
+            places.RemoveAll(x => x?.ShallClear == true || x == null);
         }
 
         public EnemyPlace LastKnownPlace
@@ -422,7 +441,7 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
-                return HeardPlacesPersonal.Count > 0 ? HeardPlacesPersonal.First() : null;
+                return HeardPlacesPersonal.Count > 0 ? HeardPlacesPersonal[0] : null;
             }
         }
     }

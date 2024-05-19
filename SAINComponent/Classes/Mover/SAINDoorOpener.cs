@@ -56,7 +56,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (BotOwner.DoorOpener.Interacting)
             {
-                //this.BotOwner.Steering.SetYAngle(0f);
+                this.BotOwner.Steering.SetYAngle(0f);
                 if (this._traversingEnd < Time.time)
                 {
                     BotOwner.DoorOpener.Interacting = false;
@@ -154,7 +154,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 door.OpenAngle = -door.OpenAngle;
             }
 
-            //bool noAnimation = door.interactWithoutAnimation;
+            bool noAnimation = door.interactWithoutAnimation;
             door.interactWithoutAnimation = true;
 
             EDoorState state = EDoorState.None;
@@ -179,7 +179,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 BotOwner.GetPlayer.vmethod_0(door, result, null);
                 Singleton<BotEventHandler>.Instance?.PlaySound(SAIN.Player, SAIN.Position, 30f, AISoundType.step);
             }
-            //door.interactWithoutAnimation = noAnimation;
+            door.interactWithoutAnimation = noAnimation;
 
             if (inverted)
             {

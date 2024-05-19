@@ -33,26 +33,34 @@ namespace SAIN.SAINComponent.Classes
             {
                 if (EnemyPerson?.PlayerNull == true)
                 {
+                    Logger.LogDebug("Enemy Player is Null. Removing...");
                     return false;
                 }
                 // Redundant Checks
                 // Common checks between PMC and bots
-                if (EnemyPlayer == null || EnemyPlayer?.HealthController?.IsAlive != true)
+                if (EnemyPlayer == null)
                 {
+                    Logger.LogDebug("Enemy is Null. Removing...");
+                    return false;
+                }
+                if (EnemyPlayer?.HealthController?.IsAlive != true)
+                {
+                    Logger.LogDebug("Enemy is Dead. Removing...");
                     return false;
                 }
                 // Checks specific to bots
-                if (EnemyPlayer?.IsAI == true && (
-                    EnemyPlayer.AIData?.BotOwner == null ||
-                    EnemyPlayer.AIData.BotOwner.ProfileId == BotOwner.ProfileId))
+                BotOwner botOwner = EnemyPlayer?.AIData?.BotOwner;
+                if (EnemyPlayer?.IsAI == true && botOwner == null)
                 {
-                    // EnemyPlayer.AIData.BotOwner.BotState != EBotState.Active
+                    Logger.LogDebug("Enemy is AI, but Bot is null. Removing...");
                     return false;
                 }
-                else
+                if (botOwner != null && botOwner.ProfileId == BotOwner.ProfileId)
                 {
-                    return true;
+                    Logger.LogWarning("Enemy has same profile id as Bot? Removing...");
+                    return false;
                 }
+                return true;
             }
         }
 

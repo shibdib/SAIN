@@ -68,6 +68,7 @@ namespace SAIN.SAINComponent.Classes.Sense
                             highestPower.Power, 
                             soundType == SAINSoundType.Gunshot ? AISoundType.gun : AISoundType.silencedGun))
                         {
+                            Logger.LogWarning("Heard Gunshot");
                             HeardGunshots.Add(highestPower);
                             OnGunshotHeard?.Invoke(highestPower);
                         }
@@ -78,6 +79,7 @@ namespace SAIN.SAINComponent.Classes.Sense
                             highestPower.Power,
                             AISoundType.step))
                     {
+                        Logger.LogWarning("Heard Sound");
                         HeardSounds.Add(highestPower);
                         OnSoundHeard?.Invoke(highestPower);
                     }
@@ -149,7 +151,6 @@ namespace SAIN.SAINComponent.Classes.Sense
 
         public bool IsBad => SourcePlayer == null
                 || SourcePlayer.Transform == null
-                || SourcePlayer.Transform.Original == null
                 || SourcePlayer.HealthController.IsAlive == false;
     }
 

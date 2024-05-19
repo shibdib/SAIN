@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using static Mono.Security.X509.X520;
 using static SAIN.Editor.SAINLayout;
 
 namespace SAIN.Editor.GUISections
@@ -24,14 +23,13 @@ namespace SAIN.Editor.GUISections
             SAINPresetDefinition selectedPreset = SAINPlugin.LoadedPreset.Info;
 
             GUIContent content = new GUIContent(
-                        $"Selected Preset Version: {selectedPreset.SAINVersion} " +
-                        $"but current SAIN Preset Version is: {AssemblyInfoClass.SAINPresetVersion}, default bot config values may be set incorrectly due to updates to SAIN.");
+                        $"Selected Preset Version: {selectedPreset.SAINPresetVersion} " +
+                        $"but current SAIN Preset Version is: {AssemblyInfoClass.SAINPresetVersion} (SAIN Version {AssemblyInfoClass.SAINVersion}), default bot config values may be set incorrectly due to updates to SAIN.");
 
-            Rect rect = GUILayoutUtility.GetRect(content, GetStyle(Style.alert), Height(LabelHeight + 5));
+            Rect rect = GUILayoutUtility.GetRect(content, GetStyle(Style.alert), Height(LabelHeight));
             if (selectedPreset.SAINVersion != AssemblyInfoClass.SAINPresetVersion)
             {
                 GUI.Box(rect, content, GetStyle(Style.alert));
-                //Box(content, GetStyle(Style.alert), Height(LabelHeight + 5));
             }
             else
             {

@@ -142,7 +142,7 @@ namespace SAIN.SAINComponent.Classes
         {
             if (_nextCheckSearchTime < Time.time)
             {
-                _nextCheckSearchTime = Time.time + 1f;
+                _nextCheckSearchTime = Time.time + 0.25f;
                 Vector3? destination = SearchMovePos(out bool hasTarget);
                 if (destination == null)
                 {
@@ -152,7 +152,7 @@ namespace SAIN.SAINComponent.Classes
                 {
                     _canStartSearch = false;
                 }
-                else if (CalculatePath(destination.Value) == NavMeshPathStatus.PathComplete)
+                else if (CalculatePath(destination.Value) != NavMeshPathStatus.PathInvalid)
                 {
                     _canStartSearch = true;
                     FinalDestination = destination.Value;
@@ -195,7 +195,7 @@ namespace SAIN.SAINComponent.Classes
                 Vector3? newTarget = SearchMovePos(out bool hasTarget, true);
                 
                 if (newTarget != null
-                    && CalculatePath(newTarget.Value) == NavMeshPathStatus.PathComplete)
+                    && CalculatePath(newTarget.Value) != NavMeshPathStatus.PathInvalid)
                 {
                     SearchedTargetPosition = false;
                     _finishedSearchPath = false;
@@ -213,7 +213,7 @@ namespace SAIN.SAINComponent.Classes
                 if (newTarget != null
                     && hasTarget 
                     && (newTarget.Value - FinalDestination).sqrMagnitude > 2f * 2f
-                    && CalculatePath(newTarget.Value) == NavMeshPathStatus.PathComplete)
+                    && CalculatePath(newTarget.Value) != NavMeshPathStatus.PathInvalid)
                 {
                     SearchedTargetPosition = false;
                     _finishedSearchPath = false;
@@ -257,8 +257,7 @@ namespace SAIN.SAINComponent.Classes
                     {
                         EnemyPlace enemyPlace = knownPlaces[i];
                         if (enemyPlace != null 
-                            && !enemyPlace.HasArrivedPersonal 
-                            && !enemyPlace.HasArrivedSquad)
+                            && !enemyPlace.HasArrivedPersonal)
                         {
                             hasTarget = true;
                             return enemyPlace.Position;
@@ -636,10 +635,10 @@ namespace SAIN.SAINComponent.Classes
 
             Reset();
 
-            if (NavMesh.SamplePosition(point, out var hit, 10f, -1))
+            if (NavMesh.SamplePosition(point, out var hit, 10f, -1) && NavMesh.SamplePosition(Start, out var hit2, 1f, -1))
             {
                 Path = new NavMeshPath();
-                if (NavMesh.CalculatePath(Start, hit.position, -1, Path))
+                if (NavMesh.CalculatePath(hit2.position, hit.position, -1, Path))
                 {
                     ReachDistance = reachDist > 0 ? reachDist : 0.5f;
                     FinalDestination = hit.position;

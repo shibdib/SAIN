@@ -344,6 +344,12 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             {
                 return true;
             }
+            if (_excludedColliderNames.Contains(collider.transform?.parent?.name))
+            {
+                //Logger.LogInfo($"Filtered collider.transform?.parent?.name [{collider.transform?.parent?.name}]");
+                return true;
+            }
+            return false;
             if (_excludedColliderNames.Contains(collider.name))
             {
                 Logger.LogInfo($"Filtered collider.name [{collider.name}]");
@@ -362,11 +368,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             if (_excludedColliderNames.Contains(collider.transform?.name))
             {
                 Logger.LogInfo($"Filtered collider.transform?.name [{collider.transform?.name}]");
-                return true;
-            }
-            if (_excludedColliderNames.Contains(collider.transform?.parent?.name))
-            {
-                Logger.LogInfo($"Filtered collider.transform?.parent?.name [{collider.transform?.parent?.name}]");
                 return true;
             }
             if (_excludedColliderNames.Contains(collider.transform?.parent?.gameObject?.name))

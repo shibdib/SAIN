@@ -211,7 +211,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         }
 
         // How long a bot will look in the direction they were shot from instead of other places
-        private readonly float Steer_LastHitTime = 2f;
+        private readonly float Steer_LastHitTime = 1f;
         // How long a bot will look at where they last saw an enemy instead of something they hear
         private readonly float Steer_TimeSinceLocationKnown_Threshold = 8f;
         // How long a bot will look at where they last saw an enemy instead of something they hear

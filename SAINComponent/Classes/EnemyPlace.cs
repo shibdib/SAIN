@@ -25,17 +25,51 @@ namespace SAIN.SAINComponent.Classes
                 {
                     return true;
                 }
-                if (HasArrivedPersonal && HasSeenPersonal)
+                if (HasArrivedPersonal 
+                    && HasSeenPersonal 
+                    && Time.time - TimeArrived > 2f
+                    && Time.time - TimeSeen > 2f)
                 {
                     return true;
                 }
-                if (HasArrivedSquad && HasSquadSeen)
+                if (HasArrivedSquad
+                    && HasSquadSeen
+                    && Time.time - TimeSquadArrived > 2f 
+                    && Time.time - TimeSquadSeen > 2f)
                 {
                     return true;
                 }
-                return Player?.HealthController?.IsAlive == true;
+                if (Player?.HealthController?.IsAlive != true)
+                {
+                    return true;
+                }
+                if (playerLeftArea)
+                {
+                    return true;
+                }
+                return false;
             }
         }
+
+        private bool playerLeftArea
+        {
+            get
+            {
+                if (_nextCheckLeaveTime < Time.time)
+                {
+                    _nextCheckLeaveTime = Time.time + 5f;
+                    // If the person this place was created for is AI and left the area, just forget it and move on.
+                    if (Player?.IsAI == true
+                        && (Player.Position - Position).sqrMagnitude > 75f * 75f)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        private float _nextCheckLeaveTime;
 
         public Vector3 Position
         {

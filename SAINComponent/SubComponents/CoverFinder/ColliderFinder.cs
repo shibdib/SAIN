@@ -64,7 +64,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     if (_nextLogTime < Time.time)
                     {
                         _nextLogTime = Time.time + 1f;
-                        Logger.LogInfo($"Found enough colliders in Layer: [{layer.MaskToString()}] after [{totalIterations}] total iterations");
+                        //Logger.LogInfo($"Found enough colliders in Layer: [{layer.MaskToString()}] after [{totalIterations}] total iterations");
                     }
                     break;
                 }
