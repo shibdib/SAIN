@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
@@ -63,6 +64,46 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
         }
 
+        private bool shallDogfight()
+        {
+            if (CurrentSoloDecision == SoloDecision.DogFight 
+                && DogFightTarget != null)
+            {
+                return (!DogFightTarget.IsVisible && DogFightTarget.TimeSinceSeen > 2f)
+                    || DogFightTarget.RealDistance > _dogFightEndDist;
+            }
+            DogFightTarget = findDogFightTarget();
+            return DogFightTarget != null;
+        }
+
+        private SAINEnemy findDogFightTarget()
+        {
+            var enemies = SAIN.EnemyController.Enemies;
+            foreach (var enemy in enemies)
+            {
+                if (enemy.Value.IsValid && shallDogFightEnemy(enemy.Value))
+                {
+                    return enemy.Value;
+                }
+            }
+            return null;
+        }
+
+        public SAINEnemy DogFightTarget { get; set; }
+
+        private bool shallDogFightEnemy(SAINEnemy enemy)
+        {
+            if (CurrentSoloDecision == SoloDecision.DogFight)
+            {
+                return (!enemy.IsVisible && enemy.Seen && enemy.TimeSinceSeen > 2f)
+                    && enemy.RealDistance > _dogFightEndDist;
+            }
+            return enemy.IsVisible && enemy.RealDistance < _dogFightStartDist;
+        }
+
+        private float _dogFightStartDist = 8f;
+        private float _dogFightEndDist = 12f;
+
         private float _nextGetDecisionTime;
         private const float getDecisionFreq = 0.0f;
         private const float getDecisionFreqAtPeace = 0.25f;
@@ -98,6 +139,12 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private void GetDecision()
         {
+            if (shallDogfight())
+            {
+                UpdateDecisionProperties(SoloDecision.DogFight, SquadDecision.None, SelfDecision.None);
+                return;
+            }
+
             if (CheckContinueRetreat())
             {
                 return;

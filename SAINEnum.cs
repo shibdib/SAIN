@@ -16,7 +16,6 @@ namespace SAIN
         Shoot,
         MoveToCover,
         StandAndShoot,
-        Investigate,
         ThrowGrenade,
         ShiftCover,
         RushEnemy,

@@ -169,7 +169,7 @@ namespace SAIN.SAINComponent.Classes.Debug
             {
                 Vector3 currentPosition = SAIN.Position;
                 Vector3 lookDirection = SAIN.Transform.LookDirection;
-                Vector3 headPosition = SAIN.Transform.Head;
+                Vector3 headPosition = SAIN.Transform.HeadPosition;
 
                 const int max = 40;
                 const float rotationAngle = 360f / (float)max;

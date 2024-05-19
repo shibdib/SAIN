@@ -298,7 +298,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (lastKnownPlace != null)
             {
                 Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
-                if (blindCornerToEnemy != null && (blindCornerToEnemy.Value - SAIN.Transform.Head).sqrMagnitude > 1f)
+                if (blindCornerToEnemy != null && (blindCornerToEnemy.Value - SAIN.Transform.HeadPosition).sqrMagnitude > 1f)
                 {
                     LookToPoint(blindCornerToEnemy.Value);
                     return true;
@@ -363,7 +363,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 direction.y = 0f;
             }
-            Vector3 pos = SAIN.Transform.Head + direction;
+            Vector3 pos = SAIN.Transform.HeadPosition + direction;
             LookToPoint(pos, rotateSpeed);
         }
 
@@ -492,7 +492,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 if (LookRandom)
                 {
                     var Mask = LayerMaskClass.HighPolyWithTerrainMask;
-                    var headPos = SAIN.Transform.Head;
+                    var headPos = SAIN.Transform.HeadPosition;
                     float pointDistance = 0f;
                     for (int i = 0; i < 10; i++)
                     {

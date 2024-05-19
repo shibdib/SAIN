@@ -187,29 +187,22 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void Say(EPhraseTrigger trigger, bool demand = false, float delay = 0f, ETagStatus mask = (ETagStatus)0, int probability = 100, bool aggressive = false)
         {
+            if (Player?.HealthController?.IsAlive != true)
+            {
+                return;
+            }
             if (trigger == EPhraseTrigger.MumblePhrase)
             {
                 trigger = ((aggressive || Time.time < Player.Awareness) ? EPhraseTrigger.OnFight : EPhraseTrigger.OnMutter);
             }
             if (!Player.Speaker.OnDemandOnly || demand)
             {
-                if (Singleton<BotEventHandler>.Instantiated)
-                {
-                    //Singleton<BotEventHandler>.Instance.SayPhrase(Player, trigger);
-                }
                 if (demand || probability > 99 || probability > UnityEngine.Random.Range(0, 100))
                 {
                     ETagStatus etagStatus = (aggressive || Player.Awareness > Time.time) ? ETagStatus.Combat : ETagStatus.Unaware;
-
                     SAINPlugin.BotController?.PlayerTalk?.Invoke(trigger, etagStatus, Player);
                     BotOwner.BotsGroup.GroupTalk.PhraseSad(BotOwner, trigger);
                     PersonalPhraseDict[trigger].TimeLastSaid = Time.time;
-
-                    if (delay > 0f)
-                    {
-                        Player.Speaker.Queue(trigger, SAIN.Memory.HealthStatus | mask | etagStatus, delay, demand);
-                        return;
-                    }
                     Player.Speaker.Play(trigger, SAIN.Memory.HealthStatus | mask | etagStatus, demand, null);
                 }
             }

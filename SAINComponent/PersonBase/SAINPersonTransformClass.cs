@@ -9,6 +9,8 @@ namespace SAIN.SAINComponent.BaseClasses
         public SAINPersonTransformClass(SAINPersonClass person)
         {
             Person = person;
+            _headPart = person.IPlayer.MainParts[BodyPartType.head];
+            _bodyPart = person.IPlayer.MainParts[BodyPartType.body];
         }
 
         public void Update()
@@ -20,48 +22,11 @@ namespace SAIN.SAINComponent.BaseClasses
         public BifacialTransform DefaultTransform => Person?.IPlayer?.Transform;
         public Vector3 Position => !TransformNull ? DefaultTransform.position : Vector3.zero;
         public Vector3 LookDirection => !TransformNull ? Person.IPlayer.LookDirection : Vector3.zero;
-
         public Vector3 Direction(Vector3 start) => !TransformNull ? Position - start : Vector3.zero;
+        public Vector3 HeadPosition => _headPart.Position;
+        public Vector3 CenterPosition => _bodyPart.Position;
 
-        public Vector3 WeaponRootPosition => WeaponRoot != null ? WeaponRoot.position : Vector3.zero;
-        public BifacialTransform WeaponRoot => Person.Player?.WeaponRoot;
-
-        public Vector3 Forward => !TransformNull ? DefaultTransform.forward : Vector3.zero;
-        public Vector3 Back => -Forward;
-        public Vector3 Right => !TransformNull ? DefaultTransform.right : Vector3.zero;
-        public Vector3 Left => -Right;
-        public Vector3 Up => !TransformNull ? DefaultTransform.up : Vector3.zero;
-        public Vector3 Down => -Up;
-        public Vector3 Head => PartPosition(BodyPartType.head);
-        public Vector3 Chest => PartPosition(BodyPartType.body);
-        public Vector3 Stomach => PartPosition(PlayerBoneType.Pelvis);
-
-        public Dictionary<BodyPartType, EnemyPart> MainParts => Person.IPlayer?.MainParts;
-
-        public Dictionary<PlayerBoneType, BifacialTransform> AllParts => Person.IPlayer?.PlayerBones?.BifacialTransforms;
-
-        public Vector3 PartPosition(BodyPartType part)
-        {
-            if (MainParts != null && MainParts.ContainsKey(part))
-            {
-                return MainParts[part].Position;
-            }
-            else
-            {
-                return Position;
-            }
-        }
-
-        public Vector3 PartPosition(PlayerBoneType part)
-        {
-            if (AllParts != null && AllParts.ContainsKey(part))
-            {
-                return AllParts[part].position;
-            }
-            else
-            {
-                return Position;
-            }
-        }
+        private EnemyPart _headPart;
+        private EnemyPart _bodyPart;
     }
 }

@@ -181,7 +181,7 @@ namespace SAIN.Layers.Combat.Solo
             {
                 LookPoint = Vector3.zero;
                 CheckSeeTimer = Time.time + 0.5f;
-                var headPosition = SAIN.Transform.Head;
+                var headPosition = SAIN.Transform.HeadPosition;
 
                 var canSeePoint = !Vector.Raycast(headPosition,
                     Search.SearchMovePoint.DangerPoint,

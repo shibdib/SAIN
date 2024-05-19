@@ -33,19 +33,19 @@ namespace SAIN.SAINComponent.Classes
             {
                 if (EnemyPerson?.PlayerNull == true)
                 {
-                    //Logger.LogDebug("Enemy Player is Null. Removing...");
+                    Logger.LogDebug("Enemy Player is Null. Removing...");
                     return false;
                 }
                 // Redundant Checks
                 // Common checks between PMC and bots
                 if (EnemyPlayer == null)
                 {
-                    //Logger.LogDebug("Enemy is Null. Removing...");
+                    Logger.LogDebug("Enemy is Null. Removing...");
                     return false;
                 }
-                if (EnemyPlayer?.HealthController?.IsAlive != true)
+                if (EnemyPlayer?.HealthController?.IsAlive == false)
                 {
-                    //Logger.LogDebug("Enemy is Dead. Removing...");
+                    Logger.LogDebug("Enemy is Dead. Removing...");
                     return false;
                 }
                 // Checks specific to bots
@@ -342,8 +342,8 @@ namespace SAIN.SAINComponent.Classes
 
         public Vector3 EnemyPosition => EnemyTransform.Position;
         public Vector3 EnemyDirection => EnemyTransform.Direction(SAIN.Transform.Position);
-        public Vector3 EnemyHeadPosition => EnemyTransform.Head;
-        public Vector3 EnemyChestPosition => EnemyTransform.Chest;
+        public Vector3 EnemyHeadPosition => EnemyTransform.HeadPosition;
+        public Vector3 EnemyChestPosition => EnemyTransform.CenterPosition;
 
         // Look Properties
         public bool InLineOfSight => Vision.InLineOfSight;

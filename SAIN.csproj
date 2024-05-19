@@ -279,6 +279,7 @@
     <Compile Include="Helpers\SAINWeaponInfo.cs" />
     <Compile Include="Helpers\SAINGearInfoHandler.cs" />
     <Compile Include="Helpers\UpdateSettingClass.cs" />
+    <Compile Include="Layers\Combat\Solo\SAINDogFightLayer.cs" />
     <Compile Include="Layers\Combat\Solo\Cover\DoSurgeryAction.cs" />
     <Compile Include="Layers\Combat\Solo\FlankAction.cs" />
     <Compile Include="Layers\Combat\Squad\FollowSearchParty.cs" />
@@ -340,7 +341,6 @@
     <Compile Include="SAINComponent\Classes\Sense\SAINSound.cs" />
     <Compile Include="SAINComponent\Classes\Sense\SAINSoundCollection.cs" />
     <Compile Include="SAINComponent\PersonBase\ISAINPerson.cs" />
-    <Compile Include="SAINComponent\PersonBase\SAINPersonComponent.cs" />
     <Compile Include="SAINComponent\PersonBase\SAINPersonClass.cs" />
     <Compile Include="SAINComponent\PersonBase\SAINPersonTransformClass.cs" />
     <Compile Include="SAINComponent\Classes\SAINMemoryClass.cs" />
@@ -425,7 +425,6 @@
     <Compile Include="BotController\Classes\WeatherVisionClass.cs" />
     <Compile Include="BotController\Classes\TimeClass.cs" />
     <Compile Include="SAINComponent\Classes\Sense\SAINVisionClass.cs" />
-    <Compile Include="Layers\Combat\Solo\InvestigateAction.cs" />
     <Compile Include="BotController\BotControllerAbstract.cs" />
     <Compile Include="BotController\SAINBotControllerComponent.cs" />
     <Compile Include="BotController\Classes\DecisionManager.cs" />

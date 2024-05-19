@@ -101,9 +101,6 @@ namespace SAIN.Layers.Combat.Solo
                 case SoloDecision.UnstuckSearch:
                     return new Action(typeof(SearchAction), $"{Decision}");
 
-                case SoloDecision.Investigate:
-                    return new Action(typeof(InvestigateAction), $"{Decision}");
-
                 default:
                     return new Action(typeof(StandAndShootAction), $"DEFAULT! {Decision}");
             }

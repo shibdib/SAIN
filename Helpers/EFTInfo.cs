@@ -51,7 +51,6 @@ namespace SAIN.Helpers
         public static bool Compare(Player A, Player B) => Compare(A?.ProfileId, B?.ProfileId);
         public static bool Compare(Player A, string B) => Compare(A?.ProfileId, B);
         public static bool Compare(string A, Player B) => Compare(A, B);
-
         public static bool Compare(string A, string B) => A == B;
 
         public static GameWorld GameWorld => Singleton<GameWorld>.Instance;

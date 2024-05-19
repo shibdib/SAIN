@@ -84,7 +84,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             var grenadePos = SAIN.Grenade.GrenadeDangerPoint; 
             if (grenadePos != null)
             {
-                Vector3 headPos = SAIN.Transform.Head;
+                Vector3 headPos = SAIN.Transform.HeadPosition;
                 Vector3 direction = grenadePos.Value - headPos;
                 if (!Physics.Raycast(headPos, direction.normalized, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
                 {

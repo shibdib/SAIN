@@ -88,7 +88,7 @@ namespace SAIN.Layers.Combat.Squad
             else if (_nextCheckVisTime < Time.time)
             {
                 _nextCheckVisTime = Time.time + 0.5f;
-                Vector3 myHead = SAIN.Transform.Head;
+                Vector3 myHead = SAIN.Transform.HeadPosition;
                 _canSeeSuppTarget = !Physics.Raycast(myHead, target.Value - myHead, (target.Value - myHead).magnitude * 0.8f);
             }
             return _canSeeSuppTarget;

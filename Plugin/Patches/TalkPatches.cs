@@ -48,11 +48,11 @@ namespace SAIN.Patches.Talk
                 SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
                 return true;
             }
-            else if (SAINPlugin.GetSAIN(__instance.AIData.BotOwner, out _, nameof(PlayerTalkPatch)))
+            if (SAINPlugin.IsBotExluded(__instance.AIData.BotOwner))
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
     }
 
@@ -75,11 +75,11 @@ namespace SAIN.Patches.Talk
             {
                 return false;
             }
-            if (SAINPlugin.GetSAIN(___botOwner_0, out _, nameof(BotTalkPatch)))
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
     }
 
@@ -101,11 +101,11 @@ namespace SAIN.Patches.Talk
             {
                 return true;
             }
-            if (SAINPlugin.GetSAIN(___botOwner_0, out _, nameof(BotTalkPatch)))
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
     }
 }

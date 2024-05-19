@@ -22,6 +22,7 @@ namespace SAIN.Components
     {
         public Action<SAINSoundType, Vector3, Player, float> AISoundPlayed { get; set; }
         public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; set; }
+        public Action<Vector3> BulletImpact { get; set; }
 
         public Dictionary<string, SAINComponentClass> Bots => BotSpawnController.Bots;
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;

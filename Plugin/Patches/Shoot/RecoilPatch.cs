@@ -43,42 +43,14 @@ namespace SAIN.Patches.Shoot
             Vector3 finalOffset = badShootOffset + (aimUpgradeByTime * (aimOffset + recoilOffset));
 
             IPlayer person = ___botOwner_0?.Memory?.GoalEnemy?.Person;
-
-            if (person != null)
+            if (person != null && SAINPlugin.LoadedPreset.GlobalSettings.General.NotLookingToggle)
             {
-                if (SAINPlugin.LoadedPreset.GlobalSettings.General.HeadShotProtection 
-                    && !person.IsAI)
-                {
-                    realTargetPoint = FindCenterMass(person);
-                    finalOffset += CheckHeadShotOffset(finalOffset, realTargetPoint, ___botOwner_0, person);
-                }
-
-                if (SAINPlugin.LoadedPreset.GlobalSettings.General.NotLookingToggle)
-                {
-                    finalOffset += NotLookingOffset(person, ___botOwner_0);
-                }
+                finalOffset += NotLookingOffset(person, ___botOwner_0);
             }
 
             _endTargetPointProp.SetValue(___botOwner_0.AimingData, realTargetPoint + finalOffset);
             return false;
         }
-
-        private static Vector3 FindCenterMass(IPlayer person)
-        {
-            Vector3 headPos = person.MainParts[BodyPartType.head].Position;
-            Vector3 floorPos = person.Position;
-            Vector3 centerMass = Vector3.Lerp(headPos, floorPos, 0.3125f);
-
-            if (person.IsYourPlayer && SAINPlugin.DebugMode && _debugCenterMassTimer < Time.time)
-            {
-                _debugCenterMassTimer = Time.time + 1f;
-                DebugGizmos.Sphere(centerMass, 0.1f, 5f);
-            }
-
-            return centerMass;
-        }
-
-        private static float _debugCenterMassTimer;
 
         private static Vector3 NotLookingOffset(IPlayer person, BotOwner botOwner)
         {
@@ -98,73 +70,6 @@ namespace SAIN.Patches.Shoot
             }
             return Vector3.zero;
         }
-
-        private static Vector3 CheckHeadShotOffset(Vector3 finalOffset, Vector3 realTargetPoint, BotOwner botOwner, IPlayer person)
-        {
-            if (person.IsAI == true)
-            {
-                return Vector3.zero;
-            }
-
-            // Get the head position of a bot's current enemy if it exists
-            Vector3 headPos = person.MainParts[BodyPartType.head].Position;
-            // Check the Distance to the bot's aiming target, and see if its really close or on the player's head
-            Vector3 headDirection = headPos - realTargetPoint;
-            Vector3 offsetDirection = finalOffset;
-
-            // Is the aim offset in the same direction as the player's head?
-            float dot = Vector3.Dot(headDirection.normalized, offsetDirection.normalized);
-            if (dot > 0.9f 
-                && headDirection.sqrMagnitude * 0.8f < offsetDirection.sqrMagnitude)
-            {
-                // Shift the aim target if it was going to be a headshot
-                Quaternion rotation = Quaternion.Euler(0f, 90f, 0f);
-                Vector3 direction = headPos - botOwner.WeaponRoot.position;
-                Vector3 offsetResult = rotation * direction.normalized * 0.25f;
-
-                if (EFTMath.RandomBool())
-                {
-                    offsetResult = -offsetResult;
-                }
-
-                if (person.IsYourPlayer)
-                {
-                    if (SAINPlugin.DebugMode)
-                    {
-                        string debugString = $"Head Protection Active: Dot Product: [{dot}]";
-                        SAIN.Logger.NotifyDebug(debugString);
-                        SAIN.Logger.LogDebug(debugString);
-
-                        if (debugHeadShotOffsetObject == null)
-                        {
-                            Color color = DebugGizmos.RandomColor;
-                            debugHeadShotOffsetObject = DebugGizmos.Sphere(offsetResult + headPos, 0.05f, color, false);
-                            debugHeadObject = DebugGizmos.Sphere(headPos, 0.05f, Color.red, false);
-                            debugHeadLineObject = DebugGizmos.Line(headPos, offsetResult + headPos, color, 0.025f, false);
-                        }
-                        else
-                        {
-                            DebugGizmos.UpdatePositionLine(headPos, offsetResult + headPos, debugHeadLineObject);
-                            debugHeadObject.transform.position = headPos;
-                            debugHeadShotOffsetObject.transform.position = offsetResult + headPos;
-                        }
-                    }
-                    else if (debugHeadShotOffsetObject != null)
-                    {
-                        GameObject.Destroy(debugHeadShotOffsetObject);
-                        GameObject.Destroy(debugHeadObject);
-                        GameObject.Destroy(debugHeadLineObject);
-                    }
-                }
-
-                return offsetResult;
-            }
-            return Vector3.zero;
-        }
-
-        private static GameObject debugHeadShotOffsetObject;
-        private static GameObject debugHeadObject;
-        private static GameObject debugHeadLineObject;
     }
 
     public class RecoilPatch : ModulePatch

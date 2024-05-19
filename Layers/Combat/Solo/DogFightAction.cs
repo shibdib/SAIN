@@ -26,49 +26,7 @@ namespace SAIN.Layers.Combat.Solo
             SAIN.Mover.SetTargetPose(1f);
             SAIN.Mover.SetTargetMoveSpeed(1f);
             SAIN.Steering.SteerByPriority(false);
-
-            SAINEnemy enemy = SAIN.Enemy;
-            if (enemy == null)
-            {
-                if (UpdateMovementTimer < Time.time)
-                {
-                    if (SAIN.Cover.ClosestPoint != null)
-                    {
-                        UpdateMovementTimer = Time.time + 0.25f;
-                        BotOwner.GoToPoint(SAIN.Cover.ClosestPoint.Position, true, -1, false, false, false, true);
-                    }
-                    else if (BackUpNoEnemy(out Vector3 noEnemyMovePos))
-                    {
-                        UpdateMovementTimer = Time.time + 0.25f;
-                        BotOwner.GoToPoint(noEnemyMovePos, true, -1, false, false, false, true);
-                    }
-                    else
-                    {
-                        UpdateMovementTimer = Time.time + 0.1f;
-                    }
-                }
-                return;
-            }
-            bool EnemyVisible = enemy.IsVisible;
-
-            if (UpdateMovementTimer < Time.time)
-            {
-                UpdateMovementTimer = Time.time + 0.35f;
-                if (EnemyVisible 
-                    && BackUp(out var pos))
-                {
-                    BotOwner.GoToPoint(pos, true, -1, false, false, false, true);
-                }
-                else if (!EnemyVisible 
-                    && CheckMoveToEnemyTimer < Time.time
-                    && enemy.Path.PathToEnemyStatus == NavMeshPathStatus.PathComplete 
-                    && (enemy.EnemyPosition - BotOwner.Position).sqrMagnitude > 2f)
-                {
-                    CheckMoveToEnemyTimer = Time.time + 1f;
-                    BotOwner.MoveToEnemyData.TryMoveToEnemy(enemy.EnemyPosition);
-                }
-            }
-
+            SAIN.Mover.DogFight.DogFightMove();
             Shoot.Update();
         }
 

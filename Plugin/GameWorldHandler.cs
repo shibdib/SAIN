@@ -10,6 +10,12 @@ namespace SAIN
     {
         public static void Update()
         {
+            InitSAINGameWorld();
+            SAINGearInfoHandler.Update();
+        }
+
+        public static void InitSAINGameWorld()
+        {
             var gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld == null && SAINGameWorld != null)
             {
@@ -17,14 +23,8 @@ namespace SAIN
             }
             else if (gameWorld != null && SAINGameWorld == null)
             {
-                ELocation location = FindLocation();
-                if (location != ELocation.None)
-                {
-                    SAINGameWorld = gameWorld.GetOrAddComponent<SAINGameworldComponent>();
-                }
+                SAINGameWorld = gameWorld.GetOrAddComponent<SAINGameworldComponent>();
             }
-
-            SAINGearInfoHandler.Update();
         }
 
         public static ELocation FindLocation()

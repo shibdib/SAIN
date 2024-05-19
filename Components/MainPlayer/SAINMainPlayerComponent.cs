@@ -16,18 +16,13 @@ namespace SAIN.Components
     {
         public void Awake()
         {
-            if (SAINPersonComponent.TryAddSAINPersonToPlayer(MainPlayer, out var component))
-            {
-                SAINPersonComponent = component;
-                SAINPerson = component.SAINPerson;
-            }
+            SAINPerson = new SAINPersonClass(MainPlayer);
             MainPlayerLight = MainPlayer.GetOrAddComponent<SAINFlashLightComponent>();
             CamoClass = new SAINCamoClass(this);
         }
 
         public SAINCamoClass CamoClass { get; private set; }
         public SAINPersonClass SAINPerson { get; private set; }
-        public SAINPersonComponent SAINPersonComponent { get; private set; }
         public SAINFlashLightComponent MainPlayerLight { get; private set; }
 
         private void Start()
@@ -94,7 +89,7 @@ namespace SAIN.Components
             places.Clear();
             for (int i = 0; i < iterationMax; i++)
             {
-                Vector3 start = SAINPerson.Transform.Head;
+                Vector3 start = SAINPerson.Transform.HeadPosition;
                 Vector3 randomDirection = UnityEngine.Random.onUnitSphere;
                 randomDirection.y = UnityEngine.Random.Range(-yVal, yVal);
                 float distance = UnityEngine.Random.Range(minPointDist, maxPointDist);
@@ -144,7 +139,6 @@ namespace SAIN.Components
         {
             try
             {
-                ComponentHelpers.DestroyComponent(SAINPersonComponent);
                 ComponentHelpers.DestroyComponent(MainPlayerLight);
                 Destroy(this);
             }

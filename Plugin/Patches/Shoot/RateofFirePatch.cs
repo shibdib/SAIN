@@ -94,17 +94,6 @@ namespace SAIN.Patches.Shoot
 
             float timeToAimResultClamped = Mathf.Clamp(timeToAimResult, 0f, fileSettings.Aiming.MAX_AIM_TIME);
 
-            //StringBuilder debugString = new StringBuilder();
-            //debugString.AppendLine($"Calculated Aim at Distance: [{distance}] Angle: [{angle}] for Bot: [{botOwner.name}]");
-            //debugString.AppendLine($"Base Aim Time: [{baseAimTime}] InCover?: [{botOwner.Memory.IsInCover}] Cover Aim Modifier: [{fileSettings.Aiming.COEF_FROM_COVER}]");
-            //debugString.AppendLine($"Calculated Aim Time: [{calculatedAimTime}] Angle Time: [{angleTime}] Distance Time: [{distanceTime}] Panicing? [{panicing}] PANIC_COEF: [{fileSettings.Aiming.PANIC_COEF}]");
-            //debugString.AppendLine($"Time To Aim Result: [{timeToAimResult}] Moving?: [{moving}] COEF_IF_MOVE: [{fileSettings.Aiming.COEF_IF_MOVE}]");
-            //debugString.AppendLine($"Time To Aim Clamped: [{timeToAimResultClamped}] MAX_AIM_TIME: [{fileSettings.Aiming.MAX_AIM_TIME}]");
-            //
-            //string debugResult = debugString.ToString();
-            //Logger.LogWarning( debugResult );
-            //NotificationManagerClass.DisplayWarningNotification(debugResult, EFT.Communications.ENotificationDurationType.Long);
-
             return timeToAimResultClamped;
         }
     }

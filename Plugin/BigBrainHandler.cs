@@ -79,6 +79,7 @@ namespace SAIN
 
                 //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
                 BrainManager.AddCustomLayer(typeof(BotRunLayer), stringList, 99);
+                BrainManager.AddCustomLayer(typeof(SAINDogFightLayer), stringList, 80); 
                 BrainManager.AddCustomLayer(typeof(ExtractLayer), stringList, settings.SAINExtractLayerPriority);
                 BrainManager.AddCustomLayer(typeof(CombatSquadLayer), stringList, settings.SAINCombatSquadLayerPriority);
                 BrainManager.AddCustomLayer(typeof(CombatSoloLayer), stringList, settings.SAINCombatSoloLayerPriority);
@@ -93,9 +94,10 @@ namespace SAIN
                 var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
 
                 BrainManager.AddCustomLayer(typeof(BotRunLayer), goons, 99);
-                //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), goons, 98);
+                BrainManager.AddCustomLayer(typeof(SAINDogFightLayer), goons, 80);
                 BrainManager.AddCustomLayer(typeof(CombatSquadLayer), goons, 64);
                 BrainManager.AddCustomLayer(typeof(CombatSoloLayer), goons, 62);
+                BrainManager.RemoveLayers(LayersToRemove, goons);
             }
 
             private static readonly List<string> goons = new List<string>()

@@ -5,6 +5,7 @@ using DrakiaXYZ.VersionChecker;
 using EFT;
 using HarmonyLib;
 using SAIN.Components;
+using SAIN.Components.BotController;
 using SAIN.Editor;
 using SAIN.Helpers;
 using SAIN.Layers;
@@ -34,6 +35,11 @@ namespace SAIN
     [BepInIncompatibility("com.dvize.NoGrenadeESP")]
     public class SAINPlugin : BaseUnityPlugin
     {
+        public static bool IsBotExluded(BotOwner botOwner)
+        {
+            return BotSpawnController.ExclusionList.Contains(botOwner.Profile.Info.Settings.Role);
+        }
+
         public static bool GetSAIN(BotOwner botOwner, out SAINComponentClass sain, string patchName)
         {
             sain = null;

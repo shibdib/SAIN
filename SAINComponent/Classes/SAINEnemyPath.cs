@@ -130,7 +130,7 @@ namespace SAIN.SAINComponent.Classes
                 LastCornerToEnemy = lastCorner;
 
                 Vector3 cornerRay = lastCorner + Vector3.up * 1f;
-                Vector3 headPos = SAIN.Transform.Head;
+                Vector3 headPos = SAIN.Transform.HeadPosition;
                 Vector3 direction = cornerRay - headPos;
 
                 CanSeeLastCornerToEnemy = !Physics.Raycast(headPos, direction.normalized, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask);

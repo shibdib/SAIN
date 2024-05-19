@@ -27,7 +27,7 @@ namespace SAIN.Components.BotController
         public Dictionary<string, SAINComponentClass> SAINBotDictionary = new Dictionary<string, SAINComponentClass>();
         private BotSpawner BotSpawner => BotController?.BotSpawner;
 
-        private static readonly WildSpawnType[] ExclusionList =
+        public static readonly List<WildSpawnType> ExclusionList = new List<WildSpawnType>
         {
             WildSpawnType.bossZryachiy,
             WildSpawnType.followerZryachiy,
@@ -206,10 +206,6 @@ namespace SAIN.Components.BotController
 
                     if (ExclusionList.Contains(settings.Role))
                     {
-                        if (SAINPersonComponent.TryAddSAINPersonToBot(botOwner, out var personComponent) == false)
-                        {
-                            Logger.LogError("Could not add SAINPerson to bot");
-                        }
                         AddNoBushESP(botOwner);
                         return;
                     }
@@ -256,10 +252,6 @@ namespace SAIN.Components.BotController
                     if (botOwner.TryGetComponent(out SAINNoBushESP noBush))
                     {
                         UnityEngine.Object.Destroy(noBush);
-                    }
-                    if (botOwner.GetPlayer?.gameObject?.TryGetComponent(out SAINPersonComponent person) == true)
-                    {
-                        UnityEngine.Object.Destroy(person);
                     }
                 }
                 else

@@ -399,10 +399,6 @@ namespace SAIN.SAINComponent.Classes
                         HeardPlacesPersonal.RemoveAt(HeardPlacesPersonal.Count - 1);
                     }
                 }
-                if (!_enemy.EnemyPlayer.IsAI && _allEnemyPlaces.Count > 0)
-                {
-                    //Logger.LogDebug($"[{_allEnemyPlaces.Count}] Enemy Places Count for [{_enemy.BotOwner?.name}]");
-                }
             }
         }
 

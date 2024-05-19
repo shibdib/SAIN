@@ -46,6 +46,24 @@ namespace SAIN.Patches.Generic
         }
     }
 
+    public class BulletImpactSuppressionPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(SmallPhysicsObject), "OnCollisionHandler");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(Transform ___transform, Vector3 ___vector3_0)
+        {
+            if (SAINPlugin.BotController != null)
+            {
+                Vector3 position = ___transform.position + ___vector3_0;
+                SAINPlugin.BotController.BulletImpact?.Invoke(position);
+                Logger.LogInfo("Bullet Impact");
+            }
+        }
+    }
     public class StopSetToNavMeshPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -76,21 +94,6 @@ namespace SAIN.Patches.Generic
         {
             // Try to turn a gun's light off before swapping weapon.
             ___botOwner_0?.BotLight?.TurnOff(false, true);
-        }
-    }
-
-    public class IsSameWayPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(PathControllerClass), "IsSameWay", new[] { typeof(Vector3), typeof(Vector3) });
-        }
-
-        [PatchPrefix]
-        public static bool PatchPrefix(ref bool __result)
-        {
-            __result = false;
-            return false;
         }
     }
 
@@ -260,6 +263,10 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
+            if (SAINPlugin.IsBotExluded(__instance.Owner))
+            {
+                return;
+            }
             if (BotsGroupSenseRecently(__instance))
             {
                 __result = true;
@@ -284,9 +291,13 @@ namespace SAIN.Patches.Generic
         public static bool EnemySenseRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
         {
             SAINEnemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
-            var lastKnown = myEnemy?.KnownPlaces?.LastKnownPlace;
-            return lastKnown != null 
-                && lastKnown.TimeSincePositionUpdated <= sain.BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC;
+            if (myEnemy?.IsValid == true)
+            {
+                var lastKnown = myEnemy?.KnownPlaces?.LastKnownPlace;
+                return lastKnown != null
+                    && lastKnown.TimeSincePositionUpdated <= sain.BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC;
+            }
+            return false;
         }
     }
 
@@ -309,6 +320,10 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
+            if (SAINPlugin.IsBotExluded(__instance.Owner))
+            {
+                return;
+            }
             if (ShallKnowEnemyPatch.BotsGroupSenseRecently(__instance))
             {
                 __result = true;
@@ -323,11 +338,11 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0)
         {
-            if (___botOwner_0 != null && SAINPlugin.BotController.GetSAIN(___botOwner_0, out _))
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
     }
 
@@ -376,11 +391,10 @@ namespace SAIN.Patches.Generic
             Vector3 danger = Vector.DangerPoint(position, force, mass);
             foreach (BotOwner bot in __instance.Bots.BotOwners)
             {
-                if (SAINPlugin.BotController.Bots.ContainsKey(bot.ProfileId))
+                if (SAINPlugin.IsBotExluded(bot))
                 {
-                    continue;
+                    bot.BewareGrenade.AddGrenadeDanger(danger, grenade);
                 }
-                bot.BewareGrenade.AddGrenadeDanger(danger, grenade);
             }
             return false;
         }
@@ -404,13 +418,17 @@ namespace SAIN.Patches.Generic
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(BotsController).GetMethod("Init", BindingFlags.Instance | BindingFlags.Public);
+            return AccessTools.Method(typeof(BotsController), "method_0");
         }
 
         [PatchPrefix]
         public static void PatchPrefix(BotsController __instance)
         {
-            SAINPlugin.BotController.DefaultController = __instance;
+            var controller = SAINPlugin.BotController;
+            if (controller != null && controller.DefaultController == null)
+            {
+                controller.DefaultController = __instance;
+            }
         }
     }
 

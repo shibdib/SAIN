@@ -35,9 +35,7 @@ namespace SAIN.SAINComponent
 
                 // Create a new Component
                 sainComponent = gameObject.AddComponent<SAINComponentClass>();
-
-                if (SAINPersonComponent.TryAddSAINPersonToPlayer(player, out SAINPersonComponent personComponent)
-                    && sainComponent?.Init(personComponent?.SAINPerson) == true)
+                if (sainComponent?.Init(new SAINPersonClass(player)) == true)
                 {
                     return true;
                 }
@@ -237,7 +235,7 @@ namespace SAIN.SAINComponent
                 Medical.Update();
 
                 //BotOwner.DoorOpener.Update(); 
-                UpdateGoalTarget();
+                //UpdateGoalTarget();
 
                 if (_nextCheckReloadTime < Time.time)
                 {
@@ -510,29 +508,18 @@ namespace SAIN.SAINComponent
 
         private Vector3? getTarget()
         {
-            if (HasEnemy && Enemy.IsVisible)
-            {
-                return Enemy.EnemyPosition;
-            }
-            if (BotOwner.Memory.IsUnderFire)
-            {
-                return Memory.UnderFireFromPosition;
-            }
-
             if (HasEnemy)
             {
+                if (Enemy.IsVisible || (Enemy.Seen && Enemy.TimeSinceSeen < 1f))
+                {
+                    return Enemy.EnemyPosition;
+                }
                 var lastKnownPlace = Enemy.KnownPlaces.LastKnownPlace;
                 if (lastKnownPlace != null)
                 {
                     return lastKnownPlace.Position;
                 }
-
                 return Enemy.EnemyPosition;
-            }
-            var placeForCheck = BotOwner.Memory.GoalTarget?.GoalTarget;
-            if (placeForCheck != null)
-            {
-                return placeForCheck.Position;
             }
             return null;
         }

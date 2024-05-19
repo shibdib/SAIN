@@ -117,7 +117,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             Vector3 direction = targetPos - rayShoot;
             if (Physics.Raycast(rayShoot, direction, direction.magnitude, mask))
             {
-                rayShoot = SAIN.Transform.Head + Vector3.up * 0.15f;
+                rayShoot = SAIN.Transform.HeadPosition + Vector3.up * 0.15f;
                 if (!Vector.Raycast(rayShoot, targetPos, mask))
                 {
                     blindfire = 1;

@@ -1,15 +1,8 @@
-﻿using BepInEx.Logging;
-using Comfort.Common;
-using EFT;
-using SAIN.Components;
+﻿using EFT;
 using SAIN.Helpers;
-using SAIN.Preset.GlobalSettings.Categories;
-using SAIN.SAINComponent;
 using SAIN.SAINComponent.BaseClasses;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
@@ -49,22 +42,24 @@ namespace SAIN.SAINComponent.Classes
             UpdateDebug();
         }
 
-        private readonly Dictionary<string, SAINEnemy> _localEnemiesList = new Dictionary<string, SAINEnemy>();
+        private readonly List<SAINEnemy> _localAIEnemiesList = new List<SAINEnemy>();
+        private readonly List<SAINEnemy> _localHumanEnemiesList = new List<SAINEnemy>();
 
         private void UpdateEnemies()
         {
             var activeEnemy = ActiveEnemy;
-            if (activeEnemy != null)
+            if (activeEnemy?.IsValid == true)
             {
-                if (activeEnemy.IsValid)
-                {
-                    activeEnemy.Update();
-                }
+                activeEnemy.Update();
             }
             removeInvalidEnemies();
             if (_enemyUpdateCoroutine == null)
             {
-                _enemyUpdateCoroutine = SAIN.StartCoroutine(updateValidEnemies(5));
+                _enemyUpdateCoroutine = SAIN.StartCoroutine(updateValidAIEnemies(1));
+            }
+            if (_enemyHumanUpdateCoroutine == null)
+            {
+                _enemyHumanUpdateCoroutine = SAIN.StartCoroutine(updateValidHumanEnemies(1));
             }
         }
 
@@ -88,17 +83,24 @@ namespace SAIN.SAINComponent.Classes
         private readonly List<string> _idsToRemove = new List<string>();
 
         private Coroutine _enemyUpdateCoroutine;
+        private Coroutine _enemyHumanUpdateCoroutine;
 
-        private IEnumerator updateValidEnemies(int maxPerFrame)
+        private IEnumerator updateValidHumanEnemies(int maxPerFrame)
         {
             while (true)
             {
                 int count = 0;
-                _localEnemiesList.AddRange(Enemies);
-                foreach (var keyPair in _localEnemiesList)
+                foreach (var enemy in Enemies)
                 {
-                    var enemy = keyPair.Value;
-                    if (enemy?.IsValid == true && !enemy.IsCurrentEnemy)
+                    if (enemy.Value?.IsAI == false)
+                    {
+                        _localHumanEnemiesList.Add(enemy.Value);
+                    }
+                }
+                //Logger.LogDebug($"Updating {_localHumanEnemiesList.Count} Human Enemies for [{BotOwner?.name}]");
+                foreach (var enemy in _localHumanEnemiesList)
+                {
+                    if (enemy?.IsValid == true)
                     {
                         enemy.Update();
                         count++;
@@ -109,7 +111,38 @@ namespace SAIN.SAINComponent.Classes
                         }
                     }
                 }
-                _localEnemiesList.Clear();
+                _localHumanEnemiesList.Clear();
+                yield return null;
+            }
+        }
+
+        private IEnumerator updateValidAIEnemies(int maxPerFrame)
+        {
+            while (true)
+            {
+                int count = 0;
+                foreach (var enemy in Enemies)
+                {
+                    if (enemy.Value?.IsAI == true)
+                    {
+                        _localAIEnemiesList.Add(enemy.Value);
+                    }
+                }
+                //Logger.LogDebug($"Updating {_localAIEnemiesList.Count} AI Enemies for [{BotOwner?.name}]");
+                foreach (var enemy in _localAIEnemiesList)
+                {
+                    if (enemy?.IsValid == true)
+                    {
+                        enemy.Update();
+                        count++;
+                        if (count >= maxPerFrame)
+                        {
+                            count = 0;
+                            yield return null;
+                        }
+                    }
+                }
+                _localAIEnemiesList.Clear();
                 yield return null;
             }
         }
@@ -187,6 +220,8 @@ namespace SAIN.SAINComponent.Classes
         {
             removeActiveEnemy(id);
             removeLastEnemy(id);
+            removeDogFightTarget(id);
+
             if (Enemies.TryGetValue(id, out SAINEnemy enemy))
             {
                 enemy.Dispose();
@@ -212,6 +247,15 @@ namespace SAIN.SAINComponent.Classes
                 LastEnemy = null;
             }
         }
+        private void removeDogFightTarget(string id)
+        {
+            SAINEnemy dogFightTarget = SAIN.Decision.DogFightTarget;
+            if (dogFightTarget?.EnemyPerson != null
+                && dogFightTarget.EnemyPerson.ProfileId == id)
+            {
+                SAIN.Decision.DogFightTarget = null;
+            }
+        }
 
 
         private void CheckAddEnemy(BotOwner botOwner)
@@ -223,19 +267,23 @@ namespace SAIN.SAINComponent.Classes
 
         private void CheckAddEnemy()
         {
+            SAINEnemy dogFightTarget = SAIN.Decision.DogFightTarget;
+            if (dogFightTarget?.IsValid == true)
+            {
+                setActiveEnemy(dogFightTarget);
+                return;
+            }
+
             var goalEnemy = BotOwner.Memory.GoalEnemy;
             if (goalEnemy != null)
             {
-                if (_newEnemy)
+                _newEnemy = false;
+                IPlayer iPlayer = goalEnemy?.Person;
+                AddEnemy(iPlayer);
+                SAINEnemy sainEnemy = CheckAddEnemy(iPlayer);
+                if (sainEnemy != null)
                 {
-                    _newEnemy = false;
-                    IPlayer iPlayer = goalEnemy?.Person;
-                    AddEnemy(iPlayer);
-                    SAINEnemy sainEnemy = CheckAddEnemy(iPlayer);
-                    if (sainEnemy != null)
-                    {
-                        setActiveEnemy(sainEnemy);
-                    }
+                    setActiveEnemy(sainEnemy);
                 }
             }
             else if (ActiveEnemy != null)
@@ -304,7 +352,7 @@ namespace SAIN.SAINComponent.Classes
 
             if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(player, out EnemyInfo enemyInfo))
             {
-                SAINPersonClass enemySAINPerson = GetSAINPerson(player);
+                SAINPersonClass enemySAINPerson = new SAINPersonClass(player);
                 SAINEnemy newEnemy = new SAINEnemy(SAIN, enemySAINPerson, enemyInfo);
                 player.HealthController.DiedEvent += newEnemy.DeleteInfo;
                 Enemies.Add(player.ProfileId, newEnemy);
@@ -333,7 +381,7 @@ namespace SAIN.SAINComponent.Classes
                                 Vector3 lookDir = player.LookDirection;
                                 Vector3 playerHeadPos = player.MainParts[BodyPartType.head].Position;
 
-                                Vector3 botChestPos = SAIN.Person.Transform.Chest;
+                                Vector3 botChestPos = SAIN.Person.Transform.CenterPosition;
                                 Vector3 botDir = (botChestPos - playerHeadPos);
 
                                 if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
@@ -358,29 +406,6 @@ namespace SAIN.SAINComponent.Classes
         public bool IsPlayerAnEnemy(string profileID)
         {
             return Enemies.ContainsKey(profileID) && Enemies[profileID] != null;
-        }
-
-        private static SAINPersonClass GetSAINPerson(IPlayer IPlayer)
-        {
-            if (IPlayer == null)
-            {
-                return null;
-            }
-
-            Player player = Singleton<GameWorld>.Instance?.GetAlivePlayerByProfileID(IPlayer.ProfileId);
-            if (player == null)
-            {
-                return null;
-            }
-
-            SAINPersonComponent _SAINPersonComponent = player?.gameObject.GetOrAddComponent<SAINPersonComponent>();
-
-            if (_SAINPersonComponent?.SAINPerson == null)
-            {
-                _SAINPersonComponent?.Init(IPlayer);
-            }
-
-            return _SAINPersonComponent?.SAINPerson;
         }
     }
 }
