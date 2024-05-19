@@ -33,19 +33,19 @@ namespace SAIN.SAINComponent.Classes
             {
                 if (EnemyPerson?.PlayerNull == true)
                 {
-                    Logger.LogDebug("Enemy Player is Null. Removing...");
+                    //Logger.LogDebug("Enemy Player is Null. Removing...");
                     return false;
                 }
                 // Redundant Checks
                 // Common checks between PMC and bots
                 if (EnemyPlayer == null)
                 {
-                    Logger.LogDebug("Enemy is Null. Removing...");
+                    //Logger.LogDebug("Enemy is Null. Removing...");
                     return false;
                 }
                 if (EnemyPlayer?.HealthController?.IsAlive != true)
                 {
-                    Logger.LogDebug("Enemy is Dead. Removing...");
+                    //Logger.LogDebug("Enemy is Dead. Removing...");
                     return false;
                 }
                 // Checks specific to bots

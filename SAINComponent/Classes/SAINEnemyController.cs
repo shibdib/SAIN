@@ -191,7 +191,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 enemy.Dispose();
                 Enemies.Remove(id);
-                Logger.LogDebug($"Removed [{id}] from [{BotOwner?.name}'s] Enemy List");
+                //Logger.LogDebug($"Removed [{id}] from [{BotOwner?.name}'s] Enemy List");
             }
         }
 
@@ -308,7 +308,7 @@ namespace SAIN.SAINComponent.Classes
                 SAINEnemy newEnemy = new SAINEnemy(SAIN, enemySAINPerson, enemyInfo);
                 player.HealthController.DiedEvent += newEnemy.DeleteInfo;
                 Enemies.Add(player.ProfileId, newEnemy);
-                Logger.LogDebug($"Added [{player.ProfileId}] to [{BotOwner?.name}'s] Enemy List");
+                //Logger.LogDebug($"Added [{player.ProfileId}] to [{BotOwner?.name}'s] Enemy List");
             }
         }
 
