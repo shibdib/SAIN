@@ -17,17 +17,10 @@ namespace SAIN.Preset.GlobalSettings
 
             if (!Load.LoadObject(out GlobalSettingsClass result, fileName, presetsFolder, Preset.Name))
             {
-                result = new GlobalSettingsClass
-                {
-                    EFTCoreSettings = EFTCoreSettings.GetCore(),
-                };
+                result = new GlobalSettingsClass();
                 SaveObjectToJson(result, fileName, presetsFolder, Preset.Name);
             }
-
-            EFTCoreSettings.UpdateCoreSettings(result.EFTCoreSettings);
-
-            SaveObjectToJson(result, fileName, presetsFolder, Preset.Name);
-
+            EFTCoreSettings.UpdateCoreSettings();
             return result;
         }
 
@@ -77,9 +70,5 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [Hidden]
         public PowerCalcSettings PowerCalc = new PowerCalcSettings();
-
-        [Advanced]
-        [Hidden]
-        public EFTCoreSettings EFTCoreSettings = new EFTCoreSettings();
     }
 }

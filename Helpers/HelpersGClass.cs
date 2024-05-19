@@ -57,10 +57,10 @@ namespace SAIN.Helpers
             return (PathControllerClass)PathControllerField.GetValue(botMover);
         }
 
-        public static EFTCoreSettings EFTCore => SAINPlugin.LoadedPreset.GlobalSettings.EFTCoreSettings;
-        public static float LAY_DOWN_ANG_SHOOT => EFTCore.Core.LAY_DOWN_ANG_SHOOT;
-        public static float Gravity => EFTCore.Core.G;
-        public static float SMOKE_GRENADE_RADIUS_COEF => EFTCore.Core.SMOKE_GRENADE_RADIUS_COEF;
+        public static EFTCore EFTCore => EFTCoreContainer.Core;
+        public static float LAY_DOWN_ANG_SHOOT => EFTCore.LAY_DOWN_ANG_SHOOT;
+        public static float Gravity => EFTCore.G;
+        public static float SMOKE_GRENADE_RADIUS_COEF => EFTCore.SMOKE_GRENADE_RADIUS_COEF;
     }
 
     public class TemporaryStatModifiers
@@ -87,15 +87,6 @@ namespace SAIN.Helpers
 
     public class EFTCoreSettings
     {
-        public static EFTCoreSettings GetCore()
-        {
-            UpdateCoreSettings();
-            return new EFTCoreSettings
-            {
-                Core = EFTCoreContainer.Core,
-            };
-        }
-
         public static void UpdateCoreSettings()
         {
             var core = EFTCoreContainer.Core;
@@ -123,11 +114,6 @@ namespace SAIN.Helpers
         public static void UpdateArmorClassCoef(float coef)
         {
             EFTCoreContainer.Core.ARMOR_CLASS_COEF = coef;
-        }
-
-        public static void UpdateCoreSettings(EFTCoreSettings newCore)
-        {
-            EFTCoreContainer.Core = newCore.Core;
         }
 
         public EFTCore Core;

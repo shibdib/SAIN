@@ -1,5 +1,7 @@
-﻿using SAIN.Editor;
+﻿using Comfort.Common;
+using SAIN.Editor;
 using SAIN.Editor.GUISections;
+using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.BotSettings;
 using SAIN.Preset.BotSettings.SAINSettings;
@@ -35,7 +37,10 @@ namespace SAIN.Preset
             PresetHandler.ExportEditorDefaults();
 
             Info = SAINDifficultyClass.DefaultPresetDefinitions[sainDifficulty];
+
             GlobalSettings = new GlobalSettingsClass();
+            EFTCoreSettings.UpdateCoreSettings();
+
             BotSettings = new BotSettings.SAINBotSettingsClass(this);
             PersonalityManager = new PersonalityManagerClass(this);
         }
