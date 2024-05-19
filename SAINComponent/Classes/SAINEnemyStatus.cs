@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -59,21 +58,79 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-
         public SAINEnemyStatus(SAINEnemy enemy) : base(enemy)
         {
         }
+
+        public bool FlareEnabled
+        {
+            get
+            {
+                if (Enemy.LastKnownPosition != null
+                    && (Enemy.LastKnownPosition.Value - EnemyPlayer.Position).sqrMagnitude < _maxDistFromPosFlareEnabled * _maxDistFromPosFlareEnabled)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        private const float _maxDistFromPosFlareEnabled = 10f;
 
         public bool EnemyLookingAtMe
         {
             get
             {
-                Vector3 directionToBot = (SAIN.Position - EnemyPosition).normalized;
-                Vector3 enemyLookDirection = EnemyPerson.Transform.LookDirection.normalized;
-                float dot = Vector3.Dot(directionToBot, enemyLookDirection);
-                return dot >= 0.9f;
+                if (_nextCheckEnemyLookTime < Time.time)
+                {
+                    _nextCheckEnemyLookTime = Time.time + 0.2f;
+                    Vector3 directionToBot = (SAIN.Position - EnemyPosition).normalized;
+                    Vector3 enemyLookDirection = EnemyPerson.Transform.LookDirection.normalized;
+                    float dot = Vector3.Dot(directionToBot, enemyLookDirection);
+                    _enemyLookAtMe = dot >= 0.9f;
+                }
+                return _enemyLookAtMe;
             }
         }
+
+        private bool _enemyLookAtMe;
+        private float _nextCheckEnemyLookTime;
+
+        public bool SearchStarted
+        {
+            get
+            {
+                return _searchStarted.Value;
+            }
+            set
+            {
+                if (value)
+                {
+                    TimeSearchLastStarted = Time.time;
+                }
+                _searchStarted.Value = value;
+            }
+        }
+
+        public int NumberOfSearchesStarted { get; set; }
+        public float TimeSearchLastStarted { get; private set; }
+        public float TimeSinceSearchLastStarted => Time.time - TimeSearchLastStarted;
+
+        private readonly ExpirableBool _searchStarted = new ExpirableBool(300f, 0.85f, 1.15f);
+
+        public bool EnemyIsSuppressed
+        {
+            get
+            {
+                return _enemyIsSuppressed.Value;
+            }
+            set
+            {
+                _enemyIsSuppressed.Value = value;
+            }
+        }
+
+        private readonly ExpirableBool _enemyIsSuppressed = new ExpirableBool(4f, 0.85f, 1.15f);
 
         public bool ShotAtMeRecently
         {
@@ -130,41 +187,5 @@ namespace SAIN.SAINComponent.Classes
         }
 
         private readonly ExpirableBool _enemyIsReloading = new ExpirableBool(4f, 0.75f, 1.25f);
-    }
-
-    public class ExpirableBool
-    {
-        public ExpirableBool(float expireTime, float randomMin, float randomMax)
-        {
-            _expireTime = expireTime;
-            _randomMin = randomMin;
-            _randomMax = randomMax;
-        }
-
-        public bool Value
-        {
-            get
-            {
-                if (_value && _resetTime < Time.time)
-                {
-                    _value = false;
-                }
-                return _value;
-            }
-            set
-            {
-                if (value == true)
-                {
-                    _resetTime = Time.time + _expireTime * Random.Range(_randomMin, _randomMax);
-                }
-                _value = value;
-            }
-        }
-
-        private bool _value;
-        private float _resetTime;
-        private readonly float _expireTime;
-        private readonly float _randomMin;
-        private readonly float _randomMax;
     }
 }

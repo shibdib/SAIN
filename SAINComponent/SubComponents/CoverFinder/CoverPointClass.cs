@@ -326,6 +326,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 nextPathSafetyTime = Time.time + 2f;
                 yield return SAINBotSpaceAwareness.CheckPathSafety(this, SAIN.CurrentTargetPosition.Value + Vector3.up);
             }
+            yield return null;
         }
 
         public bool IsSafePath

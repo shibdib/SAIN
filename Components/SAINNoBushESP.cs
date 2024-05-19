@@ -201,8 +201,9 @@ namespace SAIN.Components
                     var vision = SAIN?.Enemy?.Vision;
                     if (vision != null)
                     {
-                        vision.UpdateCanShoot(false);
-                        vision.UpdateVisible(false);
+                        bool forceOff = true;
+                        vision.UpdateCanShoot(forceOff);
+                        vision.UpdateVisible(forceOff);
                     }
                 }
             }

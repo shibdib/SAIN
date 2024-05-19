@@ -168,17 +168,10 @@ namespace SAIN.Plugin
 
                 return false;
             }
-            if (IsQuestTowardTarget(component, questPosition, dotProductThresh))
-            {
-                if (DebugExternal)
-                    Logger.LogInfo($"{botOwner.name} quest target is in direction of target, cannot quest.");
-
-                return false;
-            }
             return true;
         }
 
-        private static bool IsQuestTowardTarget(SAINComponentClass component, Vector3 questPosition, float dotProductThresh)
+        public static bool IsQuestTowardTarget(SAINComponentClass component, Vector3 questPosition, float dotProductThresh)
         {
             Vector3? currentTarget = component.CurrentTargetPosition;
             if (currentTarget == null)
@@ -205,7 +198,7 @@ namespace SAIN.Plugin
         private static bool isBotInCombat(SAINComponentClass component, out ECombatReason reason)
         {
             const float TimeSinceSeenThreshold = 10f;
-            const float TimeSinceHeardThreshold = 2f;
+            const float TimeSinceHeardThreshold = 5f;
             const float TimeSinceUnderFireThreshold = 10f;
 
             reason = ECombatReason.None;
@@ -219,14 +212,14 @@ namespace SAIN.Plugin
                 reason = ECombatReason.EnemyVisible;
                 return true;
             }
-            if (enemy.TimeSinceHeard < TimeSinceHeardThreshold)
-            {
-                reason = ECombatReason.EnemyHeardRecently;
-                return true;
-            }
             if (enemy.TimeSinceSeen < TimeSinceSeenThreshold)
             {
                 reason = ECombatReason.EnemySeenRecently;
+                return true;
+            }
+            if (enemy.TimeSinceHeard < TimeSinceHeardThreshold)
+            {
+                reason = ECombatReason.EnemyHeardRecently;
                 return true;
             }
             BotMemoryClass memory = component.BotOwner.Memory;

@@ -38,7 +38,7 @@ namespace SAIN.Patches.Generic
                 return;
             }
             if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(HaveSeenEnemyPatch))
-                && sain.Info.Profile.IsPMC
+                //&& sain.Info.Profile.IsPMC
                 && sain.EnemyController.CheckAddEnemy(__instance.Person)?.Heard == true)
             {
                 __result = true;
@@ -284,14 +284,9 @@ namespace SAIN.Patches.Generic
         public static bool EnemySenseRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
         {
             SAINEnemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
-            if (myEnemy != null)
-            {
-                if (myEnemy.LastKnownPosition != null && myEnemy.TimeSinceLastKnownUpdated <= sain.BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC)
-                {
-                    return true;
-                }
-            }
-            return false;
+            var lastKnown = myEnemy?.KnownPlaces?.LastKnownPlace;
+            return lastKnown != null 
+                && lastKnown.TimeSincePositionUpdated <= sain.BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC;
         }
     }
 

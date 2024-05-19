@@ -14,6 +14,8 @@ using EFTStatModifiersClass = GClass529;
 using EFTTime = GClass1296;
 using EFTSearchPoint = PlaceForCheck;
 using Aki.Reflection.Patching;
+using Aki.Reflection.Utils;
+using System.Linq;
 
 ////////
 // Fixed some GClass References here, but classes were renamed in the deobfuscation, so much of this isn't necessary anymore. Need to clean this up
@@ -29,7 +31,10 @@ namespace SAIN.Helpers
             EFTBotSettingsProp = AccessTools.Property(typeof(BotDifficultySettingsClass), "FileSettings");
             RefreshSettingsMethod = AccessTools.Method(typeof(BotDifficultySettingsClass), "method_0");
             PathControllerField = AccessTools.Field(typeof(BotMover), "_pathController");
+            AimDataType = PatchConstants.EftTypes.Single(x => x.GetProperty("LastSpreadCount") != null && x.GetProperty("LastAimTime") != null);
         }
+
+        public static readonly Type AimDataType;
 
         public static void RefreshSettings(BotDifficultySettingsClass settings)
         {

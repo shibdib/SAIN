@@ -2,10 +2,10 @@
 using EFT;
 using SAIN.Helpers;
 using SAIN.SAINComponent.BaseClasses;
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
-using static RootMotion.FinalIK.AimPoser;
 using static SAIN.SAINComponent.Classes.SAINEnemy;
 
 namespace SAIN.SAINComponent.Classes
@@ -16,6 +16,7 @@ namespace SAIN.SAINComponent.Classes
         {
             TimeEnemyCreated = Time.time;
             EnemyPerson = person;
+            EnemyTransform = person.Transform;
             EnemyInfo = enemyInfo;
             IsAI = enemyInfo.Person?.IsAI == true;
             EnemyProfileId = person.ProfileId;
@@ -43,9 +44,9 @@ namespace SAIN.SAINComponent.Classes
                 // Checks specific to bots
                 if (EnemyPlayer?.IsAI == true && (
                     EnemyPlayer.AIData?.BotOwner == null ||
-                    EnemyPlayer.AIData.BotOwner.ProfileId == BotOwner.ProfileId ||
-                    EnemyPlayer.AIData.BotOwner.BotState != EBotState.Active))
+                    EnemyPlayer.AIData.BotOwner.ProfileId == BotOwner.ProfileId))
                 {
+                    // EnemyPlayer.AIData.BotOwner.BotState != EBotState.Active
                     return false;
                 }
                 else
@@ -55,12 +56,11 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private readonly string EnemyProfileId;
-
+        public readonly string EnemyProfileId;
         public EnemyInfo EnemyInfo { get; private set; }
         public SAINPersonClass EnemyPerson { get; private set; }
-        public SAINPersonTransformClass EnemyTransform => EnemyPerson.Transform;
-        public bool IsCurrentEnemy => SAIN.HasEnemy && SAIN.EnemyController.ActiveEnemy == this;
+        public SAINPersonTransformClass EnemyTransform { get; private set; }
+        public bool IsCurrentEnemy => SAIN.HasEnemy && SAIN.Enemy.EnemyProfileId == this.EnemyProfileId;
 
         public void Init()
         {
@@ -76,52 +76,23 @@ namespace SAIN.SAINComponent.Classes
             SAIN.EnemyController.RemoveEnemy(EnemyProfileId);
         }
 
-        public bool SearchStarted { get; set; } = false;
-        public int TimesSearchedStarted { get; set; } = 0;
+        public bool ShallUpdateEnemy => EnemyPerson?.IsActive == true && (EnemyInfo?.ShallKnowEnemy() == true || EnemyPlayer.IsAI == false);
 
-        public bool EnemyIsSuppressed
-        {
-            get
-            {
-                return _suppressEndTimer < Time.time;
-            }
-            set
-            {
-                _suppressEndTimer = value ? Time.time + 2f : 0f;
-            }
-        }
-
-        private float _suppressEndTimer;
+        public bool IsUpdating { get; private set; }
 
         public void Update()
         {
-            if (!SAIN.HasEnemy)
-            {
-                SAIN.EnemyController.ClearEnemy();
-                return;
-            }
-            if (EnemyPlayer == null)
-            {
-                DeleteInfo(default);
-                return;
-            }
-
-            if (EnemyInfo?.ShallKnowEnemy() == true || EnemyPlayer.IsAI == false)
+            if (ShallUpdateEnemy)
             {
                 bool isCurrent = IsCurrentEnemy;
                 Vision.Update(isCurrent);
                 Path.Update(isCurrent);
-                KnownPlaces.Update();
-
-                if (isCurrent)
-                {
-                    //KnownPlaces.Update();
-                }
+                KnownPlaces.Update(isCurrent);
             }
             else
             {
-                Vision.UpdateVisible(false);
-                Vision.UpdateCanShoot(false);
+                Vision.UpdateVisible(true);
+                Vision.UpdateCanShoot(true);
                 Path.Clear();
             }
         }
@@ -136,11 +107,11 @@ namespace SAIN.SAINComponent.Classes
                     _nextCheckHidingTime = time + _checkHidingFreq;
                     _hidingBehindObject = null;
                     Vector3? lastKnown = LastKnownPosition;
-                    if (lastKnown != null 
+                    if (lastKnown != null
                         && Physics.Raycast(lastKnown.Value + Vector3.up, SAIN.Position + Vector3.up, out RaycastHit hit, _checkHidingRayDist, LayerMaskClass.HighPolyCollider))
                     {
                         _hidingBehindObject = hit.collider;
-                    } 
+                    }
                 }
                 return _hidingBehindObject;
             }
@@ -166,72 +137,122 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private Collider _hidingBehindObject;
-
-        private const float _checkHidingRayDist = 3f;
-        private const float _checkHidingFreq = 1f;
-        private float _nextCheckHidingTime;
-
-        private float _maxDistFromPosFlareEnabled = 10f;
-
-        public bool FlareEnabled
+        public Vector3? CenterMass
         {
             get
             {
-                if (LastKnownPosition != null
-                    && (LastKnownPosition.Value - EnemyPlayer.Position).sqrMagnitude < _maxDistFromPosFlareEnabled * _maxDistFromPosFlareEnabled)
+                if (EnemyPerson.IPlayer == null)
                 {
-                    return true;
+                    return null;
                 }
-                return false;
+                if (_nextGetCenterTime < Time.time)
+                {
+                    _nextGetCenterTime = Time.time + 0.1f;
+                    _centerMass = new Vector3?(findCenterMass(EnemyPerson.IPlayer));
+                }
+                return _centerMass;
             }
         }
 
+        private static Vector3 findCenterMass(IPlayer person)
+        {
+            Vector3 headPos = person.MainParts[BodyPartType.head].Position;
+            Vector3 floorPos = person.Position;
+            Vector3 centerMass = Vector3.Lerp(headPos, floorPos, 0.3125f);
+
+            if (person.IsYourPlayer && SAINPlugin.DebugMode && _debugCenterMassTime < Time.time)
+            {
+                _debugCenterMassTime = Time.time + 1f;
+                DebugGizmos.Sphere(centerMass, 0.1f, 5f);
+            }
+
+            return centerMass;
+        }
+
+        public void UpdateHeardPosition(Vector3 position, bool wasGunfire, bool arrived = false)
+        {
+            EnemyPlace place = KnownPlaces.AddPersonalHeardPlace(position, arrived, wasGunfire);
+            if (_nextReportHeardTime < Time.time)
+            {
+                _nextReportHeardTime = Time.time + _reportHeardFreq;
+                SAIN.Squad?.SquadInfo?.ReportEnemyPosition(this, place, false);
+            }
+        }
+
+        public void UpdateSeenPosition(Vector3 position)
+        {
+            var place = KnownPlaces.UpdateSeenPlace(position);
+            if (_nextReportSightTime < Time.time)
+            {
+                _nextReportSightTime = Time.time + _reportSightFreq;
+                SAIN.Squad.SquadInfo?.ReportEnemyPosition(this, place, true);
+            }
+        }
+
+        private Vector3? _centerMass;
+        private float _nextGetCenterTime;
+        private static float _debugCenterMassTime;
+        private Collider _hidingBehindObject;
+        private const float _checkHidingRayDist = 3f;
+        private const float _checkHidingFreq = 1f;
+        private float _nextCheckHidingTime;
         private float _nextUpdateDistTime;
+        private float _nextReportSightTime;
+        private float _nextReportHeardTime;
+        private const float _reportSightFreq = 0.25f;
+        private const float _reportHeardFreq = 1f;
 
-        public void UpdateKnownPosition(Vector3 position, bool arrived = false, bool seen = false)
+        public void EnemyPositionReported(EnemyPlace place, bool seen)
         {
-            KnownPlaces.AddHeardPosition(position, arrived, seen);
-            SAIN.Squad?.SquadInfo?.ReportEnemyPosition(this, position);
-        }
-        public void UpdateSeenPosition(Vector3 position, bool arrived = false, bool seen = false)
-        {
-            KnownPlaces.AddHeardPosition(position, arrived, seen);
-            SAIN.Squad?.SquadInfo?.ReportEnemyPosition(this, position);
-        }
-
-        public void EnemyPositionReported(Vector3 position, bool arrived = false, bool seen = false)
-        {
-            KnownPlaces.AddHeardPosition(position, arrived, seen);
+            if (seen)
+            {
+                KnownPlaces.UpdateSquadSeenPlace(place);
+            }
+            else
+            {
+                KnownPlaces.UpdateSquadHeardPlace(place);
+            }
         }
 
         public readonly bool IsAI;
 
         public float LastActiveTime;
 
-        private readonly float TimeCantHearAnymore = 3f;
-
         public bool Heard { get; private set; }
 
-        public void SetHeardStatus(bool canHear, Vector3 pos, bool isTalked = false)
+        public Action<SAINEnemy> OnEnemyHeard;
+
+        public void SetHeardStatus(bool value, Vector3 pos, SAINSoundType soundType)
         {
-            HeardRecently = canHear;
-            if (canHear)
+            if (value)
             {
-                UpdateKnownPosition(pos);
-                LastHeardPosition = new Vector3?(pos);
-                if (_nextSayNoise < Time.time 
-                    && (SAIN.Talk.GroupTalk.FriendIsClose 
-                        || SAIN.Equipment.HasEarPiece) 
-                    && SAIN.Squad.BotInGroup 
-                    && (SAIN.Enemy == null 
-                        || SAIN.Enemy.TimeSinceSeen > 10f))
+                if (!Heard)
                 {
-                    _nextSayNoise = Time.time + 8f;
-                    if (EFTMath.RandomBool(40))
-                    {
-                        SAIN.Talk.TalkAfterDelay(isTalked ? EPhraseTrigger.OnEnemyConversation : EPhraseTrigger.NoisePhrase);
-                    }
+                    Heard = true;
+                }
+                HeardRecently = true;
+                TimeLastHeard = Time.time;
+                bool wasGunfire = soundType == SAINSoundType.SuppressedGunShot || soundType == SAINSoundType.Gunshot;
+                UpdateHeardPosition(pos, wasGunfire);
+                OnEnemyHeard?.Invoke(this);
+                if (!wasGunfire)
+                {
+                    talkNoise(soundType == SAINSoundType.Conversation);
+                }
+            }
+        }
+
+        private void talkNoise(bool conversation)
+        {
+            if (_nextSayNoise < Time.time
+                && (SAIN.Talk.GroupTalk.FriendIsClose || SAIN.Equipment.HasEarPiece)
+                && SAIN.Squad.BotInGroup
+                && (SAIN.Enemy == null || SAIN.Enemy.TimeSinceSeen > 15f))
+            {
+                _nextSayNoise = Time.time + 8f;
+                if (EFTMath.RandomBool(40))
+                {
+                    SAIN.Talk.TalkAfterDelay(conversation ? EPhraseTrigger.OnEnemyConversation : EPhraseTrigger.NoisePhrase);
                 }
             }
         }
@@ -253,28 +274,31 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
-                if (Heard && TimeSinceHeard > TimeCantHearAnymore)
-                {
-                    _heardRecently = false;
-                }
-                return _heardRecently;
+                return _heardRecently.Value;
             }
             set
             {
-                if (value)
-                {
-                    Heard = true;
-                    TimeLastHeard = Time.time;
-                }
-                _heardRecently = value;
+                _heardRecently.Value = value;
             }
         }
 
-        private bool _heardRecently;
+        private readonly ExpirableBool _heardRecently = new ExpirableBool(2f, 0.85f, 1.15f);
 
-        public float TimeSinceHeard => Heard ? Time.time - TimeLastHeard : float.MaxValue;
+        public float TimeSinceHeard => Time.time - TimeLastHeard;
         public float TimeLastHeard { get; private set; }
-        public Vector3? LastHeardPosition { get; private set; }
+
+        public Vector3? LastHeardPosition
+        {
+            get
+            {
+                var lastHeardPlace = KnownPlaces.LastHeardPlace;
+                if (lastHeardPlace != null)
+                {
+                    return lastHeardPlace.Position;
+                }
+                return null;
+            }
+        }
 
         public void Dispose()
         {
@@ -287,11 +311,8 @@ namespace SAIN.SAINComponent.Classes
         public IPlayer EnemyIPlayer => EnemyPerson.IPlayer;
 
         public Player EnemyPlayer => EnemyPerson.Player;
-
         public float TimeEnemyCreated { get; private set; }
-
         public float TimeSinceEnemyCreated => Time.time - TimeEnemyCreated;
-
         public Vector3? LastKnownPosition => KnownPlaces.LastKnownPlace?.Position;
 
         public EnemyKnownPlaces KnownPlaces { get; private set; }
@@ -309,25 +330,11 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        public float TimeSinceLastKnownUpdated
-        {
-            get
-            {
-                EnemyPlace lastKnown = KnownPlaces.LastKnownPlace;
-                if (lastKnown != null)
-                {
-                    return Time.time - lastKnown.TimePositionUpdated;
-                }
-                return float.MaxValue;
-            }
-        }
+        public float TimeSinceLastKnownUpdated => Time.time - TimeLastKnownUpdated;
 
         public Vector3 EnemyPosition => EnemyTransform.Position;
-
         public Vector3 EnemyDirection => EnemyTransform.Direction(SAIN.Transform.Position);
-
         public Vector3 EnemyHeadPosition => EnemyTransform.Head;
-
         public Vector3 EnemyChestPosition => EnemyTransform.Chest;
 
         // Look Properties
@@ -336,15 +343,15 @@ namespace SAIN.SAINComponent.Classes
         public bool IsVisible => Vision.IsVisible;
         public bool CanShoot => Vision.CanShoot;
         public bool Seen => Vision.Seen;
-        public Vector3? LastCornerToEnemy => Vision.LastSeenPosition;
-        public float LastChangeVisionTime => Vision.VisibleStartTime;
+        public Vector3? LastCornerToEnemy => Path.LastCornerToEnemy;
+        public float LastChangeVisionTime => Vision.LastChangeVisionTime;
         public bool EnemyLookingAtMe => EnemyStatus.EnemyLookingAtMe;
-        public Vector3? LastSeenPosition => Vision.LastSeenPosition;
+        public Vector3? LastSeenPosition => KnownPlaces.LastSeenPlace?.Position;
         public float VisibleStartTime => Vision.VisibleStartTime;
         public float TimeSinceSeen => Vision.TimeSinceSeen;
 
-        public float RealDistance 
-        { 
+        public float RealDistance
+        {
             get
             {
                 if (_nextUpdateDistTime < Time.time)

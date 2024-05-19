@@ -81,7 +81,7 @@ namespace SAIN.SAINComponent.Classes
 
         private bool shallSearch(SAINEnemy enemy, float timeBeforeSearch)
         {
-            if (enemy.SearchStarted)
+            if (enemy.EnemyStatus.SearchStarted)
             {
                 return shallContinueSearch(enemy, timeBeforeSearch);
             }
@@ -248,15 +248,17 @@ namespace SAIN.SAINComponent.Classes
                 if (enemy.IsVisible)
                 {
                     hasTarget = true;
-                    return SAIN.Enemy.EnemyPosition;
+                    return enemy.EnemyPosition;
                 }
                 else
                 {
-                    var knownPlaces = enemy.KnownPlaces.EnemyPlaces;
+                    var knownPlaces = enemy.KnownPlaces.AllEnemyPlaces;
                     for (int i = 0; i < knownPlaces.Count; i++)
                     {
                         EnemyPlace enemyPlace = knownPlaces[i];
-                        if (!enemyPlace.HasArrived)
+                        if (enemyPlace != null 
+                            && !enemyPlace.HasArrivedPersonal 
+                            && !enemyPlace.HasArrivedSquad)
                         {
                             hasTarget = true;
                             return enemyPlace.Position;
@@ -272,7 +274,7 @@ namespace SAIN.SAINComponent.Classes
             }
             else
             {
-                var Target = BotOwner.Memory.GoalTarget;
+                var Target = BotOwner?.Memory.GoalTarget;
                 if (Target?.Position != null)
                 {
                     hasTarget = true;

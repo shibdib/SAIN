@@ -11,11 +11,6 @@ namespace SAIN.Helpers
 {
     internal class Reflection
     {
-        public static Type AimingDataType = PatchConstants.EftTypes.Single(x => x.GetProperty("LastSpreadCount") != null && x.GetProperty("LastAimTime") != null);
-        public static PropertyInfo EFTFileSettings = AccessTools.Property(typeof(BotDifficultySettingsClass), "FileSettings");
-        public static FieldInfo[] EFTSettingsCategories => GetFieldsInType(EFTFileSettings.PropertyType);
-        public static FieldInfo[] SAINSettingsCategories => GetFieldsInType<SAINSettingsClass>();
-
         public static FieldInfo[] GetFieldsInType<T>(BindingFlags flags = BindingFlags.Instance | BindingFlags.Public) where T : class
         {
             return typeof(T).GetFields(flags);

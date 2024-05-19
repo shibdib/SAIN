@@ -145,7 +145,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             var squadSettings = SAIN.Squad.SquadInfo?.SquadPersonalitySettings;
             if (squadSettings != null)
             {
-                float vocalization = squadSettings.VocalizationLevel * 8f - 20f;
+                float vocalization = squadSettings.VocalizationLevel * 10f - 25f;
                 chance += vocalization;
             }
             return EFTMath.RandomBool(chance) 

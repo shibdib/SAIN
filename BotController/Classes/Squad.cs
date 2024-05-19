@@ -23,7 +23,7 @@ namespace SAIN.BotController.Classes
             CheckSquadTimer = Time.time + 10f;
         }
 
-        public void ReportEnemyPosition(SAINEnemy reportedEnemy, Vector3 reportedPosition)
+        public void ReportEnemyPosition(SAINEnemy reportedEnemy, EnemyPlace place, bool seen)
         {
             if (Members == null || Members.Count <= 1)
             {
@@ -48,7 +48,7 @@ namespace SAIN.BotController.Classes
                         && reportedEnemy.EnemyPlayer != null
                         && reportedEnemy.Player.ProfileId != member.ProfileId)
                     {
-                        member.EnemyController.GetEnemy(reportedEnemy.EnemyPlayer.ProfileId)?.EnemyPositionReported(reportedPosition);
+                        member.EnemyController.GetEnemy(reportedEnemy.EnemyPlayer.ProfileId)?.EnemyPositionReported(place, seen);
                     }
                 }
             }
@@ -71,7 +71,9 @@ namespace SAIN.BotController.Classes
             foreach (var member in Members)
             {
                 SAINEnemy enemy = member.Value?.Enemy;
-                if (enemy?.EnemyPlayer != null && enemy.EnemyPlayer.ProfileId == profileId && enemy.EnemyIsSuppressed)
+                if (enemy?.EnemyPlayer != null 
+                    && enemy.EnemyPlayer.ProfileId == profileId 
+                    && enemy.EnemyStatus.EnemyIsSuppressed)
                 {
                     suppressingMember = member.Value;
                     return true;
@@ -104,7 +106,21 @@ namespace SAIN.BotController.Classes
                 return;
             }
 
-            sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, position);
+            SAINSoundType sainSoundType;
+            switch (soundType)
+            {
+                case AISoundType.silencedGun:
+                    sainSoundType = SAINSoundType.SuppressedGunShot;
+                    break;
+                case AISoundType.gun:
+                    sainSoundType = SAINSoundType.Gunshot;
+                    break;
+                default:
+                    sainSoundType = SAINSoundType.None;
+                    break;
+            }
+
+            sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, position, sainSoundType);
 
             bool isDanger = soundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;

@@ -14,29 +14,29 @@ using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.Classes.Mover;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents;
-using EFTAimingClass = GClass518;
 
 namespace SAIN.Patches.Shoot
 {
     public class AimOffsetPatch : ModulePatch
     {
-        private static Type _aimingDataType;
         protected override MethodBase GetTargetMethod()
         {
-            _aimingDataType = PatchConstants.EftTypes.Single(x => x.GetProperty("LastSpreadCount") != null && x.GetProperty("LastAimTime") != null);
-            return AccessTools.Method(_aimingDataType, "method_13");
+            _endTargetPointProp = AccessTools.Property(HelpersGClass.AimDataType, "EndTargetPoint");
+            return AccessTools.Method(HelpersGClass.AimDataType, "method_13");
         }
+
+        private static PropertyInfo _endTargetPointProp;
 
         private static float DebugTimer;
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref EFTAimingClass __instance, ref BotOwner ___botOwner_0, ref Vector3 ___vector3_5, ref Vector3 ___vector3_4, ref float ___float_13)
+        public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref Vector3 ___vector3_5, ref Vector3 ___vector3_4, ref float ___float_13)
         {
             Vector3 badShootOffset = ___vector3_5;
             float aimUpgradeByTime = ___float_13;
             Vector3 aimOffset = ___vector3_4;
             Vector3 recoilOffset = ___botOwner_0.RecoilData.RecoilOffset;
-            Vector3 realTargetPoint = __instance.RealTargetPoint;
+            Vector3 realTargetPoint = ___botOwner_0.AimingData.RealTargetPoint;
 
             // Applies aiming offset, recoil offset, and scatter offsets
             // Default Setup :: Vector3 finalTarget = __instance.RealTargetPoint + badShootOffset + (AimUpgradeByTime * (AimOffset + ___botOwner_0.RecoilData.RecoilOffset));
@@ -59,7 +59,7 @@ namespace SAIN.Patches.Shoot
                 }
             }
 
-            __instance.EndTargetPoint = realTargetPoint + finalOffset;
+            _endTargetPointProp.SetValue(___botOwner_0.AimingData, realTargetPoint + finalOffset);
             return false;
         }
 

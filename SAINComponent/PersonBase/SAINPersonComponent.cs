@@ -64,7 +64,6 @@ namespace SAIN.SAINComponent.BaseClasses
 
         public void Update()
         {
-            SAINPerson?.Update();
         }
 
         public IPlayer IPlayer => SAINPerson.IPlayer;

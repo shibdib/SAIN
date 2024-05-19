@@ -77,10 +77,13 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             else if (startSearch())
             {
-                enemy.TimesSearchedStarted++;
-                if (!enemy.SearchStarted)
+                if (SAIN.Decision.CurrentSoloDecision != SoloDecision.Search)
                 {
-                    enemy.SearchStarted = true;
+                    enemy.EnemyStatus.NumberOfSearchesStarted++;
+                }
+                if (!enemy.EnemyStatus.SearchStarted)
+                {
+                    enemy.EnemyStatus.SearchStarted = true;
                 }
                 Decision = SoloDecision.Search;
             }
@@ -403,7 +406,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             bool runNow = SAIN.Enemy != null
                 && !SAIN.Enemy.IsVisible
-                && (!SAIN.Enemy.Seen || SAIN.Enemy.TimeSinceSeen > 3f)
+                && (!SAIN.Enemy.Seen || SAIN.Enemy.TimeSinceSeen > 3f || BotOwner.Memory.IsUnderFire)
                 && SAIN.Cover.CoverPoints.Count > 0;
 
             if (StartRunCoverTimer < Time.time || runNow)
@@ -411,8 +414,9 @@ namespace SAIN.SAINComponent.Classes.Decision
                 CoverPoint coverInUse = SAIN.Cover.CoverInUse;
                 if (coverInUse != null)
                 {
-                    return (coverInUse.Position - SAIN.Position).sqrMagnitude >= SAIN.Info.FileSettings.Move.RUN_TO_COVER_MIN;
+                    return (coverInUse.Position - SAIN.Position).sqrMagnitude >= 1f;
                 }
+                return true;
             }
             return false;
         }

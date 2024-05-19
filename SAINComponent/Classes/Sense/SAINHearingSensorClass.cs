@@ -302,14 +302,16 @@ namespace SAIN.SAINComponent.Classes
 
             if (wasHeard)
             {
-                SAIN.StartCoroutine(delayAddSearch(vector, power, type, person));
+                SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
+                //SAIN.StartCoroutine(delayAddSearch(vector, power, type, person));
                 reacted = true;
             }
             else if (isGunSound && bulletFelt)
             {
                 Vector3 estimate = firedAtMe ? vector : GetEstimatedPoint(vector);
 
-                SAIN.StartCoroutine(delayAddSearch(estimate, power, type, person));
+                //SAIN.StartCoroutine(delayAddSearch(estimate, power, type, person));
+                SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
                 reacted = true;
             }
             return reacted;

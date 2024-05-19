@@ -19,7 +19,6 @@ namespace SAIN.SAINComponent.BaseClasses
 
         public void Update()
         {
-            Transform.Update();
         }
 
         public bool IsActive => PlayerNull == false && (IsAI == false || BotOwner?.BotState == EBotState.Active);

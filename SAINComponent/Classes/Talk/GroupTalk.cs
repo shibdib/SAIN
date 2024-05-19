@@ -173,7 +173,6 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
-            SAIN.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position, true);
             SAIN.Talk.GroupSay(EPhraseTrigger.OnEnemyConversation, null, false, _reportEnemyConversationChance);
         }
 

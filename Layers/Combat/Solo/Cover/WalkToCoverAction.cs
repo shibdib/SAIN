@@ -88,8 +88,10 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (SAIN.Enemy?.IsVisible == false 
                 && BotOwner.WeaponManager.HaveBullets 
-                && SAIN.Enemy.Seen && SAIN.Enemy.TimeSinceSeen < 60f 
-                && SAIN.Enemy.Path.BlindCornerToEnemy != null)
+                && SAIN.Enemy.TimeSinceLastKnownUpdated < 8f 
+                && SAIN.Enemy.Path.BlindCornerToEnemy != null
+                && SAIN.Enemy.LastKnownPosition != null
+                && (SAIN.Enemy.Path.BlindCornerToEnemy.Value - SAIN.Enemy.LastKnownPosition.Value).sqrMagnitude < 3f * 3f)
             {
                 SuppressPosition(SAIN.Enemy.Path.BlindCornerToEnemy.Value);
             }
@@ -106,7 +108,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (SuppressTimer < Time.time
                 && SAIN.Shoot(true, position, true, SAINComponentClass.EShootReason.WalkToCoverSuppress))
             {
-                SAIN.Enemy.EnemyIsSuppressed = true;
+                SAIN.Enemy.EnemyStatus.EnemyIsSuppressed = true;
                 if (SAIN.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
                 {
                     SuppressTimer = Time.time + 0.1f * Random.Range(0.75f, 1.25f);

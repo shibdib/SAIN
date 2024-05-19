@@ -12,21 +12,8 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update(bool isCurrentEnemy)
         {
-            bool visible = false;
-            bool canshoot = false;
-
-            var enemyInfo = EnemyInfo;
-            if (enemyInfo?.IsVisible == true && InLineOfSight)
-            {
-                visible = true;
-            }
-            if (enemyInfo?.CanShoot == true)
-            {
-                canshoot = true;
-            }
-
-            UpdateVisible(visible);
-            UpdateCanShoot(canshoot);
+            UpdateVisible(false);
+            UpdateCanShoot(false);
         }
 
         public bool FirstContactOccured { get; private set; }
@@ -37,23 +24,28 @@ namespace SAIN.SAINComponent.Classes
         private const float _lostContactMinSeenTime = 12f;
 
         private float _realLostVisionTime;
-        private bool _realLostVisual;
 
-        public void UpdateVisible(bool visible)
+        public void UpdateVisible(bool forceOff)
         {
             bool wasVisible = IsVisible;
-            IsVisible = visible;
+            if (forceOff)
+            {
+                IsVisible = false;
+            }
+            else
+            {
+                IsVisible = EnemyInfo?.IsVisible == true && InLineOfSight;
+            }
 
             if (IsVisible)
             {
                 if (!wasVisible)
                 {
                     VisibleStartTime = Time.time;
-                }
-                if (!wasVisible 
-                    && TimeSinceSeen >= _repeatContactMinSeenTime)
-                {
-                    ShallReportRepeatContact = true;
+                    if (Seen && TimeSinceSeen >= _repeatContactMinSeenTime)
+                    {
+                        ShallReportRepeatContact = true;
+                    }
                 }
                 if (!Seen)
                 {
@@ -68,7 +60,7 @@ namespace SAIN.SAINComponent.Classes
 
             if (Time.time - _realLostVisionTime < 1f)
             {
-                Enemy.UpdateKnownPosition(EnemyPerson.Position, false, IsVisible);
+                Enemy.UpdateSeenPosition(EnemyPerson.Position);
             }
 
             if (!IsVisible)
@@ -91,9 +83,14 @@ namespace SAIN.SAINComponent.Classes
 
         private float _nextReportLostVisualTime;
 
-        public void UpdateCanShoot(bool value)
+        public void UpdateCanShoot(bool forceOff)
         {
-            CanShoot = value;
+            if (forceOff)
+            {
+                CanShoot = false;
+                return;
+            }
+            CanShoot = EnemyInfo?.CanShoot == true;
         }
 
         public bool InLineOfSight { get; set; }

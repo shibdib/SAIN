@@ -226,7 +226,7 @@ namespace SAIN.SAINComponent.Classes
                     && enemy.InLineOfSight)
             {
                 EnemyPlace lastKnown = enemy.KnownPlaces.LastKnownPlace;
-                if (lastKnown != null && lastKnown.ClearLineOfSight(BotOwner.LookSensor._headPoint, LayerMaskClass.HighPolyWithTerrainMask))
+                if (lastKnown != null && lastKnown.PersonalClearLineOfSight(BotOwner.LookSensor._headPoint, LayerMaskClass.HighPolyWithTerrainMask))
                 {
                     result = lastKnown.Position + Vector3.up + UnityEngine.Random.onUnitSphere;
                 }
@@ -240,15 +240,27 @@ namespace SAIN.SAINComponent.Classes
 
         protected virtual Vector3? GetTarget()
         {
-            Vector3? target = getEnemyPartToShoot(BotOwner.Memory.GoalEnemy);
+            Vector3? target = getAimTarget(SAIN.Enemy);
+
             if (target == null)
             {
-                EnemyInfo lastEnemy = BotOwner.Memory.LastEnemy;
-                if (lastEnemy != null 
-                    && lastEnemy.IsVisible 
-                    && lastEnemy.CanShoot)
+                target = getAimTarget(SAIN.LastEnemy);
+            }
+            return target;
+        }
+
+        private Vector3? getAimTarget(SAINEnemy enemy)
+        {
+            Vector3? target = null;
+            if (enemy != null && enemy.IsVisible && enemy.CanShoot)
+            {
+                if (!enemy.IsAI && SAINPlugin.LoadedPreset.GlobalSettings.General.HeadShotProtection)
                 {
-                    target = getEnemyPartToShoot(lastEnemy);
+                    target = enemy.CenterMass;
+                }
+                if (target == null)
+                {
+                    target = getEnemyPartToShoot(enemy.EnemyInfo);
                 }
             }
             return target;
@@ -274,23 +286,13 @@ namespace SAIN.SAINComponent.Classes
 
         protected virtual Vector3? GetPointToShoot(SAINEnemy enemy)
         {
-            Vector3? target = null;
-            if (enemy.IsVisible && enemy.CanShoot)
-            {
-                target = GetTarget();
-            }
-            if (target == null)
-            {
-                //target = blindShootTarget(enemy);
-            }
+            Vector3? target = GetTarget();
+            SAIN.Steering.SetAimTarget(target);
             if (target != null)
             {
                 Target = target.Value;
-                BotOwner.AimingData.SetTarget(Target);
-                BotOwner.AimingData.NodeUpdate();
-                return new Vector3?(Target);
             }
-            return null;
+            return target;
         }
 
         protected Vector3 Target;

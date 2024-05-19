@@ -255,8 +255,6 @@ namespace SAIN.SAINComponent
             }
         }
 
-        private float _nextCheckFlashlightTime;
-        private GearInfoContainer GearInfoContainer;
         private float _nextCheckReloadTime;
         private bool _powerCalcd;
         public SAINDoorOpener DoorOpener { get; private set; }
@@ -266,11 +264,6 @@ namespace SAIN.SAINComponent
             get
             {
                 if (HasEnemy && !Enemy.IsAI)
-                {
-                    return true;
-                }
-                var closestHeard = EnemyController.ClosestHeardEnemy;
-                if (closestHeard != null && !closestHeard.IsAI)
                 {
                     return true;
                 }
@@ -552,6 +545,7 @@ namespace SAIN.SAINComponent
         public SAINVaultClass Vault { get; private set; }
         public SAINSearchClass Search { get; private set; }
         public SAINEnemy Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;
+        public SAINEnemy LastEnemy => HasLastEnemy ? EnemyController.LastEnemy : null;
         public SAINPersonTransformClass Transform => Person.Transform;
         public SAINMemoryClass Memory { get; private set; }
         public SAINEnemyController EnemyController { get; private set; }
@@ -581,7 +575,8 @@ namespace SAIN.SAINComponent
         public bool BotActive => 
             IsDead == false 
             && BotOwner.enabled 
-            && Player.enabled && BotOwner.BotState == EBotState.Active 
+            && Player.enabled 
+            && BotOwner.BotState == EBotState.Active 
             && BotOwner.StandBy.StandByType == BotStandByType.active 
             && BotOwner.isActiveAndEnabled 
             && Player.isActiveAndEnabled 
@@ -597,5 +592,6 @@ namespace SAIN.SAINComponent
         public string ProfileId => Person?.ProfileId;
         public Player Player => Person?.Player;
         public bool HasEnemy => EnemyController.HasEnemy;
+        public bool HasLastEnemy => EnemyController.HasLastEnemy;
     }
 }

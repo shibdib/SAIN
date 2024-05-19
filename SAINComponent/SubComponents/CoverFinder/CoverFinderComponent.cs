@@ -230,7 +230,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 {
                     if (!PointStillGood(coverInUse, out updated, out ECoverFailReason failReason))
                     {
-                        Logger.LogWarning(failReason);
+                        //Logger.LogWarning(failReason);
                         coverInUse.IsBad = true;
                     }
                     if (updated)
@@ -244,7 +244,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     var coverPoint = coverPoints[i];
                     if (!PointStillGood(coverPoint, out updated, out ECoverFailReason failReason))
                     {
-                        Logger.LogWarning(failReason);
+                        //Logger.LogWarning(failReason);
                         coverPoint.IsBad = true;
                     }
                     if (updated)
@@ -386,7 +386,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
                 _tempRecheckList.AddRange(CoverPoints);
                 yield return RecheckCoverPoints(_tempRecheckList, false);
-                yield return checkPathSafety(_tempRecheckList);
+                //yield return checkPathSafety(_tempRecheckList);
 
                 CoverPoints.RemoveAll(x => x.IsBad);
                 _tempRecheckList.Clear();
@@ -437,7 +437,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
                     if (coverCount > 0)
                     {
-                        yield return checkPathSafety(CoverPoints);
+                        //yield return checkPathSafety(CoverPoints);
                     }
 
                     if (coverCount > 1)
@@ -593,8 +593,17 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         {
             for (int i = 0; i < coverPoints.Count; i++)
             {
-                yield return coverPoints[i].CheckPathSafety();
+                var cover = coverPoints[i];
+                if (cover != null && !cover.IsBad)
+                {
+                    cover.CheckPathSafety(out bool didCheck);
+                    if (didCheck)
+                    {
+                        yield return null;
+                    }
+                }
             }
+            yield return null;
         }
 
         private float DebugLogTimer = 0f;

@@ -13,9 +13,6 @@ namespace SAIN.SAINComponent.BaseClasses
 
         public void Update()
         {
-            Head = PartPosition(BodyPartType.head);
-            Chest = PartPosition(BodyPartType.body);
-            Stomach = PartPosition(PlayerBoneType.Pelvis);
         }
 
         private readonly SAINPersonClass Person;
@@ -35,9 +32,9 @@ namespace SAIN.SAINComponent.BaseClasses
         public Vector3 Left => -Right;
         public Vector3 Up => !TransformNull ? DefaultTransform.up : Vector3.zero;
         public Vector3 Down => -Up;
-        public Vector3 Head { get; private set; }
-        public Vector3 Chest { get; private set; }
-        public Vector3 Stomach { get; private set; }
+        public Vector3 Head => PartPosition(BodyPartType.head);
+        public Vector3 Chest => PartPosition(BodyPartType.body);
+        public Vector3 Stomach => PartPosition(PlayerBoneType.Pelvis);
 
         public Dictionary<BodyPartType, EnemyPart> MainParts => Person.IPlayer?.MainParts;
 

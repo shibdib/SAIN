@@ -245,7 +245,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             if (player == null
                 || !player.HealthController.IsAlive
-                || (player.Position - SAIN.Position).sqrMagnitude > 80f * 80f)
+                || (player.Position - SAIN.Position).sqrMagnitude > 100f * 100f)
             {
                 return;
             }
@@ -253,7 +253,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 && player != null 
                 && SAIN.ProfileId != player.ProfileId)
             {
-                SAIN.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position, true);
+                SAIN.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position + UnityEngine.Random.onUnitSphere + Vector3.up, SAINSoundType.Conversation);
 
                 if (CanRespondToVoice
                     && _nextResponseTime < Time.time)

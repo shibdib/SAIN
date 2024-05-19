@@ -26,6 +26,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (CoverInUse == null)
             {
+                SAIN.Steering.SteerByPriority();
+                Shoot.Update();
+                SAIN.Cover.DuckInCover();
                 return;
             }
 

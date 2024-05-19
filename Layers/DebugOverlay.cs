@@ -110,11 +110,6 @@ namespace SAIN.Layers
                     stringBuilder.AppendLine("Active Enemy Info");
                     CreateEnemyInfo(stringBuilder, sain.Enemy);
                 }
-                else if (sain.EnemyController.ClosestHeardEnemy != null)
-                {
-                    stringBuilder.AppendLine("Closest Heard Enemy Info");
-                    CreateEnemyInfo(stringBuilder, sain.EnemyController.ClosestHeardEnemy);
-                }
 
             }
             catch (Exception ex)

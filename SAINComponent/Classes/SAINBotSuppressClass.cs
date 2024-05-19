@@ -10,6 +10,7 @@ using SAIN.SAINComponent.SubComponents;
 using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
+using SAIN.Helpers;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -26,7 +27,29 @@ namespace SAIN.SAINComponent.Classes
         public void Update()
         {
             UpdateSuppressedStatus();
+            applySuppressionStatModifiers();
         }
+
+        private void applySuppressionStatModifiers()
+        {
+            setModifier(suppressedHeavyMod, IsHeavySuppressed);
+            setModifier(suppressedMod, IsSuppressed && !IsHeavySuppressed);
+        }
+
+        private void setModifier(TemporaryStatModifiers modifiers, bool value)
+        {
+            if (value && !modifiers.Modifiers.IsApplyed)
+            {
+                BotOwner.Settings.Current.Apply(modifiers.Modifiers, -1f);
+            }
+            else if (!value && modifiers.Modifiers.IsApplyed)
+            {
+                BotOwner.Settings.Current.Dismiss(modifiers.Modifiers);
+            }
+        }
+
+        TemporaryStatModifiers suppressedMod = new TemporaryStatModifiers(1.25f, 1.35f, 1.35f, 1.5f, 1.5f);
+        TemporaryStatModifiers suppressedHeavyMod = new TemporaryStatModifiers(1.5f, 1.65f, 1.65f, 1.75f, 1.75f);
 
         public void Dispose()
         {

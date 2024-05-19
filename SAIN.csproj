@@ -311,6 +311,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\LootingBotsSettings.cs" />
     <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
+    <Compile Include="SAINComponent\Classes\ExpirableBool.cs" />
     <Compile Include="SAINComponent\Classes\TargetController.cs" />
     <Compile Include="SAINComponent\Classes\AimDownSightsController.cs" />
     <Compile Include="SAINComponent\Classes\Decision\DecisionWrapper.cs" />

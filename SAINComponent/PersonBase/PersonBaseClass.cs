@@ -11,7 +11,7 @@ namespace SAIN.SAINComponent.BaseClasses
         }
 
         public IPlayer IPlayer { get; private set; }
-        public bool PlayerNull => IPlayer == null;
+        public bool PlayerNull => IPlayer == null || IPlayer.Transform == null;
         public Player Player => IPlayer as Player;
     }
 }

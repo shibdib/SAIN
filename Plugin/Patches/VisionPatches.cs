@@ -273,7 +273,7 @@ namespace SAIN.Patches.Vision
                     if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPatch)))
                     {
                         SAINEnemy sainEnemy = sain.EnemyController.GetEnemy(player.ProfileId);
-                        if (sainEnemy?.FlareEnabled == true && sainEnemy.Heard)
+                        if (sainEnemy?.EnemyStatus.FlareEnabled == true && sainEnemy.Heard)
                         {
                             __result *= 0.9f;
                         }
@@ -308,7 +308,7 @@ namespace SAIN.Patches.Vision
                 if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionDistancePosePatch)))
                 {
                     SAINEnemy sainEnemy = sain.EnemyController.GetEnemy(player.ProfileId);
-                    if (sainEnemy?.FlareEnabled == true)
+                    if (sainEnemy?.EnemyStatus.FlareEnabled == true)
                     {
                         visibility *= 1.25f;
                     }
