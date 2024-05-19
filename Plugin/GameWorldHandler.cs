@@ -36,6 +36,10 @@ namespace SAIN
 
             ELocation Location = ELocation.None;
             string locationString = Singleton<GameWorld>.Instance.LocationId;
+            if (locationString.IsNullOrEmpty())
+            {
+                return ELocation.None;
+            }
             switch (locationString.ToLower())
             {
                 case "bigmap":
