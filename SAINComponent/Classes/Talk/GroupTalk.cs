@@ -525,6 +525,11 @@ namespace SAIN.SAINComponent.Classes.Talk
                 return;
             }
 
+            if ((heardNoise.Position - SAIN.Position).sqrMagnitude > _hearNoiseMaxDist)
+            {
+                return;
+            }
+
             SAIN.Talk.TalkAfterDelay(EPhraseTrigger.NoisePhrase, ETagStatus.Aware, 0.33f);
         }
 

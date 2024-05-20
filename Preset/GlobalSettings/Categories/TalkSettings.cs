@@ -32,15 +32,30 @@ namespace SAIN.Preset.GlobalSettings
         [Default(85f)]
         [Percentage]
         public float FriendlyReponseChance = 85f;
+
         [Default(80f)]
         [Percentage]
         public float FriendlyReponseChanceAI = 80f;
+
         [Default(65f)]
         [Percentage]
         public float FriendlyReponseDistance = 65f;
+
         [Default(35f)]
         [Percentage]
         public float FriendlyReponseDistanceAI = 35f;
+
+        [Default(1f)]
+        [MinMax(0.5f, 10f)]
+        public float FriendlyResponseFrequencyLimit = 1f;
+
+        [Default(0.33f)]
+        [MinMax(0.25f, 3f)]
+        public float FriendlyResponseMinRandomDelay = 0.33f;
+
+        [Default(0.75f)]
+        [MinMax(0.25f, 3f)]
+        public float FriendlyResponseMaxRandomDelay = 0.75f;
 
         [Name("Vanilla Bot Talking")]
         [Description("Disable all SAIN based handling of bot talking. No more squad chatter, no more quiet bots, completely disables SAIN's handling of bot voices")]

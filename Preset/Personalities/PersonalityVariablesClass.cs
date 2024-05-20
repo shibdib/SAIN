@@ -147,7 +147,7 @@ namespace SAIN.Preset.Personalities
 
         [Description("Will this personality yell back at enemies taunting them")]
         [Default(true)]
-        public bool CanRespondToVoice = true;
+        public bool CanRespondToEnemyVoice = true;
 
         [Default(false)]
         [Advanced]
@@ -225,6 +225,10 @@ namespace SAIN.Preset.Personalities
         [Default(false)]
         [Advanced]
         public bool CanFakeDeathRare = false;
+
+        [Default(2f)]
+        [Advanced]
+        public float FakeDeathChance = 2f;
 
         [Name("Bots Who Can Use This")]
         [Description("Setting default on these always results in true")]

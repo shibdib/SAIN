@@ -96,7 +96,7 @@ namespace SAIN.Preset.Personalities
                         PowerLevelMin = 250f,
 
                         CanTaunt = true,
-                        CanRespondToVoice = true,
+                        CanRespondToEnemyVoice = true,
                         TauntFrequency = 6,
                         TauntMaxDistance = 75f,
                         ConstantTaunt = true,
@@ -159,7 +159,7 @@ namespace SAIN.Preset.Personalities
                         PowerLevelMin = 150f,
 
                         CanTaunt = true,
-                        CanRespondToVoice = true,
+                        CanRespondToEnemyVoice = true,
                         TauntFrequency = 4,
                         TauntMaxDistance = 90f,
                         ConstantTaunt = true,
@@ -220,7 +220,7 @@ namespace SAIN.Preset.Personalities
                         PowerLevelMin = 350f,
 
                         CanTaunt = true,
-                        CanRespondToVoice = false,
+                        CanRespondToEnemyVoice = false,
                         TauntFrequency = 15,
                         TauntMaxDistance = 50f,
                         ConstantTaunt = false,
@@ -280,7 +280,7 @@ namespace SAIN.Preset.Personalities
                         PowerLevelMin = 200f,
 
                         CanTaunt = true,
-                        CanRespondToVoice = true,
+                        CanRespondToEnemyVoice = true,
                         TauntFrequency = 10,
                         TauntMaxDistance = 60f,
                         FrequentTaunt = true,
@@ -339,7 +339,7 @@ namespace SAIN.Preset.Personalities
                         SearchWaitMultiplier = 0.8f,
                         PowerLevelMax = 150f,
                         AggressionMultiplier = 1f,
-                        CanRespondToVoice = false,
+                        CanRespondToEnemyVoice = false,
                         WillChaseDistantGunshots = false,
 
                         Sneaky = true,
@@ -397,7 +397,7 @@ namespace SAIN.Preset.Personalities
                         AggressionMultiplier = 1f,
                         ShiftCoverTimeMultiplier = 0.66f,
                         CanBegForLife = true,
-                        CanRespondToVoice = false,
+                        CanRespondToEnemyVoice = false,
                         WillChaseDistantGunshots = false,
 
                         SearchHasEnemySpeed = 0f,
@@ -447,7 +447,7 @@ namespace SAIN.Preset.Personalities
                         AggressionMultiplier = 1f,
                         CanShiftCoverPosition = false,
                         CanBegForLife = true,
-                        CanRespondToVoice = false,
+                        CanRespondToEnemyVoice = false,
                         WillChaseDistantGunshots = false,
 
                         SearchHasEnemySpeed = 0f,
@@ -490,7 +490,7 @@ namespace SAIN.Preset.Personalities
                         WillSearchForEnemy = true,
                         WillSearchFromAudio = true,
                         SearchBaseTime = 60f,
-                        CanRespondToVoice = true,
+                        CanRespondToEnemyVoice = true,
                         WillChaseDistantGunshots = false,
 
                         SearchHasEnemySpeed = 0.6f,
