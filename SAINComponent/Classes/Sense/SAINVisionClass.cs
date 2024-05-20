@@ -36,10 +36,11 @@ namespace SAIN.SAINComponent.Classes
                 return result;
             }
             var pose = player.Pose;
-            float speed = player.Velocity.magnitude / player.MovementContext.MaxSpeed;
+            float speed = player.Velocity.magnitude / 5f; // 5f is the observed max sprinting speed with gameplays (with Realism, which gives faster sprinting)
             if (player.MovementContext.IsSprintEnabled)
             {
-                result *= 1.33f;
+                Preset.GlobalSettings.LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
+                result *= Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Mathf.InverseLerp(0, 5f, player.Velocity.magnitude));
             }
             else switch (pose)
             {
