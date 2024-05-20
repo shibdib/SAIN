@@ -251,20 +251,26 @@ namespace SAIN.Patches.Vision
                         __result *= inverseWeatherModifier;
                     }
 
+                    Preset.GlobalSettings.LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
                     if (player.IsSprintEnabled)
                     {
-                        __result *= 0.66f;
+                        __result *= Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Mathf.InverseLerp(0, 5f, player.Velocity.magnitude)); // 5f is the observed max sprinting speed with gameplays (with Realism, which gives faster sprinting)
                     }
 
-                    float elevationDifference = enemy.position.y - BotTransform.position.y;
-                    if (elevationDifference > 2f)
+                    Vector3 botEyeToPlayerBody = __instance.Person.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
+                    var visionAngleDeviation = Vector3.Angle(new Vector3(botEyeToPlayerBody.x, 0f, botEyeToPlayerBody.z), botEyeToPlayerBody);
+
+                    if (botEyeToPlayerBody.y >= 0)
                     {
-                        __result *= 1.33f;
+                        float angleFactor = Mathf.InverseLerp(0, globalLookSettings.HighElevationMaxAngle, visionAngleDeviation);
+                        __result *= Mathf.Lerp(1f, globalLookSettings.HighElevationVisionModifier, angleFactor);
                     }
-                    if (elevationDifference < -2f)
+                    else
                     {
-                        __result *= 0.85f;
+                        float angleFactor = Mathf.InverseLerp(0, globalLookSettings.LowElevationMaxAngle, visionAngleDeviation);
+                        __result *= Mathf.Lerp(1f, globalLookSettings.LowElevationVisionModifier, angleFactor);
                     }
+        
                     if (!player.IsAI)
                     {
                         __result *= SAINNotLooking.GetVisionSpeedIncrease(__instance.Owner);
