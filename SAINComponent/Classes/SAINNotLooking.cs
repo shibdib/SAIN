@@ -7,108 +7,73 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes
 {
     public class SAINNotLooking
     {
-        private static Player MainPlayer;
-
         private static GeneralSettings Settings => SAINPlugin.LoadedPreset.GlobalSettings.General;
 
-        public static float GetSpreadIncrease(BotOwner bot)
+        public static float GetSpreadIncrease(IPlayer person, BotOwner botOwner)
         {
-            if (Settings.NotLookingToggle && CheckIfPlayerNotLooking(bot))
+            if (Settings.NotLookingToggle && CheckIfPlayerNotLooking(person, botOwner))
             {
                 return Settings.NotLookingAccuracyAmount;
             }
-
             return 0f;
         }
 
-        public static float GetVisionSpeedIncrease(BotOwner bot)
+        public static float GetVisionSpeedDecrease(EnemyInfo enemyInfo)
         {
-            if (CheckIfPlayerNotLooking(bot))
+            if (CheckIfPlayerNotLooking(enemyInfo))
             {
                 return Settings.NotLookingVisionSpeedModifier;
             }
-
             return 1f;
         }
 
-        private static bool CheckIfPlayerNotLooking(BotOwner bot)
+        private static bool CheckIfPlayerNotLooking(IPlayer player, BotOwner botOwner)
         {
-            if (bot == null || bot.GetPlayer == null)
+            if (player == null || botOwner == null)
             {
                 return false;
             }
-            var enemy = bot.Memory.GoalEnemy;
-            if (enemy == null)
+            if (botOwner.EnemiesController.EnemyInfos.TryGetValue(player, out EnemyInfo enemyInfo))
             {
-                return false;
+                return CheckIfPlayerNotLooking(enemyInfo);
             }
-            if (GetMainPlayer())
-            {
-                Vector3 lookDir = MainPlayerLookDir.normalized;
-                Vector3 playerPos = MainPlayerPosition;
+            return false;
+        }
 
-                Vector3 botPos = bot.Position;
+        private static bool CheckIfPlayerNotLooking(EnemyInfo enemyInfo)
+        {
+            if (enemyInfo == null || enemyInfo.Owner == null)
+            {
+                return false;
+            }
+            IPlayer player = enemyInfo.Person;
+            if (player == null)
+            {
+                return false;
+            }
+
+            if (!enemyInfo.HaveSeenPersonal
+                || Time.time - enemyInfo.PersonalSeenTime <= Settings.NotLookingTimeLimit
+                || !enemyInfo.IsVisible)
+            {
+                Vector3 lookDir = player.LookDirection.normalized;
+                Vector3 playerPos = player.Position;
+                Vector3 botPos = enemyInfo.Owner.Position;
                 Vector3 botDir = (botPos - playerPos).normalized;
-
                 float angle = Vector3.Angle(botDir, lookDir);
-
-                if (angle >= Settings.NotLookingAngle)
-                {
-                    if (!enemy.HaveSeenPersonal
-                        || Time.time - enemy.PersonalSeenTime <= Settings.NotLookingTimeLimit
-                        || !enemy.IsVisible)
-                    {
-                        if (SAINPlugin.DebugMode && DebugTimer < Time.time)
-                        {
-                            DebugTimer = Time.time + 1f;
-                            //Logger.LogDebug($"Player Not Looking at Bot");
-                        }
-                        return true;
-                    }
-                }
+                return angle >= Settings.NotLookingAngle;
             }
 
             return false;
         }
 
         private static float DebugTimer;
-
-        private static bool GetMainPlayer()
-        {
-            if (MainPlayer == null)
-            {
-                MainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-            }
-            return MainPlayer != null;
-        }
-
-        private static Vector3 MainPlayerLookDir
-        {
-            get
-            {
-                if (MainPlayer != null)
-                {
-                    return MainPlayer.LookDirection;
-                }
-                return Vector3.down;
-            }
-        }
-        private static Vector3 MainPlayerPosition
-        {
-            get
-            {
-                if (MainPlayer != null)
-                {
-                    return MainPlayer.Position;
-                }
-                return Vector3.zero;
-            }
-        }
     }
 }

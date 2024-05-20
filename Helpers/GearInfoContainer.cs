@@ -152,7 +152,7 @@ namespace SAIN
             return gainVisionTime;
         }
 
-        public float GetGainSightModifierFromGear(float distance)
+        public float GetStealthModifier(float distance)
         {
             if (_nextGetSightModTime < Time.time)
             {

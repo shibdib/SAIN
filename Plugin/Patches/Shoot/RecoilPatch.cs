@@ -56,13 +56,13 @@ namespace SAIN.Patches.Shoot
         {
             if (person.IsAI == false)
             {
-                float ExtraSpread = SAINNotLooking.GetSpreadIncrease(botOwner);
+                float ExtraSpread = SAINNotLooking.GetSpreadIncrease(person, botOwner);
                 if (ExtraSpread > 0)
                 {
                     Vector3 vectorSpread = UnityEngine.Random.insideUnitSphere * ExtraSpread;
                     if (SAINPlugin.DebugMode && DebugTimer < Time.time)
                     {
-                        DebugTimer = Time.time + 1f;
+                        DebugTimer = Time.time + 10f;
                         Logger.LogDebug($"Increasing Spread because Player isn't looking. Magnitude: [{vectorSpread.magnitude}]");
                     }
                     return vectorSpread;

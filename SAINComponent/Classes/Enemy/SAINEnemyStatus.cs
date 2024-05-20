@@ -51,7 +51,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
         }
 
-        public bool FlareEnabled
+        public bool PositionalFlareEnabled
         {
             get
             {

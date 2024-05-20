@@ -326,9 +326,9 @@ namespace SAIN.SAINComponent.Classes
 
         private Vector3 GetSoundDispersion(IPlayer person, Vector3 pos, AISoundType soundType)
         {
-            const float dispGun = 20f;
-            const float dispSuppGun = 15;
-            const float dispStep = 10;
+            const float dispGun = 17.5f;
+            const float dispSuppGun = 12.5f;
+            const float dispStep = 6.25f;
 
             Vector3 shooterDirectionToBot = BotOwner.Transform.position - pos;
             float shooterDistance = shooterDirectionToBot.magnitude;

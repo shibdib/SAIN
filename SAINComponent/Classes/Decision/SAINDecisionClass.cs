@@ -70,11 +70,37 @@ namespace SAIN.SAINComponent.Classes.Decision
             if (CurrentSoloDecision == SoloDecision.DogFight 
                 && DogFightTarget != null)
             {
-                return (!DogFightTarget.IsVisible && DogFightTarget.TimeSinceSeen > 2f)
-                    || DogFightTarget.RealDistance > _dogFightEndDist;
+                checkClearDogFightTarget();
+                if (DogFightTarget != null)
+                {
+                    return true;
+                }
             }
             DogFightTarget = findDogFightTarget();
             return DogFightTarget != null;
+        }
+
+        private void checkClearDogFightTarget()
+        {
+            if (DogFightTarget == null)
+            {
+                return;
+            }
+            if (DogFightTarget.Player?.HealthController.IsAlive == false)
+            {
+                DogFightTarget = null;
+                return;
+            }
+            if (DogFightTarget.RealDistance > _dogFightEndDist)
+            {
+                DogFightTarget = null;
+                return;
+            }
+            if (!DogFightTarget.IsVisible && DogFightTarget.TimeSinceSeen > 3f)
+            {
+                DogFightTarget = null;
+                return;
+            }
         }
 
         private SAINEnemy findDogFightTarget()
@@ -82,7 +108,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             var enemies = SAIN.EnemyController.Enemies;
             foreach (var enemy in enemies)
             {
-                if (enemy.Value.IsValid && shallDogFightEnemy(enemy.Value))
+                if (shallDogFightEnemy(enemy.Value))
                 {
                     return enemy.Value;
                 }
@@ -94,12 +120,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallDogFightEnemy(SAINEnemy enemy)
         {
-            if (CurrentSoloDecision == SoloDecision.DogFight)
-            {
-                return (!enemy.IsVisible && enemy.Seen && enemy.TimeSinceSeen > 2f)
-                    && enemy.RealDistance > _dogFightEndDist;
-            }
-            return enemy.IsVisible && enemy.RealDistance < _dogFightStartDist;
+            return enemy?.IsValid == true && enemy.IsVisible && enemy.RealDistance < _dogFightStartDist;
         }
 
         private float _dogFightStartDist = 8f;

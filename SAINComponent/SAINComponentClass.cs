@@ -45,18 +45,6 @@ namespace SAIN.SAINComponent
             return false;
         }
 
-        private void PlayerKilled(EDamageType damageType)
-        {
-            if (damageType == EDamageType.Bullet)
-            {
-                IFirearmHandsController firearmHandsController = Player?.HandsController as IFirearmHandsController;
-                if (firearmHandsController != null)
-                {
-                    // firearmHandsController.SetTriggerPressed(true);
-                }
-            }
-        }
-
         public Action<string, BotOwner> OnSAINDisposed { get; set; }
         public SAINPersonClass Person { get; private set; }
         public SAINMedical Medical { get; private set; }
@@ -67,11 +55,6 @@ namespace SAIN.SAINComponent
             {
                 Logger.LogAndNotifyError("Person is Null in SAINComponent Init");
                 return false;
-            }
-
-            if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(person.Player, out float power))
-            {
-                _powerCalcd = true;
             }
 
             Person = person;
@@ -149,15 +132,6 @@ namespace SAIN.SAINComponent
             SpaceAwareness.Init();
             Medical.Init();
 
-            try
-            {
-                Player.HealthController.DiedEvent += PlayerKilled;
-            }
-            catch
-            {
-
-            }
-
             TimeBotCreated = Time.time;
 
             return true;
@@ -200,15 +174,6 @@ namespace SAIN.SAINComponent
                 if (BotOwner.Mover.IsMoving)
                 {
                     DoorOpener.Update();
-                }
-
-                if (!_powerCalcd && BotOwner?.WeaponManager?.IsWeaponReady == true)
-                {
-                    if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(Player, out float power))
-                    {
-                        Info.CalcPersonality();
-                        _powerCalcd = true;
-                    }
                 }
 
                 Decision.Update();
@@ -255,7 +220,6 @@ namespace SAIN.SAINComponent
         }
 
         private float _nextCheckReloadTime;
-        private bool _powerCalcd;
         public SAINDoorOpener DoorOpener { get; private set; }
         public bool PatrolDataPaused { get; private set; }
         public bool IsHumanACareEnemy
@@ -397,12 +361,6 @@ namespace SAIN.SAINComponent
             {
                 OnSAINDisposed?.Invoke(ProfileId, BotOwner);
 
-                try
-                {
-                    Player.HealthController.DiedEvent -= PlayerKilled;
-                }
-                catch { }
-
                 StopAllCoroutines();
 
                 Search.Dispose();
@@ -520,7 +478,6 @@ namespace SAIN.SAINComponent
                 {
                     return lastKnownPlace.Position;
                 }
-                return Enemy.EnemyPosition;
             }
             return null;
         }

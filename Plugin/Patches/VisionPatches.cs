@@ -16,6 +16,7 @@ using static UnityEngine.EventSystems.EventTrigger;
 using UnityEngine.UIElements;
 using EFT.InventoryLogic;
 using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.Preset.GlobalSettings.Categories;
 
 namespace SAIN.Patches.Vision
 {
@@ -216,77 +217,20 @@ namespace SAIN.Patches.Vision
         }
 
         [PatchPostfix]
-        public static void PatchPostfix(BifacialTransform BotTransform, BifacialTransform enemy, ref float __result, EnemyInfo __instance)
+        public static void PatchPostfix(ref float __result, EnemyInfo __instance)
         {
-            float dist = (BotTransform.position - enemy.position).magnitude;
-            float weatherModifier = SAINPlugin.BotController.WeatherVision.VisibilityNum;
-            float inverseWeatherModifier = Mathf.Sqrt(2f - weatherModifier);
-
-            WildSpawnType wildSpawnType = __instance.Owner.Profile.Info.Settings.Role;
-            if (PresetHandler.LoadedPreset.BotSettings.SAINSettings.TryGetValue(wildSpawnType, out var botType))
+            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPatch)) 
+                && __instance.Person != null)
             {
-                BotDifficulty diff = __instance.Owner.Profile.Info.Settings.BotDifficulty;
-                __result *= Math.CalcVisSpeed(dist, botType.Settings[diff]);
-            }
-
-            var person = __instance?.Person;
-            if (person != null)
-            {
-                Player player = EFTInfo.GetPlayer(__instance.Person.ProfileId);
-                if (player != null)
+                SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
+                if (enemy != null)
                 {
-                    var gearInfo = SAINGearInfoHandler.GetGearInfo(player);
-                    if (gearInfo != null)
-                    {
-                        __result *= gearInfo.GetGainSightModifierFromGear(__instance.Distance);
-                    }
-                    // if player is using suppressed weapon, and has shot recently, don't increase vis speed as much.
-                    bool suppressedFlare = false;
-                    if (player.HandsController.Item is Weapon weapon)
-                    {
-                        suppressedFlare = person.AIData.GetFlare && gearInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
-                    }
-
-                    if (!person.AIData.GetFlare || suppressedFlare)
-                    {
-                        __result *= inverseWeatherModifier;
-                    }
-
-                    Preset.GlobalSettings.LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
-                    if (player.IsSprintEnabled)
-                    {
-                        __result *= Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Mathf.InverseLerp(0, 5f, player.Velocity.magnitude)); // 5f is the observed max sprinting speed with gameplays (with Realism, which gives faster sprinting)
-                    }
-
-                    Vector3 botEyeToPlayerBody = __instance.Person.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
-                    var visionAngleDeviation = Vector3.Angle(new Vector3(botEyeToPlayerBody.x, 0f, botEyeToPlayerBody.z), botEyeToPlayerBody);
-
-                    if (botEyeToPlayerBody.y >= 0)
-                    {
-                        float angleFactor = Mathf.InverseLerp(0, globalLookSettings.HighElevationMaxAngle, visionAngleDeviation);
-                        __result *= Mathf.Lerp(1f, globalLookSettings.HighElevationVisionModifier, angleFactor);
-                    }
-                    else
-                    {
-                        float angleFactor = Mathf.InverseLerp(0, globalLookSettings.LowElevationMaxAngle, visionAngleDeviation);
-                        __result *= Mathf.Lerp(1f, globalLookSettings.LowElevationVisionModifier, angleFactor);
-                    }
-        
-                    if (!player.IsAI)
-                    {
-                        __result *= SAINNotLooking.GetVisionSpeedIncrease(__instance.Owner);
-                    }
-
-                    if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPatch)))
-                    {
-                        SAINEnemy sainEnemy = sain.EnemyController.GetEnemy(player.ProfileId);
-                        if (sainEnemy?.EnemyStatus.FlareEnabled == true && sainEnemy.Heard)
-                        {
-                            __result *= 0.9f;
-                        }
-                    }
+                    __result *= enemy.Vision.GainSightModifier;
+                    return;
                 }
             }
+
+            __result *= SAINEnemyVision.GetGainSightModifier(__instance, null);
         }
     }
 
@@ -309,15 +253,15 @@ namespace SAIN.Patches.Vision
                 var gearInfo = SAINGearInfoHandler.GetGearInfo(player);
                 if (gearInfo != null)
                 {
-                    visibility *= gearInfo.GetGainSightModifierFromGear(__instance.Distance);
+                    visibility /= gearInfo.GetStealthModifier(__instance.Distance);
                 }
 
                 if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionDistancePosePatch)))
                 {
                     SAINEnemy sainEnemy = sain.EnemyController.GetEnemy(player.ProfileId);
-                    if (sainEnemy?.EnemyStatus.FlareEnabled == true)
+                    if (sainEnemy?.EnemyStatus.PositionalFlareEnabled == true && sainEnemy?.Heard == true)
                     {
-                        visibility *= 1.25f;
+                        visibility *= 1.15f;
                     }
                     if (player.AIData.GetFlare && sainEnemy?.Heard == true)
                     {
@@ -331,12 +275,19 @@ namespace SAIN.Patches.Vision
                         }
 
                         // increase visiblity
-                        visibility *= suppressedFlare ? 1.1f : 1.25f;
+                        visibility *= suppressedFlare ? 1.05f : 1.15f;
                     }
                 }
                 if (player.IsSprintEnabled)
                 {
-                    visibility *= 1.25f;
+                    visibility *= 1.15f;
+                }
+
+                // Reduce vision distance for ai vs ai vision checks
+                if (player.IsAI 
+                    && SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI)
+                {
+                    visibility *= 0.65f;
                 }
 
                 float defaultVisDist = __instance.Owner.LookSensor.VisibleDist;
@@ -355,9 +306,7 @@ namespace SAIN.Patches.Vision
         protected override MethodBase GetTargetMethod()
         {
             _UsingLight = AccessTools.PropertySetter(typeof(AIData), "UsingLight");
-
             _tacticalModesField = AccessTools.Field(typeof(TacticalComboVisualController), "list_0");
-
             return AccessTools.Method(typeof(Player.FirearmController), "SetLightsState");
         }
 
