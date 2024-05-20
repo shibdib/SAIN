@@ -217,6 +217,21 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private IEnumerator RespondToVoice(EPhraseTrigger trigger, ETagStatus mask, float delay, Player sourcePlayer, float responseDist, float chance = 100f, bool friendly = false)
         {
+            if (!EFTMath.RandomBool(chance))
+            {
+                yield break;
+            }
+            if (sourcePlayer == null || BotOwner == null || Player == null || SAIN == null || sourcePlayer.ProfileId == SAIN.ProfileId)
+            {
+                yield break;
+            }
+            if (!sourcePlayer.HealthController.IsAlive
+                || !Player.HealthController.IsAlive
+                || (sourcePlayer.Position - SAIN.Position).sqrMagnitude > responseDist * responseDist)
+            {
+                yield break;
+            }
+
             yield return new WaitForSeconds(delay);
 
             if (sourcePlayer == null || BotOwner == null || Player == null || SAIN == null)
@@ -224,24 +239,18 @@ namespace SAIN.SAINComponent.Classes.Talk
                 yield break;
             }
 
-            if (sourcePlayer.HealthController.IsAlive
-                && Player.HealthController.IsAlive 
-                && (sourcePlayer.Position - SAIN.Position).sqrMagnitude < responseDist * responseDist)
+            if (friendly && !BotOwner.Memory.IsPeace)
             {
-                //Logger.LogInfo("Responding To Voice! Coroutine finish");
-                if (friendly && !BotOwner.Memory.IsPeace)
+                SAIN.Talk.Say(trigger, null, true);
+            }
+            else
+            {
+                if (friendly && _nextGestureTime < Time.time)
                 {
-                    SAIN.Talk.Say(trigger, null, true);
+                    _nextGestureTime = Time.time + 3f;
+                    Player.HandsController.ShowGesture(EGesture.Hello);
                 }
-                else
-                {
-                    if (friendly && _nextGestureTime < Time.time)
-                    {
-                        _nextGestureTime = Time.time + 3f;
-                        Player.HandsController.ShowGesture(EGesture.Hello);
-                    }
-                    SAIN.Talk.Say(trigger, mask, false);
-                }
+                SAIN.Talk.Say(trigger, mask, false);
             }
         }
 
@@ -264,7 +273,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     && _nextResponseTime < Time.time)
                 {
                     //Logger.LogInfo("Responding To Voice!");
-                    _nextResponseTime = Time.time + 0.5f;
+                    _nextResponseTime = Time.time + 1f;
                     SAIN.StartCoroutine(RespondToVoice(
                         EPhraseTrigger.OnFight,
                         ETagStatus.Combat,
@@ -307,7 +316,11 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void SetFriendlyTalked(Player player)
         {
-            if (player == null || SAIN == null || !player.HealthController.IsAlive || (player.Position - SAIN.Position).sqrMagnitude > 80f * 80f || SAIN.ProfileId == player.ProfileId)
+            if (player == null 
+                || SAIN == null 
+                || !player.HealthController.IsAlive 
+                || (player.Position - SAIN.Position).sqrMagnitude > 100f * 100f 
+                || SAIN.ProfileId == player.ProfileId)
             {
                 return;
             }
@@ -315,7 +328,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (BotOwner.Memory.IsPeace
                 && _nextResponseTime < Time.time)
             {
-                _nextResponseTime = Time.time + 0.75f;
+                _nextResponseTime = Time.time + 1f;
 
                 if (player.IsAI == false || shallBeChatty())
                 {
