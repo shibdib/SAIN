@@ -1,5 +1,6 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
+using SAIN.SAINComponent.Classes.Enemy;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes

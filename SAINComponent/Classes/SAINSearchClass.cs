@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.Enemy;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;

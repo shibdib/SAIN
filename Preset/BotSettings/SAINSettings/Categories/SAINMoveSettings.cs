@@ -26,7 +26,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float RUN_TO_COVER_MIN = 2f;
+        public float RUN_TO_COVER_MIN = 1.5f;
 
         // [Hidden]
         // [JsonIgnore]
@@ -40,16 +40,16 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         //[JsonIgnore]
         //public float REACH_DIST_RUN = 1f;
         //
-        //[Hidden]
-        //[JsonIgnore]
-        //public float BASESTART_SLOW_DIST = 0.65f;
+        [Hidden]
+        [JsonIgnore]
+        public float BASESTART_SLOW_DIST = 0.65f;
         //
         //[Hidden]
         //[JsonIgnore]
         //public float START_SLOW_DIST = 1.25f;
         //
-        //[Hidden]
-        //[JsonIgnore]
-        //public float SLOW_COEF = 10;
+        [Hidden]
+        [JsonIgnore]
+        public float SLOW_COEF = 10;
     }
 }

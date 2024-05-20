@@ -2,7 +2,7 @@
 using SAIN.SAINComponent.SubComponents;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class SAINEnemyVision : EnemyBase
     {
@@ -65,8 +65,8 @@ namespace SAIN.SAINComponent.Classes
 
             if (!IsVisible)
             {
-                if (Seen 
-                    && TimeSinceSeen > _lostContactMinSeenTime 
+                if (Seen
+                    && TimeSinceSeen > _lostContactMinSeenTime
                     && _nextReportLostVisualTime < Time.time)
                 {
                     _nextReportLostVisualTime = Time.time + 20f;

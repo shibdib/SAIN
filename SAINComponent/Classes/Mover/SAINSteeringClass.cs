@@ -1,5 +1,6 @@
 ﻿using EFT;
 using HarmonyLib;
+using SAIN.SAINComponent.Classes.Enemy;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;

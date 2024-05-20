@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class EnemyPlace
     {
@@ -25,8 +25,8 @@ namespace SAIN.SAINComponent.Classes
                 {
                     return true;
                 }
-                if (HasArrivedPersonal 
-                    && HasSeenPersonal 
+                if (HasArrivedPersonal
+                    && HasSeenPersonal
                     && Time.time - TimeArrived > 2f
                     && Time.time - TimeSeen > 2f)
                 {
@@ -34,12 +34,12 @@ namespace SAIN.SAINComponent.Classes
                 }
                 if (HasArrivedSquad
                     && HasSquadSeen
-                    && Time.time - TimeSquadArrived > 2f 
+                    && Time.time - TimeSquadArrived > 2f
                     && Time.time - TimeSquadSeen > 2f)
                 {
                     return true;
                 }
-                if (Player?.HealthController?.IsAlive != true)
+                if (Player?.HealthController?.IsAlive == false)
                 {
                     return true;
                 }
@@ -59,10 +59,17 @@ namespace SAIN.SAINComponent.Classes
                 {
                     _nextCheckLeaveTime = Time.time + 5f;
                     // If the person this place was created for is AI and left the area, just forget it and move on.
-                    if (Player?.IsAI == true
-                        && (Player.Position - Position).sqrMagnitude > 75f * 75f)
+                    if (Player != null)
                     {
-                        return true;
+                        float sqrMag = (Player.Position - Position).sqrMagnitude;
+                        if (Player?.IsAI == true && sqrMag > 75f * 75f)
+                        {
+                            return true;
+                        }
+                        if (Player?.IsAI == false && sqrMag > 125f * 125f)
+                        {
+                            return true;
+                        }
                     }
                 }
                 return false;

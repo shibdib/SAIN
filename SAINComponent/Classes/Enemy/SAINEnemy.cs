@@ -6,9 +6,9 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
-using static SAIN.SAINComponent.Classes.SAINEnemy;
+using static SAIN.SAINComponent.Classes.Enemy.SAINEnemy;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class SAINEnemy : SAINBase, ISAINClass
     {
@@ -68,7 +68,7 @@ namespace SAIN.SAINComponent.Classes
         public EnemyInfo EnemyInfo { get; private set; }
         public SAINPersonClass EnemyPerson { get; private set; }
         public SAINPersonTransformClass EnemyTransform { get; private set; }
-        public bool IsCurrentEnemy => SAIN.HasEnemy && SAIN.Enemy.EnemyProfileId == this.EnemyProfileId;
+        public bool IsCurrentEnemy => SAIN.HasEnemy && SAIN.Enemy.EnemyProfileId == EnemyProfileId;
 
         public void Init()
         {

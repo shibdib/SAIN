@@ -4,6 +4,7 @@ using SAIN.Components;
 using UnityEngine;
 using static SAIN.Helpers.HelpersGClass;
 using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.SAINComponent.Classes.Sense
 {

@@ -7,6 +7,7 @@ using SAIN.SAINComponent.BaseClasses;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Debug;
 using SAIN.SAINComponent.Classes.Decision;
+using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.Classes.Info;
 using SAIN.SAINComponent.Classes.Mover;
 using SAIN.SAINComponent.Classes.Talk;

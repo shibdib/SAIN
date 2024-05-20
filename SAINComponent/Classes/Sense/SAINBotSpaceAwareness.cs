@@ -4,6 +4,7 @@ using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Layers.Combat.Solo;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
 using System.Collections;

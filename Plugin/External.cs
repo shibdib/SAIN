@@ -3,6 +3,7 @@ using EFT;
 using HarmonyLib;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
+using SAIN.SAINComponent.Classes.Enemy;
 using System;
 using System.Collections.Generic;
 using System.Linq;

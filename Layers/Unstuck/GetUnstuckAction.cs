@@ -41,26 +41,6 @@ namespace SAIN.Layers.Combat.Run
                 }
             }
 
-            if (unstuckDestination == null)
-            {
-                var preVaultPosition = SAIN.BotStuck.PreVaultPositions;
-                for (int i = 0; i < preVaultPosition.Count; i++)
-                {
-                    var pos = preVaultPosition[i];
-                    NavMeshPath path = new NavMeshPath();
-                    if (NavMesh.CalculatePath(pos, SAIN.Position, -1, path))
-                    {
-                        unstuckDestination = new Vector3?(path.corners[path.corners.Length - 1]);
-                        break;
-                    }
-                    else
-                    {
-                        unstuckDestination = new Vector3?(pos);
-                        break;
-                    }
-                }
-            }
-
             if (unstuckDestination != null)
             {
                 BotOwner.Mover.GoToByWay(new Vector3[] { SAIN.Position, unstuckDestination.Value }, -1f);

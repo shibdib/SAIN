@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class SAINEnemyController : SAINBase, ISAINClass
     {
@@ -172,14 +172,14 @@ namespace SAIN.SAINComponent.Classes
                 }
                 else if (debugLastHeardPosition != null || debugLastSeenPosition != null)
                 {
-                    GameObject.Destroy(debugLastHeardPosition);
-                    GameObject.Destroy(debugLastSeenPosition);
+                    Object.Destroy(debugLastHeardPosition);
+                    Object.Destroy(debugLastSeenPosition);
                 }
             }
             else if (debugLastHeardPosition != null || debugLastSeenPosition != null)
             {
-                GameObject.Destroy(debugLastHeardPosition);
-                GameObject.Destroy(debugLastSeenPosition);
+                Object.Destroy(debugLastHeardPosition);
+                Object.Destroy(debugLastSeenPosition);
             }
         }
 
@@ -331,7 +331,7 @@ namespace SAIN.SAINComponent.Classes
         public SAINEnemy CheckAddEnemy(IPlayer IPlayer)
         {
             AddEnemy(IPlayer);
-            if (IPlayer != null 
+            if (IPlayer != null
                 && Enemies.TryGetValue(IPlayer.ProfileId, out SAINEnemy enemy))
             {
                 return enemy;
@@ -341,10 +341,10 @@ namespace SAIN.SAINComponent.Classes
 
         private void AddEnemy(IPlayer player)
         {
-            if (player == null 
+            if (player == null
                 || !player.HealthController.IsAlive
-                || Enemies.ContainsKey(player.ProfileId) 
-                || player.ProfileId == SAIN.ProfileId 
+                || Enemies.ContainsKey(player.ProfileId)
+                || player.ProfileId == SAIN.ProfileId
                 || player.IsAI && player.AIData?.BotOwner == null)
             {
                 return;
@@ -382,7 +382,7 @@ namespace SAIN.SAINComponent.Classes
                                 Vector3 playerHeadPos = player.MainParts[BodyPartType.head].Position;
 
                                 Vector3 botChestPos = SAIN.Person.Transform.CenterPosition;
-                                Vector3 botDir = (botChestPos - playerHeadPos);
+                                Vector3 botDir = botChestPos - playerHeadPos;
 
                                 if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
                                 {

@@ -37,7 +37,12 @@ namespace SAIN
     {
         public static bool IsBotExluded(BotOwner botOwner)
         {
-            return BotSpawnController.ExclusionList.Contains(botOwner.Profile.Info.Settings.Role);
+            return IsBotExluded(botOwner.Profile.Info.Settings.Role);
+        }
+
+        public static bool IsBotExluded(WildSpawnType wildSpawnType)
+        {
+            return BotSpawnController.ExclusionList.Contains(wildSpawnType);
         }
 
         public static bool GetSAIN(BotOwner botOwner, out SAINComponentClass sain, string patchName)
@@ -110,8 +115,8 @@ namespace SAIN
         {
             var patches = new List<Type>() {
                 //typeof(Patches.Generic.ShallRunAwayGrenadePatch),
-                //typeof(Patches.Generic.IsSameWayPatch),
 
+                typeof(Patches.Generic.BulletImpactSuppressionPatch),
                 typeof(Patches.Generic.HaveSeenEnemyPatch),
                 typeof(Patches.Generic.StopSetToNavMeshPatch),
                 typeof(Patches.Generic.TurnDamnLightOffPatch),
@@ -124,7 +129,7 @@ namespace SAIN
                 typeof(Patches.Generic.GrenadeExplosionActionPatch),
                 typeof(Patches.Generic.AimRotateSpeedPatch),
                 typeof(Patches.Generic.OnMakingShotRecoilPatch),
-                typeof(Patches.Generic.GetHitPatch),
+                //typeof(Patches.Generic.GetHitPatch),
                 typeof(Patches.Generic.BotGroupAddEnemyPatch),
                 typeof(Patches.Generic.ForceNoHeadAimPatch),
                 typeof(Patches.Generic.NoTeleportPatch),

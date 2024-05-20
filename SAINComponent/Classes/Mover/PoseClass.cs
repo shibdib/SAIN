@@ -2,6 +2,7 @@
 using UnityEngine;
 using SAIN.Helpers;
 using System;
+using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {

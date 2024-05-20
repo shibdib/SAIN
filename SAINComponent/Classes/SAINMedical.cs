@@ -5,11 +5,11 @@ using SAIN.SAINComponent.Classes.Decision;
 using SAIN.SAINComponent.Classes.Talk;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.Classes.Mover;
-using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents;
 using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
+using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.SAINComponent.Classes
 {

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using static UnityEngine.UI.GridLayoutGroup;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class SAINEnemyPath : EnemyBase
     {
@@ -87,7 +87,7 @@ namespace SAIN.SAINComponent.Classes
             // We should always have a not null LastKnownPosition here, but have the real position as a fallback just in case
             Vector3 enemyPosition;
             EnemyPlace lastKnown = Enemy.KnownPlaces.LastKnownPlace;
-            if (lastKnown !=  null)
+            if (lastKnown != null)
             {
                 enemyPosition = lastKnown.Position;
             }
@@ -99,7 +99,7 @@ namespace SAIN.SAINComponent.Classes
             Vector3 botPosition = SAIN.Position;
 
             // Did we already check the current enemy position and has the bot not moved? dont recalc path then
-            if (_enemyLastPosChecked != null 
+            if (_enemyLastPosChecked != null
                 && (_enemyLastPosChecked.Value - enemyPosition).sqrMagnitude < 0.1f
                 && (_botLastPosChecked - botPosition).sqrMagnitude < 0.1f)
             {
@@ -195,10 +195,10 @@ namespace SAIN.SAINComponent.Classes
         public Vector3? LastCornerToEnemy { get; private set; }
         public bool CanSeeLastCornerToEnemy { get; private set; }
 
-        public Vector3? BlindCornerToEnemy 
-        { 
-            get 
-            { 
+        public Vector3? BlindCornerToEnemy
+        {
+            get
+            {
                 if (_nextCheckBlindCornerTime < Time.time)
                 {
                     _nextCheckBlindCornerTime = Time.time + 0.5f;
@@ -229,7 +229,7 @@ namespace SAIN.SAINComponent.Classes
                     if (!SAINPlugin.DebugMode && blindcornerGUIObject != null)
                     {
                         DebugGizmos.DestroyLabel(blindcornerGUIObject);
-                        GameObject.Destroy(blindcornerGammeObject);
+                        Object.Destroy(blindcornerGammeObject);
                         blindcornerGUIObject = null;
                     }
                 }

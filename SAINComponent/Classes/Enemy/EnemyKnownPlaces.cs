@@ -10,7 +10,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class EnemyKnownPlaces
     {
@@ -82,7 +82,7 @@ namespace SAIN.SAINComponent.Classes
                 Vector3 lookSensor = _enemy.BotOwner.LookSensor._headPoint;
                 foreach (var place in HeardPlacesPersonal)
                 {
-                    if (!place.HasSeenPersonal 
+                    if (!place.HasSeenPersonal
                         && place.PersonalClearLineOfSight(lookSensor, LayerMaskClass.HighPolyWithTerrainMaskAI))
                     {
                         tryTalk();
@@ -97,7 +97,7 @@ namespace SAIN.SAINComponent.Classes
 
                 Vector3 lookSensor = _enemy.BotOwner.LookSensor._headPoint;
                 EnemyPlace place = LastSquadSeenPlace;
-                if (place != null 
+                if (place != null
                     && !place.HasSquadSeen
                     && place.SquadClearLineOfSight(lookSensor, LayerMaskClass.HighPolyWithTerrainMaskAI))
                 {
@@ -218,7 +218,7 @@ namespace SAIN.SAINComponent.Classes
 
             stringBuilder.AppendLine($"Time Since Position Updated: {Time.time - place.TimePositionUpdated}");
 
-            stringBuilder.AppendLine($"Arrived? [{place.HasArrivedPersonal}]" 
+            stringBuilder.AppendLine($"Arrived? [{place.HasArrivedPersonal}]"
                 + (place.HasArrivedPersonal ? $"Time Since Arrived: [{Time.time - place.TimeArrived}]" : string.Empty));
 
             stringBuilder.AppendLine($"Seen? [{place.HasSeenPersonal}]"
@@ -227,10 +227,10 @@ namespace SAIN.SAINComponent.Classes
 
         private readonly Dictionary<EnemyPlace, GUIObject> _guiObjects = new Dictionary<EnemyPlace, GUIObject>();
 
-        public bool SearchedAllKnownLocations 
-        { 
-            get 
-            { 
+        public bool SearchedAllKnownLocations
+        {
+            get
+            {
                 if (_nextCheckSearchTime < Time.time)
                 {
                     _nextCheckSearchTime = Time.time + 0.5f;
@@ -245,7 +245,7 @@ namespace SAIN.SAINComponent.Classes
                         }
                     }
 
-                    if (allSearched 
+                    if (allSearched
                         && !_searchedAllKnownLocations)
                     {
                         TimeAllLocationsSearched = Time.time;
@@ -332,7 +332,7 @@ namespace SAIN.SAINComponent.Classes
             _searchedAllKnownLocations = false;
 
             var lastHeard = LastHeardPlace;
-            if (lastHeard != null 
+            if (lastHeard != null
                 && (lastHeard.Position - position).sqrMagnitude < 5f * 5f)
             {
                 lastHeard.Position = position;
@@ -340,9 +340,9 @@ namespace SAIN.SAINComponent.Classes
                 return lastHeard;
             }
 
-            var newPlace = new EnemyPlace(position, 300f, gunFire, _enemy.EnemyIPlayer) 
+            var newPlace = new EnemyPlace(position, 300f, gunFire, _enemy.EnemyIPlayer)
             {
-                HasArrivedPersonal = arrived, 
+                HasArrivedPersonal = arrived,
             };
 
             if (HeardPlacesPersonal.Count >= _maxHeardPlaces)

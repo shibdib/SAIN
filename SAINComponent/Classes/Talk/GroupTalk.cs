@@ -7,6 +7,7 @@ using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
 using System.Linq;

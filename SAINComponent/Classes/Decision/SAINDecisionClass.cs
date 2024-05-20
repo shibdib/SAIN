@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
 using System.Collections;

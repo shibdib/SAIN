@@ -26,7 +26,7 @@ namespace SAIN.Patches.Hearing
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ____botOwner)
         {
-            if (SAINPlugin.IsBotExluded(____botOwner))
+            if (SAINPlugin.IsBotExluded(____botOwner.Profile.Info.Settings.Role))
             {
                 return true;
             }

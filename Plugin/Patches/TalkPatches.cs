@@ -27,8 +27,7 @@ namespace SAIN.Patches.Talk
         [PatchPrefix]
         public static bool PatchPrefix(ref Player __instance, ref EPhraseTrigger @event, ref ETagStatus mask, ref bool aggressive)
         {
-            // If handling of bots talking is disabled, let the original method run
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching || __instance.HealthController?.IsAlive == false)
+            if (__instance?.HealthController?.IsAlive == false)
             {
                 return true;
             }
@@ -43,12 +42,19 @@ namespace SAIN.Patches.Talk
                     break;
             }
 
-            if (!__instance.IsAI)
+            BotOwner botOwner = __instance?.AIData?.BotOwner;
+            if (botOwner == null)
             {
                 SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
                 return true;
             }
-            if (SAINPlugin.IsBotExluded(__instance.AIData.BotOwner))
+
+            // If handling of bots talking is disabled, let the original method run
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
+            {
+                return true;
+            }
+            if (SAINPlugin.IsBotExluded(botOwner.Profile.Info.Settings.Role))
             {
                 return true;
             }
@@ -64,7 +70,7 @@ namespace SAIN.Patches.Talk
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref BotOwner ___botOwner_0, EPhraseTrigger type, ETagStatus? additionalMask = null)
+        public static bool PatchPrefix(BotOwner ___botOwner_0, EPhraseTrigger type, ETagStatus? additionalMask = null)
         {
             // If handling of bots talking is disabled, let the original method run
             if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
@@ -75,7 +81,7 @@ namespace SAIN.Patches.Talk
             {
                 return false;
             }
-            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            if (SAINPlugin.IsBotExluded(___botOwner_0.Profile.Info.Settings.Role))
             {
                 return true;
             }
@@ -94,14 +100,14 @@ namespace SAIN.Patches.Talk
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref BotOwner ___botOwner_0)
+        public static bool PatchPrefix(BotOwner ___botOwner_0)
         {
             // If handling of bots talking is disabled, let the original method run
             if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
             {
                 return true;
             }
-            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            if (SAINPlugin.IsBotExluded(___botOwner_0.Profile.Info.Settings.Role))
             {
                 return true;
             }

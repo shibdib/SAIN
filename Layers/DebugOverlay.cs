@@ -1,6 +1,6 @@
 ﻿using EFT;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes;
+using SAIN.SAINComponent.Classes.Enemy;
 using System;
 using System.Reflection;
 using System.Text;

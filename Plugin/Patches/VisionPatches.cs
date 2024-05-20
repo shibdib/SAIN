@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using static UnityEngine.EventSystems.EventTrigger;
 using UnityEngine.UIElements;
 using EFT.InventoryLogic;
+using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.Patches.Vision
 {

@@ -2,7 +2,7 @@
 using EFT;
 using SAIN.Layers.Combat.Solo;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes;
+using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using UnityEngine;
 

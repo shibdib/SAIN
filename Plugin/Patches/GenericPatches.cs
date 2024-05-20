@@ -15,11 +15,11 @@ using EFT.HealthSystem;
 using Aki.Reflection.Utils;
 using System;
 using System.Linq;
-using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent;
 using Audio.Data;
 using EFT.UI;
 using System.Collections;
+using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.Patches.Generic
 {
@@ -54,11 +54,11 @@ namespace SAIN.Patches.Generic
         }
 
         [PatchPostfix]
-        public static void PatchPostfix(Transform ___transform, Vector3 ___vector3_0)
+        public static void PatchPostfix(SmallPhysicsObject __instance, ref Vector3 ___vector3_0)
         {
             if (SAINPlugin.BotController != null)
             {
-                Vector3 position = ___transform.position + ___vector3_0;
+                Vector3 position = __instance.transform.position + ___vector3_0;
                 SAINPlugin.BotController.BulletImpact?.Invoke(position);
                 Logger.LogInfo("Bullet Impact");
             }
@@ -263,7 +263,7 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            if (SAINPlugin.IsBotExluded(__instance.Owner))
+            if (SAINPlugin.IsBotExluded(__instance.Owner.Profile.Info.Settings.Role))
             {
                 return;
             }
@@ -320,7 +320,7 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            if (SAINPlugin.IsBotExluded(__instance.Owner))
+            if (SAINPlugin.IsBotExluded(__instance.Owner.Profile.Info.Settings.Role))
             {
                 return;
             }
@@ -336,9 +336,9 @@ namespace SAIN.Patches.Generic
         protected override MethodBase GetTargetMethod() => typeof(BotCoversData).GetMethod("GetClosestPoint");
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref BotOwner ___botOwner_0)
+        public static bool PatchPrefix(BotOwner ___botOwner_0)
         {
-            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            if (SAINPlugin.IsBotExluded(___botOwner_0.Profile.Info.Settings.Role))
             {
                 return true;
             }
@@ -391,7 +391,7 @@ namespace SAIN.Patches.Generic
             Vector3 danger = Vector.DangerPoint(position, force, mass);
             foreach (BotOwner bot in __instance.Bots.BotOwners)
             {
-                if (SAINPlugin.IsBotExluded(bot))
+                if (SAINPlugin.IsBotExluded(bot.Profile.Info.Settings.Role))
                 {
                     bot.BewareGrenade.AddGrenadeDanger(danger, grenade);
                 }

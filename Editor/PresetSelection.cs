@@ -22,12 +22,17 @@ namespace SAIN.Editor.GUISections
 
             SAINPresetDefinition selectedPreset = SAINPlugin.LoadedPreset.Info;
 
+            string sainPresetV = selectedPreset.SAINPresetVersion;
+            if (string.IsNullOrEmpty(sainPresetV))
+            {
+                sainPresetV = selectedPreset.SAINVersion;
+            }
             GUIContent content = new GUIContent(
-                        $"Selected Preset Version: {selectedPreset.SAINPresetVersion} " +
-                        $"but current SAIN Preset Version is: {AssemblyInfoClass.SAINPresetVersion} (SAIN Version {AssemblyInfoClass.SAINVersion}), default bot config values may be set incorrectly due to updates to SAIN.");
+                        $"Warning: The selected preset version is: [{sainPresetV}], " +
+                        $"but current SAIN preset version is: [{AssemblyInfoClass.SAINPresetVersion}] (SAIN version [{AssemblyInfoClass.SAINVersion}]), default bot config values may be set incorrectly due to updates to SAIN. THIS DOESN'T MEAN YOUR GAME IS BROKEN, just be aware bots might not act as intended.");
 
-            Rect rect = GUILayoutUtility.GetRect(content, GetStyle(Style.alert), Height(LabelHeight));
-            if (selectedPreset.SAINVersion != AssemblyInfoClass.SAINPresetVersion)
+            Rect rect = GUILayoutUtility.GetRect(content, GetStyle(Style.alert), Height(30));
+            if (selectedPreset.IsCustom && sainPresetV != AssemblyInfoClass.SAINPresetVersion)
             {
                 GUI.Box(rect, content, GetStyle(Style.alert));
             }

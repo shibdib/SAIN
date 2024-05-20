@@ -2,7 +2,7 @@
 using SAIN.SAINComponent.BaseClasses;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.Enemy
 {
     public abstract class EnemyBase
     {

@@ -1,5 +1,6 @@
 using EFT;
 using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.Enemy;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Mover

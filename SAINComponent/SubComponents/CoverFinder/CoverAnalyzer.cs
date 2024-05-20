@@ -3,6 +3,7 @@ using EFT;
 using EFT.Interactive;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
+using SAIN.SAINComponent.Classes.Enemy;
 using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;

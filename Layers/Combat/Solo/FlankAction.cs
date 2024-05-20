@@ -12,6 +12,7 @@ using SAIN.Helpers;
 using UnityEngine;
 using UnityEngine.AI;
 using System.IO;
+using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.Layers.Combat.Solo
 {
