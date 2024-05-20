@@ -77,6 +77,10 @@ namespace SAIN.SAINComponent.Classes.Talk
                 TauntFreq = PersonalitySettings.TauntFrequency * _randomizationFactor;
                 CanRespondToVoice = PersonalitySettings.CanRespondToVoice;
                 ResponseDist = TauntDist;
+                _friendlyResponseChance = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyReponseChance;
+                _friendlyResponseChanceAI = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyReponseChanceAI;
+                _friendlyResponseDistance = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyReponseDistance;
+                _friendlyResponseDistanceAI = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyReponseDistanceAI;
             }
             else
             {
@@ -249,6 +253,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
+
             if (SAIN != null 
                 && player != null 
                 && SAIN.ProfileId != player.ProfileId)
@@ -314,13 +319,16 @@ namespace SAIN.SAINComponent.Classes.Talk
 
                 if (player.IsAI == false || shallBeChatty())
                 {
+                    float maxDist = player.IsAI ? _friendlyResponseDistanceAI : _friendlyResponseDistance;
+                    float chance = player.IsAI ? _friendlyResponseChanceAI : _friendlyResponseChance;
+
                     SAIN.StartCoroutine(RespondToVoice(
                         EPhraseTrigger.MumblePhrase,
                         ETagStatus.Unaware,
                         Random.Range(0.33f, 0.75f),
                         player,
-                        _friendlyResponseDistance,
-                        _friendlyResponseChance
+                        maxDist,
+                        chance
                     ));
                 }
             }
@@ -357,8 +365,11 @@ namespace SAIN.SAINComponent.Classes.Talk
             EPhraseTrigger.HoldFire,
             EPhraseTrigger.GetBack
         };
-        private const float _friendlyResponseDistance = 30f;
-        private const float _friendlyResponseChance = 85f;
+
+        private float _friendlyResponseDistance = 60f;
+        private float _friendlyResponseDistanceAI = 35f;
+        private float _friendlyResponseChance = 85f;
+        private float _friendlyResponseChanceAI = 80f;
         private float _nextResponseTime;
         private float _tauntTimer = 0f;
     }

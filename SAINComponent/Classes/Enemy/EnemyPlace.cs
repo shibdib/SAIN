@@ -33,7 +33,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     return true;
                 }
                 if (HasArrivedSquad
-                    && HasSquadSeen
+                    && HasSeenSquad
                     && Time.time - TimeSquadArrived > 2f
                     && Time.time - TimeSquadSeen > 2f)
                 {
@@ -159,7 +159,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public float TimeSeen;
 
-        public bool HasSquadSeen
+        public bool HasSeenSquad
         {
             get
             {
@@ -203,9 +203,9 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 Vector3 pos = Position + Vector3.up;
                 Vector3 direction = pos - origin;
                 _inSightSquadNow = !Physics.Raycast(pos, direction, direction.magnitude, mask);
-                if (!HasSquadSeen && _inSightSquadNow)
+                if (!HasSeenSquad && _inSightSquadNow)
                 {
-                    HasSquadSeen = true;
+                    HasSeenSquad = true;
                 }
             }
             return _inSightSquadNow;

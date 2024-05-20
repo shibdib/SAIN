@@ -98,7 +98,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 Vector3 lookSensor = _enemy.BotOwner.LookSensor._headPoint;
                 EnemyPlace place = LastSquadSeenPlace;
                 if (place != null
-                    && !place.HasSquadSeen
+                    && !place.HasSeenSquad
                     && place.SquadClearLineOfSight(lookSensor, LayerMaskClass.HighPolyWithTerrainMaskAI))
                 {
                     tryTalk();

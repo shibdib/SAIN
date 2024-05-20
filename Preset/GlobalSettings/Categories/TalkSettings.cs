@@ -29,6 +29,19 @@ namespace SAIN.Preset.GlobalSettings
         [Default(false)]
         public bool TalkativeGoons = false;
 
+        [Default(85f)]
+        [Percentage]
+        public float FriendlyReponseChance = 85f;
+        [Default(80f)]
+        [Percentage]
+        public float FriendlyReponseChanceAI = 80f;
+        [Default(65f)]
+        [Percentage]
+        public float FriendlyReponseDistance = 65f;
+        [Default(35f)]
+        [Percentage]
+        public float FriendlyReponseDistanceAI = 35f;
+
         [Name("Vanilla Bot Talking")]
         [Description("Disable all SAIN based handling of bot talking. No more squad chatter, no more quiet bots, completely disables SAIN's handling of bot voices")]
         [Default(false)]
