@@ -14,8 +14,18 @@ using SAIN.Helpers;
 
 namespace SAIN.SAINComponent.Classes
 {
+    public enum ESuppressionStatus
+    {
+        None = 0,
+        Low = 1,
+        Medium = 2,
+        High = 3,
+        Extreme = 4,
+    }
     public class SAINBotSuppressClass : SAINBase, ISAINClass
     {
+        public ESuppressionStatus SuppressionStatus { get; private set; }
+
         public SAINBotSuppressClass(SAINComponentClass sain) : base(sain)
         {
         }

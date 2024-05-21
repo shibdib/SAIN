@@ -7,6 +7,7 @@ using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes.Enemy;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -288,7 +289,12 @@ namespace SAIN.SAINComponent.Classes
 
                     SAIN?.Suppression?.AddSuppression();
                     SAIN.Memory.SetUnderFire(person, vector);
-                    SAIN.EnemyController.CheckAddEnemy(person)?.SetEnemyAsSniper(shooterDistance > 100f);
+                    SAINEnemy enemy = SAIN.EnemyController.CheckAddEnemy(person);
+                    if (enemy != null)
+                    {
+                        enemy.SetEnemyAsSniper(shooterDistance > 100f);
+                        enemy.EnemyStatus.ShotAtMeRecently = true;
+                    }
                     reacted = true;
                 }
             }

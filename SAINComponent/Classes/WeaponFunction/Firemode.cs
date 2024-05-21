@@ -4,6 +4,8 @@ using Random = UnityEngine.Random;
 using static EFT.InventoryLogic.Weapon;
 using SAIN.Components;
 using SAIN.SAINComponent;
+using EFT.InventoryLogic;
+using SAIN.SAINComponent.Classes.Info;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
@@ -19,62 +21,82 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Update()
         {
+            if (_nextSwapTime < Time.time)
+            {
+                _nextSwapTime = Time.time + _swapFreq;
+                var manager = BotOwner?.WeaponManager;
+                if (manager.Selector?.IsWeaponReady == true)
+                {
+                    checkSwapFiremode();
+                }
+            }
         }
 
         public void Dispose()
         {
         }
 
-        private const float SemiAutoSwapDist = 55f;
-        private const float FullAutoSwapDist = 45f;
-
-        public void CheckSwap()
+        private bool checkSwapMachineGun()
         {
-            if (SAIN.ManualShootReason != SAINComponentClass.EShootReason.None && SAIN.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
+            if (SAIN.ManualShootReason != SAINComponentClass.EShootReason.None
+                && SAIN.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun
+                && CanSetMode(EFireMode.fullauto))
             {
-                if (SAIN.Info.WeaponInfo.HasFullAuto() && CanSetMode(EFireMode.fullauto))
-                {
-                    SetFireMode(EFireMode.fullauto);
-                }
-                return;
+                SetFireMode(EFireMode.fullauto);
+                return true;
             }
+            return false;
+        }
+
+        private void checkSwapFiremode()
+        {
+            WeaponInfoClass weaponInfo = SAIN.Info.WeaponInfo;
+
+            if (weaponInfo == null)
+                return;
+
+            if (checkSwapMachineGun())
+                return;
+
             if (BotOwner?.WeaponManager?.Stationary?.Taken == false)
             {
-                float distance = SAIN.DistanceToAimTarget;
-                EFireMode mode = EFireMode.doublet;
-
-                if (distance > SemiAutoSwapDist)
-                {
-                    if (SAIN.Info.WeaponInfo.HasSemi())
-                    {
-                        mode = EFireMode.single;
-                    }
-                }
-                else if (distance <= FullAutoSwapDist)
-                {
-                    if (SAIN.Info.WeaponInfo.HasFullAuto())
-                    {
-                        mode = EFireMode.fullauto;
-                    }
-                    else if (SAIN.Info.WeaponInfo.HasBurst())
-                    {
-                        mode = EFireMode.burst;
-                    }
-                    else if (SAIN.Info.WeaponInfo.HasDoubleAction())
-                    {
-                        mode = EFireMode.doubleaction;
-                    }
-                }
-
-                if (mode != EFireMode.doublet && CanSetMode(mode))
+                if (getModeToSwap(weaponInfo, out EFireMode mode) && CanSetMode(mode))
                 {
                     SetFireMode(mode);
+                    return;
                 }
-                else
+
+                tryCheckWeapon();
+            }
+        }
+
+        private bool getModeToSwap(WeaponInfoClass weaponInfo, out EFireMode mode)
+        {
+            float distance = SAIN.DistanceToAimTarget;
+            mode = EFireMode.doublet;
+            if (distance > SemiAutoSwapDist)
+            {
+                if (weaponInfo.HasFireMode(EFireMode.single))
                 {
-                    CheckWeapon();
+                    mode = EFireMode.single;
                 }
             }
+            else if (distance <= FullAutoSwapDist)
+            {
+                if (weaponInfo.HasFireMode(EFireMode.fullauto))
+                {
+                    mode = EFireMode.fullauto;
+                }
+                else if (weaponInfo.HasFireMode(EFireMode.burst))
+                {
+                    mode = EFireMode.burst;
+                }
+                else if (weaponInfo.HasFireMode(EFireMode.doubleaction))
+                {
+                    mode = EFireMode.doubleaction;
+                }
+            }
+            return mode != EFireMode.doublet;
         }
 
         public void SetFireMode(EFireMode fireMode)
@@ -85,10 +107,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public bool CanSetMode(EFireMode fireMode)
         {
-            return SAIN.Info.WeaponInfo.CurrentWeapon != null && SAIN.Info.WeaponInfo.HasFireMode(fireMode) && !SAIN.Info.WeaponInfo.IsFireModeSet(fireMode);
+            WeaponInfoClass weaponInfo = SAIN.Info.WeaponInfo;
+            return weaponInfo?.CurrentWeapon != null && weaponInfo.HasFireMode(fireMode) && !weaponInfo.IsFireModeSet(fireMode);
         }
 
-        private void CheckWeapon()
+        private void tryCheckWeapon()
         {
             if (SAIN.Enemy == null)
             {
@@ -107,8 +130,13 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             }
         }
 
+        private float SemiAutoSwapDist => SAIN.Info.WeaponInfo.SwapToSemiDist;
+        private float FullAutoSwapDist => SAIN.Info.WeaponInfo.SwapToAutoDist;
         private float CheckMagTimer;
         private float CheckChamberTimer;
         private float NextCheckTimer;
+        private float _nextSwapTime;
+        private float _swapFreq = 0.2f;
+
     }
 }

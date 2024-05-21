@@ -86,6 +86,47 @@ namespace SAIN.Preset.GlobalSettings
             { ICaliber.Default, 0.5f },
         };
 
+        [Name("Max FullAuto Distances")]
+        [Description("The maximum distance a bot using this caliber can fire it full auto. Not all values are used since some calibers don't have any full auto weapons that use it.")]
+        [MinMax(10f, 150f)]
+        [Advanced]
+        [DefaultDictionary(nameof(AmmoCaliberFullAutoMaxDistancesDefaults))]
+        public Dictionary<ICaliber, float> AmmoCaliberFullAutoMaxDistances = new Dictionary<ICaliber, float>(AmmoCaliberFullAutoMaxDistancesDefaults);
+
+        [JsonIgnore]
+        [Hidden]
+        public static readonly Dictionary<ICaliber, float> AmmoCaliberFullAutoMaxDistancesDefaults = new Dictionary<ICaliber, float>()
+        {
+            { ICaliber.Caliber9x18PM, 80f },
+            { ICaliber.Caliber9x19PARA, 80f },
+            { ICaliber.Caliber46x30, 70f },
+            { ICaliber.Caliber9x21, 70f },
+            { ICaliber.Caliber57x28, 70f },
+            { ICaliber.Caliber762x25TT, 70f },
+            { ICaliber.Caliber1143x23ACP, 75f },
+            { ICaliber.Caliber9x33R, 75f },
+            { ICaliber.Caliber545x39, 65f },
+            { ICaliber.Caliber556x45NATO, 65f },
+            { ICaliber.Caliber9x39, 60f },
+            { ICaliber.Caliber762x35, 55f },
+            { ICaliber.Caliber762x39, 50f },
+            { ICaliber.Caliber366TKM, 45f },
+            { ICaliber.Caliber762x51, 45f },
+            { ICaliber.Caliber127x55, 50f },
+            { ICaliber.Caliber762x54R, 50f },
+            { ICaliber.Caliber86x70, 40f },
+            { ICaliber.Caliber20g, 30f },
+            { ICaliber.Caliber12g, 30f },
+            { ICaliber.Caliber23x75, 30f },
+            { ICaliber.Caliber26x75, 30f },
+            { ICaliber.Caliber30x29, 30f },
+            { ICaliber.Caliber40x46, 30f },
+            { ICaliber.Caliber40mmRU, 30f },
+            { ICaliber.Caliber127x108, 30f },
+            { ICaliber.Caliber68x51, 50f },
+            { ICaliber.Default, 55f },
+        };
+
         [Name("Weapon Shootability")]
         [Description(
             "Lower is BETTER. " +

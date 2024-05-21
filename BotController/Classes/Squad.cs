@@ -91,7 +91,8 @@ namespace SAIN.BotController.Classes
             Flashlight,
         }
 
-        public Action<PlaceForCheck> OnSoundHeard;
+        public Action<PlaceForCheck> OnSoundHeard { get; set; }
+        public Action<EnemyPlace, SAINEnemy> OnEnemyHeard { get; set; }
 
         public void AddPointToSearch(Vector3 position, float soundPower, SAINComponentClass sain, AISoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
         {
