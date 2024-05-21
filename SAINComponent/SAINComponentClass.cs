@@ -401,6 +401,11 @@ namespace SAIN.SAINComponent
             catch { }
         }
 
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+        }
+
         private void UpdateGoalTarget()
         {
             if (updateGoalTargetTimer < Time.time)

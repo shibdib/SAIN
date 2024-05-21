@@ -161,6 +161,7 @@ namespace SAIN
                 //typeof(Patches.Vision.AIVisionUpdateLimitPatch),
                 typeof(Patches.Vision.WeatherTimeVisibleDistancePatch),
                 typeof(Patches.Vision.NoAIESPPatch),
+                typeof(Patches.Vision.BotLightTurnOnPatch),
                 typeof(Patches.Vision.VisionSpeedPatch),
                 typeof(Patches.Vision.VisionDistancePosePatch),
                 typeof(Patches.Vision.CheckFlashlightPatch),

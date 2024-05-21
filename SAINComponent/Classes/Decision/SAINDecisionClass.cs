@@ -181,9 +181,9 @@ namespace SAIN.SAINComponent.Classes.Decision
             else if (EnemyDecisions.GetDecision(out soloDecision))
             {
             }
-            else if (GoalTargetDecisions.GetDecision(out soloDecision))
-            {
-            }
+            //else if (GoalTargetDecisions.GetDecision(out soloDecision))
+            //{
+            //}
 
             UpdateDecisionProperties(soloDecision, squadDecision, selfDecision);
         }

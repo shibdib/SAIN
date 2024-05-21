@@ -161,5 +161,9 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [MinMax(1f, 100f)]
         [Advanced]
         public float NO_GRASS_DIST = 3f;
+
+        [Hidden]
+        [JsonIgnore]
+        public bool SHOOT_FROM_EYES = false;
     }
 }

@@ -17,6 +17,9 @@ using UnityEngine.UIElements;
 using EFT.InventoryLogic;
 using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.Preset.GlobalSettings.Categories;
+using SAIN.SAINComponent;
+using System.Windows.Forms;
+using SAIN.Preset.GlobalSettings;
 
 namespace SAIN.Patches.Vision
 {
@@ -107,7 +110,7 @@ namespace SAIN.Patches.Vision
                             enemyInfo.CheckLookEnemy(lookAll);
                         }
                     }
-                    catch (Exception e) 
+                    catch (Exception e)
                     {
                         Logger.LogError(e);
                         BotOwner.EnemiesController.EnemyInfos.Remove(enemyInfo.Person);
@@ -196,16 +199,57 @@ namespace SAIN.Patches.Vision
         }
     }
 
-    public class EnemyPartDataVisionPatch : ModulePatch
+    public class BotLightTurnOnPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.PropertyGetter(typeof(AIData), "FlarePower");
+            return AccessTools.Method(typeof(BotLight), "TurnOn");
         }
 
         [PatchPrefix]
-        public static void PatchPrefix(ref float visibleCoef, BotOwner owner)
+        public static bool PatchPrefix(BotOwner ___botOwner_0, ref bool ____isInDarkPlace)
         {
+            if (____isInDarkPlace 
+                && !SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.AllowLightOnForDarkBuildings)
+            {
+                ____isInDarkPlace = false;
+            }
+            if (____isInDarkPlace || ___botOwner_0.Memory.GoalEnemy != null)
+            {
+                return true;
+            }
+            if (!shallTurnLightOff(___botOwner_0.Profile.Info.Settings.Role))
+            {
+                return true;
+            }
+            ___botOwner_0.BotLight.TurnOff(false, true);
+            return false;
+        }
+
+        private static bool shallTurnLightOff(WildSpawnType wildSpawnType)
+        {
+            FlashlightSettings settings = SAINPlugin.LoadedPreset.GlobalSettings.Flashlight;
+            if (EnumValues.WildSpawn.IsScav(wildSpawnType))
+            {
+                return settings.TurnLightOffNoEnemySCAV;
+            }
+            if (EnumValues.WildSpawn.IsPMC(wildSpawnType))
+            {
+                return settings.TurnLightOffNoEnemyPMC;
+            }
+            if (EnumValues.WildSpawn.IsGoons(wildSpawnType))
+            {
+                return settings.TurnLightOffNoEnemyGOONS;
+            }
+            if (EnumValues.WildSpawn.IsBoss(wildSpawnType))
+            {
+                return settings.TurnLightOffNoEnemyBOSS;
+            }
+            if (EnumValues.WildSpawn.IsFollower(wildSpawnType))
+            {
+                return settings.TurnLightOffNoEnemyFOLLOWER;
+            }
+            return settings.TurnLightOffNoEnemyRAIDERROGUE;
         }
     }
 
@@ -219,7 +263,7 @@ namespace SAIN.Patches.Vision
         [PatchPostfix]
         public static void PatchPostfix(ref float __result, EnemyInfo __instance)
         {
-            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPatch)) 
+            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPatch))
                 && __instance.Person != null)
             {
                 SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
@@ -284,7 +328,7 @@ namespace SAIN.Patches.Vision
                 }
 
                 // Reduce vision distance for ai vs ai vision checks
-                if (player.IsAI 
+                if (player.IsAI
                     && SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI)
                 {
                     visibility *= 0.65f;

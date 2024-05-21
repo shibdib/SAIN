@@ -460,10 +460,14 @@ namespace SAIN.SAINComponent.Classes.Debug
         {
             while (true)
             {
-                checkFixOffMeshBot();
-                tryAutoVault();
-                checkResetPathFromVault();
-                doStuckChecks();
+                if (SAIN.BotActive
+                && !SAIN.GameIsEnding)
+                {
+                    checkFixOffMeshBot();
+                    tryAutoVault();
+                    checkResetPathFromVault();
+                    doStuckChecks();
+                }
                 yield return null;
             }
         }

@@ -39,6 +39,11 @@ namespace SAIN.Helpers
                 return type.ToString() == "sptUsec" || type.ToString() == "sptBear";
             }
 
+            public static bool IsGoons(WildSpawnType type)
+            {
+                return Goons.Contains(type);
+            }
+
             public static WildSpawnType[] Scavs =
             {
                 WildSpawnType.assault,
@@ -46,6 +51,13 @@ namespace SAIN.Helpers
                 WildSpawnType.crazyAssaultEvent,
                 WildSpawnType.cursedAssault,
                 WildSpawnType.marksman
+            };
+
+            public static WildSpawnType[] Goons =
+            {
+                WildSpawnType.bossKnight,
+                WildSpawnType.followerBigPipe,
+                WildSpawnType.followerBirdEye,
             };
 
             public static readonly WildSpawnType Usec = Parse<WildSpawnType>("sptUsec");
