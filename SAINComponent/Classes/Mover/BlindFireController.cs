@@ -24,7 +24,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
 
             SAINEnemy enemy = SAIN.Enemy;
-            if (enemy == null || !enemy.Seen || enemy.TimeSinceSeen > 10f || !BotOwner.WeaponManager.IsReady || !BotOwner.WeaponManager.HaveBullets || SAIN.Mover.IsSprinting || SAIN.Cover.CoverInUse == null)
+            if (enemy == null || !enemy.Seen || enemy.TimeSinceSeen > 10f || !BotOwner.WeaponManager.IsReady || !BotOwner.WeaponManager.HaveBullets || SAIN.Player.IsSprintEnabled || SAIN.Cover.CoverInUse == null)
             {
                 ResetBlindFire();
                 return;

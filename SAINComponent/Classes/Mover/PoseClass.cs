@@ -38,9 +38,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (_updatePoseTimer < Time.time)
             {
                 _updatePoseTimer = Time.time + 0.25f;
+                BotOwner.Mover?.SetPose(_targetPoseLevel);
+
                 if (SAIN.Mover.CurrentStamina > 0.1f)
                 {
-                    BotOwner.Mover?.SetPose(_targetPoseLevel);
+                    //BotOwner.Mover?.SetPose(_targetPoseLevel);
                 }
             }
         }
@@ -79,7 +81,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (UpdateFindObjectTimer < Time.time)
             {
-                UpdateFindObjectTimer = Time.time + 0.66f;
+                UpdateFindObjectTimer = Time.time + 0.5f;
 
                 if (FindCrouchFromCover(out float pose1))
                 {
@@ -98,36 +100,26 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool FindCrouchFromCover(out float targetPose, bool useCollider = false)
         {
             targetPose = 1f;
-            if (SAIN.CurrentTargetPosition != null)
+            if ((SAIN.AILimit.CurrentAILimit == AILimitSetting.Close || SAIN.Enemy?.IsAI == false)
+                && SAIN.CurrentTargetPosition != null)
             {
                 SAINEnemy enemy = SAIN.Enemy;
-                if (enemy != null)
+                if (enemy.LastKnownPosition != null)
                 {
                     if (useCollider)
                     {
-                        targetPose = FindCrouchHeightColliderSphereCast(enemy.EnemyChestPosition);
+                        targetPose = FindCrouchHeightColliderSphereCast(enemy.LastKnownPosition.Value + Vector3.up);
                     }
                     else
                     {
-                        targetPose = FindCrouchHeightRaycast(enemy.EnemyChestPosition, 2f);
-                    }
-                }
-                else
-                {
-                    if (useCollider)
-                    {
-                        targetPose = FindCrouchHeightColliderSphereCast(SAIN.CurrentTargetPosition.Value);
-                    }
-                    else
-                    {
-                        targetPose = FindCrouchHeightRaycast(SAIN.CurrentTargetPosition.Value, 2f);
+                        targetPose = FindCrouchHeightRaycast(enemy.LastKnownPosition.Value + Vector3.up);
                     }
                 }
             }
             bool foundCover = targetPose < 1f;
             if (foundCover)
             {
-                SetTargetPose(targetPose);
+                //SetTargetPose(targetPose);
             }
             return foundCover;
         }

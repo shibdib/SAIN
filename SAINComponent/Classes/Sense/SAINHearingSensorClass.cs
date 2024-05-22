@@ -81,7 +81,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 return;
             }
-            if (iPlayer != null && BotOwner.ProfileId == iPlayer.ProfileId)
+            if (iPlayer != null && Player.ProfileId == iPlayer.ProfileId)
             {
                 return;
             }
@@ -90,7 +90,7 @@ namespace SAIN.SAINComponent.Classes
                 && SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
                 && iPlayer.IsAI
                 && SAIN.CurrentAILimit != AILimitSetting.Close 
-                && (iPlayer.Position - SAIN.Position).sqrMagnitude > 100f)
+                && (iPlayer.Position - SAIN.Position).sqrMagnitude > 200f)
             {
                 return;
             }
@@ -133,6 +133,10 @@ namespace SAIN.SAINComponent.Classes
         {
             if (iPlayer != null)
             {
+                if (iPlayer.ProfileId == SAIN.Person.IPlayer.ProfileId)
+                {
+                    return true;
+                }
                 // Checks if the player is not an active enemy and that they are a neutral party
                 if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer)
                     && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
@@ -157,15 +161,10 @@ namespace SAIN.SAINComponent.Classes
                     return false;
                 }
 
-                if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer))
-                {
-                    return true;
-                }
-                // One Final Check because my brain is bad.
-                if (!BotOwner.EnemiesController.EnemyInfos.ContainsKey(iPlayer))
-                {
+                //if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer))
+                //{
                     //return true;
-                }
+                //}
             }
             return false;
         }
@@ -270,6 +269,9 @@ namespace SAIN.SAINComponent.Classes
             bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
             float shooterDistance = (BotOwner.Transform.position - soundPosition).magnitude;
 
+            Player player = EFTInfo.GetPlayer(person);
+            bool isEnemy = player != null && BotOwner.EnemiesController.IsEnemy(player);
+
             Vector3 vector = GetSoundDispersion(person, soundPosition, type);
 
             bool firedAtMe = false;
@@ -281,22 +283,14 @@ namespace SAIN.SAINComponent.Classes
 
                 if (firedAtMe)
                 {
-                    try
-                    {
-                        BotOwner?.HearingSensor?.OnEnemySounHearded?.Invoke(vector, to.magnitude, type);
-                    }
-                    catch { }
-
-                    SAIN?.Suppression?.AddSuppression();
-                    SAIN.Memory.SetUnderFire(person, vector);
-                    SAINEnemy enemy = SAIN.EnemyController.CheckAddEnemy(person);
-                    if (enemy != null)
-                    {
-                        enemy.SetEnemyAsSniper(shooterDistance > 100f);
-                        enemy.EnemyStatus.ShotAtMeRecently = true;
-                    }
+                    SAIN.StartCoroutine(delayReact(vector, to, type, person, shooterDistance, isEnemy));
                     reacted = true;
                 }
+            }
+
+            if (!isEnemy)
+            {
+                return reacted;
             }
 
             if (!firedAtMe
@@ -308,24 +302,77 @@ namespace SAIN.SAINComponent.Classes
 
             if (wasHeard)
             {
-                SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
-                //SAIN.StartCoroutine(delayAddSearch(vector, power, type, person));
+                //SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
+                SAIN.StartCoroutine(delayAddSearch(vector, power, type, person));
                 reacted = true;
             }
             else if (isGunSound && bulletFelt)
             {
                 Vector3 estimate = firedAtMe ? vector : GetEstimatedPoint(vector);
 
-                //SAIN.StartCoroutine(delayAddSearch(estimate, power, type, person));
-                SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
+                SAIN.StartCoroutine(delayAddSearch(estimate, power, type, person));
+                //SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
                 reacted = true;
             }
             return reacted;
         }
 
+        private IEnumerator baseHearDelay()
+        {
+            if (BotOwner?.Memory.IsPeace == true)
+            {
+                yield return new WaitForSeconds(SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayAtPeace);
+            }
+            else
+            {
+                yield return new WaitForSeconds(SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayWithEnemy);
+            }
+        }
+
+        private IEnumerator delayReact(Vector3 vector, Vector3 to, AISoundType type, IPlayer person, float shooterDistance, bool isEnemy)
+        {
+            yield return baseHearDelay();
+
+            if (BotOwner == null
+                || Player == null
+                || Player.HealthController.IsAlive == false
+                || person == null
+                || person.HealthController.IsAlive == false)
+            {
+                yield break;
+            }
+
+            try
+            {
+                BotOwner.HearingSensor.OnEnemySounHearded?.Invoke(vector, to.magnitude, type);
+            }
+            catch { }
+
+            SAIN.Memory.SetUnderFire(person, vector);
+            if (isEnemy)
+            {
+                SAIN.Suppression.AddSuppression();
+                SAINEnemy enemy = SAIN.EnemyController.CheckAddEnemy(person);
+                if (enemy != null)
+                {
+                    enemy.SetEnemyAsSniper(shooterDistance > 100f);
+                    enemy.EnemyStatus.ShotAtMeRecently = true;
+                }
+            }
+        }
+
         private IEnumerator delayAddSearch(Vector3 vector, float power, AISoundType type, IPlayer person)
         {
-            yield return new WaitForSeconds(0.2f);
+            yield return baseHearDelay();
+
+            if (BotOwner == null 
+                || Player == null 
+                || Player.HealthController.IsAlive == false 
+                || person == null 
+                || person.HealthController.IsAlive == false)
+            {
+                yield break;
+            }
             SAIN?.Squad?.SquadInfo?.AddPointToSearch(vector, power, SAIN, type, person);
             CheckCalcGoal();
         }

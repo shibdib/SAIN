@@ -10,8 +10,8 @@ namespace SAIN.SAINComponent
         {
         }
 
-        public BotOwner BotOwner => SAIN.BotOwner;
-        public Player Player => SAIN.Player;
+        public BotOwner BotOwner => SAIN?.BotOwner;
+        public Player Player => SAIN?.Player;
         public GlobalSettingsClass GlobalSettings => SAINPlugin.LoadedPreset?.GlobalSettings;
     }
 

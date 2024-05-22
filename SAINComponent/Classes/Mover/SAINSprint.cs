@@ -229,7 +229,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                         Player.MovementContext.TryVaulting();
                     }
 
-                    steer(currentCorner(), SAIN.Mover.IsSprinting ? turnSpeedSprint : turnSpeedTurning);
+                    steer(currentCorner(), SAIN.Player.IsSprintEnabled ? turnSpeedSprint : turnSpeedTurning);
                     move((currentCorner() - SAIN.Position).normalized);
 
                     distToCurrent = distanceToCurrentCornerSqr();
@@ -271,7 +271,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
             }
 
-            if (SAIN.Mover.IsSprinting)
+            if (SAIN.Player.IsSprintEnabled)
             {
                 Player.MovementContext.SprintSpeed = 2f;
             }

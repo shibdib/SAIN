@@ -67,16 +67,22 @@ namespace SAIN.Layers.Combat.Squad
                 sprint = false;
             }
 
-            if (sprint)
+            if (_nextChangeSprintTime < Time.time)
             {
-                SAIN.Mover.Sprint(true);
-            }
-            else
-            {
-                SAIN.Mover.Sprint(false);
-                SAIN.Steering.SteerByPriority();
+                _nextChangeSprintTime = Time.time + 1f;
+                if (sprint)
+                {
+                    SAIN.Mover.Sprint(true);
+                }
+                else
+                {
+                    SAIN.Mover.Sprint(false);
+                    SAIN.Steering.SteerByPriority();
+                }
             }
         }
+
+        private float _nextChangeSprintTime;
 
         public override void Stop()
         {

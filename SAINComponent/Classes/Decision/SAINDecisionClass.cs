@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
@@ -20,7 +19,9 @@ namespace SAIN.SAINComponent.Classes.Decision
         }
 
         public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnDecisionMade;
+
         public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnSAINStart;
+
         public event Action<float> OnSAINEnd;
 
         public bool SAINActive => CurrentSoloDecision != SoloDecision.None
@@ -67,7 +68,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallDogfight()
         {
-            if (CurrentSoloDecision == SoloDecision.DogFight 
+            if (CurrentSoloDecision == SoloDecision.DogFight
                 && DogFightTarget != null)
             {
                 checkClearDogFightTarget();
@@ -246,7 +247,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 OnDecisionMade?.Invoke(CurrentSoloDecision, CurrentSquadDecision, CurrentSelfDecision, time);
 
                 // If previously all decisions were none, sain has now started.
-                if (OldSoloDecision == SoloDecision.None 
+                if (OldSoloDecision == SoloDecision.None
                     && OldSelfDecision == SelfDecision.None
                     && OldSquadDecision == SquadDecision.None)
                 {

@@ -61,7 +61,34 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
             ActivateCoverFinder(SAIN.Decision.SAINActive);
+            createDebug();
         }
+
+        private void createDebug()
+        {
+            if (SAINPlugin.DebugMode)
+            {
+                if (CoverInUse != null)
+                {
+                    if (debugCoverObject == null)
+                    {
+                        debugCoverObject = DebugGizmos.CreateLabel(CoverInUse.Position, "Cover In Use");
+                        debugCoverLine = DebugGizmos.Line(CoverInUse.Position, SAIN.Position + Vector3.up, 0.075f, -1, true);
+                    }
+                    debugCoverObject.WorldPos = CoverInUse.Position;
+                    DebugGizmos.UpdatePositionLine(CoverInUse.Position, SAIN.Position + Vector3.up, debugCoverLine);
+                }
+            }
+            else if (debugCoverObject != null)
+            {
+                DebugGizmos.DestroyLabel(debugCoverObject);
+                debugCoverObject = null;
+            }
+        }
+
+
+        private GUIObject debugCoverObject;
+        private GameObject debugCoverLine;
 
         public void Dispose()
         {

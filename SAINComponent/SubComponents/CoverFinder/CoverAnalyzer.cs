@@ -228,7 +228,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
             if (NavMesh.CalculatePath(OriginPoint, position, -1, pathToPoint) && pathToPoint.status == NavMeshPathStatus.PathComplete)
             {
-                if (PathToEnemy(pathToPoint))
+                if (checkPathToEnemy(pathToPoint))
                 {
                     isSafe = checkSafety ? CheckPathSafety(pathToPoint) : false;
                     return true;
@@ -247,7 +247,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         static bool DebugCoverFinder => SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder;
 
-        private bool PathToEnemy(NavMeshPath path)
+        private bool checkPathToEnemy(NavMeshPath path)
         {
             SAINEnemy enemy = SAIN.Enemy;
             if (enemy != null 

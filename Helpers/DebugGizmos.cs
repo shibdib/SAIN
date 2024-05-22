@@ -220,6 +220,10 @@ namespace SAIN.Helpers
 
         public static void UpdatePositionLine(Vector3 a, Vector3 b, GameObject gameObject)
         {
+            if (gameObject == null)
+            {
+                return;
+            }
             var lineRenderer = gameObject.GetComponent<LineRenderer>();
             lineRenderer?.SetPosition(0, a);
             lineRenderer?.SetPosition(1, b);

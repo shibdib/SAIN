@@ -33,9 +33,9 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public void Update(bool isCurrentEnemy)
         {
             updatePlaces();
+            checkIfArrived();
             if (isCurrentEnemy)
             {
-                checkIfArrived();
                 checkIfSeen();
                 createDebug();
             }
@@ -45,33 +45,24 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (SAINPlugin.DebugMode)
             {
-                var enemyPlaces = AllEnemyPlaces;
-                foreach (var obj in _guiObjects)
+                EnemyPlace lastKnown = LastKnownPlace;
+                if (lastKnown != null)
                 {
-                    if (!enemyPlaces.Contains(obj.Key))
+                    if (debugLastKnown == null)
                     {
-                        _debugPlacesToRemove.Add(obj.Key);
+                        debugLastKnown = DebugGizmos.CreateLabel(lastKnown.Position, string.Empty);
                     }
-                }
-                foreach (var debugPlace in _debugPlacesToRemove)
-                {
-                    DebugGizmos.DestroyLabel(_guiObjects[debugPlace]);
-                    _guiObjects.Remove(debugPlace);
-                }
-                _debugPlacesToRemove.Clear();
-
-                foreach (var place in enemyPlaces)
-                {
-                    if (!_guiObjects.ContainsKey(place))
-                    {
-                        _guiObjects.Add(place, new GUIObject());
-                    }
-                    GUIObject obj = _guiObjects[place];
-                    updateDebugString(place, obj);
-                    DebugGizmos.AddGUIObject(obj);
+                    updateDebugString(lastKnown, debugLastKnown);
                 }
             }
+            else if (debugLastKnown != null)
+            {
+                DebugGizmos.DestroyLabel(debugLastKnown);
+                debugLastKnown = null;
+            }
         }
+
+        private GUIObject debugLastKnown;
 
         private void checkIfSeen()
         {
@@ -298,7 +289,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (LastSeenPlace == null)
             {
                 LastSeenPlace = new EnemyPlace(position, 300f, true, _enemy.EnemyIPlayer);
-                _allEnemyPlaces.Add(LastSeenPlace);
                 updatePlaces(true);
                 OnEnemyPlaceAdded?.Invoke(LastSeenPlace, _enemy.SAIN);
             }
@@ -311,23 +301,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void UpdateSquadSeenPlace(EnemyPlace place)
         {
-            if (LastSquadSeenPlace != place)
+            if (LastSquadSeenPlace == null || LastSquadSeenPlace != place)
             {
-                if (LastSquadSeenPlace == null)
-                {
-                    LastSquadSeenPlace = place;
-                    _allEnemyPlaces.Add(LastSquadSeenPlace);
-                }
-                else
-                {
-                    LastSquadSeenPlace.Position = place.Position;
-                }
+                LastSquadSeenPlace = place;
+                updatePlaces(true);
+                return;
             }
         }
 
         public Action<EnemyPlace, SAINComponentClass> OnEnemyPlaceAdded;
 
-        public EnemyPlace AddPersonalHeardPlace(Vector3 position, bool arrived, bool gunFire)
+        public EnemyPlace AddPersonalHeardPlace(Vector3 position, bool arrived, bool isGunFire)
         {
             _searchedAllKnownLocations = false;
 
@@ -340,7 +324,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return lastHeard;
             }
 
-            var newPlace = new EnemyPlace(position, 300f, gunFire, _enemy.EnemyIPlayer)
+            var newPlace = new EnemyPlace(position, 300f, isGunFire, _enemy.EnemyIPlayer)
             {
                 HasArrivedPersonal = arrived,
             };
@@ -351,7 +335,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
 
             HeardPlacesPersonal.Add(newPlace);
-            _allEnemyPlaces.Add(newPlace);
             updatePlaces(true);
             OnEnemyPlaceAdded?.Invoke(newPlace, _enemy.SAIN);
             return newPlace;
@@ -359,14 +342,14 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void UpdateSquadHeardPlace(EnemyPlace place)
         {
-            if (LastSquadHeardPlace == null)
+            if (LastSquadHeardPlace == null || LastSquadHeardPlace != place)
             {
-                _allEnemyPlaces.Add(LastSquadSeenPlace);
+                LastSquadHeardPlace = place;
+                updatePlaces(true);
             }
-            LastSquadHeardPlace = place;
         }
 
-        private const int _maxHeardPlaces = 10;
+        private const int _maxHeardPlaces = 5;
 
         public EnemyPlace LastSeenPlace { get; private set; }
         public EnemyPlace LastSquadSeenPlace { get; private set; }
@@ -380,15 +363,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 _nextUpdatePlacesTime = Time.time + 0.5f;
 
-                clearPlaces(_allEnemyPlaces);
-                if (_allEnemyPlaces.Count > 1)
-                {
-                    sortByAge(_allEnemyPlaces);
-                    if (_allEnemyPlaces.Count > _maxHeardPlaces + 3)
-                    {
-                        _allEnemyPlaces.RemoveAt(_allEnemyPlaces.Count - 1);
-                    }
-                }
+                _allEnemyPlaces.Clear();
 
                 clearPlaces(HeardPlacesPersonal);
                 if (HeardPlacesPersonal.Count > 1)
@@ -399,6 +374,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
                         HeardPlacesPersonal.RemoveAt(HeardPlacesPersonal.Count - 1);
                     }
                 }
+                _allEnemyPlaces.AddRange(HeardPlacesPersonal);
+
+                if (LastSquadSeenPlace != null)
+                    _allEnemyPlaces.Add(LastSquadSeenPlace);
+                if (LastSquadHeardPlace != null)
+                    _allEnemyPlaces.Add(LastSquadHeardPlace);
+                if (LastSeenPlace != null)
+                    _allEnemyPlaces.Add(LastSeenPlace);
+
+                sortByAge(_allEnemyPlaces);
             }
         }
 
@@ -419,6 +404,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             places.RemoveAll(x => x == null);
             places.Sort((x, y) => x.TimeSincePositionUpdated.CompareTo(y.TimeSincePositionUpdated));
         }
+
         private void clearPlaces(List<EnemyPlace> places)
         {
             places.RemoveAll(x => x?.ShallClear == true || x == null);

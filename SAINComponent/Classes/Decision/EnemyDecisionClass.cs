@@ -292,6 +292,10 @@ namespace SAIN.SAINComponent.Classes.Decision
                     ShiftResetTimer = -1f;
                     return false;
                 }
+                if (!BotOwner.Mover.IsMoving)
+                {
+                    return false;
+                }
                 if (!ShiftCoverComplete)
                 {
                     return true;
@@ -331,7 +335,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
-            if (!enemy.Seen)
+            if (!enemy.Seen || enemy.TimeSinceSeen < 8f)
             {
                 return false;
             }
@@ -353,7 +357,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return true;
             }
-            if (enemy.RealDistance > SAIN.Info.WeaponInfo.EffectiveWeaponDistance * 0.8f 
+            if (enemy.RealDistance > SAIN.Info.WeaponInfo.EffectiveWeaponDistance * 0.66f 
                 && decision == SoloDecision.MoveToEngage)
             {
                 return true;

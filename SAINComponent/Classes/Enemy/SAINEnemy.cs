@@ -88,7 +88,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public bool ShallUpdateEnemy => EnemyPerson?.IsActive == true && (EnemyInfo?.ShallKnowEnemy() == true || EnemyPlayer.IsAI == false);
+        public bool ShallUpdateEnemy => 
+            EnemyPerson?.IsActive == true && (TimeSinceLastKnownUpdated < 600f || EnemyPlayer.IsAI == false);
 
         public void Update()
         {

@@ -412,7 +412,7 @@ namespace SAIN.SAINComponent.Classes
             float pose = 1f;
             _setMaxSpeedPose = false;
             // Environment id of 0 means a bot is outside.
-            if (shallSprint || SAIN.Mover.IsSprinting || Player.IsSprintEnabled || _Running)
+            if (shallSprint || Player.IsSprintEnabled || _Running)
             {
                 _setMaxSpeedPose = true;
                 speed = 1f;

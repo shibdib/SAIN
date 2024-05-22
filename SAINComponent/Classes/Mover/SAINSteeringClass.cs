@@ -227,7 +227,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         public SteerPriority FindSteerPriority()
         {
             // return values are ordered by priority, so the targets get less "important" as they descend down this function.
-            if (SAIN.Mover.IsSprinting || Player.IsSprintEnabled)
+            if (SAIN.Mover.SprintController.Running || Player.IsSprintEnabled)
             {
                 return SteerPriority.Sprinting;
             }

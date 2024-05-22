@@ -6,6 +6,16 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class HearingSettings
     {
+        [Name("Hearing Delay / Reaction Time with Active Enemy")]
+        [MinMax(0.0f, 1f, 100f)]
+        [Default(0.2f)]
+        public float BaseHearingDelayWithEnemy = 0.2f;
+
+        [Name("Hearing Delay / Reaction Time while At Peace")]
+        [MinMax(0.0f, 1f, 100f)]
+        [Default(0.35f)]
+        public float BaseHearingDelayAtPeace = 0.35f;
+
         [Name("Global Gunshot Audible Range Multiplier")]
         [Default(1f)]
         [MinMax(0.1f, 2f, 100f)]

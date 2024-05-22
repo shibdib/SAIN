@@ -1,8 +1,10 @@
 ﻿using EFT;
+using EFT.Hideout;
 using SAIN.Helpers;
 using SAIN.SAINComponent.BaseClasses;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Enemy
@@ -54,7 +56,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             removeInvalidEnemies();
             if (_enemyUpdateCoroutine == null)
             {
-                _enemyUpdateCoroutine = SAIN.StartCoroutine(updateValidAIEnemies(1));
+                _enemyUpdateCoroutine = SAIN.StartCoroutine(updateValidAIEnemies(3));
             }
             if (_enemyHumanUpdateCoroutine == null)
             {
@@ -341,42 +343,42 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public SAINEnemy CheckAddEnemy(IPlayer IPlayer)
         {
-            AddEnemy(IPlayer);
-            if (IPlayer != null
-                && Enemies.TryGetValue(IPlayer.ProfileId, out SAINEnemy enemy))
-            {
-                return enemy;
-            }
-            return null;
+            return tryAddEnemy(IPlayer);
         }
 
         private void AddEnemy(IPlayer player)
         {
+            tryAddEnemy(player);
+        }
+
+        private SAINEnemy tryAddEnemy(IPlayer player)
+        {
             if (player == null)
             {
-                Logger.LogDebug("Cannot add null player as an enemy.");
-                return;
+                //Logger.LogDebug("Cannot add null player as an enemy.");
+                return null;
             }
             if (!player.HealthController.IsAlive)
             {
-                Logger.LogDebug("Cannot add null player as an enemy.");
-                return;
+                //Logger.LogDebug("Cannot add null player as an enemy.");
+                return null;
             }
-            if (Enemies.ContainsKey(player.ProfileId))
+            if (Enemies.TryGetValue(player.ProfileId, out SAINEnemy enemy))
             {
-                return;
+                return enemy;
             }
-            if (player.ProfileId == SAIN.ProfileId)
+            if (player.ProfileId == SAIN.Player.ProfileId)
             {
-                Logger.LogDebug("Cannot add enemy profileid that matches this bots profileid");
-                return;
+                string debugString = $"Cannot add enemy {getBotInfo(player)} that matches this bot {getBotInfo(Player)}: ";
+                debugString = findSourceDebug(debugString);
+                Logger.LogDebug(debugString);
+                return null;
             }
             if (player.IsAI && player.AIData?.BotOwner == null)
             {
                 Logger.LogDebug("Cannot add ai as enemy with null Botowner");
-                return;
+                return null;
             }
-
             if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(player, out EnemyInfo enemyInfo))
             {
                 SAINPersonClass enemySAINPerson = new SAINPersonClass(player);
@@ -384,12 +386,32 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 player.OnIPlayerDeadOrUnspawn += newEnemy.DeleteInfo;
                 Enemies.Add(player.ProfileId, newEnemy);
                 //Logger.LogDebug($"Added [{player.ProfileId}] to [{BotOwner?.name}'s] Enemy List");
+                return newEnemy;
             }
             else
             {
-                Logger.LogDebug($"Player [{player.Profile.Nickname}, {player.Profile.Info.Settings.Role}] " +
-                    $"is not in Bot's EnemyInfos list. Cannot Add them as a SAIN Enemy.");
+                //string debugString = $"Player {getBotInfo(player)} " +
+                //    $"is not in Bot {getBotInfo(player)} EnemyInfos list. Cannot Add them as a SAIN Enemy.";
+                //debugString = findSourceDebug(debugString);
+                //Logger.LogDebug(debugString);
             }
+            return null;
+        }
+
+        private string getBotInfo(Player player)
+        {
+            return $" [{player.Profile.Nickname}, {player.Profile.Info.Settings.Role}, {player.ProfileId}] ";
+        }
+        private string getBotInfo(IPlayer player)
+        {
+            return $" [{player.Profile.Nickname}, {player.Profile.Info.Settings.Role}, {player.ProfileId}] ";
+        }
+
+        private string findSourceDebug(string debugString)
+        {
+            StackTrace stackTrace = new StackTrace();
+            debugString += $" StackTrace: [{stackTrace.ToString()}]";
+            return debugString;
         }
 
         public bool IsHumanPlayerLookAtMe(out Player lookingPlayer)

@@ -49,8 +49,16 @@ namespace SAIN.Layers.Combat.Squad
             if (SAIN == null) return false;
             //if (SAIN.SAINEnabled == false) return false;
 
-            return SAIN.Decision.CurrentSquadDecision != SquadDecision.None
-                && SAIN.Decision.CurrentSelfDecision == SelfDecision.None;
+            if (SAIN.Decision.CurrentSquadDecision != SquadDecision.None
+                && SAIN.Decision.CurrentSelfDecision == SelfDecision.None)
+            {
+                if (SAIN.Cover.CoverInUse != null)
+                {
+                    SAIN.Cover.CoverInUse = null;
+                }
+                return true;
+            }
+            return false;
         }
 
         public override bool IsCurrentActionEnding()

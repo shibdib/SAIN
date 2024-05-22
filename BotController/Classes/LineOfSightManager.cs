@@ -92,7 +92,10 @@ namespace SAIN.Components
             int partCount = 0;
             foreach (var player in Players)
             {
-                if (player != null && player.Transform != null && player.Transform.Original != null && player.IsAI == false)
+                if (player != null 
+                    && player.Transform != null 
+                    && player.Transform.Original != null 
+                    && player.IsAI == false)
                 {
                     if (partCount == 0)
                     {
@@ -135,19 +138,22 @@ namespace SAIN.Components
                 for (int j = 0; j < _humanPlayers.Count; j++)
                 {
                     Player player = _humanPlayers[j];
-                    bool lineOfSight = false;
-                    foreach (var part in player.MainParts.Values)
+                    if (bot.BotOwner?.EnemiesController.IsEnemy(player) == true)
                     {
-                        if (!lineOfSight)
+                        bool lineOfSight = false;
+                        foreach (var part in player.MainParts.Values)
                         {
-                            lineOfSight = allRaycastHits[total].collider == null;
+                            if (!lineOfSight)
+                            {
+                                lineOfSight = allRaycastHits[total].collider == null;
+                            }
+                            total++;
                         }
-                        total++;
-                    }
-                    var sainEnemy = bot.EnemyController.GetEnemy(player.ProfileId);
-                    if (sainEnemy != null)
-                    {
-                        sainEnemy.Vision.InLineOfSight = lineOfSight;
+                        var sainEnemy = bot.EnemyController.GetEnemy(player.ProfileId);
+                        if (sainEnemy != null)
+                        {
+                            sainEnemy.Vision.InLineOfSight = lineOfSight;
+                        }
                     }
                 }
             }
@@ -162,7 +168,8 @@ namespace SAIN.Components
             _validPlayers.Clear();
             foreach (var player in Players)
             {
-                if (player != null && player.Transform != null && player.Transform.Original != null)
+                if (player != null 
+                    && player.Transform != null)
                 {
                     _validPlayers.Add(player);
                 }
@@ -187,7 +194,7 @@ namespace SAIN.Components
                     float magnitude = direction.magnitude;
                     float max = player.IsAI ? player.AIData.BotOwner.LookSensor.VisibleDist : magnitude;
 
-                    if (!player.HealthController.IsAlive || (player.IsAI && player.AIData.BotOwner.BotState != EBotState.Active))
+                    if (!player.HealthController.IsAlive || (player.IsAI && player.AIData.BotOwner.BotState != EBotState.Active) || player.ProfileId == bot.Player.ProfileId)
                     {
                         max = 0f;
                     }
@@ -210,16 +217,26 @@ namespace SAIN.Components
                 {
                     Player player = _validPlayers[j];
 
-                    bool lineOfSight = allRaycastHits[total].collider == null && player != null && player.HealthController.IsAlive;
-                    if (lineOfSight)
+                    if (player != null && player.ProfileId != bot.Player.ProfileId)
                     {
-                        visPlayers.Add(player);
-                    }
-
-                    var sainEnemy = bot.EnemyController.CheckAddEnemy(player);
-                    if (sainEnemy?.IsAI == true)
-                    {
-                        sainEnemy.Vision.InLineOfSight = lineOfSight;
+                        bool lineOfSight = allRaycastHits[total].collider == null && player.HealthController.IsAlive;
+                        if (lineOfSight)
+                        {
+                            visPlayers.Add(player);
+                        }
+                        var sainEnemy = bot.EnemyController.CheckAddEnemy(player);
+                        if (sainEnemy?.IsAI == true)
+                        {
+                            sainEnemy.Vision.InLineOfSight = lineOfSight;
+                        }
+                        //if (bot.BotOwner?.EnemiesController.IsEnemy(player) == true)
+                        //{
+                        //    var sainEnemy = bot.EnemyController.CheckAddEnemy(player);
+                        //    if (sainEnemy?.IsAI == true)
+                        //    {
+                        //        sainEnemy.Vision.InLineOfSight = lineOfSight;
+                        //    }
+                        //}
                     }
                     total++;
                 }
