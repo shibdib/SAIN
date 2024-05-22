@@ -12,7 +12,6 @@ using System.Linq;
 using SAIN.Components.BotController;
 using UnityEngine.AI;
 using SAIN.Helpers;
-using static RootMotion.FinalIK.AimPoser;
 
 namespace SAIN.Layers
 {
@@ -63,6 +62,11 @@ namespace SAIN.Layers
                 shallSprint = false;
             }
 
+            if (!BotOwner.GetPlayer.MovementContext.CanSprint)
+            {
+                shallSprint = false;
+            }
+
             if (!Exfil.HasValue)
             {
                 return;
@@ -71,40 +75,28 @@ namespace SAIN.Layers
             Vector3 point = Exfil.Value;
             float distance = (point - BotOwner.Position).sqrMagnitude;
 
-            if (distance < 4f)
+            if (distance < 8f)
             {
                 shallSprint = false;
-            }
-            if (distance < 1f)
-            {
-                SAIN.Mover.SetTargetPose(0f);
-            }
-            else
-            {
-                SAIN.Mover.SetTargetPose(1f);
-                SAIN.Mover.SetTargetMoveSpeed(1f);
             }
 
             if (ExtractStarted)
             {
                 StartExtract(point);
+                SAIN.Mover.SetTargetPose(0f);
+                SAIN.Mover.SetTargetMoveSpeed(0f);
             }
             else
             {
                 MoveToExtract(distance, point);
+                SAIN.Mover.SetTargetPose(1f);
+                SAIN.Mover.SetTargetMoveSpeed(1f);
             }
 
             if (BotOwner.BotState == EBotState.Active)
             {
-                if (!shallSprint)
-                {
-                    SAIN.Steering.SteerByPriority();
-                    Shoot.Update();
-                }
-                else
-                {
-                    SAIN.Steering.LookToMovingDirection(500f, true);
-                }
+                SAIN.Steering.SteerByPriority();
+                Shoot.Update();
             }
         }
 
@@ -138,6 +130,14 @@ namespace SAIN.Layers
                 ExtractTimer = -1f;
                 ReCalcPathTimer = Time.time + 4f;
 
+                if (shallSprint)
+                {
+
+                }
+                else
+                {
+
+                }
                 NavMeshPathStatus pathStatus = BotOwner.Mover.GoToPoint(point, true, 0.5f, false, false);
                 var pathController = HelpersGClass.GetPathControllerClass(BotOwner.Mover);
                 if (pathController?.CurPath != null)

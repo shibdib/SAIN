@@ -336,6 +336,17 @@ namespace SAIN.SAINComponent.Classes
             const float dispSuppGun = 12.5f;
             const float dispStep = 6.25f;
 
+            float dispersionModifier = 1f;
+            float dot = Vector3.Dot(person.LookDirection.normalized, (pos - person.Position).normalized);
+            if (dot < 0.1f)
+            {
+                dispersionModifier = 1.5f;
+            }
+            if (dot > 0.66f)
+            {
+                dispersionModifier = 0.75f;
+            }
+
             Vector3 shooterDirectionToBot = BotOwner.Transform.position - pos;
             float shooterDistance = shooterDirectionToBot.magnitude;
 
@@ -352,6 +363,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 dispersion = shooterDistance / dispStep;
             }
+            dispersion *= dispersionModifier;
 
             // If a bot is hearing multiple sounds from a iPlayer, they will now be more accurate at finding the source soundPosition based on how many sounds they have heard from this particular iPlayer
             int soundCount = 0;

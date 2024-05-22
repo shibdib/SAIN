@@ -79,14 +79,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public bool FirstContactReported = false;
         public bool ShallReportRepeatContact => Vision.ShallReportRepeatContact;
 
-        public void DeleteInfo(EDamageType _)
+        public void DeleteInfo(IPlayer player)
         {
             SAIN.EnemyController.RemoveEnemy(EnemyProfileId);
+            if (player != null)
+            {
+                player.OnIPlayerDeadOrUnspawn -= DeleteInfo;
+            }
         }
 
         public bool ShallUpdateEnemy => EnemyPerson?.IsActive == true && (EnemyInfo?.ShallKnowEnemy() == true || EnemyPlayer.IsAI == false);
-
-        public bool IsUpdating { get; private set; }
 
         public void Update()
         {

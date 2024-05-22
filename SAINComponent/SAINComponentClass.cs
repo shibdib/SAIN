@@ -171,11 +171,7 @@ namespace SAIN.SAINComponent
                     return;
                 }
 
-                if (BotOwner.Mover.IsMoving)
-                {
-                    DoorOpener.Update();
-                }
-
+                DoorOpener.Update();
                 Decision.Update();
                 Search.Update();
                 Memory.Update();
@@ -201,7 +197,7 @@ namespace SAIN.SAINComponent
                 Medical.Update();
 
                 //BotOwner.DoorOpener.Update(); 
-                //UpdateGoalTarget();
+                UpdateGoalTarget();
 
                 if (_nextCheckReloadTime < Time.time)
                 {
