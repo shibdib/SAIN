@@ -104,7 +104,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 && SAIN.CurrentTargetPosition != null)
             {
                 SAINEnemy enemy = SAIN.Enemy;
-                if (enemy.LastKnownPosition != null)
+                if (enemy?.LastKnownPosition != null)
                 {
                     if (useCollider)
                     {
