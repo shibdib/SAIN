@@ -17,7 +17,7 @@ namespace SAIN.Components
     {
         private void Awake()
         {
-            SAINBotController = this.GetOrAddComponent<SAINBotControllerComponent>();
+            SAINBotController = this.GetOrAddComponent<SAINBotController>();
             ExtractFinder = this.GetOrAddComponent<Extract.ExtractFinderComponent>();
         }
 
@@ -111,7 +111,7 @@ namespace SAIN.Components
 
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
         public SAINMainPlayerComponent SAINMainPlayer { get; private set; }
-        public SAINBotControllerComponent SAINBotController { get; private set; }
+        public SAINBotController SAINBotController { get; private set; }
         public Extract.ExtractFinderComponent ExtractFinder { get; private set; }
         public SpawnPointMarker[] SpawnPointMarkers { get; private set; }
     }

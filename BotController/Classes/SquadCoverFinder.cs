@@ -12,20 +12,20 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
     public class SquadCoverFinder
     {
-        public SquadCoverFinder(Squad squad, SAINBotControllerComponent botController)
+        public SquadCoverFinder(Squad squad, SAINBotController botController)
         {
             Squad = squad;
             Members = squad.Members;
             SAINBotController = botController;
         }
 
-        public void AddMember(SAINComponentClass member)
+        public void AddMember(Bot member)
         {
             member.Decision.OnSAINStart += OnMemberSAINStart;
             member.Decision.OnSAINEnd += OnMemberSAINEnd;
         }
 
-        public void RemoveMember(SAINComponentClass member)
+        public void RemoveMember(Bot member)
         {
             member.Decision.OnSAINStart -= OnMemberSAINStart;
             member.Decision.OnSAINEnd -= OnMemberSAINEnd;
@@ -62,7 +62,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         }
 
         public Squad Squad { get; private set; }
-        public Dictionary<string, SAINComponentClass> Members { get; private set; }
-        public SAINBotControllerComponent SAINBotController { get; private set; }
+        public Dictionary<string, Bot> Members { get; private set; }
+        public SAINBotController SAINBotController { get; private set; }
     }
 }

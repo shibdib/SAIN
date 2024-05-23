@@ -156,7 +156,7 @@ namespace SAIN.Components
 
                     debugHitPos = hit.position;
 
-                    if (bot.TryGetComponent(out SAINComponentClass sain))
+                    if (bot.TryGetComponent(out Bot sain))
                     {
                         sain.Squad.SquadInfo.AddPointToSearch
                             (hit.position,

@@ -18,13 +18,19 @@ using static RootMotion.FinalIK.InteractionTrigger;
 
 namespace SAIN.Components
 {
-    public class SAINBotControllerComponent : MonoBehaviour
+    public class SAINBotController : MonoBehaviour
     {
+        public static SAINBotController Instance;
+        public SAINBotController()
+        {
+            Instance = this;
+        }
+
         public Action<SAINSoundType, Vector3, Player, float> AISoundPlayed { get; set; }
         public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; set; }
         public Action<Vector3> BulletImpact { get; set; }
 
-        public Dictionary<string, SAINComponentClass> Bots => BotSpawnController.Bots;
+        public Dictionary<string, Bot> Bots => BotSpawnController.Bots;
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
         public IBotGame BotGame => Singleton<IBotGame>.Instance;
         public Player MainPlayer => Singleton<GameWorld>.Instance?.MainPlayer;
@@ -96,7 +102,7 @@ namespace SAIN.Components
             }
             foreach (var bot in Bots)
             {
-                SAINComponentClass sain = bot.Value;
+                Bot sain = bot.Value;
                 if (sain != null && sain.BotOwner != null && bot.Key != player.ProfileId)
                 {
                     if (sain.BotOwner.BotsGroup.IsPlayerEnemyByRole(player.Profile.Info.Settings.Role))
@@ -326,21 +332,21 @@ namespace SAIN.Components
             catch { }
         }
 
-        public bool GetSAIN(string botName, out SAINComponentClass bot)
+        public bool GetSAIN(string botName, out Bot bot)
         {
             StringBuilder debugString = null;
             bot = BotSpawnController.GetSAIN(botName, debugString);
             return bot != null;
         }
 
-        public bool GetSAIN(BotOwner botOwner, out SAINComponentClass bot)
+        public bool GetSAIN(BotOwner botOwner, out Bot bot)
         {
             StringBuilder debugString = null;
             bot = BotSpawnController.GetSAIN(botOwner, debugString);
             return bot != null;
         }
 
-        public bool GetSAIN(Player player, out SAINComponentClass bot)
+        public bool GetSAIN(Player player, out Bot bot)
         {
             StringBuilder debugString = null;
             bot = BotSpawnController.GetSAIN(player, debugString);

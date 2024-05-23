@@ -10,7 +10,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
     public class Recoil : SAINBase, ISAINClass
     {
-        public Recoil(SAINComponentClass sain) : base(sain)
+        public Recoil(Bot sain) : base(sain)
         {
         }
 

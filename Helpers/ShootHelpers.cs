@@ -15,14 +15,14 @@ namespace SAIN.Helpers
     {
         public static float FullAutoBurstLength(BotOwner BotOwner, float distance)
         {
-            var component = BotOwner.GetComponent<SAINComponentClass>();
+            var component = BotOwner.GetComponent<Bot>();
 
             if (component == null)
             {
                 return 0.001f;
             }
 
-            if (component.ManualShootReason != SAINComponentClass.EShootReason.None && component.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
+            if (component.ManualShootReason != Bot.EShootReason.None && component.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
             {
                 return 0.75f;
             }

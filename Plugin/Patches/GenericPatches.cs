@@ -296,7 +296,7 @@ namespace SAIN.Patches.Generic
             BotsGroup group = enemyInfo.GroupOwner;
             for (int i = 0; i < group.MembersCount; i++)
             {
-                if (SAINPlugin.GetSAIN(group.Member(i), out SAINComponentClass sain, nameof(ShallKnowEnemyPatch))
+                if (SAINPlugin.GetSAIN(group.Member(i), out Bot sain, nameof(ShallKnowEnemyPatch))
                     && EnemySenseRecently(sain, enemyInfo))
                 {
                     return true;
@@ -306,7 +306,7 @@ namespace SAIN.Patches.Generic
             return false;
         }
 
-        public static bool EnemySenseRecently(SAINComponentClass sain, EnemyInfo enemyInfo)
+        public static bool EnemySenseRecently(Bot sain, EnemyInfo enemyInfo)
         {
             SAINEnemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
             if (myEnemy?.IsValid == true)

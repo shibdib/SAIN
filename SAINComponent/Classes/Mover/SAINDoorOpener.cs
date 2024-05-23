@@ -18,13 +18,13 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class SAINDoorOpener
     {
-        public SAINDoorOpener(SAINComponentClass sain, BotOwner bot)
+        public SAINDoorOpener(Bot sain, BotOwner bot)
         {
             SAIN = sain;
             this.BotOwner = bot;
         }
 
-        private SAINComponentClass SAIN;
+        private Bot SAIN;
 
         public void Init()
         {

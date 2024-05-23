@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes.Sense
     {
         TemporaryStatModifiers Modifiers = new TemporaryStatModifiers(1f, 1f, 1f, 1f, 1f);
 
-        public DazzleClass(SAINComponentClass owner) : base(owner)
+        public DazzleClass(Bot owner) : base(owner)
         {
         }
 

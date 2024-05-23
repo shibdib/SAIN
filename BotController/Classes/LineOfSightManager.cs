@@ -62,10 +62,10 @@ namespace SAIN.Components
             }
         }
 
-        private readonly List<SAINComponentClass> _localBotList = new List<SAINComponentClass>();
-        private readonly List<SAINComponentClass> _tempBotList = new List<SAINComponentClass>();
+        private readonly List<Bot> _localBotList = new List<Bot>();
+        private readonly List<Bot> _tempBotList = new List<Bot>();
 
-        private IEnumerator doRaycasts(List<SAINComponentClass> botList)
+        private IEnumerator doRaycasts(List<Bot> botList)
         {
             CheckVisiblePlayers(botList);
             yield return null;
@@ -86,7 +86,7 @@ namespace SAIN.Components
         private readonly List<Player> _humanPlayers = new List<Player>();
         private readonly List<Player> _validPlayers = new List<Player>();
 
-        private void CheckHumanVisibility(List<SAINComponentClass> botList)
+        private void CheckHumanVisibility(List<Bot> botList)
         {
             _humanPlayers.Clear();
             int partCount = 0;
@@ -163,7 +163,7 @@ namespace SAIN.Components
             _humanPlayers.Clear();
         }
 
-        private void CheckVisiblePlayers(List<SAINComponentClass> botList)
+        private void CheckVisiblePlayers(List<Bot> botList)
         {
             _validPlayers.Clear();
             foreach (var player in Players)
@@ -210,7 +210,7 @@ namespace SAIN.Components
             total = 0;
             for (int i = 0; i < botList.Count; i++)
             {
-                SAINComponentClass bot = botList[i];
+                Bot bot = botList[i];
                 var visPlayers = bot.Memory.VisiblePlayers;
                 visPlayers.Clear();
                 for (int j = 0; j < _validPlayers.Count; j++)

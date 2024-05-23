@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINMemoryClass : SAINBase, ISAINClass
     {
-        public SAINMemoryClass(SAINComponentClass sain) : base(sain)
+        public SAINMemoryClass(Bot sain) : base(sain)
         {
             Decisions = new DecisionWrapper(sain);
         }

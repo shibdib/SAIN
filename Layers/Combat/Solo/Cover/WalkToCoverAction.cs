@@ -106,7 +106,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private void SuppressPosition(Vector3 position)
         {
             if (SuppressTimer < Time.time
-                && SAIN.Shoot(true, position, true, SAINComponentClass.EShootReason.WalkToCoverSuppress))
+                && SAIN.Shoot(true, position, true, Bot.EShootReason.WalkToCoverSuppress))
             {
                 SAIN.Enemy.EnemyStatus.EnemyIsSuppressed = true;
                 if (SAIN.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)

@@ -20,7 +20,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private static readonly FieldInfo _pathControllerField;
 
-        public SAINBotUnstuckClass(SAINComponentClass sain) : base(sain)
+        public SAINBotUnstuckClass(Bot sain) : base(sain)
         {
         }
 

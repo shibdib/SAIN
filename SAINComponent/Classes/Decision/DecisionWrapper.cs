@@ -6,7 +6,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 {
     public class DecisionWrapper : SAINComponentAbstract, ISAINClass
     {
-        public DecisionWrapper(SAINComponentClass sain) : base(sain)
+        public DecisionWrapper(Bot sain) : base(sain)
         {
             Main = new DecisionTypeWrapper<SoloDecision>(sain);
             Squad = new DecisionTypeWrapper<SquadDecision>(sain);
@@ -31,13 +31,13 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public class DecisionTypeWrapper<T> where T : Enum
         {
-            public DecisionTypeWrapper(SAINComponentClass sain)
+            public DecisionTypeWrapper(Bot sain)
             {
                 SAIN = sain;
                 Type = typeof(T);
             }
 
-            private readonly SAINComponentClass SAIN;
+            private readonly Bot SAIN;
             private Type Type;
 
             public T Current

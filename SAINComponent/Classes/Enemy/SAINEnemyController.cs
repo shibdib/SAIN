@@ -19,7 +19,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public readonly Dictionary<string, SAINEnemy> Enemies = new Dictionary<string, SAINEnemy>();
 
-        public SAINEnemyController(SAINComponentClass sain) : base(sain)
+        public SAINEnemyController(Bot sain) : base(sain)
         {
         }
 

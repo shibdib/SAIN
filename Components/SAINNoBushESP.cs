@@ -56,9 +56,9 @@ namespace SAIN.Components
         private static readonly MethodInfo CanShootByState;
 
         private BotOwner BotOwner;
-        private SAINComponentClass SAIN;
+        private Bot SAIN;
 
-        public void Init(BotOwner botOwner, SAINComponentClass sain = null)
+        public void Init(BotOwner botOwner, Bot sain = null)
         {
             if (NoBushMask == 0)
             {

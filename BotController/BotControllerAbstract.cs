@@ -18,15 +18,15 @@ namespace SAIN
     {
         public void Awake()
         {
-            BotController = GameWorld.GetOrAddComponent<SAINBotControllerComponent>();
+            BotController = GameWorld.GetOrAddComponent<SAINBotController>();
         }
 
         public SAINControl()
         {
         }
 
-        public SAINBotControllerComponent BotController { get; private set; }
-        public Dictionary<string, SAINComponentClass> Bots => BotController?.BotSpawnController?.SAINBotDictionary;
+        public SAINBotController BotController { get; private set; }
+        public Dictionary<string, Bot> Bots => BotController?.BotSpawnController?.SAINBotDictionary;
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
     }
 }

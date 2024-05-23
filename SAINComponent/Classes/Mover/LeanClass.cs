@@ -6,7 +6,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class LeanClass : SAINBase, ISAINClass
     {
-        public LeanClass(SAINComponentClass sain) : base(sain)
+        public LeanClass(Bot sain) : base(sain)
         {
         }
 

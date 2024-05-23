@@ -49,7 +49,7 @@ namespace SAIN.Layers.Combat.Squad
                     }
                     else if (
                         WaitShootTimer < Time.time 
-                        && SAIN.Shoot(true, target.Value, true, SAINComponentClass.EShootReason.SquadSuppressing))
+                        && SAIN.Shoot(true, target.Value, true, Bot.EShootReason.SquadSuppressing))
                     {
                         enemy.EnemyStatus.EnemyIsSuppressed = true;
                         float waitTime = hasMachineGun ? 0.1f : 0.5f;

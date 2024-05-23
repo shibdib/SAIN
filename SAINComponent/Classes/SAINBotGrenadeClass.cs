@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINBotGrenadeClass : SAINBase, ISAINClass
     {
-        public SAINBotGrenadeClass(SAINComponentClass sain) : base(sain)
+        public SAINBotGrenadeClass(Bot sain) : base(sain)
         {
         }
 

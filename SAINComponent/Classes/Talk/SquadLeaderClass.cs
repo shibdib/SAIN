@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 {
     public class SquadLeaderClass : SAINBase
     {
-        public SquadLeaderClass(SAINComponentClass owner) : base(owner)
+        public SquadLeaderClass(Bot owner) : base(owner)
         {
         }
 

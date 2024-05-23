@@ -32,7 +32,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public bool ProcessingLimited { get; private set; }
         public CoverFinderStatus CurrentStatus { get; private set; }
 
-        public void Init(SAINComponentClass sain)
+        public void Init(Bot sain)
         {
             SAIN = sain;
             Player = sain.Player;
@@ -70,7 +70,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         }
         private Vector3 _targetPoint;
 
-        public SAINComponentClass SAIN { get; private set; }
+        public Bot SAIN { get; private set; }
         public Player Player { get; private set; }
         public BotOwner BotOwner { get; private set; }
 
@@ -563,7 +563,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private static float _debugTimer;
         private static float _debugTimer2;
 
-        public static void OrderPointsByPathDist(List<CoverPoint> points, SAINComponentClass sain)
+        public static void OrderPointsByPathDist(List<CoverPoint> points, Bot sain)
         {
             points.Sort((x, y) => x.RoundedPathLength.CompareTo(y.RoundedPathLength));
         }

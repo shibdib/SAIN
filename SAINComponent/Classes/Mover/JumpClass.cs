@@ -6,7 +6,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class JumpClass : SAINBase, ISAINClass
     {
-        public JumpClass(SAINComponentClass sain) : base(sain)
+        public JumpClass(Bot sain) : base(sain)
         {
         }
 

@@ -255,6 +255,7 @@
     <Compile Include="BotController\Classes\ESquadPersonality.cs" />
     <Compile Include="BotController\Classes\ESquadRole.cs" />
     <Compile Include="BotController\Classes\MemberInfo.cs" />
+    <Compile Include="BotController\Classes\PersonalityController.cs" />
     <Compile Include="BotController\Classes\Squad.cs" />
     <Compile Include="BotController\Classes\SquadPersonalityManager.cs" />
     <Compile Include="BotController\Classes\SquadPersonalitySettings.cs" />
@@ -428,7 +429,7 @@
     <Compile Include="BotController\Classes\TimeClass.cs" />
     <Compile Include="SAINComponent\Classes\Sense\SAINVisionClass.cs" />
     <Compile Include="BotController\BotControllerAbstract.cs" />
-    <Compile Include="BotController\SAINBotControllerComponent.cs" />
+    <Compile Include="BotController\SAINBotController.cs" />
     <Compile Include="BotController\Classes\DecisionManager.cs" />
     <Compile Include="BotController\Classes\PathManager.cs" />
     <Compile Include="BotController\Classes\LineOfSightManager.cs" />
@@ -487,7 +488,7 @@
     <Compile Include="Layers\Combat\Solo\Cover\HoldinCoverAction.cs" />
     <Compile Include="Layers\Combat\Squad\SuppressAction.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotGrenadeClass.cs" />
-    <Compile Include="SAINComponent\SAINComponentClass.cs" />
+    <Compile Include="SAINComponent\Bot.cs" />
     <Compile Include="Layers\Combat\Solo\CombatSoloLayer.cs" />
     <Compile Include="Layers\Combat\Solo\ShootAction.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINSteeringClass.cs" />

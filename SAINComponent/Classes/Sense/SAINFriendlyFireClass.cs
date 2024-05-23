@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINFriendlyFireClass : SAINBase, ISAINClass
     {
-        public SAINFriendlyFireClass(SAINComponentClass sain) : base(sain)
+        public SAINFriendlyFireClass(Bot sain) : base(sain)
         {
         }
 

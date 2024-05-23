@@ -11,7 +11,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class DogFight : SAINBase, ISAINClass
     {
-        public DogFight(SAINComponentClass sain) : base(sain)
+        public DogFight(Bot sain) : base(sain)
         {
         }
 

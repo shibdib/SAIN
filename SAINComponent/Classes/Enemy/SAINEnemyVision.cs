@@ -142,7 +142,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float _visionDistanceModifier;
         private float _nextCheckVisTime;
 
-        public static float GetGainSightModifier(EnemyInfo enemyInfo, SAINComponentClass sain)
+        public static float GetGainSightModifier(EnemyInfo enemyInfo, Bot sain)
         {
             float result = 1f;
             float dist = (enemyInfo.Owner.Position - enemyInfo.CurrPosition).magnitude;

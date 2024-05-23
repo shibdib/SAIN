@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static SAIN.SAINComponent.SAINComponentClass;
+using static SAIN.SAINComponent.Bot;
 using UnityEngine.UIElements;
 using UnityEngine;
 using Comfort.Common;
@@ -13,7 +13,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINAILimit : SAINBase, ISAINClass
     {
-        public SAINAILimit(SAINComponentClass sain) : base(sain)
+        public SAINAILimit(Bot sain) : base(sain)
         {
         }
 

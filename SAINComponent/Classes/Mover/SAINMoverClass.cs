@@ -64,7 +64,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
     public class SAINMoverClass : SAINBase, ISAINClass
     {
-        public SAINMoverClass(SAINComponentClass sain) : base(sain)
+        public SAINMoverClass(Bot sain) : base(sain)
         {
             BlindFire = new BlindFireController(sain);
             SideStep = new SideStepClass(sain);

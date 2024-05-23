@@ -4,6 +4,7 @@ using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.GlobalSettings;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using static SAIN.Helpers.EnumValues;
 
@@ -20,6 +21,13 @@ namespace SAIN.Preset.Personalities
 
         private void ImportPersonalities()
         {
+            import();
+            PersonalityDefaultsClass.InitDefaults(Personalities);
+            checkFix();
+        }
+
+        private void import()
+        {
             if (Preset.Info.IsCustom == true)
             {
                 foreach (var item in EnumValues.Personalities)
@@ -30,9 +38,10 @@ namespace SAIN.Preset.Personalities
                     }
                 }
             }
+        }
 
-            InitDefaults();
-
+        private void checkFix()
+        {
             if (Preset.Info.IsCustom == true)
             {
                 bool hadToFix = false;
@@ -41,21 +50,15 @@ namespace SAIN.Preset.Personalities
                     if (item.Value.Variables.AllowedTypes.Count == 0)
                     {
                         hadToFix = true;
-                        if (item.Key == EPersonality.Chad || item.Key == EPersonality.GigaChad)
-                        {
-                            AddPMCTypes(item.Value.Variables.AllowedTypes);
-                        }
-                        else
-                        {
-                            AddAllBotTypes(item.Value.Variables.AllowedTypes);
-                        }
+                        break;
                     }
                 }
                 if (hadToFix)
                 {
                     string message = "The Preset you are using is out of date, and required manual fixing. Its recommended you create a new one.";
-                    NotificationManagerClass.DisplayMessageNotification(message);
-                    Logger.LogWarning(message);
+                    Logger.LogAndNotifyError(message);
+                    Personalities.Clear();
+                    PersonalityDefaultsClass.InitDefaults(Personalities);
                 }
             }
         }
@@ -70,25 +73,44 @@ namespace SAIN.Preset.Personalities
             Personalities.Remove(EPersonality.Coward);
             Personalities.Remove(EPersonality.Timmy);
             Personalities.Remove(EPersonality.Normal);
-            InitDefaults();
+            PersonalityDefaultsClass.InitDefaults(Personalities);
         }
 
         public void ResetToDefault(EPersonality personality)
         {
             Personalities.Remove(personality);
-            InitDefaults();
+            PersonalityDefaultsClass.InitDefaults(Personalities);
         }
 
-        private void InitDefaults()
+        public PersonalityDictionary Personalities = new PersonalityDictionary();
+
+        public class PersonalityDictionary : Dictionary<EPersonality, PersonalitySettingsClass>{ }
+
+        private static class PersonalityDefaultsClass
         {
-            var pers = EPersonality.GigaChad;
-            if (!Personalities.ContainsKey(pers))
+
+            public static void InitDefaults(PersonalityDictionary Personalities)
             {
-                string name = pers.ToString();
-                string description = "A true alpha threat. Hyper Aggressive and typically wearing high tier equipment.";
-                var settings = new PersonalitySettingsClass(pers, name, description)
+                initGigaChad(Personalities);
+                initWreckless(Personalities);
+                initSnappingTurtle(Personalities);
+                initChad(Personalities);
+                initRat(Personalities);
+                initTimmy(Personalities);
+                initCoward(Personalities);
+                initNormal(Personalities);
+            }
+
+            private static void initGigaChad(PersonalityDictionary Personalities)
+            {
+                EPersonality GigaChad = EPersonality.GigaChad;
+                if (!Personalities.ContainsKey(GigaChad))
                 {
-                    Variables =
+                    string name = GigaChad.ToString();
+                    string description = "A true alpha threat. Hyper Aggressive and typically wearing high tier equipment.";
+                    var settings = new PersonalitySettingsClass(GigaChad, name, description)
+                    {
+                        Variables =
                     {
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 60,
@@ -134,24 +156,26 @@ namespace SAIN.Preset.Personalities
                         MoveToCoverNoEnemySpeed = 1f,
                         MoveToCoverNoEnemyPose = 1f,
                     }
-                };
+                    };
 
-                AddPMCTypes(settings.Variables.AllowedTypes);
-                Personalities.Add(pers, settings);
-                if (Preset.Info.IsCustom == true)
-                {
-                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                    AddPMCTypes(settings.Variables.AllowedTypes);
+                    Personalities.Add(GigaChad, settings);
+                    if (Preset.Info.IsCustom == true)
+                    {
+                        SAINPresetClass.Export(settings, Preset.Info.Name, GigaChad.ToString(), nameof(Personalities));
+                    }
                 }
             }
-
-            pers = EPersonality.Wreckless;
-            if (!Personalities.ContainsKey(pers))
+            private static void initWreckless(PersonalityDictionary Personalities)
             {
-                string name = pers.ToString();
-                string description = "Rush B Cyka Blyat. Who care if I die? Gotta get the clip";
-                var settings = new PersonalitySettingsClass(pers, name, description)
+                EPersonality Wreckless = EPersonality.Wreckless;
+                if (!Personalities.ContainsKey(Wreckless))
                 {
-                    Variables =
+                    string name = Wreckless.ToString();
+                    string description = "Rush B Cyka Blyat. Who care if I die? Gotta get the clip";
+                    var settings = new PersonalitySettingsClass(Wreckless, name, description)
+                    {
+                        Variables =
                     {
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 3,
@@ -195,24 +219,26 @@ namespace SAIN.Preset.Personalities
                         MoveToCoverNoEnemySpeed = 1f,
                         MoveToCoverNoEnemyPose = 1f,
                     }
-                };
+                    };
 
-                AddAllBotTypes(settings.Variables.AllowedTypes);
-                Personalities.Add(pers, settings);
-                if (Preset.Info.IsCustom == true)
-                {
-                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                    AddAllBotTypes(settings.Variables.AllowedTypes);
+                    Personalities.Add(Wreckless, settings);
+                    if (Preset.Info.IsCustom == true)
+                    {
+                        SAINPresetClass.Export(settings, Preset.Info.Name, Wreckless.ToString(), nameof(Personalities));
+                    }
                 }
             }
-
-            pers = EPersonality.SnappingTurtle;
-            if (!Personalities.ContainsKey(pers))
+            private static void initSnappingTurtle(PersonalityDictionary Personalities)
             {
-                string name = pers.ToString();
-                string description = "A player who finds the balance between rat and chad, yin and yang. Will rat you out but can spring out at any moment.";
-                var settings = new PersonalitySettingsClass(pers, name, description)
+                EPersonality SnappingTurtle = EPersonality.SnappingTurtle;
+                if (!Personalities.ContainsKey(SnappingTurtle))
                 {
-                    Variables =
+                    string name = SnappingTurtle.ToString();
+                    string description = "A player who finds the balance between rat and chad, yin and yang. Will rat you out but can spring out at any moment.";
+                    var settings = new PersonalitySettingsClass(SnappingTurtle, name, description)
+                    {
+                        Variables =
                     {
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 30,
@@ -254,24 +280,26 @@ namespace SAIN.Preset.Personalities
                         MoveToCoverNoEnemySpeed = 1f,
                         MoveToCoverNoEnemyPose = 1f,
                     }
-                };
+                    };
 
-                AddPMCTypes(settings.Variables.AllowedTypes);
-                Personalities.Add(pers, settings);
-                if (Preset.Info.IsCustom == true)
-                {
-                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                    AddPMCTypes(settings.Variables.AllowedTypes);
+                    Personalities.Add(SnappingTurtle, settings);
+                    if (Preset.Info.IsCustom == true)
+                    {
+                        SAINPresetClass.Export(settings, Preset.Info.Name, SnappingTurtle.ToString(), nameof(Personalities));
+                    }
                 }
             }
-
-            pers = EPersonality.Chad;
-            if (!Personalities.ContainsKey(pers))
+            private static void initChad(PersonalityDictionary Personalities)
             {
-                string name = pers.ToString();
-                string description = "An aggressive player. Typically wearing high tier equipment, and is more aggressive than usual.";
-                var settings = new PersonalitySettingsClass(pers, name, description)
+                EPersonality Chad = EPersonality.Chad;
+                if (!Personalities.ContainsKey(Chad))
                 {
-                    Variables =
+                    string name = Chad.ToString();
+                    string description = "An aggressive player. Typically wearing high tier equipment, and is more aggressive than usual.";
+                    var settings = new PersonalitySettingsClass(Chad, name, description)
+                    {
+                        Variables =
                     {
                         Enabled = true,
 
@@ -310,24 +338,26 @@ namespace SAIN.Preset.Personalities
                         MoveToCoverNoEnemySpeed = 0.7f,
                         MoveToCoverNoEnemyPose = 1f,
                     }
-                };
+                    };
 
-                AddAllBotTypes(settings.Variables.AllowedTypes);
-                Personalities.Add(pers, settings);
-                if (Preset.Info.IsCustom == true)
-                {
-                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                    AddAllBotTypes(settings.Variables.AllowedTypes);
+                    Personalities.Add(Chad, settings);
+                    if (Preset.Info.IsCustom == true)
+                    {
+                        SAINPresetClass.Export(settings, Preset.Info.Name, Chad.ToString(), nameof(Personalities));
+                    }
                 }
             }
-
-            pers = EPersonality.Rat;
-            if (!Personalities.ContainsKey(pers))
+            private static void initRat(PersonalityDictionary Personalities)
             {
-                string name = pers.ToString();
-                string description = "Scum of Tarkov. Rarely Seeks out enemies, and will hide and ambush.";
-                var settings = new PersonalitySettingsClass(pers, name, description)
+                EPersonality Rat = EPersonality.Rat;
+                if (!Personalities.ContainsKey(Rat))
                 {
-                    Variables =
+                    string name = Rat.ToString();
+                    string description = "Scum of Tarkov. Rarely Seeks out enemies, and will hide and ambush.";
+                    var settings = new PersonalitySettingsClass(Rat, name, description)
+                    {
+                        Variables =
                     {
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 25,
@@ -358,31 +388,33 @@ namespace SAIN.Preset.Personalities
 
                         CanShiftCoverPosition = false
                     }
-                };
+                    };
 
-                var allowedTypes = settings.Variables.AllowedTypes;
-                AddAllBotTypes(allowedTypes);
+                    var allowedTypes = settings.Variables.AllowedTypes;
+                    AddAllBotTypes(allowedTypes);
 
-                allowedTypes.Remove("Raider");
-                allowedTypes.Remove("Rogue");
-                allowedTypes.Remove("Bloodhound");
+                    allowedTypes.Remove("Raider");
+                    allowedTypes.Remove("Rogue");
+                    allowedTypes.Remove("Bloodhound");
 
-                Personalities.Add(pers, settings);
-                if (Preset.Info.IsCustom == true)
-                {
-                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                    Personalities.Add(Rat, settings);
+                    if (Preset.Info.IsCustom == true)
+                    {
+                        SAINPresetClass.Export(settings, Preset.Info.Name, Rat.ToString(), nameof(Personalities));
+                    }
                 }
             }
-
-            pers = EPersonality.Timmy;
-            if (!Personalities.ContainsKey(pers))
+            private static void initTimmy(PersonalityDictionary Personalities)
             {
-                string name = pers.ToString();
-                string description = "A New Player, terrified of everything.";
-
-                var settings = new PersonalitySettingsClass(pers, name, description)
+                EPersonality Timmy = EPersonality.Timmy;
+                if (!Personalities.ContainsKey(Timmy))
                 {
-                    Variables =
+                    string name = Timmy.ToString();
+                    string description = "A New Player, terrified of everything.";
+
+                    var settings = new PersonalitySettingsClass(Timmy, name, description)
+                    {
+                        Variables =
                     {
                         Enabled = true,
                         RandomChanceIfMeetRequirements = 50f,
@@ -410,30 +442,32 @@ namespace SAIN.Preset.Personalities
                         MoveToCoverNoEnemySpeed = 1f,
                         MoveToCoverNoEnemyPose = 1f,
                     }
-                };
+                    };
 
-                var allowedTypes = settings.Variables.AllowedTypes;
-                AddAllBotTypes(allowedTypes);
+                    var allowedTypes = settings.Variables.AllowedTypes;
+                    AddAllBotTypes(allowedTypes);
 
-                allowedTypes.Remove("Raider");
-                allowedTypes.Remove("Rogue");
-                allowedTypes.Remove("Bloodhound");
+                    allowedTypes.Remove("Raider");
+                    allowedTypes.Remove("Rogue");
+                    allowedTypes.Remove("Bloodhound");
 
-                Personalities.Add(pers, settings);
-                if (Preset.Info.IsCustom == true)
-                {
-                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                    Personalities.Add(Timmy, settings);
+                    if (Preset.Info.IsCustom == true)
+                    {
+                        SAINPresetClass.Export(settings, Preset.Info.Name, Timmy.ToString(), nameof(Personalities));
+                    }
                 }
             }
-
-            pers = EPersonality.Coward;
-            if (!Personalities.ContainsKey(pers))
+            private static void initCoward(PersonalityDictionary Personalities)
             {
-                string name = pers.ToString();
-                string description = "A player who is more passive and afraid than usual.";
-                var settings = new PersonalitySettingsClass(pers, name, description)
+                EPersonality Coward = EPersonality.Coward;
+                if (!Personalities.ContainsKey(Coward))
                 {
-                    Variables =
+                    string name = Coward.ToString();
+                    string description = "A player who is more passive and afraid than usual.";
+                    var settings = new PersonalitySettingsClass(Coward, name, description)
+                    {
+                        Variables =
                     {
                         Enabled = true,
                         RandomlyAssignedChance = 5,
@@ -460,30 +494,32 @@ namespace SAIN.Preset.Personalities
                         MoveToCoverNoEnemySpeed = 1f,
                         MoveToCoverNoEnemyPose = 1f,
                     }
-                };
+                    };
 
-                var allowedTypes = settings.Variables.AllowedTypes;
-                AddAllBotTypes(allowedTypes);
+                    var allowedTypes = settings.Variables.AllowedTypes;
+                    AddAllBotTypes(allowedTypes);
 
-                allowedTypes.Remove("Raider");
-                allowedTypes.Remove("Rogue");
-                allowedTypes.Remove("Bloodhound");
+                    allowedTypes.Remove("Raider");
+                    allowedTypes.Remove("Rogue");
+                    allowedTypes.Remove("Bloodhound");
 
-                Personalities.Add(pers, settings);
-                if (Preset.Info.IsCustom == true)
-                {
-                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                    Personalities.Add(Coward, settings);
+                    if (Preset.Info.IsCustom == true)
+                    {
+                        SAINPresetClass.Export(settings, Preset.Info.Name, Coward.ToString(), nameof(Personalities));
+                    }
                 }
             }
-
-            pers = EPersonality.Normal;
-            if (!Personalities.ContainsKey(pers))
+            private static void initNormal(PersonalityDictionary Personalities)
             {
-                string name = pers.ToString();
-                string description = "An Average Tarkov Enjoyer";
-                var settings = new PersonalitySettingsClass(pers, name, description)
+                EPersonality Normal = EPersonality.Normal;
+                if (!Personalities.ContainsKey(Normal))
                 {
-                    Variables =
+                    string name = Normal.ToString();
+                    string description = "An Average Tarkov Enjoyer";
+                    var settings = new PersonalitySettingsClass(Normal, name, description)
+                    {
+                        Variables =
                     {
                         Enabled = true,
                         HoldGroundBaseTime = 0.65f,
@@ -503,29 +539,31 @@ namespace SAIN.Preset.Personalities
                         MoveToCoverNoEnemySpeed = 1f,
                         MoveToCoverNoEnemyPose = 1f,
                     }
-                };
+                    };
 
-                AddAllBotTypes(settings.Variables.AllowedTypes);
-                Personalities.Add(pers, settings);
-                if (Preset.Info.IsCustom == true)
-                {
-                    SAINPresetClass.Export(settings, Preset.Info.Name, pers.ToString(), nameof(Personalities));
+                    AddAllBotTypes(settings.Variables.AllowedTypes);
+                    Personalities.Add(Normal, settings);
+                    if (Preset.Info.IsCustom == true)
+                    {
+                        SAINPresetClass.Export(settings, Preset.Info.Name, Normal.ToString(), nameof(Personalities));
+                    }
                 }
             }
-        }
 
-        private static void AddAllBotTypes(List<string> allowedTypes)
-        {
-            allowedTypes.Clear();
-            allowedTypes.AddRange(BotTypeDefinitions.BotTypesNames);
-        }
+            private static void AddPMCTypes(List<string> allowedTypes)
+            {
+                allowedTypes.Add(BotTypeDefinitions.BotTypes[WildSpawn.Usec].Name);
+                allowedTypes.Add(BotTypeDefinitions.BotTypes[WildSpawn.Bear].Name);
+            }
 
-        private static void AddPMCTypes(List<string> allowedTypes)
-        {
-            allowedTypes.Add(BotTypeDefinitions.BotTypes[WildSpawn.Usec].Name);
-            allowedTypes.Add(BotTypeDefinitions.BotTypes[WildSpawn.Bear].Name);
-        }
+            private static void AddAllBotTypes(List<string> allowedTypes)
+            {
+                allowedTypes.Clear();
+                allowedTypes.AddRange(BotTypeDefinitions.BotTypesNames);
+            }
 
-        public Dictionary<EPersonality, PersonalitySettingsClass> Personalities = new Dictionary<EPersonality, PersonalitySettingsClass>();
+            private static SAINPresetClass Preset => SAINPlugin.LoadedPreset;
+
+        }
     }
 }

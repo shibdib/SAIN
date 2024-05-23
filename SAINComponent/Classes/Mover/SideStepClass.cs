@@ -5,7 +5,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class SideStepClass : SAINBase, ISAINClass
     {
-        public SideStepClass(SAINComponentClass sain) : base(sain)
+        public SideStepClass(Bot sain) : base(sain)
         {
         }
 

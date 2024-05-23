@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.Info
 {
     public class SAINBotInfoClass : SAINBase, ISAINClass
     {
-        public SAINBotInfoClass(SAINComponentClass sain) : base(sain)
+        public SAINBotInfoClass(Bot sain) : base(sain)
         {
             Profile = new ProfileClass(sain);
             WeaponInfo = new WeaponInfoClass(sain);

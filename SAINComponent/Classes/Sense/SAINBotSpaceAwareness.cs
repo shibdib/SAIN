@@ -28,7 +28,7 @@ namespace SAIN.SAINComponent.Classes
 
     public class SAINBotSpaceAwareness : SAINBase, ISAINClass
     {
-        public SAINBotSpaceAwareness(SAINComponentClass sain) : base(sain)
+        public SAINBotSpaceAwareness(Bot sain) : base(sain)
         {
         }
 

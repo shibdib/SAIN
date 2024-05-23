@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class SAINSteeringClass : SAINBase, ISAINClass
     {
-        public SAINSteeringClass(SAINComponentClass sain) : base(sain)
+        public SAINSteeringClass(Bot sain) : base(sain)
         {
         }
 
@@ -231,7 +231,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return SteerPriority.Sprinting;
             }
-            if (SAIN.ManualShootReason != SAINComponentClass.EShootReason.None 
+            if (SAIN.ManualShootReason != Bot.EShootReason.None 
                 && SAIN.ManualShootTargetPosition != Vector3.zero)
             {
                 return SteerPriority.ManualShooting;

@@ -58,7 +58,7 @@ namespace SAIN.Layers
             }
         }
 
-        public static void AddBaseInfo(SAINComponentClass sain, BotOwner botOwner, StringBuilder stringBuilder)
+        public static void AddBaseInfo(Bot sain, BotOwner botOwner, StringBuilder stringBuilder)
         {
             try
             {

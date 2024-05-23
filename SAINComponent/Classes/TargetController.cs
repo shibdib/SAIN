@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class TargetController : SAINBase, ISAINClass
     {
-        public TargetController(SAINComponentClass sain) : base(sain)
+        public TargetController(Bot sain) : base(sain)
         {
         }
 

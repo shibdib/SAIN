@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 {
     public class SquadDecisionClass : SAINBase, ISAINClass
     {
-        public SquadDecisionClass(SAINComponentClass sain) : base(sain)
+        public SquadDecisionClass(Bot sain) : base(sain)
         {
         }
 
@@ -161,7 +161,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         float SquadDecision_SuppressFriendlyDistStart = 30f;
         float SquadDecision_SuppressFriendlyDistEnd = 50f;
 
-        private bool shallSuppressEnemy(SAINComponentClass member)
+        private bool shallSuppressEnemy(Bot member)
         {
             if (SAIN.Enemy?.SuppressionTarget == null)
             {
@@ -186,7 +186,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return memberDistance <= SquadDecision_SuppressFriendlyDistStart && ammo >= 0.5f;
         }
 
-        private bool shallGroupSearch(SAINComponentClass member)
+        private bool shallGroupSearch(Bot member)
         {
             bool squadSearching = member.Memory.Decisions.Main.Current == SoloDecision.Search || member.Decision.CurrentSquadDecision == SquadDecision.Search;
             if (squadSearching)
@@ -218,7 +218,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private bool doesMemberShareTarget(SAINComponentClass member, Vector3 targetPosition, float maxDist = 20f)
+        private bool doesMemberShareTarget(Bot member, Vector3 targetPosition, float maxDist = 20f)
         {
             if (member == null || member.ProfileId == SAIN.ProfileId || member.BotOwner?.IsDead == true)
             {
@@ -228,7 +228,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return member.CurrentTargetPosition != null 
                 && (member.CurrentTargetPosition.Value - targetPosition).sqrMagnitude < maxDist;
         }
-        private bool doesMemberShareEnemy(SAINComponentClass member)
+        private bool doesMemberShareEnemy(Bot member)
         {
             if (member == null || member.ProfileId == SAIN.ProfileId || member.BotOwner?.IsDead == true)
             {
@@ -243,7 +243,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         float SquadDecision_EndHelpFriendDist = 45f;
         float SquadDecision_EndHelp_FriendsEnemySeenRecentTime = 8f;
 
-        private bool shallHelp(SAINComponentClass member)
+        private bool shallHelp(Bot member)
         {
             float distance = member.Enemy.Path.PathDistance;
             bool visible = member.Enemy.IsVisible;

@@ -35,6 +35,19 @@ namespace SAIN.Components.BotController
             CheckRaidProgressTimer = Time.time + 5f;
         }
 
+        public void LogExtractionOfBot(string profileID)
+        {
+            ExtractedBots.Add(profileID);
+        }
+
+        public void AddExtractedBots(List<string> list)
+        {
+            list.Clear();
+            list.AddRange(this.ExtractedBots);
+        }
+
+        public readonly List<string> ExtractedBots = new List<string>();
+
         private Dictionary<ExfiltrationPoint, float> exfilActivationTimes = new Dictionary<ExfiltrationPoint, float>();
 
         public bool HasExfilBeenActivated(ExfiltrationPoint exfil)
@@ -93,9 +106,9 @@ namespace SAIN.Components.BotController
         }
 
         private float exfilSearchRetryDelay = 10;
-        private Dictionary<SAINComponentClass, float> botExfilSearchRetryTime = new Dictionary<SAINComponentClass, float>();
+        private Dictionary<Bot, float> botExfilSearchRetryTime = new Dictionary<Bot, float>();
 
-        public void ResetExfilSearchTime(SAINComponentClass bot)
+        public void ResetExfilSearchTime(Bot bot)
         {
             if (botExfilSearchRetryTime.ContainsKey(bot))
             {
@@ -107,7 +120,7 @@ namespace SAIN.Components.BotController
             }
         }
 
-        public bool TryFindExfilForBot(SAINComponentClass bot)
+        public bool TryFindExfilForBot(Bot bot)
         {
             if (bot == null)
             {
@@ -173,7 +186,7 @@ namespace SAIN.Components.BotController
             return true;
         }
 
-        public static bool IsBotAllowedToExfil(SAINComponentClass bot)
+        public static bool IsBotAllowedToExfil(Bot bot)
         {
             if (!bot.Info.Profile.IsPMC && !bot.Info.Profile.IsScav)
             {
@@ -183,7 +196,7 @@ namespace SAIN.Components.BotController
             return true;
         }
 
-        private bool TryAssignExfilForBot(SAINComponentClass bot)
+        private bool TryAssignExfilForBot(Bot bot)
         {
             IDictionary<ExfiltrationPoint, Vector3> validExfils = GameWorldHandler.SAINGameWorld.ExtractFinder.GetValidExfilsForBot(bot);
             bot.Memory.ExfilPoint = selectExfilForBot(bot, validExfils);
@@ -193,7 +206,7 @@ namespace SAIN.Components.BotController
 
         public static float MinDistanceToExtract { get; private set; } = 10f;
 
-        private ExfiltrationPoint selectExfilForBot(SAINComponentClass bot, IDictionary<ExfiltrationPoint, Vector3> validExfils)
+        private ExfiltrationPoint selectExfilForBot(Bot bot, IDictionary<ExfiltrationPoint, Vector3> validExfils)
         {
             // Check each valid extract to ensure the bot can use it and that it isn't too close. If this method is called when a bot is near an extract, it might be because
             // it got stuck. 
@@ -272,7 +285,7 @@ namespace SAIN.Components.BotController
             return true;
         }
 
-        private bool TryAssignSquadExfil(SAINComponentClass bot)
+        private bool TryAssignSquadExfil(Bot bot)
         {
             var squad = bot.Squad;
             if (squad.IAmLeader)

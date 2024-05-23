@@ -26,6 +26,7 @@ namespace SAIN.Plugin
         private static MethodInfo _IsPathTowardEnemyMethod;
         private static MethodInfo _TimeSinceSenseEnemyMethod;
         private static MethodInfo _CanBotQuestMethod;
+        private static MethodInfo _GetExtractedBotsMethod;
 
         /**
          * Return true if SAIN is loaded in the client
@@ -65,11 +66,27 @@ namespace SAIN.Plugin
                     _IsPathTowardEnemyMethod = AccessTools.Method(_SAINExternalType, "IsPathTowardEnemy");
                     _TimeSinceSenseEnemyMethod = AccessTools.Method(_SAINExternalType, "TimeSinceSenseEnemy");
                     _CanBotQuestMethod = AccessTools.Method(_SAINExternalType, "CanBotQuest");
+                    _GetExtractedBotsMethod = AccessTools.Method(_SAINExternalType, "GetExtractedBots");
                 }
             }
 
             // If we found the External class, at least some of the methods are (probably) available
             return (_SAINExternalType != null);
+        }
+
+        /// <summary>
+        /// Get a list of all "Player.ProfileID"s of bots that have extracted. The list must not be null. The list is cleared before adding all extracted ProfileIDs;
+        /// </summary>
+        /// <param name="list">An already existing list to add to</param>
+        /// <returns>True if the list was successfully updated</returns>
+        public static bool GetExtractedBots(List<string> list)
+        {
+            if (list == null) return false;
+            if (!Init()) return false;
+            if (_GetExtractedBotsMethod == null) return false;
+
+            _GetExtractedBotsMethod.Invoke(null, new object[] { list });
+            return true;
         }
 
         /**

@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINHearingSensorClass : SAINBase, ISAINClass
     {
-        public SAINHearingSensorClass(SAINComponentClass sain) : base(sain)
+        public SAINHearingSensorClass(Bot sain) : base(sain)
         {
         }
 

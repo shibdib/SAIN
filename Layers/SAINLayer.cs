@@ -24,17 +24,17 @@ namespace SAIN.Layers
 
         public override string GetName() => LayerName;
 
-        public SAINBotControllerComponent BotController => SAINPlugin.BotController;
+        public SAINBotController BotController => SAINPlugin.BotController;
         public DecisionWrapper Decisions => SAIN?.Memory?.Decisions;
 
-        private SAINComponentClass _SAIN = null;
-        public SAINComponentClass SAIN
+        private Bot _SAIN = null;
+        public Bot SAIN
         {
             get
             {
                 if (_SAIN == null && BotOwner?.BotState == EBotState.Active)
                 {
-                    _SAIN = BotOwner.GetComponent<SAINComponentClass>();
+                    _SAIN = BotOwner.GetComponent<Bot>();
                 }
 
                 return _SAIN;

@@ -10,14 +10,14 @@ namespace SAIN.SAINComponent.Classes
         public ShootClass(BotOwner owner)
             : base(owner)
         {
-            SAIN = owner.GetComponent<SAINComponentClass>();
+            SAIN = owner.GetComponent<Bot>();
             Shoot = new BotShoot(owner);
         }
 
         private readonly BotShoot Shoot;
         private BotOwner BotOwner => botOwner_0;
 
-        private readonly SAINComponentClass SAIN;
+        private readonly Bot SAIN;
 
         private float changeAimTimer;
 

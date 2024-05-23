@@ -13,14 +13,14 @@ namespace SAIN.Layers
     {
         public SAINAction(BotOwner botOwner, string name) : base(botOwner)
         {
-            SAIN = botOwner.GetComponent<SAINComponentClass>();
+            SAIN = botOwner.GetComponent<Bot>();
             Shoot = new ShootClass(botOwner);
         }
 
-        public SAINBotControllerComponent BotController => SAINPlugin.BotController;
+        public SAINBotController BotController => SAINPlugin.BotController;
         public DecisionWrapper Decisions => SAIN.Memory.Decisions;
 
-        public readonly SAINComponentClass SAIN;
+        public readonly Bot SAIN;
 
         public readonly ShootClass Shoot;
 

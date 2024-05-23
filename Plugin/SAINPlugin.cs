@@ -45,7 +45,7 @@ namespace SAIN
             return BotSpawnController.ExclusionList.Contains(wildSpawnType);
         }
 
-        public static bool GetSAIN(BotOwner botOwner, out SAINComponentClass sain, string patchName)
+        public static bool GetSAIN(BotOwner botOwner, out Bot sain, string patchName)
         {
             sain = null;
             if (SAINPlugin.BotController == null)
@@ -56,7 +56,7 @@ namespace SAIN
             return SAINPlugin.BotController.GetSAIN(botOwner, out sain);
         }
 
-        public static bool GetSAIN(Player player, out SAINComponentClass sain, string patchName)
+        public static bool GetSAIN(Player player, out Bot sain, string patchName)
         {
             sain = null;
             if (player != null && !player.IsAI)
@@ -202,7 +202,7 @@ namespace SAIN
 
         public static SAINPresetClass LoadedPreset => PresetHandler.LoadedPreset;
 
-        public static SAINBotControllerComponent BotController => GameWorldHandler.SAINBotController;
+        public static SAINBotController BotController => GameWorldHandler.SAINBotController;
 
         private void Update()
         {

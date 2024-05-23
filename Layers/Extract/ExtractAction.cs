@@ -12,6 +12,7 @@ using System.Linq;
 using SAIN.Components.BotController;
 using UnityEngine.AI;
 using SAIN.Helpers;
+using SAIN.Components;
 
 namespace SAIN.Layers
 {
@@ -175,6 +176,7 @@ namespace SAIN.Layers
             if (ExtractTimer < Time.time)
             {
                 Logger.LogInfo($"{BotOwner.name} Extracted at {point} for extract {SAIN.Memory.ExfilPoint.Settings.Name} at {System.DateTime.UtcNow}");
+                SAINBotController.Instance?.BotExtractManager?.LogExtractionOfBot(SAIN.Player.ProfileId);
 
                 var botgame = Singleton<IBotGame>.Instance;
                 Player player = SAIN.Player;

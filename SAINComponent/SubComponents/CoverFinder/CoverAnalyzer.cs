@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
     public class CoverAnalyzer : SAINBase, ISAINClass
     {
-        public CoverAnalyzer(SAINComponentClass botOwner, CoverFinderComponent coverFinder) : base(botOwner)
+        public CoverAnalyzer(Bot botOwner, CoverFinderComponent coverFinder) : base(botOwner)
         {
             CoverFinder = coverFinder;
         }

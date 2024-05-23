@@ -20,7 +20,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             _pathControllerField = AccessTools.Field(typeof(BotMover), "_pathController");
         }
 
-        public SAINSprint(SAINComponentClass sain) : base(sain)
+        public SAINSprint(Bot sain) : base(sain)
         {
         }
 

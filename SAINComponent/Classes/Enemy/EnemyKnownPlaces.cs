@@ -309,7 +309,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public Action<EnemyPlace, SAINComponentClass> OnEnemyPlaceAdded;
+        public Action<EnemyPlace, Bot> OnEnemyPlaceAdded;
 
         public EnemyPlace AddPersonalHeardPlace(Vector3 position, bool arrived, bool isGunFire)
         {

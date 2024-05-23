@@ -20,7 +20,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 {
     public class GroupTalk : SAINBase, ISAINClass
     {
-        public GroupTalk(SAINComponentClass bot) : base(bot)
+        public GroupTalk(Bot bot) : base(bot)
         {
         }
 

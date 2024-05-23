@@ -129,12 +129,12 @@ namespace SAIN.Components.Extract
             }
         }
 
-        public int CountValidExfilsForBot(SAINComponentClass bot)
+        public int CountValidExfilsForBot(Bot bot)
         {
             return GetValidExfilsForBot(bot).Count;
         }
 
-        public IDictionary<ExfiltrationPoint, Vector3> GetValidExfilsForBot(SAINComponentClass bot)
+        public IDictionary<ExfiltrationPoint, Vector3> GetValidExfilsForBot(Bot bot)
         {
             return bot.Info.Profile.IsScav ? ValidScavExfils : ValidExfils;
         }

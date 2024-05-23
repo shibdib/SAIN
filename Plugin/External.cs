@@ -1,6 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using SAIN.Components;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Enemy;
@@ -20,7 +21,7 @@ namespace SAIN.Plugin
     {
         public static bool ExtractBot(BotOwner bot)
         {
-            var component = bot.GetComponent<SAINComponentClass>();
+            var component = bot.GetComponent<Bot>();
             if (component == null)
             {
                 return false;
@@ -31,9 +32,27 @@ namespace SAIN.Plugin
             return true;
         }
 
+        public static void GetExtractedBots(List<string> list)
+        {
+            var botController = SAINBotController.Instance;
+            if (botController == null)
+            {
+                Logger.LogWarning("SAIN Bot Controller is Null, cannot retrieve Extracted Bots List.");
+                return;
+            }
+            var extractedBots = botController.BotExtractManager?.ExtractedBots;
+            if (extractedBots == null)
+            {
+                Logger.LogWarning("List of extracted bots is null! Cannot copy list.");
+                return;
+            }
+            list.Clear();
+            list.AddRange(extractedBots);
+        }
+
         public static bool TrySetExfilForBot(BotOwner bot)
         {
-            var component = bot.GetComponent<SAINComponentClass>();
+            var component = bot.GetComponent<Bot>();
             if (component == null)
             {
                 return false;
@@ -56,7 +75,7 @@ namespace SAIN.Plugin
 
         public static bool ResetDecisionsForBot(BotOwner bot)
         {
-            var component = bot.GetComponent<SAINComponentClass>();
+            var component = bot.GetComponent<Bot>();
             if (component == null)
             {
                 return false;
@@ -110,7 +129,7 @@ namespace SAIN.Plugin
 
         public static float TimeSinceSenseEnemy(BotOwner botOwner)
         {
-            var component = botOwner.GetComponent<SAINComponentClass>();
+            var component = botOwner.GetComponent<Bot>();
             if (component == null)
             {
                 return float.MaxValue;
@@ -127,7 +146,7 @@ namespace SAIN.Plugin
 
         public static bool IsPathTowardEnemy(NavMeshPath path, BotOwner botOwner, float ratioSameOverAll = 0.25f, float sqrDistCheck = 0.05f)
         {
-            var component = botOwner.GetComponent<SAINComponentClass>();
+            var component = botOwner.GetComponent<Bot>();
             if (component == null)
             {
                 return false;
@@ -150,7 +169,7 @@ namespace SAIN.Plugin
 
         public static bool CanBotQuest(BotOwner botOwner, Vector3 questPosition, float dotProductThresh = 0.33f)
         {
-            var component = botOwner.GetComponent<SAINComponentClass>();
+            var component = botOwner.GetComponent<Bot>();
             if (component == null)
             {
                 return false;
@@ -172,7 +191,7 @@ namespace SAIN.Plugin
             return true;
         }
 
-        public static bool IsQuestTowardTarget(SAINComponentClass component, Vector3 questPosition, float dotProductThresh)
+        public static bool IsQuestTowardTarget(Bot component, Vector3 questPosition, float dotProductThresh)
         {
             Vector3? currentTarget = component.CurrentTargetPosition;
             if (currentTarget == null)
@@ -187,7 +206,7 @@ namespace SAIN.Plugin
             return Vector3.Dot(targetDirection.normalized, questDirection.normalized) > dotProductThresh;
         }
 
-        private static bool IsBotSearching(SAINComponentClass component)
+        private static bool IsBotSearching(Bot component)
         {
             if (component.Decision.CurrentSoloDecision == SoloDecision.Search || component.Decision.CurrentSquadDecision == SquadDecision.Search)
             {
@@ -196,7 +215,7 @@ namespace SAIN.Plugin
             return false;
         }
 
-        private static bool isBotInCombat(SAINComponentClass component, out ECombatReason reason)
+        private static bool isBotInCombat(Bot component, out ECombatReason reason)
         {
             const float TimeSinceSeenThreshold = 10f;
             const float TimeSinceHeardThreshold = 5f;

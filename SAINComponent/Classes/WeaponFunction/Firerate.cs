@@ -18,7 +18,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
     public class Firerate : SAINBase, ISAINClass
     {
-        public Firerate(SAINComponentClass sain) : base(sain)
+        public Firerate(Bot sain) : base(sain)
         {
         }
 

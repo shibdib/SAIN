@@ -90,7 +90,7 @@ namespace SAIN.Patches.Shoot
                 Logger.LogError($"Bot Controller Null in [{nameof(RecoilPatch)}]");
                 return true;
             }
-            if (SAINPlugin.BotController.GetSAIN(____owner, out SAINComponentClass sain))
+            if (SAINPlugin.BotController.GetSAIN(____owner, out Bot sain))
             {
                 return false;
             }
@@ -116,7 +116,7 @@ namespace SAIN.Patches.Shoot
                 Logger.LogError($"Bot Controller Null in [{nameof(LoseRecoilPatch)}]");
                 return true;
             }
-            if (SAINPlugin.BotController.GetSAIN(____owner, out SAINComponentClass sain))
+            if (SAINPlugin.BotController.GetSAIN(____owner, out Bot sain))
             {
                 var recoil = sain?.Info?.WeaponInfo?.Recoil;
                 if (recoil != null)
@@ -147,7 +147,7 @@ namespace SAIN.Patches.Shoot
                 Logger.LogError($"Bot Controller Null in [{nameof(EndRecoilPatch)}]");
                 return true;
             }
-            if (SAINPlugin.BotController.GetSAIN(____owner, out SAINComponentClass sain))
+            if (SAINPlugin.BotController.GetSAIN(____owner, out Bot sain))
             {
                 return false;
             }

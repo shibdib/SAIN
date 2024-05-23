@@ -19,9 +19,9 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent
 {
-    public class SAINComponentClass : MonoBehaviour, IBotComponent
+    public class Bot : MonoBehaviour, IBotComponent
     {
-        public static bool TryAddSAINToBot(BotOwner botOwner, out SAINComponentClass sainComponent)
+        public static bool TryAddSAINToBot(BotOwner botOwner, out Bot sainComponent)
         {
             Player player = EFTInfo.GetPlayer(botOwner?.ProfileId);
             GameObject gameObject = botOwner?.gameObject;
@@ -35,7 +35,7 @@ namespace SAIN.SAINComponent
                 }
 
                 // Create a new Component
-                sainComponent = gameObject.AddComponent<SAINComponentClass>();
+                sainComponent = gameObject.AddComponent<Bot>();
                 if (sainComponent?.Init(new SAINPersonClass(player)) == true)
                 {
                     return true;

@@ -17,7 +17,7 @@ namespace SAIN.SAINComponent.Classes
     {
         public EHitReaction HitReaction { get; private set; }
 
-        public SAINMedical(SAINComponentClass sain) : base(sain)
+        public SAINMedical(Bot sain) : base(sain)
         {
             Surgery = new BotSurgery(sain);
         }
@@ -54,7 +54,7 @@ namespace SAIN.SAINComponent.Classes
 
     public class BotSurgery : SAINBase, ISAINClass
     {
-        public BotSurgery(SAINComponentClass sain) : base(sain)
+        public BotSurgery(Bot sain) : base(sain)
         {
         }
 

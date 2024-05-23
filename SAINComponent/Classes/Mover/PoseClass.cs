@@ -8,7 +8,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class PoseClass : SAINBase, ISAINClass
     {
-        public PoseClass(SAINComponentClass sain) : base(sain)
+        public PoseClass(Bot sain) : base(sain)
         {
         }
 

@@ -13,7 +13,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 {
     public class EnemyDecisionClass : SAINBase, ISAINClass
     {
-        public EnemyDecisionClass(SAINComponentClass sain) : base(sain)
+        public EnemyDecisionClass(Bot sain) : base(sain)
         {
         }
 

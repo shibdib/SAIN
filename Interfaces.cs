@@ -9,7 +9,7 @@ namespace SAIN
 {
     public interface ISAINSubComponent
     {
-        void Init(SAINComponentClass sain);
+        void Init(Bot sain);
         BotOwner BotOwner { get; }
         Player Player { get; }
     }

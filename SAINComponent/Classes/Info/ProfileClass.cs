@@ -6,7 +6,7 @@ namespace SAIN.SAINComponent.Classes.Info
 {
     public class ProfileClass : SAINBase, ISAINClass
     {
-        public ProfileClass(SAINComponentClass sain) : base(sain)
+        public ProfileClass(Bot sain) : base(sain)
         {
             IsBoss = EnumValues.WildSpawn.IsBoss(WildSpawnType);
             IsFollower = EnumValues.WildSpawn.IsFollower(WildSpawnType);

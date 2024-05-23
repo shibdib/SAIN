@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
     public class CoverPointController : MonoBehaviour
     {
-        public CoverPointComponent AddCoverPoint(Collider collider, SAINComponentClass sain, Vector3 point, NavMeshPath path)
+        public CoverPointComponent AddCoverPoint(Collider collider, Bot sain, Vector3 point, NavMeshPath path)
         {
             if (collider == null) return null;
             CoverPointComponent coverPoint = collider.gameObject.GetOrAddComponent<CoverPointComponent>();
@@ -33,7 +33,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             Collider = this.GetComponent<Collider>();
         }
 
-        public CoverPointNew AddOrUpdateCoverPoint(SAINComponentClass sain, Vector3 point, NavMeshPath pathToPoint)
+        public CoverPointNew AddOrUpdateCoverPoint(Bot sain, Vector3 point, NavMeshPath pathToPoint)
         {
             if (!CoverPoints.ContainsKey(sain.ProfileId))
             {
@@ -106,7 +106,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
     public sealed class CoverPointNew
     {
-        public readonly SAINComponentClass SAIN;
+        public readonly Bot SAIN;
         public readonly Collider Collider;
 
         public Vector3 Position 
@@ -133,7 +133,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public float PathLengthToCover;
         public readonly float TimeCreated;
 
-        public CoverPointNew(SAINComponentClass sain, Vector3 point, Collider collider, NavMeshPath path)
+        public CoverPointNew(Bot sain, Vector3 point, Collider collider, NavMeshPath path)
         {
             SAIN = sain;
             Position = point;
@@ -149,7 +149,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
     public class CoverPoint
     {
-        public CoverPoint(SAINComponentClass sain, Vector3 point, Collider collider, NavMeshPath pathToPoint)
+        public CoverPoint(Bot sain, Vector3 point, Collider collider, NavMeshPath pathToPoint)
         {
             SAIN = sain;
             TimeCreated = Time.time;
@@ -161,7 +161,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             PathToPoint = pathToPoint;
         }
 
-        private SAINComponentClass SAIN;
+        private Bot SAIN;
 
         public bool BotIsUsingThis => SAIN.Cover.CoverInUse == this;
 
@@ -372,11 +372,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
     public sealed class SAINBotCoverInfo
     {
-        public SAINBotCoverInfo(SAINComponentClass sain)
+        public SAINBotCoverInfo(Bot sain)
         {
             SAIN = sain;
         }
-        public readonly SAINComponentClass SAIN;
+        public readonly Bot SAIN;
 
         public bool BotIsUsingThis = false;
         public float TimeLastUsed = 0f;

@@ -4,7 +4,7 @@ namespace SAIN.BotController.Classes
 {
     public class MemberInfo
     {
-        public MemberInfo(SAINComponentClass sain)
+        public MemberInfo(Bot sain)
         {
             SAIN = sain;
             ProfileId = sain.ProfileId;
@@ -43,7 +43,7 @@ namespace SAIN.BotController.Classes
             HealthStatus = healthStatus;
         }
 
-        public readonly SAINComponentClass SAIN;
+        public readonly Bot SAIN;
         public readonly string ProfileId;
         public readonly string Nickname;
 

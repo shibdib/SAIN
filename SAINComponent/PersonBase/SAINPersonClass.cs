@@ -13,7 +13,7 @@ namespace SAIN.SAINComponent.BaseClasses
             Profile = person.Profile;
             if (person?.AIData?.BotOwner != null)
             {
-                SAIN = person.AIData.BotOwner.GetComponent<SAINComponentClass>();
+                SAIN = person.AIData.BotOwner.GetComponent<Bot>();
             }
         }
 
@@ -32,7 +32,7 @@ namespace SAIN.SAINComponent.BaseClasses
         public bool IsSAINBot => SAIN != null;
         public AIData AIData => IPlayer?.AIData;
         public BotOwner BotOwner => AIData?.BotOwner;
-        public SAINComponentClass SAIN { get; private set; }
+        public Bot SAIN { get; private set; }
         public SAINBotInfoClass SAINBotInfo => SAIN?.Info;
         public SAINSquadClass SAINSquad => SAIN?.Squad;
     }

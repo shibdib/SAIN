@@ -7,7 +7,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class BlindFireController : SAINBase, ISAINClass
     {
-        public BlindFireController(SAINComponentClass sain) : base(sain)
+        public BlindFireController(Bot sain) : base(sain)
         {
         }
 
@@ -83,7 +83,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 Vector3 blindFireDirection = Vector.Rotate(targetPos - start, Vector.RandomRange(3), Vector.RandomRange(3), Vector.RandomRange(3));
                 BlindFireTargetPos = blindFireDirection + start;
                 //SAIN.Steering.LookToPoint(BlindFireTargetPos);
-                SAIN.Shoot(true, BlindFireTargetPos, false, SAINComponentClass.EShootReason.Blindfire);
+                SAIN.Shoot(true, BlindFireTargetPos, false, Bot.EShootReason.Blindfire);
             }
         }
 

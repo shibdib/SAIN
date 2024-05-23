@@ -10,7 +10,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 {
     public class SAINDecisionClass : SAINBase, ISAINClass
     {
-        public SAINDecisionClass(SAINComponentClass sain) : base(sain)
+        public SAINDecisionClass(Bot sain) : base(sain)
         {
             SelfActionDecisions = new SelfActionDecisionClass(sain);
             EnemyDecisions = new EnemyDecisionClass(sain);

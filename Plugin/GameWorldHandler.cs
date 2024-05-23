@@ -86,7 +86,7 @@ namespace SAIN
         }
 
         public static SAINGameworldComponent SAINGameWorld { get; private set; }
-        public static SAINBotControllerComponent SAINBotController => SAINGameWorld?.SAINBotController;
+        public static SAINBotController SAINBotController => SAINGameWorld?.SAINBotController;
         public static SAINMainPlayerComponent SAINMainPlayer => SAINGameWorld?.SAINMainPlayer;
     }
 }

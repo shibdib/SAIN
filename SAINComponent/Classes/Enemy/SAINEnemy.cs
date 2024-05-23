@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class SAINEnemy : SAINBase, ISAINClass
     {
-        public SAINEnemy(SAINComponentClass bot, SAINPersonClass person, EnemyInfo enemyInfo) : base(bot)
+        public SAINEnemy(Bot bot, SAINPersonClass person, EnemyInfo enemyInfo) : base(bot)
         {
             TimeEnemyCreated = Time.time;
             EnemyPerson = person;

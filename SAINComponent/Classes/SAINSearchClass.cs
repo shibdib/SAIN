@@ -24,7 +24,7 @@ namespace SAIN.SAINComponent.Classes
 
     public class SAINSearchClass : SAINBase, ISAINClass
     {
-        public SAINSearchClass(SAINComponentClass sain) : base(sain)
+        public SAINSearchClass(Bot sain) : base(sain)
         {
         }
 

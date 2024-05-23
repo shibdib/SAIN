@@ -19,7 +19,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         }
 
         public SAINEnemy Enemy { get; private set; }
-        public SAINComponentClass SAIN { get; private set; }
+        public Bot SAIN { get; private set; }
         public EnemyInfo EnemyInfo { get; private set; }
         public Player EnemyPlayer { get; private set; }
         public IPlayer EnemyIPlayer { get; private set; }
