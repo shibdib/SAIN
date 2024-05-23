@@ -19,26 +19,26 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINEnemy enemy = SAIN.Enemy;
+            SAINEnemy enemy = Bot.Enemy;
             if (enemy == null)
             {
-                SAIN.Steering.SteerByPriority();
+                Bot.Steering.SteerByPriority();
                 return;
             }
 
-            SAIN.Mover.SetTargetPose(1f);
-            SAIN.Mover.SetTargetMoveSpeed(1f);
+            Bot.Mover.SetTargetPose(1f);
+            Bot.Mover.SetTargetMoveSpeed(1f);
 
             if (CheckShoot(enemy))
             {
-                SAIN.Steering.SteerByPriority();
+                Bot.Steering.SteerByPriority();
                 Shoot.Update();
                 return;
             }
 
-            if (SAIN.Decision.SelfActionDecisions.LowOnAmmo(0.66f))
+            if (Bot.Decision.SelfActionDecisions.LowOnAmmo(0.66f))
             {
-                SAIN.SelfActions.TryReload();
+                Bot.SelfActions.TryReload();
             }
 
             Vector3? LastSeenPosition = enemy.LastSeenPosition;
@@ -53,11 +53,11 @@ namespace SAIN.Layers.Combat.Solo
             }
             else
             {
-                SAIN.Steering.SteerByPriority();
+                Bot.Steering.SteerByPriority();
                 Shoot.Update();
                 return;
             }
-            var cover = SAIN.Cover.FindPointInDirection(movePos - SAIN.Position, 0.5f, 3f);
+            var cover = Bot.Cover.FindPointInDirection(movePos - Bot.Position, 0.5f, 3f);
             if (cover != null)
             {
                 movePos = cover.Position;
@@ -70,12 +70,12 @@ namespace SAIN.Layers.Combat.Solo
                 {
                     RecalcPathTimer = Time.time + 2f;
                     BotOwner.BotRun.Run(movePos, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
-                    SAIN.Steering.LookToMovingDirection(500f, true);
+                    Bot.Steering.LookToMovingDirection(500f, true);
                 }
             }
             else
             {
-                SAIN.Mover.Sprint(false);
+                Bot.Mover.Sprint(false);
 
                 if (RecalcPathTimer < Time.time)
                 {
@@ -83,9 +83,9 @@ namespace SAIN.Layers.Combat.Solo
                     BotOwner.MoveToEnemyData.TryMoveToEnemy(movePos);
                 }
 
-                if (!SAIN.Steering.SteerByPriority(false))
+                if (!Bot.Steering.SteerByPriority(false))
                 {
-                    SAIN.Steering.LookToMovingDirection();
+                    Bot.Steering.LookToMovingDirection();
                     //SAIN.Steering.LookToPoint(movePos + Vector3.up * 1f);
                 }
             }
@@ -95,7 +95,7 @@ namespace SAIN.Layers.Combat.Solo
         {
             float distance = enemy.RealDistance;
             bool enemyLookAtMe = enemy.EnemyLookingAtMe;
-            float EffDist = SAIN.Info.WeaponInfo.EffectiveWeaponDistance;
+            float EffDist = Bot.Info.WeaponInfo.EffectiveWeaponDistance;
 
             if (enemy.IsVisible)
             {

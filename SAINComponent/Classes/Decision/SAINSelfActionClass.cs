@@ -24,13 +24,13 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Update()
         {
-            if (!SAIN.PatrolDataPaused)
+            if (!Bot.PatrolDataPaused)
             {
                 return;
             }
             if (!UsingMeds && Player != null)
             {
-                if (SAIN.Memory.Decisions.Self.Current == SelfDecision.Reload)
+                if (Bot.Memory.Decisions.Self.Current == SelfDecision.Reload)
                 {
                     TryReload();
                     return;
@@ -44,7 +44,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                         return;
                     }
 
-                    switch (SAIN.Memory.Decisions.Self.Current)
+                    switch (Bot.Memory.Decisions.Self.Current)
                     {
                         case SelfDecision.Reload:
                             TryReload();
@@ -88,7 +88,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         public void DoSurgery()
         {
             var surgery = BotOwner.Medecine.SurgicalKit;
-            if (HealTimer < Time.time && !BotOwner.Mover.IsMoving && SAIN.Cover.BotIsAtCoverInUse() && surgery.ShallStartUse())
+            if (HealTimer < Time.time && !BotOwner.Mover.IsMoving && Bot.Cover.BotIsAtCoverInUse() && surgery.ShallStartUse())
             {
                 HealTimer = Time.time + 5f;
                 surgery.ApplyToCurrentPart();

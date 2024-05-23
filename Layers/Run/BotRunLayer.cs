@@ -29,12 +29,12 @@ namespace SAIN.Layers.Combat.Run
 
         public override bool IsCurrentActionEnding()
         {
-            if (SAIN == null) return true;
+            if (Bot == null) return true;
 
             return false;
         }
 
         private SoloDecision LastActionDecision = SoloDecision.None;
-        public SoloDecision CurrentDecision => SAIN.Memory.Decisions.Main.Current;
+        public SoloDecision CurrentDecision => Bot.Memory.Decisions.Main.Current;
     }
 }

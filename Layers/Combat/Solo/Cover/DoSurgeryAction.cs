@@ -22,15 +22,15 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Update()
         {
-            _allClear = SAIN.Medical.Surgery.ShallTrySurgery();
+            _allClear = Bot.Medical.Surgery.ShallTrySurgery();
             if (_allClear)
             {
-                SAIN.Mover.SetTargetMoveSpeed(0f);
-                SAIN.Mover.SetTargetPose(0f);
+                Bot.Mover.SetTargetMoveSpeed(0f);
+                Bot.Mover.SetTargetPose(0f);
                 tryStartSurgery();
             }
 
-            SAIN.Steering.SteerByPriority();
+            Bot.Steering.SteerByPriority();
         }
 
         private void tryStartSurgery()
@@ -41,7 +41,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 && !surgery.Using
                 && surgery.ShallStartUse())
             {
-                SAIN.Medical.Surgery.SurgeryStarted = true;
+                Bot.Medical.Surgery.SurgeryStarted = true;
                 surgery.ApplyToCurrentPart();
             }
         }
@@ -51,7 +51,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
-            SAIN.Mover.StopMove();
+            Bot.Mover.StopMove();
             _startSurgeryTime = Time.time + 1f;
         }
 
@@ -59,16 +59,16 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
-            SAIN.Cover.CheckResetCoverInUse();
-            SAIN.Medical.Surgery.SurgeryStarted = false;
+            Bot.Cover.CheckResetCoverInUse();
+            Bot.Medical.Surgery.SurgeryStarted = false;
             BotOwner.MovementResume();
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)
         {
-            stringBuilder.AppendLine($"Health Status {SAIN.Memory.HealthStatus}");
-            stringBuilder.AppendLine($"Surgery Started? {SAIN.Medical.Surgery.SurgeryStarted}");
-            stringBuilder.AppendLine($"Time Since Surgery Started {Time.time - SAIN.Medical.Surgery.SurgeryStartTime}");
+            stringBuilder.AppendLine($"Health Status {Bot.Memory.Health.HealthStatus}");
+            stringBuilder.AppendLine($"Surgery Started? {Bot.Medical.Surgery.SurgeryStarted}");
+            stringBuilder.AppendLine($"Time Since Surgery Started {Time.time - Bot.Medical.Surgery.SurgeryStartTime}");
             stringBuilder.AppendLine($"Area Clear? {_allClear}");
             stringBuilder.AppendLine($"ShallStartUse Surgery? {BotOwner.Medecine.SurgicalKit.ShallStartUse()}");
             stringBuilder.AppendLine($"IsBleeding? {BotOwner.Medecine.FirstAid.IsBleeding}");

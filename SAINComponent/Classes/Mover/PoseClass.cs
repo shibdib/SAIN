@@ -18,7 +18,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (!SAIN.PatrolDataPaused)
+            if (!Bot.PatrolDataPaused)
             {
                 return;
             }
@@ -40,7 +40,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 _updatePoseTimer = Time.time + 0.25f;
                 BotOwner.Mover?.SetPose(_targetPoseLevel);
 
-                if (SAIN.Mover.CurrentStamina > 0.1f)
+                if (Bot.Mover.CurrentStamina > 0.1f)
                 {
                     //BotOwner.Mover?.SetPose(_targetPoseLevel);
                 }
@@ -100,39 +100,34 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool FindCrouchFromCover(out float targetPose, bool useCollider = false)
         {
             targetPose = 1f;
-            if ((SAIN.AILimit.CurrentAILimit == AILimitSetting.Close || SAIN.Enemy?.IsAI == false)
-                && SAIN.CurrentTargetPosition != null)
+            if ((Bot.AILimit.CurrentAILimit == AILimitSetting.Close || Bot.Enemy?.IsAI == false))
             {
-                SAINEnemy enemy = SAIN.Enemy;
+                SAINEnemy enemy = Bot.Enemy;
                 if (enemy?.LastKnownPosition != null)
                 {
+                    Vector3 position = enemy.LastKnownPosition.Value + Vector3.up;
                     if (useCollider)
                     {
-                        targetPose = FindCrouchHeightColliderSphereCast(enemy.LastKnownPosition.Value + Vector3.up);
+                        targetPose = FindCrouchHeightColliderSphereCast(position);
                     }
                     else
                     {
-                        targetPose = FindCrouchHeightRaycast(enemy.LastKnownPosition.Value + Vector3.up);
+                        targetPose = FindCrouchHeightRaycast(position);
                     }
                 }
             }
-            bool foundCover = targetPose < 1f;
-            if (foundCover)
-            {
-                //SetTargetPose(targetPose);
-            }
-            return foundCover;
+            return targetPose < 1f;
         }
 
-        private float FindCrouchHeightRaycast(Vector3 target, float rayLength = 3f)
+        private float FindCrouchHeightRaycast(Vector3 target, float rayLength = 4f)
         {
-            const float StartHeight = 1.5f;
+            const float StartHeight = 1.6f;
             const int max = 6;
             const float heightStep = 1f / max;
             LayerMask Mask = LayerMaskClass.HighPolyWithTerrainMask;
 
             Vector3 offset = Vector3.up * heightStep;
-            Vector3 start = SAIN.Transform.Position + Vector3.up * StartHeight;
+            Vector3 start = Bot.Transform.Position + Vector3.up * StartHeight;
             Vector3 direction = target - start;
             float targetHeight = StartHeight;
             for (int i = 0; i <= max; i++)
@@ -155,7 +150,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private float FindCrouchHeightColliderSphereCast(Vector3 target, float rayLength = 3f, bool flatDir = true)
         {
             LayerMask Mask = LayerMaskClass.HighPolyWithTerrainMask;
-            Vector3 start = SAIN.Transform.Position + Vector3.up * 0.75f;
+            Vector3 start = Bot.Transform.Position + Vector3.up * 0.75f;
             Vector3 direction = target - start;
             if (flatDir)
             {

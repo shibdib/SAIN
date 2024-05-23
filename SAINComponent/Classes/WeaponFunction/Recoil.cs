@@ -63,7 +63,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public Vector3 CalculateRecoil(Vector3 currentRecoil)
         {
-            float distance = SAIN.DistanceToAimTarget;
+            float distance = Bot.DistanceToAimTarget;
 
             // Reduces scatter recoil at very close range. Clamps Distance between 3 and 20 then scale to 0.25 to 1.
             // So if a target is 3m or less Distance, their recoil scaling will be 25% its original value
@@ -71,8 +71,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             distance /= 20f;
             distance = distance * 0.75f + 0.25f;
 
-            float weaponhorizrecoil = CalcHorizRecoil(SAIN.Info.WeaponInfo.RecoilForceUp);
-            float weaponvertrecoil = CalcVertRecoil(SAIN.Info.WeaponInfo.RecoilForceBack);
+            float weaponhorizrecoil = CalcHorizRecoil(Bot.Info.WeaponInfo.RecoilForceUp);
+            float weaponvertrecoil = CalcVertRecoil(Bot.Info.WeaponInfo.RecoilForceBack);
 
             float addRecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.AddRecoil;
             float horizRecoil = (1f * (weaponhorizrecoil + addRecoil));
@@ -99,7 +99,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return vector;
         }
 
-        private float RecoilMultiplier => Mathf.Round(SAIN.Info.FileSettings.Shoot.RecoilMultiplier * GlobalSettings.Shoot.GlobalRecoilMultiplier * 100f) / 100f;
+        private float RecoilMultiplier => Mathf.Round(Bot.Info.FileSettings.Shoot.RecoilMultiplier * GlobalSettings.Shoot.GlobalRecoilMultiplier * 100f) / 100f;
 
         float CalcVertRecoil(float recoilVal)
         {
@@ -108,7 +108,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 result = recoilVal / 150;
             }
-            result *= SAIN.Info.WeaponInfo.FinalModifier;
+            result *= Bot.Info.WeaponInfo.FinalModifier;
             result *= UnityEngine.Random.Range(0.8f, 1.2f);
             return result;
         }
@@ -120,7 +120,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 result = recoilVal / 300;
             }
-            result *= SAIN.Info.WeaponInfo.FinalModifier;
+            result *= Bot.Info.WeaponInfo.FinalModifier;
             result *= UnityEngine.Random.Range(0.8f, 1.2f);
             return result;
         }

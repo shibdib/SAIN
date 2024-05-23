@@ -45,11 +45,11 @@ namespace SAIN.SAINComponent.Classes
 
         public bool ShallStartSearch(out Vector3 destination, bool mustHaveTarget = false)
         {
-            if (SAIN.Decision.CurrentSoloDecision != SoloDecision.Search
+            if (Bot.Decision.CurrentSoloDecision != SoloDecision.Search
                 && _nextRecalcSearchTime < Time.time)
             {
                 _nextRecalcSearchTime = Time.time + 30f;
-                SAIN.Info.CalcTimeBeforeSearch();
+                Bot.Info.CalcTimeBeforeSearch();
             }
             destination = Vector3.zero;
 
@@ -61,18 +61,18 @@ namespace SAIN.SAINComponent.Classes
         public bool WantToSearch()
         {
             bool wantToSearch = false;
-            float timeBeforeSearch = SAIN.Info.TimeBeforeSearch;
+            float timeBeforeSearch = Bot.Info.TimeBeforeSearch;
 
-            SAINEnemy enemy = SAIN.Enemy;
+            SAINEnemy enemy = Bot.Enemy;
 
             if (enemy != null)
             {
                 wantToSearch = shallSearch(enemy, timeBeforeSearch);
             }
-            else if (SAIN.Info.PersonalitySettings.WillSearchFromAudio)
+            else if (Bot.Info.PersonalitySettings.WillSearchFromAudio)
             {
-                Vector3? target = SAIN.CurrentTargetPosition;
-                if (target != null && SAIN.TimeSinceTargetFound > timeBeforeSearch)
+                Vector3? target = Bot.CurrentTargetPosition;
+                if (target != null && Bot.TimeSinceTargetFound > timeBeforeSearch)
                 {
                     wantToSearch = true;
                 }
@@ -94,12 +94,12 @@ namespace SAIN.SAINComponent.Classes
 
         private bool shallBeginSearch(SAINEnemy enemy, float timeBeforeSearch)
         {
-            if (SAIN.Info.PersonalitySettings.WillSearchForEnemy
-                && !SAIN.Suppression.IsSuppressed
+            if (Bot.Info.PersonalitySettings.WillSearchForEnemy
+                && !Bot.Suppression.IsSuppressed
                 && !enemy.IsVisible
                 && !BotOwner.Memory.IsUnderFire)
             {
-                float myPower = SAIN.Info.PowerLevel;
+                float myPower = Bot.Info.PowerLevel;
                 if (enemy.EnemyPlayer.AIData.PowerOfEquipment < myPower * 0.5f)
                 {
                     return true;
@@ -119,8 +119,8 @@ namespace SAIN.SAINComponent.Classes
 
         private bool shallContinueSearch(SAINEnemy enemy, float timeBeforeSearch)
         {
-            if (SAIN.Info.PersonalitySettings.WillSearchForEnemy
-                && !SAIN.Suppression.IsSuppressed
+            if (Bot.Info.PersonalitySettings.WillSearchForEnemy
+                && !Bot.Suppression.IsSuppressed
                 && !enemy.IsVisible
                 && !BotOwner.Memory.IsUnderFire)
             {
@@ -169,9 +169,9 @@ namespace SAIN.SAINComponent.Classes
 
         private bool checkBotZone(Vector3 target)
         {
-            if (SAIN.Memory.BotZoneCollider != null)
+            if (Bot.Memory.Location.BotZoneCollider != null)
             {
-                Vector3 closestPointInZone = SAIN.Memory.BotZoneCollider.ClosestPointOnBounds(target);
+                Vector3 closestPointInZone = Bot.Memory.Location.BotZoneCollider.ClosestPointOnBounds(target);
                 float distance = (target - closestPointInZone).sqrMagnitude;
                 if (distance > 50f * 50f)
                 {
@@ -186,7 +186,7 @@ namespace SAIN.SAINComponent.Classes
 
         private void updateSearchDestination()
         {
-            if (!SearchedTargetPosition && (FinalDestination - SAIN.Position).sqrMagnitude < 1f)
+            if (!SearchedTargetPosition && (FinalDestination - Bot.Position).sqrMagnitude < 1f)
             {
                 SearchedTargetPosition = true;
             }
@@ -243,7 +243,7 @@ namespace SAIN.SAINComponent.Classes
 
         public Vector3? SearchMovePos(out bool hasTarget, bool randomSearch = false)
         {
-            var enemy = SAIN.Enemy;
+            var enemy = Bot.Enemy;
             if (enemy != null && (enemy.Seen || enemy.Heard))
             {
                 if (enemy.IsVisible)
@@ -345,7 +345,7 @@ namespace SAIN.SAINComponent.Classes
             if (WaitPointTimer < 0)
             {
                 float baseTime = 3;
-                var personalitySettings = SAIN.Info.PersonalitySettings;
+                var personalitySettings = Bot.Info.PersonalitySettings;
                 if (personalitySettings != null)
                 {
                     baseTime /= personalitySettings.SearchWaitMultiplier;
@@ -383,22 +383,22 @@ namespace SAIN.SAINComponent.Classes
         {
             RecalcPathTimer = Time.time + 2;
 
-            if (!shallSprint && SAIN.Mover.SprintController.Running)
+            if (!shallSprint && Bot.Mover.SprintController.Running)
             {
-                SAIN.Mover.SprintController.CancelRun();
+                Bot.Mover.SprintController.CancelRun();
             }
 
             _Running = false;
             if (shallSprint 
-                && SAIN.Mover.SprintController.RunToPoint(destination))
+                && Bot.Mover.SprintController.RunToPoint(destination))
             {
                 _Running = true;
                 return true;
             }
             else
             {
-                SAIN.Mover.Sprint(false);
-                return SAIN.Mover.GoToPoint(destination, out _);
+                Bot.Mover.Sprint(false);
+                return Bot.Mover.GoToPoint(destination, out _);
             }
         }
 
@@ -407,7 +407,7 @@ namespace SAIN.SAINComponent.Classes
 
         private void SwitchSearchModes(bool shallSprint)
         {
-            var persSettings = SAIN.Info.PersonalitySettings;
+            var persSettings = Bot.Info.PersonalitySettings;
             float speed = 1f;
             float pose = 1f;
             _setMaxSpeedPose = false;
@@ -418,9 +418,9 @@ namespace SAIN.SAINComponent.Classes
                 speed = 1f;
                 pose = 1f;
             }
-            else if (!SAIN.Memory.IsIndoors)
+            else if (!Bot.Memory.Location.IsIndoors)
             {
-                if (persSettings.Sneaky && SAIN.Cover.CoverPoints.Count > 2 && Time.time - BotOwner.Memory.UnderFireTime > 30f)
+                if (persSettings.Sneaky && Bot.Cover.CoverPoints.Count > 2 && Time.time - BotOwner.Memory.UnderFireTime > 30f)
                 {
                     speed = 0.7f;
                     pose = 1f;
@@ -441,9 +441,9 @@ namespace SAIN.SAINComponent.Classes
                 //speed = DecideSpeed(FinalDestination, out pose);
             }
 
-            if (!shallSprint && SAIN.Mover.SprintController.Running)
+            if (!shallSprint && Bot.Mover.SprintController.Running)
             {
-                SAIN.Mover.SprintController.CancelRun();
+                Bot.Mover.SprintController.CancelRun();
             }
 
             LastState = CurrentState;
@@ -474,13 +474,13 @@ namespace SAIN.SAINComponent.Classes
 
                     if (_setMaxSpeedPose)
                     {
-                        SAIN.Mover.SetTargetMoveSpeed(1f);
-                        SAIN.Mover.SetTargetPose(1f);
+                        Bot.Mover.SetTargetMoveSpeed(1f);
+                        Bot.Mover.SetTargetPose(1f);
                     }
                     else
                     {
-                        SAIN.Mover.SetTargetMoveSpeed(speed);
-                        SAIN.Mover.SetTargetPose(pose);
+                        Bot.Mover.SetTargetMoveSpeed(speed);
+                        Bot.Mover.SetTargetPose(pose);
                     }
 
                     MoveToPoint(FinalDestination, shallSprint);
@@ -498,13 +498,13 @@ namespace SAIN.SAINComponent.Classes
 
                     if (_setMaxSpeedPose)
                     {
-                        SAIN.Mover.SetTargetMoveSpeed(1f);
-                        SAIN.Mover.SetTargetPose(1f);
+                        Bot.Mover.SetTargetMoveSpeed(1f);
+                        Bot.Mover.SetTargetPose(1f);
                     }
                     else
                     {
-                        SAIN.Mover.SetTargetMoveSpeed(speed);
-                        SAIN.Mover.SetTargetPose(pose);
+                        Bot.Mover.SetTargetMoveSpeed(speed);
+                        Bot.Mover.SetTargetPose(pose);
                     }
 
                     if (BotIsAtPoint(ActiveDestination) 
@@ -524,13 +524,13 @@ namespace SAIN.SAINComponent.Classes
 
                     if (_setMaxSpeedPose)
                     {
-                        SAIN.Mover.SetTargetMoveSpeed(1f);
-                        SAIN.Mover.SetTargetPose(1f);
+                        Bot.Mover.SetTargetMoveSpeed(1f);
+                        Bot.Mover.SetTargetPose(1f);
                     }
                     else
                     {
-                        SAIN.Mover.SetTargetMoveSpeed(0.1f);
-                        SAIN.Mover.SetTargetPose(pose);
+                        Bot.Mover.SetTargetMoveSpeed(0.1f);
+                        Bot.Mover.SetTargetPose(pose);
                     }
 
                     if (BotIsAtPoint(ActiveDestination))
@@ -549,13 +549,13 @@ namespace SAIN.SAINComponent.Classes
 
                     if (_setMaxSpeedPose)
                     {
-                        SAIN.Mover.SetTargetMoveSpeed(1f);
-                        SAIN.Mover.SetTargetPose(1f);
+                        Bot.Mover.SetTargetMoveSpeed(1f);
+                        Bot.Mover.SetTargetPose(1f);
                     }
                     else
                     {
-                        SAIN.Mover.SetTargetMoveSpeed((speed / 2f).Round100());
-                        SAIN.Mover.SetTargetPose(pose);
+                        Bot.Mover.SetTargetMoveSpeed((speed / 2f).Round100());
+                        Bot.Mover.SetTargetPose(pose);
                     }
 
                     if (BotIsAtPoint(ActiveDestination))
@@ -572,8 +572,8 @@ namespace SAIN.SAINComponent.Classes
                     break;
 
                 case ESearchMove.Wait:
-                    SAIN.Mover.SetTargetMoveSpeed(0f);
-                    SAIN.Mover.SetTargetPose(0.75f);
+                    Bot.Mover.SetTargetMoveSpeed(0f);
+                    Bot.Mover.SetTargetPose(0.75f);
                     if (!WaitAtPoint())
                     {
                         CurrentState = NextState;
@@ -589,14 +589,14 @@ namespace SAIN.SAINComponent.Classes
         private bool CheckIfStuck()
         {
             bool botIsStuck = 
-                (!SAIN.BotStuck.BotHasChangedPosition && SAIN.BotStuck.TimeSpentNotMoving > 3f) 
-                || SAIN.BotStuck.BotIsStuck;
+                (!Bot.BotStuck.BotHasChangedPosition && Bot.BotStuck.TimeSpentNotMoving > 3f) 
+                || Bot.BotStuck.BotIsStuck;
 
             if (botIsStuck && UnstuckMoveTimer < Time.time)
             {
                 UnstuckMoveTimer = Time.time + 2f;
 
-                var TargetPosition = SAIN.CurrentTargetPosition;
+                var TargetPosition = Bot.CurrentTargetPosition;
                 if (TargetPosition != null)
                 {
                     CalculatePath(TargetPosition.Value, false);
@@ -628,7 +628,7 @@ namespace SAIN.SAINComponent.Classes
 
         public NavMeshPathStatus CalculatePath(Vector3 point, bool MustHavePath = true, float reachDist = 0.5f)
         {
-            Vector3 Start = SAIN.Position;
+            Vector3 Start = Bot.Position;
             if ((point - Start).sqrMagnitude <= 0.5f)
             {
                 return NavMeshPathStatus.PathInvalid;

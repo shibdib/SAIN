@@ -1,5 +1,6 @@
 ﻿using BepInEx.Bootstrap;
 using EFT;
+using EFT.Interactive;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ namespace SAIN.Plugin
         private static MethodInfo _TimeSinceSenseEnemyMethod;
         private static MethodInfo _CanBotQuestMethod;
         private static MethodInfo _GetExtractedBotsMethod;
+        private static MethodInfo _GetExtractionInfosMethod;
 
         /**
          * Return true if SAIN is loaded in the client
@@ -67,6 +69,7 @@ namespace SAIN.Plugin
                     _TimeSinceSenseEnemyMethod = AccessTools.Method(_SAINExternalType, "TimeSinceSenseEnemy");
                     _CanBotQuestMethod = AccessTools.Method(_SAINExternalType, "CanBotQuest");
                     _GetExtractedBotsMethod = AccessTools.Method(_SAINExternalType, "GetExtractedBots");
+                    _GetExtractionInfosMethod = AccessTools.Method(_SAINExternalType, "GetExtractionInfos");
                 }
             }
 
@@ -86,6 +89,20 @@ namespace SAIN.Plugin
             if (_GetExtractedBotsMethod == null) return false;
 
             _GetExtractedBotsMethod.Invoke(null, new object[] { list });
+            return true;
+        }
+        /// <summary>
+        /// Get a list of all "Player.ProfileID"s of bots that have extracted. The list must not be null. The list is cleared before adding all extracted ProfileIDs;
+        /// </summary>
+        /// <param name="list">An already existing list to add to</param>
+        /// <returns>True if the list was successfully updated</returns>
+        public static bool GetExtractedBots(List<ExtractionInfo> list)
+        {
+            if (list == null) return false;
+            if (!Init()) return false;
+            if (_GetExtractionInfosMethod == null) return false;
+
+            _GetExtractionInfosMethod.Invoke(null, new object[] { list });
             return true;
         }
 
@@ -162,5 +179,24 @@ namespace SAIN.Plugin
 
             return (float)_TimeSinceSenseEnemyMethod.Invoke(null, new object[] { botOwner });
         }
+
+    }
+
+    public class ExtractionInfo
+    {
+        public ExtractionInfo(BotOwner bot, string reason, ExfiltrationPoint exfil) 
+        {
+            BotNickname = bot.Profile.Nickname;
+            ProfileID = bot.GetPlayer.ProfileId;
+            Reason = reason;
+            TimeExtracted = Time.time;
+            ExtractionPoint = exfil.Settings.Name;
+        }
+
+        public readonly string BotNickname;
+        public readonly string ProfileID;
+        public readonly string Reason;
+        public readonly string ExtractionPoint;
+        public readonly float TimeExtracted;
     }
 }

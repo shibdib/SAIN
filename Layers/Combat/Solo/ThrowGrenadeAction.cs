@@ -14,15 +14,15 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            if (!Stopped && Time.time - StartTime > 1f || SAIN.Cover.CheckLimbsForCover())
+            if (!Stopped && Time.time - StartTime > 1f || Bot.Cover.CheckLimbsForCover())
             {
                 Stopped = true;
                 BotOwner.StopMove();
             }
 
-            if (SAIN.Squad.BotInGroup && SAIN.Talk.GroupTalk.FriendIsClose)
+            if (Bot.Squad.BotInGroup && Bot.Talk.GroupTalk.FriendIsClose)
             {
-                SAIN.Talk.Say(EPhraseTrigger.OnGrenade);
+                Bot.Talk.Say(EPhraseTrigger.OnGrenade);
             }
         }
 

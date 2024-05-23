@@ -12,7 +12,7 @@ namespace SAIN.Layers
     {
         public static string BuildLayerName<T>()
         {
-            return $"{nameof(SAIN)} {typeof(T).Name}";
+            return $"{nameof(Bot)} {typeof(T).Name}";
         }
 
         public SAINLayer(BotOwner botOwner, int priority, string layerName) : base(botOwner, priority)
@@ -25,10 +25,10 @@ namespace SAIN.Layers
         public override string GetName() => LayerName;
 
         public SAINBotController BotController => SAINPlugin.BotController;
-        public DecisionWrapper Decisions => SAIN?.Memory?.Decisions;
+        public DecisionWrapper Decisions => Bot?.Memory?.Decisions;
 
         private Bot _SAIN = null;
-        public Bot SAIN
+        public Bot Bot
         {
             get
             {
@@ -44,9 +44,9 @@ namespace SAIN.Layers
 
         public override void BuildDebugText(StringBuilder stringBuilder)
         {
-            if (SAIN != null)
+            if (Bot != null)
             {
-                DebugOverlay.AddBaseInfo(SAIN, BotOwner, stringBuilder);
+                DebugOverlay.AddBaseInfo(Bot, BotOwner, stringBuilder);
             }
         }
     }

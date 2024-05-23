@@ -26,35 +26,35 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (CoverInUse == null)
             {
-                SAIN.Steering.SteerByPriority();
+                Bot.Steering.SteerByPriority();
                 Shoot.Update();
-                SAIN.Cover.DuckInCover();
+                Bot.Cover.DuckInCover();
                 return;
             }
 
             if (!Stopped && !CoverInUse.Spotted && (CoverInUse.Position - BotOwner.Position).sqrMagnitude < 0.1f)
             {
-                SAIN.Mover.StopMove();
+                Bot.Mover.StopMove();
                 Stopped = true;
             }
 
-            SAIN.Steering.SteerByPriority();
+            Bot.Steering.SteerByPriority();
             Shoot.Update();
-            SAIN.Cover.DuckInCover();
+            Bot.Cover.DuckInCover();
 
-            if (SAIN.Enemy != null 
-                && SAIN.Player.MovementContext.CanProne
-                && SAIN.Player.PoseLevel <= 0.1 
-                && SAIN.Enemy.IsVisible 
+            if (Bot.Enemy != null 
+                && Bot.Player.MovementContext.CanProne
+                && Bot.Player.PoseLevel <= 0.1 
+                && Bot.Enemy.IsVisible 
                 && BotOwner.WeaponManager.Reload.Reloading)
             {
-                SAIN.Mover.Prone.SetProne(true);
+                Bot.Mover.Prone.SetProne(true);
             }
 
-            if (SAIN.Suppression.IsSuppressed)
+            if (Bot.Suppression.IsSuppressed)
             {
                 ChangeLeanTimer = Time.time + 2f * Random.Range(0.66f, 1.33f);
-                SAIN.Mover.FastLean(LeanSetting.None);
+                Bot.Mover.FastLean(LeanSetting.None);
                 CurrentLean = LeanSetting.None;
             }
             else
@@ -75,7 +75,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                             break;
                     }
                     CurrentLean = newLean;
-                    SAIN.Mover.FastLean(newLean);
+                    Bot.Mover.FastLean(newLean);
                 }
             }
         }
@@ -84,18 +84,18 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             bool holdLean = false;
 
-            if (SAIN.Suppression.IsSuppressed)
+            if (Bot.Suppression.IsSuppressed)
             {
                 return false;
             }
 
-            if (SAIN.HasEnemy && SAIN.Enemy.IsVisible && SAIN.Enemy.CanShoot)
+            if (Bot.HasEnemy && Bot.Enemy.IsVisible && Bot.Enemy.CanShoot)
             {
-                if (SAIN.Enemy.IsVisible && SAIN.Enemy.CanShoot)
+                if (Bot.Enemy.IsVisible && Bot.Enemy.CanShoot)
                 {
                     holdLean = true;
                 }
-                else if (SAIN.Enemy.TimeSinceSeen < 3f)
+                else if (Bot.Enemy.TimeSinceSeen < 3f)
                 {
                     holdLean = true;
                 }
@@ -110,7 +110,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 return;
             }
             CurrentLean = setting;
-            SAIN.Mover.FastLean(setting);
+            Bot.Mover.FastLean(setting);
         }
 
         private LeanSetting CurrentLean;
@@ -121,19 +121,19 @@ namespace SAIN.Layers.Combat.Solo.Cover
         public override void Start()
         {
             ChangeLeanTimer = Time.time + 2f;
-            CoverInUse = SAIN.Cover.CoverInUse;
+            CoverInUse = Bot.Cover.CoverInUse;
         }
 
         public override void Stop()
         {
-            SAIN.Cover.CheckResetCoverInUse();
-            SAIN.Mover.Prone.SetProne(false);
+            Bot.Cover.CheckResetCoverInUse();
+            Bot.Mover.Prone.SetProne(false);
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)
         {
             stringBuilder.AppendLine("Hold In Cover Info");
-            var cover = SAIN.Cover;
+            var cover = Bot.Cover;
             stringBuilder.AppendLabeledValue("CoverFinder State", $"{cover.CurrentCoverFinderState}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("Cover Count", $"{cover.CoverPoints.Count}", Color.white, Color.yellow, true);
 
@@ -142,9 +142,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
             stringBuilder.AppendLabeledValue("Current Cover Value", $"{CoverInUse?.CoverValue}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("CoverFinder State", $"{cover.CurrentCoverFinderState}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("Cover Count", $"{cover.CoverPoints.Count}", Color.white, Color.yellow, true);
-            if (SAIN.CurrentTargetPosition != null)
+            if (Bot.CurrentTargetPosition != null)
             {
-                stringBuilder.AppendLabeledValue("Current Target Position", $"{SAIN.CurrentTargetPosition.Value}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Current Target Position", $"{Bot.CurrentTargetPosition.Value}", Color.white, Color.yellow, true);
             }
             else
             {
@@ -157,7 +157,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 stringBuilder.AppendLabeledValue("Status", $"{CoverInUse.Status}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Height / Value", $"{CoverInUse.CoverHeight} {CoverInUse.CoverValue}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Path Length", $"{CoverInUse.PathLength}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Straight Distance", $"{(CoverInUse.Position - SAIN.Position).magnitude}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Straight Distance", $"{(CoverInUse.Position - Bot.Position).magnitude}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Safe Path?", $"{CoverInUse.IsSafePath}", Color.white, Color.yellow, true);
             }
 

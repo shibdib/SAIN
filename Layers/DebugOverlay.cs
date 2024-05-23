@@ -64,7 +64,7 @@ namespace SAIN.Layers
             {
                 var info = sain.Info;
                 var decisions = sain.Memory.Decisions;
-                stringBuilder.AppendLine($"Name: [{sain.Person.Name}] Personality: [{info.Personality}] Type: [{info.Profile.WildSpawnType}]");
+                stringBuilder.AppendLine($"Name: [{sain.Person.Name}] Nickname: [{sain.Player.Profile.Nickname}] Personality: [{info.Personality}] Type: [{info.Profile.WildSpawnType}]");
                 stringBuilder.AppendLine($"Suppression Status: Num: [{sain.Suppression?.SuppressionNumber}] IsSuppressed: [{sain.Suppression?.IsSuppressed}] IsHeavySuppressed: [{sain.Suppression?.IsHeavySuppressed}]");
                 stringBuilder.AppendLine($"Steering: [{sain.Steering.CurrentSteerPriority}]");
                 stringBuilder.AppendLine($"AI Limited: [{sain.CurrentAILimit}]");
@@ -77,7 +77,7 @@ namespace SAIN.Layers
                     stringBuilder.AppendLine($"Squad Personality: [{sain.Squad.SquadInfo.SquadPersonality}]");
                 }
 
-                stringBuilder.AppendLine($"Indoors? {sain.Memory.IsIndoors} EnvironmentID: {sain.Player?.AIData.EnvironmentId}");
+                stringBuilder.AppendLine($"Indoors? {sain.Memory.Location.IsIndoors} EnvironmentID: {sain.Player?.AIData.EnvironmentId}");
 
                 if (decisions.Main.Current != SoloDecision.None)
                 {

@@ -127,20 +127,28 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             float minHeight = CoverFinderComponent.CoverMinHeight;
             const float minX = 0.2f;
             const float minZ = 0.2f;
+            float minY = CoverFinderComponent.CoverMinHeight;
 
             int hitReduction = 0;
             for (int i = 0; i < hits; i++)
             {
                 Vector3 size = array[i].bounds.size;
-                if (size.y < CoverFinderComponent.CoverMinHeight
-                        || size.x < minX && size.z < minZ)
+                if (size.y < minY
+                        || (size.x < minX && size.z < minZ))
                 {
                     array[i] = null;
                     hitReduction++;
                 }
             }
+            UpdateDebugColliders(array);
+            return hits - hitReduction;
+        }
 
-            if (SAINPlugin.DebugMode)
+        public void UpdateDebugColliders(Collider[] array)
+        {
+            if (SAINPlugin.DebugMode 
+                && SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder 
+                && CoverFinderComponent.Bot.Cover.CurrentCoverFinderState == Classes.CoverFinderState.on)
             {
                 foreach (Collider collider in array)
                 {
@@ -162,10 +170,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                             debugColliders.Add(collider, marker);
                         }
                     }
-
                 }
             }
-            else if (debugGUIObjects.Count > 0 || debugColliders.Count > 0)
+            else if (debugGUIObjects.Count > 0 
+                || debugColliders.Count > 0)
             {
                 foreach (var obj in debugGUIObjects)
                 {
@@ -178,8 +186,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 debugGUIObjects.Clear();
                 debugColliders.Clear();
             }
-
-            return hits - hitReduction;
         }
 
         private static Dictionary<Collider, GUIObject> debugGUIObjects = new Dictionary<Collider, GUIObject>();

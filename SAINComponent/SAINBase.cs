@@ -6,12 +6,14 @@ namespace SAIN.SAINComponent
 {
     public abstract class SAINBase : SAINComponentAbstract
     {
-        public SAINBase(Bot sain) : base (sain)
+        public SAINBase(Bot bot) : base (bot)
         {
+            BotOwner = bot.BotOwner;
+            Player = bot.Player;
         }
 
-        public BotOwner BotOwner => SAIN?.BotOwner;
-        public Player Player => SAIN?.Player;
+        public readonly BotOwner BotOwner;
+        public readonly Player Player;
         public GlobalSettingsClass GlobalSettings => SAINPlugin.LoadedPreset?.GlobalSettings;
     }
 
@@ -19,9 +21,9 @@ namespace SAIN.SAINComponent
     {
         public SAINComponentAbstract(Bot sain)
         {
-            SAIN = sain;
+            Bot = sain;
         }
 
-        public Bot SAIN { get; private set; }
+        public Bot Bot { get; private set; }
     }
 }

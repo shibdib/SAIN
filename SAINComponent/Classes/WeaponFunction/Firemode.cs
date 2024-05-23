@@ -38,8 +38,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private bool checkSwapMachineGun()
         {
-            if (SAIN.ManualShootReason != Bot.EShootReason.None
-                && SAIN.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun
+            if (Bot.ManualShootReason != Bot.EShootReason.None
+                && Bot.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun
                 && CanSetMode(EFireMode.fullauto))
             {
                 SetFireMode(EFireMode.fullauto);
@@ -50,7 +50,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void checkSwapFiremode()
         {
-            WeaponInfoClass weaponInfo = SAIN.Info.WeaponInfo;
+            WeaponInfoClass weaponInfo = Bot.Info.WeaponInfo;
 
             if (weaponInfo == null)
                 return;
@@ -72,7 +72,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private bool getModeToSwap(WeaponInfoClass weaponInfo, out EFireMode mode)
         {
-            float distance = SAIN.DistanceToAimTarget;
+            float distance = Bot.DistanceToAimTarget;
             mode = EFireMode.doublet;
             if (distance > SemiAutoSwapDist)
             {
@@ -101,19 +101,19 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void SetFireMode(EFireMode fireMode)
         {
-            SAIN.Info.WeaponInfo.CurrentWeapon?.FireMode?.SetFireMode(fireMode);
+            Bot.Info.WeaponInfo.CurrentWeapon?.FireMode?.SetFireMode(fireMode);
             Player?.HandsController?.FirearmsAnimator?.SetFireMode(fireMode);
         }
 
         public bool CanSetMode(EFireMode fireMode)
         {
-            WeaponInfoClass weaponInfo = SAIN.Info.WeaponInfo;
+            WeaponInfoClass weaponInfo = Bot.Info.WeaponInfo;
             return weaponInfo?.CurrentWeapon != null && weaponInfo.HasFireMode(fireMode) && !weaponInfo.IsFireModeSet(fireMode);
         }
 
         private void tryCheckWeapon()
         {
-            if (SAIN.Enemy == null)
+            if (Bot.Enemy == null)
             {
                 if (CheckMagTimer < Time.time && NextCheckTimer < Time.time)
                 {
@@ -130,8 +130,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             }
         }
 
-        private float SemiAutoSwapDist => SAIN.Info.WeaponInfo.SwapToSemiDist;
-        private float FullAutoSwapDist => SAIN.Info.WeaponInfo.SwapToAutoDist;
+        private float SemiAutoSwapDist => Bot.Info.WeaponInfo.SwapToSemiDist;
+        private float FullAutoSwapDist => Bot.Info.WeaponInfo.SwapToAutoDist;
         private float CheckMagTimer;
         private float CheckChamberTimer;
         private float NextCheckTimer;

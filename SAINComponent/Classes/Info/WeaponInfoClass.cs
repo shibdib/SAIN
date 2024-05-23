@@ -123,7 +123,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private void CalculateShootModifier()
         {
-            var weapInfo = SAIN.Info.WeaponInfo;
+            var weapInfo = Bot.Info.WeaponInfo;
 
             float AmmoCaliberModifier =
                 GetAmmoShootability(ICaliber)
@@ -136,7 +136,7 @@ namespace SAIN.SAINComponent.Classes.Info
                 .Round100();
 
             float ProficiencyModifier =
-                SAIN.Info.FileSettings.Mind.WeaponProficiency
+                Bot.Info.FileSettings.Mind.WeaponProficiency
                 .Scale0to1(ShootSettings.WeaponProficiencyScaling)
                 .Round100();
 
@@ -151,7 +151,7 @@ namespace SAIN.SAINComponent.Classes.Info
                 .Round100();
 
             float DifficultyModifier =
-                SAIN.Info.Profile.DifficultyModifier
+                Bot.Info.Profile.DifficultyModifier
                 .Scale0to1(ShootSettings.DifficultyScaling)
                 .Round100();
 
@@ -274,7 +274,7 @@ namespace SAIN.SAINComponent.Classes.Info
             }
         }
 
-        public WeaponInfoClass WeaponInfo => SAIN.Info?.WeaponInfo;
+        public WeaponInfoClass WeaponInfo => Bot.Info?.WeaponInfo;
 
         public string WeaponClass => CurrentWeapon.Template.weapClass;
 

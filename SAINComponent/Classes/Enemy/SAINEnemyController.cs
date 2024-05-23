@@ -5,6 +5,7 @@ using SAIN.SAINComponent.BaseClasses;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Enemy
@@ -56,11 +57,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
             removeInvalidEnemies();
             if (_enemyUpdateCoroutine == null)
             {
-                _enemyUpdateCoroutine = SAIN.StartCoroutine(updateValidAIEnemies(3));
+                _enemyUpdateCoroutine = Bot.StartCoroutine(updateValidAIEnemies(3));
             }
             if (_enemyHumanUpdateCoroutine == null)
             {
-                _enemyHumanUpdateCoroutine = SAIN.StartCoroutine(updateValidHumanEnemies(1));
+                _enemyHumanUpdateCoroutine = Bot.StartCoroutine(updateValidHumanEnemies(1));
             }
         }
 
@@ -158,17 +159,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     {
                         if (debugLastHeardPosition == null)
                         {
-                            debugLastHeardPosition = DebugGizmos.Line(ActiveEnemy.LastHeardPosition.Value, SAIN.Position, Color.yellow, 0.01f, false, Time.deltaTime, true);
+                            debugLastHeardPosition = DebugGizmos.Line(ActiveEnemy.LastHeardPosition.Value, Bot.Position, Color.yellow, 0.01f, false, Time.deltaTime, true);
                         }
-                        DebugGizmos.UpdatePositionLine(ActiveEnemy.LastHeardPosition.Value, SAIN.Position, debugLastHeardPosition);
+                        DebugGizmos.UpdatePositionLine(ActiveEnemy.LastHeardPosition.Value, Bot.Position, debugLastHeardPosition);
                     }
                     if (ActiveEnemy.LastSeenPosition != null)
                     {
                         if (debugLastSeenPosition == null)
                         {
-                            debugLastSeenPosition = DebugGizmos.Line(ActiveEnemy.LastSeenPosition.Value, SAIN.Position, Color.red, 0.01f, false, Time.deltaTime, true);
+                            debugLastSeenPosition = DebugGizmos.Line(ActiveEnemy.LastSeenPosition.Value, Bot.Position, Color.red, 0.01f, false, Time.deltaTime, true);
                         }
-                        DebugGizmos.UpdatePositionLine(ActiveEnemy.LastSeenPosition.Value, SAIN.Position, debugLastSeenPosition);
+                        DebugGizmos.UpdatePositionLine(ActiveEnemy.LastSeenPosition.Value, Bot.Position, debugLastSeenPosition);
                     }
                 }
                 else if (debugLastHeardPosition != null || debugLastSeenPosition != null)
@@ -249,17 +250,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
         }
         private void removeDogFightTarget(string id)
         {
-            SAINEnemy dogFightTarget = SAIN.Decision.DogFightTarget;
+            SAINEnemy dogFightTarget = Bot.Decision.DogFightTarget;
             if (dogFightTarget?.EnemyPerson != null
                 && dogFightTarget.EnemyPerson.ProfileId == id)
             {
-                SAIN.Decision.DogFightTarget = null;
+                Bot.Decision.DogFightTarget = null;
             }
         }
 
         private void CheckAddEnemy()
         {
-            SAINEnemy dogFightTarget = SAIN.Decision.DogFightTarget;
+            SAINEnemy dogFightTarget = Bot.Decision.DogFightTarget;
             if (dogFightTarget?.IsValid == true)
             {
                 setActiveEnemy(dogFightTarget);
@@ -367,7 +368,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 return enemy;
             }
-            if (player.ProfileId == SAIN.Player.ProfileId)
+            if (player.ProfileId == Bot.Player.ProfileId)
             {
                 string debugString = $"Cannot add enemy {getBotInfo(player)} that matches this bot {getBotInfo(Player)}: ";
                 debugString = findSourceDebug(debugString);
@@ -382,7 +383,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(player, out EnemyInfo enemyInfo))
             {
                 SAINPersonClass enemySAINPerson = new SAINPersonClass(player);
-                SAINEnemy newEnemy = new SAINEnemy(SAIN, enemySAINPerson, enemyInfo);
+                SAINEnemy newEnemy = new SAINEnemy(Bot, enemySAINPerson, enemyInfo);
                 player.OnIPlayerDeadOrUnspawn += newEnemy.DeleteInfo;
                 Enemies.Add(player.ProfileId, newEnemy);
                 //Logger.LogDebug($"Added [{player.ProfileId}] to [{BotOwner?.name}'s] Enemy List");
@@ -430,12 +431,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     {
                         foreach (var player in players)
                         {
-                            if (SAIN.Memory.VisiblePlayers.Contains(player))
+                            if (Bot.Memory.VisiblePlayers.Contains(player))
                             {
                                 Vector3 lookDir = player.LookDirection;
                                 Vector3 playerHeadPos = player.MainParts[BodyPartType.head].Position;
 
-                                Vector3 botChestPos = SAIN.Person.Transform.CenterPosition;
+                                Vector3 botChestPos = Bot.Person.Transform.CenterPosition;
                                 Vector3 botDir = botChestPos - playerHeadPos;
 
                                 if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
@@ -460,6 +461,41 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public bool IsPlayerAnEnemy(string profileID)
         {
             return Enemies.ContainsKey(profileID) && Enemies[profileID] != null;
+        }
+
+        public bool IsPlayerFriendly(IPlayer iPlayer)
+        {
+            if (iPlayer != null)
+            {
+                if (iPlayer.ProfileId == Bot.Person.IPlayer.ProfileId)
+                {
+                    return true;
+                }
+                // Checks if the player is not an active enemy and that they are a neutral party
+                if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer)
+                    && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
+                {
+                    return true;
+                }
+                // Double check that the source isn't from a member of the bot's group.
+                if (iPlayer.AIData.IsAI
+                    && BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
+                {
+                    return true;
+                }
+                // Check that the source isn't an ally
+                if (BotOwner.BotsGroup.Allies.Contains(iPlayer))
+                {
+                    return true;
+                }
+                // Checks if the player is an enemy by their role.
+                var role = iPlayer.Profile.Info.Settings.Role;
+                if (BotOwner.Settings.FileSettings.Mind.ENEMY_BOT_TYPES.Contains(role))
+                {
+                    return false;
+                }
+            }
+            return false;
         }
     }
 }

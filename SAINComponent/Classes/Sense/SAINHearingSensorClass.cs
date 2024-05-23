@@ -77,7 +77,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void HearSound(IPlayer iPlayer, Vector3 position, float power, AISoundType type)
         {
-            if (BotOwner == null || SAIN == null)
+            if (BotOwner == null || Bot == null)
             {
                 return;
             }
@@ -89,8 +89,8 @@ namespace SAIN.SAINComponent.Classes
             if (iPlayer != null 
                 && SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
                 && iPlayer.IsAI
-                && SAIN.CurrentAILimit != AILimitSetting.Close 
-                && (iPlayer.Position - SAIN.Position).sqrMagnitude > 200f)
+                && Bot.CurrentAILimit != AILimitSetting.Close 
+                && (iPlayer.Position - Bot.Position).sqrMagnitude > 200f)
             {
                 return;
             }
@@ -102,7 +102,7 @@ namespace SAIN.SAINComponent.Classes
                 ManualCleanup();
             }
 
-            if (!SAIN.GameIsEnding)
+            if (!Bot.GameIsEnding)
             {
                 EnemySoundHeard(iPlayer, position, power, type);
             }
@@ -133,7 +133,7 @@ namespace SAIN.SAINComponent.Classes
         {
             if (iPlayer != null)
             {
-                if (iPlayer.ProfileId == SAIN.Person.IPlayer.ProfileId)
+                if (iPlayer.ProfileId == Bot.Person.IPlayer.ProfileId)
                 {
                     return true;
                 }
@@ -189,15 +189,15 @@ namespace SAIN.SAINComponent.Classes
 
             if (wasHeard && isFootstep)
             {
-                if (!SAIN.Equipment.HasEarPiece)
+                if (!Bot.Equipment.HasEarPiece)
                 {
                     range *= 0.675f;
                 }
-                if (SAIN.Equipment.HasHeavyHelmet)
+                if (Bot.Equipment.HasHeavyHelmet)
                 {
                     range *= 0.8f;
                 }
-                if (SAIN.Memory.HealthStatus == ETagStatus.Dying)
+                if (Bot.Memory.Health.HealthStatus == ETagStatus.Dying)
                 {
                     range *= 0.8f;
                 }
@@ -206,7 +206,7 @@ namespace SAIN.SAINComponent.Classes
                     range *= 0.85f;
                 }
 
-                range *= SAIN.Info.FileSettings.Core.HearingSense;
+                range *= Bot.Info.FileSettings.Core.HearingSense;
 
                 range = Mathf.Round(range * 10f) / 10f;
 
@@ -283,7 +283,7 @@ namespace SAIN.SAINComponent.Classes
 
                 if (firedAtMe)
                 {
-                    SAIN.StartCoroutine(delayReact(vector, to, type, person, shooterDistance, isEnemy));
+                    Bot.StartCoroutine(delayReact(vector, to, type, person, shooterDistance, isEnemy));
                     reacted = true;
                 }
             }
@@ -294,8 +294,8 @@ namespace SAIN.SAINComponent.Classes
             }
 
             if (!firedAtMe
-                && !SAIN.Info.PersonalitySettings.WillChaseDistantGunshots
-                && (SAIN.Position - soundPosition).sqrMagnitude > 150f * 150f)
+                && !Bot.Info.PersonalitySettings.WillChaseDistantGunshots
+                && (Bot.Position - soundPosition).sqrMagnitude > 150f * 150f)
             {
                 return reacted;
             }
@@ -303,14 +303,14 @@ namespace SAIN.SAINComponent.Classes
             if (wasHeard)
             {
                 //SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
-                SAIN.StartCoroutine(delayAddSearch(vector, power, type, person));
+                Bot.StartCoroutine(delayAddSearch(vector, power, type, person));
                 reacted = true;
             }
             else if (isGunSound && bulletFelt)
             {
                 Vector3 estimate = firedAtMe ? vector : GetEstimatedPoint(vector);
 
-                SAIN.StartCoroutine(delayAddSearch(estimate, power, type, person));
+                Bot.StartCoroutine(delayAddSearch(estimate, power, type, person));
                 //SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
                 reacted = true;
             }
@@ -348,11 +348,11 @@ namespace SAIN.SAINComponent.Classes
             }
             catch { }
 
-            SAIN.Memory.SetUnderFire(person, vector);
+            Bot.Memory.SetUnderFire(person, vector);
             if (isEnemy)
             {
-                SAIN.Suppression.AddSuppression();
-                SAINEnemy enemy = SAIN.EnemyController.CheckAddEnemy(person);
+                Bot.Suppression.AddSuppression();
+                SAINEnemy enemy = Bot.EnemyController.CheckAddEnemy(person);
                 if (enemy != null)
                 {
                     enemy.SetEnemyAsSniper(shooterDistance > 100f);
@@ -373,7 +373,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 yield break;
             }
-            SAIN?.Squad?.SquadInfo?.AddPointToSearch(vector, power, SAIN, type, person);
+            Bot?.Squad?.SquadInfo?.AddPointToSearch(vector, power, Bot, type, person);
             CheckCalcGoal();
         }
 
@@ -511,7 +511,7 @@ namespace SAIN.SAINComponent.Classes
         private bool CheckFootStepDetectChance(float distance)
         {
             float closehearing = 10f;
-            float farhearing = SAIN.Info.FileSettings.Hearing.MaxFootstepAudioDistance;
+            float farhearing = Bot.Info.FileSettings.Hearing.MaxFootstepAudioDistance;
 
             if (distance <= closehearing)
             {

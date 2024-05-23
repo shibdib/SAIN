@@ -68,7 +68,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public EnemyInfo EnemyInfo { get; private set; }
         public SAINPersonClass EnemyPerson { get; private set; }
         public SAINPersonTransformClass EnemyTransform { get; private set; }
-        public bool IsCurrentEnemy => SAIN.HasEnemy && SAIN.Enemy.EnemyProfileId == EnemyProfileId;
+        public bool IsCurrentEnemy => Bot.HasEnemy && Bot.Enemy.EnemyProfileId == EnemyProfileId;
 
         public void Init()
         {
@@ -81,7 +81,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void DeleteInfo(IPlayer player)
         {
-            SAIN.EnemyController.RemoveEnemy(EnemyProfileId);
+            Bot.EnemyController.RemoveEnemy(EnemyProfileId);
             if (player != null)
             {
                 player.OnIPlayerDeadOrUnspawn -= DeleteInfo;
@@ -119,7 +119,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     _hidingBehindObject = null;
                     Vector3? lastKnown = LastKnownPosition;
                     if (lastKnown != null
-                        && Physics.Raycast(lastKnown.Value + Vector3.up, SAIN.Position + Vector3.up, out RaycastHit hit, _checkHidingRayDist, LayerMaskClass.HighPolyCollider))
+                        && Physics.Raycast(lastKnown.Value + Vector3.up, Bot.Position + Vector3.up, out RaycastHit hit, _checkHidingRayDist, LayerMaskClass.HighPolyCollider))
                     {
                         _hidingBehindObject = hit.collider;
                     }
@@ -186,7 +186,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (_nextReportHeardTime < Time.time)
             {
                 _nextReportHeardTime = Time.time + _reportHeardFreq;
-                SAIN.Squad?.SquadInfo?.ReportEnemyPosition(this, place, false);
+                Bot.Squad?.SquadInfo?.ReportEnemyPosition(this, place, false);
             }
         }
 
@@ -196,7 +196,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (_nextReportSightTime < Time.time)
             {
                 _nextReportSightTime = Time.time + _reportSightFreq;
-                SAIN.Squad.SquadInfo?.ReportEnemyPosition(this, place, true);
+                Bot.Squad.SquadInfo?.ReportEnemyPosition(this, place, true);
             }
         }
 
@@ -256,14 +256,14 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private void talkNoise(bool conversation)
         {
             if (_nextSayNoise < Time.time
-                && (SAIN.Talk.GroupTalk.FriendIsClose || SAIN.Equipment.HasEarPiece)
-                && SAIN.Squad.BotInGroup
-                && (SAIN.Enemy == null || SAIN.Enemy.TimeSinceSeen > 15f))
+                && (Bot.Talk.GroupTalk.FriendIsClose || Bot.Equipment.HasEarPiece)
+                && Bot.Squad.BotInGroup
+                && (Bot.Enemy == null || Bot.Enemy.TimeSinceSeen > 15f))
             {
                 _nextSayNoise = Time.time + 8f;
                 if (EFTMath.RandomBool(40))
                 {
-                    SAIN.Talk.TalkAfterDelay(conversation ? EPhraseTrigger.OnEnemyConversation : EPhraseTrigger.NoisePhrase);
+                    Bot.Talk.TalkAfterDelay(conversation ? EPhraseTrigger.OnEnemyConversation : EPhraseTrigger.NoisePhrase);
                 }
             }
         }
@@ -275,9 +275,9 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public void SetEnemyAsSniper(bool isSniper)
         {
             IsSniper = isSniper;
-            if (isSniper && SAIN.Squad.BotInGroup && SAIN.Talk.GroupTalk.FriendIsClose)
+            if (isSniper && Bot.Squad.BotInGroup && Bot.Talk.GroupTalk.FriendIsClose)
             {
-                SAIN.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.5f, 1f));
+                Bot.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.5f, 1f));
             }
         }
 
@@ -344,7 +344,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public float TimeSinceLastKnownUpdated => Time.time - TimeLastKnownUpdated;
 
         public Vector3 EnemyPosition => EnemyTransform.Position;
-        public Vector3 EnemyDirection => EnemyTransform.Direction(SAIN.Transform.Position);
+        public Vector3 EnemyDirection => EnemyTransform.Direction(Bot.Transform.Position);
         public Vector3 EnemyHeadPosition => EnemyTransform.HeadPosition;
         public Vector3 EnemyChestPosition => EnemyTransform.CenterPosition;
 
@@ -368,7 +368,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 if (_nextUpdateDistTime < Time.time)
                 {
                     _nextUpdateDistTime = Time.time + 0.1f;
-                    _realDistance = (EnemyPerson.Transform.Position - SAIN.Position).magnitude;
+                    _realDistance = (EnemyPerson.Transform.Position - Bot.Position).magnitude;
                 }
                 return _realDistance;
             }

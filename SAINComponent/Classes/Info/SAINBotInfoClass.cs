@@ -154,7 +154,7 @@ namespace SAIN.SAINComponent.Classes.Info
             {
                 searchTime = 0.1f;
             }
-            else if (Profile.IsFollower && SAIN.Squad.BotInGroup)
+            else if (Profile.IsFollower && Bot.Squad.BotInGroup)
             {
                 searchTime = 10f;
             }
@@ -186,7 +186,7 @@ namespace SAIN.SAINComponent.Classes.Info
         {
             float percentage = Random.Range(FileSettings.Mind.MinExtractPercentage, FileSettings.Mind.MaxExtractPercentage);
 
-            var squad = SAIN?.Squad;
+            var squad = Bot?.Squad;
             var members = squad?.Members;
             if (squad != null && squad.BotInGroup && members != null && members.Count > 0)
             {

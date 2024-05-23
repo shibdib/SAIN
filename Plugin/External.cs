@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
+using SAIN.Plugin;
 
 namespace SAIN.Plugin
 {
@@ -41,6 +42,24 @@ namespace SAIN.Plugin
                 return;
             }
             var extractedBots = botController.BotExtractManager?.ExtractedBots;
+            if (extractedBots == null)
+            {
+                Logger.LogWarning("List of extracted bots is null! Cannot copy list.");
+                return;
+            }
+            list.Clear();
+            list.AddRange(extractedBots);
+        }
+
+        public static void GetExtractionInfos(List<ExtractionInfo> list)
+        {
+            var botController = SAINBotController.Instance;
+            if (botController == null)
+            {
+                Logger.LogWarning("SAIN Bot Controller is Null, cannot retrieve Extracted Bots List.");
+                return;
+            }
+            var extractedBots = botController.BotExtractManager?.BotExtractionInfos;
             if (extractedBots == null)
             {
                 Logger.LogWarning("List of extracted bots is null! Cannot copy list.");

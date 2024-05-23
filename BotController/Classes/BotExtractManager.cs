@@ -10,6 +10,8 @@ using SAIN.SAINComponent;
 using SAIN.Helpers;
 using System.Collections;
 using HarmonyLib;
+using SAIN.Plugin;
+using UnityEngine.Profiling;
 
 namespace SAIN.Components.BotController
 {
@@ -35,18 +37,15 @@ namespace SAIN.Components.BotController
             CheckRaidProgressTimer = Time.time + 5f;
         }
 
-        public void LogExtractionOfBot(string profileID)
+        public void LogExtractionOfBot(BotOwner bot, Vector3 point, string reason, ExfiltrationPoint exfil)
         {
-            ExtractedBots.Add(profileID);
-        }
-
-        public void AddExtractedBots(List<string> list)
-        {
-            list.Clear();
-            list.AddRange(this.ExtractedBots);
+            Logger.LogInfo($"{bot.name} Extracted because {reason} at {point} for extract {exfil.Settings.Name} at {System.DateTime.UtcNow}");
+            BotExtractionInfos.Add(new ExtractionInfo(bot, reason, exfil));
+            ExtractedBots.Add(bot.GetPlayer.ProfileId);
         }
 
         public readonly List<string> ExtractedBots = new List<string>();
+        public readonly List<ExtractionInfo> BotExtractionInfos = new List<ExtractionInfo>();
 
         private Dictionary<ExfiltrationPoint, float> exfilActivationTimes = new Dictionary<ExfiltrationPoint, float>();
 
@@ -54,7 +53,8 @@ namespace SAIN.Components.BotController
         {
             // If all bots who paid for the car extract die, it will no longer leave. Therefore, the common extract time needs to be discarded. When this happens,
             // the exfil Status changes from EExfiltrationStatus.Countdown to EExfiltrationStatus.UncompleteRequirements.
-            if ((exfil.Settings.ExfiltrationType == EExfiltrationType.SharedTimer) && (exfil.Status == EExfiltrationStatus.UncompleteRequirements))
+            if ((exfil.Settings.ExfiltrationType == EExfiltrationType.SharedTimer) 
+                && (exfil.Status == EExfiltrationStatus.UncompleteRequirements))
             {
                 if (exfilActivationTimes.ContainsKey(exfil))
                 {
@@ -147,7 +147,7 @@ namespace SAIN.Components.BotController
             }
             
             // If an exfil has already been assigned, don't continue searching
-            if ((bot.Memory.ExfilPosition != null) && (bot.Memory.ExfilPoint != null))
+            if ((bot.Memory.Extract.ExfilPosition != null) && (bot.Memory.Extract.ExfilPoint != null))
             {
                 return true;
             }
@@ -181,7 +181,7 @@ namespace SAIN.Components.BotController
                 return false;
             }
 
-            Logger.LogInfo($"{bot.name} has selected {bot.Memory.ExfilPoint.Settings.Name} for extraction");
+            Logger.LogInfo($"{bot.name} has selected {bot.Memory.Extract.ExfilPoint.Settings.Name} for extraction");
 
             return true;
         }
@@ -199,9 +199,9 @@ namespace SAIN.Components.BotController
         private bool TryAssignExfilForBot(Bot bot)
         {
             IDictionary<ExfiltrationPoint, Vector3> validExfils = GameWorldHandler.SAINGameWorld.ExtractFinder.GetValidExfilsForBot(bot);
-            bot.Memory.ExfilPoint = selectExfilForBot(bot, validExfils);
+            bot.Memory.Extract.ExfilPoint = selectExfilForBot(bot, validExfils);
 
-            return bot.Memory.ExfilPoint != null;
+            return bot.Memory.Extract.ExfilPoint != null;
         }
 
         public static float MinDistanceToExtract { get; private set; } = 10f;
@@ -228,7 +228,7 @@ namespace SAIN.Components.BotController
             }
 
             KeyValuePair<ExfiltrationPoint, Vector3> selectedExfil = possibleExfils.Random();
-            bot.Memory.ExfilPosition = selectedExfil.Value;
+            bot.Memory.Extract.ExfilPosition = selectedExfil.Value;
 
             if (SAINPlugin.DebugMode)
             {
@@ -290,34 +290,34 @@ namespace SAIN.Components.BotController
             var squad = bot.Squad;
             if (squad.IAmLeader)
             {
-                if (bot.Memory.ExfilPosition == null)
+                if (bot.Memory.Extract.ExfilPosition == null)
                 {
                     if (!TryAssignExfilForBot(bot))
                     {
                         return false;
                     }
                 }
-                if (bot.Memory.ExfilPosition != null)
+                if (bot.Memory.Extract.ExfilPosition != null)
                 {
                     if (squad.Members != null && squad.Members.Count > 0)
                     {
                         foreach (var member in squad.Members)
                         {
-                            if (member.Value.Memory.ExfilPosition == null && member.Value.ProfileId != bot.ProfileId)
+                            if (member.Value.Memory.Extract.ExfilPosition == null && member.Value.ProfileId != bot.ProfileId)
                             {
                                 Vector3 random = UnityEngine.Random.onUnitSphere * 2f;
                                 random.y = 0f;
-                                Vector3 point = bot.Memory.ExfilPosition.Value + random;
+                                Vector3 point = bot.Memory.Extract.ExfilPosition.Value + random;
                                 if (NavMesh.SamplePosition(point, out var navHit, 1f, -1))
                                 {
-                                    member.Value.Memory.ExfilPosition = navHit.position;
+                                    member.Value.Memory.Extract.ExfilPosition = navHit.position;
                                 }
                                 else
                                 {
-                                    member.Value.Memory.ExfilPosition = bot.Memory.ExfilPosition;
+                                    member.Value.Memory.Extract.ExfilPosition = bot.Memory.Extract.ExfilPosition;
                                 }
 
-                                member.Value.Memory.ExfilPoint = bot.Memory.ExfilPoint;
+                                member.Value.Memory.Extract.ExfilPoint = bot.Memory.Extract.ExfilPoint;
                             }
                         }
                     }
@@ -325,11 +325,11 @@ namespace SAIN.Components.BotController
             }
             else
             {
-                bot.Memory.ExfilPoint = squad.LeaderComponent?.Memory.ExfilPoint;
-                bot.Memory.ExfilPosition = squad.LeaderComponent?.Memory.ExfilPosition;
+                bot.Memory.Extract.ExfilPoint = squad.LeaderComponent?.Memory.Extract.ExfilPoint;
+                bot.Memory.Extract.ExfilPosition = squad.LeaderComponent?.Memory.Extract.ExfilPosition;
             }
 
-            return (bot.Memory.ExfilPosition != null) && (bot.Memory.ExfilPoint != null);
+            return (bot.Memory.Extract.ExfilPosition != null) && (bot.Memory.Extract.ExfilPoint != null);
         }
 
         private float CheckRaidProgressTimer = 0f;

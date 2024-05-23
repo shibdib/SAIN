@@ -19,7 +19,7 @@ namespace SAIN.Layers.Combat.Solo
         public override Action GetNextAction()
         {
             SoloDecision Decision = CurrentDecision;
-            var SelfDecision = SAIN.Decision.CurrentSelfDecision;
+            var SelfDecision = Bot.Decision.CurrentSelfDecision;
             LastActionDecision = Decision;
 
             if (_doSurgeryAction)
@@ -43,7 +43,7 @@ namespace SAIN.Layers.Combat.Solo
                     return new Action(typeof(ShiftCoverAction), $"{Decision}");
 
                 case SoloDecision.RunToCover:
-                    if (SAIN.Cover.CoverPoints.Count > 0)
+                    if (Bot.Cover.CoverPoints.Count > 0)
                     {
                         return new Action(typeof(RunToCoverAction), $"{Decision}");
                     }
@@ -54,7 +54,7 @@ namespace SAIN.Layers.Combat.Solo
                     }
 
                 case SoloDecision.Retreat:
-                    if (SAIN.Cover.CoverPoints.Count > 0)
+                    if (Bot.Cover.CoverPoints.Count > 0)
                     {
                         return new Action(typeof(RunToCoverAction), $"{Decision} + {SelfDecision}");
                     }
@@ -66,7 +66,7 @@ namespace SAIN.Layers.Combat.Solo
 
                 case SoloDecision.MoveToCover:
                 case SoloDecision.UnstuckMoveToCover:
-                    if (SAIN.Cover.CoverPoints.Count > 0)
+                    if (Bot.Cover.CoverPoints.Count > 0)
                     {
                         return new Action(typeof(WalkToCoverAction), $"{Decision}");
                     }
@@ -110,16 +110,16 @@ namespace SAIN.Layers.Combat.Solo
 
         public override bool IsActive()
         {
-            if (SAIN == null) return false;
+            if (Bot == null) return false;
 
             return CurrentDecision != SoloDecision.None;
         }
 
         public override bool IsCurrentActionEnding()
         {
-            if (SAIN == null) return true;
+            if (Bot == null) return true;
 
-            if (NoCoverUseDogFight && SAIN.Cover.CoverPoints.Count > 0)
+            if (NoCoverUseDogFight && Bot.Cover.CoverPoints.Count > 0)
             {
                 NoCoverUseDogFight = false;
                 return true;
@@ -127,8 +127,8 @@ namespace SAIN.Layers.Combat.Solo
 
             // this is dumb im sorry
             if (!_doSurgeryAction 
-                && SAIN.Decision.CurrentSelfDecision == SelfDecision.Surgery 
-                && SAIN.Cover.BotIsAtCoverInUse())
+                && Bot.Decision.CurrentSelfDecision == SelfDecision.Surgery 
+                && Bot.Cover.BotIsAtCoverInUse())
             {
                 _doSurgeryAction = true;
                 return true;
@@ -140,6 +140,6 @@ namespace SAIN.Layers.Combat.Solo
         bool _doSurgeryAction;
 
         private SoloDecision LastActionDecision = SoloDecision.None;
-        public SoloDecision CurrentDecision => SAIN.Memory.Decisions.Main.Current;
+        public SoloDecision CurrentDecision => Bot.Memory.Decisions.Main.Current;
     }
 }

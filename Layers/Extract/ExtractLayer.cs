@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using EFT.Interactive;
 using Comfort.Common;
+using SAIN.SAINComponent.Classes;
 
 namespace SAIN.Layers
 {
@@ -22,15 +23,15 @@ namespace SAIN.Layers
 
         public override bool IsActive()
         {
-            if (SAIN == null) return false;
+            if (Bot == null) return false;
             //if (SAIN.SAINEnabled == false) return false;
 
-            if (!SAIN.Info.FileSettings.Mind.EnableExtracts || !SAIN.Info.GlobalSettings.Extract.EnableExtractsGlobal)
+            if (!Bot.Info.FileSettings.Mind.EnableExtracts || !Bot.Info.GlobalSettings.Extract.EnableExtractsGlobal)
             {
                 return false;
             }
 
-            if (!Components.BotController.BotExtractManager.IsBotAllowedToExfil(SAIN))
+            if (!Components.BotController.BotExtractManager.IsBotAllowedToExfil(Bot))
             {
                 return false;
             }
@@ -40,18 +41,18 @@ namespace SAIN.Layers
                 return false;
             }
 
-            if (SAIN.Memory.ExfilPosition == null)
+            if (Bot.Memory.Extract.ExfilPosition == null)
             {
-                BotController.BotExtractManager.TryFindExfilForBot(SAIN);
+                BotController.BotExtractManager.TryFindExfilForBot(Bot);
                 return false;
             }
 
             // If the bot can no longer use its selected extract and isn't already in the extract area, select another one. This typically happens if
             // the bot selects a VEX but the car leaves before the bot reaches it.
-            if (!BotController.BotExtractManager.CanBotsUseExtract(SAIN.Memory.ExfilPoint) && !IsInExtractArea())
+            if (!BotController.BotExtractManager.CanBotsUseExtract(Bot.Memory.Extract.ExfilPoint) && !IsInExtractArea())
             {
-                SAIN.Memory.ExfilPoint = null;
-                SAIN.Memory.ExfilPosition = null;
+                Bot.Memory.Extract.ExfilPoint = null;
+                Bot.Memory.Extract.ExfilPosition = null;
 
                 return false;
             }
@@ -61,7 +62,7 @@ namespace SAIN.Layers
 
         private bool IsInExtractArea()
         {
-            float distance = (BotOwner.Position - SAIN.Memory.ExfilPosition.Value).sqrMagnitude;
+            float distance = (BotOwner.Position - Bot.Memory.Extract.ExfilPosition.Value).sqrMagnitude;
             return distance < ExtractAction.MinDistanceToStartExtract;
         }
 
@@ -72,19 +73,16 @@ namespace SAIN.Layers
                 return false;
             }
             float percentageLeft = BotController.BotExtractManager.PercentageRemaining;
-            if (percentageLeft <= SAIN.Info.PercentageBeforeExtract)
+            if (percentageLeft <= Bot.Info.PercentageBeforeExtract)
             {
                 if (!Logged)
                 {
                     Logged = true;
                     Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract with [{percentageLeft}] of the raid remaining.");
                 }
-                if (SAIN.Enemy == null)
+                if (Bot.Enemy == null || BotController.BotExtractManager.TimeRemaining < 120)
                 {
-                    return true;
-                }
-                else if (BotController.BotExtractManager.TimeRemaining < 120)
-                {
+                    Bot.Memory.Extract.ExtractReason = EExtractReason.Time;
                     return true;
                 }
             }
@@ -93,19 +91,16 @@ namespace SAIN.Layers
 
         private bool ExtractFromInjury()
         {
-            if (SAIN.Memory.Dying && !BotOwner.Medecine.FirstAid.HaveSmth2Use)
+            if (Bot.Memory.Health.Dying && !BotOwner.Medecine.FirstAid.HaveSmth2Use)
             {
                 if (!Logged)
                 {
                     Logged = true;
                     Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because of heavy injury and lack of healing items.");
                 }
-                if (SAIN.Enemy == null)
+                if (Bot.Enemy == null || Bot.Enemy.TimeSinceSeen > 30f)
                 {
-                    return true;
-                }
-                else if (SAIN.Enemy.TimeSinceSeen > 30f)
-                {
+                    Bot.Memory.Extract.ExtractReason = EExtractReason.Injured;
                     return true;
                 }
             }
@@ -124,7 +119,7 @@ namespace SAIN.Layers
             // No integration setup yet, set it up
             if (SAINLootingBotsIntegration == null)
             {
-                SAINLootingBotsIntegration = new SAINLootingBotsIntegration(BotOwner, SAIN);
+                SAINLootingBotsIntegration = new SAINLootingBotsIntegration(BotOwner, Bot);
             }
 
             SAINLootingBotsIntegration?.Update();
@@ -136,6 +131,7 @@ namespace SAIN.Layers
                     _loggedExtractLoot = true;
                     Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because of Loot found in raid. Net Loot Value: [{SAINLootingBotsIntegration?.NetLootValue}]");
                 }
+                Bot.Memory.Extract.ExtractReason = EExtractReason.Loot;
                 return true;
             }
             return false;
@@ -149,28 +145,25 @@ namespace SAIN.Layers
 
         private bool HasActiveThreat()
         {
-            if (SAIN.Enemy == null)
+            if (Bot.Enemy == null || Bot.Enemy.TimeSinceSeen > 30f)
             {
                 return false;
             }
-            else if (SAIN.Enemy.TimeSinceSeen > 30f)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return true;
         }
 
         private bool ExtractFromExternal()
         {
-            if (SAIN.Info.ForceExtract && !_loggedExtractExternal)
+            if (Bot.Info.ForceExtract)
             {
-                _loggedExtractExternal = true;
-                Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because of external call.");
+                if (!_loggedExtractExternal)
+                {
+                    _loggedExtractExternal = true;
+                    Logger.LogInfo($"[{BotOwner.name}] Is Moving to Extract because of external call.");
+                }
+                Bot.Memory.Extract.ExtractReason = EExtractReason.External;
             }
-            return SAIN.Info.ForceExtract;
+            return Bot.Info.ForceExtract;
         }
 
         private bool _loggedExtractExternal;

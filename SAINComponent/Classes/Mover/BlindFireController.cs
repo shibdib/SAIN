@@ -17,21 +17,21 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (!SAIN.PatrolDataPaused)
+            if (!Bot.PatrolDataPaused)
             {
                 ResetBlindFire();
                 return;
             }
 
-            SAINEnemy enemy = SAIN.Enemy;
-            if (enemy == null || !enemy.Seen || enemy.TimeSinceSeen > 10f || !BotOwner.WeaponManager.IsReady || !BotOwner.WeaponManager.HaveBullets || SAIN.Player.IsSprintEnabled || SAIN.Cover.CoverInUse == null)
+            SAINEnemy enemy = Bot.Enemy;
+            if (enemy == null || !enemy.Seen || enemy.TimeSinceSeen > 10f || !BotOwner.WeaponManager.IsReady || !BotOwner.WeaponManager.HaveBullets || Bot.Player.IsSprintEnabled || Bot.Cover.CoverInUse == null)
             {
                 ResetBlindFire();
                 return;
             }
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
                 && enemy.IsAI
-                && SAIN.CurrentAILimit != AILimitSetting.Close)
+                && Bot.CurrentAILimit != AILimitSetting.Close)
             {
                 ResetBlindFire();
                 return;
@@ -39,7 +39,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (CurrentBlindFireSetting == 0)
             {
-                WeaponPosOffset = BotOwner.WeaponRoot.position - SAIN.Transform.Position;
+                WeaponPosOffset = BotOwner.WeaponRoot.position - Bot.Transform.Position;
             }
 
             Vector3 targetPos;
@@ -69,7 +69,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 ResetBlindFire();
                 BlindFireTimer = Time.time + 0.5f;
-                SAIN.Shoot(false, Vector3.zero);
+                Bot.Shoot(false, Vector3.zero);
             }
             else
             {
@@ -79,11 +79,11 @@ namespace SAIN.SAINComponent.Classes.Mover
                     SetBlindFire(blindfire);
                 }
 
-                Vector3 start = SAIN.Position;
+                Vector3 start = Bot.Position;
                 Vector3 blindFireDirection = Vector.Rotate(targetPos - start, Vector.RandomRange(3), Vector.RandomRange(3), Vector.RandomRange(3));
                 BlindFireTargetPos = blindFireDirection + start;
                 //SAIN.Steering.LookToPoint(BlindFireTargetPos);
-                SAIN.Shoot(true, BlindFireTargetPos, false, Bot.EShootReason.Blindfire);
+                Bot.Shoot(true, BlindFireTargetPos, false, Bot.EShootReason.Blindfire);
             }
         }
 
@@ -114,11 +114,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             int blindfire = 0;
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
 
-            Vector3 rayShoot = WeaponPosOffset + SAIN.Transform.Position;
+            Vector3 rayShoot = WeaponPosOffset + Bot.Transform.Position;
             Vector3 direction = targetPos - rayShoot;
             if (Physics.Raycast(rayShoot, direction, direction.magnitude, mask))
             {
-                rayShoot = SAIN.Transform.HeadPosition + Vector3.up * 0.15f;
+                rayShoot = Bot.Transform.HeadPosition + Vector3.up * 0.15f;
                 if (!Vector.Raycast(rayShoot, targetPos, mask))
                 {
                     blindfire = 1;
@@ -132,7 +132,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             int blindfire = 0;
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
 
-            Vector3 rayShoot = WeaponPosOffset + SAIN.Transform.Position;
+            Vector3 rayShoot = WeaponPosOffset + Bot.Transform.Position;
             Vector3 direction = targetPos - rayShoot;
             if (Physics.Raycast(rayShoot, direction, direction.magnitude, mask))
             {

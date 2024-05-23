@@ -10,10 +10,10 @@ namespace SAIN.BotController.Classes
             ProfileId = sain.ProfileId;
             Nickname = sain.Player.Profile.Nickname;
 
-            HealthStatus = sain.Memory.HealthStatus;
+            HealthStatus = sain.Memory.Health.HealthStatus;
 
             sain.Decision.OnDecisionMade += UpdateDecisions;
-            sain.Memory.HealthStatusChanged += UpdateHealth;
+            sain.Memory.Health.HealthStatusChanged += UpdateHealth;
 
             UpdatePowerLevel();
         }
@@ -61,7 +61,7 @@ namespace SAIN.BotController.Classes
             if (SAIN != null)
             {
                 SAIN.Decision.OnDecisionMade -= UpdateDecisions;
-                SAIN.Memory.HealthStatusChanged -= UpdateHealth;
+                SAIN.Memory.Health.HealthStatusChanged -= UpdateHealth;
             }
         }
     }

@@ -21,18 +21,18 @@ namespace SAIN.Layers.Combat.Run
 
         public override void Update()
         {
-            SAIN.Mover.SetTargetPose(1f);
-            SAIN.Mover.SetTargetMoveSpeed(1f);
+            Bot.Mover.SetTargetPose(1f);
+            Bot.Mover.SetTargetMoveSpeed(1f);
 
-            if (nextRandomRunTime > Time.time && (_runDestination - SAIN.Position).sqrMagnitude < 1f)
+            if (nextRandomRunTime > Time.time && (_runDestination - Bot.Position).sqrMagnitude < 1f)
             {
                 nextRandomRunTime = 0f;
             }
 
             if ((nextRandomRunTime < Time.time 
-                || !SAIN.Mover.SprintController.Running)
+                || !Bot.Mover.SprintController.Running)
                 && findRandomPlace(out var path) 
-                && SAIN.Mover.SprintController.RunToPoint(_runDestination))
+                && Bot.Mover.SprintController.RunToPoint(_runDestination))
             {
                 nextRandomRunTime = Time.time + 20f;
             }
@@ -53,10 +53,10 @@ namespace SAIN.Layers.Combat.Run
             for (int i = 0; i < 50;  i++)
             {
                 Vector3 random = UnityEngine.Random.onUnitSphere * 100f;
-                if (NavMesh.SamplePosition(random + SAIN.Position, out var hit, 10f, -1))
+                if (NavMesh.SamplePosition(random + Bot.Position, out var hit, 10f, -1))
                 {
                     path = new NavMeshPath();
-                    if (NavMesh.CalculatePath(SAIN.Position, hit.position, -1, path))
+                    if (NavMesh.CalculatePath(Bot.Position, hit.position, -1, path))
                     {
                         _runDestination = path.corners[path.corners.Length - 1];
                         return true;
@@ -69,14 +69,14 @@ namespace SAIN.Layers.Combat.Run
 
         public override void Stop()
         {
-            SAIN.Mover.SprintController.CancelRun();
+            Bot.Mover.SprintController.CancelRun();
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)
         {
             stringBuilder.AppendLine("Run Info");
-            var cover = SAIN.Cover;
-            stringBuilder.AppendLabeledValue("Run State", $"{SAIN.Mover.SprintController.CurrentRunStatus}", Color.white, Color.yellow, true);
+            var cover = Bot.Cover;
+            stringBuilder.AppendLabeledValue("Run State", $"{Bot.Mover.SprintController.CurrentRunStatus}", Color.white, Color.yellow, true);
         }
     }
 }

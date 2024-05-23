@@ -15,9 +15,9 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Update()
         {
-            if (SAIN.Steering.SteerByPriority())
+            if (Bot.Steering.SteerByPriority())
             {
-                SAIN.Mover.Sprint(false);
+                Bot.Mover.Sprint(false);
             }
             else
             {
@@ -43,11 +43,11 @@ namespace SAIN.Layers.Combat.Squad
 
         private void MoveToLead()
         {
-            var SquadLeadPos = SAIN.Squad.LeaderComponent?.BotOwner?.Position;
-            if (SquadLeadPos != null && SAIN.Mover.GoToPoint(SquadLeadPos.Value, out _))
+            var SquadLeadPos = Bot.Squad.LeaderComponent?.BotOwner?.Position;
+            if (SquadLeadPos != null && Bot.Mover.GoToPoint(SquadLeadPos.Value, out _))
             {
-                SAIN.Mover.SetTargetPose(1f);
-                SAIN.Mover.SetTargetMoveSpeed(1f);
+                Bot.Mover.SetTargetPose(1f);
+                Bot.Mover.SetTargetMoveSpeed(1f);
                 CheckShouldSprint(SquadLeadPos.Value);
                 BotOwner.DoorOpener.Update();
             }
@@ -55,14 +55,14 @@ namespace SAIN.Layers.Combat.Squad
 
         private void CheckShouldSprint(Vector3 pos)
         {
-            bool hasEnemy = SAIN.HasEnemy;
-            bool enemyLOS = SAIN.Enemy?.InLineOfSight == true;
+            bool hasEnemy = Bot.HasEnemy;
+            bool enemyLOS = Bot.Enemy?.InLineOfSight == true;
             float leadDist = (pos - BotOwner.Position).magnitude;
-            float enemyDist = hasEnemy ? (SAIN.Enemy.EnemyIPlayer.Position - BotOwner.Position).magnitude : 999f;
+            float enemyDist = hasEnemy ? (Bot.Enemy.EnemyIPlayer.Position - BotOwner.Position).magnitude : 999f;
 
             bool sprint = hasEnemy && leadDist > 30f && !enemyLOS && enemyDist > 50f;
 
-            if (SAIN.Steering.SteerByPriority(false))
+            if (Bot.Steering.SteerByPriority(false))
             {
                 sprint = false;
             }
@@ -72,12 +72,12 @@ namespace SAIN.Layers.Combat.Squad
                 _nextChangeSprintTime = Time.time + 1f;
                 if (sprint)
                 {
-                    SAIN.Mover.Sprint(true);
+                    Bot.Mover.Sprint(true);
                 }
                 else
                 {
-                    SAIN.Mover.Sprint(false);
-                    SAIN.Steering.SteerByPriority();
+                    Bot.Mover.Sprint(false);
+                    Bot.Steering.SteerByPriority();
                 }
             }
         }

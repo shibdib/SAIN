@@ -140,7 +140,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     Prone.SetProne(true);
                 }
-                SAIN.DoorOpener.Update();
+                Bot.DoorOpener.Update();
                 return true;
             }
             return CurrentPathStatus != NavMeshPathStatus.PathInvalid;
@@ -155,7 +155,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     Prone.SetProne(true);
                 }
-                SAIN.DoorOpener.Update();
+                Bot.DoorOpener.Update();
                 return true;
             }
             return false;
@@ -171,7 +171,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (GoToPointCoroutine != null)
             {
-                SAIN.StopCoroutine(GoToPointCoroutine);
+                Bot.StopCoroutine(GoToPointCoroutine);
                 GoToPointCoroutine = null;
             }
 
@@ -192,7 +192,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     {
                         Prone.SetProne(true);
                     }
-                    SAIN.DoorOpener.Update();
+                    Bot.DoorOpener.Update();
                     calculating = false;
                     return true;
                 }
@@ -227,7 +227,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     {
                         Prone.SetProne(true);
                     }
-                    SAIN.DoorOpener.Update();
+                    Bot.DoorOpener.Update();
                     _coroutineRunning = false;
                     yield break;
                 }
@@ -252,7 +252,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             pointToGo = point;
             if (NavMesh.SamplePosition(point, out NavMeshHit targetHit, navSampleRange, -1) 
-                && NavMesh.SamplePosition(SAIN.Transform.Position, out NavMeshHit botHit, navSampleRange, -1))
+                && NavMesh.SamplePosition(Bot.Transform.Position, out NavMeshHit botHit, navSampleRange, -1))
             {
                 if (CurrentPath == null)
                 {
@@ -278,7 +278,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         public bool CanGoToPoint(Vector3 point, out NavMeshPath path, bool mustHaveCompletePath = true, float navSampleRange = 1f)
         {
             if (NavMesh.SamplePosition(point, out NavMeshHit targetHit, navSampleRange, -1)
-                && NavMesh.SamplePosition(SAIN.Transform.Position, out NavMeshHit botHit, navSampleRange, -1))
+                && NavMesh.SamplePosition(Bot.Transform.Position, out NavMeshHit botHit, navSampleRange, -1))
             {
                 path = new NavMeshPath();
                 if (NavMesh.CalculatePath(botHit.position, targetHit.position, -1, path) && path.corners.Length > 1)
@@ -310,7 +310,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     Prone.SetProne(true);
                 }
-                SAIN.DoorOpener.Update();
+                Bot.DoorOpener.Update();
                 return true;
             }
             return false;
@@ -330,7 +330,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     CurrentPath.ClearCorners();
                 }
-                if (NavMesh.CalculatePath(SAIN.Transform.Position, navHit.position, -1, CurrentPath) && CurrentPath.corners.Length > 1)
+                if (NavMesh.CalculatePath(Bot.Transform.Position, navHit.position, -1, CurrentPath) && CurrentPath.corners.Length > 1)
                 {
                     if (mustHaveCompletePath && CurrentPath.status != NavMeshPathStatus.PathComplete)
                     {
@@ -356,7 +356,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (NavMesh.SamplePosition(pointToGo, out var navHit, navSampleRange, -1))
             {
                 path.ClearCorners();
-                if (NavMesh.CalculatePath(SAIN.Transform.Position, navHit.position, -1, path) && path.corners.Length > 1)
+                if (NavMesh.CalculatePath(Bot.Transform.Position, navHit.position, -1, path) && path.corners.Length > 1)
                 {
                     if (mustHaveCompletePath && path.status != NavMeshPathStatus.PathComplete)
                     {
@@ -373,8 +373,8 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void SetStamina()
         {
-            if (SAIN.CurrentTargetPosition != null 
-                && !SAIN.Extracting 
+            if (Bot.CurrentTargetPosition != null 
+                && !Bot.Extracting 
                 && CurrentStamina < 0.1f)
             {
                 Player.Physical.Stamina.UpdateStamina(Player.Physical.Stamina.TotalCapacity / 4f);
@@ -409,7 +409,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (!_stopping && BotOwner.Mover.IsMoving)
             {
                 _stopping = true;
-                SAIN.StartCoroutine(StopAfterDelay(0.1f));
+                Bot.StartCoroutine(StopAfterDelay(0.1f));
             }
         }
 
@@ -422,16 +422,16 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 BotOwner.Mover?.Stop();
             }
-            if (SAIN?.Mover?.SprintController?.Running == true)
+            if (Bot?.Mover?.SprintController?.Running == true)
             {
-                SAIN.Mover.SprintController.CancelRun();
+                Bot.Mover.SprintController.CancelRun();
             }
             _stopping = false;
         }
 
         public void ResetPath(float delay)
         {
-            SAIN.StartCoroutine(resetPath(0.2f));
+            Bot.StartCoroutine(resetPath(0.2f));
         }
 
         private IEnumerator resetPath(float delay)
@@ -450,7 +450,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (value)
             {
-                SAIN.Steering.LookToMovingDirection();
+                Bot.Steering.LookToMovingDirection();
                 FastLean(0f);
             }
             BotOwner.Mover?.Sprint(value);

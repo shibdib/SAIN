@@ -1,5 +1,6 @@
 ﻿using Aki.Reflection.Patching;
 using Comfort.Common;
+using Dissonance;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using HarmonyLib;
@@ -64,77 +65,197 @@ namespace SAIN
         {
             public static void Init()
             {
+                handlePMCS();
+                handleScavs();
+                handleBosses();
+                handleFollowers();
+                handleOthers();
+                handleGoons();
+            }
+
+            private static void handlePMCS()
+            {
                 var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
-                List<Brain> brains = BotBrains.AllBrainsList;
-                List<string> stringList = new List<string>();
-                for (int i = 0; i < brains.Count; i++)
+                List<string> pmcBrain = new List<string>();
+                pmcBrain.Add(Brain.PMC.ToString());
+
+                BrainManager.AddCustomLayer(typeof(BotRunLayer), pmcBrain, 99);
+                BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), pmcBrain, 80);
+                BrainManager.AddCustomLayer(typeof(ExtractLayer), pmcBrain, settings.SAINExtractLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), pmcBrain, settings.SAINCombatSquadLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), pmcBrain, settings.SAINCombatSoloLayerPriority); 
+
+                List<string> LayersToRemove = new List<string>
                 {
-                    var brain = brains[i].ToString();
-                    if (goons.Contains(brain))
-                    {
-                        continue;
-                    }
-                    stringList.Add(brain);
-                }
+                    "Help",
+                    "AdvAssaultTarget",
+                    "Hit",
+                    "Simple Target",
+                    "Pmc",
+                    "AssaultHaveEnemy",
+                    "Request",
+                    "FightReqNull",
+                    "PeacecReqNull",
+                    "Assault Building",
+                    "Enemy Building",
+                    "KnightFight",
+                    "PtrlBirdEye"
+                };
+                BrainManager.RemoveLayers(LayersToRemove, pmcBrain);
+            }
+
+            private static void handleScavs()
+            {
+                List<string> brainList = getBrainList(AIBrains.Scavs);
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
 
                 //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
-                BrainManager.AddCustomLayer(typeof(BotRunLayer), stringList, 99);
-                BrainManager.AddCustomLayer(typeof(SAINDogFightLayer), stringList, 80); 
-                BrainManager.AddCustomLayer(typeof(ExtractLayer), stringList, settings.SAINExtractLayerPriority);
-                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), stringList, settings.SAINCombatSquadLayerPriority);
-                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), stringList, settings.SAINCombatSoloLayerPriority);
+                BrainManager.AddCustomLayer(typeof(BotRunLayer), brainList, 99);
+                BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), brainList, 80);
+                BrainManager.AddCustomLayer(typeof(ExtractLayer), brainList, settings.SAINExtractLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), brainList, settings.SAINCombatSquadLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), brainList, settings.SAINCombatSoloLayerPriority);
 
-                assignBosses();
-
-                BrainManager.RemoveLayers(LayersToRemove, stringList);
+                List<string> LayersToRemove = new List<string>
+                {
+                    "Help",
+                    "AdvAssaultTarget",
+                    "Hit",
+                    "Simple Target",
+                    "Pmc",
+                    "AssaultHaveEnemy",
+                    "Assault Building",
+                    "Enemy Building",
+                    "KnightFight",
+                    "PtrlBirdEye"
+                };
+                BrainManager.RemoveLayers(LayersToRemove, brainList);
             }
 
-            private static void assignBosses()
+            private static List<string> getBrainList(List<Brain> brains)
             {
+                List<string> brainList = new List<string>();
+                for (int i = 0; i < brains.Count; i++)
+                {
+                    brainList.Add(brains[i].ToString());
+                }
+                return brainList;
+            }
+
+            private static void handleOthers()
+            {
+                List<string> brainList = getBrainList(AIBrains.Others);
+
                 var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
+                //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
+                BrainManager.AddCustomLayer(typeof(BotRunLayer), brainList, 99);
+                BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), brainList, 80);
+                BrainManager.AddCustomLayer(typeof(ExtractLayer), brainList, settings.SAINExtractLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), brainList, settings.SAINCombatSquadLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), brainList, settings.SAINCombatSoloLayerPriority);
 
-                BrainManager.AddCustomLayer(typeof(BotRunLayer), goons, 99);
-                BrainManager.AddCustomLayer(typeof(SAINDogFightLayer), goons, 80);
-                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), goons, 64);
-                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), goons, 62);
-                BrainManager.RemoveLayers(LayersToRemove, goons);
+                List<string> LayersToRemove = new List<string>
+                {
+                    "Help",
+                    "AdvAssaultTarget",
+                    "Hit",
+                    "Simple Target",
+                    "Pmc",
+                    "AssaultHaveEnemy",
+                    "Request",
+                    "FightReqNull",
+                    "PeacecReqNull",
+                    "Assault Building",
+                    "Enemy Building",
+                    "KnightFight",
+                    "PtrlBirdEye"
+                };
+                BrainManager.RemoveLayers(LayersToRemove, brainList);
             }
 
-            private static readonly List<string> goons = new List<string>()
+            private static void handleBosses()
             {
-                Brain.BigPipe.ToString(),
-                Brain.BirdEye.ToString(),
-                Brain.Knight.ToString()
-            };
+                List<string> brainList = getBrainList(AIBrains.Bosses);
 
-            private static void assignPMCs()
-            {
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
+                //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
+                BrainManager.AddCustomLayer(typeof(BotRunLayer), brainList, 99);
+                BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), brainList, 80);
+                BrainManager.AddCustomLayer(typeof(ExtractLayer), brainList, settings.SAINExtractLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), brainList, settings.SAINCombatSquadLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), brainList, settings.SAINCombatSoloLayerPriority);
+
+                List<string> LayersToRemove = new List<string>
+                {
+                    "Help",
+                    "AdvAssaultTarget",
+                    "Hit",
+                    "Simple Target",
+                    "Pmc",
+                    "AssaultHaveEnemy",
+                    "Assault Building",
+                    "Enemy Building",
+                    "KnightFight",
+                    "PtrlBirdEye"
+                };
+                BrainManager.RemoveLayers(LayersToRemove, brainList);
             }
 
-            private static void assignScavs()
+            private static void handleFollowers()
             {
+                List<string> brainList = getBrainList(AIBrains.Followers);
+
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
+                //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
+                BrainManager.AddCustomLayer(typeof(BotRunLayer), brainList, 99);
+                BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), brainList, 80);
+                BrainManager.AddCustomLayer(typeof(ExtractLayer), brainList, settings.SAINExtractLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), brainList, settings.SAINCombatSquadLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), brainList, settings.SAINCombatSoloLayerPriority);
+
+                List<string> LayersToRemove = new List<string>
+                {
+                    "Help",
+                    "AdvAssaultTarget",
+                    "Hit",
+                    "Simple Target",
+                    "Pmc",
+                    "AssaultHaveEnemy",
+                    "Assault Building",
+                    "Enemy Building",
+                    "KnightFight",
+                    "PtrlBirdEye"
+                };
+                BrainManager.RemoveLayers(LayersToRemove, brainList);
             }
 
-            private static void assignOtherBots()
+            private static void handleGoons()
             {
-            }
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General; 
+                List<string> brainList = getBrainList(AIBrains.Goons);
 
-            public static readonly List<string> LayersToRemove = new List<string>
-            {
-                "Help",
-                "AdvAssaultTarget",
-                "Hit",
-                "Simple Target",
-                "Pmc",
-                "AssaultHaveEnemy",
-                "Request",
-                "FightReqNull",
-                "PeacecReqNull",
-                "Assault Building",
-                "Enemy Building",
-                "KnightFight",
-                "PtrlBirdEye"
-            };
+                BrainManager.AddCustomLayer(typeof(BotRunLayer), brainList, 99);
+                BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), brainList, 80);
+                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), brainList, 64);
+                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), brainList, 62); 
+
+                List<string> LayersToRemove = new List<string>
+                {
+                    "Help",
+                    "AdvAssaultTarget",
+                    "Hit",
+                    "Simple Target",
+                    "Pmc",
+                    "AssaultHaveEnemy",
+                    //"FightReqNull",
+                    //"PeacecReqNull",
+                    "Assault Building",
+                    "Enemy Building",
+                    "KnightFight",
+                    "PtrlBirdEye"
+                };
+                BrainManager.RemoveLayers(LayersToRemove, brainList);
+            }
         }
     }
 }

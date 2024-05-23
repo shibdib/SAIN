@@ -294,6 +294,8 @@ namespace SAIN.Patches.Vision
                 // Increase or decrease vis distance based on pose and if sprinting.
                 float visibility = SAINVisionClass.GetVisibilityModifier(player);
 
+                float partRatio = SAINVisionClass.GetRatioPartsVisible(__instance, out int visibleCount);
+
                 var gearInfo = SAINGearInfoHandler.GetGearInfo(player);
                 if (gearInfo != null)
                 {
