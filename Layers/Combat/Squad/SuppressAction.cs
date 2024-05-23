@@ -15,41 +15,41 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Update()
         {
-            var enemy = Bot.Enemy;
+            var enemy = SAINBot.Enemy;
 
             if (!BotOwner.WeaponManager.HaveBullets 
-                || (!BotOwner.ShootData.Shooting && Bot.Decision.SelfActionDecisions.LowOnAmmo(0.5f)))
+                || (!BotOwner.ShootData.Shooting && SAINBot.Decision.SelfActionDecisions.LowOnAmmo(0.5f)))
             {
-                Bot.SelfActions.TryReload();
+                SAINBot.SelfActions.TryReload();
             }
 
             if (enemy != null)
             {
                 if (enemy.IsVisible && enemy.CanShoot)
                 {
-                    Bot.Mover.StopMove();
+                    SAINBot.Mover.StopMove();
                     Shoot.Update();
                 }
                 else if (FindSuppressionTarget(out var target) && CanSeeSuppressionTarget(target))
                 {
-                    Bot.Mover.StopMove();
+                    SAINBot.Mover.StopMove();
 
-                    bool hasMachineGun = Bot.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun;
+                    bool hasMachineGun = SAINBot.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun;
                     if (hasMachineGun 
-                        && Bot.Mover.Prone.ShallProne(true))
+                        && SAINBot.Mover.Prone.ShallProne(true))
                     {
-                        Bot.Mover.Prone.SetProne(true);
+                        SAINBot.Mover.Prone.SetProne(true);
                     }
 
                     //SAIN.Steering.LookToPoint(pos.Value);
 
                     if (!BotOwner.WeaponManager.HaveBullets)
                     {
-                        Bot.SelfActions.TryReload();
+                        SAINBot.SelfActions.TryReload();
                     }
                     else if (
                         WaitShootTimer < Time.time 
-                        && Bot.Shoot(true, target.Value, true, Bot.EShootReason.SquadSuppressing))
+                        && SAINBot.Shoot(true, target.Value, true, Bot.EShootReason.SquadSuppressing))
                     {
                         enemy.EnemyStatus.EnemyIsSuppressed = true;
                         float waitTime = hasMachineGun ? 0.1f : 0.5f;
@@ -58,12 +58,12 @@ namespace SAIN.Layers.Combat.Squad
                 }
                 else
                 {
-                    Bot.Shoot(false, Vector3.zero);
-                    Bot.Steering.SteerByPriority();
+                    SAINBot.Shoot(false, Vector3.zero);
+                    SAINBot.Steering.SteerByPriority();
 
                     if (enemy.LastKnownPosition != null)
                     {
-                        Bot.Mover.GoToPoint(enemy.LastKnownPosition.Value, out _);
+                        SAINBot.Mover.GoToPoint(enemy.LastKnownPosition.Value, out _);
                     }
                 }
             }
@@ -75,7 +75,7 @@ namespace SAIN.Layers.Combat.Squad
 
         private bool FindSuppressionTarget(out Vector3? pos)
         {
-            pos = Bot.Enemy?.SuppressionTarget;
+            pos = SAINBot.Enemy?.SuppressionTarget;
             return pos != null;
         }
 
@@ -88,7 +88,7 @@ namespace SAIN.Layers.Combat.Squad
             else if (_nextCheckVisTime < Time.time)
             {
                 _nextCheckVisTime = Time.time + 0.5f;
-                Vector3 myHead = Bot.Transform.HeadPosition;
+                Vector3 myHead = SAINBot.Transform.HeadPosition;
                 _canSeeSuppTarget = !Physics.Raycast(myHead, target.Value - myHead, (target.Value - myHead).magnitude * 0.8f);
             }
             return _canSeeSuppTarget;

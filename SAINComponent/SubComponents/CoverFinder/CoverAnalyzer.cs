@@ -50,7 +50,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             NavMeshPath path = new NavMeshPath();
             if (CheckColliderForCover(collider, out Vector3 place, false, out _, path, out failReason))
             {
-                newPoint = new CoverPoint(Bot, place, collider, path);
+                newPoint = new CoverPoint(SAINBot, place, collider, path);
                 return true;
             }
             newPoint = null;
@@ -138,8 +138,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private bool CheckHumanPlayerVisibility(Vector3 point)
         {
             Player closestPlayer = GameWorldHandler.SAINGameWorld?.FindClosestPlayer(out float sqrDist, point);
-            if (Bot.EnemyController.IsHumanPlayerActiveEnemy == false 
-                && Bot.EnemyController.IsHumanPlayerLookAtMe(out Player lookingPlayer) == true 
+            if (SAINBot.EnemyController.IsHumanPlayerActiveEnemy == false 
+                && SAINBot.EnemyController.IsHumanPlayerLookAtMe(out Player lookingPlayer) == true 
                 && lookingPlayer != null)
             {
                 bool VisibleCheckPass = (VisibilityCheck(point, lookingPlayer.Position));
@@ -249,7 +249,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool checkPathToEnemy(NavMeshPath path)
         {
-            SAINEnemy enemy = Bot.Enemy;
+            SAINEnemy enemy = SAINBot.Enemy;
             if (enemy != null 
                 && enemy.Path.PathToEnemy != null 
                 && !SAINBotSpaceAwareness.ArePathsDifferent(path, enemy.Path.PathToEnemy, 0.5f, 0.1f))
@@ -307,14 +307,14 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public bool CheckPositionVsOtherBots(Vector3 position)
         {
-            if (Bot.Squad.Members == null || Bot.Squad.Members.Count < 2)
+            if (SAINBot.Squad.Members == null || SAINBot.Squad.Members.Count < 2)
             {
                 return true;
             }
 
             const float DistanceToBotCoverThresh = 1f;
 
-            foreach (var member in Bot.Squad.Members.Values)
+            foreach (var member in SAINBot.Squad.Members.Values)
             {
                 if (member != null && member.BotOwner != BotOwner)
                 {

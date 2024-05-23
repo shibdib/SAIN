@@ -33,8 +33,8 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            if (BotOwner.WeaponManager.Selector.EquipmentSlot == EquipmentSlot.Holster 
-                && !BotOwner.WeaponManager.HaveBullets 
+            if (BotOwner.WeaponManager.Selector.EquipmentSlot == EquipmentSlot.Holster
+                && !BotOwner.WeaponManager.HaveBullets
                 && !BotOwner.WeaponManager.Selector.TryChangeToMain())
             {
                 selectWeapon();

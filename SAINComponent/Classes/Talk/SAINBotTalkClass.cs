@@ -34,7 +34,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void GetHit(float damage, EBodyPart bodyPart, EDamageType type, float damageReducedByArmor, MaterialType special = MaterialType.None)
         {
-            if (Player == null || BotOwner == null || Bot == null)
+            if (Player == null || BotOwner == null || SAINBot == null)
             {
                 return;
             }
@@ -82,11 +82,11 @@ namespace SAIN.SAINComponent.Classes.Talk
 
                     if (TalkPack != null)
                     {
-                        allTalkDelay = Time.time + Bot.Info.FileSettings.Mind.TalkFrequency;
+                        allTalkDelay = Time.time + SAINBot.Info.FileSettings.Mind.TalkFrequency;
 
                         if (TalkPack.phraseInfo.Phrase == EPhraseTrigger.Roger || TalkPack.phraseInfo.Phrase == EPhraseTrigger.Negative)
                         {
-                            if (Bot.Squad.VisibleMembers != null && Bot.Squad.LeaderComponent != null && Bot.Squad.VisibleMembers.Contains(Bot.Squad.LeaderComponent) && Bot.Enemy?.IsVisible == false)
+                            if (SAINBot.Squad.VisibleMembers != null && SAINBot.Squad.LeaderComponent != null && SAINBot.Squad.VisibleMembers.Contains(SAINBot.Squad.LeaderComponent) && SAINBot.Enemy?.IsVisible == false)
                             {
                                 if (TalkPack.phraseInfo.Phrase == EPhraseTrigger.Roger)
                                 {
@@ -114,7 +114,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             PersonalPhraseDict.Clear();
         }
 
-        public bool CanTalk => Bot.Info.FileSettings.Mind.CanTalk;
+        public bool CanTalk => SAINBot.Info.FileSettings.Mind.CanTalk;
 
         public bool Say(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false)
         {
@@ -142,7 +142,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public bool GroupSay(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false, float chance = 60)
         {
-            var squadSettings = Bot.Squad.SquadInfo?.SquadPersonalitySettings;
+            var squadSettings = SAINBot.Squad.SquadInfo?.SquadPersonalitySettings;
             if (squadSettings != null)
             {
                 float vocalization = squadSettings.VocalizationLevel * 10f - 25f;
@@ -203,7 +203,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     SAINPlugin.BotController?.PlayerTalk?.Invoke(trigger, etagStatus, Player);
                     BotOwner.BotsGroup.GroupTalk.PhraseSad(BotOwner, trigger);
                     PersonalPhraseDict[trigger].TimeLastSaid = Time.time;
-                    Player.Speaker.Play(trigger, Bot.Memory.Health.HealthStatus | mask | etagStatus, demand, null);
+                    Player.Speaker.Play(trigger, SAINBot.Memory.Health.HealthStatus | mask | etagStatus, demand, null);
                 }
             }
         }
@@ -229,9 +229,9 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 etagStatus |= ETagStatus.Combat;
             }
-            else if (Bot.Enemy != null)
+            else if (SAINBot.Enemy != null)
             {
-                if (Bot.Enemy.Seen && Bot.Enemy.TimeSinceSeen < 30f)
+                if (SAINBot.Enemy.Seen && SAINBot.Enemy.TimeSinceSeen < 30f)
                 {
                     etagStatus |= ETagStatus.Combat;
                 }
@@ -240,7 +240,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     etagStatus |= ETagStatus.Aware;
                 }
 
-                switch (Bot.Enemy.EnemyIPlayer.Side)
+                switch (SAINBot.Enemy.EnemyIPlayer.Side)
                 {
                     case EPlayerSide.Usec:
                         etagStatus |= ETagStatus.Usec;

@@ -16,7 +16,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Init()
         {
-            SquadInfo = SAINPlugin.BotController.BotSquads.GetSquad(Bot);
+            SquadInfo = SAINPlugin.BotController.BotSquads.GetSquad(SAINBot);
         }
 
         public Squad SquadInfo { get; private set; }
@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private float UpdateMembersTimer = 0f;
 
-        public bool IAmLeader => SquadInfo.LeaderId == Bot.ProfileId;
+        public bool IAmLeader => SquadInfo.LeaderId == SAINBot.ProfileId;
 
         public Bot LeaderComponent => SquadInfo?.LeaderComponent;
 
@@ -49,7 +49,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
                 if (LeaderComponent != null)
                 {
-                    DistanceToSquadLeader = (Bot.Position - LeaderComponent.Position).magnitude;
+                    DistanceToSquadLeader = (SAINBot.Position - LeaderComponent.Position).magnitude;
                 }
             }
         }
@@ -63,7 +63,7 @@ namespace SAIN.SAINComponent.Classes.Info
             VisibleMembers.Clear();
             foreach (var member in Members.Values)
             {
-                if (member != null && member.ProfileId != Bot.ProfileId && Bot.Memory.VisiblePlayers.Contains(member.Player))
+                if (member != null && member.ProfileId != SAINBot.ProfileId && SAINBot.Memory.VisiblePlayers.Contains(member.Player))
                 {
                     VisibleMembers.Add(member);
                 }

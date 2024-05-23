@@ -39,7 +39,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 FoundTargetTimer = -1f;
                 return false;
             }
-            if (Bot.CurrentTargetPosition == null)
+            if (SAINBot.CurrentTargetPosition == null)
             {
                 FoundTargetTimer = -1f;
                 return false;
@@ -58,7 +58,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 Decision = SoloDecision.Search;
             }
-            else if (Bot.Decision.EnemyDecisions.StartHoldInCover())
+            else if (SAINBot.Decision.EnemyDecisions.StartHoldInCover())
             {
                 Decision = SoloDecision.HoldInCover;
             }
@@ -90,7 +90,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     {
                         return true;
                     }
-                    if (Bot.Info.Profile.IsPMC)
+                    if (SAINBot.Info.Profile.IsPMC)
                     {
                         return true;
                     }
@@ -101,14 +101,14 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool ShallNotSearch()
         {
-            if (!Bot.Info.PersonalitySettings.WillSearchFromAudio)
+            if (!SAINBot.Info.PersonalitySettings.Search.WillSearchFromAudio)
             {
                 return false;
             }
-            Vector3? target = Bot.CurrentTargetPosition;
-            if (target != null && !Bot.Info.Profile.IsPMC && Bot.Memory.Location.BotZoneCollider != null)
+            Vector3? target = SAINBot.CurrentTargetPosition;
+            if (target != null && !SAINBot.Info.Profile.IsPMC && SAINBot.Memory.Location.BotZoneCollider != null)
             {
-                Vector3 closestPointInZone = Bot.Memory.Location.BotZoneCollider.ClosestPointOnBounds(target.Value);
+                Vector3 closestPointInZone = SAINBot.Memory.Location.BotZoneCollider.ClosestPointOnBounds(target.Value);
                 float distance = (target.Value - closestPointInZone).magnitude;
                 if (distance > 50f)
                 {
@@ -120,7 +120,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool startSearch()
         {
-            return Bot.Search.ShallStartSearch(out _, true);
+            return SAINBot.Search.ShallStartSearch(out _, true);
         }
     }
 }

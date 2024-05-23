@@ -28,14 +28,14 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
         }
 
-        private SAINSquadClass Squad => Bot.Squad;
+        private SAINSquadClass Squad => SAINBot.Squad;
 
         float SquaDDecision_DontDoSquadDecision_EnemySeenRecentTime = 3f;
 
         public bool GetDecision(out SquadDecision Decision)
         {
             Decision = SquadDecision.None;
-            if (!Squad.BotInGroup || Bot.Squad.SquadInfo?.LeaderComponent == null || Squad.LeaderComponent?.IsDead == true)
+            if (!Squad.BotInGroup || SAINBot.Squad.SquadInfo?.LeaderComponent == null || Squad.LeaderComponent?.IsDead == true)
             {
                 return false;
             }
@@ -59,7 +59,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool EnemyDecision(out SquadDecision Decision)
         {
             Decision = SquadDecision.None;
-            SAINEnemy myEnemy = Bot.Enemy;
+            SAINEnemy myEnemy = SAINBot.Enemy;
 
             if (shallPushSuppressedEnemy(myEnemy))
             {
@@ -73,19 +73,19 @@ namespace SAIN.SAINComponent.Classes.Decision
                     return false;
                 }
             }
-            if (Bot.Squad.LeaderComponent != null && shallGroupSearch())
+            if (SAINBot.Squad.LeaderComponent != null && shallGroupSearch())
             {
                 Decision = SquadDecision.GroupSearch;
                 return true;
             }
 
-            foreach (var member in Bot.Squad.Members.Values)
+            foreach (var member in SAINBot.Squad.Members.Values)
             {
                 if (member == null || member.BotOwner == BotOwner || member.BotOwner.IsDead)
                 {
                     continue;
                 }
-                if (!HasRadioComms && (Bot.Transform.Position - member.Transform.Position).sqrMagnitude > SquaDecision_RadioCom_MaxDistSq)
+                if (!HasRadioComms && (SAINBot.Transform.Position - member.Transform.Position).sqrMagnitude > SquaDecision_RadioCom_MaxDistSq)
                 {
                     continue;
                 }
@@ -118,27 +118,28 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool shallPushSuppressedEnemy(SAINEnemy enemy)
         {
             if (enemy != null
-                && !Bot.Decision.SelfActionDecisions.LowOnAmmo(PushSuppressedEnemyLowAmmoRatio) 
-                && Bot.Info.PersonalitySettings.CanRushEnemyReloadHeal)
+                && !SAINBot.Decision.SelfActionDecisions.LowOnAmmo(PushSuppressedEnemyLowAmmoRatio) 
+                && SAINBot.Info.PersonalitySettings.Rush.CanRushEnemyReloadHeal)
             {
                 bool inRange = false;
-                if (enemy.Path.PathDistance < PushSuppressedEnemyMaxPathDistanceSprint
+                float modifier = enemy.EnemyStatus.VulnerableAction == EEnemyAction.UsingSurgery ? 1.25f : 1f;
+                if (enemy.Path.PathDistance < PushSuppressedEnemyMaxPathDistanceSprint * modifier
                     && BotOwner?.CanSprintPlayer == true)
                 {
                     inRange = true;
                 }
-                else if (enemy.Path.PathDistance < PushSuppressedEnemyMaxPathDistance)
+                else if (enemy.Path.PathDistance < PushSuppressedEnemyMaxPathDistance * modifier)
                 {
                     inRange = true;
                 }
 
                 if (inRange
-                    && Bot.Memory.Health.HealthStatus == ETagStatus.Healthy
-                    && Bot.Squad.SquadInfo.SquadIsSuppressEnemy(enemy.EnemyPlayer.ProfileId, out var suppressingMember) 
-                    && suppressingMember != Bot)
+                    && (SAINBot.Memory.Health.HealthStatus == ETagStatus.Healthy || SAINBot.Memory.Health.HealthStatus == ETagStatus.Injured)
+                    && SAINBot.Squad.SquadInfo.SquadIsSuppressEnemy(enemy.EnemyPlayer.ProfileId, out var suppressingMember) 
+                    && suppressingMember != SAINBot)
                 {
                     var enemyStatus = enemy.EnemyStatus;
-                    if (enemyStatus.EnemyIsReloading || enemyStatus.EnemyIsHealing || enemyStatus.EnemyHasGrenadeOut)
+                    if (enemy.EnemyStatus.VulnerableAction != EEnemyAction.None)
                     {
                         return true;
                     }
@@ -156,18 +157,18 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private bool HasRadioComms => Bot.Equipment.HasEarPiece;
+        private bool HasRadioComms => SAINBot.Equipment.HasEarPiece;
 
         float SquadDecision_SuppressFriendlyDistStart = 30f;
         float SquadDecision_SuppressFriendlyDistEnd = 50f;
 
         private bool shallSuppressEnemy(Bot member)
         {
-            if (Bot.Enemy?.SuppressionTarget == null)
+            if (SAINBot.Enemy?.SuppressionTarget == null)
             {
                 return false;
             }
-            if (Bot.Enemy?.IsVisible == true)
+            if (SAINBot.Enemy?.IsVisible == true)
             {
                 return false;
             }
@@ -177,9 +178,9 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             float memberDistance = (member.Transform.Position - BotOwner.Position).magnitude;
-            float ammo = Bot.Decision.SelfActionDecisions.AmmoRatio;
+            float ammo = SAINBot.Decision.SelfActionDecisions.AmmoRatio;
 
-            if (Bot.Memory.Decisions.Squad.Current == SquadDecision.Suppress)
+            if (SAINBot.Memory.Decisions.Squad.Current == SquadDecision.Suppress)
             {
                 return memberDistance <= SquadDecision_SuppressFriendlyDistEnd && ammo >= 0.1f;
             }
@@ -198,18 +199,18 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallGroupSearch()
         {
-            foreach (var member in Bot.Squad.Members.Values)
+            foreach (var member in SAINBot.Squad.Members.Values)
             {
                 if (member.Memory.Decisions.Main.Current == SoloDecision.Search)
                 {
-                    if (Bot.Enemy != null
+                    if (SAINBot.Enemy != null
                         && doesMemberShareEnemy(member))
                     {
                         return true;
                     }
-                    if (Bot.Enemy == null
-                        && Bot.CurrentTargetPosition != null
-                        && doesMemberShareTarget(member, Bot.CurrentTargetPosition.Value))
+                    if (SAINBot.Enemy == null
+                        && SAINBot.CurrentTargetPosition != null
+                        && doesMemberShareTarget(member, SAINBot.CurrentTargetPosition.Value))
                     {
                         return true;
                     }
@@ -220,7 +221,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool doesMemberShareTarget(Bot member, Vector3 targetPosition, float maxDist = 20f)
         {
-            if (member == null || member.ProfileId == Bot.ProfileId || member.BotOwner?.IsDead == true)
+            if (member == null || member.ProfileId == SAINBot.ProfileId || member.BotOwner?.IsDead == true)
             {
                 return false;
             }
@@ -230,13 +231,13 @@ namespace SAIN.SAINComponent.Classes.Decision
         }
         private bool doesMemberShareEnemy(Bot member)
         {
-            if (member == null || member.ProfileId == Bot.ProfileId || member.BotOwner?.IsDead == true)
+            if (member == null || member.ProfileId == SAINBot.ProfileId || member.BotOwner?.IsDead == true)
             {
                 return false;
             }
 
             return member.Enemy != null
-                && member.Enemy.EnemyPlayer.ProfileId == Bot.Enemy.EnemyPlayer.ProfileId;
+                && member.Enemy.EnemyPlayer.ProfileId == SAINBot.Enemy.EnemyPlayer.ProfileId;
         }
 
         float SquadDecision_StartHelpFriendDist = 30f;
@@ -248,7 +249,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             float distance = member.Enemy.Path.PathDistance;
             bool visible = member.Enemy.IsVisible;
 
-            if (Bot.Memory.Decisions.Squad.Current == SquadDecision.Help 
+            if (SAINBot.Memory.Decisions.Squad.Current == SquadDecision.Help 
                 && member.Enemy.Seen)
             {
                 return distance < SquadDecision_EndHelpFriendDist
@@ -265,7 +266,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool shallRegroup()
         {
-            var squad = Bot.Squad;
+            var squad = SAINBot.Squad;
             if (squad.IAmLeader)
             {
                 return false;
@@ -274,7 +275,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             float maxDist = SquadDecision_Regroup_NoEnemy_StartDist;
             float minDist = SquadDecision_Regroup_NoEnemy_EndDistance;
 
-            var enemy = Bot.Enemy;
+            var enemy = SAINBot.Enemy;
             if (enemy != null)
             {
                 if (enemy.IsVisible || (enemy.Seen && enemy.TimeSinceSeen < SquadDecision_Regroup_EnemySeenRecentTime))
@@ -305,7 +306,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                         }
                     }
                 }
-                if (Bot.Memory.Decisions.Squad.Current == SquadDecision.Regroup)
+                if (SAINBot.Memory.Decisions.Squad.Current == SquadDecision.Regroup)
                 {
                     return leadDistance > minDist;
                 }

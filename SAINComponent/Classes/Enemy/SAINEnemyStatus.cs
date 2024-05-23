@@ -4,7 +4,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class SAINEnemyStatus : EnemyBase
     {
-        public EEnemyAction EnemyAction
+        public EEnemyAction VulnerableAction
         {
             get
             {
@@ -19,6 +19,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 else if (EnemyIsHealing)
                 {
                     return EEnemyAction.Healing;
+                }
+                else if (EnemyUsingSurgery)
+                {
+                    return EEnemyAction.UsingSurgery;
                 }
                 else
                 {
@@ -42,6 +46,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
                     case EEnemyAction.Healing:
                         EnemyIsHealing = true;
+                        break;
+
+                    case EEnemyAction.Looting:
+                        EnemyIsLooting = true;
+                        break;
+
+                    case EEnemyAction.UsingSurgery:
+                        EnemyUsingSurgery = true;
+                        break;
+
+                    default:
                         break;
                 }
             }
@@ -106,6 +121,34 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public float TimeSinceSearchLastStarted => Time.time - TimeSearchLastStarted;
 
         private readonly ExpirableBool _searchStarted = new ExpirableBool(300f, 0.85f, 1.15f);
+
+        public bool EnemyUsingSurgery
+        {
+            get
+            {
+                return _enemySurgery.Value;
+            }
+            set
+            {
+                _enemySurgery.Value = value;
+            }
+        }
+
+        private readonly ExpirableBool _enemySurgery = new ExpirableBool(8f, 0.85f, 1.15f);
+
+        public bool EnemyIsLooting
+        {
+            get
+            {
+                return _enemyLooting.Value;
+            }
+            set
+            {
+                _enemyLooting.Value = value;
+            }
+        }
+
+        private readonly ExpirableBool _enemyLooting = new ExpirableBool(30f, 0.85f, 1.15f);
 
         public bool EnemyIsSuppressed
         {

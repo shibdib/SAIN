@@ -32,17 +32,17 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (_updateDogFightTimer < Time.time)
             {
                 Vector3 targetPos = Vector3.zero;
-                if (Bot.Enemy != null)
+                if (SAINBot.Enemy != null)
                 {
                     BackUp(out targetPos);
                 }
-                else if (Bot.CurrentTargetPosition != null)
+                else if (SAINBot.CurrentTargetPosition != null)
                 {
                     BackUpNoEnemy(out targetPos);
                 }
 
                 if (targetPos != Vector3.zero 
-                    && Bot.Mover.GoToPoint(targetPos, out _ , -1, false, false))
+                    && SAINBot.Mover.GoToPoint(targetPos, out _ , -1, false, false))
                 {
                     _updateDogFightTimer = Time.time + 0.66f;
                 }
@@ -53,7 +53,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool BackUp(out Vector3 trgPos)
         {
-            Vector3 a = -Vector.NormalizeFastSelf(Bot.Enemy.EnemyDirection);
+            Vector3 a = -Vector.NormalizeFastSelf(SAINBot.Enemy.EnemyDirection);
             trgPos = Vector3.zero;
             float num = 0f;
             Vector3 random = Random.onUnitSphere * 1f;
@@ -88,12 +88,12 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool BackUpNoEnemy(out Vector3 trgPos)
         {
-            if (Bot.CurrentTargetPosition == null)
+            if (SAINBot.CurrentTargetPosition == null)
             {
                 trgPos = Vector3.zero;
                 return false;
             }
-            Vector3 direction = Bot.CurrentTargetPosition.Value - Bot.Position;
+            Vector3 direction = SAINBot.CurrentTargetPosition.Value - SAINBot.Position;
             Vector3 a = -Vector.NormalizeFastSelf(direction);
             trgPos = Vector3.zero;
             float num = 0f;

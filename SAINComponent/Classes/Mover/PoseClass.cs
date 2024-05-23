@@ -18,7 +18,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (!Bot.PatrolDataPaused)
+            if (!SAINBot.PatrolDataPaused)
             {
                 return;
             }
@@ -40,7 +40,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 _updatePoseTimer = Time.time + 0.25f;
                 BotOwner.Mover?.SetPose(_targetPoseLevel);
 
-                if (Bot.Mover.CurrentStamina > 0.1f)
+                if (SAINBot.Mover.CurrentStamina > 0.1f)
                 {
                     //BotOwner.Mover?.SetPose(_targetPoseLevel);
                 }
@@ -100,9 +100,9 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool FindCrouchFromCover(out float targetPose, bool useCollider = false)
         {
             targetPose = 1f;
-            if ((Bot.AILimit.CurrentAILimit == AILimitSetting.Close || Bot.Enemy?.IsAI == false))
+            if ((SAINBot.AILimit.CurrentAILimit == AILimitSetting.Close || SAINBot.Enemy?.IsAI == false))
             {
-                SAINEnemy enemy = Bot.Enemy;
+                SAINEnemy enemy = SAINBot.Enemy;
                 if (enemy?.LastKnownPosition != null)
                 {
                     Vector3 position = enemy.LastKnownPosition.Value + Vector3.up;
@@ -127,7 +127,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             LayerMask Mask = LayerMaskClass.HighPolyWithTerrainMask;
 
             Vector3 offset = Vector3.up * heightStep;
-            Vector3 start = Bot.Transform.Position + Vector3.up * StartHeight;
+            Vector3 start = SAINBot.Transform.Position + Vector3.up * StartHeight;
             Vector3 direction = target - start;
             float targetHeight = StartHeight;
             for (int i = 0; i <= max; i++)
@@ -150,7 +150,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private float FindCrouchHeightColliderSphereCast(Vector3 target, float rayLength = 3f, bool flatDir = true)
         {
             LayerMask Mask = LayerMaskClass.HighPolyWithTerrainMask;
-            Vector3 start = Bot.Transform.Position + Vector3.up * 0.75f;
+            Vector3 start = SAINBot.Transform.Position + Vector3.up * 0.75f;
             Vector3 direction = target - start;
             if (flatDir)
             {

@@ -77,7 +77,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void HearSound(IPlayer iPlayer, Vector3 position, float power, AISoundType type)
         {
-            if (BotOwner == null || Bot == null)
+            if (BotOwner == null || SAINBot == null)
             {
                 return;
             }
@@ -89,8 +89,8 @@ namespace SAIN.SAINComponent.Classes
             if (iPlayer != null 
                 && SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
                 && iPlayer.IsAI
-                && Bot.CurrentAILimit != AILimitSetting.Close 
-                && (iPlayer.Position - Bot.Position).sqrMagnitude > 200f)
+                && SAINBot.CurrentAILimit != AILimitSetting.Close 
+                && (iPlayer.Position - SAINBot.Position).sqrMagnitude > 200f)
             {
                 return;
             }
@@ -102,7 +102,7 @@ namespace SAIN.SAINComponent.Classes
                 ManualCleanup();
             }
 
-            if (!Bot.GameIsEnding)
+            if (!SAINBot.GameIsEnding)
             {
                 EnemySoundHeard(iPlayer, position, power, type);
             }
@@ -112,7 +112,7 @@ namespace SAIN.SAINComponent.Classes
 
         public bool EnemySoundHeard(IPlayer iPlayer, Vector3 soundPosition, float power, AISoundType type)
         {
-            if (IsPlayerFriendly(iPlayer))
+            if (SAINBot.EnemyController.IsPlayerFriendly(iPlayer))
             {
                 return false;
             }
@@ -127,46 +127,6 @@ namespace SAIN.SAINComponent.Classes
 
             return (wasHeard || bulletFelt) 
                 && ReactToSound(iPlayer, soundPosition, distance, wasHeard, bulletFelt, type);
-        }
-
-        public bool IsPlayerFriendly(IPlayer iPlayer)
-        {
-            if (iPlayer != null)
-            {
-                if (iPlayer.ProfileId == Bot.Person.IPlayer.ProfileId)
-                {
-                    return true;
-                }
-                // Checks if the player is not an active enemy and that they are a neutral party
-                if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer)
-                    && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
-                {
-                    return true;
-                }
-                // Double check that the source isn't from a member of the bot's group.
-                if (iPlayer.AIData.IsAI
-                    && BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
-                {
-                    return true;
-                }
-                // Check that the source isn't an ally
-                if (BotOwner.BotsGroup.Allies.Contains(iPlayer))
-                {
-                    return true;
-                }
-                // Checks if the player is an enemy by their role.
-                var role = iPlayer.Profile.Info.Settings.Role;
-                if (BotOwner.Settings.FileSettings.Mind.ENEMY_BOT_TYPES.Contains(role))
-                {
-                    return false;
-                }
-
-                //if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer))
-                //{
-                    //return true;
-                //}
-            }
-            return false;
         }
 
         private bool ProcessSound(IPlayer player, Vector3 position, float power, AISoundType type, out float distance)
@@ -189,15 +149,15 @@ namespace SAIN.SAINComponent.Classes
 
             if (wasHeard && isFootstep)
             {
-                if (!Bot.Equipment.HasEarPiece)
+                if (!SAINBot.Equipment.HasEarPiece)
                 {
                     range *= 0.675f;
                 }
-                if (Bot.Equipment.HasHeavyHelmet)
+                if (SAINBot.Equipment.HasHeavyHelmet)
                 {
                     range *= 0.8f;
                 }
-                if (Bot.Memory.Health.HealthStatus == ETagStatus.Dying)
+                if (SAINBot.Memory.Health.HealthStatus == ETagStatus.Dying)
                 {
                     range *= 0.8f;
                 }
@@ -206,7 +166,7 @@ namespace SAIN.SAINComponent.Classes
                     range *= 0.85f;
                 }
 
-                range *= Bot.Info.FileSettings.Core.HearingSense;
+                range *= SAINBot.Info.FileSettings.Core.HearingSense;
 
                 range = Mathf.Round(range * 10f) / 10f;
 
@@ -283,7 +243,7 @@ namespace SAIN.SAINComponent.Classes
 
                 if (firedAtMe)
                 {
-                    Bot.StartCoroutine(delayReact(vector, to, type, person, shooterDistance, isEnemy));
+                    SAINBot.StartCoroutine(delayReact(vector, to, type, person, shooterDistance, isEnemy));
                     reacted = true;
                 }
             }
@@ -294,8 +254,8 @@ namespace SAIN.SAINComponent.Classes
             }
 
             if (!firedAtMe
-                && !Bot.Info.PersonalitySettings.WillChaseDistantGunshots
-                && (Bot.Position - soundPosition).sqrMagnitude > 150f * 150f)
+                && !SAINBot.Info.PersonalitySettings.Search.WillChaseDistantGunshots
+                && (SAINBot.Position - soundPosition).sqrMagnitude > 150f * 150f)
             {
                 return reacted;
             }
@@ -303,14 +263,14 @@ namespace SAIN.SAINComponent.Classes
             if (wasHeard)
             {
                 //SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
-                Bot.StartCoroutine(delayAddSearch(vector, power, type, person));
+                SAINBot.StartCoroutine(delayAddSearch(vector, power, type, person));
                 reacted = true;
             }
             else if (isGunSound && bulletFelt)
             {
                 Vector3 estimate = firedAtMe ? vector : GetEstimatedPoint(vector);
 
-                Bot.StartCoroutine(delayAddSearch(estimate, power, type, person));
+                SAINBot.StartCoroutine(delayAddSearch(estimate, power, type, person));
                 //SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
                 reacted = true;
             }
@@ -348,11 +308,11 @@ namespace SAIN.SAINComponent.Classes
             }
             catch { }
 
-            Bot.Memory.SetUnderFire(person, vector);
+            SAINBot.Memory.SetUnderFire(person, vector);
             if (isEnemy)
             {
-                Bot.Suppression.AddSuppression();
-                SAINEnemy enemy = Bot.EnemyController.CheckAddEnemy(person);
+                SAINBot.Suppression.AddSuppression();
+                SAINEnemy enemy = SAINBot.EnemyController.CheckAddEnemy(person);
                 if (enemy != null)
                 {
                     enemy.SetEnemyAsSniper(shooterDistance > 100f);
@@ -373,7 +333,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 yield break;
             }
-            Bot?.Squad?.SquadInfo?.AddPointToSearch(vector, power, Bot, type, person);
+            SAINBot?.Squad?.SquadInfo?.AddPointToSearch(vector, power, SAINBot, type, person);
             CheckCalcGoal();
         }
 
@@ -511,7 +471,7 @@ namespace SAIN.SAINComponent.Classes
         private bool CheckFootStepDetectChance(float distance)
         {
             float closehearing = 10f;
-            float farhearing = Bot.Info.FileSettings.Hearing.MaxFootstepAudioDistance;
+            float farhearing = SAINBot.Info.FileSettings.Hearing.MaxFootstepAudioDistance;
 
             if (distance <= closehearing)
             {

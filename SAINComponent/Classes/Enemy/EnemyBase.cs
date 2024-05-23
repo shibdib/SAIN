@@ -9,8 +9,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public EnemyBase(SAINEnemy enemy)
         {
             Enemy = enemy;
-            SAIN = enemy.Bot;
-            BotOwner = enemy.Bot.BotOwner;
+            SAIN = enemy.SAINBot;
+            BotOwner = enemy.SAINBot.BotOwner;
             EnemyPerson = enemy.EnemyPerson;
             EnemyInfo = enemy.EnemyInfo;
             EnemyPlayer = enemy.EnemyPerson.Player;

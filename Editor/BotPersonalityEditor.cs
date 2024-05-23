@@ -39,11 +39,35 @@ namespace SAIN.Editor.GUISections
 
                 if (OpenPersMenus[name])
                 {
-                    EditAllValuesInObj(personality.Variables, out bool newEdit);
+                    EditAllValuesInObj(personality.Assignment, out bool newEdit);
+
                     if (newEdit)
-                    {
                         PersonalitiesWereEdited = true;
-                    }
+
+                    EditAllValuesInObj(personality.Behavior.General, out newEdit);
+
+                    if (newEdit)
+                        PersonalitiesWereEdited = true;
+
+                    EditAllValuesInObj(personality.Behavior.Rush, out newEdit);
+
+                    if (newEdit)
+                        PersonalitiesWereEdited = true;
+
+                    EditAllValuesInObj(personality.Behavior.Search, out newEdit);
+
+                    if (newEdit)
+                        PersonalitiesWereEdited = true;
+
+                    EditAllValuesInObj(personality.Behavior.Talk, out newEdit);
+
+                    if (newEdit)
+                        PersonalitiesWereEdited = true;
+
+                    EditAllValuesInObj(personality.StatModifiers, out newEdit);
+
+                    if (newEdit)
+                        PersonalitiesWereEdited = true;
                 }
             }
         }

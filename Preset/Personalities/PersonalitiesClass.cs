@@ -4,6 +4,7 @@ using SAIN.Attributes;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace SAIN.Preset.Personalities
 {
@@ -23,42 +24,9 @@ namespace SAIN.Preset.Personalities
         public EPersonality SAINPersonality;
         public string Name;
         public string Description;
-
-        public PersonalityVariablesClass Variables = new PersonalityVariablesClass();
-
         public bool CanBePersonality(SAINBotInfoClass infoClass)
         {
-            return CanBePersonality(infoClass.WildSpawnType, infoClass.PowerLevel, infoClass.PlayerLevel);
-        }
-
-        public bool CanBePersonality(WildSpawnType wildSpawnType, float PowerLevel, int PlayerLevel)
-        {
-            if (Variables.Enabled == false)
-            {
-                return false;
-            }
-            if (Variables.CanBeRandomlyAssigned && EFTMath.RandomBool(Variables.RandomlyAssignedChance))
-            {
-                return true;
-            }
-            if (!BotTypeDefinitions.BotTypes.ContainsKey(wildSpawnType))
-            {
-                return false;
-            }
-            string name = BotTypeDefinitions.BotTypes[wildSpawnType].Name;
-            if (!Variables.AllowedTypes.Contains(name))
-            {
-                return false;
-            }
-            if (PowerLevel > Variables.PowerLevelMax || PowerLevel < Variables.PowerLevelMin)
-            {
-                return false;
-            }
-            if (PlayerLevel > Variables.MaxLevel)
-            {
-                return false;
-            }
-            return EFTMath.RandomBool(Variables.RandomChanceIfMeetRequirements);
+            return Assignment.CanBePersonality(infoClass);
         }
 
         public PersonalityAssignmentSettings Assignment = new PersonalityAssignmentSettings();
@@ -68,10 +36,56 @@ namespace SAIN.Preset.Personalities
 
     public class PersonalityAssignmentSettings
     {
+        public bool CanBePersonality(SAINBotInfoClass infoClass)
+        {
+            if (Enabled)
+            {
+                if (checkRandomAssignment())
+                {
+                    return true;
+                }
+                if (meetsRequirements(infoClass))
+                {
+                    float assignmentChance = getChance(infoClass.PowerLevel);
+                    return EFTMath.RandomBool(assignmentChance);
+                }
+            }
+            return false;
+        }
+
+        private bool checkRandomAssignment()
+        {
+            return CanBeRandomlyAssigned && EFTMath.RandomBool(RandomlyAssignedChance);
+        }
+
+        private bool meetsRequirements(SAINBotInfoClass infoClass)
+        {
+            return AllowedTypes.Contains(infoClass.WildSpawnType) 
+                && infoClass.PowerLevel < PowerLevelMax 
+                && infoClass.PowerLevel > PowerLevelMin 
+                && infoClass.PlayerLevel < MaxLevel 
+                && infoClass.PlayerLevel > MinLevel;
+        }
+
+        private float getChance(float powerLevel)
+        {
+            powerLevel = Mathf.Clamp(powerLevel, 0, 1000);
+            float modifier0to1 = (powerLevel - PowerLevelScaleStart) / (PowerLevelScaleEnd - PowerLevelScaleStart);
+            if (InverseScale)
+            {
+                modifier0to1 = 1f - modifier0to1;
+            }
+            float result = MaxChanceIfMeetRequirements * modifier0to1;
+            result = Mathf.Clamp(result, 0f, 100f);
+            Logger.LogDebug($"Result: [{result}] Power: [{powerLevel}] PowerLevelScaleStart [{PowerLevelScaleStart}] PowerLevelScaleEnd [{PowerLevelScaleEnd}] MaxChanceIfMeetRequirements [{MaxChanceIfMeetRequirements}]");
+            return result;
+        }
+
         [Name("Maximum of this Personality Per Raid")]
         [Description("How many alive bots can be assigned this personality. 0 means no limit.")]
         [Default(0f)]
         [MinMax(0f, 50f, 1f)]
+        [Hidden]
         public float MaximumOfThisTypePerRaid = 0f;
 
         [JsonIgnore]
@@ -85,11 +99,9 @@ namespace SAIN.Preset.Personalities
 
         [Name("Personality Enabled")]
         [Description("Enables or Disables this Personality, if a All Chads, All GigaChads, or AllRats is enabled in global settings, this value is ignored")]
-        [Default(true)]
         public bool Enabled = true;
 
         [NameAndDescription("Can Be Randomly Assigned", "A percentage chance that this personality can be applied to any bot, regardless of bot stats, power, player level, or anything else.")]
-        [Default(true)]
         public bool CanBeRandomlyAssigned = true;
 
         [NameAndDescription("Randomly Assigned Chance", "If personality can be randomly assigned, this is the chance that will happen")]
@@ -104,7 +116,6 @@ namespace SAIN.Preset.Personalities
         [Percentage]
         public float MaxLevel = 100;
 
-
         [Name("Power Level Scale Start")]
         [Description("When a bot is at, or above this power level, they will start to have a chance to be assigned this personality.")]
         [MinMax(0, 1000, 1)]
@@ -114,6 +125,9 @@ namespace SAIN.Preset.Personalities
         [Description("When a bot is at, or above this power level, they will have the full percentage chance to be assigned this personality.")]
         [MinMax(0, 1000, 1)]
         public float PowerLevelScaleEnd = 500f;
+
+        [Description("The lower the power level, the higher the chance")]
+        public bool InverseScale = false;
 
         [NameAndDescription("Power Level Minimum", "Minimum Power level for a bot to use this personality." + PowerLevelDescription)]
         [MinMax(0, 800, 1)]
@@ -324,12 +338,12 @@ namespace SAIN.Preset.Personalities
 
         [Default(20f)]
         [Advanced]
-        [Percentage]
+        [MinMax(0.1f, 100f, 100f)]
         public float TauntFrequency = 15f;
 
         [Default(20f)]
         [Advanced]
-        [Percentage]
+        [MinMax(0.1f, 150f, 100f)]
         public float TauntMaxDistance = 70f;
 
         [Default(false)]

@@ -100,7 +100,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private void tryTalk()
         {
-            _enemy.Bot?.Talk.GroupSay(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 40);
+            _enemy.SAINBot?.Talk.GroupSay(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 40);
         }
 
         private float _nextCheckArrivedHeardPlaces;
@@ -114,7 +114,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (_nextCheckArrivedHeardPlaces < time)
             {
                 _nextCheckArrivedHeardPlaces = time + _checkArriveFreq;
-                Vector3 myPosition = _enemy.Bot.Position;
+                Vector3 myPosition = _enemy.SAINBot.Position;
 
                 bool arrivedNew = false;
                 foreach (EnemyPlace heardPlace in HeardPlacesPersonal)
@@ -130,7 +130,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (_nextCheckArrivedSeenPlace < time)
             {
                 _nextCheckArrivedSeenPlace = time + _checkArriveFreq;
-                Vector3 myPosition = _enemy.Bot.Position;
+                Vector3 myPosition = _enemy.SAINBot.Position;
 
                 bool arrivedNew = false;
                 if (checkPersonalArrived(LastSeenPlace, myPosition) && !arrivedNew)
@@ -144,7 +144,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (_nextCheckArrivedSquadPlaces < time)
             {
                 _nextCheckArrivedSquadPlaces = time + _checkArriveFreq;
-                Vector3 myPosition = _enemy.Bot.Position;
+                Vector3 myPosition = _enemy.SAINBot.Position;
 
                 bool arrivedNew = false;
                 if (checkSquadArrived(LastSquadSeenPlace, myPosition) && !arrivedNew)
@@ -290,7 +290,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 LastSeenPlace = new EnemyPlace(position, 300f, true, _enemy.EnemyIPlayer);
                 updatePlaces(true);
-                OnEnemyPlaceAdded?.Invoke(LastSeenPlace, _enemy.Bot);
+                OnEnemyPlaceAdded?.Invoke(LastSeenPlace, _enemy.SAINBot);
             }
             else
             {
@@ -336,7 +336,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             HeardPlacesPersonal.Add(newPlace);
             updatePlaces(true);
-            OnEnemyPlaceAdded?.Invoke(newPlace, _enemy.Bot);
+            OnEnemyPlaceAdded?.Invoke(newPlace, _enemy.SAINBot);
             return newPlace;
         }
 

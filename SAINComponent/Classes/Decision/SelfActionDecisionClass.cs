@@ -31,14 +31,14 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
         }
 
-        public SelfDecision CurrentSelfAction => Bot.Decision.CurrentSelfDecision;
-        private EnemyPathDistance EnemyDistance => Bot.Decision.EnemyDistance;
+        public SelfDecision CurrentSelfAction => SAINBot.Decision.CurrentSelfDecision;
+        private EnemyPathDistance EnemyDistance => SAINBot.Decision.EnemyDistance;
 
         public bool GetDecision(out SelfDecision Decision)
         {
-            if ( Bot.Enemy == null && !BotOwner.Medecine.Using && LowOnAmmo(0.75f) )
+            if ( SAINBot.Enemy == null && !BotOwner.Medecine.Using && LowOnAmmo(0.75f) )
             {
-                Bot.SelfActions.TryReload();
+                SAINBot.SelfActions.TryReload();
                 Decision = SelfDecision.None;
                 return false;
             }
@@ -55,7 +55,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 }
                 else
                 {
-                    if (LastHealCheckTime < Time.time && !Bot.Memory.Health.Healthy)
+                    if (LastHealCheckTime < Time.time && !SAINBot.Memory.Health.Healthy)
                     {
                         LastHealCheckTime = Time.time + 1f;
                         if (StartUseStims())
@@ -66,7 +66,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                         {
                             Decision = SelfDecision.FirstAid;
                         }
-                        else if (Bot.Medical.Surgery.ShallTrySurgery())
+                        else if (SAINBot.Medical.Surgery.ShallTrySurgery())
                         {
                             Decision = SelfDecision.Surgery;
                         }
@@ -81,10 +81,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartRunGrenade()
         {
-            var grenadePos = Bot.Grenade.GrenadeDangerPoint; 
+            var grenadePos = SAINBot.Grenade.GrenadeDangerPoint; 
             if (grenadePos != null)
             {
-                Vector3 headPos = Bot.Transform.HeadPosition;
+                Vector3 headPos = SAINBot.Transform.HeadPosition;
                 Vector3 direction = grenadePos.Value - headPos;
                 if (!Physics.Raycast(headPos, direction.normalized, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
                 {
@@ -134,12 +134,12 @@ namespace SAIN.SAINComponent.Classes.Decision
             if (CurrentSelfAction != SelfDecision.None)
             {
                 if (CurrentSelfAction == SelfDecision.Surgery 
-                    && Bot.Medical.Surgery.ShallTrySurgery())
+                    && SAINBot.Medical.Surgery.ShallTrySurgery())
                 {
                     Decision = CurrentSelfAction;
                     return true;
                 }
-                else if (Time.time - Bot.Decision.ChangeDecisionTime > 5f)
+                else if (Time.time - SAINBot.Decision.ChangeDecisionTime > 5f)
                 {
                     if (CurrentSelfAction != SelfDecision.Surgery)
                     {
@@ -147,7 +147,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                         TryFixBusyHands();
                         return false;
                     }
-                    else if (Time.time - Bot.Decision.ChangeDecisionTime > 30f)
+                    else if (Time.time - SAINBot.Decision.ChangeDecisionTime > 30f)
                     {
                         Decision = SelfDecision.None;
                         TryFixBusyHands();
@@ -160,7 +160,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return continueAction;
         }
 
-        private bool ContinueRunGrenade => CurrentSelfAction == SelfDecision.RunAwayGrenade && Bot.Grenade.GrenadeDangerPoint != null;
+        private bool ContinueRunGrenade => CurrentSelfAction == SelfDecision.RunAwayGrenade && SAINBot.Grenade.GrenadeDangerPoint != null;
         public bool UsingMeds => BotOwner.Medecine.Using;
         private bool ContinueReload => BotOwner.WeaponManager.Reload?.Reloading == true; //  && !StartCancelReload()
         public bool CanUseStims
@@ -168,7 +168,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             get
             {
                 var stims = BotOwner.Medecine.Stimulators;
-                return stims.HaveSmt && Time.time - stims.LastEndUseTime > 3f && stims.CanUseNow() && !Bot.Memory.Health.Healthy;
+                return stims.HaveSmt && Time.time - stims.LastEndUseTime > 3f && stims.CanUseNow() && !SAINBot.Memory.Health.Healthy;
             }
         }
         public bool CanUseFirstAid => BotOwner.Medecine.FirstAid.ShallStartUse();
@@ -180,10 +180,10 @@ namespace SAIN.SAINComponent.Classes.Decision
             bool takeStims = false;
             if (CanUseStims)
             {
-                var enemy = Bot.Enemy;
+                var enemy = SAINBot.Enemy;
                 if (enemy == null)
                 {
-                    if (Bot.Memory.Health.Dying || Bot.Memory.Health.BadlyInjured)
+                    if (SAINBot.Memory.Health.Dying || SAINBot.Memory.Health.BadlyInjured)
                     {
                         takeStims = true;
                     }
@@ -211,7 +211,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             bool useFirstAid = false;
             if (CanUseFirstAid)
             {
-                var enemy = Bot.Enemy;
+                var enemy = SAINBot.Enemy;
                 if (enemy == null)
                 {
                     useFirstAid = true;
@@ -220,7 +220,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 {
                     var pathStatus = EnemyDistance;
                     bool SeenRecent = enemy.TimeSinceSeen < StartFirstAid_Injury_SeenRecentTime;
-                    var status = Bot;
+                    var status = SAINBot;
                     if (status.Memory.Health.Injured)
                     {
                         if (!enemy.InLineOfSight && !SeenRecent && pathStatus != EnemyPathDistance.VeryClose && pathStatus != EnemyPathDistance.Close)
@@ -264,8 +264,8 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
 
-            var enemy = Bot.Enemy;
-            if (enemy != null && BotOwner.WeaponManager.Reload.Reloading && Bot.Enemy != null)
+            var enemy = SAINBot.Enemy;
+            if (enemy != null && BotOwner.WeaponManager.Reload.Reloading && SAINBot.Enemy != null)
             {
                 var pathStatus = enemy.CheckPathDistance();
                 bool SeenRecent = Time.time - enemy.TimeSinceSeen > 3f;
@@ -310,7 +310,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 }
                 else if (LowOnAmmo())
                 {
-                    var enemy = Bot.Enemy;
+                    var enemy = SAINBot.Enemy;
                     if (enemy == null)
                     {
                         needToReload = true;
@@ -342,14 +342,14 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             if (CanUseSurgery)
             {
-                var enemy = Bot.Enemy;
+                var enemy = SAINBot.Enemy;
                 if (enemy == null)
                 {
-                    if (Bot.CurrentTargetPosition == null)
+                    if (SAINBot.CurrentTargetPosition == null)
                     {
                         useSurgery = true;
                     }
-                    else if ((Bot.CurrentTargetPosition.Value - Bot.Position).sqrMagnitude > useSurgDist * useSurgDist)
+                    else if ((SAINBot.CurrentTargetPosition.Value - SAINBot.Position).sqrMagnitude > useSurgDist * useSurgDist)
                     {
                         useSurgery = true;
                     }
@@ -365,9 +365,9 @@ namespace SAIN.SAINComponent.Classes.Decision
                     }
                 }
 
-                if (Bot.HasEnemy)
+                if (SAINBot.HasEnemy)
                 {
-                    foreach (var enemyInfo in Bot.EnemyController.Enemies)
+                    foreach (var enemyInfo in SAINBot.EnemyController.Enemies)
                     {
                         if (enemyInfo.Value.InLineOfSight)
                         {

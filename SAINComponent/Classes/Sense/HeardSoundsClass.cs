@@ -62,7 +62,7 @@ namespace SAIN.SAINComponent.Classes.Sense
                     SAINSoundType soundType = highestPower.SoundType;
                     if (soundType == SAINSoundType.Gunshot || soundType == SAINSoundType.SuppressedGunShot)
                     {
-                        if (Bot.Hearing.EnemySoundHeard(
+                        if (SAINBot.Hearing.EnemySoundHeard(
                             highestPower.SourcePlayer, 
                             highestPower.Position, 
                             highestPower.Power, 
@@ -73,7 +73,7 @@ namespace SAIN.SAINComponent.Classes.Sense
                             OnGunshotHeard?.Invoke(highestPower);
                         }
                     }
-                    else if (Bot.Hearing.EnemySoundHeard(
+                    else if (SAINBot.Hearing.EnemySoundHeard(
                             highestPower.SourcePlayer,
                             highestPower.Position,
                             highestPower.Power,
@@ -98,19 +98,19 @@ namespace SAIN.SAINComponent.Classes.Sense
 
         public void AddSound(SAINSoundType soundType, Vector3 position, IPlayer sourcePlayer, float power)
         {
-            if (Bot.GameIsEnding)
+            if (SAINBot.GameIsEnding)
             {
                 return;
             }
-            if (sourcePlayer == null || sourcePlayer.Transform == null || sourcePlayer.ProfileId == Bot.ProfileId)
+            if (sourcePlayer == null || sourcePlayer.Transform == null || sourcePlayer.ProfileId == SAINBot.ProfileId)
             {
                 return;
             }
-            if ((position - Bot.Position).sqrMagnitude > power * power)
+            if ((position - SAINBot.Position).sqrMagnitude > power * power)
             {
                 return;
             }
-            if (Bot.Hearing.IsPlayerFriendly(sourcePlayer))
+            if (SAINBot.EnemyController.IsPlayerFriendly(sourcePlayer))
             {
                 return;
             }

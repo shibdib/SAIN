@@ -44,24 +44,24 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (Running)
             {
-                Bot.StopCoroutine(_runToPointCoroutine);
+                SAINBot.StopCoroutine(_runToPointCoroutine);
                 _runToPointCoroutine = null;
-                Bot.Mover.Sprint(false);
+                SAINBot.Mover.Sprint(false);
             }
         }
 
         public bool RunToPoint(Vector3 point)
         {
-            if (Bot.Mover.CanGoToPoint(point, out NavMeshPath path))
+            if (SAINBot.Mover.CanGoToPoint(point, out NavMeshPath path))
             {
                 LastRunDestination = path.corners[path.corners.Length - 1];
                 if (_runToPointCoroutine != null)
                 {
-                    Bot.StopCoroutine(_runToPointCoroutine);
+                    SAINBot.StopCoroutine(_runToPointCoroutine);
                     _runToPointCoroutine = null;
                 }
                 CurrentPath = path;
-                _runToPointCoroutine = Bot.StartCoroutine(RunToPoint(path));
+                _runToPointCoroutine = SAINBot.StartCoroutine(RunToPoint(path));
                 return _runToPointCoroutine != null;
             }
             return false;
@@ -69,8 +69,8 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void checkForDoors()
         {
-            Vector3 botPosition = Bot.Position + Vector3.up;
-            Vector3 lookDirection = Bot.LookDirection;
+            Vector3 botPosition = SAINBot.Position + Vector3.up;
+            Vector3 lookDirection = SAINBot.LookDirection;
 
             if (Physics.Raycast(botPosition, lookDirection, out var doorHit, 2f, LayerMaskClass.DoorLayer))
             {
@@ -108,16 +108,16 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return false;
             }
 
-            if (Bot.Mover.CanGoToPoint(CurrentPath.corners[CurrentPath.corners.Length - 1], out NavMeshPath path))
+            if (SAINBot.Mover.CanGoToPoint(CurrentPath.corners[CurrentPath.corners.Length - 1], out NavMeshPath path))
             {
                 LastRunDestination = path.corners[path.corners.Length - 1];
                 if (_runToPointCoroutine != null)
                 {
-                    Bot.StopCoroutine(_runToPointCoroutine);
+                    SAINBot.StopCoroutine(_runToPointCoroutine);
                     _runToPointCoroutine = null;
                 }
                 CurrentPath = path;
-                _runToPointCoroutine = Bot.StartCoroutine(RunToPoint(path));
+                _runToPointCoroutine = SAINBot.StartCoroutine(RunToPoint(path));
                 return true;
             }
             return false;
@@ -207,7 +207,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 float distToCurrent = distanceToCurrentCornerSqr();
                 while (distToCurrent > reachDist)
                 {
-                    Bot.DoorOpener.Update();
+                    SAINBot.DoorOpener.Update();
                     trackMovement();
 
                     // Start or stop sprinting with a buffer
@@ -229,8 +229,8 @@ namespace SAIN.SAINComponent.Classes.Mover
                         Player.MovementContext.TryVaulting();
                     }
 
-                    steer(currentCorner(), Bot.Player.IsSprintEnabled ? turnSpeedSprint : turnSpeedTurning);
-                    move((currentCorner() - Bot.Position).normalized);
+                    steer(currentCorner(), SAINBot.Player.IsSprintEnabled ? turnSpeedSprint : turnSpeedTurning);
+                    move((currentCorner() - SAINBot.Position).normalized);
 
                     distToCurrent = distanceToCurrentCornerSqr();
                     yield return null;
@@ -247,7 +247,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (BotOwner.DoorOpener.Interacting)
             {
                 CurrentRunStatus = RunStatus.InteractingWithDoor;
-                Bot.Mover.Sprint(false);
+                SAINBot.Mover.Sprint(false);
                 return;
             }
 
@@ -255,23 +255,23 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (staminaValue < 0.1f)
             {
                 CurrentRunStatus = RunStatus.NoStamina;
-                Bot.Mover.Sprint(false);
+                SAINBot.Mover.Sprint(false);
             }
             else if (staminaValue > 0.5f)
             {
                 if (distToCurrent < reachDistRunning)
                 {
-                    Bot.Mover.Sprint(false);
+                    SAINBot.Mover.Sprint(false);
                     CurrentRunStatus = RunStatus.Turning;
                 }
                 else if (distToCurrent > reachDistRunningBuffer)
                 {
-                    Bot.Mover.Sprint(true);
+                    SAINBot.Mover.Sprint(true);
                     CurrentRunStatus = RunStatus.Running;
                 }
             }
 
-            if (Bot.Player.IsSprintEnabled)
+            if (SAINBot.Player.IsSprintEnabled)
             {
                 Player.MovementContext.SprintSpeed = 2f;
             }
@@ -282,11 +282,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (nextCheckPosTime < Time.time)
             {
                 nextCheckPosTime = Time.time + 0.5f;
-                positionMoving = (Bot.Position - lastCheckPos).sqrMagnitude > 0.05f;
+                positionMoving = (SAINBot.Position - lastCheckPos).sqrMagnitude > 0.05f;
                 if (positionMoving)
                 {
                     timeNotMoving = -1f;
-                    lastCheckPos = Bot.Position;
+                    lastCheckPos = SAINBot.Position;
                 }
                 else if (timeNotMoving < 0)
                 {
@@ -306,7 +306,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (this._nextCheckVoxel < Time.time)
             {
                 this._nextCheckVoxel = Time.time + 0.5f;
-                BotOwner.AIData.SetPosToVoxel(Bot.Position);
+                BotOwner.AIData.SetPosToVoxel(SAINBot.Position);
             }
         }
 
@@ -314,7 +314,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private float distanceToCurrentCornerSqr()
         {
-            Vector3 dir = currentCorner() - Bot.Position;
+            Vector3 dir = currentCorner() - SAINBot.Position;
             //dir.y = 0f;
             return dir.sqrMagnitude;
         }
@@ -329,13 +329,13 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             CurrentRunStatus = RunStatus.FirstTurn;
 
-            Bot.Mover.Sprint(false);
+            SAINBot.Mover.Sprint(false);
 
             // First step, look towards the path we want to run
             float dotProduct = 0f;
             while (dotProduct < dotThreshold)
             {
-                Vector3 targetLookDir = firstCorner - Bot.Position;
+                Vector3 targetLookDir = firstCorner - SAINBot.Position;
                 targetLookDir.y = 0f;
                 dotProduct = steer(firstCorner, firstTurnSpeed);
                 if (!BotOwner.DoorOpener.Interacting)
@@ -352,14 +352,14 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private float steer(Vector3 target, float turnSpeed)
         {
-            Vector3 playerPosition = Bot.Position;
-            Vector3 currentLookDirNormal = Bot.Person.Transform.LookDirection.normalized;
+            Vector3 playerPosition = SAINBot.Position;
+            Vector3 currentLookDirNormal = SAINBot.Person.Transform.LookDirection.normalized;
             Vector3 targetLookDir = (target - playerPosition);
             Vector3 targetLookDirNormal = targetLookDir.normalized;
 
             if (!BotOwner.DoorOpener.Interacting)
             {
-                Bot.Steering.LookToDirection(targetLookDirNormal, true, turnSpeed);
+                SAINBot.Steering.LookToDirection(targetLookDirNormal, true, turnSpeed);
             }
             float dotProduct = Vector3.Dot(targetLookDirNormal, currentLookDirNormal);
             return dotProduct;
@@ -408,7 +408,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             while (true)
             {
-                Vector3 botPosition = Bot.Position;
+                Vector3 botPosition = SAINBot.Position;
                 Vector3? currentCorner = CurrentCorner();
 
                 if (currentCorner != null)

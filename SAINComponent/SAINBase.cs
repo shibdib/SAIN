@@ -21,9 +21,9 @@ namespace SAIN.SAINComponent
     {
         public SAINComponentAbstract(Bot sain)
         {
-            Bot = sain;
+            SAINBot = sain;
         }
 
-        public Bot Bot { get; private set; }
+        public Bot SAINBot { get; private set; }
     }
 }

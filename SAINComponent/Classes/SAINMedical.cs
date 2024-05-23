@@ -99,14 +99,14 @@ namespace SAIN.SAINComponent.Classes
 
             if (_canStartSurgery)
             {
-                var enemy = Bot.Enemy;
+                var enemy = SAINBot.Enemy;
                 if (enemy == null)
                 {
-                    if (Bot.CurrentTargetPosition == null)
+                    if (SAINBot.CurrentTargetPosition == null)
                     {
                         useSurgery = true;
                     }
-                    else if ((Bot.CurrentTargetPosition.Value - Bot.Position).sqrMagnitude > useSurgDist * useSurgDist)
+                    else if ((SAINBot.CurrentTargetPosition.Value - SAINBot.Position).sqrMagnitude > useSurgDist * useSurgDist)
                     {
                         useSurgery = true;
                     }
@@ -140,7 +140,7 @@ namespace SAIN.SAINComponent.Classes
         private bool checkEnemies(float minPathDist, float minTimeSinceSeen)
         {
             bool allClear = true;
-            var enemies = Bot.EnemyController.Enemies;
+            var enemies = SAINBot.EnemyController.Enemies;
             foreach (var enemy in enemies.Values)
             {
                 if (!checkThisEnemy(enemy, minPathDist, minTimeSinceSeen))

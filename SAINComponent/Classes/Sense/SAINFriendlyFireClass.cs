@@ -22,7 +22,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            if (!Bot.PatrolDataPaused)
+            if (!SAINBot.PatrolDataPaused)
             {
                 FriendlyFireStatus = FriendlyFireStatus.None;
                 return;
@@ -48,13 +48,13 @@ namespace SAIN.SAINComponent.Classes
         public FriendlyFireStatus CheckFriendlyFire(Vector3? target = null)
         {
             var friendlyFire = FriendlyFireStatus.None;
-            if (!Bot.Squad.BotInGroup || !BotOwner.ShootData.Shooting)
+            if (!SAINBot.Squad.BotInGroup || !BotOwner.ShootData.Shooting)
             {
                 return friendlyFire;
             }
             if (target == null)
             {
-                target = Bot.Enemy?.EnemyChestPosition;
+                target = SAINBot.Enemy?.EnemyChestPosition;
             }
             if (target == null)
             {

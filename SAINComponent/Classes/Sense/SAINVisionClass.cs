@@ -18,7 +18,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            var Enemy = Bot.Enemy;
+            var Enemy = SAINBot.Enemy;
             if (Enemy?.EnemyIPlayer != null && Enemy?.IsVisible == true)
             {
                 FlashLightDazzle.CheckIfDazzleApplied(Enemy);

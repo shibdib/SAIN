@@ -23,21 +23,21 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (!Bot.PatrolDataPaused)
+            if (!SAINBot.PatrolDataPaused)
             {
                 ResetLean();
                 return;
             }
-            var CurrentDecision = Bot.Memory.Decisions.Main.Current;
-            var enemy = Bot.Enemy;
-            if (enemy == null || Player.IsSprintEnabled || DontLean.Contains(CurrentDecision) || Bot.Suppression.IsSuppressed)
+            var CurrentDecision = SAINBot.Memory.Decisions.Main.Current;
+            var enemy = SAINBot.Enemy;
+            if (enemy == null || Player.IsSprintEnabled || DontLean.Contains(CurrentDecision) || SAINBot.Suppression.IsSuppressed)
             {
                 ResetLean();
                 return;
             }
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI 
                 && enemy.IsAI 
-                && Bot.CurrentAILimit != AILimitSetting.Close)
+                && SAINBot.CurrentAILimit != AILimitSetting.Close)
             {
                 ResetLean();
                 return;
@@ -71,7 +71,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             LastLeanDirection = LeanDirection;
             LeanDirection = LeanSetting.None;
-            Bot.Mover.FastLean(0f);
+            SAINBot.Mover.FastLean(0f);
         }
 
         public void FindLeanDirectionRayCast(Vector3 targetPos)
@@ -129,7 +129,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             var setting = GetSettingFromResults();
             LastLeanDirection = LeanDirection;
             LeanDirection = setting;
-            Bot.Mover.FastLean(setting);
+            SAINBot.Mover.FastLean(setting);
         }
 
         public LeanSetting GetSettingFromResults()
@@ -160,7 +160,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool CheckOffSetRay(Vector3 targetPos, float angle, float dist, out Vector3 Point)
         {
             Vector3 startPos = BotOwner.Position;
-            startPos.y = Bot.Transform.HeadPosition.y;
+            startPos.y = SAINBot.Transform.HeadPosition.y;
 
             if (dist > 0f)
             {

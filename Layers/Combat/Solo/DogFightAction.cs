@@ -23,10 +23,10 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            Bot.Mover.SetTargetPose(1f);
-            Bot.Mover.SetTargetMoveSpeed(1f);
-            Bot.Steering.SteerByPriority(false);
-            Bot.Mover.DogFight.DogFightMove();
+            SAINBot.Mover.SetTargetPose(1f);
+            SAINBot.Mover.SetTargetMoveSpeed(1f);
+            SAINBot.Steering.SteerByPriority(false);
+            SAINBot.Mover.DogFight.DogFightMove();
             Shoot.Update();
         }
 
@@ -35,7 +35,7 @@ namespace SAIN.Layers.Combat.Solo
 
         private bool BackUp(out Vector3 trgPos)
         {
-            Vector3 a = -Vector.NormalizeFastSelf(Bot.Enemy.EnemyDirection);
+            Vector3 a = -Vector.NormalizeFastSelf(SAINBot.Enemy.EnemyDirection);
             trgPos = Vector3.zero;
             float num = 0f;
             Vector3 random = Random.onUnitSphere * 1f;
@@ -70,12 +70,12 @@ namespace SAIN.Layers.Combat.Solo
 
         private bool BackUpNoEnemy(out Vector3 trgPos)
         {
-            if (Bot.CurrentTargetPosition == null)
+            if (SAINBot.CurrentTargetPosition == null)
             {
                 trgPos = Vector3.zero;
                 return false;
             }
-            Vector3 direction = Bot.CurrentTargetPosition.Value - Bot.Position;
+            Vector3 direction = SAINBot.CurrentTargetPosition.Value - SAINBot.Position;
             Vector3 a = -Vector.NormalizeFastSelf(direction);
             trgPos = Vector3.zero;
             float num = 0f;
@@ -118,7 +118,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
-            Bot.Mover.Sprint(false);
+            SAINBot.Mover.Sprint(false);
             BotOwner.Mover.SprintPause(1f);
         }
 

@@ -18,23 +18,23 @@ namespace SAIN.Layers.Combat.Squad
         {
             Shoot.Update();
 
-            SAINEnemy enemy = Bot.Enemy;
-            if (!Bot.Steering.SteerByPriority(false) && enemy != null)
+            SAINEnemy enemy = SAINBot.Enemy;
+            if (!SAINBot.Steering.SteerByPriority(false) && enemy != null)
             {
-                Bot.Steering.LookToEnemy(enemy);
+                SAINBot.Steering.LookToEnemy(enemy);
             }
 
             if (enemy != null)
             {
                 if (PointDestination == null)
                 {
-                    PointDestination = Bot.Cover.FindPointInDirection(enemy.EnemyDirection);
+                    PointDestination = SAINBot.Cover.FindPointInDirection(enemy.EnemyDirection);
                 }
                 if (PointDestination != null)
                 {
                     Vector3 destination = PointDestination.Position;
 
-                    if ((destination - Bot.Position).sqrMagnitude < 1f)
+                    if ((destination - SAINBot.Position).sqrMagnitude < 1f)
                     {
                         PointDestination = null;
                         return;
@@ -45,10 +45,10 @@ namespace SAIN.Layers.Combat.Squad
 
                         if (sprint && BotOwner.BotRun.Run(destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance))
                         {
-                            Bot.Steering.LookToMovingDirection(500f, true);
+                            SAINBot.Steering.LookToMovingDirection(500f, true);
                             _recalcPathTime = Time.time + 1f;
                         }
-                        else if (Bot.Mover.GoToPoint(destination, out _))
+                        else if (SAINBot.Mover.GoToPoint(destination, out _))
                         {
                             _recalcPathTime = Time.time + 1f;
                         }

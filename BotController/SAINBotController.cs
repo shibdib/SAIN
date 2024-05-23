@@ -232,9 +232,17 @@ namespace SAIN.Components
                         {
                             Enemy.EnemyStatus.EnemyIsReloading = true;
                         }
+                        else if (soundType == SAINSoundType.Looting)
+                        {
+                            Enemy.EnemyStatus.EnemyIsLooting = true;
+                        }
                         else if (soundType == SAINSoundType.Heal)
                         {
                             Enemy.EnemyStatus.EnemyIsHealing = true;
+                        }
+                        else if (soundType == SAINSoundType.Surgery)
+                        {
+                            Enemy.EnemyStatus.VulnerableAction = SAINComponent.Classes.Enemy.EEnemyAction.UsingSurgery;
                         }
                         else
                         {
@@ -243,7 +251,7 @@ namespace SAIN.Components
 
                         if (shallUpdateSquad)
                         {
-                            bot.Squad.SquadInfo.UpdateSharedEnemyStatus(Enemy.EnemyIPlayer, Enemy.EnemyStatus.EnemyAction, bot);
+                            bot.Squad.SquadInfo.UpdateSharedEnemyStatus(Enemy.EnemyIPlayer, Enemy.EnemyStatus.VulnerableAction, bot);
                         }
                     }
                 }

@@ -36,7 +36,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public float SemiAutoROF()
         {
-            WeaponInfoClass weaponInfo = Bot.Info.WeaponInfo;
+            WeaponInfoClass weaponInfo = SAINBot.Info.WeaponInfo;
             if (weaponInfo == null)
             {
                 return 1f;
@@ -54,7 +54,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 final = Mathf.Clamp(final, 0.1f, 3f);
             }
 
-            final /= Bot.Info.FileSettings.Shoot.FireratMulti;
+            final /= SAINBot.Info.FileSettings.Shoot.FireratMulti;
 
             // Final Result which is randomized +- 15%
             float finalTime = final * Random.Range(0.85f, 1.15f);
@@ -71,7 +71,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             get
             {
                 var perMeterDictionary = GlobalSettings?.Shoot?.WeaponPerMeter;
-                var weapInfo = Bot?.Info?.WeaponInfo;
+                var weapInfo = SAINBot?.Info?.WeaponInfo;
 
                 if (perMeterDictionary != null && weapInfo != null)
                 {

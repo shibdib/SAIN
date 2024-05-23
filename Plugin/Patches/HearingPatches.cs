@@ -1,6 +1,7 @@
 ﻿using Aki.Reflection.Patching;
 using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using EFT.Weather;
 using HarmonyLib;
 using Interpolation;
@@ -208,11 +209,16 @@ namespace SAIN.Patches.Hearing
         }
 
         [PatchPrefix]
-        public static void PatchPrefix(Player __instance)
+        public static void PatchPrefix(MedsClass meds, Player __instance)
         {
             if (SAINPlugin.BotController != null)
             {
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(SAINSoundType.Heal, __instance.Position, __instance, 35f);
+                SAINSoundType soundType = SAINSoundType.Heal;
+                if (meds != null && meds.HealthEffectsComponent.AffectsAny(new EDamageEffectType[]{EDamageEffectType.DestroyedPart }))
+                {
+                    soundType = SAINSoundType.Surgery;
+                }
+                SAINPlugin.BotController.AISoundPlayed?.Invoke(soundType, __instance.Position, __instance, 35f);
             }
         }
     }

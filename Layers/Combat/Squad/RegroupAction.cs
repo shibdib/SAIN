@@ -15,9 +15,9 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Update()
         {
-            if (Bot.Steering.SteerByPriority())
+            if (SAINBot.Steering.SteerByPriority())
             {
-                Bot.Mover.Sprint(false);
+                SAINBot.Mover.Sprint(false);
             }
             else
             {
@@ -43,11 +43,11 @@ namespace SAIN.Layers.Combat.Squad
 
         private void MoveToLead()
         {
-            var SquadLeadPos = Bot.Squad.LeaderComponent?.BotOwner?.Position;
-            if (SquadLeadPos != null && Bot.Mover.GoToPoint(SquadLeadPos.Value, out _))
+            var SquadLeadPos = SAINBot.Squad.LeaderComponent?.BotOwner?.Position;
+            if (SquadLeadPos != null && SAINBot.Mover.GoToPoint(SquadLeadPos.Value, out _))
             {
-                Bot.Mover.SetTargetPose(1f);
-                Bot.Mover.SetTargetMoveSpeed(1f);
+                SAINBot.Mover.SetTargetPose(1f);
+                SAINBot.Mover.SetTargetMoveSpeed(1f);
                 CheckShouldSprint(SquadLeadPos.Value);
                 BotOwner.DoorOpener.Update();
             }
@@ -55,14 +55,14 @@ namespace SAIN.Layers.Combat.Squad
 
         private void CheckShouldSprint(Vector3 pos)
         {
-            bool hasEnemy = Bot.HasEnemy;
-            bool enemyLOS = Bot.Enemy?.InLineOfSight == true;
+            bool hasEnemy = SAINBot.HasEnemy;
+            bool enemyLOS = SAINBot.Enemy?.InLineOfSight == true;
             float leadDist = (pos - BotOwner.Position).magnitude;
-            float enemyDist = hasEnemy ? (Bot.Enemy.EnemyIPlayer.Position - BotOwner.Position).magnitude : 999f;
+            float enemyDist = hasEnemy ? (SAINBot.Enemy.EnemyIPlayer.Position - BotOwner.Position).magnitude : 999f;
 
             bool sprint = hasEnemy && leadDist > 30f && !enemyLOS && enemyDist > 50f;
 
-            if (Bot.Steering.SteerByPriority(false))
+            if (SAINBot.Steering.SteerByPriority(false))
             {
                 sprint = false;
             }
@@ -72,12 +72,12 @@ namespace SAIN.Layers.Combat.Squad
                 _nextChangeSprintTime = Time.time + 1f;
                 if (sprint)
                 {
-                    Bot.Mover.Sprint(true);
+                    SAINBot.Mover.Sprint(true);
                 }
                 else
                 {
-                    Bot.Mover.Sprint(false);
-                    Bot.Steering.SteerByPriority();
+                    SAINBot.Mover.Sprint(false);
+                    SAINBot.Steering.SteerByPriority();
                 }
             }
         }

@@ -36,7 +36,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             if (mainDecisionCoroutine == null)
             {
-                mainDecisionCoroutine = Bot.StartCoroutine(mainDecisionLoop());
+                mainDecisionCoroutine = SAINBot.StartCoroutine(mainDecisionLoop());
             }
         }
 
@@ -46,7 +46,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             while (true)
             {
-                if (BotOwner == null || Bot == null || !Bot.BotActive || Bot.GameIsEnding)
+                if (BotOwner == null || SAINBot == null || !SAINBot.BotActive || SAINBot.GameIsEnding)
                 {
                     CurrentSoloDecision = SoloDecision.None;
                     CurrentSquadDecision = SquadDecision.None;
@@ -59,7 +59,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 if (_nextGetDecisionTime + delay < Time.time)
                 {
                     _nextGetDecisionTime = Time.time;
-                    EnemyDistance = Bot.HasEnemy ? Bot.Enemy.CheckPathDistance() : EnemyPathDistance.NoEnemy;
+                    EnemyDistance = SAINBot.HasEnemy ? SAINBot.Enemy.CheckPathDistance() : EnemyPathDistance.NoEnemy;
                     GetDecision();
                 }
                 yield return null;
@@ -106,7 +106,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private SAINEnemy findDogFightTarget()
         {
-            var enemies = Bot.EnemyController.Enemies;
+            var enemies = SAINBot.EnemyController.Enemies;
             foreach (var enemy in enemies)
             {
                 if (shallDogFightEnemy(enemy.Value))
@@ -269,13 +269,13 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool CheckContinueRetreat()
         {
-            float timeChangeDec = Bot.Decision.TimeSinceChangeDecision;
+            float timeChangeDec = SAINBot.Decision.TimeSinceChangeDecision;
             bool Running = CurrentSoloDecision == SoloDecision.Retreat || CurrentSoloDecision == SoloDecision.RunToCover;
-            if (Running && !Bot.BotStuck.BotHasChangedPosition && Bot.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 0.5f)
+            if (Running && !SAINBot.BotStuck.BotHasChangedPosition && SAINBot.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 0.5f)
             {
                 return false;
             }
-            CoverPoint pointInUse = Bot.Cover.CoverInUse;
+            CoverPoint pointInUse = SAINBot.Cover.CoverInUse;
             if (pointInUse != null)
             {
                 if (pointInUse.Status == CoverStatus.InCover)
@@ -290,7 +290,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool CheckStuckDecision(out SoloDecision Decision)
         {
             Decision = SoloDecision.None;
-            bool stuck = Bot.BotStuck.BotIsStuck;
+            bool stuck = SAINBot.BotStuck.BotIsStuck;
 
             if (!stuck && FinalBotUnstuckTimer != 0f)
             {
@@ -307,7 +307,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 BotUnstuckTimerDecision = Time.time + 5f;
 
                 var current = this.CurrentSoloDecision;
-                if (FinalBotUnstuckTimer < Time.time && Bot.HasEnemy)
+                if (FinalBotUnstuckTimer < Time.time && SAINBot.HasEnemy)
                 {
                     Decision = SoloDecision.UnstuckDogFight;
                     return true;

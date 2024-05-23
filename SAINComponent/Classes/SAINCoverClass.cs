@@ -25,7 +25,7 @@ namespace SAIN.SAINComponent.Classes
 
         public CoverPoint FindPointInDirection(Vector3 direction, float dotThreshold = 0.33f, float minDistance = 8f)
         {
-            Vector3 botPosition = Bot.Position;
+            Vector3 botPosition = SAINBot.Position;
             for (int i = 0; i < CoverPoints.Count; i++)
             {
                 CoverPoint point = CoverPoints[i];
@@ -46,19 +46,19 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            CoverFinder.Init(Bot);
+            CoverFinder.Init(SAINBot);
         }
 
         public CoverFinderState CurrentCoverFinderState { get; private set; }
 
         public void Update()
         {
-            if (!Bot.BotActive || Bot.GameIsEnding)
+            if (!SAINBot.BotActive || SAINBot.GameIsEnding)
             {
                 ActivateCoverFinder(false);
                 return;
             }
-            ActivateCoverFinder(Bot.Decision.SAINActive);
+            ActivateCoverFinder(SAINBot.Decision.SAINActive);
             createDebug();
         }
 
@@ -71,10 +71,10 @@ namespace SAIN.SAINComponent.Classes
                     if (debugCoverObject == null)
                     {
                         debugCoverObject = DebugGizmos.CreateLabel(CoverInUse.Position, "Cover In Use");
-                        debugCoverLine = DebugGizmos.Line(CoverInUse.Position, Bot.Position + Vector3.up, 0.075f, -1, true);
+                        debugCoverLine = DebugGizmos.Line(CoverInUse.Position, SAINBot.Position + Vector3.up, 0.075f, -1, true);
                     }
                     debugCoverObject.WorldPos = CoverInUse.Position;
-                    DebugGizmos.UpdatePositionLine(CoverInUse.Position, Bot.Position + Vector3.up, debugCoverLine);
+                    DebugGizmos.UpdatePositionLine(CoverInUse.Position, SAINBot.Position + Vector3.up, debugCoverLine);
                 }
             }
             else if (debugCoverObject != null)
@@ -105,7 +105,7 @@ namespace SAIN.SAINComponent.Classes
             CoverPoint coverInUse = CoverInUse;
             if (coverInUse != null)
             {
-                SAINEnemy enemy = Bot.Enemy;
+                SAINEnemy enemy = SAINBot.Enemy;
                 bool HitInCoverKnown = enemy != null && damage.Player != null && enemy.EnemyPlayer.ProfileId == damage.Player.iPlayer.ProfileId;
                 bool HitInCoverCantSee = enemy != null && enemy.IsVisible == false;
 
@@ -140,14 +140,14 @@ namespace SAIN.SAINComponent.Classes
 
         public void CheckResetCoverInUse()
         {
-            SoloDecision decision = Bot.Decision.CurrentSoloDecision;
+            SoloDecision decision = SAINBot.Decision.CurrentSoloDecision;
             if (decision != SoloDecision.MoveToCover
                 && decision != SoloDecision.RunToCover
                 && decision != SoloDecision.Retreat
                 && decision != SoloDecision.HoldInCover 
                 && decision != SoloDecision.ShiftCover)
             {
-                Bot.Cover.CoverInUse = null;
+                SAINBot.Cover.CoverInUse = null;
             }
         }
 
@@ -180,12 +180,12 @@ namespace SAIN.SAINComponent.Classes
 
         public void SortPointsByPathDist()
         {
-            CoverFinderComponent.OrderPointsByPathDist(CoverPoints, Bot);
+            CoverFinderComponent.OrderPointsByPathDist(CoverPoints, SAINBot);
         }
 
         private bool GetPointToHideFrom(out Vector3? target)
         {
-            target = Bot.Grenade.GrenadeDangerPoint ?? Bot.CurrentTargetPosition;
+            target = SAINBot.Grenade.GrenadeDangerPoint ?? SAINBot.CurrentTargetPosition;
             return target != null;
         }
 
@@ -194,11 +194,11 @@ namespace SAIN.SAINComponent.Classes
             var point = CoverInUse;
             if (point != null)
             {
-                var move = Bot.Mover;
+                var move = SAINBot.Mover;
                 var prone = move.Prone;
                 bool shallProne = prone.ShallProneHide();
 
-                if (shallProne && (Bot.Decision.CurrentSelfDecision != SelfDecision.None || Bot.Suppression.IsHeavySuppressed))
+                if (shallProne && (SAINBot.Decision.CurrentSelfDecision != SelfDecision.None || SAINBot.Suppression.IsHeavySuppressed))
                 {
                     prone.SetProne(true);
                     return true;
@@ -218,7 +218,7 @@ namespace SAIN.SAINComponent.Classes
 
         public bool CheckLimbsForCover()
         {
-            var enemy = Bot.Enemy;
+            var enemy = SAINBot.Enemy;
             if (enemy?.IsVisible == true)
             {
                 if (CheckLimbTimer < Time.time)

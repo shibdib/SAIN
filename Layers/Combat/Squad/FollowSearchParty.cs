@@ -16,13 +16,13 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Update()
         {
-            if (!Bot.Mover.SprintController.Running)
+            if (!SAINBot.Mover.SprintController.Running)
             {
                 Shoot.Update();
-                Bot.Steering.SteerByPriority();
+                SAINBot.Steering.SteerByPriority();
             }
 
-            var leader = Bot.Squad.SquadInfo?.LeaderComponent;
+            var leader = SAINBot.Squad.SquadInfo?.LeaderComponent;
             if (leader != null)
             {
                 _leaderPosition = leader.Position;
@@ -30,25 +30,25 @@ namespace SAIN.Layers.Combat.Squad
                 {
                     _nextUpdatePosTime = Time.time + 1f;
 
-                    float sqrMag = (_leaderPosition - Bot.Position).sqrMagnitude;
+                    float sqrMag = (_leaderPosition - SAINBot.Position).sqrMagnitude;
                     if (sqrMag < 5f * 5f)
                     {
-                        Bot.Mover.StopMove();
+                        SAINBot.Mover.StopMove();
                         return;
                     }
                     if (sqrMag > 30f * 30f)
                     {
-                        Bot.Mover.SprintController.RunToPoint(_leaderPosition);
+                        SAINBot.Mover.SprintController.RunToPoint(_leaderPosition);
                     }
                     else if (sqrMag > 10f * 10f)
                     {
-                        Bot.Mover.GoToPoint(_leaderPosition, out _, 5f);
+                        SAINBot.Mover.GoToPoint(_leaderPosition, out _, 5f);
                     }
 
-                    if (sqrMag < 20f * 20f && Bot.Mover.SprintController.Running)
+                    if (sqrMag < 20f * 20f && SAINBot.Mover.SprintController.Running)
                     {
-                        Bot.Mover.SprintController.CancelRun();
-                        Bot.Mover.GoToPoint(_leaderPosition, out _, 5f);
+                        SAINBot.Mover.SprintController.CancelRun();
+                        SAINBot.Mover.GoToPoint(_leaderPosition, out _, 5f);
                     }
                 }
             }
@@ -63,7 +63,7 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Stop()
         {
-            Bot.Mover.SprintController.CancelRun();
+            SAINBot.Mover.SprintController.CancelRun();
         }
     }
 }

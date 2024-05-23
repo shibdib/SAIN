@@ -189,6 +189,7 @@ namespace SAIN
         Heal,
         Food,
         Conversation,
+        Surgery,
     }
 
     public enum ELocation

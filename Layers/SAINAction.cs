@@ -13,20 +13,20 @@ namespace SAIN.Layers
     {
         public SAINAction(BotOwner botOwner, string name) : base(botOwner)
         {
-            Bot = botOwner.GetComponent<Bot>();
+            SAINBot = botOwner.GetComponent<Bot>();
             Shoot = new ShootClass(botOwner);
         }
 
         public SAINBotController BotController => SAINPlugin.BotController;
-        public DecisionWrapper Decisions => Bot.Memory.Decisions;
+        public DecisionWrapper Decisions => SAINBot.Memory.Decisions;
 
-        public readonly Bot Bot;
+        public readonly Bot SAINBot;
 
         public readonly ShootClass Shoot;
 
         public override void BuildDebugText(StringBuilder stringBuilder)
         {
-            DebugOverlay.AddBaseInfo(Bot, BotOwner, stringBuilder);
+            DebugOverlay.AddBaseInfo(SAINBot, BotOwner, stringBuilder);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            Bot.Steering.SteerByPriority();
+            SAINBot.Steering.SteerByPriority();
 
             /*
             if (SAIN.Cover.DuckInCover())
@@ -34,20 +34,20 @@ namespace SAIN.Layers.Combat.Solo
 
             return;
 
-            if (Bot.Cover.BotIsAtCoverInUse())
+            if (SAINBot.Cover.BotIsAtCoverInUse())
             {
                 return;
             }
             else
             {
-                bool prone = Bot.Mover.Prone.ShallProne(true);
-                Bot.Mover.Prone.SetProne(prone);
+                bool prone = SAINBot.Mover.Prone.ShallProne(true);
+                SAINBot.Mover.Prone.SetProne(prone);
             }
         }
 
         public override void Start()
         {
-            Bot.Mover.StopMove();
+            SAINBot.Mover.StopMove();
             BotOwner.Mover.SprintPause(0.5f);
             _stopMoveTime = Time.time + 0.5f;
         }

@@ -138,14 +138,14 @@ namespace SAIN.SAINComponent.Classes.Info
         public void CalcHoldGroundDelay()
         {
             var settings = PersonalitySettings;
-            float baseTime = settings.HoldGroundBaseTime * AggressionMultiplier;
+            float baseTime = settings.General.HoldGroundBaseTime * AggressionMultiplier;
 
-            float min = settings.HoldGroundMinRandom;
-            float max = settings.HoldGroundMaxRandom;
+            float min = settings.General.HoldGroundMinRandom;
+            float max = settings.General.HoldGroundMaxRandom;
             HoldGroundDelay = 0.6f + baseTime.Randomize(min, max).Round100();
         }
 
-        private float AggressionMultiplier => (FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.AggressionMultiplier).Round100();
+        private float AggressionMultiplier => (FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.General.AggressionMultiplier).Round100();
 
         public void CalcTimeBeforeSearch()
         {
@@ -154,13 +154,13 @@ namespace SAIN.SAINComponent.Classes.Info
             {
                 searchTime = 0.1f;
             }
-            else if (Profile.IsFollower && Bot.Squad.BotInGroup)
+            else if (Profile.IsFollower && SAINBot.Squad.BotInGroup)
             {
                 searchTime = 10f;
             }
             else
             {
-                searchTime = PersonalitySettings.SearchBaseTime;
+                searchTime = PersonalitySettings.Search.SearchBaseTime;
             }
 
             searchTime = (searchTime.Randomize(0.66f, 1.33f) / AggressionMultiplier).Round100();
@@ -186,7 +186,7 @@ namespace SAIN.SAINComponent.Classes.Info
         {
             float percentage = Random.Range(FileSettings.Mind.MinExtractPercentage, FileSettings.Mind.MaxExtractPercentage);
 
-            var squad = Bot?.Squad;
+            var squad = SAINBot?.Squad;
             var members = squad?.Members;
             if (squad != null && squad.BotInGroup && members != null && members.Count > 0)
             {
@@ -235,16 +235,17 @@ namespace SAIN.SAINComponent.Classes.Info
                 return result;
             }
 
-            if (BotTypeDefinitions.BotTypes.ContainsKey(WildSpawnType))
+            foreach (var setting 
+                in SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary)
             {
-                var personalities = SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary.Values;
-                foreach (PersonalitySettingsClass setting in personalities)
+                if (setting.Value.CanBePersonality(this))
                 {
-                    if (setting.CanBePersonality(this))
-                    {
-                        return setting.SAINPersonality;
-                    }
+                    return setting.Value.SAINPersonality;
                 }
+            }
+            if (Profile.IsPMC)
+            {
+                return EPersonality.Chad;
             }
             return EPersonality.Normal;
         }
@@ -279,12 +280,10 @@ namespace SAIN.SAINComponent.Classes.Info
                     return EFTMath.RandomBool() ? EPersonality.Wreckless : EPersonality.GigaChad;
 
                 case WildSpawnType.bossKnight:
-                    return EPersonality.GigaChad;
-
-                case WildSpawnType.followerBigPipe:
-                    return EPersonality.Chad;
-
                 case WildSpawnType.followerBirdEye:
+                case WildSpawnType.followerBigPipe:
+                    return EPersonality.SnappingTurtle;
+
                 case WildSpawnType.bossKojaniy:
                     return EPersonality.Rat;
 
@@ -307,7 +306,7 @@ namespace SAIN.SAINComponent.Classes.Info
         public BotDifficulty BotDifficulty => Profile.BotDifficulty;
 
         public EPersonality Personality { get; private set; }
-        public PersonalityVariablesClass PersonalitySettings => PersonalitySettingsClass?.Variables;
+        public PersonalityBehaviorSettings PersonalitySettings => PersonalitySettingsClass?.Behavior;
         public PersonalitySettingsClass PersonalitySettingsClass { get; private set; }
 
         public float PercentageBeforeExtract { get; set; } = -1f;

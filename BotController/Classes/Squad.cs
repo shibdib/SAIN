@@ -442,7 +442,7 @@ namespace SAIN.BotController.Classes
                 SAINEnemy memberEnemy = member.EnemyController.CheckAddEnemy(player);
                 if (memberEnemy != null)
                 {
-                    memberEnemy.EnemyStatus.EnemyAction = action;
+                    memberEnemy.EnemyStatus.VulnerableAction = action;
                 }
             }
         }
