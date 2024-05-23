@@ -106,7 +106,7 @@ namespace SAIN.Preset
             bool success = false;
             try
             {
-                foreach (var pers in personClass.Personalities)
+                foreach (var pers in personClass.PersonalityDictionary)
                 {
                     if (pers.Value != null && Export(pers.Value, presetName, pers.Key.ToString(), nameof(Personalities)))
                     {

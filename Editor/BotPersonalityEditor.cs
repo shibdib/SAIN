@@ -25,7 +25,7 @@ namespace SAIN.Editor.GUISections
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
 
-            foreach (var personality in SAINPlugin.LoadedPreset.PersonalityManager.Personalities.Values)
+            foreach (var personality in SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary.Values)
             {
                 string name = personality.Name;
                 if (!OpenPersMenus.ContainsKey(name))

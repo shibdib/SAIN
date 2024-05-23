@@ -83,7 +83,7 @@ namespace SAIN.SAINComponent.Classes
             if (_nextLogTime < Time.time && visibleCount > 0 && !enemyInfo.Person.IsAI)
             {
                 _nextLogTime = Time.time + 0.1f;
-                Logger.LogDebug($"Visible Ratio for Enemy Parts: [{(float)visibleCount / (float)partCount}] for Bot [{enemyInfo.Owner.name}]");
+                //Logger.LogDebug($"Visible Ratio for Enemy Parts: [{(float)visibleCount / (float)partCount}] for Bot [{enemyInfo.Owner.name}]");
             }
 
             return (float) visibleCount / (float) partCount;

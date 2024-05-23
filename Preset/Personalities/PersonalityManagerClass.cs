@@ -22,7 +22,7 @@ namespace SAIN.Preset.Personalities
         private void ImportPersonalities()
         {
             import();
-            PersonalityDefaultsClass.InitDefaults(Personalities);
+            PersonalityDefaultsClass.InitDefaults(PersonalityDictionary, Preset);
             checkFix();
         }
 
@@ -32,9 +32,9 @@ namespace SAIN.Preset.Personalities
             {
                 foreach (var item in EnumValues.Personalities)
                 {
-                    if (SAINPresetClass.Import(out PersonalitySettingsClass personality, Preset.Info.Name, item.ToString(), nameof(Personalities)))
+                    if (SAINPresetClass.Import(out PersonalitySettingsClass personality, Preset.Info.Name, item.ToString(), nameof(PersonalityDictionary)))
                     {
-                        Personalities.Add(item, personality);
+                        PersonalityDictionary.Add(item, personality);
                     }
                 }
             }
@@ -45,7 +45,7 @@ namespace SAIN.Preset.Personalities
             if (Preset.Info.IsCustom == true)
             {
                 bool hadToFix = false;
-                foreach (var item in Personalities)
+                foreach (var item in PersonalityDictionary)
                 {
                     if (item.Value.Variables.AllowedTypes.Count == 0)
                     {
@@ -57,51 +57,54 @@ namespace SAIN.Preset.Personalities
                 {
                     string message = "The Preset you are using is out of date, and required manual fixing. Its recommended you create a new one.";
                     Logger.LogAndNotifyError(message);
-                    Personalities.Clear();
-                    PersonalityDefaultsClass.InitDefaults(Personalities);
+                    PersonalityDictionary.Clear();
+                    PersonalityDefaultsClass.InitDefaults(PersonalityDictionary, Preset);
                 }
             }
         }
 
         public void ResetAllToDefaults()
         {
-            Personalities.Remove(EPersonality.Wreckless);
-            Personalities.Remove(EPersonality.SnappingTurtle);
-            Personalities.Remove(EPersonality.GigaChad);
-            Personalities.Remove(EPersonality.Chad);
-            Personalities.Remove(EPersonality.Rat);
-            Personalities.Remove(EPersonality.Coward);
-            Personalities.Remove(EPersonality.Timmy);
-            Personalities.Remove(EPersonality.Normal);
-            PersonalityDefaultsClass.InitDefaults(Personalities);
+            PersonalityDictionary.Remove(EPersonality.Wreckless);
+            PersonalityDictionary.Remove(EPersonality.SnappingTurtle);
+            PersonalityDictionary.Remove(EPersonality.GigaChad);
+            PersonalityDictionary.Remove(EPersonality.Chad);
+            PersonalityDictionary.Remove(EPersonality.Rat);
+            PersonalityDictionary.Remove(EPersonality.Coward);
+            PersonalityDictionary.Remove(EPersonality.Timmy);
+            PersonalityDictionary.Remove(EPersonality.Normal);
+            PersonalityDefaultsClass.InitDefaults(PersonalityDictionary, Preset);
         }
 
         public void ResetToDefault(EPersonality personality)
         {
-            Personalities.Remove(personality);
-            PersonalityDefaultsClass.InitDefaults(Personalities);
+            PersonalityDictionary.Remove(personality);
+            PersonalityDefaultsClass.InitDefaults(PersonalityDictionary, Preset);
         }
 
-        public PersonalityDictionary Personalities = new PersonalityDictionary();
+        public PersonalityDictionary PersonalityDictionary = new PersonalityDictionary();
 
-        public class PersonalityDictionary : Dictionary<EPersonality, PersonalitySettingsClass>{ }
 
         private static class PersonalityDefaultsClass
         {
 
-            public static void InitDefaults(PersonalityDictionary Personalities)
+            public static void InitDefaults(PersonalityDictionary Personalities, SAINPresetClass preset)
             {
-                initGigaChad(Personalities);
-                initWreckless(Personalities);
-                initSnappingTurtle(Personalities);
-                initChad(Personalities);
-                initRat(Personalities);
-                initTimmy(Personalities);
-                initCoward(Personalities);
-                initNormal(Personalities);
+                if (Personalities == null)
+                {
+                    Logger.LogError("Personalities == null");
+                }
+                initGigaChad(Personalities, preset);
+                initWreckless(Personalities, preset);
+                initSnappingTurtle(Personalities, preset);
+                initChad(Personalities, preset);
+                initRat(Personalities, preset);
+                initTimmy(Personalities, preset);
+                initCoward(Personalities, preset);
+                initNormal(Personalities, preset);
             }
 
-            private static void initGigaChad(PersonalityDictionary Personalities)
+            private static void initGigaChad(PersonalityDictionary Personalities, SAINPresetClass Preset)
             {
                 EPersonality GigaChad = EPersonality.GigaChad;
                 if (!Personalities.ContainsKey(GigaChad))
@@ -166,7 +169,7 @@ namespace SAIN.Preset.Personalities
                     }
                 }
             }
-            private static void initWreckless(PersonalityDictionary Personalities)
+            private static void initWreckless(PersonalityDictionary Personalities, SAINPresetClass Preset)
             {
                 EPersonality Wreckless = EPersonality.Wreckless;
                 if (!Personalities.ContainsKey(Wreckless))
@@ -229,7 +232,7 @@ namespace SAIN.Preset.Personalities
                     }
                 }
             }
-            private static void initSnappingTurtle(PersonalityDictionary Personalities)
+            private static void initSnappingTurtle(PersonalityDictionary Personalities, SAINPresetClass Preset)
             {
                 EPersonality SnappingTurtle = EPersonality.SnappingTurtle;
                 if (!Personalities.ContainsKey(SnappingTurtle))
@@ -290,7 +293,7 @@ namespace SAIN.Preset.Personalities
                     }
                 }
             }
-            private static void initChad(PersonalityDictionary Personalities)
+            private static void initChad(PersonalityDictionary Personalities, SAINPresetClass Preset)
             {
                 EPersonality Chad = EPersonality.Chad;
                 if (!Personalities.ContainsKey(Chad))
@@ -348,7 +351,7 @@ namespace SAIN.Preset.Personalities
                     }
                 }
             }
-            private static void initRat(PersonalityDictionary Personalities)
+            private static void initRat(PersonalityDictionary Personalities, SAINPresetClass Preset)
             {
                 EPersonality Rat = EPersonality.Rat;
                 if (!Personalities.ContainsKey(Rat))
@@ -404,7 +407,7 @@ namespace SAIN.Preset.Personalities
                     }
                 }
             }
-            private static void initTimmy(PersonalityDictionary Personalities)
+            private static void initTimmy(PersonalityDictionary Personalities, SAINPresetClass Preset)
             {
                 EPersonality Timmy = EPersonality.Timmy;
                 if (!Personalities.ContainsKey(Timmy))
@@ -458,7 +461,7 @@ namespace SAIN.Preset.Personalities
                     }
                 }
             }
-            private static void initCoward(PersonalityDictionary Personalities)
+            private static void initCoward(PersonalityDictionary Personalities, SAINPresetClass Preset)
             {
                 EPersonality Coward = EPersonality.Coward;
                 if (!Personalities.ContainsKey(Coward))
@@ -510,7 +513,7 @@ namespace SAIN.Preset.Personalities
                     }
                 }
             }
-            private static void initNormal(PersonalityDictionary Personalities)
+            private static void initNormal(PersonalityDictionary Personalities, SAINPresetClass Preset)
             {
                 EPersonality Normal = EPersonality.Normal;
                 if (!Personalities.ContainsKey(Normal))
@@ -562,8 +565,8 @@ namespace SAIN.Preset.Personalities
                 allowedTypes.AddRange(BotTypeDefinitions.BotTypesNames);
             }
 
-            private static SAINPresetClass Preset => SAINPlugin.LoadedPreset;
-
         }
     }
+
+    public class PersonalityDictionary : Dictionary<EPersonality, PersonalitySettingsClass>{ }
 }

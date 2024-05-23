@@ -63,7 +63,7 @@ namespace SAIN.SAINComponent.Classes.Info
         public void CalcPersonality()
         {
             Personality = GetPersonality();
-            PersonalitySettingsClass = SAINPlugin.LoadedPreset.PersonalityManager.Personalities[Personality];
+            PersonalitySettingsClass = SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary[Personality];
             CalcTimeBeforeSearch();
             CalcHoldGroundDelay();
         }
@@ -237,7 +237,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
             if (BotTypeDefinitions.BotTypes.ContainsKey(WildSpawnType))
             {
-                var personalities = SAINPlugin.LoadedPreset.PersonalityManager.Personalities.Values;
+                var personalities = SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary.Values;
                 foreach (PersonalitySettingsClass setting in personalities)
                 {
                     if (setting.CanBePersonality(this))
