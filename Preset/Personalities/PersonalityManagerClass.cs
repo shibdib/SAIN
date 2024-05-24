@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using UnityEngine;
+using static EFT.SpeedTree.TreeWind;
 using static SAIN.Helpers.EnumValues;
 
 namespace SAIN.Preset.Personalities
@@ -221,9 +222,9 @@ namespace SAIN.Preset.Personalities
                 if (!Personalities.ContainsKey(SnappingTurtle))
                 {
                     string description = "A player who finds the balance between rat and chad, yin and yang. Will rat you out but can spring out at any moment.";
-                    var turtleSettings = new PersonalitySettingsClass(SnappingTurtle, SnappingTurtle.ToString(), description);
+                    var settings = new PersonalitySettingsClass(SnappingTurtle, SnappingTurtle.ToString(), description);
 
-                    var turtleAssignment = turtleSettings.Assignment;
+                    var turtleAssignment = settings.Assignment;
                     turtleAssignment.Enabled = true;
                     turtleAssignment.RandomlyAssignedChance = 1;
                     turtleAssignment.CanBeRandomlyAssigned = true;
@@ -235,7 +236,7 @@ namespace SAIN.Preset.Personalities
                     turtleAssignment.PowerLevelScaleStart = 150;
                     turtleAssignment.PowerLevelScaleEnd = 500;
 
-                    var turtleBehavior = turtleSettings.Behavior;
+                    var turtleBehavior = settings.Behavior;
 
                     turtleBehavior.General.AggressionMultiplier = 1;
                     turtleBehavior.General.HoldGroundBaseTime = 1.5f;
@@ -278,7 +279,12 @@ namespace SAIN.Preset.Personalities
                     turtleBehavior.Rush.CanBunnyHop = true;
                     turtleBehavior.Rush.BunnyHopChance = 20;
 
-                    AddPMCTypes(turtleSettings.Assignment.AllowedTypes);
+                    AddPMCTypes(settings.Assignment.AllowedTypes);
+                    Personalities.Add(SnappingTurtle, settings);
+                    if (Preset.Info.IsCustom == true)
+                    {
+                        SAINPresetClass.Export(settings, Preset.Info.Name, SnappingTurtle.ToString(), nameof(Personalities));
+                    }
                 }
             }
 
