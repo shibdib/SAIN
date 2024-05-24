@@ -14,18 +14,18 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void Update(bool isCurrentEnemy)
         {
-            float timeAdd = 0.5f;
+            float timeAdd = 1f;
             if (!isCurrentEnemy && Enemy.IsAI)
             {
                 timeAdd = 4f;
             }
             if (!isCurrentEnemy && !Enemy.IsAI)
             {
-                timeAdd = 0.5f;
+                timeAdd = 1f;
             }
             if (isCurrentEnemy && !Enemy.IsAI)
             {
-                timeAdd = 0.2f;
+                timeAdd = 0.5f;
             }
 
             if (CheckPathTimer + timeAdd < Time.time)

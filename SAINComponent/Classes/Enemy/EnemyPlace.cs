@@ -6,14 +6,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class EnemyPlace
     {
-        public EnemyPlace(Vector3 position, float expireTime, bool isDanger, IPlayer player)
+        public EnemyPlace(string ownerID, Vector3 position, float expireTime, bool isDanger, IPlayer player)
         {
+            OwnerID = ownerID;
             Position = position;
             ExpireTime = expireTime;
             IsDanger = isDanger;
             Player = player;
         }
 
+        public readonly string OwnerID;
         public readonly IPlayer Player;
         public readonly bool IsDanger;
 

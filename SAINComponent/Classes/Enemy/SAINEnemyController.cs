@@ -40,9 +40,95 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public void Update()
         {
             CheckAddEnemy();
-            UpdateEnemies();
-            UpdateDebug();
+            updateEnemies();
+            checkActiveEnemies();
+            updateDebug();
         }
+
+        private void checkDiscrepency()
+        {
+            EnemyInfo goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (goalEnemy != null && ActiveEnemy == null)
+            {
+                if (_nextLogTime < Time.time)
+                {
+                    _nextLogTime = Time.time + 1f;
+                    Logger.LogError("Bot's Goal Enemy is not null, but SAIN enemy is null.");
+                    if (goalEnemy.Person == null)
+                    {
+                        Logger.LogError("Bot's Goal Enemy Person is null");
+                        return;
+                    }
+                    if (goalEnemy.ProfileId == SAINBot.ProfileId)
+                    {
+                        Logger.LogError("goalEnemy.ProfileId == SAINBot.ProfileId");
+                        return;
+                    }
+                    if (goalEnemy.ProfileId == SAINBot.Player.ProfileId)
+                    {
+                        Logger.LogError("goalEnemy.ProfileId == SAINBot.Player.ProfileId");
+                        return;
+                    }
+                    if (goalEnemy.ProfileId == SAINBot.BotOwner.ProfileId)
+                    {
+                        Logger.LogError("goalEnemy.ProfileId == SAINBot.Player.ProfileId");
+                        return;
+                    }
+                    SAINEnemy sainEnemy = GetEnemy(goalEnemy.ProfileId);
+                    if (sainEnemy != null)
+                    {
+                        setActiveEnemy(sainEnemy);
+                        Logger.LogError("Got SAINEnemy from goalEnemy.ProfileId");
+                        return;
+                    }
+                    sainEnemy = CheckAddEnemy(goalEnemy.Person);
+                    if (sainEnemy != null)
+                    {
+                        setActiveEnemy(sainEnemy);
+                        Logger.LogError("Got SAINEnemy from goalEnemy.Person");
+                        return;
+                    }
+                }
+            }
+        }
+
+        private float _nextLogTime;
+
+        private void checkActiveEnemies()
+        {
+            if (ActiveEnemies.Count > 0)
+                ActiveEnemies.RemoveAll(x => x == null);
+
+            foreach (SAINEnemy enemy in Enemies.Values)
+            {
+                if (enemy != null)
+                {
+                    bool inList = ActiveEnemies.Contains(enemy);
+                    bool isActive = enemy.ActiveThreat;
+                    if (isActive && !inList)
+                    {
+                        ActiveEnemies.Add(enemy);
+                    }
+                    else if (!isActive && inList)
+                    {
+                        ActiveEnemies.Remove(enemy);
+                    }
+                }
+            }
+            if (_nextLogActiveTime < Time.time && ActiveEnemies.Count > 0)
+            {
+                _nextLogActiveTime = Time.time + 10f;
+                Logger.LogDebug($"[{SAINBot.name}] Active Enemies: [{ActiveEnemies.Count}]");
+                foreach (var enemy in ActiveEnemies)
+                {
+                    Logger.LogDebug($"{SAINBot.Player.name} : {enemy.EnemyPlayer.Profile.Nickname} : {enemy.EnemyPlayer.name} : {enemy.Player.ProfileId} : Time Since Active: [{enemy.TimeSinceActive}]");
+                }
+            }
+        }
+
+        private float _nextLogActiveTime;
+
+        public readonly List<SAINEnemy> ActiveEnemies = new List<SAINEnemy>();
 
         private SAINEnemy checkIfAnyEnemyVisible()
         {
@@ -63,7 +149,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private readonly List<SAINEnemy> _localAIEnemiesList = new List<SAINEnemy>();
         private readonly List<SAINEnemy> _localHumanEnemiesList = new List<SAINEnemy>();
 
-        private void UpdateEnemies()
+        private void updateEnemies()
         {
             var activeEnemy = ActiveEnemy;
             if (activeEnemy?.IsValid == true)
@@ -165,7 +251,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private void UpdateDebug()
+        private void updateDebug()
         {
             if (ActiveEnemy != null)
             {
@@ -287,13 +373,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return;
             }
             checkGoalEnemy();
-            SAINEnemy visibileEnemy = checkIfAnyEnemyVisible();
-            if (visibileEnemy != null)
+            if (ActiveEnemy?.IsVisible == false)
             {
-                setActiveEnemy(visibileEnemy);
-                if (BotOwner.Memory.GoalEnemy != visibileEnemy.EnemyInfo)
+                SAINEnemy visibileEnemy = checkIfAnyEnemyVisible();
+                if (visibileEnemy != null)
                 {
-                    BotOwner.Memory.GoalEnemy = visibileEnemy.EnemyInfo;
+                    setActiveEnemy(visibileEnemy);
+                    if (BotOwner.Memory.GoalEnemy != visibileEnemy.EnemyInfo)
+                    {
+                        BotOwner.Memory.GoalEnemy = visibileEnemy.EnemyInfo;
+                    }
                 }
             }
         }
@@ -311,8 +400,9 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
             if (sainEnemy == null || !AreEnemiesSame(goalEnemy, sainEnemy))
             {
-                setEnemyFromEnemyInfo(goalEnemy);
+                //setEnemyFromEnemyInfo(goalEnemy);
             }
+            setEnemyFromEnemyInfo(goalEnemy);
         }
 
         private void setEnemyFromEnemyInfo(EnemyInfo enemyInfo)
@@ -321,6 +411,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (sainEnemy != null)
             {
                 setActiveEnemy(sainEnemy);
+            }
+            else
+            {
+                Logger.LogError($"{enemyInfo?.Person?.ProfileId} not SAIN enemy!");
             }
         }
 
@@ -385,12 +479,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (player == null)
             {
-                //Logger.LogDebug("Cannot add null player as an enemy.");
+                Logger.LogDebug("Cannot add null player as an enemy.");
                 return null;
             }
             if (!player.HealthController.IsAlive)
             {
-                //Logger.LogDebug("Cannot add null player as an enemy.");
+                Logger.LogDebug("Cannot add dead player as an enemy.");
                 return null;
             }
             if (Enemies.TryGetValue(player.ProfileId, out SAINEnemy enemy))
@@ -446,46 +540,37 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public bool IsHumanPlayerLookAtMe(out Player lookingPlayer)
         {
-            if (CheckMainPlayerVisionTimer < Time.time)
+            var gameworld = GameWorldHandler.SAINGameWorld?.GameWorld;
+            if (gameworld != null)
             {
-                CheckMainPlayerVisionTimer = Time.time + 0.25f;
-                MainPlayerWasLookAtMe = false;
-                _lookingPlayer = null;
-
-                var gameworld = GameWorldHandler.SAINGameWorld?.GameWorld;
-                if (gameworld != null)
+                var players = gameworld.AllAlivePlayersList;
+                if (players != null)
                 {
-                    var players = gameworld.AllAlivePlayersList;
-                    if (players != null)
+                    foreach (var player in SAINBot.Memory.VisiblePlayers)
                     {
-                        foreach (var player in players)
+                        if (player != null
+                            && !player.IsAI
+                            && SAINBot.EnemyController.IsPlayerAnEnemy(player.ProfileId))
                         {
-                            if (SAINBot.Memory.VisiblePlayers.Contains(player))
+                            Vector3 lookDir = player.LookDirection;
+                            Vector3 playerHeadPos = player.MainParts[BodyPartType.head].Position;
+
+                            Vector3 botChestPos = SAINBot.Person.Transform.CenterPosition;
+                            Vector3 botDir = botChestPos - playerHeadPos;
+
+                            if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
                             {
-                                Vector3 lookDir = player.LookDirection;
-                                Vector3 playerHeadPos = player.MainParts[BodyPartType.head].Position;
-
-                                Vector3 botChestPos = SAINBot.Person.Transform.CenterPosition;
-                                Vector3 botDir = botChestPos - playerHeadPos;
-
-                                if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
-                                {
-                                    MainPlayerWasLookAtMe = true;
-                                    _lookingPlayer = player;
-                                    break;
-                                }
+                                lookingPlayer = player;
+                                return true;
                             }
                         }
                     }
                 }
             }
-            lookingPlayer = _lookingPlayer;
-            return MainPlayerWasLookAtMe;
+            lookingPlayer = null;
+            return false;
         }
 
-        private Player _lookingPlayer;
-        private float CheckMainPlayerVisionTimer;
-        private bool MainPlayerWasLookAtMe;
 
         public bool IsPlayerAnEnemy(string profileID)
         {
@@ -496,36 +581,40 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (iPlayer != null)
             {
-                if (iPlayer.ProfileId == SAINBot.Person.IPlayer.ProfileId)
+                Player player = EFTInfo.GetPlayer(iPlayer);
+                if (player != null)
                 {
-                    return true;
-                }
-                if (GetEnemy(iPlayer.ProfileId) != null)
-                {
-                    return false;
-                }
-                // Checks if the player is not an active enemy and that they are a neutral party
-                if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer)
-                    && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
-                {
-                    return true;
-                }
-                // Double check that the source isn't from a member of the bot's group.
-                if (iPlayer.AIData.IsAI
-                    && BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
-                {
-                    return true;
-                }
-                // Check that the source isn't an ally
-                if (BotOwner.BotsGroup.Allies.Contains(iPlayer))
-                {
-                    return true;
-                }
-                // Checks if the player is an enemy by their role.
-                var role = iPlayer.Profile.Info.Settings.Role;
-                if (BotOwner.Settings.FileSettings.Mind.ENEMY_BOT_TYPES.Contains(role))
-                {
-                    return false;
+                    // Check that the source isn't from a member of the bot's group.
+                    if (player.AIData.IsAI
+                        && BotOwner.BotsGroup.Contains(player.AIData.BotOwner))
+                    {
+                        return true;
+                    }
+                    if (player.ProfileId == SAINBot.Person.Player.ProfileId)
+                    {
+                        return true;
+                    }
+                    if (GetEnemy(player.ProfileId) != null)
+                    {
+                        return false;
+                    }
+                    // Checks if the player is not an active enemy and that they are a neutral party
+                    if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer)
+                        && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
+                    {
+                        return true;
+                    }
+                    // Check that the source isn't an ally
+                    if (BotOwner.BotsGroup.Allies.Contains(iPlayer))
+                    {
+                        return true;
+                    }
+                    // Checks if the player is an enemy by their role.
+                    var role = iPlayer.Profile.Info.Settings.Role;
+                    if (BotOwner.Settings.FileSettings.Mind.ENEMY_BOT_TYPES.Contains(role))
+                    {
+                        return false;
+                    }
                 }
             }
             return false;

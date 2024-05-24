@@ -129,10 +129,41 @@ namespace SAIN.Preset.BotSettings
                         eftSettings = new EFTBotSettings(name, wildSpawnType, Difficulties);
                         SaveObjectToJson(eftSettings, name, "Default Bot Config Values");
                     }
+                    if (wildSpawnType != WildSpawnType.shooterBTR
+                        && wildSpawnType != WildSpawnType.bossZryachiy
+                        && wildSpawnType != WildSpawnType.followerZryachiy)
+                    {
+                        foreach (var settings in eftSettings.Settings)
+                        {
+                            //var enemyTypes = settings.Value.Mind.ENEMY_BOT_TYPES;
+                            //if (enemyTypes.Length == 0)
+                            //{
+                            //    Logger.LogError($"{name} : {settings.Key} has empty enemy types.");
+                            //}
+                            //for (int i = 0; i < enemyTypes.Length; i++)
+                            //{
+                            //    _enemyTypeList.Add(enemyTypes[i]);
+                            //}
+                            //if (!_enemyTypeList.Contains(EnumValues.WildSpawn.Usec))
+                            //{
+                            //    Logger.LogError($"{name} : {settings.Key} is missing Usec as enemy type");
+                            //    _enemyTypeList.Add(EnumValues.WildSpawn.Usec);
+                            //}
+                            //if (!_enemyTypeList.Contains(EnumValues.WildSpawn.Bear))
+                            //{
+                            //    Logger.LogError($"{name} : {settings.Key} is missing Bear as enemy type");
+                            //    _enemyTypeList.Add(EnumValues.WildSpawn.Bear);
+                            //}
+                            //settings.Value.Mind.ENEMY_BOT_TYPES = _enemyTypeList.ToArray();
+                            //_enemyTypeList.Clear();
+                        }
+                    }
                     EFTSettings.Add(wildSpawnType, eftSettings);
                 }
             }
         }
+
+        private static List<WildSpawnType> _enemyTypeList = new List<WildSpawnType>();
 
         public SAINSettingsClass GetSAINSettings(WildSpawnType type, BotDifficulty difficulty)
         {

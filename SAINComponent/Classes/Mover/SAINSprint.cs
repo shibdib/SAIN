@@ -273,7 +273,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (SAINBot.Player.IsSprintEnabled)
             {
-                Player.MovementContext.SprintSpeed = 2f;
+                //Player.MovementContext.SprintSpeed = 2f;
             }
         }
 
@@ -357,7 +357,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             Vector3 targetLookDir = (target - playerPosition);
             Vector3 targetLookDirNormal = targetLookDir.normalized;
 
-            if (!BotOwner.DoorOpener.Interacting)
+            if (!SAINBot.Player.IsSprintEnabled || BotOwner.DoorOpener.Interacting)
+            {
+                SAINBot.Steering.SteerByPriority();
+            }
+            else
             {
                 SAINBot.Steering.LookToDirection(targetLookDirNormal, true, turnSpeed);
             }

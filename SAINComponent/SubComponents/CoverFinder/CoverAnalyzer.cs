@@ -98,7 +98,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return false;
         }
 
-        public static bool GetPlaceToMove(Collider collider, Vector3 targetPosition, Vector3 botPosition, out Vector3 place, float navSampleRange = 0.5f)
+        public static bool GetPlaceToMove(Collider collider, Vector3 targetPosition, Vector3 botPosition, out Vector3 place, float navSampleRange = 1f)
         {
             const float ExtendLengthThresh = 2f;
 
@@ -118,9 +118,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
             if (collider.bounds.size.z > ExtendLengthThresh && collider.bounds.size.x > ExtendLengthThresh)
             {
-                float min = Mathf.Min(collider.bounds.size.z, collider.bounds.size.x);
-                float multiplier = Mathf.Clamp(1f + (min - ExtendLengthThresh), 1f, 3f);
-                colliderDir *= multiplier;
+                //float min = Mathf.Min(collider.bounds.size.z, collider.bounds.size.x);
+                //float multiplier = Mathf.Clamp(1f + (min - ExtendLengthThresh), 1f, 3f);
+                //colliderDir *= multiplier;
             }
 
             // a farPoint on opposite side of the target
@@ -129,7 +129,16 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             // the closest edge to that farPoint
             if (NavMesh.SamplePosition(farPoint, out var hit, navSampleRange, -1))
             {
-                place = hit.position;
+                if (NavMesh.FindClosestEdge(hit.position, out var edge, -1) 
+                    && NavMesh.SamplePosition(edge.position + colliderDir, out var hit2, navSampleRange, -1))
+                {
+                    //Logger.LogDebug("Found Edge");
+                    place = hit2.position;
+                }
+                else
+                {
+                    place = hit.position;
+                }
                 return true;
             }
             return false;
@@ -137,28 +146,34 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool CheckHumanPlayerVisibility(Vector3 point)
         {
-            Player closestPlayer = GameWorldHandler.SAINGameWorld?.FindClosestPlayer(out float sqrDist, point);
+            // this function is all fucked up
+            return true;
+            //Player closestPlayer = GameWorldHandler.SAINGameWorld?.FindClosestPlayer(out float sqrDist, point);
             if (SAINBot.EnemyController.IsHumanPlayerActiveEnemy == false 
-                && SAINBot.EnemyController.IsHumanPlayerLookAtMe(out Player lookingPlayer) == true 
+                && SAINBot.EnemyController.IsHumanPlayerLookAtMe(out Player lookingPlayer)
                 && lookingPlayer != null)
             {
-                bool VisibleCheckPass = (VisibilityCheck(point, lookingPlayer.Position));
-
-                if (SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder)
+                SAINEnemy enemy = SAINBot.EnemyController.GetEnemy(lookingPlayer.ProfileId);
+                var lastKnown = enemy?.LastKnownPosition;
+                if (lastKnown != null)
                 {
-                    if (VisibleCheckPass)
+                    bool VisibleCheckPass = (VisibilityCheck(point, lastKnown.Value));
+                    if (SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder)
                     {
-                        // Main Player does not have vision on coverpoint position
-                        Logger.LogWarning("PASS");
+                        if (VisibleCheckPass)
+                        {
+                            // Main Player does not have vision on coverpoint position
+                            Logger.LogWarning("PASS");
+                        }
+                        else
+                        {
+                            // Main Player has vision
+                            Logger.LogWarning("FAIL");
+                        }
                     }
-                    else
-                    {
-                        // Main Player has vision
-                        Logger.LogWarning("FAIL");
-                    }
-                }
 
-                return VisibleCheckPass;
+                    return VisibleCheckPass;
+                }
             }
             return true;
         }
@@ -192,25 +207,20 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool CheckPosition(Vector3 position)
         {
-            if (CoverFinder.SpottedCoverPoints.Count > 0)
+            return (position - TargetPoint).sqrMagnitude > CoverMinEnemyDist * CoverMinEnemyDist
+                && !isPositionSpotted(position)
+                && CheckPositionVsOtherBots(position)
+                && VisibilityCheck(position, TargetPoint);
+        }
+
+        private bool isPositionSpotted(Vector3 position)
+        {
+            foreach (var point in CoverFinder.SpottedCoverPoints)
             {
-                foreach (var point in CoverFinder.SpottedCoverPoints)
+                Vector3 coverPos = point.CoverPoint.Position;
+                if (!point.IsValidAgain && point.TooClose(coverPos, position))
                 {
-                    Vector3 coverPos = point.CoverPoint.Position;
-                    if (!point.IsValidAgain && point.TooClose(coverPos, position))
-                    {
-                        return false;
-                    }
-                }
-            }
-            if (CheckPositionVsOtherBots(position))
-            {
-                if ((position - TargetPoint).sqrMagnitude > CoverMinEnemyDist * CoverMinEnemyDist)
-                {
-                    if (VisibilityCheck(position, TargetPoint))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
             return false;

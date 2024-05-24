@@ -5,7 +5,9 @@ using Interpolation;
 using SAIN.BotController.Classes;
 using SAIN.Components.BotController;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes.Enemy;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -210,49 +212,58 @@ namespace SAIN.Components
             }
 
             Singleton<BotEventHandler>.Instance?.PlaySound(player, player.Position, range, AISoundType.step);
+            delayHearAction(player, range, soundType);
+        }
 
+        private IEnumerator delayHearAction(Player player, float range, SAINSoundType soundType, float delay = 0.25f)
+        {
+            yield return new WaitForSeconds(delay);
+
+            if (player == null || !player.HealthController.IsAlive)
+            {
+                yield break;
+            }
             foreach (var bot in Bots.Values)
             {
-                if (player.ProfileId == bot.Player.ProfileId)
+                if (bot == null || player.ProfileId == bot.Player.ProfileId)
                 {
                     continue;
                 }
-                var Enemy = bot?.EnemyController?.GetEnemy(player.ProfileId);
 
-                if (Enemy?.EnemyIPlayer != null)
+                SAINEnemy Enemy = bot.EnemyController.GetEnemy(player.ProfileId);
+                if (Enemy?.EnemyPerson.IsActive == true 
+                    && Enemy.IsValid 
+                    && Enemy.RealDistance <= range)
                 {
-                    if (Enemy.RealDistance <= range)
+                    bool shallUpdateSquad = true;
+                    if (soundType == SAINSoundType.GrenadePin || soundType == SAINSoundType.GrenadeDraw)
                     {
-                        bool shallUpdateSquad = true;
-                        if (soundType == SAINSoundType.GrenadePin || soundType == SAINSoundType.GrenadeDraw)
-                        {
-                            Enemy.EnemyStatus.EnemyHasGrenadeOut = true;
-                        }
-                        else if (soundType == SAINSoundType.Reload)
-                        {
-                            Enemy.EnemyStatus.EnemyIsReloading = true;
-                        }
-                        else if (soundType == SAINSoundType.Looting)
-                        {
-                            Enemy.EnemyStatus.EnemyIsLooting = true;
-                        }
-                        else if (soundType == SAINSoundType.Heal)
-                        {
-                            Enemy.EnemyStatus.EnemyIsHealing = true;
-                        }
-                        else if (soundType == SAINSoundType.Surgery)
-                        {
-                            Enemy.EnemyStatus.VulnerableAction = SAINComponent.Classes.Enemy.EEnemyAction.UsingSurgery;
-                        }
-                        else
-                        {
-                            shallUpdateSquad = false;
-                        }
+                        Enemy.EnemyStatus.EnemyHasGrenadeOut = true;
+                    }
+                    else if (soundType == SAINSoundType.Reload)
+                    {
+                        Enemy.EnemyStatus.EnemyIsReloading = true;
+                    }
+                    else if (soundType == SAINSoundType.Looting)
+                    {
+                        Enemy.EnemyStatus.EnemyIsLooting = true;
+                    }
+                    else if (soundType == SAINSoundType.Heal)
+                    {
+                        Enemy.EnemyStatus.EnemyIsHealing = true;
+                    }
+                    else if (soundType == SAINSoundType.Surgery)
+                    {
+                        Enemy.EnemyStatus.VulnerableAction = SAINComponent.Classes.Enemy.EEnemyAction.UsingSurgery;
+                    }
+                    else
+                    {
+                        shallUpdateSquad = false;
+                    }
 
-                        if (shallUpdateSquad)
-                        {
-                            bot.Squad.SquadInfo.UpdateSharedEnemyStatus(Enemy.EnemyIPlayer, Enemy.EnemyStatus.VulnerableAction, bot);
-                        }
+                    if (shallUpdateSquad)
+                    {
+                        bot.Squad.SquadInfo.UpdateSharedEnemyStatus(Enemy.EnemyIPlayer, Enemy.EnemyStatus.VulnerableAction, bot);
                     }
                 }
             }
@@ -269,11 +280,11 @@ namespace SAIN.Components
             {
                 if (!isSmoke)
                 {
-                    Singleton<BotEventHandler>.Instance?.PlaySound(player, explosionPosition, 200f, AISoundType.gun);
+                    registerGrenadeExplosionForSAINBots(explosionPosition, player, playerProfileID, 200f);
                 }
                 else
                 {
-                    Singleton<BotEventHandler>.Instance?.PlaySound(player, explosionPosition, 50f, AISoundType.gun);
+                    registerGrenadeExplosionForSAINBots(explosionPosition, player, playerProfileID, 50f); 
 
                     float radius = smokeRadius * HelpersGClass.SMOKE_GRENADE_RADIUS_COEF;
                     Vector3 position = player.Position;
@@ -282,6 +293,33 @@ namespace SAIN.Components
                         foreach (BotsGroup botGroupClass in keyValuePair.Value.GetGroups(true))
                         {
                             botGroupClass.AddSmokePlace(explosionPosition, smokeLifeTime, radius, position);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void registerGrenadeExplosionForSAINBots(Vector3 explosionPosition, Player player, string playerProfileID, float range)
+        {
+            // Play a sound with the input range.
+            Singleton<BotEventHandler>.Instance?.PlaySound(player, explosionPosition, range, AISoundType.gun);
+
+            // We dont want bots to think the grenade explosion was a place they heard an enemy, so set this manually.
+            foreach (var bot in Bots.Values)
+            {
+                if (bot != null)
+                {
+                    float distance = (bot.Position - explosionPosition).magnitude;
+                    if (distance < range)
+                    {
+                        SAINEnemy enemy = bot.EnemyController.GetEnemy(playerProfileID);
+                        if (enemy != null)
+                        {
+                            float dispersion = distance / 10f;
+                            Vector3 random = UnityEngine.Random.onUnitSphere * dispersion;
+                            random.y = 0;
+                            Vector3 estimatedThrowPosition = enemy.EnemyPosition + random;
+                            enemy.SetHeardStatus(true, estimatedThrowPosition, SAINSoundType.GrenadeExplosion);
                         }
                     }
                 }
@@ -297,6 +335,10 @@ namespace SAIN.Components
             var danger = Vector.DangerPoint(position, force, mass);
             foreach (var bot in Bots.Values)
             {
+                if (bot != null && bot.EnemyController.IsPlayerFriendly(grenade.Player.iPlayer))
+                {
+                    continue;
+                }
                 if (bot != null && (danger - bot.Transform.Position).sqrMagnitude < 200f * 200f)
                 {
                     bot.Grenade.EnemyGrenadeThrown(grenade, danger);

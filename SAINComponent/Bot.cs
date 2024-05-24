@@ -92,12 +92,6 @@ namespace SAIN.SAINComponent
                 SpaceAwareness = new SAINBotSpaceAwareness(this);
                 DoorOpener = new SAINDoorOpener(this, person.BotOwner);
                 Medical = new SAINMedical(this);
-
-                NavMeshAgent = this.GetComponent<NavMeshAgent>();
-                if (NavMeshAgent == null)
-                {
-                    Logger.LogError("Agent Null");
-                }
             }
             catch (Exception ex)
             {
@@ -136,8 +130,6 @@ namespace SAIN.SAINComponent
 
             return true;
         }
-
-        public NavMeshAgent NavMeshAgent { get; private set; }
 
         public float TimeBotCreated { get; private set; }
 
@@ -218,23 +210,17 @@ namespace SAIN.SAINComponent
         private float _nextCheckReloadTime;
         public SAINDoorOpener DoorOpener { get; private set; }
         public bool PatrolDataPaused { get; private set; }
-        public bool IsHumanACareEnemy
+        public bool IsHumanActiveEnemy
         {
             get
             {
-                if (HasEnemy && !Enemy.IsAI)
+                foreach (var enemy in EnemyController.ActiveEnemies)
                 {
-                    return true;
-                }
-
-                foreach (var player in Memory.VisiblePlayers)
-                {
-                    if (!player.IsAI)
+                    if (enemy != null && !enemy.IsAI)
                     {
                         return true;
                     }
                 }
-                
                 return false;
             }
         }
@@ -308,10 +294,12 @@ namespace SAIN.SAINComponent
                 }
                 else
                 {
+                    BotOwner.ShootData.EndShoot();
                     ManualShootReason = EShootReason.None;
                     return false;
                 }
             }
+            BotOwner.ShootData.EndShoot();
             ManualShootReason = EShootReason.None;
             return false;
         }
@@ -443,6 +431,7 @@ namespace SAIN.SAINComponent
 
                     if (_currentTarget != null)
                     {
+                        DirectionToCurrentTarget = _currentTarget.Value - Position;
                         if (hadNoTarget)
                         {
                             TimeTargetFound = Time.time;
@@ -451,12 +440,15 @@ namespace SAIN.SAINComponent
                     }
                     else
                     {
+                        DirectionToCurrentTarget = Vector3.zero;
                         CurrentTargetDistance = 0f;
                     }
                 }
                 return _currentTarget;
             }
         }
+
+        public Vector3 DirectionToCurrentTarget { get; private set; }
 
         public float TimeTargetFound { get; private set; }
         public float TimeSinceTargetFound => Time.time - TimeTargetFound;
@@ -479,6 +471,15 @@ namespace SAIN.SAINComponent
                 {
                     return lastKnownPlace.Position;
                 }
+                if (Enemy.KnownPlaces.LastSeenPlace != null)
+                {
+                    return Enemy.KnownPlaces.LastSeenPlace.Position;
+                }
+                if (Enemy.KnownPlaces.LastHeardPlace != null)
+                {
+                    return Enemy.KnownPlaces.LastHeardPlace.Position;
+                }
+                return Enemy.EnemyPosition;
             }
             return null;
         }
@@ -518,15 +519,14 @@ namespace SAIN.SAINComponent
             || Player == null 
             || Player.HealthController.IsAlive == false;
 
-        public bool BotActive => 
-            IsDead == false 
-            && BotOwner.enabled 
-            && Player.enabled 
-            && BotOwner.BotState == EBotState.Active 
-            && BotOwner.StandBy.StandByType == BotStandByType.active 
-            && BotOwner.isActiveAndEnabled 
-            && Player.isActiveAndEnabled 
-            && isActiveAndEnabled;
+        public bool BotActive =>
+            IsDead == false
+            && BotOwner.isActiveAndEnabled
+            //&& BotOwner.enabled 
+            //&& Player.enabled 
+            && BotOwner.BotState == EBotState.Active;
+            //&& BotOwner.StandBy.StandByType == BotStandByType.active 
+            //&& BotOwner.isActiveAndEnabled ;
 
         public bool GameIsEnding => 
             Singleton<IBotGame>.Instance == null 

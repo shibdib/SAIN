@@ -11,6 +11,7 @@ using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
 using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -83,7 +84,12 @@ namespace SAIN.SAINComponent.Classes
             }
             if (PlayerWhoLastShotMe != null && !PlayerWhoLastShotMe.IsAI)
             {
-                Logger.LogAndNotifyDebug($"{BotOwner.name} is hit in {HitReaction}");
+                //Logger.LogAndNotifyDebug($"{BotOwner.name} is hit in {HitReaction}");
+            }
+            SAINEnemy enemy = SAINBot.EnemyController.CheckAddEnemy(player);
+            if (enemy != null)
+            {
+                enemy.RegisterShotByEnemy(damageInfo);
             }
         }
 

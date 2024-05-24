@@ -8,6 +8,7 @@ using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
@@ -159,21 +160,100 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
-            if (_nextGrenadeCheckTime < Time.time 
-                && enemy.LastKnownPosition != null
-                && !enemy.IsVisible 
-                && enemy.TimeSinceSeen > SAINBot.Info.FileSettings.Grenade.TimeSinceSeenBeforeThrow
-                && enemy.TimeSinceLastKnownUpdated < 60f
-                && (enemy.LastKnownPosition.Value - SAINBot.Position).sqrMagnitude < GrenadeMaxEnemyDistance * GrenadeMaxEnemyDistance)
+            if (tryThrowGrenade())
             {
-                _nextGrenadeCheckTime = Time.time + 0.25f;
-                if (grenades.ReadyToThrow && grenades.AIGreanageThrowData.IsUpToDate())
+                return true;
+            }
+            if (_nextGrenadeCheckTime < Time.time && 
+                canTryThrow(enemy))
+            {
+                _nextGrenadeCheckTime = Time.time + 0.5f;
+                if (findThrowTarget(enemy))
                 {
-                    SAINBot.Steering.LookToDirection(grenades.AIGreanageThrowData.Direction, false);
-                    grenades.DoThrow();
                     return true;
                 }
-                grenades.CanThrowGrenade(enemy.LastKnownPosition.Value + Vector3.up * 0.5f);
+            }
+            return false;
+        }
+
+        private bool canTryThrow(SAINEnemy enemy)
+        {
+            return !enemy.IsVisible
+                && enemy.TimeSinceSeen > SAINBot.Info.FileSettings.Grenade.TimeSinceSeenBeforeThrow
+                && enemy.TimeSinceLastKnownUpdated < 120f;
+        }
+
+        private bool findThrowTarget(SAINEnemy enemy)
+        {
+            if (enemy.LastCornerToEnemy != null &&
+                enemy.CanSeeLastCornerToEnemy &&
+                tryThrowToPos(enemy.LastCornerToEnemy.Value, "LastCornerToEnemy"))
+            {
+                return true;
+            }
+            if (enemy.Path.BlindCornerToEnemy != null &&
+                enemy.LastKnownPosition != null &&
+                (enemy.Path.BlindCornerToEnemy.Value - enemy.LastKnownPosition.Value).sqrMagnitude < 5f * 5f &&
+                tryThrowToPos(enemy.Path.BlindCornerToEnemy.Value, "BlindCornerToEnemy"))
+            {
+                return true;
+            }
+            if (enemy.LastKnownPosition != null &&
+                tryThrowToPos(enemy.LastKnownPosition.Value, "LastKnownPosition"))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool tryThrowToPos(Vector3 pos, string posString)
+        {
+            pos += Vector3.up * 0.25f;
+            if (checkCanThrowFromPos(pos))
+            {
+                Logger.LogDebug($"{posString} Can Throw to pos");
+                return true;
+            }
+            if (checkCanThrowFromPos(pos + (pos - SAINBot.Position).normalized))
+            {
+                Logger.LogDebug($"{posString} Can Throw to pos + (pos - SAINBot.Position).normalized");
+                return true;
+            }
+            if (checkCanThrowFromPos(pos + Vector3.up))
+            {
+                Logger.LogDebug($"{posString} Can Throw to pos + vector3.up");
+                return true;
+            }
+            if (checkCanThrowFromPos(pos + Vector3.up + UnityEngine.Random.onUnitSphere))
+            {
+                Logger.LogDebug($"{posString} Can Throw to pos + Vector3.up + UnityEngine.Random.onUnitSphere");
+                return true;
+            }
+            return false;
+        }
+
+        private bool tryThrowGrenade()
+        {
+            var grenades = BotOwner.WeaponManager.Grenades;
+            if (grenades.ReadyToThrow && grenades.AIGreanageThrowData.IsUpToDate())
+            {
+                SAINBot.Steering.LookToDirection(grenades.AIGreanageThrowData.Direction, false);
+                grenades.DoThrow();
+                return true;
+            }
+            return false;
+        }
+
+        private bool checkCanThrowFromPos(Vector3? pos)
+        {
+            return pos != null && checkCanThrowFromPos(pos.Value);
+        }
+
+        private bool checkCanThrowFromPos(Vector3 pos)
+        {
+            if ((pos - SAINBot.Position).sqrMagnitude < GrenadeMaxEnemyDistance * GrenadeMaxEnemyDistance)
+            {
+                return BotOwner.WeaponManager.Grenades.CanThrowGrenade(pos);
             }
             return false;
         }

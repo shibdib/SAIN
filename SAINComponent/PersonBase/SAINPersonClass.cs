@@ -5,16 +5,23 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.BaseClasses
 {
-    public class SAINPersonClass : PersonBaseClass, ISAINPerson
+    public class SAINPersonClass : PersonBaseClass
     {
         public SAINPersonClass(IPlayer person) : base(person)
         {
+            Name = Player.name;
             Transform = new SAINPersonTransformClass(this);
             Profile = person.Profile;
-            if (person?.AIData?.BotOwner != null)
+            ProfileId = person.Profile.ProfileId;
+            Nickname = person.Profile.Nickname;
+            AIData = person.AIData;
+            BotOwner = person.AIData.BotOwner;
+            IsAI = person.AIData.BotOwner != null;
+            if (IsAI)
             {
                 SAIN = person.AIData.BotOwner.GetComponent<Bot>();
             }
+            IsSAINBot = SAIN != null;
         }
 
         public void Update()
@@ -23,17 +30,15 @@ namespace SAIN.SAINComponent.BaseClasses
 
         public bool IsActive => PlayerNull == false && (IsAI == false || BotOwner?.BotState == EBotState.Active);
         public Vector3 Position => Transform.Position;
-        public SAINPersonTransformClass Transform { get; private set; }
-        public Profile Profile { get; private set; }
-        public string ProfileId => Profile?.ProfileId;
-        public string Nickname => Profile?.Nickname;
-        public string Name => Player?.name;
-        public bool IsAI => BotOwner != null;
-        public bool IsSAINBot => SAIN != null;
-        public AIData AIData => IPlayer?.AIData;
-        public BotOwner BotOwner => AIData?.BotOwner;
-        public Bot SAIN { get; private set; }
-        public SAINBotInfoClass SAINBotInfo => SAIN?.Info;
-        public SAINSquadClass SAINSquad => SAIN?.Squad;
+        public readonly SAINPersonTransformClass Transform;
+        public readonly Profile Profile;
+        public readonly string ProfileId;
+        public readonly string Nickname;
+        public readonly string Name;
+        public readonly bool IsAI;
+        public readonly bool IsSAINBot;
+        public readonly AIData AIData;
+        public readonly BotOwner BotOwner;
+        public readonly Bot SAIN;
     }
 }

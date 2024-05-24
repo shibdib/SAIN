@@ -41,6 +41,35 @@ namespace SAIN.Patches.Generic
             return true;
         }
     }
+
+    public class AddPointToSearchPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotsGroup), "AddPointToSearch");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(BotsGroup __instance, BotOwner owner)
+        {
+            return SAINPlugin.IsBotExluded(owner);
+        }
+    }
+
+    public class SetPanicPointPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotMemoryClass), "SetPanicPoint");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(BotOwner ___botOwner_0)
+        {
+            return SAINPlugin.IsBotExluded(___botOwner_0);
+        }
+    }
+
     public class HaveSeenEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

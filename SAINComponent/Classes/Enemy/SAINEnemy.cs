@@ -6,6 +6,7 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
+using static DrakiaXYZ.BigBrain.Brains.CustomLayer;
 using static SAIN.SAINComponent.Classes.Enemy.SAINEnemy;
 
 namespace SAIN.SAINComponent.Classes.Enemy
@@ -15,10 +16,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public SAINEnemy(Bot bot, SAINPersonClass person, EnemyInfo enemyInfo) : base(bot)
         {
             TimeEnemyCreated = Time.time;
+            EnemyName = $"{person.Name} ({person.Profile.Nickname})";
             EnemyPerson = person;
             EnemyTransform = person.Transform;
             EnemyInfo = enemyInfo;
-            IsAI = enemyInfo.Person?.IsAI == true;
+            IsAI = enemyInfo.Person.IsAI;
             EnemyProfileId = person.ProfileId;
 
             EnemyStatus = new SAINEnemyStatus(this);
@@ -26,6 +28,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
             Path = new SAINEnemyPath(this);
             KnownPlaces = new EnemyKnownPlaces(this);
         }
+
+        public readonly string EnemyName;
 
         public bool IsValid
         {
@@ -70,6 +74,29 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public SAINPersonTransformClass EnemyTransform { get; private set; }
         public bool IsCurrentEnemy => SAINBot.HasEnemy && SAINBot.Enemy.EnemyProfileId == EnemyProfileId;
 
+        public void RegisterShotByEnemy(DamageInfo damageInfo)
+        {
+            IPlayer player = damageInfo.Player?.iPlayer;
+            if (player != null && player.ProfileId == EnemyProfileId)
+            {
+                ShotByEnemyRecently = true;
+            }
+        }
+
+        public bool ShotByEnemyRecently
+        {
+            get
+            {
+                return _shotByEnemy.Value;
+            }
+            set
+            {
+                _shotByEnemy.Value = value;
+            }
+        }
+
+        private readonly ExpirableBool _shotByEnemy = new ExpirableBool(2f, 0.75f, 1.25f);
+
         public void Init()
         {
         }
@@ -88,14 +115,87 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
+        public bool ActiveThreat
+        {
+            get
+            {
+                // If the enemy is an in-active bot or haven't sensed them in a very long time, just set them as inactive.
+                if (!ShallUpdateEnemy)
+                {
+                    return false;
+                }
+                // have we seen them very recently?
+                if (IsVisible || (Seen && TimeSinceSeen < 30f))
+                {
+                    return true;
+                }
+                // have we heard them very recently?
+                if (HeardRecently || (Heard && TimeSinceHeard < 10f))
+                {
+                    return true;
+                }
+                Vector3? lastKnown = LastKnownPosition;
+                // do we have no position where we sensed an enemy?
+                if (lastKnown == null)
+                {
+                    return false;
+                }
+                float timeSinceActive = TimeSinceActive;
+                float sqrMagnitude = (lastKnown.Value - EnemyPosition).sqrMagnitude;
+                if (IsAI)
+                {
+                    // Is the AI Enemys current position greater than x meters away from our last known position?
+                    if (sqrMagnitude > _activeDistanceThresholdAI * _activeDistanceThresholdAI)
+                    {
+                        // Set them as inactive after a certain x seconds
+                        return timeSinceActive < _activeForPeriodAI;
+                    }
+                    else
+                    {
+                        // Enemy is close to where we last saw them, keep considering them as active.
+                        return true;
+                    }
+                }
+                else
+                {
+                    // Is the Human Enemys current position greater than x meters away from our last known position?
+                    if (sqrMagnitude > _activeDistanceThreshold * _activeDistanceThreshold)
+                    {
+                        // Set them as inactive after a certain x seconds
+                        return timeSinceActive < _activeForPeriod;
+                    }
+                    else
+                    {
+                        // Enemy is close to where we last saw them, keep considering them as active.
+                        return true;
+                    }
+                }
+            }
+        }
+
+        private float _activeForPeriod = 180f;
+        private float _activeForPeriodAI = 90f;
+        private float _activeDistanceThreshold = 150f;
+        private float _activeDistanceThresholdAI = 75f;
+
+        private bool _hasBeenActive;
+        public float TimeLastActive { get; private set; } = 0f;
+        public float TimeSinceActive => _hasBeenActive ? Time.time - TimeLastActive : float.MaxValue;
+
         public bool ShallUpdateEnemy => 
-            EnemyPerson?.IsActive == true && (TimeSinceLastKnownUpdated < 600f || EnemyPlayer.IsAI == false);
+            EnemyPerson?.IsActive == true 
+            && TimeSinceLastKnownUpdated < 600f 
+            && TimeSinceLastKnownUpdated >= 0f
+            && _isActive;
+
+        private bool _isActive => !IsAI || Player.AIData.BotOwner.BotState == EBotState.Active;
 
         public void Update()
         {
             if (ShallUpdateEnemy)
             {
                 bool isCurrent = IsCurrentEnemy;
+                updateActiveState(isCurrent);
                 Vision.Update(isCurrent);
                 Path.Update(isCurrent);
                 KnownPlaces.Update(isCurrent);
@@ -105,6 +205,19 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 Vision.UpdateVisible(true);
                 Vision.UpdateCanShoot(true);
                 Path.Clear();
+            }
+        }
+
+        private void updateActiveState(bool isCurrent)
+        {
+            if (isCurrent && 
+                !_hasBeenActive)
+            {
+                _hasBeenActive = true;
+            }
+            if (isCurrent)
+            {
+                TimeLastActive = Time.time;
             }
         }
 
@@ -183,7 +296,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public void UpdateHeardPosition(Vector3 position, bool wasGunfire, bool arrived = false)
         {
             EnemyPlace place = KnownPlaces.AddPersonalHeardPlace(position, arrived, wasGunfire);
-            if (_nextReportHeardTime < Time.time)
+            if (place != null 
+                && _nextReportHeardTime < Time.time)
             {
                 _nextReportHeardTime = Time.time + _reportHeardFreq;
                 SAINBot.Squad?.SquadInfo?.ReportEnemyPosition(this, place, false);
@@ -277,7 +391,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             IsSniper = isSniper;
             if (isSniper && SAINBot.Squad.BotInGroup && SAINBot.Talk.GroupTalk.FriendIsClose)
             {
-                SAINBot.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.5f, 1f));
+                SAINBot.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.33f, 0.66f));
             }
         }
 
@@ -302,12 +416,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             get
             {
-                var lastHeardPlace = KnownPlaces.LastHeardPlace;
-                if (lastHeardPlace != null)
-                {
-                    return lastHeardPlace.Position;
-                }
-                return null;
+                return KnownPlaces.LastHeardPlace?.Position;
             }
         }
 
@@ -328,18 +437,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public EnemyKnownPlaces KnownPlaces { get; private set; }
 
-        public float TimeLastKnownUpdated
-        {
-            get
-            {
-                EnemyPlace lastKnown = KnownPlaces.LastKnownPlace;
-                if (lastKnown != null)
-                {
-                    return lastKnown.TimePositionUpdated;
-                }
-                return float.MaxValue;
-            }
-        }
+        public float TimeLastKnownUpdated => KnownPlaces.TimeSinceLastKnownUpdated;
 
         public float TimeSinceLastKnownUpdated => Time.time - TimeLastKnownUpdated;
 

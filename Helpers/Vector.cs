@@ -37,14 +37,14 @@ namespace SAIN.Helpers
                     Vector3 cornerB = corners[i + 1];
                     Vector3 cornerC = corners[i + 2];
 
-                    if (CheckIfBlindCorner(botPosition, cornerC, headOffset))
+                    if (CheckIfBlindCorner(headPosition, cornerC, headOffset))
                     {
                         if (SAINPlugin.DebugMode)
                         {
                             DebugGizmos.Sphere(cornerB, 0.025f, 5f);
                         }
-                        Vector3 result = AdjustCornerPosition(cornerA, cornerB, cornerC, 0.1f);
-                        return new Vector3?(result + headOffset);
+                        Vector3 result = AdjustCornerPosition(cornerA, cornerB, cornerC, 0.2f);
+                        return new Vector3?(result + (botOwner.WeaponRoot.position - botOwner.Position));
                     }
                 }
             }

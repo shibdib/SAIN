@@ -12,8 +12,8 @@ namespace SAIN.SAINComponent.BaseClasses
             Player = EFTInfo.GetPlayer(iPlayer);
         }
 
-        public IPlayer IPlayer { get; private set; }
         public bool PlayerNull => IPlayer == null || IPlayer.Transform == null;
+        public IPlayer IPlayer { get; private set; }
         public Player Player { get; private set; }
     }
 }

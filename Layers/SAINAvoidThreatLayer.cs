@@ -42,6 +42,7 @@ namespace SAIN.Layers
 
         public override bool IsCurrentActionEnding()
         {
+            if (Bot == null) return true;
             return _lastActionDecision != CurrentDecision;
         }
 

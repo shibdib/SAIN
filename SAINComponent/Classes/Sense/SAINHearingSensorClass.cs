@@ -30,7 +30,7 @@ namespace SAIN.SAINComponent.Classes
         public void Init()
         {
             Singleton<BotEventHandler>.Instance.OnSoundPlayed += HearSound;
-            Singleton<BotEventHandler>.Instance.OnKill += CleanupKilledPlayer;
+            Singleton<BotEventHandler>.Instance.OnKill += cleanupKilledPlayer;
         }
 
         public void Update()
@@ -39,7 +39,7 @@ namespace SAIN.SAINComponent.Classes
 
         private float cleanupTimer;
 
-        private void CleanupKilledPlayer(IPlayer killer, IPlayer target)
+        private void cleanupKilledPlayer(IPlayer killer, IPlayer target)
         {
             if (target != null && SoundsHeardFromPlayer.ContainsKey(target.ProfileId))
             {
@@ -72,16 +72,25 @@ namespace SAIN.SAINComponent.Classes
         {
             ManualCleanup(true);
             Singleton<BotEventHandler>.Instance.OnSoundPlayed -= HearSound;
-            Singleton<BotEventHandler>.Instance.OnKill -= CleanupKilledPlayer;
+            Singleton<BotEventHandler>.Instance.OnKill -= cleanupKilledPlayer;
         }
 
         public void HearSound(IPlayer iPlayer, Vector3 position, float power, AISoundType type)
         {
-            if (BotOwner == null || SAINBot == null)
+            if (BotOwner == null || 
+                SAINBot == null || 
+                iPlayer == null || 
+                !SAINBot.BotActive || 
+                SAINBot.GameIsEnding)
             {
                 return;
             }
-            if (iPlayer != null && Player.ProfileId == iPlayer.ProfileId)
+            if (iPlayer != null && SAINBot.Person.ProfileId == iPlayer.ProfileId)
+            {
+                return;
+            }
+
+            if (iPlayer != null && (iPlayer.Position - position).sqrMagnitude > 3f * 3f)
             {
                 return;
             }
@@ -102,10 +111,7 @@ namespace SAIN.SAINComponent.Classes
                 ManualCleanup();
             }
 
-            if (!SAINBot.GameIsEnding)
-            {
-                EnemySoundHeard(iPlayer, position, power, type);
-            }
+            EnemySoundHeard(iPlayer, position, power, type);
         }
 
         private readonly Dictionary<string, SAINSoundCollection> SoundsHeardFromPlayer = new Dictionary<string, SAINSoundCollection>();
@@ -151,7 +157,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 if (!SAINBot.Equipment.HasEarPiece)
                 {
-                    range *= 0.675f;
+                    range *= 0.625f;
                 }
                 if (SAINBot.Equipment.HasHeavyHelmet)
                 {
@@ -223,6 +229,11 @@ namespace SAIN.SAINComponent.Classes
             return false;
         }
 
+        private IEnumerator hearSound(IPlayer iPlayer, Vector3 soundPosition, float power, AISoundType type)
+        {
+            yield return null;
+        }
+
         public bool ReactToSound(IPlayer person, Vector3 soundPosition, float power, bool wasHeard, bool bulletFelt, AISoundType type)
         {
             bool reacted = false;
@@ -239,7 +250,7 @@ namespace SAIN.SAINComponent.Classes
             if (person != null && bulletFelt && isGunSound)
             {
                 Vector3 to = vector + person.LookDirection;
-                firedAtMe = DidShotFlyByMe(vector, to, 15f);
+                firedAtMe = DidShotFlyByMe(vector, to, 2f);
 
                 if (firedAtMe)
                 {
@@ -425,7 +436,9 @@ namespace SAIN.SAINComponent.Classes
             bool firedAtMe = false;
             if ((projectionPoint - BotOwner.Position).sqrMagnitude < maxDist * maxDist)
             {
-                firedAtMe = !Physics.Raycast(from, direction, direction.magnitude * 0.95f, LayerMaskClass.HighPolyWithTerrainMask);
+                firedAtMe = true;
+
+                //firedAtMe = !Physics.Raycast(from, direction, direction.magnitude * 0.95f, LayerMaskClass.HighPolyWithTerrainMask);
             }
 
             if (SAINPlugin.DebugMode && SAINPlugin.EditorDefaults.DebugDrawProjectionPoints)

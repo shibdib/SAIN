@@ -32,61 +32,17 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (_updateDogFightTimer < Time.time)
             {
                 Vector3 targetPos = Vector3.zero;
-                if (SAINBot.Enemy != null)
+                if (findStrafePoint(out targetPos) 
+                    && SAINBot.Mover.GoToPoint(targetPos, out _, -1, false, false))
                 {
-                    BackUp(out targetPos);
-                }
-                else if (SAINBot.CurrentTargetPosition != null)
-                {
-                    BackUpNoEnemy(out targetPos);
-                }
-
-                if (targetPos != Vector3.zero 
-                    && SAINBot.Mover.GoToPoint(targetPos, out _ , -1, false, false))
-                {
-                    _updateDogFightTimer = Time.time + 0.66f;
+                    _updateDogFightTimer = Time.time + 0.5f;
                 }
             }
         }
 
         private float _updateDogFightTimer;
 
-        private bool BackUp(out Vector3 trgPos)
-        {
-            Vector3 a = -Vector.NormalizeFastSelf(SAINBot.Enemy.EnemyDirection);
-            trgPos = Vector3.zero;
-            float num = 0f;
-            Vector3 random = Random.onUnitSphere * 1f;
-            random.y = 0f;
-            if (NavMesh.SamplePosition(BotOwner.Position + a * 2f / 2f + random, out NavMeshHit navMeshHit, 1f, -1))
-            {
-                trgPos = navMeshHit.position;
-                Vector3 a2 = trgPos - BotOwner.Position;
-                float magnitude = a2.magnitude;
-                if (magnitude != 0f)
-                {
-                    Vector3 a3 = a2 / magnitude;
-                    num = magnitude;
-                    if (NavMesh.SamplePosition(BotOwner.Position + a3 * 2f, out navMeshHit, 1f, -1))
-                    {
-                        trgPos = navMeshHit.position;
-                        num = (trgPos - BotOwner.Position).magnitude;
-                    }
-                }
-            }
-            if (num != 0f && num > BotOwner.Settings.FileSettings.Move.REACH_DIST)
-            {
-                navMeshPath_0.ClearCorners();
-                if (NavMesh.CalculatePath(BotOwner.Position, trgPos, -1, navMeshPath_0) && navMeshPath_0.status == NavMeshPathStatus.PathComplete)
-                {
-                    trgPos = navMeshPath_0.corners[navMeshPath_0.corners.Length - 1];
-                    return CheckLength(navMeshPath_0, num);
-                }
-            }
-            return false;
-        }
-
-        private bool BackUpNoEnemy(out Vector3 trgPos)
+        private bool findStrafePoint(out Vector3 trgPos)
         {
             if (SAINBot.CurrentTargetPosition == null)
             {
@@ -97,7 +53,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             Vector3 a = -Vector.NormalizeFastSelf(direction);
             trgPos = Vector3.zero;
             float num = 0f;
-            Vector3 random = Random.onUnitSphere * 1f;
+            Vector3 random = Random.onUnitSphere * 1.25f;
             random.y = 0f;
             if (NavMesh.SamplePosition(BotOwner.Position + a * 2f / 2f + random, out NavMeshHit navMeshHit, 1f, -1))
             {
@@ -117,11 +73,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (num != 0f && num > BotOwner.Settings.FileSettings.Move.REACH_DIST)
             {
-                navMeshPath_0.ClearCorners();
-                if (NavMesh.CalculatePath(BotOwner.Position, trgPos, -1, navMeshPath_0) && navMeshPath_0.status == NavMeshPathStatus.PathComplete)
+                dogFightPath.ClearCorners();
+                if (NavMesh.CalculatePath(BotOwner.Position, trgPos, -1, dogFightPath) && dogFightPath.status == NavMeshPathStatus.PathComplete)
                 {
-                    trgPos = navMeshPath_0.corners[navMeshPath_0.corners.Length - 1];
-                    return CheckLength(navMeshPath_0, num);
+                    trgPos = dogFightPath.corners[dogFightPath.corners.Length - 1];
+                    return CheckLength(dogFightPath, num);
                 }
             }
             return false;
@@ -129,9 +85,9 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool CheckLength(NavMeshPath path, float straighDist)
         {
-            return path.CalculatePathLength() < straighDist * 1.2f;
+            return path.CalculatePathLength() < straighDist * 1.5f;
         }
 
-        private readonly NavMeshPath navMeshPath_0 = new NavMeshPath();
+        private readonly NavMeshPath dogFightPath = new NavMeshPath();
     }
 }

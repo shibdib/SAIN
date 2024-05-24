@@ -38,7 +38,7 @@ namespace SAIN.SAINComponent.Classes
 
         private AILimitSetting CheckForAILimit()
         {
-            if (SAINBot.IsHumanACareEnemy)
+            if (SAINBot.IsHumanActiveEnemy)
             {
                 CurrentAILimit = AILimitSetting.Close;
                 return CurrentAILimit;

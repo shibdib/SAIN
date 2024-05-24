@@ -148,21 +148,10 @@ namespace SAIN.Layers.Combat.Solo
                 //SteerByPriority(false);
                 //return;
             }
-            if (SprintEnabled)
+            if (!SteerByPriority(false) 
+                && !SAINBot.Steering.LookToLastKnownEnemyPosition())
             {
                 LookToMovingDirection();
-                return;
-            }
-            if (SteerByPriority(false) == false)
-            {
-                if (SAINBot.CurrentTargetPosition != null)
-                {
-                    SAINBot.Steering.LookToPoint(SAINBot.CurrentTargetPosition.Value);
-                }
-                else
-                {
-                    LookToMovingDirection();
-                }
             }
         }
 

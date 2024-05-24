@@ -122,133 +122,12 @@ namespace SAIN.SAINComponent.Classes.Debug
             return new Vector2(vector.x, vector.y);
         }
 
-        private IEnumerator TrackPosition()
-        {
-            var wait = new WaitForSeconds(0.5f);
-            while (BotOwner != null)
-            {
-                _isOnNavMesh = CheckBotIsOnNavMesh();
-                if (_isOnNavMesh)
-                {
-                    Vector3 newPos = SAINBot.Position;
-                    int count = _positions.Count;
-                    if (count > 0)
-                    {
-                        Vector3 last = _positions[count - 1];
-                        if ((newPos - last).sqrMagnitude > 2f)
-                        {
-                            count++;
-                            _positions.Add(newPos);
-                        }
-                    }
-                }
-                if (_positions.Count > _positions.Capacity)
-                {
-                    _positions.RemoveAt(0);
-                }
-                yield return wait;
-            }
-        }
-
-        private readonly List<Vector3> _positions = new List<Vector3>(10);
-
-        private IEnumerator FindPathBackToNavMesh()
-        {
-            while (!_isOnNavMesh && BotOwner != null && BotOwner.Mover != null)
-            {
-                Vector3 currentPosition = SAINBot.Position;
-                Vector3 lookDirection = SAINBot.Transform.LookDirection;
-                Vector3 headPosition = SAINBot.Transform.HeadPosition;
-
-                const int max = 40;
-                const float rotationAngle = 360f / (float)max;
-
-                Vector3 pointToLook = Vector3.zero;
-                float furthestHitDist = 0f;
-
-                int count = 0;
-                // Find direction to look for navmesh
-                for (int i = 0; i < max; i++)
-                {
-                    count++;
-
-                    float rotation = rotationAngle * (i + 1);
-                    Quaternion rotate = Quaternion.Euler(0, rotation, 0f);
-                    Vector3 direction = rotate * lookDirection;
-
-                    if (!Physics.SphereCast(headPosition, 0.05f, direction, out RaycastHit hit, 5f, -1))
-                    {
-                        pointToLook = headPosition + direction;
-                        break;
-                    }
-                    else
-                    {
-                        float sqrMag = (hit.point - headPosition).sqrMagnitude;
-                        if (sqrMag > furthestHitDist)
-                        {
-                            furthestHitDist = sqrMag;
-                            pointToLook = hit.point;
-                        }
-                    }
-
-                    if (count >= 5)
-                    {
-                        count = 0;
-                        yield return null;
-                    }
-                }
-
-                yield return null;
-
-                Vector3 navHitPoint = Vector3.zero;
-                for (int i = 0; i < 5; i++)
-                {
-                    float range = 0.5f * (i + 1);
-                    if (NavMesh.SamplePosition(pointToLook, out NavMeshHit hit, range, -1))
-                    {
-                        navHitPoint = hit.position;
-                        break;
-                    }
-                    yield return null;
-                }
-
-                if (navHitPoint != Vector3.zero)
-                {
-                    DebugGizmos.Line(SAINBot.Position, navHitPoint);
-                    Vector3 closestEdgePoint = Vector3.zero;
-                    if (NavMesh.FindClosestEdge(navHitPoint, out NavMeshHit edge, -1))
-                    {
-                        closestEdgePoint = edge.position;
-
-                        BotOwner.MovementPause(5f);
-                        DebugGizmos.Line(SAINBot.Position, closestEdgePoint);
-
-                        float startMoveTime = 0f;
-                        while (startMoveTime < 5f)
-                        {
-                            startMoveTime += Time.deltaTime;
-
-                            //Player.Move(findMoveDirection((Singleton<GameWorld>.Instance.MainPlayer.Position - currentPosition).normalized));
-                            Player.Move(findMoveDirection((closestEdgePoint - currentPosition).normalized));
-
-                            _isOnNavMesh = CheckBotIsOnNavMesh();
-                            if (_isOnNavMesh)
-                            {
-                                yield break;
-                            }
-                            yield return null;
-                        }
-                    }
-                }
-            }
-        }
-
         private bool _isOnNavMesh;
         private float _nextCheckNavMeshTime;
 
         private bool CheckBotIsOnNavMesh()
         {
-            return NavMesh.SamplePosition(SAINBot.Position, out _, 0.15f, -1);
+            return NavMesh.SamplePosition(SAINBot.Position, out _, 0.25f, -1);
         }
 
         private void CheckIfPositionChanged()
@@ -387,7 +266,6 @@ namespace SAIN.SAINComponent.Classes.Debug
             return false;
         }
 
-
         private float _nextVaultCheckTime;
         private bool DontUnstuckMe;
 
@@ -414,7 +292,7 @@ namespace SAIN.SAINComponent.Classes.Debug
         private void tryAutoVault()
         {
             if (_nextVaultCheckTime < Time.time
-                && BotOwner.Mover.IsMoving)
+                && BotOwner?.Mover?.IsMoving == true)
             {
                 float timeAdd;
                 Vector3 lookDir = Player.LookDirection.normalized;

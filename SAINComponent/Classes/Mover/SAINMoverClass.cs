@@ -453,14 +453,14 @@ namespace SAIN.SAINComponent.Classes.Mover
                 SAINBot.Steering.LookToMovingDirection();
                 FastLean(0f);
             }
-            BotOwner.Mover?.Sprint(value);
+            BotOwner.Mover.Sprint(value);
         }
 
         public void TryJump()
         {
             if (JumpTimer < Time.time && CanJump)
             {
-                JumpTimer = Time.time + 0.66f;
+                JumpTimer = Time.time + 0.5f;
                 Player.MovementContext.TryJump();
             }
         }
@@ -482,19 +482,29 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void FastLean(float value)
         {
+            setTilt(value);
+            handleShoulderSwap(value);
+        }
+
+        private void setTilt(float value)
+        {
             if (Player.MovementContext.Tilt != value)
             {
                 Player.MovementContext.SetTilt(value);
             }
-            if (value < 0)
+        }
+
+        private void handleShoulderSwap(float leanValue)
+        {
+            bool shoulderSwapped = isShoulderSwapped;
+            if ((leanValue < 0 && !shoulderSwapped) 
+                || (leanValue >= 0 && shoulderSwapped))
             {
-                Player.MovementContext.LeftStanceController.SetLeftStanceForce(true);
-            }
-            else
-            {
-                Player.MovementContext.LeftStanceController.SetLeftStanceForce(false);
+                Player.MovementContext.LeftStanceController.ToggleLeftStance();
             }
         }
+
+        private bool isShoulderSwapped => Player.MovementContext.LeftStanceController.LeftStance;
 
         public bool CanJump => Player.MovementContext.CanJump;
 
