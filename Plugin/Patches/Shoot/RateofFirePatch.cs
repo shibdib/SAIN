@@ -31,6 +31,10 @@ namespace SAIN.Patches.Shoot
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0, float dist, float ang, ref bool ___bool_1, ref float ___float_10, ref float __result)
         {
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            {
+                return true;
+            }
             float aimDelay = ___float_10;
             bool moving = ___bool_1;
             bool panicing = (bool)_PanicingProp.GetValue(___botOwner_0.AimingData);
@@ -109,8 +113,12 @@ namespace SAIN.Patches.Shoot
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref BotOwner ____owner, ref float ___nextFingerUpTime)
+        public static bool PatchPrefix(BotOwner ____owner, ref float ___nextFingerUpTime)
         {
+            if (SAINPlugin.IsBotExluded(____owner))
+            {
+                return true;
+            }
             if (____owner.AimingData == null)
             {
                 return true;
@@ -142,8 +150,12 @@ namespace SAIN.Patches.Shoot
         }
 
         [PatchPostfix]
-        public static void PatchPostfix(ref BotOwner ___botOwner_0, ref float __result)
+        public static void PatchPostfix(BotOwner ___botOwner_0, ref float __result)
         {
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            {
+                return;
+            }
             if (SAINPlugin.BotController.GetSAIN(___botOwner_0, out var component))
             {
                 __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
@@ -158,8 +170,12 @@ namespace SAIN.Patches.Shoot
         }
 
         [PatchPostfix]
-        public static void PatchPostfix(ref BotOwner ___botOwner_0, ref float __result)
+        public static void PatchPostfix(BotOwner ___botOwner_0, ref float __result)
         {
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            {
+                return;
+            }
             if (SAINPlugin.BotController.GetSAIN(___botOwner_0, out var component))
             {
                 __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
@@ -174,8 +190,12 @@ namespace SAIN.Patches.Shoot
         }
 
         [PatchPostfix]
-        public static void PatchPostfix(ref BotOwner ___botOwner_0, ref float __result)
+        public static void PatchPostfix(BotOwner ___botOwner_0, ref float __result)
         {
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            {
+                return;
+            }
             if (SAINPlugin.BotController.GetSAIN(___botOwner_0, out var component))
             {
                 __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();

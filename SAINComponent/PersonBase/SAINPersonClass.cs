@@ -19,7 +19,7 @@ namespace SAIN.SAINComponent.BaseClasses
             IsAI = person.AIData.BotOwner != null;
             if (IsAI)
             {
-                SAIN = person.AIData.BotOwner.GetComponent<Bot>();
+                SAIN = person.AIData.BotOwner.GetComponent<BotComponent>();
             }
             IsSAINBot = SAIN != null;
         }
@@ -39,6 +39,6 @@ namespace SAIN.SAINComponent.BaseClasses
         public readonly bool IsSAINBot;
         public readonly AIData AIData;
         public readonly BotOwner BotOwner;
-        public readonly Bot SAIN;
+        public readonly BotComponent SAIN;
     }
 }

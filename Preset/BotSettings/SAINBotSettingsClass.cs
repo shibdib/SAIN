@@ -81,9 +81,9 @@ namespace SAIN.Preset.BotSettings
                     FieldInfo ACatField = AccessTools.Field(A.GetType(), BCatField.Name);
                     if (ACatField != null)
                     {
-                        // Get the multiplier of the EFT group Category
+                        // Get the value of the EFT group Category
                         object ACatObject = ACatField.GetValue(A);
-                        // SoundList the field names in that category
+                        // list the field names in that category
                         List<string> AVariableNames = AccessTools.GetFieldNames(ACatObject);
 
                         foreach (FieldInfo BVariableField in BVariableFieldArray)

@@ -6,6 +6,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINLookSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static SAINLookSettings Defaults = new SAINLookSettings();
+
         [NameAndDescription(
             "Base Vision Speed Multiplier",
             "The Base vision speed multiplier, affects all ranges to enemy. " +
@@ -93,7 +97,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [NameAndDescription("FlashLight Visible Angle",
             "The Maximum Angle of a bot's cone of vision with Flashlight Enabled")]
-        [Default(30f)]
+        [Default(35f)]
         [MinMax(10, 180)]
         [Advanced]
         public float VISIBLE_ANG_LIGHT = 35f;
@@ -107,12 +111,12 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [NameAndDescription("Lose Vision Ability Time",
             "How Long after losing vision a bot will still be able to sense an enemy")]
-        [Default(0.25f)]
+        [Default(0.33f)]
         [MinMax(0.01f, 3f, 100f)]
         [Advanced]
         [JsonIgnore]
         [Hidden]
-        public float GOAL_TO_FULL_DISSAPEAR = 0.5f;
+        public float GOAL_TO_FULL_DISSAPEAR = 0.33f;
 
         [NameAndDescription("Lose Vision Ability Foliage Time",
             "How Long after losing vision a bot will still be able to sense an enemy")]
@@ -121,11 +125,11 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Advanced]
         [JsonIgnore]
         [Hidden]
-        public float GOAL_TO_FULL_DISSAPEAR_GREEN = 0.25f;
+        public float GOAL_TO_FULL_DISSAPEAR_GREEN = 0.15f;
 
         [NameAndDescription("Lose Shoot Ability Time",
             "How Long after losing vision a bot will still be able to shoot an enemy")]
-        [Default(0.01f)]
+        [Default(0.1f)]
         [MinMax(0.01f, 3f, 100f)]
         [Advanced]
         [JsonIgnore]
@@ -165,5 +169,9 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Hidden]
         [JsonIgnore]
         public bool SHOOT_FROM_EYES = false;
+
+        [Hidden]
+        [JsonIgnore]
+        public float COEF_REPEATED_SEEN = 1f;
     }
 }

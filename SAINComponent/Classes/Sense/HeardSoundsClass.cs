@@ -11,7 +11,7 @@ namespace SAIN.SAINComponent.Classes.Sense
 {
     public class HeardSoundsClass : SAINBase, ISAINClass
     {
-        public HeardSoundsClass(Bot sain) : base(sain)
+        public HeardSoundsClass(BotComponent sain) : base(sain)
         {
         }
 

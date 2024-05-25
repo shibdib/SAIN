@@ -27,7 +27,7 @@ namespace SAIN.Layers.Combat.Squad
                     return new Action(typeof(SearchAction), $"{Decision}");
 
                 case SquadDecision.GroupSearch:
-                    if (Bot.Squad.IAmLeader)
+                    if (SAINBot.Squad.IAmLeader)
                     {
                         return new Action(typeof(SearchAction), $"{Decision} : Lead Search Party");
                     }
@@ -46,30 +46,27 @@ namespace SAIN.Layers.Combat.Squad
 
         public override bool IsActive()
         {
-            if (Bot == null) return false;
-            //if (SAIN.SAINEnabled == false) return false;
-
-            if (Bot.Decision.CurrentSquadDecision != SquadDecision.None
-                && Bot.Decision.CurrentSelfDecision == SelfDecision.None)
+            if (SAINBot?.BotActive == true)
             {
-                if (Bot.Cover.CoverInUse != null)
+                if (SAINBot.Decision.CurrentSquadDecision != SquadDecision.None
+                    && SAINBot.Decision.CurrentSelfDecision == SelfDecision.None)
                 {
-                    Bot.Cover.CoverInUse = null;
+                    if (SAINBot.Cover.CoverInUse != null)
+                    {
+                        SAINBot.Cover.CoverInUse = null;
+                    }
+                    return true;
                 }
-                return true;
             }
             return false;
         }
 
         public override bool IsCurrentActionEnding()
         {
-            if (Bot == null) return true;
-            //if (SAIN.SAINEnabled == false) return true;
-
-            return SquadDecision != LastActionDecision;
+            return SAINBot?.BotActive == true && SquadDecision != LastActionDecision;
         }
 
         private SquadDecision LastActionDecision = SquadDecision.None;
-        public SquadDecision SquadDecision => Bot.Decision.CurrentSquadDecision;
+        public SquadDecision SquadDecision => SAINBot.Decision.CurrentSquadDecision;
     }
 }

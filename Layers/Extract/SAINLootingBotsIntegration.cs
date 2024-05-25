@@ -8,7 +8,7 @@ namespace SAIN.Layers
 {
     public class SAINLootingBotsIntegration
     {
-        public SAINLootingBotsIntegration(BotOwner owner, Bot sain)
+        public SAINLootingBotsIntegration(BotOwner owner, BotComponent sain)
         {
             SAIN = sain;
             BotOwner = owner;
@@ -24,7 +24,7 @@ namespace SAIN.Layers
         }
 
         private readonly BotOwner BotOwner;
-        private readonly Bot SAIN;
+        private readonly BotComponent SAIN;
 
         private void CheckStatus()
         {

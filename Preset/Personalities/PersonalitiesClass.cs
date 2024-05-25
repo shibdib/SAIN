@@ -173,6 +173,11 @@ namespace SAIN.Preset.Personalities
         [MinMax(0.01f, 5f, 100)]
         public float AggressionMultiplier = 1f;
 
+        [Name("Kick Open All Possible Doors")]
+        [Description("If this personality has an enemy, always kick open doors if they can.")]
+        [Default(false)]
+        public bool KickOpenAllDoors = false;
+
         [Name("Hold Ground Base Time")]
         [Description("The base time, before modifiers, that a personality will stand their ground and shoot or return fire on an enemy if caught out of cover.")]
         [Default(1f)]

@@ -83,65 +83,66 @@ namespace SAIN.Preset.Personalities
                 if (!Personalities.ContainsKey(GigaChad))
                 {
                     string description = "A true alpha threat. Hyper Aggressive and typically wearing high tier equipment.";
-                    var GigaChadSettings = new PersonalitySettingsClass(GigaChad, GigaChad.ToString(), description);
+                    var settings = new PersonalitySettingsClass(GigaChad, GigaChad.ToString(), description);
 
-                    var gigaChadAssignment = GigaChadSettings.Assignment;
-                    gigaChadAssignment.Enabled = true;
-                    gigaChadAssignment.RandomlyAssignedChance = 3;
-                    gigaChadAssignment.CanBeRandomlyAssigned = true;
-                    gigaChadAssignment.MaxChanceIfMeetRequirements = 80;
-                    gigaChadAssignment.MinLevel = 0;
-                    gigaChadAssignment.MaxLevel = 100;
-                    gigaChadAssignment.PowerLevelMin = 250;
-                    gigaChadAssignment.PowerLevelMax = 1000;
-                    gigaChadAssignment.PowerLevelScaleStart = 250;
-                    gigaChadAssignment.PowerLevelScaleEnd = 500;
+                    var assignment = settings.Assignment;
+                    assignment.Enabled = true;
+                    assignment.RandomlyAssignedChance = 3;
+                    assignment.CanBeRandomlyAssigned = true;
+                    assignment.MaxChanceIfMeetRequirements = 80;
+                    assignment.MinLevel = 0;
+                    assignment.MaxLevel = 100;
+                    assignment.PowerLevelMin = 250;
+                    assignment.PowerLevelMax = 1000;
+                    assignment.PowerLevelScaleStart = 250;
+                    assignment.PowerLevelScaleEnd = 500;
 
-                    var gigaChadBehavior = GigaChadSettings.Behavior;
+                    var behavior = settings.Behavior;
 
-                    gigaChadBehavior.General.AggressionMultiplier = 1;
-                    gigaChadBehavior.General.HoldGroundBaseTime = 1.25f;
-                    gigaChadBehavior.General.HoldGroundMaxRandom = 1.5f;
-                    gigaChadBehavior.General.HoldGroundMinRandom = 0.65f;
+                    behavior.General.KickOpenAllDoors = true;
+                    behavior.General.AggressionMultiplier = 1;
+                    behavior.General.HoldGroundBaseTime = 1.25f;
+                    behavior.General.HoldGroundMaxRandom = 1.5f;
+                    behavior.General.HoldGroundMinRandom = 0.65f;
 
-                    gigaChadBehavior.Cover.CanShiftCoverPosition = true;
-                    gigaChadBehavior.Cover.ShiftCoverTimeMultiplier = 0.5f;
-                    gigaChadBehavior.Cover.MoveToCoverHasEnemySpeed = 1f;
-                    gigaChadBehavior.Cover.MoveToCoverHasEnemyPose = 1f;
-                    gigaChadBehavior.Cover.MoveToCoverNoEnemySpeed = 1f;
-                    gigaChadBehavior.Cover.MoveToCoverNoEnemyPose = 1f;
+                    behavior.Cover.CanShiftCoverPosition = true;
+                    behavior.Cover.ShiftCoverTimeMultiplier = 0.5f;
+                    behavior.Cover.MoveToCoverHasEnemySpeed = 1f;
+                    behavior.Cover.MoveToCoverHasEnemyPose = 1f;
+                    behavior.Cover.MoveToCoverNoEnemySpeed = 1f;
+                    behavior.Cover.MoveToCoverNoEnemyPose = 1f;
 
-                    gigaChadBehavior.Talk.CanTaunt = true;
-                    gigaChadBehavior.Talk.CanRespondToEnemyVoice = true;
-                    gigaChadBehavior.Talk.TauntFrequency = 6;
-                    gigaChadBehavior.Talk.TauntMaxDistance = 75f;
-                    gigaChadBehavior.Talk.ConstantTaunt = true;
-                    gigaChadBehavior.Talk.FrequentTaunt = true;
-                    gigaChadBehavior.Talk.CanFakeDeathRare = true;
-                    gigaChadBehavior.Talk.FakeDeathChance = 3;
+                    behavior.Talk.CanTaunt = true;
+                    behavior.Talk.CanRespondToEnemyVoice = true;
+                    behavior.Talk.TauntFrequency = 6;
+                    behavior.Talk.TauntMaxDistance = 75f;
+                    behavior.Talk.ConstantTaunt = true;
+                    behavior.Talk.FrequentTaunt = true;
+                    behavior.Talk.CanFakeDeathRare = true;
+                    behavior.Talk.FakeDeathChance = 3;
 
-                    gigaChadBehavior.Search.WillSearchForEnemy = true;
-                    gigaChadBehavior.Search.WillSearchFromAudio = true;
-                    gigaChadBehavior.Search.WillChaseDistantGunshots = true;
-                    gigaChadBehavior.Search.SearchBaseTime = 6;
-                    gigaChadBehavior.Search.SprintWhileSearchChance = 60;
-                    gigaChadBehavior.Search.SearchHasEnemySpeed = 1f;
-                    gigaChadBehavior.Search.SearchHasEnemyPose = 1f;
-                    gigaChadBehavior.Search.SearchNoEnemySpeed = 1f;
-                    gigaChadBehavior.Search.SearchNoEnemyPose = 1f;
-                    gigaChadBehavior.Search.SearchWaitMultiplier = 3f;
+                    behavior.Search.WillSearchForEnemy = true;
+                    behavior.Search.WillSearchFromAudio = true;
+                    behavior.Search.WillChaseDistantGunshots = true;
+                    behavior.Search.SearchBaseTime = 6;
+                    behavior.Search.SprintWhileSearchChance = 60;
+                    behavior.Search.SearchHasEnemySpeed = 1f;
+                    behavior.Search.SearchHasEnemyPose = 1f;
+                    behavior.Search.SearchNoEnemySpeed = 1f;
+                    behavior.Search.SearchNoEnemyPose = 1f;
+                    behavior.Search.SearchWaitMultiplier = 3f;
 
-                    gigaChadBehavior.Rush.CanRushEnemyReloadHeal = true;
-                    gigaChadBehavior.Rush.CanJumpCorners = true;
-                    gigaChadBehavior.Rush.JumpCornerChance = 40f;
-                    gigaChadBehavior.Rush.CanBunnyHop = true;
-                    gigaChadBehavior.Rush.BunnyHopChance = 5;
+                    behavior.Rush.CanRushEnemyReloadHeal = true;
+                    behavior.Rush.CanJumpCorners = true;
+                    behavior.Rush.JumpCornerChance = 40f;
+                    behavior.Rush.CanBunnyHop = true;
+                    behavior.Rush.BunnyHopChance = 5;
 
-                    AddPMCTypes(GigaChadSettings.Assignment.AllowedTypes);
-                    Personalities.Add(GigaChad, GigaChadSettings);
+                    AddPMCTypes(settings.Assignment.AllowedTypes);
+                    Personalities.Add(GigaChad, settings);
                     if (Preset.Info.IsCustom == true)
                     {
-                        SAINPresetClass.Export(GigaChadSettings, Preset.Info.Name, GigaChad.ToString(), nameof(Personalities));
+                        SAINPresetClass.Export(settings, Preset.Info.Name, GigaChad.ToString(), nameof(Personalities));
                     }
                 }
             }
@@ -153,65 +154,66 @@ namespace SAIN.Preset.Personalities
                 {
                     string description = "Rush B Cyka Blyat. Who care if I die? Gotta get the clip";
 
-                    var wrecklessSettings = new PersonalitySettingsClass(Wreckless, Wreckless.ToString(), description);
+                    var settings = new PersonalitySettingsClass(Wreckless, Wreckless.ToString(), description);
 
-                    var wrecklessAssignment = wrecklessSettings.Assignment;
-                    wrecklessAssignment.Enabled = true;
-                    wrecklessAssignment.RandomlyAssignedChance = 1;
-                    wrecklessAssignment.CanBeRandomlyAssigned = true;
-                    wrecklessAssignment.MaxChanceIfMeetRequirements = 5;
-                    wrecklessAssignment.MinLevel = 0;
-                    wrecklessAssignment.MaxLevel = 100;
-                    wrecklessAssignment.PowerLevelMin = 250;
-                    wrecklessAssignment.PowerLevelMax = 1000;
-                    wrecklessAssignment.PowerLevelScaleStart = 250;
-                    wrecklessAssignment.PowerLevelScaleEnd = 500;
+                    var assignment = settings.Assignment;
+                    assignment.Enabled = true;
+                    assignment.RandomlyAssignedChance = 1;
+                    assignment.CanBeRandomlyAssigned = true;
+                    assignment.MaxChanceIfMeetRequirements = 5;
+                    assignment.MinLevel = 0;
+                    assignment.MaxLevel = 100;
+                    assignment.PowerLevelMin = 250;
+                    assignment.PowerLevelMax = 1000;
+                    assignment.PowerLevelScaleStart = 250;
+                    assignment.PowerLevelScaleEnd = 500;
 
-                    var wrecklessBehavior = wrecklessSettings.Behavior;
+                    var behavior = settings.Behavior;
 
-                    wrecklessBehavior.General.AggressionMultiplier = 1;
-                    wrecklessBehavior.General.HoldGroundBaseTime = 2f;
-                    wrecklessBehavior.General.HoldGroundMaxRandom = 2.5f;
-                    wrecklessBehavior.General.HoldGroundMinRandom = 0.75f;
+                    behavior.General.KickOpenAllDoors = true;
+                    behavior.General.AggressionMultiplier = 1;
+                    behavior.General.HoldGroundBaseTime = 2f;
+                    behavior.General.HoldGroundMaxRandom = 2.5f;
+                    behavior.General.HoldGroundMinRandom = 0.75f;
 
-                    wrecklessBehavior.Cover.CanShiftCoverPosition = true;
-                    wrecklessBehavior.Cover.ShiftCoverTimeMultiplier = 0.5f;
-                    wrecklessBehavior.Cover.MoveToCoverHasEnemySpeed = 1f;
-                    wrecklessBehavior.Cover.MoveToCoverHasEnemyPose = 1f;
-                    wrecklessBehavior.Cover.MoveToCoverNoEnemySpeed = 1f;
-                    wrecklessBehavior.Cover.MoveToCoverNoEnemyPose = 1f;
+                    behavior.Cover.CanShiftCoverPosition = true;
+                    behavior.Cover.ShiftCoverTimeMultiplier = 0.5f;
+                    behavior.Cover.MoveToCoverHasEnemySpeed = 1f;
+                    behavior.Cover.MoveToCoverHasEnemyPose = 1f;
+                    behavior.Cover.MoveToCoverNoEnemySpeed = 1f;
+                    behavior.Cover.MoveToCoverNoEnemyPose = 1f;
 
-                    wrecklessBehavior.Talk.CanTaunt = true;
-                    wrecklessBehavior.Talk.CanRespondToEnemyVoice = true;
-                    wrecklessBehavior.Talk.TauntFrequency = 1;
-                    wrecklessBehavior.Talk.TauntMaxDistance = 100f;
-                    wrecklessBehavior.Talk.ConstantTaunt = true;
-                    wrecklessBehavior.Talk.FrequentTaunt = true;
-                    wrecklessBehavior.Talk.CanFakeDeathRare = true;
-                    wrecklessBehavior.Talk.FakeDeathChance = 6;
+                    behavior.Talk.CanTaunt = true;
+                    behavior.Talk.CanRespondToEnemyVoice = true;
+                    behavior.Talk.TauntFrequency = 1;
+                    behavior.Talk.TauntMaxDistance = 100f;
+                    behavior.Talk.ConstantTaunt = true;
+                    behavior.Talk.FrequentTaunt = true;
+                    behavior.Talk.CanFakeDeathRare = true;
+                    behavior.Talk.FakeDeathChance = 6;
 
-                    wrecklessBehavior.Search.WillSearchForEnemy = true;
-                    wrecklessBehavior.Search.WillSearchFromAudio = true;
-                    wrecklessBehavior.Search.WillChaseDistantGunshots = true;
-                    wrecklessBehavior.Search.SearchBaseTime = 0.1f;
-                    wrecklessBehavior.Search.SprintWhileSearchChance = 85;
-                    wrecklessBehavior.Search.SearchHasEnemySpeed = 1f;
-                    wrecklessBehavior.Search.SearchHasEnemyPose = 1f;
-                    wrecklessBehavior.Search.SearchNoEnemySpeed = 1f;
-                    wrecklessBehavior.Search.SearchNoEnemyPose = 1f;
-                    wrecklessBehavior.Search.SearchWaitMultiplier = 1f;
+                    behavior.Search.WillSearchForEnemy = true;
+                    behavior.Search.WillSearchFromAudio = true;
+                    behavior.Search.WillChaseDistantGunshots = true;
+                    behavior.Search.SearchBaseTime = 0.1f;
+                    behavior.Search.SprintWhileSearchChance = 85;
+                    behavior.Search.SearchHasEnemySpeed = 1f;
+                    behavior.Search.SearchHasEnemyPose = 1f;
+                    behavior.Search.SearchNoEnemySpeed = 1f;
+                    behavior.Search.SearchNoEnemyPose = 1f;
+                    behavior.Search.SearchWaitMultiplier = 1f;
 
-                    wrecklessBehavior.Rush.CanRushEnemyReloadHeal = true;
-                    wrecklessBehavior.Rush.CanJumpCorners = true;
-                    wrecklessBehavior.Rush.JumpCornerChance = 60f;
-                    wrecklessBehavior.Rush.CanBunnyHop = true;
-                    wrecklessBehavior.Rush.BunnyHopChance = 10;
+                    behavior.Rush.CanRushEnemyReloadHeal = true;
+                    behavior.Rush.CanJumpCorners = true;
+                    behavior.Rush.JumpCornerChance = 60f;
+                    behavior.Rush.CanBunnyHop = true;
+                    behavior.Rush.BunnyHopChance = 10;
 
-                    AddAllBotTypes(wrecklessSettings.Assignment.AllowedTypes);
-                    Personalities.Add(Wreckless, wrecklessSettings);
+                    AddAllBotTypes(settings.Assignment.AllowedTypes);
+                    Personalities.Add(Wreckless, settings);
                     if (Preset.Info.IsCustom == true)
                     {
-                        SAINPresetClass.Export(wrecklessSettings, Preset.Info.Name, Wreckless.ToString(), nameof(Personalities));
+                        SAINPresetClass.Export(settings, Preset.Info.Name, Wreckless.ToString(), nameof(Personalities));
                     }
                 }
             }

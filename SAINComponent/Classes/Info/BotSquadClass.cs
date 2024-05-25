@@ -10,7 +10,7 @@ namespace SAIN.SAINComponent.Classes.Info
 {
     public class SAINSquadClass : SAINBase, ISAINClass
     {
-        public SAINSquadClass(Bot sain) : base(sain)
+        public SAINSquadClass(BotComponent sain) : base(sain)
         {
         }
 
@@ -25,17 +25,17 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public string SquadID => SquadInfo.Id;
 
-        public readonly List<Bot> VisibleMembers = new List<Bot>();
+        public readonly List<BotComponent> VisibleMembers = new List<BotComponent>();
 
         private float UpdateMembersTimer = 0f;
 
         public bool IAmLeader => SquadInfo.LeaderId == SAINBot.ProfileId;
 
-        public Bot LeaderComponent => SquadInfo?.LeaderComponent;
+        public BotComponent LeaderComponent => SquadInfo?.LeaderComponent;
 
         public bool BotInGroup => BotOwner.BotsGroup.MembersCount > 1;
 
-        public Dictionary<string, Bot> Members => SquadInfo?.Members;
+        public Dictionary<string, BotComponent> Members => SquadInfo?.Members;
 
         public bool MemberIsFallingBack => SquadInfo?.MemberIsFallingBack == true;
 

@@ -32,7 +32,7 @@ namespace SAIN.Components
         public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; set; }
         public Action<Vector3> BulletImpact { get; set; }
 
-        public Dictionary<string, Bot> Bots => BotSpawnController.Bots;
+        public Dictionary<string, BotComponent> Bots => BotSpawnController.Bots;
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
         public IBotGame BotGame => Singleton<IBotGame>.Instance;
         public Player MainPlayer => Singleton<GameWorld>.Instance?.MainPlayer;
@@ -104,7 +104,7 @@ namespace SAIN.Components
             }
             foreach (var bot in Bots)
             {
-                Bot sain = bot.Value;
+                BotComponent sain = bot.Value;
                 if (sain != null && sain.BotOwner != null && bot.Key != player.ProfileId)
                 {
                     if (sain.BotOwner.BotsGroup.IsPlayerEnemyByRole(player.Profile.Info.Settings.Role))
@@ -212,7 +212,7 @@ namespace SAIN.Components
             }
 
             Singleton<BotEventHandler>.Instance?.PlaySound(player, player.Position, range, AISoundType.step);
-            delayHearAction(player, range, soundType);
+            StartCoroutine(delayHearAction(player, range, soundType));
         }
 
         private IEnumerator delayHearAction(Player player, float range, SAINSoundType soundType, float delay = 0.25f)
@@ -328,22 +328,35 @@ namespace SAIN.Components
 
         private void GrenadeThrown(Grenade grenade, Vector3 position, Vector3 force, float mass)
         {
-            if (grenade == null)
+            if (grenade != null)
             {
-                return;
+                StartCoroutine(grenadeThrown(grenade, position, force, mass));
             }
+        }
+
+        private IEnumerator grenadeThrown(Grenade grenade, Vector3 position, Vector3 force, float mass)
+        {
             var danger = Vector.DangerPoint(position, force, mass);
-            foreach (var bot in Bots.Values)
+            yield return null;
+            Player player = EFTInfo.GetPlayer(grenade.ProfileId);
+            if (player == null)
             {
-                if (bot != null && bot.EnemyController.IsPlayerFriendly(grenade.Player.iPlayer))
+                Logger.LogError($"Player Null from ID {grenade.ProfileId}");
+                yield break;
+            }
+            if (player.HealthController.IsAlive)
+            {
+                foreach (var bot in Bots.Values)
                 {
-                    continue;
-                }
-                if (bot != null && (danger - bot.Transform.Position).sqrMagnitude < 200f * 200f)
-                {
-                    bot.Grenade.EnemyGrenadeThrown(grenade, danger);
+                    if (bot?.BotActive == true &&
+                        !bot.EnemyController.IsPlayerFriendly(player) &&
+                        (danger - bot.Position).sqrMagnitude < 100f * 100f)
+                    {
+                        bot.Grenade.EnemyGrenadeThrown(grenade, danger);
+                    }
                 }
             }
+            yield return null;
         }
 
         public List<string> Groups = new List<string>();
@@ -382,21 +395,21 @@ namespace SAIN.Components
             catch { }
         }
 
-        public bool GetSAIN(string botName, out Bot bot)
+        public bool GetSAIN(string botName, out BotComponent bot)
         {
             StringBuilder debugString = null;
             bot = BotSpawnController.GetSAIN(botName, debugString);
             return bot != null;
         }
 
-        public bool GetSAIN(BotOwner botOwner, out Bot bot)
+        public bool GetSAIN(BotOwner botOwner, out BotComponent bot)
         {
             StringBuilder debugString = null;
             bot = BotSpawnController.GetSAIN(botOwner, debugString);
             return bot != null;
         }
 
-        public bool GetSAIN(Player player, out Bot bot)
+        public bool GetSAIN(Player player, out BotComponent bot)
         {
             StringBuilder debugString = null;
             bot = BotSpawnController.GetSAIN(player, debugString);

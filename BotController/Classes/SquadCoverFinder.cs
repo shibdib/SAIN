@@ -19,16 +19,16 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             SAINBotController = botController;
         }
 
-        public void AddMember(Bot member)
+        public void AddMember(BotComponent member)
         {
-            member.Decision.OnSAINStart += OnMemberSAINStart;
-            member.Decision.OnSAINEnd += OnMemberSAINEnd;
+            member.Decision.OnSAINActivated += OnMemberSAINStart;
+            member.Decision.OnSAINDeactivated += OnMemberSAINEnd;
         }
 
-        public void RemoveMember(Bot member)
+        public void RemoveMember(BotComponent member)
         {
-            member.Decision.OnSAINStart -= OnMemberSAINStart;
-            member.Decision.OnSAINEnd -= OnMemberSAINEnd;
+            member.Decision.OnSAINActivated -= OnMemberSAINStart;
+            member.Decision.OnSAINDeactivated -= OnMemberSAINEnd;
         }
 
         public void Update()
@@ -62,7 +62,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         }
 
         public Squad Squad { get; private set; }
-        public Dictionary<string, Bot> Members { get; private set; }
+        public Dictionary<string, BotComponent> Members { get; private set; }
         public SAINBotController SAINBotController { get; private set; }
     }
 }

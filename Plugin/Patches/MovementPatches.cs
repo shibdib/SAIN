@@ -24,7 +24,7 @@ namespace SAIN.Patches.Generic
         public static bool Enabled => !ModDetection.ProjectFikaLoaded;
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref BotOwner ____owner)
+        public static bool PatchPrefix(ref BotOwner ____owner, ref bool __result)
         {
             if (!SAINPlugin.LoadedPreset.GlobalSettings.General.NewDoorOpening)
             {
@@ -35,9 +35,14 @@ namespace SAIN.Patches.Generic
                 return true;
             }
 
+            if (SAINPlugin.IsBotExluded(____owner))
+            {
+                return true;
+            }
+
             if (SAINPlugin.GetSAIN(____owner, out var sain, nameof(DoorOpenerPatch)))
             {
-                sain.DoorOpener.Update();
+                __result = sain.DoorOpener.Update();
                 return false;
             }
             return true;

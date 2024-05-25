@@ -106,9 +106,9 @@ namespace SAIN.Components.BotController
         }
 
         private float exfilSearchRetryDelay = 10;
-        private Dictionary<Bot, float> botExfilSearchRetryTime = new Dictionary<Bot, float>();
+        private Dictionary<BotComponent, float> botExfilSearchRetryTime = new Dictionary<BotComponent, float>();
 
-        public void ResetExfilSearchTime(Bot bot)
+        public void ResetExfilSearchTime(BotComponent bot)
         {
             if (botExfilSearchRetryTime.ContainsKey(bot))
             {
@@ -120,7 +120,7 @@ namespace SAIN.Components.BotController
             }
         }
 
-        public bool TryFindExfilForBot(Bot bot)
+        public bool TryFindExfilForBot(BotComponent bot)
         {
             if (bot == null)
             {
@@ -186,7 +186,7 @@ namespace SAIN.Components.BotController
             return true;
         }
 
-        public static bool IsBotAllowedToExfil(Bot bot)
+        public static bool IsBotAllowedToExfil(BotComponent bot)
         {
             if (!bot.Info.Profile.IsPMC && !bot.Info.Profile.IsScav)
             {
@@ -196,7 +196,7 @@ namespace SAIN.Components.BotController
             return true;
         }
 
-        private bool TryAssignExfilForBot(Bot bot)
+        private bool TryAssignExfilForBot(BotComponent bot)
         {
             IDictionary<ExfiltrationPoint, Vector3> validExfils = GameWorldHandler.SAINGameWorld.ExtractFinder.GetValidExfilsForBot(bot);
             bot.Memory.Extract.ExfilPoint = selectExfilForBot(bot, validExfils);
@@ -206,7 +206,7 @@ namespace SAIN.Components.BotController
 
         public static float MinDistanceToExtract { get; private set; } = 10f;
 
-        private ExfiltrationPoint selectExfilForBot(Bot bot, IDictionary<ExfiltrationPoint, Vector3> validExfils)
+        private ExfiltrationPoint selectExfilForBot(BotComponent bot, IDictionary<ExfiltrationPoint, Vector3> validExfils)
         {
             // Check each valid extract to ensure the bot can use it and that it isn't too close. If this method is called when a bot is near an extract, it might be because
             // it got stuck. 
@@ -285,7 +285,7 @@ namespace SAIN.Components.BotController
             return true;
         }
 
-        private bool TryAssignSquadExfil(Bot bot)
+        private bool TryAssignSquadExfil(BotComponent bot)
         {
             var squad = bot.Squad;
             if (squad.IAmLeader)

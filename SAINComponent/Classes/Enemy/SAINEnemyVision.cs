@@ -1,12 +1,12 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.InventoryLogic;
 using SAIN.Helpers;
 using SAIN.Patches.Vision;
 using SAIN.Plugin;
 using SAIN.Preset.GlobalSettings;
-using SAIN.SAINComponent.SubComponents;
+using SAIN.SAINComponent.Classes.Sense;
 using UnityEngine;
-using static MultiFlareLight;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
@@ -110,7 +110,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public float TimeLastSeen { get; private set; }
         public float LastChangeVisionTime { get; private set; }
 
-        public float GainSightModifier
+        public float GainSightCoef
         {
             get
             {
@@ -132,17 +132,85 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (_nextCheckVisTime < Time.time)
             {
-                _nextCheckVisTime = Time.time + 0.2f;
-                _gainSightModifier = GetGainSightModifier(EnemyInfo, SAIN);
+                _nextCheckVisTime = Time.time + 0.1f;
+                _gainSightModifier = GetGainSightModifier(EnemyInfo, SAIN) * calcRepeatSeenCoef();
                 _visionDistanceModifier = 0f;
             }
         }
+
+        private float calcRepeatSeenCoef()
+        {
+            float result = 1f;
+            if (Seen)
+            {
+                Vector3? lastSeenPos = LastSeenPosition;
+                if (lastSeenPos != null)
+                {
+                    result = calcVisionSpeedPositional(
+                        lastSeenPos.Value, 
+                        _minSeenSpeedCoef, 
+                        _minDistRepeatSeen, 
+                        _maxDistRepeatSeen, 
+                        SeenSpeedCheck.Vision);
+                }
+            }
+
+            if (Enemy.Heard)
+            {
+                Vector3? lastHeardPosition = Enemy.LastHeardPosition;
+                if (lastHeardPosition != null)
+                {
+                    result *= calcVisionSpeedPositional(
+                        lastHeardPosition.Value, 
+                        _minHeardSpeedCoef, 
+                        _minDistRepeatHeard, 
+                        _maxDistRepeatHeard, 
+                        SeenSpeedCheck.Audio);
+                }
+            }
+            return result;
+        }
+
+        private enum SeenSpeedCheck
+        {
+            None = 0,
+            Vision = 1,
+            Audio = 2,
+        }
+
+        private float calcVisionSpeedPositional(Vector3 position, float minSpeedCoef, float minDist, float maxDist, SeenSpeedCheck check)
+        {
+            float distance = (position - EnemyPosition).magnitude;
+            if (distance <= minDist)
+            {
+                return minSpeedCoef;
+            }
+            if (distance >= maxDist)
+            {
+                return 1f;
+            }
+            
+            float seenSpeedDiff = maxDist - minDist;
+            float distanceDiff = distance - minDist;
+            float scaled = distanceDiff / seenSpeedDiff;
+            float result = Mathf.Lerp(minSpeedCoef, 1f, scaled);
+            //Logger.LogInfo($"{check} Distance from Position: {distance} Result: {result}");
+            return result;
+        }
+
+        private float _minSeenSpeedCoef = 1E-05f;
+        private float _minDistRepeatSeen = 3f;
+        private float _maxDistRepeatSeen = 15f;
+
+        private float _minHeardSpeedCoef = 0.2f;
+        private float _minDistRepeatHeard = 5f;
+        private float _maxDistRepeatHeard = 25f;
 
         private float _gainSightModifier;
         private float _visionDistanceModifier;
         private float _nextCheckVisTime;
 
-        public static float GetGainSightModifier(EnemyInfo enemyInfo, Bot sain)
+        public static float GetGainSightModifier(EnemyInfo enemyInfo, BotComponent sain)
         {
             float result = 1f;
             float dist = (enemyInfo.Owner.Position - enemyInfo.CurrPosition).magnitude;
@@ -168,10 +236,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
                         result *= gearInfo.GetStealthModifier(enemyInfo.Distance);
                     }
 
-                    bool flare =  person.AIData.GetFlare;
-                    bool suppressedFlare = 
-                        flare 
-                        && player.HandsController.Item is Weapon weapon 
+                    bool flare = person.AIData.GetFlare;
+                    bool suppressedFlare =
+                        flare
+                        && player.HandsController.Item is Weapon weapon
                         && gearInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
 
                     // Only apply vision speed debuff from weather if their enemy has not shot an unsuppressed weapon

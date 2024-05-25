@@ -11,7 +11,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class SAINMovementPlanController : SAINBase, ISAINClass
     {
-        public SAINMovementPlanController(Bot sain) : base(sain)
+        public SAINMovementPlanController(BotComponent sain) : base(sain)
         {
         }
 
@@ -36,9 +36,9 @@ namespace SAIN.SAINComponent.Classes.Mover
     {
         private static int PointCount = 0;
 
-        public readonly Bot SAIN;
+        public readonly BotComponent SAIN;
 
-        public SAINMovementPlan(Bot sain, NavMeshPath directPath, Vector3 endGoal)
+        public SAINMovementPlan(BotComponent sain, NavMeshPath directPath, Vector3 endGoal)
         {
             SAIN = sain;
             DirectPath = directPath;

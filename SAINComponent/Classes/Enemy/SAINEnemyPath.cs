@@ -2,7 +2,6 @@
 using SAIN.Helpers;
 using UnityEngine;
 using UnityEngine.AI;
-using static UnityEngine.UI.GridLayoutGroup;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
@@ -61,25 +60,22 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public void Clear()
         {
             if (PathToEnemy != null && PathToEnemy.corners.Length > 0)
-            {
                 PathToEnemy.ClearCorners();
-            }
+
             if (PathToEnemyStatus != NavMeshPathStatus.PathInvalid)
-            {
                 PathToEnemyStatus = NavMeshPathStatus.PathInvalid;
-            }
+
             if (LastCornerToEnemy != null)
-            {
                 LastCornerToEnemy = null;
-            }
+
             if (CanSeeLastCornerToEnemy)
-            {
                 CanSeeLastCornerToEnemy = false;
-            }
+
             if (_blindCorner != null)
-            {
                 _blindCorner = null;
-            }
+
+            if (PathDistance != float.MaxValue)
+                PathDistance = float.MaxValue;
         }
 
         private void CalcPath(bool isCurrentEnemy)

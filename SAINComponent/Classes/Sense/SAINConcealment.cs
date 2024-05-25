@@ -10,7 +10,7 @@ namespace SAIN.SAINComponent.Classes.Sense
 {
     public class SAINConcealment : SAINBase, ISAINClass
     {
-        public SAINConcealment(Bot sain) : base(sain)
+        public SAINConcealment(BotComponent sain) : base(sain)
         {
         }
         public void Init()

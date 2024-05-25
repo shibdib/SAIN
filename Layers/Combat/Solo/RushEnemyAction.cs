@@ -52,8 +52,8 @@ namespace SAIN.Layers.Combat.Solo
 
                 SAINBot.Mover.Sprint(false);
                 SAINBot.Mover.SprintController.CancelRun();
+                SAINBot.Mover.DogFight.DogFightMove(true);
 
-                SAINBot.Mover.DogFight.DogFightMove();
                 if (SAINBot.Enemy.IsVisible && SAINBot.Enemy.CanShoot)
                 {
                     SAINBot.Steering.SteerByPriority();
@@ -118,6 +118,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Stop()
         {
+            SAINBot.Mover.DogFight.ResetDogFightStatus();
             SAINBot.Mover.SprintController.CancelRun();
         }
     }

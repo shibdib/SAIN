@@ -25,8 +25,8 @@ namespace SAIN.Layers.Combat.Solo
         {
             SAINBot.Mover.SetTargetPose(1f);
             SAINBot.Mover.SetTargetMoveSpeed(1f);
-            SAINBot.Steering.SteerByPriority(false);
-            SAINBot.Mover.DogFight.DogFightMove();
+            SAINBot.Steering.SteerByPriority();
+            SAINBot.Mover.DogFight.DogFightMove(true);
             Shoot.Update();
         }
 
@@ -40,6 +40,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Stop()
         {
+            SAINBot.Mover.DogFight.ResetDogFightStatus();
             BotOwner.MovementResume();
         }
     }

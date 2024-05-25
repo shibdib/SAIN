@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class AimDownSightsController : SAINBase, ISAINClass
     {
-        public AimDownSightsController(Bot sain) : base(sain)
+        public AimDownSightsController(BotComponent sain) : base(sain)
         {
         }
 
@@ -78,11 +78,11 @@ namespace SAIN.SAINComponent.Classes
                     break;
 
                 case EAimDownSightsStatus.MovingToCover:
-                    result = SAINBot.ManualShootReason == Bot.EShootReason.WalkToCoverSuppress;
+                    result = SAINBot.ManualShootReason == BotComponent.EShootReason.WalkToCoverSuppress;
                     break;
 
                 case EAimDownSightsStatus.Suppressing:
-                    result = SAINBot.ManualShootReason == Bot.EShootReason.SquadSuppressing;
+                    result = SAINBot.ManualShootReason == BotComponent.EShootReason.SquadSuppressing;
                     break;
 
                 case EAimDownSightsStatus.DogFight:
@@ -148,7 +148,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 result = EAimDownSightsStatus.EnemyHeardRecent;
             }
-            else if (decisions.Squad.Current == SquadDecision.Suppress && SAINBot.ManualShootReason == Bot.EShootReason.SquadSuppressing)
+            else if (decisions.Squad.Current == SquadDecision.Suppress && SAINBot.ManualShootReason == BotComponent.EShootReason.SquadSuppressing)
             {
                 result = EAimDownSightsStatus.Suppressing;
             }

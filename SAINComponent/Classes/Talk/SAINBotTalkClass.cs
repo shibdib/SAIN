@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 {
     public class SAINBotTalkClass : SAINBase, ISAINClass
     {
-        public SAINBotTalkClass(Bot sain) : base(sain)
+        public SAINBotTalkClass(BotComponent sain) : base(sain)
         {
             PhraseObjectsAdd(PersonalPhraseDict);
 

@@ -14,6 +14,7 @@ using static EFT.SpeedTree.TreeWind;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.BaseClasses;
 using System.Text;
+using SAIN.Helpers;
 
 namespace SAIN.Components.BotController
 {
@@ -24,7 +25,7 @@ namespace SAIN.Components.BotController
             Instance = this;
         }
 
-        public Dictionary<string, Bot> SAINBotDictionary = new Dictionary<string, Bot>();
+        public Dictionary<string, BotComponent> SAINBotDictionary = new Dictionary<string, BotComponent>();
         private BotSpawner BotSpawner => BotController?.BotSpawner;
 
         public static readonly List<WildSpawnType> ExclusionList = new List<WildSpawnType>
@@ -80,7 +81,7 @@ namespace SAIN.Components.BotController
             }
         }
 
-        public Bot GetSAIN(BotOwner botOwner, StringBuilder debugString)
+        public BotComponent GetSAIN(BotOwner botOwner, StringBuilder debugString)
         {
             if (botOwner == null)
             {
@@ -95,13 +96,13 @@ namespace SAIN.Components.BotController
             }
 
             string name = botOwner.name;
-            Bot result = GetSAIN(name, debugString);
+            BotComponent result = GetSAIN(name, debugString);
 
             if ( result == null )
             {
                 //debugString?.AppendLine( $"[{name}] not found in SAIN Bot Dictionary. Getting Component Manually..." );
 
-                result = botOwner.gameObject.GetComponent<Bot>();
+                result = botOwner.gameObject.GetComponent<BotComponent>();
 
                 if (result != null)
                 {
@@ -121,7 +122,7 @@ namespace SAIN.Components.BotController
             return result;
         }
 
-        public Bot GetSAIN(Player player, StringBuilder debugString)
+        public BotComponent GetSAIN(Player player, StringBuilder debugString)
         {
             if (debugString == null && SAINPlugin.DebugMode)
             {
@@ -145,14 +146,14 @@ namespace SAIN.Components.BotController
             return null;
         }
 
-        public Bot GetSAIN(string botName, StringBuilder debugString)
+        public BotComponent GetSAIN(string botName, StringBuilder debugString)
         {
             if (debugString == null && SAINPlugin.DebugMode)
             {
                 debugString = new StringBuilder();
             }
 
-            Bot result = null;
+            BotComponent result = null;
             if ( SAINBotDictionary.ContainsKey(botName) )
             {
                 result = SAINBotDictionary[botName];
@@ -204,13 +205,13 @@ namespace SAIN.Components.BotController
                     botOwner.LeaveData.OnLeave += RemoveBot;
                     SetBrainInfo(botOwner);
 
-                    if (ExclusionList.Contains(settings.Role))
+                    if (SAINPlugin.IsBotExluded(botOwner))
                     {
                         AddNoBushESP(botOwner);
                         return;
                     }
 
-                    if (Bot.TryAddSAINToBot(botOwner, out Bot component))
+                    if (BotComponent.TryAddBotComponent(botOwner, out BotComponent component))
                     {
                         string name = botOwner.name;
                         if (SAINBotDictionary.ContainsKey(name))
@@ -245,7 +246,7 @@ namespace SAIN.Components.BotController
                 if (botOwner != null)
                 {
                     SAINBotDictionary.Remove(botOwner.name);
-                    if (botOwner.TryGetComponent(out Bot component))
+                    if (botOwner.TryGetComponent(out BotComponent component))
                     {
                         component.Dispose();
                     }

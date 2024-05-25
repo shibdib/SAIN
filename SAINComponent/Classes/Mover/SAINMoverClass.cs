@@ -64,7 +64,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
     public class SAINMoverClass : SAINBase, ISAINClass
     {
-        public SAINMoverClass(Bot sain) : base(sain)
+        public SAINMoverClass(BotComponent sain) : base(sain)
         {
             BlindFire = new BlindFireController(sain);
             SideStep = new SideStepClass(sain);
@@ -400,33 +400,51 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
-        public void StopMove()
+        public void StopMove(float delay = 0.1f, float forDuration = 0f)
         {
-            if (Player.IsSprintEnabled)
+            if (Player?.IsSprintEnabled == true)
             {
                 Sprint(false);
             }
-            if (!_stopping && BotOwner.Mover.IsMoving)
+            if (delay <= 0f)
+            {
+                stop(forDuration);
+                return;
+            }
+            if (delay > 0 && 
+                !_stopping && 
+                BotOwner?.Mover?.IsMoving == true)
             {
                 _stopping = true;
-                SAINBot.StartCoroutine(StopAfterDelay(0.1f));
+                SAINBot.StartCoroutine(StopAfterDelay(delay, forDuration));
             }
         }
 
         private float _nextStopMoveTime;
 
-        private IEnumerator StopAfterDelay(float delay)
+        private IEnumerator StopAfterDelay(float delay, float forDuration)
         {
-            yield return new WaitForSeconds(delay);
+            yield return new WaitForSeconds(delay); 
+            stop(forDuration);
+            _stopping = false;
+        }
+
+        private void stop(float forDuration)
+        {
             if (BotOwner?.Mover?.IsMoving == true)
             {
-                BotOwner.Mover?.Stop();
+                BotOwner.Mover.Stop();
             }
-            if (SAINBot?.Mover?.SprintController?.Running == true)
+            SAINBot?.Mover.SprintController.CancelRun();
+            PauseMovement(forDuration);
+        }
+
+        public void PauseMovement(float forDuration)
+        {
+            if (forDuration > 0)
             {
-                SAINBot.Mover.SprintController.CancelRun();
+                BotOwner?.Mover?.MovementPause(forDuration);
             }
-            _stopping = false;
         }
 
         public void ResetPath(float delay)
@@ -436,7 +454,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private IEnumerator resetPath(float delay)
         {
-            yield return StopAfterDelay(delay);
+            yield return StopAfterDelay(delay, 0f);
             BotOwner?.Mover?.RecalcWay();
         }
 

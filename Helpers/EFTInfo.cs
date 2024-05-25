@@ -26,7 +26,7 @@ namespace SAIN.Helpers
             Player player = enemy?.EnemyPlayer;
             return IsPlayerMainPlayer(player);
         }
-        public static bool IsEnemyMainPlayer(Bot bot)
+        public static bool IsEnemyMainPlayer(BotComponent bot)
         {
             return IsEnemyMainPlayer(bot?.Enemy);
         }
@@ -39,7 +39,7 @@ namespace SAIN.Helpers
             return player != null && Compare(player, MainPlayer);
         }
 
-        public static Player GetPlayer(Bot bot) => GetPlayer(bot?.ProfileId);
+        public static Player GetPlayer(BotComponent bot) => GetPlayer(bot?.ProfileId);
         public static Player GetPlayer(BotOwner bot) => GetPlayer(bot?.ProfileId);
         public static Player GetPlayer(IPlayer person) => GetPlayer(person?.ProfileId);
         public static Player GetPlayer(string profileID) => GameWorld?.GetAlivePlayerByProfileID(profileID);

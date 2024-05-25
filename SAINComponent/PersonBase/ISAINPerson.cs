@@ -20,7 +20,7 @@ namespace SAIN.SAINComponent.BaseClasses
         bool IsSAINBot { get; }
         AIData AIData { get; }
         BotOwner BotOwner { get; }
-        Bot SAIN { get; }
+        BotComponent SAIN { get; }
         SAINBotInfoClass SAINBotInfo { get; }
         SAINSquadClass SAINSquad { get; }
     }

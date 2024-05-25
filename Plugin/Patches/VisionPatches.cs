@@ -252,8 +252,38 @@ namespace SAIN.Patches.Vision
             return settings.TurnLightOffNoEnemyRAIDERROGUE;
         }
     }
+    public class VisionSpeedPrePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(EnemyInfo), "method_5");
+        }
 
-    public class VisionSpeedPatch : ModulePatch
+        [PatchPrefix]
+        public static void PatchPrefix(ref float __result, EnemyInfo __instance)
+        {
+            if (SAINPlugin.IsBotExluded(__instance.Owner))
+            {
+                __result *= SAINEnemyVision.GetGainSightModifier(__instance, null);
+                return;
+            }
+
+            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPostPatch))
+                && __instance.Person != null)
+            {
+                SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
+                if (enemy != null)
+                {
+                    __result *= enemy.Vision.GainSightCoef;
+                    return;
+                }
+            }
+
+            __result *= SAINEnemyVision.GetGainSightModifier(__instance, null);
+        }
+    }
+
+    public class VisionSpeedPostPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -263,13 +293,18 @@ namespace SAIN.Patches.Vision
         [PatchPostfix]
         public static void PatchPostfix(ref float __result, EnemyInfo __instance)
         {
-            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPatch))
+            if (SAINPlugin.IsBotExluded(__instance.Owner))
+            {
+                __result *= SAINEnemyVision.GetGainSightModifier(__instance, null);
+                return;
+            }
+            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPostPatch))
                 && __instance.Person != null)
             {
                 SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
                 if (enemy != null)
                 {
-                    __result *= enemy.Vision.GainSightModifier;
+                    __result *= enemy.Vision.GainSightCoef;
                     return;
                 }
             }

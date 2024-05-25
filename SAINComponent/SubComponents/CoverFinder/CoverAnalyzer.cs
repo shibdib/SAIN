@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
     public class CoverAnalyzer : SAINBase, ISAINClass
     {
-        public CoverAnalyzer(Bot botOwner, CoverFinderComponent coverFinder) : base(botOwner)
+        public CoverAnalyzer(BotComponent botOwner, CoverFinderComponent coverFinder) : base(botOwner)
         {
             CoverFinder = coverFinder;
         }
@@ -51,6 +51,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             if (CheckColliderForCover(collider, out Vector3 place, false, out _, path, out failReason))
             {
                 newPoint = new CoverPoint(SAINBot, place, collider, path);
+                newPoint.PathLength = path.CalculatePathLength();
                 return true;
             }
             newPoint = null;
@@ -63,6 +64,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             NavMeshPath path = new NavMeshPath();
             if (CheckColliderForCover(coverPoint.Collider, out Vector3 place, false, out _, coverPoint.PathToPoint, out failReason))
             {
+                coverPoint.PathLength = coverPoint.PathToPoint.CalculatePathLength();
                 coverPoint.Position = place;
             }
 

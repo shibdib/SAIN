@@ -19,7 +19,7 @@ namespace SAIN.SAINComponent.Classes
     {
         public EHitReaction HitReaction { get; private set; }
 
-        public SAINBotHitReaction(Bot sain) : base(sain)
+        public SAINBotHitReaction(BotComponent sain) : base(sain)
         {
         }
 

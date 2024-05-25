@@ -488,7 +488,7 @@
     <Compile Include="Layers\Combat\Solo\Cover\HoldinCoverAction.cs" />
     <Compile Include="Layers\Combat\Squad\SuppressAction.cs" />
     <Compile Include="SAINComponent\Classes\SAINBotGrenadeClass.cs" />
-    <Compile Include="SAINComponent\Bot.cs" />
+    <Compile Include="SAINComponent\BotComponent.cs" />
     <Compile Include="Layers\Combat\Solo\CombatSoloLayer.cs" />
     <Compile Include="Layers\Combat\Solo\ShootAction.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINSteeringClass.cs" />

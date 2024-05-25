@@ -20,7 +20,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public readonly Dictionary<string, SAINEnemy> Enemies = new Dictionary<string, SAINEnemy>();
 
-        public SAINEnemyController(Bot sain) : base(sain)
+        public SAINEnemyController(BotComponent sain) : base(sain)
         {
         }
 
@@ -118,10 +118,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (_nextLogActiveTime < Time.time && ActiveEnemies.Count > 0)
             {
                 _nextLogActiveTime = Time.time + 10f;
-                Logger.LogDebug($"[{SAINBot.name}] Active Enemies: [{ActiveEnemies.Count}]");
+                //Logger.LogDebug($"[{SAINBot.name}] Active Enemies: [{ActiveEnemies.Count}]");
                 foreach (var enemy in ActiveEnemies)
                 {
-                    Logger.LogDebug($"{SAINBot.Player.name} : {enemy.EnemyPlayer.Profile.Nickname} : {enemy.EnemyPlayer.name} : {enemy.Player.ProfileId} : Time Since Active: [{enemy.TimeSinceActive}]");
+                    //Logger.LogDebug($"{SAINBot.Player.name} : {enemy.EnemyPlayer.Profile.Nickname} : {enemy.EnemyPlayer.name} : {enemy.Player.ProfileId} : Time Since Active: [{enemy.TimeSinceActive}]");
                 }
             }
         }
@@ -398,11 +398,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
                 return;
             }
-            if (sainEnemy == null || !AreEnemiesSame(goalEnemy, sainEnemy))
+
+            if (goalEnemy?.Person != null && goalEnemy.Person.HealthController.IsAlive == false)
             {
-                //setEnemyFromEnemyInfo(goalEnemy);
+                BotOwner.Memory.GoalEnemy = null;
+                BotOwner.CalcGoal();
             }
-            setEnemyFromEnemyInfo(goalEnemy);
+            else
+            {
+                setEnemyFromEnemyInfo(goalEnemy);
+            }
         }
 
         private void setEnemyFromEnemyInfo(EnemyInfo enemyInfo)

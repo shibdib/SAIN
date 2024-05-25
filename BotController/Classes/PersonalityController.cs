@@ -21,7 +21,7 @@ namespace SAIN.BotController.Classes
         {
         }
 
-        public EPersonality GetAPersonality(Bot bot)
+        public EPersonality GetAPersonality(BotComponent bot)
         {
             return EPersonality.Normal;
         }
@@ -31,7 +31,7 @@ namespace SAIN.BotController.Classes
             _personalityCounts.Clear();
             foreach (var kvp in Bots)
             {
-                Bot bot = kvp.Value;
+                BotComponent bot = kvp.Value;
                 if (bot != null)
                 {
                     updateCount(bot.Info.Personality, 1);

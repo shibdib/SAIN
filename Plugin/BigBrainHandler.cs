@@ -41,7 +41,6 @@ namespace SAIN
             {
                 BrainAssignment.Init();
                 BigBrainInitialized = true;
-
             }
         }
 
@@ -51,12 +50,13 @@ namespace SAIN
             ExtractLayer.Name,
             CombatSoloLayer.Name,
             BotUnstuckLayer.Name,
+            SAINAvoidThreatLayer.Name,
         };
-
         public static readonly List<string> SAINCombatLayers = new List<string>
         {
             CombatSquadLayer.Name,
             CombatSoloLayer.Name,
+            SAINAvoidThreatLayer.Name,
         };
 
         public static bool BigBrainInitialized;
@@ -106,6 +106,11 @@ namespace SAIN
 
             private static void handleScavs()
             {
+                if (SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaScavs)
+                {
+                    return;
+                }
+
                 List<string> brainList = getBrainList(AIBrains.Scavs);
                 var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
 
@@ -175,15 +180,19 @@ namespace SAIN
 
             private static void handleBosses()
             {
+                if (SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaBosses)
+                {
+                    return;
+                }
+
                 List<string> brainList = getBrainList(AIBrains.Bosses);
 
                 var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
                 //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
                 BrainManager.AddCustomLayer(typeof(BotRunLayer), brainList, 99);
                 BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), brainList, 80);
-                BrainManager.AddCustomLayer(typeof(ExtractLayer), brainList, settings.SAINExtractLayerPriority);
-                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), brainList, settings.SAINCombatSquadLayerPriority);
-                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), brainList, settings.SAINCombatSoloLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), brainList, 70);
+                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), brainList, 69);
 
                 List<string> LayersToRemove = new List<string>
                 {
@@ -196,22 +205,26 @@ namespace SAIN
                     "Assault Building",
                     "Enemy Building",
                     "KnightFight",
-                    "PtrlBirdEye"
+                    "PtrlBirdEye",
+                    "BossBoarFight"
                 };
                 BrainManager.RemoveLayers(LayersToRemove, brainList);
             }
 
             private static void handleFollowers()
             {
+                if (SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaBosses)
+                {
+                    return;
+                }
                 List<string> brainList = getBrainList(AIBrains.Followers);
 
                 var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
                 //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
                 BrainManager.AddCustomLayer(typeof(BotRunLayer), brainList, 99);
                 BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), brainList, 80);
-                BrainManager.AddCustomLayer(typeof(ExtractLayer), brainList, settings.SAINExtractLayerPriority);
-                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), brainList, settings.SAINCombatSquadLayerPriority);
-                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), brainList, settings.SAINCombatSoloLayerPriority);
+                BrainManager.AddCustomLayer(typeof(CombatSquadLayer), brainList, 70);
+                BrainManager.AddCustomLayer(typeof(CombatSoloLayer), brainList, 69);
 
                 List<string> LayersToRemove = new List<string>
                 {
@@ -224,7 +237,8 @@ namespace SAIN
                     "Assault Building",
                     "Enemy Building",
                     "KnightFight",
-                    "PtrlBirdEye"
+                    "PtrlBirdEye",
+                    "BoarGrenadeDanger"
                 };
                 BrainManager.RemoveLayers(LayersToRemove, brainList);
             }

@@ -47,7 +47,7 @@ namespace SAIN.SAINComponent.SubComponents
 
         private void Update()
         {
-            if (BotOwner.IsDead || Grenade == null)
+            if (BotOwner == null || BotOwner.IsDead || Grenade == null)
             {
                 StopAllCoroutines();
                 Destroy(this);

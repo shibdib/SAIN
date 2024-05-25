@@ -13,7 +13,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class SAINEnemy : SAINBase, ISAINClass
     {
-        public SAINEnemy(Bot bot, SAINPersonClass person, EnemyInfo enemyInfo) : base(bot)
+        public SAINEnemy(BotComponent bot, SAINPersonClass person, EnemyInfo enemyInfo) : base(bot)
         {
             TimeEnemyCreated = Time.time;
             EnemyName = $"{person.Name} ({person.Profile.Nickname})";
@@ -122,7 +122,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 // If the enemy is an in-active bot or haven't sensed them in a very long time, just set them as inactive.
                 if (!ShallUpdateEnemy)
                 {
-                    return false;
+                    //return false;
                 }
                 // have we seen them very recently?
                 if (IsVisible || (Seen && TimeSinceSeen < 30f))
@@ -182,29 +182,28 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public float TimeLastActive { get; private set; } = 0f;
         public float TimeSinceActive => _hasBeenActive ? Time.time - TimeLastActive : float.MaxValue;
 
-        public bool ShallUpdateEnemy => 
-            EnemyPerson?.IsActive == true 
-            && TimeSinceLastKnownUpdated < 600f 
-            && TimeSinceLastKnownUpdated >= 0f
-            && _isActive;
+        public bool ShallUpdateEnemy =>
+            EnemyPerson?.IsActive == true
+            && TimeSinceLastKnownUpdated < 600f
+            && TimeSinceLastKnownUpdated >= 0f;
 
         private bool _isActive => !IsAI || Player.AIData.BotOwner.BotState == EBotState.Active;
 
         public void Update()
         {
+            bool isCurrent = IsCurrentEnemy;
+            updateActiveState(isCurrent);
+            Vision.Update(isCurrent);
+            KnownPlaces.Update(isCurrent);
+            Path.Update(isCurrent);
+
             if (ShallUpdateEnemy)
             {
-                bool isCurrent = IsCurrentEnemy;
-                updateActiveState(isCurrent);
-                Vision.Update(isCurrent);
-                Path.Update(isCurrent);
-                KnownPlaces.Update(isCurrent);
+                //Path.Update(isCurrent);
             }
             else
             {
-                Vision.UpdateVisible(true);
-                Vision.UpdateCanShoot(true);
-                Path.Clear();
+                //Path.Clear();
             }
         }
 

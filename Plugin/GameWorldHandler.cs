@@ -25,6 +25,10 @@ namespace SAIN
             {
                 SAINGameWorld = gameWorld.GetOrAddComponent<SAINGameworldComponent>();
             }
+            if (gameWorld == null)
+            {
+                SAINPlugin.ClearExcludedIDs();
+            }
         }
 
         public static ELocation FindLocation()

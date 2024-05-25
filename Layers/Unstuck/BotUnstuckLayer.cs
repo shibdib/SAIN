@@ -24,12 +24,12 @@ namespace SAIN.Layers.Combat.Run
 
         public override bool IsActive()
         {
-            return Bot?.BotStuck?.BotIsStuck == true;
+            return SAINBot?.BotStuck?.BotIsStuck == true;
         }
 
         public override bool IsCurrentActionEnding()
         {
-            if (Bot == null) return true;
+            if (SAINBot == null) return true;
 
             return false;
         }

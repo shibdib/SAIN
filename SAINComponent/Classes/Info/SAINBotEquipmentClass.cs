@@ -24,7 +24,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public static readonly FieldInfo InventoryControllerProp;
 
-        public SAINBotEquipmentClass(Bot sain) : base(sain)
+        public SAINBotEquipmentClass(BotComponent sain) : base(sain)
         {
         }
 

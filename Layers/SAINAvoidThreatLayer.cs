@@ -35,18 +35,20 @@ namespace SAIN.Layers
 
         public override bool IsActive()
         {
-            if (Bot == null) return false;
-            SoloDecision decision = CurrentDecision;
-            return decision == SoloDecision.DogFight || decision == SoloDecision.AvoidGrenade;
+            if (SAINBot?.BotActive == true)
+            {
+                SoloDecision decision = CurrentDecision;
+                return decision == SoloDecision.DogFight || decision == SoloDecision.AvoidGrenade;
+            }
+            return false;
         }
 
         public override bool IsCurrentActionEnding()
         {
-            if (Bot == null) return true;
-            return _lastActionDecision != CurrentDecision;
+            return SAINBot?.BotActive == true && _lastActionDecision != CurrentDecision;
         }
 
         private SoloDecision _lastActionDecision;
-        public SoloDecision CurrentDecision => Bot.Decision.CurrentSoloDecision;
+        public SoloDecision CurrentDecision => SAINBot.Decision.CurrentSoloDecision;
     }
 }

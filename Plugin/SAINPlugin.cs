@@ -21,7 +21,9 @@ using SAIN.SAINComponent.Classes.Mover;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
+using static EFT.SpeedTree.TreeWind;
 using static SAIN.AssemblyInfoClass;
 
 namespace SAIN
@@ -37,15 +39,76 @@ namespace SAIN
     {
         public static bool IsBotExluded(BotOwner botOwner)
         {
-            return IsBotExluded(botOwner.Profile.Info.Settings.Role);
+            if (_excludedIDs.Contains(botOwner.ProfileId))
+            {
+                return true;
+            }
+            if (_sainIDs.Contains(botOwner.ProfileId))
+            {
+                return false;
+            }
+            bool isExcluded = IsBotExluded(botOwner.Profile.Info.Settings.Role, botOwner.Profile.Nickname);
+            if (isExcluded)
+            {
+                _excludedIDs.Add(botOwner.ProfileId);
+            }
+            else
+            {
+                _sainIDs.Add(botOwner.ProfileId);
+            }
+            return isExcluded;
         }
 
-        public static bool IsBotExluded(WildSpawnType wildSpawnType)
+        private static List<string> _excludedIDs = new List<string>();
+        private static List<string> _sainIDs = new List<string>();
+
+        public static void ClearExcludedIDs()
         {
-            return BotSpawnController.ExclusionList.Contains(wildSpawnType);
+            if (_excludedIDs.Count > 0)
+                _excludedIDs.Clear();
+
+            if (_sainIDs.Count > 0) 
+                _sainIDs.Clear();
         }
 
-        public static bool GetSAIN(BotOwner botOwner, out Bot sain, string patchName)
+        public static bool IsBotExluded(WildSpawnType wildSpawnType, string nickname)
+        {
+            if (BotSpawnController.ExclusionList.Contains(wildSpawnType))
+            {
+                return true;
+            }
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaBosses &&
+                !EnumValues.WildSpawn.IsGoons(wildSpawnType) && 
+                (EnumValues.WildSpawn.IsBoss(wildSpawnType) || 
+                EnumValues.WildSpawn.IsFollower(wildSpawnType)))
+            {
+                return true;
+            }
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaScavs &&
+                EnumValues.WildSpawn.IsScav(wildSpawnType))
+            {
+                if (!SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaPlayerScavs && isPlayerScav(nickname))
+                {
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private static bool isPlayerScav(string nickname)
+        {
+            // Pattern: xxx (xxx)
+            string pattern = "\\w+.[(]\\w+[)]";
+            Regex regex = new Regex(pattern);
+            if (regex.Matches(nickname).Count > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool GetSAIN(BotOwner botOwner, out BotComponent sain, string patchName)
         {
             sain = null;
             if (SAINPlugin.BotController == null)
@@ -56,7 +119,7 @@ namespace SAIN
             return SAINPlugin.BotController.GetSAIN(botOwner, out sain);
         }
 
-        public static bool GetSAIN(Player player, out Bot sain, string patchName)
+        public static bool GetSAIN(Player player, out BotComponent sain, string patchName)
         {
             sain = null;
             if (player != null && !player.IsAI)
@@ -164,7 +227,7 @@ namespace SAIN
                 typeof(Patches.Vision.WeatherTimeVisibleDistancePatch),
                 typeof(Patches.Vision.NoAIESPPatch),
                 typeof(Patches.Vision.BotLightTurnOnPatch),
-                typeof(Patches.Vision.VisionSpeedPatch),
+                typeof(Patches.Vision.VisionSpeedPostPatch),
                 typeof(Patches.Vision.VisionDistancePosePatch),
                 typeof(Patches.Vision.CheckFlashlightPatch),
 

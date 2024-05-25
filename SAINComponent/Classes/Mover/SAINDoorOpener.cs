@@ -18,13 +18,13 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class SAINDoorOpener
     {
-        public SAINDoorOpener(Bot sain, BotOwner bot)
+        public SAINDoorOpener(BotComponent sain, BotOwner bot)
         {
-            SAIN = sain;
+            SAINBot = sain;
             this.BotOwner = bot;
         }
 
-        private Bot SAIN;
+        private BotComponent SAINBot;
 
         public void Init()
         {
@@ -60,7 +60,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 if (this._traversingEnd < Time.time)
                 {
                     BotOwner.DoorOpener.Interacting = false;
-                    if (!SAIN.Mover.SprintController.Running)
+                    if (!SAINBot.Mover.SprintController.Running)
                     {
                         BotOwner.Mover.MovementResume();
                     }
@@ -88,9 +88,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                 if (gstruct.Value.CurDist < 16f)
                 {
                     Vector3 targetDest;
-                    if (SAIN.Mover.SprintController.Running)
+                    if (SAINBot.Mover.SprintController.Running)
                     {
-                        targetDest = SAIN.Mover.SprintController.currentCorner();
+                        targetDest = SAINBot.Mover.SprintController.currentCorner();
                     }
                     else
                     {
@@ -119,7 +119,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                             this.TraverseDoorLink();
                         }
                         else if (this._refreshWayPeriod < Time.time 
-                            && !SAIN.Mover.SprintController.Running)
+                            && !SAINBot.Mover.SprintController.Running)
                         {
                             this._refreshWayPeriod = Time.time + 2f;
                             this.BotOwner.GoToPoint(this.BotOwner.Mover.LastDestination(), false, -1f, false, false, false, true);
@@ -136,17 +136,55 @@ namespace SAIN.SAINComponent.Classes.Mover
             this.TryInteract();
         }
 
-        private void EndDoorOpen()
+        private void doDefaultInteract(Door door, EInteractionType Etype)
         {
-            //BotOwner.DoorOpener.Interacting = false;
-            //_traversingEnd = Time.time;
+            BotOwner.GetPlayer.CurrentManagedState.StartDoorInteraction(door, new InteractionResult(Etype), new Action(doorOpenDone));
+        }
+
+        private void doorOpenDone()
+        {
+            _traversingEnd = 0f;
+        }
+
+        private bool shallKickOpen(Door door, EInteractionType Etype)
+        {
+            if (SAINBot.Info.PersonalitySettings.General.KickOpenAllDoors && 
+                Etype == EInteractionType.Open && 
+                SAINBot.Enemy != null)
+            {
+                var breakInParameters = door.GetBreakInParameters(SAINBot.Position);
+                return door.BreachSuccessRoll(breakInParameters.InteractionPosition);
+            }
+            return false;
         }
 
         public void Interact(Door door, EInteractionType Etype)
         {
             BotOwner.DoorOpener.Interacting = true;
-            _traversingEnd = Time.time + 0.35f;
 
+            bool noAnimation = door.interactWithoutAnimation;
+            EDoorState snap = door.Snap;
+
+            if (shallKickOpen(door, Etype) || Etype == EInteractionType.Breach)
+            {
+                Etype = EInteractionType.Breach;
+            }
+            else
+            {
+                door.interactWithoutAnimation = true;
+                door.Snap = EDoorState.None;
+            }
+
+            if (Etype == EInteractionType.Breach || ModDetection.ProjectFikaLoaded)
+            {
+                _traversingEnd = Time.time + 2f;
+                doDefaultInteract(door, Etype);
+                door.interactWithoutAnimation = noAnimation;
+                door.Snap = snap;
+                return;
+            }
+
+            _traversingEnd = Time.time + 0.35f;
             bool inverted = false;
             if (ShallInvertDoorAngle(door))
             {
@@ -154,14 +192,11 @@ namespace SAIN.SAINComponent.Classes.Mover
                 door.OpenAngle = -door.OpenAngle;
             }
 
-            bool noAnimation = door.interactWithoutAnimation;
-            door.interactWithoutAnimation = true;
 
             EDoorState state = EDoorState.None;
             switch (Etype)
             {
                 case EInteractionType.Open:
-                case EInteractionType.Breach:
                     state = EDoorState.Open;
                     break;
                 case EInteractionType.Close:
@@ -176,10 +211,11 @@ namespace SAIN.SAINComponent.Classes.Mover
                 //Logger.LogWarning("Opening Door");
                 var result = new InteractionResult(Etype);
                 door.method_3(state);
-                BotOwner.GetPlayer.vmethod_0(door, result, null);
-                Singleton<BotEventHandler>.Instance?.PlaySound(SAIN.Player, SAIN.Position, 30f, AISoundType.step);
+                //BotOwner.GetPlayer.vmethod_0(door, result, null);
+                Singleton<BotEventHandler>.Instance?.PlaySound(SAINBot.Player, SAINBot.Position, 30f, AISoundType.step);
             }
             door.interactWithoutAnimation = noAnimation;
+            door.Snap = snap;
 
             if (inverted)
             {

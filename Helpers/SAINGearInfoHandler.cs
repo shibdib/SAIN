@@ -37,6 +37,7 @@ namespace SAIN
             if (WeaponInfos.ContainsKey(player))
             {
                 WeaponInfos[player].ClearCache();
+                WeaponInfos.Remove(player);
             }
             player.OnPlayerDeadOrUnspawn -= RemovePlayer;
         }

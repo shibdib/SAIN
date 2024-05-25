@@ -17,7 +17,7 @@ namespace SAIN.SAINComponent.Classes
 
     public class SAINCoverClass : SAINBase, ISAINClass
     {
-        public SAINCoverClass(Bot sain) : base(sain)
+        public SAINCoverClass(BotComponent sain) : base(sain)
         {
             CoverFinder = sain.GetOrAddComponent<CoverFinderComponent>();
             Player.HealthController.ApplyDamageEvent += OnBeingHit;

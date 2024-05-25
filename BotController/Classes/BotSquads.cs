@@ -53,7 +53,7 @@ namespace SAIN.BotController.Classes
 
         public SquadCoverFinder SquadCoverFinder { get; private set; }
 
-        public Squad GetSquad(Bot sain)
+        public Squad GetSquad(BotComponent sain)
         {
             Squad result = null;
             var group = sain?.BotOwner?.BotsGroup;

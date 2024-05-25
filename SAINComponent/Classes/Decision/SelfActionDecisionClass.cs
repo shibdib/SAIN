@@ -9,7 +9,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 {
     public class SelfActionDecisionClass : SAINBase, ISAINClass
     {
-        public SelfActionDecisionClass(Bot sain) : base(sain)
+        public SelfActionDecisionClass(BotComponent sain) : base(sain)
         {
         }
 
@@ -84,6 +84,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             var grenadePos = SAINBot.Grenade.GrenadeDangerPoint; 
             if (grenadePos != null)
             {
+                return true;
                 Vector3 headPos = SAINBot.Transform.HeadPosition;
                 Vector3 direction = grenadePos.Value - headPos;
                 if (!Physics.Raycast(headPos, direction.normalized, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
@@ -295,7 +296,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartBotReload()
         {
-            // Only allow reloading every 5 seconds to avoid spamming reload when the weapon data is bad
+            // Only allow reloading every 1 seconds to avoid spamming reload when the weapon data is bad
             if (NextReloadTime > Time.time)
             {
                 return false;
@@ -328,7 +329,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             if (needToReload)
             {
-                NextReloadTime = Time.time + 5;
+                NextReloadTime = Time.time + 1;
             }
 
             return needToReload;

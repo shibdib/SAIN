@@ -110,9 +110,7 @@ namespace SAIN
     {
         None = 0,
         Left = 1,
-        HalfLeft = 2,
-        Right = 3,
-        HalfRight = 4,
+        Right = 2,
     }
 
     public enum SideStepSetting

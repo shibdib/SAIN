@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 {
     public class SAINSelfActionClass : SAINBase, ISAINClass
     {
-        public SAINSelfActionClass(Bot sain) : base(sain)
+        public SAINSelfActionClass(BotComponent sain) : base(sain)
         {
         }
 

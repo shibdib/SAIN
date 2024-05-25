@@ -6,7 +6,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class LeanClass : SAINBase, ISAINClass
     {
-        public LeanClass(Bot sain) : base(sain)
+        public LeanClass(BotComponent sain) : base(sain)
         {
         }
 
@@ -26,6 +26,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (!SAINBot.PatrolDataPaused)
             {
                 ResetLean();
+                return;
+            }
+            if (IsHoldingLean)
+            {
                 return;
             }
             var CurrentDecision = SAINBot.Memory.Decisions.Main.Current;
@@ -55,6 +59,18 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
                 float timeAdd = LeanDirection == LeanSetting.None ? 0.25f : 1f;
                 LeanTimer = Time.time + timeAdd;
+            }
+        }
+
+        private float _stopHoldLeanTime;
+
+        public bool IsHoldingLean => _stopHoldLeanTime > Time.time;
+
+        public void HoldLean(float duration)
+        {
+            if (LeanDirection != LeanSetting.None)
+            {
+                _stopHoldLeanTime = Time.time + duration;
             }
         }
 

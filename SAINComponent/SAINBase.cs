@@ -6,7 +6,7 @@ namespace SAIN.SAINComponent
 {
     public abstract class SAINBase : SAINComponentAbstract
     {
-        public SAINBase(Bot bot) : base (bot)
+        public SAINBase(BotComponent bot) : base (bot)
         {
             BotOwner = bot.BotOwner;
             Player = bot.Player;
@@ -19,11 +19,11 @@ namespace SAIN.SAINComponent
 
     public class SAINComponentAbstract
     {
-        public SAINComponentAbstract(Bot sain)
+        public SAINComponentAbstract(BotComponent sain)
         {
             SAINBot = sain;
         }
 
-        public Bot SAINBot { get; private set; }
+        public BotComponent SAINBot { get; private set; }
     }
 }

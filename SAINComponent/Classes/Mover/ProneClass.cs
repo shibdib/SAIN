@@ -9,7 +9,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class ProneClass : SAINBase, ISAINClass
     {
-        public ProneClass(Bot sain) : base(sain)
+        public ProneClass(BotComponent sain) : base(sain)
         {
         }
 

@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.Classes
     {
         public ESuppressionStatus SuppressionStatus { get; private set; }
 
-        public SAINBotSuppressClass(Bot sain) : base(sain)
+        public SAINBotSuppressClass(BotComponent sain) : base(sain)
         {
         }
 

@@ -26,7 +26,7 @@ namespace SAIN
         }
 
         public SAINBotController BotController { get; private set; }
-        public Dictionary<string, Bot> Bots => BotController?.BotSpawnController?.SAINBotDictionary;
+        public Dictionary<string, BotComponent> Bots => BotController?.BotSpawnController?.SAINBotDictionary;
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
     }
 }

@@ -15,8 +15,8 @@ namespace SAIN.BotController.Classes
 {
     public class Squad
     {
-        public readonly Dictionary<ESquadRole, Bot> Roles 
-            = new Dictionary<ESquadRole, Bot>();
+        public readonly Dictionary<ESquadRole, BotComponent> Roles 
+            = new Dictionary<ESquadRole, BotComponent>();
 
         public Squad()
         {
@@ -66,7 +66,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        public bool SquadIsSuppressEnemy(string profileId, out Bot suppressingMember)
+        public bool SquadIsSuppressEnemy(string profileId, out BotComponent suppressingMember)
         {
             foreach (var member in Members)
             {
@@ -94,7 +94,7 @@ namespace SAIN.BotController.Classes
         public Action<PlaceForCheck> OnSoundHeard { get; set; }
         public Action<EnemyPlace, SAINEnemy> OnEnemyHeard { get; set; }
 
-        public void AddPointToSearch(Vector3 position, float soundPower, Bot sain, AISoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
+        public void AddPointToSearch(Vector3 position, float soundPower, BotComponent sain, AISoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
         {
             if (EFTBotGroup == null)
             {
@@ -264,7 +264,7 @@ namespace SAIN.BotController.Classes
         public Action<IPlayer, DamageInfo, float> LeaderKilled { get; set; }
         public Action<IPlayer, DamageInfo, float> MemberKilled { get; set; }
 
-        public Action<Bot, float> NewLeaderFound { get; set; }
+        public Action<BotComponent, float> NewLeaderFound { get; set; }
 
         public bool LeaderIsDeadorNull => LeaderComponent?.Player == null || LeaderComponent?.Player?.HealthController.IsAlive == false;
 
@@ -272,7 +272,7 @@ namespace SAIN.BotController.Classes
 
         public const float FindLeaderAfterKilledCooldown = 60f;
 
-        public Bot LeaderComponent { get; private set; }
+        public BotComponent LeaderComponent { get; private set; }
         public string LeaderId { get; private set; }
 
         public float LeaderPowerLevel { get; private set; }
@@ -424,7 +424,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        public void UpdateSharedEnemyStatus(IPlayer player, EEnemyAction action, Bot sain)
+        public void UpdateSharedEnemyStatus(IPlayer player, EEnemyAction action, BotComponent sain)
         {
             if (sain == null)
             {
@@ -484,7 +484,7 @@ namespace SAIN.BotController.Classes
             RemoveMember(player?.ProfileId);
         }
 
-        public void MemberExtracted(Bot sain)
+        public void MemberExtracted(BotComponent sain)
         {
             if (SAINPlugin.DebugMode)
                 Logger.LogInfo($"Leader [{sain?.Player?.Profile.Nickname}] Extracted for Squad: [{Id}]");
@@ -494,7 +494,7 @@ namespace SAIN.BotController.Classes
         private void FindSquadLeader()
         {
             float power = 0f;
-            Bot leadComponent = null;
+            BotComponent leadComponent = null;
 
             // Iterate through each memberInfo memberInfo in friendly group to see who has the highest power level or if any are bosses
             foreach (var memberInfo in MemberInfos.Values)
@@ -522,7 +522,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        private void AssignSquadLeader(Bot sain)
+        private void AssignSquadLeader(BotComponent sain)
         {
             if (sain?.Player == null)
             {
@@ -547,7 +547,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        public void AddMember(Bot sain)
+        public void AddMember(BotComponent sain)
         {
             // Make sure nothing is null as a safety check.
             if (sain?.Player != null && sain.BotOwner != null)
@@ -587,7 +587,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        public void RemoveMember(Bot sain)
+        public void RemoveMember(BotComponent sain)
         {
             RemoveMember(sain?.ProfileId);
         }
@@ -610,7 +610,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        public readonly Dictionary<string, Bot> Members = new Dictionary<string, Bot>();
+        public readonly Dictionary<string, BotComponent> Members = new Dictionary<string, BotComponent>();
         public readonly Dictionary<string, MemberInfo> MemberInfos = new Dictionary<string, MemberInfo>();
     }
 }

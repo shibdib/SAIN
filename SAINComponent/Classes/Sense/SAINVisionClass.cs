@@ -7,7 +7,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINVisionClass : SAINBase, ISAINClass
     {
-        public SAINVisionClass(Bot component) : base(component)
+        public SAINVisionClass(BotComponent component) : base(component)
         {
             FlashLightDazzle = new DazzleClass(component);
         }

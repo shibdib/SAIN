@@ -71,7 +71,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (coverInUse == null)
             {
-                SAINBot.Mover.DogFight.DogFightMove();
+                SAINBot.Mover.DogFight.DogFightMove(false);
             }
 
             EngageEnemy();
@@ -88,10 +88,10 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (SAINBot.Enemy?.IsVisible == false 
                 && BotOwner.WeaponManager.HaveBullets 
-                && SAINBot.Enemy.TimeSinceLastKnownUpdated < 8f 
+                && SAINBot.Enemy.TimeSinceLastKnownUpdated < 30f 
                 && SAINBot.Enemy.Path.BlindCornerToEnemy != null
                 && SAINBot.Enemy.LastKnownPosition != null
-                && (SAINBot.Enemy.Path.BlindCornerToEnemy.Value - SAINBot.Enemy.LastKnownPosition.Value).sqrMagnitude < 3f * 3f)
+                && (SAINBot.Enemy.Path.BlindCornerToEnemy.Value - SAINBot.Enemy.LastKnownPosition.Value).sqrMagnitude < 2f * 2f)
             {
                 SuppressPosition(SAINBot.Enemy.Path.BlindCornerToEnemy.Value);
             }
@@ -106,7 +106,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private void SuppressPosition(Vector3 position)
         {
             if (SuppressTimer < Time.time
-                && SAINBot.Shoot(true, position, true, Bot.EShootReason.WalkToCoverSuppress))
+                && SAINBot.Shoot(true, position, true, BotComponent.EShootReason.WalkToCoverSuppress))
             {
                 SAINBot.Enemy.EnemyStatus.EnemyIsSuppressed = true;
                 if (SAINBot.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
@@ -127,6 +127,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
+            SAINBot.Mover.DogFight.ResetDogFightStatus();
             SAINBot.Cover.CheckResetCoverInUse();
             SAINBot.Shoot(false, Vector3.zero);
         }

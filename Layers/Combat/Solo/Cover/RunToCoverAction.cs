@@ -92,7 +92,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (!_moveSuccess)
             {
                 SAINBot.Cover.CoverInUse = null;
-                SAINBot.Mover.DogFight.DogFightMove();
+                SAINBot.Mover.DogFight.DogFightMove(false);
             }
 
             SAINBot.Steering.SteerByPriority();
@@ -184,7 +184,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             return result;
         }
 
-        private bool shallRun(Vector3 destination) => (destination - SAINBot.Position).sqrMagnitude > SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN * SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN * 2f;
+        private bool shallRun(Vector3 destination) => (destination - SAINBot.Position).sqrMagnitude > SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN * SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN * 1f;
 
         private bool _moveSuccess;
         private float _recalcMoveTimer;
@@ -208,6 +208,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
+            SAINBot.Mover.DogFight.ResetDogFightStatus();
             SAINBot.Mover.SprintController.CancelRun();
             SAINBot.Cover.CheckResetCoverInUse();
         }

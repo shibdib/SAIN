@@ -22,7 +22,7 @@ namespace SAIN.Plugin
     {
         public static bool ExtractBot(BotOwner bot)
         {
-            var component = bot.GetComponent<Bot>();
+            var component = bot.GetComponent<BotComponent>();
             if (component == null)
             {
                 return false;
@@ -71,7 +71,7 @@ namespace SAIN.Plugin
 
         public static bool TrySetExfilForBot(BotOwner bot)
         {
-            var component = bot.GetComponent<Bot>();
+            var component = bot.GetComponent<BotComponent>();
             if (component == null)
             {
                 return false;
@@ -94,7 +94,7 @@ namespace SAIN.Plugin
 
         public static bool ResetDecisionsForBot(BotOwner bot)
         {
-            var component = bot.GetComponent<Bot>();
+            var component = bot.GetComponent<BotComponent>();
             if (component == null)
             {
                 return false;
@@ -148,7 +148,7 @@ namespace SAIN.Plugin
 
         public static float TimeSinceSenseEnemy(BotOwner botOwner)
         {
-            var component = botOwner.GetComponent<Bot>();
+            var component = botOwner.GetComponent<BotComponent>();
             if (component == null)
             {
                 return float.MaxValue;
@@ -165,7 +165,7 @@ namespace SAIN.Plugin
 
         public static bool IsPathTowardEnemy(NavMeshPath path, BotOwner botOwner, float ratioSameOverAll = 0.25f, float sqrDistCheck = 0.05f)
         {
-            var component = botOwner.GetComponent<Bot>();
+            var component = botOwner.GetComponent<BotComponent>();
             if (component == null)
             {
                 return false;
@@ -188,7 +188,7 @@ namespace SAIN.Plugin
 
         public static bool CanBotQuest(BotOwner botOwner, Vector3 questPosition, float dotProductThresh = 0.33f)
         {
-            var component = botOwner.GetComponent<Bot>();
+            var component = botOwner.GetComponent<BotComponent>();
             if (component == null)
             {
                 return false;
@@ -210,7 +210,7 @@ namespace SAIN.Plugin
             return true;
         }
 
-        public static bool IsQuestTowardTarget(Bot component, Vector3 questPosition, float dotProductThresh)
+        public static bool IsQuestTowardTarget(BotComponent component, Vector3 questPosition, float dotProductThresh)
         {
             Vector3? currentTarget = component.CurrentTargetPosition;
             if (currentTarget == null)
@@ -225,7 +225,7 @@ namespace SAIN.Plugin
             return Vector3.Dot(targetDirection.normalized, questDirection.normalized) > dotProductThresh;
         }
 
-        private static bool IsBotSearching(Bot component)
+        private static bool IsBotSearching(BotComponent component)
         {
             if (component.Decision.CurrentSoloDecision == SoloDecision.Search || component.Decision.CurrentSquadDecision == SquadDecision.Search)
             {
@@ -234,7 +234,7 @@ namespace SAIN.Plugin
             return false;
         }
 
-        private static bool isBotInCombat(Bot component, out ECombatReason reason)
+        private static bool isBotInCombat(BotComponent component, out ECombatReason reason)
         {
             const float TimeSinceSeenThreshold = 10f;
             const float TimeSinceHeardThreshold = 5f;

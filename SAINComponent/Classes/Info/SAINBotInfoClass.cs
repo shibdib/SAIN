@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.Info
 {
     public class SAINBotInfoClass : SAINBase, ISAINClass
     {
-        public SAINBotInfoClass(Bot sain) : base(sain)
+        public SAINBotInfoClass(BotComponent sain) : base(sain)
         {
             Profile = new ProfileClass(sain);
             WeaponInfo = new WeaponInfoClass(sain);
@@ -277,7 +277,7 @@ namespace SAIN.SAINComponent.Classes.Info
             {
                 case WildSpawnType.bossKilla:
                 case WildSpawnType.bossTagilla:
-                    return EFTMath.RandomBool() ? EPersonality.Wreckless : EPersonality.GigaChad;
+                    return EPersonality.Wreckless;
 
                 case WildSpawnType.bossKnight:
                 case WildSpawnType.followerBirdEye:

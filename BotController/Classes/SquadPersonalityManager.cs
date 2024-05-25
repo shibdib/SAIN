@@ -6,7 +6,7 @@ namespace SAIN.BotController.Classes
 {
     public class SquadPersonalityManager
     {
-        public static ESquadPersonality GetSquadPersonality(Dictionary<string, Bot> Members, out SquadPersonalitySettings settings)
+        public static ESquadPersonality GetSquadPersonality(Dictionary<string, BotComponent> Members, out SquadPersonalitySettings settings)
         {
             GetMemberPersonalities(Members);
             EPersonality mostFrequentPersonality =  GetMostFrequentPersonality(PersonalityCounts, out int count);
@@ -15,7 +15,7 @@ namespace SAIN.BotController.Classes
             return result;
         }
 
-        private static void GetMemberPersonalities(Dictionary<string, Bot> Members)
+        private static void GetMemberPersonalities(Dictionary<string, BotComponent> Members)
         {
             PersonalityCounts.Clear();
             MemberPersonalities.Clear();

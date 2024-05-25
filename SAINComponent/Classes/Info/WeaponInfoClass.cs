@@ -13,7 +13,7 @@ namespace SAIN.SAINComponent.Classes.Info
 {
     public class WeaponInfoClass : SAINBase, ISAINClass
     {
-        public WeaponInfoClass(Bot sain) : base(sain)
+        public WeaponInfoClass(BotComponent sain) : base(sain)
         {
             Recoil = new Recoil(sain);
             Firerate = new Firerate(sain);

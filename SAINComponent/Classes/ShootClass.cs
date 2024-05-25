@@ -10,14 +10,14 @@ namespace SAIN.SAINComponent.Classes
         public ShootClass(BotOwner owner)
             : base(owner)
         {
-            SAIN = owner.GetComponent<Bot>();
+            SAIN = owner.GetComponent<BotComponent>();
             Shoot = new BotShoot(owner);
         }
 
         private readonly BotShoot Shoot;
         private BotOwner BotOwner => botOwner_0;
 
-        private readonly Bot SAIN;
+        private readonly BotComponent SAIN;
 
         private float changeAimTimer;
 
@@ -46,16 +46,61 @@ namespace SAIN.SAINComponent.Classes
                 SAIN.AimDownSightsController.UpdateADSstatus();
             }
 
-            if (SAIN.Enemy != null 
-                && SAIN.Enemy.RealDistance > SAIN.Info.FileSettings.Shoot.MaxPointFireDistance 
-                && !BotOwner.ShootData.ShootController.IsAiming)
+            if (!tryPauseForShoot())
             {
-                BotOwner.AimingData?.LoseTarget();
                 return;
             }
 
             aimAtEnemy();
         }
+
+        private bool tryPauseForShoot()
+        {
+            if (ShallPauseForShoot())
+            {
+                if (_nextPauseMoveTime < Time.time &&
+                    !IsMovementPaused)
+                {
+                    _nextPauseMoveTime = Time.time + Random.Range(_pauseMoveFrequencyMin, _pauseMoveFrequencyMax);
+                    SAIN.Mover.PauseMovement(Random.Range(_pauseMoveDurationMin, _pauseMoveDurationMax));
+                }
+                if (!IsMovementPaused)
+                {
+                    BotOwner.AimingData?.LoseTarget();
+                    return false;
+                }
+            }
+            else if (IsMovementPaused)
+            {
+                BotOwner.Mover.MovementResume();
+            }
+            return true;
+        }
+
+        public bool ShallPauseForShoot()
+        {
+            float maxPointFireDist = SAIN.Info.FileSettings.Shoot.MaxPointFireDistance;
+            return 
+                SAIN.Enemy != null &&
+                SAIN.Enemy.RealDistance > maxPointFireDist &&
+                IsAiming;
+        }
+
+        public bool IsAiming
+        {
+            get
+            {
+                return BotOwner?.ShootData?.ShootController?.IsAiming == true || BotOwner?.AimingData?.IsReady == true;
+            }
+        }
+
+        public bool IsMovementPaused => BotOwner?.Mover.Pause == true;
+
+        private float _nextPauseMoveTime;
+        private float _pauseMoveFrequencyMin = 1.5f;
+        private float _pauseMoveFrequencyMax = 3f;
+        private float _pauseMoveDurationMin = 0.5f;
+        private float _pauseMoveDurationMax = 1f;
 
         private void selectWeapon()
         {

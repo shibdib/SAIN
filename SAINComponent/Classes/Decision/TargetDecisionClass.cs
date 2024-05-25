@@ -8,7 +8,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 {
     public class TargetDecisionClass : SAINBase, ISAINClass
     {
-        public TargetDecisionClass(Bot sain) : base(sain)
+        public TargetDecisionClass(BotComponent sain) : base(sain)
         {
         }
 

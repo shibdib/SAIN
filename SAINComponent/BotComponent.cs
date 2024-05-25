@@ -19,9 +19,9 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent
 {
-    public class Bot : MonoBehaviour, IBotComponent
+    public class BotComponent : MonoBehaviour, IBotComponent
     {
-        public static bool TryAddSAINToBot(BotOwner botOwner, out Bot sainComponent)
+        public static bool TryAddBotComponent(BotOwner botOwner, out BotComponent sainComponent)
         {
             Player player = EFTInfo.GetPlayer(botOwner?.ProfileId);
             GameObject gameObject = botOwner?.gameObject;
@@ -35,7 +35,7 @@ namespace SAIN.SAINComponent
                 }
 
                 // Create a new Component
-                sainComponent = gameObject.AddComponent<Bot>();
+                sainComponent = gameObject.AddComponent<BotComponent>();
                 if (sainComponent?.Init(new SAINPersonClass(player)) == true)
                 {
                     return true;
@@ -133,7 +133,6 @@ namespace SAIN.SAINComponent
 
         public float TimeBotCreated { get; private set; }
 
-
         private void Update()
         {
             if (BotOwner == null || this == null || Player == null)
@@ -147,69 +146,73 @@ namespace SAIN.SAINComponent
                 return;
             }
 
-            if (GameIsEnding)
+            if (GameIsEnding || !BotActive)
             {
+                StopAllCoroutines();
                 return;
             }
 
-            if (BotActive)
+            checkLayerActive();
+            handlePatrolData();
+
+            AILimit.UpdateAILimit();
+            if (AILimit.LimitAIThisFrame)
             {
-                checkLayerActive();
-                handlePatrolData();
+                //return;
+            }
 
-                AILimit.UpdateAILimit();
-                if (AILimit.LimitAIThisFrame)
+            DoorOpener.Update();
+            Decision.Update();
+            Search.Update();
+            Memory.Update();
+            EnemyController.Update();
+            FriendlyFireClass.Update();
+            Vision.Update();
+            Equipment.Update();
+            Mover.Update();
+            BotStuck.Update();
+            Hearing.Update();
+            Talk.Update();
+            Cover.Update();
+            Info.Update();
+            Squad.Update();
+            SelfActions.Update();
+            Grenade.Update();
+            Steering.Update();
+            Vault.Update();
+            Suppression.Update();
+            AimDownSightsController.Update();
+            BotHitReaction.Update();
+            SpaceAwareness.Update();
+            Medical.Update();
+
+            //BotOwner.DoorOpener.Update();
+            UpdateGoalTarget();
+
+            if (_nextCheckReloadTime < Time.time)
+            {
+                _nextCheckReloadTime = Time.time + 0.5f;
+                if (!BotOwner.WeaponManager.HaveBullets)
                 {
-                    return;
+                    SelfActions.TryReload();
                 }
+            }
 
-                DoorOpener.Update();
-                Decision.Update();
-                Search.Update();
-                Memory.Update();
-                EnemyController.Update();
-                FriendlyFireClass.Update();
-                Vision.Update();
-                Equipment.Update();
-                Mover.Update();
-                BotStuck.Update();
-                Hearing.Update();
-                Talk.Update();
-                Cover.Update();
-                Info.Update();
-                Squad.Update();
-                SelfActions.Update();
-                Grenade.Update();
-                Steering.Update();
-                Vault.Update();
-                Suppression.Update();
-                AimDownSightsController.Update();
-                BotHitReaction.Update();
-                SpaceAwareness.Update();
-                Medical.Update();
+            if (BotOwner.WeaponManager.Reload.Reloading)
+            {
+                BotOwner.WeaponManager.Reload.Reload();
+            }
 
-                //BotOwner.DoorOpener.Update(); 
-                UpdateGoalTarget();
-
-                if (_nextCheckReloadTime < Time.time)
-                {
-                    _nextCheckReloadTime = Time.time + 0.5f;
-                    if (!BotOwner.WeaponManager.HaveBullets)
-                    {
-                        SelfActions.TryReload();
-                    }
-                }
-
-                if (ManualShootReason != EShootReason.None && (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 1f < Time.time))
-                {
-                    Shoot(false, Vector3.zero);
-                }
+            if (ManualShootReason != EShootReason.None && (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 1f < Time.time))
+            {
+                Shoot(false, Vector3.zero);
             }
         }
 
         private float _nextCheckReloadTime;
         public SAINDoorOpener DoorOpener { get; private set; }
         public bool PatrolDataPaused { get; private set; }
+
         public bool IsHumanActiveEnemy
         {
             get
@@ -224,11 +227,12 @@ namespace SAIN.SAINComponent
                 return false;
             }
         }
+
         public bool Extracting { get; set; }
 
         private void handlePatrolData()
         {
-            if (CurrentTargetPosition == null 
+            if (CurrentTargetPosition == null
                 && !Extracting)
             {
                 PatrolDataPaused = false;
@@ -253,6 +257,7 @@ namespace SAIN.SAINComponent
         private bool _speedReset;
         public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
         public bool BotIsAlive => Player?.HealthController?.IsAlive == true;
+
         public float DistanceToAimTarget
         {
             get
@@ -335,6 +340,7 @@ namespace SAIN.SAINComponent
                 }
             }
         }
+
         public bool CombatLayersActive { get; private set; }
 
         private float RecheckTimer = 0f;
@@ -404,7 +410,7 @@ namespace SAIN.SAINComponent
                         BotOwner.Memory.GoalTarget.Clear();
                         BotOwner.CalcGoal();
                     }
-                    else if (BotOwner.Memory.GoalTarget.CreatedTime > 120f 
+                    else if (BotOwner.Memory.GoalTarget.CreatedTime > 120f
                         && Enemy == null
                         && Decision.CurrentSoloDecision != SoloDecision.Search)
                     {
@@ -513,23 +519,24 @@ namespace SAIN.SAINComponent
         public SAINBotGrenadeClass Grenade { get; private set; }
         public SAINSteeringClass Steering { get; private set; }
 
-        public bool IsDead => 
-            BotOwner == null 
-            || BotOwner.IsDead == true 
-            || Player == null 
+        public bool IsDead =>
+            BotOwner == null
+            || BotOwner.IsDead == true
+            || Player == null
             || Player.HealthController.IsAlive == false;
 
         public bool BotActive =>
             IsDead == false
             && BotOwner.isActiveAndEnabled
-            //&& BotOwner.enabled 
-            //&& Player.enabled 
+            //&& BotOwner.enabled
+            //&& Player.enabled
             && BotOwner.BotState == EBotState.Active;
-            //&& BotOwner.StandBy.StandByType == BotStandByType.active 
-            //&& BotOwner.isActiveAndEnabled ;
 
-        public bool GameIsEnding => 
-            Singleton<IBotGame>.Instance == null 
+        //&& BotOwner.StandBy.StandByType == BotStandByType.active
+        //&& BotOwner.isActiveAndEnabled ;
+
+        public bool GameIsEnding =>
+            Singleton<IBotGame>.Instance == null
             || Singleton<IBotGame>.Instance.Status == GameStatus.Stopping;
 
         public Vector3 Position => Person.Position;

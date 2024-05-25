@@ -1,16 +1,18 @@
 ﻿using EFT;
+using SAIN.BotController.Classes;
 using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
     public class SAINDecisionClass : SAINBase, ISAINClass
     {
-        public SAINDecisionClass(Bot sain) : base(sain)
+        public SAINDecisionClass(BotComponent sain) : base(sain)
         {
             SelfActionDecisions = new SelfActionDecisionClass(sain);
             EnemyDecisions = new EnemyDecisionClass(sain);
@@ -20,9 +22,9 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnDecisionMade;
 
-        public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnSAINStart;
+        public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnSAINActivated;
 
-        public event Action<float> OnSAINEnd;
+        public event Action<float> OnSAINDeactivated;
 
         public bool SAINActive => CurrentSoloDecision != SoloDecision.None
                 || CurrentSelfDecision != SelfDecision.None
@@ -60,72 +62,12 @@ namespace SAIN.SAINComponent.Classes.Decision
                 {
                     _nextGetDecisionTime = Time.time;
                     EnemyDistance = SAINBot.HasEnemy ? SAINBot.Enemy.CheckPathDistance() : EnemyPathDistance.NoEnemy;
-                    GetDecision();
+                    getDecision();
                 }
                 yield return null;
             }
         }
 
-        private bool shallDogfight()
-        {
-            if (CurrentSoloDecision == SoloDecision.DogFight
-                && DogFightTarget != null)
-            {
-                checkClearDogFightTarget();
-                if (DogFightTarget != null)
-                {
-                    return true;
-                }
-            }
-            DogFightTarget = findDogFightTarget();
-            return DogFightTarget != null;
-        }
-
-        private void checkClearDogFightTarget()
-        {
-            if (DogFightTarget == null)
-            {
-                return;
-            }
-            if (DogFightTarget.Player?.HealthController.IsAlive == false)
-            {
-                DogFightTarget = null;
-                return;
-            }
-            if (DogFightTarget.RealDistance > _dogFightEndDist)
-            {
-                DogFightTarget = null;
-                return;
-            }
-            if (!DogFightTarget.IsVisible && DogFightTarget.TimeSinceSeen > 3f)
-            {
-                DogFightTarget = null;
-                return;
-            }
-        }
-
-        private SAINEnemy findDogFightTarget()
-        {
-            var enemies = SAINBot.EnemyController.Enemies;
-            foreach (var enemy in enemies)
-            {
-                if (shallDogFightEnemy(enemy.Value))
-                {
-                    return enemy.Value;
-                }
-            }
-            return null;
-        }
-
-        public SAINEnemy DogFightTarget { get; set; }
-
-        private bool shallDogFightEnemy(SAINEnemy enemy)
-        {
-            return enemy?.IsValid == true && enemy.IsVisible && enemy.RealDistance < _dogFightStartDist;
-        }
-
-        private float _dogFightStartDist = 8f;
-        private float _dogFightEndDist = 12f;
 
         private float _nextGetDecisionTime;
         private const float getDecisionFreq = 0.0f;
@@ -154,17 +96,17 @@ namespace SAIN.SAINComponent.Classes.Decision
         public float ChangeDecisionTime { get; private set; }
         public float TimeSinceChangeDecision => Time.time - ChangeDecisionTime;
 
-        public void ResetDecisions()
-        {
-            UpdateDecisionProperties(SoloDecision.None, SquadDecision.None, SelfDecision.None);
-            BotOwner.CalcGoal();
-        }
-
-        private void GetDecision()
+        private void getDecision()
         {
             if (shallDogfight())
             {
-                UpdateDecisionProperties(SoloDecision.DogFight, SquadDecision.None, SelfDecision.None);
+                setDecision(SoloDecision.DogFight, SquadDecision.None, SelfDecision.None);
+                return;
+            }
+
+            if (shallAvoidGrenade())
+            {
+                setDecision(SoloDecision.AvoidGrenade, SquadDecision.None, SelfDecision.None);
                 return;
             }
 
@@ -173,29 +115,35 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return;
             }
 
-            SelfActionDecisions.GetDecision(out SelfDecision selfDecision);
-            SquadDecisions.GetDecision(out SquadDecision squadDecision);
+            if (SelfActionDecisions.GetDecision(out SelfDecision selfDecision))
+            {
+                setDecision(SoloDecision.Retreat, SquadDecision.None, selfDecision);
+                return;
+            }
 
-            if (CheckStuckDecision(out SoloDecision soloDecision))
+            if (SquadDecisions.GetDecision(out SquadDecision squadDecision))
             {
+                setDecision(SoloDecision.None, squadDecision, SelfDecision.None);
+                return;
             }
-            else if (EnemyDecisions.GetDecision(out soloDecision))
-            {
-            }
-            //else if (GoalTargetDecisions.GetDecision(out soloDecision))
+
+            //if (CheckStuckDecision(out SoloDecision soloDecision))
             //{
+            //    setDecision(soloDecision, SquadDecision.None, SelfDecision.None);
+            //    return;
             //}
 
-            UpdateDecisionProperties(soloDecision, squadDecision, selfDecision);
-        }
-
-        private void UpdateDecisionProperties(SoloDecision solo, SquadDecision squad, SelfDecision self)
-        {
-            if (self != SelfDecision.None)
+            if (EnemyDecisions.GetDecision(out SoloDecision soloDecision))
             {
-                solo = SoloDecision.Retreat;
+                setDecision(soloDecision, SquadDecision.None, SelfDecision.None);
+                return;
             }
 
+            setDecision(SoloDecision.None, SquadDecision.None, SelfDecision.None);
+        }
+
+        private void setDecision(SoloDecision solo, SquadDecision squad, SelfDecision self)
+        {
             if (SAINPlugin.ForceSoloDecision != SoloDecision.None)
             {
                 solo = SAINPlugin.ForceSoloDecision;
@@ -209,80 +157,231 @@ namespace SAIN.SAINComponent.Classes.Decision
                 self = SAINPlugin.ForceSelfDecision;
             }
 
-            OldSoloDecision = CurrentSoloDecision;
+            bool newDecision = checkForNewDecision(solo, squad, self);
+
             CurrentSoloDecision = solo;
-
-            OldSquadDecision = CurrentSquadDecision;
             CurrentSquadDecision = squad;
-
-            OldSelfDecision = CurrentSelfDecision;
             CurrentSelfDecision = self;
-
-            CheckForNewDecisions();
-        }
-
-        private void CheckForNewDecisions()
-        {
-            bool newDecision = false;
-            float time = Time.time;
-
-            if (CurrentSoloDecision != OldSoloDecision)
-            {
-                ChangeDecisionTime = time;
-                newDecision = true;
-            }
-            if (CurrentSelfDecision != OldSelfDecision)
-            {
-                ChangeSelfDecisionTime = time;
-                newDecision = true;
-            }
-            if (CurrentSquadDecision != OldSquadDecision)
-            {
-                ChangeSquadDecisionTime = time;
-                newDecision = true;
-            }
 
             if (newDecision)
             {
-                OnDecisionMade?.Invoke(CurrentSoloDecision, CurrentSquadDecision, CurrentSelfDecision, time);
-
-                // If previously all decisions were none, sain has now started.
-                if (OldSoloDecision == SoloDecision.None
-                    && OldSelfDecision == SelfDecision.None
-                    && OldSquadDecision == SquadDecision.None)
-                {
-                    OnSAINStart?.Invoke(CurrentSoloDecision, CurrentSquadDecision, CurrentSelfDecision, time);
-                }
-
-                // Are all decisions None? Then SAIN is no longer active.
-                if (CurrentSoloDecision == SoloDecision.None
-                    && CurrentSelfDecision == SelfDecision.None
-                    && CurrentSquadDecision == SquadDecision.None)
-                {
-                    OnSAINEnd?.Invoke(time);
-                }
+                ChangeDecisionTime = Time.time;
+                OnDecisionMade?.Invoke(solo, squad, self, Time.time);
+                checkSAINStart(); 
+                checkSAINEnd();
             }
         }
 
+        private void checkSAINStart()
+        {
+            // If previously all decisions were none, sain has now started.
+            if (OldSoloDecision == SoloDecision.None
+                && OldSelfDecision == SelfDecision.None
+                && OldSquadDecision == SquadDecision.None)
+            {
+                OnSAINActivated?.Invoke(CurrentSoloDecision, CurrentSquadDecision, CurrentSelfDecision, Time.time);
+            }
+        }
+
+        private void checkSAINEnd()
+        {
+            // Are all decisions None? Then SAIN is no longer active.
+            if (CurrentSoloDecision == SoloDecision.None
+                && CurrentSelfDecision == SelfDecision.None
+                && CurrentSquadDecision == SquadDecision.None)
+            {
+                OnSAINDeactivated?.Invoke(Time.time);
+            }
+        }
+
+        private bool checkForNewDecision(SoloDecision solo, SquadDecision squad, SelfDecision self)
+        {
+            bool newDecision = false;
+            float time = Time.time;
+            if (CurrentSoloDecision != solo)
+            {
+                ChangeSoloDecisionTime = time;
+                OldSoloDecision = CurrentSoloDecision;
+                newDecision = true;
+            }
+            if (CurrentSquadDecision != squad)
+            {
+                ChangeSquadDecisionTime = time;
+                OldSquadDecision = CurrentSquadDecision;
+                newDecision = true;
+            }
+            if (CurrentSelfDecision != self)
+            {
+                ChangeSelfDecisionTime = time;
+                OldSelfDecision = CurrentSelfDecision;
+                newDecision = true;
+            }
+            return newDecision;
+        }
+
+        public void ResetDecisions()
+        {
+            setDecision(SoloDecision.None, SquadDecision.None, SelfDecision.None);
+            BotOwner.CalcGoal();
+        }
+
+        private bool shallDogfight()
+        {
+            if (CurrentSoloDecision == SoloDecision.DogFight
+                && DogFightTarget != null)
+            {
+                checkClearDogFightTarget();
+                if (DogFightTarget != null)
+                {
+                    return true;
+                }
+            }
+            DogFightTarget = findDogFightTarget();
+            return DogFightTarget != null;
+        }
+
+        private void checkClearDogFightTarget()
+        {
+            if (DogFightTarget == null)
+            {
+                return;
+            }
+            if (DogFightTarget.Player?.HealthController.IsAlive == false)
+            {
+                DogFightTarget = null;
+                return;
+            }
+            float pathDist = DogFightTarget.Path.PathDistance;
+            if (pathDist > _dogFightEndDist)
+            {
+                DogFightTarget = null;
+                return;
+            }
+            if (!DogFightTarget.IsVisible && DogFightTarget.TimeSinceSeen > 2f)
+            {
+                DogFightTarget = null;
+                return;
+            }
+        }
+
+        private SAINEnemy findDogFightTarget()
+        {
+            var enemies = SAINBot.EnemyController.Enemies;
+            foreach (var enemy in enemies)
+            {
+                if (shallDogFightEnemy(enemy.Value))
+                {
+                    return enemy.Value;
+                }
+            }
+            return null;
+        }
+
+        public SAINEnemy DogFightTarget { get; set; }
+
+        private bool shallDogFightEnemy(SAINEnemy enemy)
+        {
+            return enemy?.IsValid == true && enemy.IsVisible && enemy.Path.PathDistance < _dogFightStartDist;
+        }
+
+        private float _dogFightStartDist = 4f;
+        private float _dogFightEndDist = 10f;
+
+        private bool shallAvoidGrenade()
+        {
+            Vector3? grenadePos = SAINBot.Grenade.GrenadeDangerPoint;
+            if (grenadePos != null)
+            {
+                float pathDist = calcPathDist(grenadePos.Value);
+                return checkDistances(pathDist, (grenadePos.Value - SAINBot.Position).magnitude);
+            }
+            return false;
+        }
+
+        private bool checkDistances(float pathDist, float straightDist)
+        {
+            if (pathDist > straightDist * 1.5f)
+            {
+                return false;
+            }
+            if (CurrentSoloDecision == SoloDecision.AvoidGrenade)
+            {
+                if (straightDist < 5f)
+                {
+                    //return true;
+                }
+                if (pathDist < 15f)
+                {
+                    return true;
+                }
+            }
+            if (straightDist < 3f)
+            {
+                //return true;
+            }
+            if (pathDist < 10f)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private float calcPathDist(Vector3 point)
+        {
+            if (_nextCalcPathTime < Time.time)
+            {
+                _nextCalcPathTime = Time.time + _calcPathFreq;
+                _grenadePathDist = calcPathAndReturnDist(point);
+            }
+            return _grenadePathDist;
+        }
+
+        private float _nextCalcPathTime;
+        private float _calcPathFreq = 0.5f;
+        private float _grenadePathDist;
+
+        private float calcPathAndReturnDist(Vector3 point)
+        {
+            Vector3 botPosition = SAINBot.Position;
+            if (NavMesh.SamplePosition(point, out var hit, 5f, -1))
+            {
+                if (NavMesh.SamplePosition(botPosition, out var botHit, 0.5f, -1))
+                {
+                    botPosition = botHit.position;
+                }
+                NavMeshPath path = new NavMeshPath();
+                if (NavMesh.CalculatePath(botPosition, hit.position, -1, path))
+                {
+                    return path.CalculatePathLength();
+                }
+            }
+            return (botPosition - point).magnitude;
+        }
+
+        public float ChangeSoloDecisionTime { get; private set; }
         public float ChangeSelfDecisionTime { get; private set; }
         public float ChangeSquadDecisionTime { get; private set; }
 
         private bool CheckContinueRetreat()
         {
             float timeChangeDec = SAINBot.Decision.TimeSinceChangeDecision;
+            if (timeChangeDec > 10)
+            {
+                return false;
+            }
             bool Running = CurrentSoloDecision == SoloDecision.Retreat || CurrentSoloDecision == SoloDecision.RunToCover;
-            if (Running && !SAINBot.BotStuck.BotHasChangedPosition && SAINBot.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 0.5f)
+            if (Running && !SAINBot.BotStuck.BotHasChangedPosition && SAINBot.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 2f)
             {
                 return false;
             }
             CoverPoint pointInUse = SAINBot.Cover.CoverInUse;
-            if (pointInUse != null)
+            if (pointInUse != null && pointInUse.IsBad == false)
             {
                 if (pointInUse.Status == CoverStatus.InCover)
                 {
                     return false;
                 }
-                return BotOwner.Mover.IsMoving && timeChangeDec < 30f;
+                return BotOwner.Mover.IsMoving;
             }
             return false;
         }

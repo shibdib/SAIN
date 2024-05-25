@@ -83,14 +83,18 @@ namespace SAIN.Patches.Shoot
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref Vector3 ____recoilOffset, ref BotOwner ____owner)
+        public static bool PatchPrefix(BotOwner ____owner)
         {
+            if (SAINPlugin.IsBotExluded(____owner))
+            {
+                return true;
+            }
             if (SAINPlugin.BotController == null)
             {
                 Logger.LogError($"Bot Controller Null in [{nameof(RecoilPatch)}]");
                 return true;
             }
-            if (SAINPlugin.BotController.GetSAIN(____owner, out Bot sain))
+            if (SAINPlugin.BotController.GetSAIN(____owner, out BotComponent sain))
             {
                 return false;
             }
@@ -109,14 +113,18 @@ namespace SAIN.Patches.Shoot
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref Vector3 ____recoilOffset, ref BotOwner ____owner)
+        public static bool PatchPrefix(ref Vector3 ____recoilOffset, BotOwner ____owner)
         {
+            if (SAINPlugin.IsBotExluded(____owner))
+            {
+                return true;
+            }
             if (SAINPlugin.BotController == null)
             {
                 Logger.LogError($"Bot Controller Null in [{nameof(LoseRecoilPatch)}]");
                 return true;
             }
-            if (SAINPlugin.BotController.GetSAIN(____owner, out Bot sain))
+            if (SAINPlugin.BotController.GetSAIN(____owner, out BotComponent sain))
             {
                 var recoil = sain?.Info?.WeaponInfo?.Recoil;
                 if (recoil != null)
@@ -140,14 +148,18 @@ namespace SAIN.Patches.Shoot
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref BotOwner ____owner)
+        public static bool PatchPrefix(BotOwner ____owner)
         {
+            if (SAINPlugin.IsBotExluded(____owner))
+            {
+                return true;
+            }
             if (SAINPlugin.BotController == null)
             {
                 Logger.LogError($"Bot Controller Null in [{nameof(EndRecoilPatch)}]");
                 return true;
             }
-            if (SAINPlugin.BotController.GetSAIN(____owner, out Bot sain))
+            if (SAINPlugin.BotController.GetSAIN(____owner, out BotComponent sain))
             {
                 return false;
             }

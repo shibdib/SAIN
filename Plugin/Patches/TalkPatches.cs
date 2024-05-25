@@ -25,7 +25,7 @@ namespace SAIN.Patches.Talk
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref Player __instance, ref EPhraseTrigger @event, ref ETagStatus mask, ref bool aggressive)
+        public static bool PatchPrefix(Player __instance, EPhraseTrigger @event, ETagStatus mask, bool aggressive)
         {
             if (__instance?.HealthController?.IsAlive == false)
             {
@@ -54,7 +54,7 @@ namespace SAIN.Patches.Talk
             {
                 return true;
             }
-            if (SAINPlugin.IsBotExluded(botOwner.Profile.Info.Settings.Role))
+            if (SAINPlugin.IsBotExluded(botOwner))
             {
                 return true;
             }
@@ -81,7 +81,7 @@ namespace SAIN.Patches.Talk
             {
                 return false;
             }
-            if (SAINPlugin.IsBotExluded(___botOwner_0.Profile.Info.Settings.Role))
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
             {
                 return true;
             }
@@ -107,7 +107,7 @@ namespace SAIN.Patches.Talk
             {
                 return true;
             }
-            if (SAINPlugin.IsBotExluded(___botOwner_0.Profile.Info.Settings.Role))
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
             {
                 return true;
             }

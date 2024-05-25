@@ -23,6 +23,16 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0.1f, 5f, 100f)]
         public float GlobalDifficultyModifier = 1f;
 
+        [Name("Vanilla Bosses Except Goons")]
+        [Description("REQUIRES RESTART OF GAME. Bosses and boss followers will have vanilla ai behavior, except for Goons.")]
+        public bool VanillaBosses = false;
+
+        [Name("Vanilla Scavs")]
+        [Description("REQUIRES RESTART OF GAME. Scavs will have vanilla ai behavior.")]
+        public bool VanillaScavs = false;
+
+        public bool VanillaPlayerScavs = false;
+
         [Name("Performance Mode")]
         [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN. Can cause bots to take too long to find cover to go to.")]
         [Default(false)]

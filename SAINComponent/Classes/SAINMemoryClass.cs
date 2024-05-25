@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINMemoryClass : SAINBase, ISAINClass
     {
-        public SAINMemoryClass(Bot sain) : base(sain)
+        public SAINMemoryClass(BotComponent sain) : base(sain)
         {
             Decisions = new DecisionWrapper(sain);
             Health = new HealthTracker(sain);
@@ -101,7 +101,7 @@ namespace SAIN.SAINComponent.Classes
         public AIPlaceInfo BotZone => BotOwner.AIData.PlaceInfo;
         public bool IsIndoors { get; private set; }
 
-        public LocationTracker(Bot sain) : base(sain)
+        public LocationTracker(BotComponent sain) : base(sain)
         {
         }
 
@@ -130,7 +130,7 @@ namespace SAIN.SAINComponent.Classes
         public bool Dying => HealthStatus == ETagStatus.Dying;
         public ETagStatus HealthStatus { get; private set; }
 
-        public HealthTracker(Bot sain) : base(sain)
+        public HealthTracker(BotComponent sain) : base(sain)
         {
         }
 

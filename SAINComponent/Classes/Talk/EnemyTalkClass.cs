@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 {
     public class EnemyTalk : SAINBase, ISAINClass
     {
-        public EnemyTalk(Bot bot) : base(bot)
+        public EnemyTalk(BotComponent bot) : base(bot)
         {
         }
 

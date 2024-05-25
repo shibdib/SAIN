@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINBotGrenadeClass : SAINBase, ISAINClass
     {
-        public SAINBotGrenadeClass(Bot sain) : base(sain)
+        public SAINBotGrenadeClass(BotComponent sain) : base(sain)
         {
         }
 
@@ -25,24 +25,22 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            GrenadeDangerPoint = null;
-            for (int i = ActiveGrenades.Count - 1; i >= 0; i--)
-            {
-                var tracker = ActiveGrenades[i];
-                if (tracker == null || tracker.Grenade == null)
-                {
-                    ActiveGrenades.RemoveAt(i);
-                }
-            }
+            GrenadeDangerPoint = findGrenadeDangerPoint();
+        }
+
+        private Vector3? findGrenadeDangerPoint()
+        {
+            ActiveGrenades.RemoveAll(x => x == null || x.Grenade == null);
             for (int i = 0; i < ActiveGrenades.Count; i++)
             {
                 GrenadeTracker tracker = ActiveGrenades[i];
                 if (tracker != null && tracker.Grenade != null && tracker.GrenadeSpotted)
                 {
-                    GrenadeDangerPoint = tracker.Grenade.transform.position;
-                    break;
+                    DangerGrenade = tracker.Grenade;
+                    return tracker.DangerPoint;
                 }
             }
+            return null;
         }
 
         public void Dispose()
@@ -50,7 +48,7 @@ namespace SAIN.SAINComponent.Classes
         }
 
         public Vector3? GrenadeDangerPoint { get; private set; }
-
+        public Grenade DangerGrenade { get; private set; }
 
         public GrenadeThrowType GetThrowType(out GrenadeThrowDirection direction, out Vector3 ThrowAtPoint)
         {
@@ -89,7 +87,7 @@ namespace SAIN.SAINComponent.Classes
             }
             else
             {
-                direction= GrenadeThrowDirection.None;
+                direction = GrenadeThrowDirection.None;
                 return GrenadeThrowType.None;
             }
         }

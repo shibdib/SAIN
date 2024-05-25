@@ -19,17 +19,7 @@ namespace SAIN.Layers.Combat.Solo
         public override void Update()
         {
             SAINBot.Steering.SteerByPriority();
-
-            /*
-            if (SAIN.Cover.DuckInCover())
-            {
-                if (_stopMoveTime < Time.time)
-                {
-                    SAIN.Mover.StopMove();
-                }
-            }
-            */
-
+            SAINBot.Mover.Pose.SetPoseToCover();
             Shoot.Update();
 
             return;
@@ -48,6 +38,7 @@ namespace SAIN.Layers.Combat.Solo
         public override void Start()
         {
             SAINBot.Mover.StopMove();
+            SAINBot.Mover.Lean.HoldLean(0.5f);
             BotOwner.Mover.SprintPause(0.5f);
             _stopMoveTime = Time.time + 0.5f;
         }

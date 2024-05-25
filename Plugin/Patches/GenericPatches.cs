@@ -121,6 +121,10 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0)
         {
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            {
+                return true;
+            }
             if (SAINPlugin.GetSAIN(___botOwner_0, out var sain, nameof(StopSetToNavMeshPatch)) && sain.Mover.SprintController.Running)
             {
                 return false;
@@ -141,21 +145,6 @@ namespace SAIN.Patches.Generic
         {
             // Try to turn a gun's light off before swapping weapon.
             ___botOwner_0?.BotLight?.TurnOff(false, true);
-        }
-    }
-
-    public class ShallRunAwayGrenadePatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(BotBewareGrenade), "ShallRunAway");
-        }
-
-        [PatchPrefix]
-        public static bool PatchPrefix(ref bool __result)
-        {
-            __result = false;
-            return false;
         }
     }
 
@@ -251,27 +240,6 @@ namespace SAIN.Patches.Generic
         }
     }
 
-    internal class GetHitPatch : ModulePatch
-    {
-        private static Type _aimingDataType;
-        private static MethodInfo _aimingDataGetHit;
-
-        protected override MethodBase GetTargetMethod()
-        {
-            _aimingDataType = PatchConstants.EftTypes.Single(x => x.GetProperty("LastSpreadCount") != null && x.GetProperty("LastAimTime") != null);
-            _aimingDataGetHit = AccessTools.Method(_aimingDataType, "GetHit");
-            return _aimingDataGetHit;
-        }
-
-        [PatchPrefix]
-        public static void PatchPrefix(ref BotOwner ___botOwner_0, DamageInfo damageInfo)
-        {
-            if (SAINPlugin.GetSAIN(___botOwner_0, out var sain, nameof(GetHitPatch)))
-            {
-            }
-        }
-    }
-
     internal class ForceNoHeadAimPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(EnemyInfo).GetMethod("method_7");
@@ -310,7 +278,7 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            if (SAINPlugin.IsBotExluded(__instance.Owner.Profile.Info.Settings.Role))
+            if (SAINPlugin.IsBotExluded(__instance.Owner))
             {
                 return;
             }
@@ -325,7 +293,7 @@ namespace SAIN.Patches.Generic
             BotsGroup group = enemyInfo.GroupOwner;
             for (int i = 0; i < group.MembersCount; i++)
             {
-                if (SAINPlugin.GetSAIN(group.Member(i), out Bot sain, nameof(ShallKnowEnemyPatch))
+                if (SAINPlugin.GetSAIN(group.Member(i), out BotComponent sain, nameof(ShallKnowEnemyPatch))
                     && EnemySenseRecently(sain, enemyInfo))
                 {
                     return true;
@@ -335,7 +303,7 @@ namespace SAIN.Patches.Generic
             return false;
         }
 
-        public static bool EnemySenseRecently(Bot sain, EnemyInfo enemyInfo)
+        public static bool EnemySenseRecently(BotComponent sain, EnemyInfo enemyInfo)
         {
             SAINEnemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
             if (myEnemy?.IsValid == true)
@@ -367,7 +335,7 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            if (SAINPlugin.IsBotExluded(__instance.Owner.Profile.Info.Settings.Role))
+            if (SAINPlugin.IsBotExluded(__instance.Owner))
             {
                 return;
             }
@@ -385,7 +353,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ___botOwner_0)
         {
-            if (SAINPlugin.IsBotExluded(___botOwner_0.Profile.Info.Settings.Role))
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
             {
                 return true;
             }
@@ -438,7 +406,7 @@ namespace SAIN.Patches.Generic
             Vector3 danger = Vector.DangerPoint(position, force, mass);
             foreach (BotOwner bot in __instance.Bots.BotOwners)
             {
-                if (SAINPlugin.IsBotExluded(bot.Profile.Info.Settings.Role))
+                if (SAINPlugin.IsBotExluded(bot))
                 {
                     bot.BewareGrenade.AddGrenadeDanger(danger, grenade);
                 }
