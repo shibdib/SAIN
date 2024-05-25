@@ -42,6 +42,10 @@ namespace SAIN.SAINComponent.Classes.Mover
                 moveSettings.FIRST_TURN_SPEED = 150f;
                 moveSettings.FIRST_TURN_BIG_SPEED = 240f;
             }
+            if (!SAINBot.SAINLayersActive)
+            {
+                return;
+            }
             if (SAINBot.CurrentTargetPosition != null)
             {
                 updateLookDirection();

@@ -53,12 +53,12 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            if (!SAINBot.BotActive || SAINBot.GameIsEnding)
+            if (!SAINBot.BotActive || SAINBot.GameIsEnding || !SAINBot.SAINLayersActive)
             {
                 ActivateCoverFinder(false);
                 return;
             }
-            ActivateCoverFinder(SAINBot.Decision.SAINActive);
+            ActivateCoverFinder(SAINBot.Decision.HasDecision);
             createDebug();
         }
 

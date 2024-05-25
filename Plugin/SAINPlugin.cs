@@ -201,7 +201,7 @@ namespace SAIN
                 typeof(Patches.Generic.NoTeleportPatch),
                 typeof(Patches.Generic.ShallKnowEnemyPatch),
                 typeof(Patches.Generic.ShallKnowEnemyLatePatch),
-                typeof(Patches.Generic.SkipLookForCoverPatch),
+                //typeof(Patches.Generic.SkipLookForCoverPatch),
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
 
                 typeof(Patches.Hearing.LootingSoundPatch),

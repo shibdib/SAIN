@@ -110,11 +110,12 @@ namespace SAIN.Layers.Combat.Solo
 
         public override bool IsActive()
         {
-            if (SAINBot?.BotActive == true)
+            bool active = SAINBot?.BotActive == true && CurrentDecision != SoloDecision.None;
+            if (SAINBot != null && SAINBot.SAINSoloActive != active)
             {
-                return CurrentDecision != SoloDecision.None;
+                SAINBot.SAINSoloActive = active;
             }
-            return false;
+            return active;
         }
 
         public override bool IsCurrentActionEnding()

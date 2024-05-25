@@ -35,12 +35,16 @@ namespace SAIN.Layers
 
         public override bool IsActive()
         {
-            if (SAINBot?.BotActive == true)
+            bool active = 
+                SAINBot?.BotActive == true &&
+                (CurrentDecision == SoloDecision.DogFight ||
+                CurrentDecision == SoloDecision.AvoidGrenade);
+
+            if (SAINBot != null && SAINBot.SAINAvoidActive != active)
             {
-                SoloDecision decision = CurrentDecision;
-                return decision == SoloDecision.DogFight || decision == SoloDecision.AvoidGrenade;
+                SAINBot.SAINAvoidActive = active;
             }
-            return false;
+            return active;
         }
 
         public override bool IsCurrentActionEnding()

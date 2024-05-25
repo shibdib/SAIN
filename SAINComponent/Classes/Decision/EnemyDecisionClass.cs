@@ -167,7 +167,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             if (_nextGrenadeCheckTime < Time.time && 
                 canTryThrow(enemy))
             {
-                _nextGrenadeCheckTime = Time.time + 0.5f;
+                _nextGrenadeCheckTime = Time.time + 0.25f;
                 if (findThrowTarget(enemy))
                 {
                     return true;
@@ -183,26 +183,36 @@ namespace SAIN.SAINComponent.Classes.Decision
                 && enemy.TimeSinceLastKnownUpdated < 120f;
         }
 
+        int throwTarget = 0;
+
         private bool findThrowTarget(SAINEnemy enemy)
         {
-            if (enemy.LastCornerToEnemy != null &&
+            throwTarget++;
+            if (throwTarget == 1 && 
+                enemy.LastCornerToEnemy != null &&
                 enemy.CanSeeLastCornerToEnemy &&
                 tryThrowToPos(enemy.LastCornerToEnemy.Value, "LastCornerToEnemy"))
             {
                 return true;
             }
-            if (enemy.Path.BlindCornerToEnemy != null &&
+            if (throwTarget == 2 && 
+                enemy.Path.BlindCornerToEnemy != null &&
                 enemy.LastKnownPosition != null &&
                 (enemy.Path.BlindCornerToEnemy.Value - enemy.LastKnownPosition.Value).sqrMagnitude < 5f * 5f &&
                 tryThrowToPos(enemy.Path.BlindCornerToEnemy.Value, "BlindCornerToEnemy"))
             {
                 return true;
             }
-            if (enemy.LastKnownPosition != null &&
+            if (throwTarget == 3 && 
+                enemy.LastKnownPosition != null &&
                 tryThrowToPos(enemy.LastKnownPosition.Value, "LastKnownPosition"))
             {
                 return true;
             }
+
+            if (throwTarget >= 3)
+                throwTarget = 0;
+
             return false;
         }
 

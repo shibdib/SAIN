@@ -133,6 +133,12 @@ namespace SAIN.SAINComponent
 
         public float TimeBotCreated { get; private set; }
 
+        public bool SAINLayersActive => SAINSoloActive || SAINSquadActive || SAINAvoidActive;
+
+        public bool SAINSoloActive { get; set; }
+        public bool SAINSquadActive { get; set; }
+        public bool SAINAvoidActive { get; set; }
+
         private void Update()
         {
             if (BotOwner == null || this == null || Player == null)

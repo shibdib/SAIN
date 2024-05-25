@@ -18,7 +18,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (!SAINBot.PatrolDataPaused)
+            if (!SAINBot.PatrolDataPaused || !SAINBot.SAINLayersActive)
             {
                 return;
             }

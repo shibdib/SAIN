@@ -46,19 +46,24 @@ namespace SAIN.Layers.Combat.Squad
 
         public override bool IsActive()
         {
-            if (SAINBot?.BotActive == true)
+            bool active =
+                SAINBot?.BotActive == true &&
+                SquadDecision != SquadDecision.None &&
+                SAINBot.Decision.CurrentSelfDecision == SelfDecision.None;
+
+            if (SAINBot != null && 
+                SAINBot.SAINSquadActive != active)
             {
-                if (SAINBot.Decision.CurrentSquadDecision != SquadDecision.None
-                    && SAINBot.Decision.CurrentSelfDecision == SelfDecision.None)
-                {
-                    if (SAINBot.Cover.CoverInUse != null)
-                    {
-                        SAINBot.Cover.CoverInUse = null;
-                    }
-                    return true;
-                }
+                SAINBot.SAINSquadActive = active;
             }
-            return false;
+
+            if (active && 
+                SAINBot.Cover.CoverInUse != null)
+            {
+                SAINBot.Cover.CoverInUse = null;
+            }
+
+            return active;
         }
 
         public override bool IsCurrentActionEnding()

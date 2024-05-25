@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public event Action<float> OnSAINDeactivated;
 
-        public bool SAINActive => CurrentSoloDecision != SoloDecision.None
+        public bool HasDecision => CurrentSoloDecision != SoloDecision.None
                 || CurrentSelfDecision != SelfDecision.None
                 || CurrentSquadDecision != SquadDecision.None;
 
@@ -56,7 +56,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     yield break;
                 }
 
-                float delay = SAINActive ? getDecisionFreq : getDecisionFreqAtPeace;
+                float delay = HasDecision ? getDecisionFreq : getDecisionFreqAtPeace;
 
                 if (_nextGetDecisionTime + delay < Time.time)
                 {
