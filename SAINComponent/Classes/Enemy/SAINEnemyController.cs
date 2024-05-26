@@ -165,11 +165,13 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
             if (_enemyUpdateCoroutine == null)
             {
-                _enemyUpdateCoroutine = SAINBot.StartCoroutine(updateValidAIEnemies(2));
+                if (BotOwner.isActiveAndEnabled)
+                    _enemyUpdateCoroutine = SAINBot.StartCoroutine(updateValidAIEnemies(2));
             }
             if (_enemyHumanUpdateCoroutine == null)
             {
-                _enemyHumanUpdateCoroutine = SAINBot.StartCoroutine(updateValidHumanEnemies(1));
+                if (BotOwner.isActiveAndEnabled)
+                    _enemyHumanUpdateCoroutine = SAINBot.StartCoroutine(updateValidHumanEnemies(1));
             }
         }
 

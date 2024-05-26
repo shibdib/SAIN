@@ -41,7 +41,7 @@ namespace SAIN.Components
                     int i = 0;
                     foreach (var Bot in _localBotList)
                     {
-                        if (Bot != null)
+                        if (Bot?.BotActive == true)
                         {
                             _tempBotList.Add(Bot);
                             i++;
@@ -94,7 +94,7 @@ namespace SAIN.Components
             {
                 if (player != null 
                     && player.Transform != null 
-                    && player.Transform.Original != null 
+                    //&& player.Transform.Original != null 
                     && player.IsAI == false)
                 {
                     if (partCount == 0)
@@ -106,6 +106,11 @@ namespace SAIN.Components
             }
 
             int total = botList.Count * _humanPlayers.Count * partCount;
+
+            if (total <= 0)
+            {
+                return;
+            }
 
             NativeArray<SpherecastCommand> allSpherecastCommands = new NativeArray<SpherecastCommand>(total, Allocator.TempJob);
             NativeArray<RaycastHit> allRaycastHits = new NativeArray<RaycastHit>(total, Allocator.TempJob);
@@ -138,22 +143,19 @@ namespace SAIN.Components
                 for (int j = 0; j < _humanPlayers.Count; j++)
                 {
                     Player player = _humanPlayers[j];
-                    if (bot.BotOwner?.EnemiesController.IsEnemy(player) == true)
+                    bool lineOfSight = false;
+                    foreach (var part in player.MainParts.Values)
                     {
-                        bool lineOfSight = false;
-                        foreach (var part in player.MainParts.Values)
+                        if (!lineOfSight)
                         {
-                            if (!lineOfSight)
-                            {
-                                lineOfSight = allRaycastHits[total].collider == null;
-                            }
-                            total++;
+                            lineOfSight = allRaycastHits[total].collider == null;
                         }
-                        var sainEnemy = bot.EnemyController.GetEnemy(player.ProfileId);
-                        if (sainEnemy != null)
-                        {
-                            sainEnemy.Vision.InLineOfSight = lineOfSight;
-                        }
+                        total++;
+                    }
+                    var sainEnemy = bot.EnemyController.GetEnemy(player.ProfileId);
+                    if (sainEnemy != null)
+                    {
+                        sainEnemy.Vision.InLineOfSight = lineOfSight;
                     }
                 }
             }
@@ -171,10 +173,20 @@ namespace SAIN.Components
                 if (player != null 
                     && player.Transform != null)
                 {
+                    if (player.IsAI && 
+                        player.AIData.BotOwner?.BotState != EBotState.Active)
+                    {
+                        continue;
+                    }
                     _validPlayers.Add(player);
                 }
             }
             int total = botList.Count * _validPlayers.Count;
+
+            if (total <= 0)
+            {
+                return;
+            }
 
             NativeArray<SpherecastCommand> allSpherecastCommands = new NativeArray<SpherecastCommand>(total, Allocator.TempJob);
             NativeArray<RaycastHit> allRaycastHits = new NativeArray<RaycastHit>(total, Allocator.TempJob);
@@ -323,7 +335,7 @@ namespace SAIN.Components
 
         private readonly float SpherecastRadius = 0.025f;
         private LayerMask SightLayers => LayerMaskClass.HighPolyWithTerrainMask;
-        private readonly int MinJobSize = 6;
+        private readonly int MinJobSize = 1;
         private List<Player> Players => EFTInfo.AlivePlayers;
     }
 }

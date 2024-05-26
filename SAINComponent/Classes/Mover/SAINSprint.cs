@@ -36,7 +36,13 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
+            if (Running)
+            {
+                _timeRunning = Time.time;
+            }
         }
+
+        private float _timeRunning;
 
         public bool Running => _runToPointCoroutine != null;
 
@@ -50,9 +56,23 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
+        public bool ShallResetToNavMesh()
+        {
+            if (Running)
+            {
+                return false;
+            }
+            if (_timeRunning + 1f < Time.time)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public bool RunToPoint(Vector3 point)
         {
-            if (SAINBot.Mover.CanGoToPoint(point, out NavMeshPath path))
+            if (BotOwner.isActiveAndEnabled)
+                if (SAINBot.Mover.CanGoToPoint(point, out NavMeshPath path))
             {
                 LastRunDestination = path.corners[path.corners.Length - 1];
                 if (_runToPointCoroutine != null)
@@ -108,7 +128,8 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return false;
             }
 
-            if (SAINBot.Mover.CanGoToPoint(CurrentPath.corners[CurrentPath.corners.Length - 1], out NavMeshPath path))
+            if (BotOwner.isActiveAndEnabled)
+                if (SAINBot.Mover.CanGoToPoint(CurrentPath.corners[CurrentPath.corners.Length - 1], out NavMeshPath path))
             {
                 LastRunDestination = path.corners[path.corners.Length - 1];
                 if (_runToPointCoroutine != null)
@@ -239,8 +260,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
-        const float reachDistRunning = 1f;
-        const float reachDistRunningBuffer = 1.5f;
+        const float reachDistRunning = 0.25f;
+        const float reachDistRunningBuffer = 0.5f;
 
         private void handleSprinting(float distToCurrent)
         {

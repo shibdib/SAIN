@@ -183,9 +183,9 @@ namespace SAIN.SAINComponent
             if (GameIsEnding || !BotActive)
             {
                 //StopAllCoroutines();
+                Cover.ActivateCoverFinder(false);
                 return;
             }
-
 
             if (AILimit.LimitAIThisFrame)
             {

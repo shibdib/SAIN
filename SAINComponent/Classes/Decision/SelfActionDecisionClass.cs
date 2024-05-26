@@ -36,7 +36,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool GetDecision(out SelfDecision Decision)
         {
-            if ( SAINBot.Enemy == null && !BotOwner.Medecine.Using && LowOnAmmo(0.75f) )
+            if ( SAINBot.Enemy == null && BotOwner?.Medecine?.Using == false && LowOnAmmo(0.75f) )
             {
                 SAINBot.SelfActions.TryReload();
                 Decision = SelfDecision.None;
@@ -55,9 +55,10 @@ namespace SAIN.SAINComponent.Classes.Decision
                 }
                 else
                 {
-                    if (LastHealCheckTime < Time.time && !SAINBot.Memory.Health.Healthy)
+                    if (_nextCheckHealTime < Time.time && 
+                        !SAINBot.Memory.Health.Healthy)
                     {
-                        LastHealCheckTime = Time.time + 1f;
+                        _nextCheckHealTime = Time.time + 1f;
                         if (StartUseStims())
                         {
                             Decision = SelfDecision.Stims;
@@ -77,7 +78,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return Decision != SelfDecision.None;
         }
 
-        private float LastHealCheckTime;
+        private float _nextCheckHealTime;
 
         private bool StartRunGrenade()
         {

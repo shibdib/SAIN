@@ -46,7 +46,7 @@ namespace SAIN.SAINComponent.Classes
                 SAIN.AimDownSightsController.UpdateADSstatus();
             }
 
-            if (!tryPauseForShoot())
+            if (!tryPauseForShoot(true))
             {
                 return;
             }
@@ -54,7 +54,14 @@ namespace SAIN.SAINComponent.Classes
             aimAtEnemy();
         }
 
-        private bool tryPauseForShoot()
+        public void AllowUnpauseMove(bool value)
+        {
+            _shallUnpause = value;
+        }
+
+        bool _shallUnpause = true;
+
+        private bool tryPauseForShoot(bool shallUnpause)
         {
             if (ShallPauseForShoot())
             {
@@ -70,9 +77,9 @@ namespace SAIN.SAINComponent.Classes
                     return false;
                 }
             }
-            else if (IsMovementPaused)
+            else if (IsMovementPaused && _shallUnpause)
             {
-                BotOwner.Mover.MovementResume();
+                //BotOwner.Mover.MovementResume();
             }
             return true;
         }
@@ -97,8 +104,8 @@ namespace SAIN.SAINComponent.Classes
         public bool IsMovementPaused => BotOwner?.Mover.Pause == true;
 
         private float _nextPauseMoveTime;
-        private float _pauseMoveFrequencyMin = 1.5f;
-        private float _pauseMoveFrequencyMax = 3f;
+        private float _pauseMoveFrequencyMin = 2f;
+        private float _pauseMoveFrequencyMax = 4f;
         private float _pauseMoveDurationMin = 0.5f;
         private float _pauseMoveDurationMax = 1f;
 

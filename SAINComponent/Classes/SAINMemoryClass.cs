@@ -14,7 +14,6 @@ namespace SAIN.SAINComponent.Classes
     {
         public SAINMemoryClass(BotComponent sain) : base(sain)
         {
-            //Decisions = new DecisionWrapper(sain);
             Health = new HealthTracker(sain);
             Location = new LocationTracker(sain);
         }
@@ -29,6 +28,24 @@ namespace SAIN.SAINComponent.Classes
             Location.Update();
             checkResetUnderFire();
         }
+
+        private void checkVisiblePlayers()
+        {
+            if (_nextCheckVisPlayersTime < Time.time)
+            {
+                _nextCheckVisPlayersTime = Time.time + 10f;
+                Logger.LogDebug($"Checking Visible {VisiblePlayers.Count} Players for {BotOwner.name}...");
+                foreach (var player in VisiblePlayers)
+                {
+                    if (player != null)
+                    {
+                        Logger.LogDebug($"Visible for {BotOwner.name} = {player.name} : {player.Side} : {player.ProfileId} : Is Friendly? {SAINBot.EnemyController.IsPlayerFriendly(player)}");
+                    }
+                }
+            }
+        }
+
+        private float _nextCheckVisPlayersTime;
 
         public Action<SAINEnemy> OnEnemyHeardFromPeace { get; set; }
 
@@ -85,7 +102,7 @@ namespace SAIN.SAINComponent.Classes
         {
         }
 
-        public List<Player> VisiblePlayers = new List<Player>();
+        public readonly List<Player> VisiblePlayers = new List<Player>();
 
         public Vector3 UnderFireFromPosition { get; set; }
 

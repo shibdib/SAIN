@@ -53,7 +53,9 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            if (!SAINBot.BotActive || SAINBot.GameIsEnding || !SAINBot.SAINLayersActive)
+            if (!SAINBot.BotActive || 
+                SAINBot.GameIsEnding || 
+                !SAINBot.SAINLayersActive)
             {
                 ActivateCoverFinder(false);
                 return;
@@ -124,7 +126,7 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private void ActivateCoverFinder(bool value)
+        public void ActivateCoverFinder(bool value)
         {
             if (value)
             {

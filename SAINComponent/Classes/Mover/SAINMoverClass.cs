@@ -416,7 +416,15 @@ namespace SAIN.SAINComponent.Classes.Mover
                 BotOwner?.Mover?.IsMoving == true)
             {
                 _stopping = true;
-                SAINBot.StartCoroutine(StopAfterDelay(delay, forDuration));
+
+                if (BotOwner.isActiveAndEnabled)
+                {
+                    SAINBot.StartCoroutine(StopAfterDelay(delay, forDuration));
+                }
+                else
+                {
+                    StopAfterDelay(delay, forDuration);
+                }
             }
         }
 
@@ -449,7 +457,14 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void ResetPath(float delay)
         {
-            SAINBot.StartCoroutine(resetPath(0.2f));
+            if (BotOwner.isActiveAndEnabled)
+            {
+                SAINBot.StartCoroutine(resetPath(0.2f));
+            }
+            else
+            {
+                resetPath(0.2f);
+            }
         }
 
         private IEnumerator resetPath(float delay)

@@ -20,11 +20,15 @@ namespace SAIN.Layers.Combat.Solo
             SAINBot.Mover.StopMove();
             SAINBot.Mover.Lean.HoldLean(0.5f);
             BotOwner.Mover.SprintPause(0.5f);
+            shallResume = SAINBot.Decision.CurrentSoloDecision == SoloDecision.ShootDistantEnemy;
         }
+
+        bool shallResume = false;
 
         public override void Stop()
         {
-            BotOwner.Mover.MovementResume();
+            if (shallResume)
+                BotOwner.Mover.MovementResume();
         }
     }
 }

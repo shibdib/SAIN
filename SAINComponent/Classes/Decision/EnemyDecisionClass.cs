@@ -173,11 +173,11 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             if (!GlobalSettings.General.BotsUseGrenades)
             {
-                var core = BotOwner.Settings.FileSettings.Core;
-                if (core.CanGrenade)
-                {
-                    core.CanGrenade = false;
-                }
+                //var core = BotOwner.Settings.FileSettings.Core;
+                //if (core.CanGrenade)
+                //{
+                //    core.CanGrenade = false;
+                //}
                 return false;
             }
 
@@ -505,9 +505,9 @@ namespace SAIN.SAINComponent.Classes.Decision
                 && enemy.CanShoot 
                 && (SAINBot.Memory.Health.HealthStatus == ETagStatus.Healthy || SAINBot.Memory.Health.HealthStatus == ETagStatus.Injured))
             {
-                float timeAdd = 3f * UnityEngine.Random.Range(0.75f, 1.25f); ;
+                float timeAdd = 4f * UnityEngine.Random.Range(0.75f, 1.25f); ;
                 _nextShootDistTargetTime = Time.time + timeAdd;
-                _endShootDistTargetTime = Time.time + timeAdd / 2f;
+                _endShootDistTargetTime = Time.time + timeAdd / 3f;
                 return true;
             }
             return false;
@@ -593,7 +593,9 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallStandAndShoot(SAINEnemy enemy)
         {
-            if (enemy.IsVisible && enemy.CanShoot)
+            if (enemy.IsVisible && 
+                enemy.CanShoot && 
+                BotOwner.WeaponManager?.HaveBullets == true)
             {
                 if (enemy.RealDistance > SAINBot.Info.WeaponInfo.EffectiveWeaponDistance * 1.25f)
                 {
@@ -608,11 +610,12 @@ namespace SAIN.SAINComponent.Classes.Decision
 
                 if (!enemy.EnemyLookingAtMe)
                 {
-                    CoverPoint closestPoint = SAINBot.Cover.ClosestPoint;
-                    if (!enemy.EnemyLookingAtMe && closestPoint != null && closestPoint.Status <= CoverStatus.CloseToCover)
-                    {
-                        return true;
-                    }
+                    return true;
+                    //CoverPoint closestPoint = SAINBot.Cover.ClosestPoint;
+                    //if (!enemy.EnemyLookingAtMe && closestPoint != null && closestPoint.Status <= CoverStatus.CloseToCover)
+                    //{
+                    //    return true;
+                    //}
                 }
 
                 float visibleFor = Time.time - enemy.VisibleStartTime;

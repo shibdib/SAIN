@@ -231,7 +231,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private IEnumerator RecheckCoverPoints(List<CoverPoint> coverPoints, bool limit = true)
         {
-            if (!limit || (limit && HavePositionsChanged()))
+           // if (!limit || (limit && HavePositionsChanged()))
+            if (HavePositionsChanged())
             {
                 bool shallLimit = limit && shallLimitProcessing();
                 WaitForSeconds wait = new WaitForSeconds(0.05f);

@@ -60,7 +60,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             if (SAINBot.Enemy != null && !HasDecision)
             {
-                Logger.LogError("Have No Decision but enemy is not null!");
+                //Logger.LogError("Have No Decision but enemy is not null!");
             }
         }
 
@@ -194,8 +194,9 @@ namespace SAIN.SAINComponent.Classes.Decision
                 checkSAINEnd();
                 if (_nextLogTIme < Time.time)
                 {
-                    _nextLogTIme = Time.time + 3f;
-                    Logger.LogWarning($"{solo} {squad} {self}");
+                    //_nextLogTIme = Time.time + 3f;
+                    //if (SAINBot.Enemy?.Player?.IsYourPlayer == true)
+                    //    Logger.LogWarning($"{BotOwner.name} : {solo} {squad} {self}");
                 }
             }
         }

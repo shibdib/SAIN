@@ -77,7 +77,7 @@ namespace SAIN.Preset.Personalities
             }
             float result = MaxChanceIfMeetRequirements * modifier0to1;
             result = Mathf.Clamp(result, 0f, 100f);
-            Logger.LogDebug($"Result: [{result}] Power: [{powerLevel}] PowerLevelScaleStart [{PowerLevelScaleStart}] PowerLevelScaleEnd [{PowerLevelScaleEnd}] MaxChanceIfMeetRequirements [{MaxChanceIfMeetRequirements}]");
+            //Logger.LogDebug($"Result: [{result}] Power: [{powerLevel}] PowerLevelScaleStart [{PowerLevelScaleStart}] PowerLevelScaleEnd [{PowerLevelScaleEnd}] MaxChanceIfMeetRequirements [{MaxChanceIfMeetRequirements}]");
             return result;
         }
 

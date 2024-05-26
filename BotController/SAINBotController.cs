@@ -84,7 +84,7 @@ namespace SAIN.Components
             TimeVision.Update();
             WeatherVision.Update();
             LineOfSightManager.Update();
-            showBotInfoDebug();
+            //showBotInfoDebug();
             //CoverManager.Update();
             //PathManager.Update();
             //AddNavObstacles();

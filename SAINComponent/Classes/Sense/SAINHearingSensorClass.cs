@@ -116,10 +116,7 @@ namespace SAIN.SAINComponent.Classes
             if (SAINBot?.Player?.HealthController?.IsAlive == true && 
                 iPlayer?.HealthController?.IsAlive == true)
             {
-                if (!SAINBot.BotActive ||
-                    SAINBot.GameIsEnding || 
-                    SAINBot.Person.ProfileId == iPlayer.ProfileId || 
-                    (iPlayer.Position - position).sqrMagnitude > 3f * 3f)
+                if (shallIgnore(iPlayer, position))
                 {
                     return;
                 }

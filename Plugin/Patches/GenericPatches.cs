@@ -125,7 +125,7 @@ namespace SAIN.Patches.Generic
             {
                 return true;
             }
-            if (SAINPlugin.GetSAIN(___botOwner_0, out var sain, nameof(StopSetToNavMeshPatch)) && sain.Mover.SprintController.Running)
+            if (SAINPlugin.GetSAIN(___botOwner_0, out var sain, nameof(StopSetToNavMeshPatch)) && !sain.Mover.SprintController.ShallResetToNavMesh())
             {
                 return false;
             }
@@ -188,7 +188,8 @@ namespace SAIN.Patches.Generic
                 }
                 ___bool_1 = true;
                 ___botOwner_0.WeaponManager.Selector.TakePrevWeapon();
-                SAINPlugin.BotController?.StartCoroutine(TakePrevWeapon(___botOwner_0));
+                if (___botOwner_0.isActiveAndEnabled)
+                    SAINPlugin.BotController?.StartCoroutine(TakePrevWeapon(___botOwner_0));
             }
             return false;
         }

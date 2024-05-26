@@ -34,13 +34,14 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public void UpdateVisible(bool forceOff)
         {
             bool wasVisible = IsVisible;
+            bool lineOfSight = InLineOfSight || SAIN.Memory.VisiblePlayers.Contains(EnemyPlayer);
             if (forceOff)
             {
                 IsVisible = false;
             }
             else
             {
-                IsVisible = EnemyInfo?.IsVisible == true && InLineOfSight;
+                IsVisible = EnemyInfo?.IsVisible == true && lineOfSight;
             }
 
             if (IsVisible)
