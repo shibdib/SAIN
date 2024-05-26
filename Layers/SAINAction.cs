@@ -18,7 +18,6 @@ namespace SAIN.Layers
         }
 
         public SAINBotController BotController => SAINPlugin.BotController;
-        public DecisionWrapper Decisions => SAINBot.Memory.Decisions;
 
         public readonly BotComponent SAINBot;
 

@@ -88,6 +88,12 @@ namespace SAIN.Layers
                 StartExtract(point);
                 SAINBot.Mover.SetTargetPose(0f);
                 SAINBot.Mover.SetTargetMoveSpeed(0f);
+                if (_sayExitLocatedTime < Time.time)
+                {
+                    _sayExitLocatedTime = Time.time + 10;
+                    SAINBot.Talk.GroupSay(EPhraseTrigger.ExitLocated, null, true, 70);
+                }
+
             }
             else
             {
@@ -110,6 +116,8 @@ namespace SAIN.Layers
                 Shoot.Update();
             }
         }
+
+        private float _sayExitLocatedTime;
 
         private bool isFightingEnemy()
         {

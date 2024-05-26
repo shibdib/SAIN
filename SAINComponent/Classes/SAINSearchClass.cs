@@ -65,23 +65,30 @@ namespace SAIN.SAINComponent.Classes
 
             SAINEnemy enemy = SAINBot.Enemy;
 
-            if (enemy != null)
+            if ((enemy != null && enemy.Seen) || 
+                enemy != null && enemy.Heard && SAINBot.Info.PersonalitySettings.Search.WillSearchFromAudio)
             {
                 wantToSearch = shallSearch(enemy, timeBeforeSearch);
             }
-            else if (SAINBot.Info.PersonalitySettings.Search.WillSearchFromAudio)
-            {
-                Vector3? target = SAINBot.CurrentTargetPosition;
-                if (target != null && SAINBot.TimeSinceTargetFound > timeBeforeSearch)
-                {
-                    wantToSearch = true;
-                }
-            }
+            //else if (SAINBot.Info.PersonalitySettings.Search.WillSearchFromAudio)
+            //{
+            //    Vector3? target = SAINBot.CurrentTargetPosition;
+            //    if (target != null && SAINBot.TimeSinceTargetFound > timeBeforeSearch)
+            //    {
+            //        wantToSearch = true;
+            //    }
+            //}
             return wantToSearch;
         }
 
         private bool shallSearch(SAINEnemy enemy, float timeBeforeSearch)
         {
+            if (shallBeStealthyDuringSearch(enemy) && 
+                SAINBot.Decision.EnemyDecisions.UnFreezeTime > Time.time &&
+                enemy.TimeSinceLastKnownUpdated > 10f)
+            {
+                return true;
+            }
             if (shallSearchCauseLooting(enemy))
             {
                 return true;
@@ -94,6 +101,11 @@ namespace SAIN.SAINComponent.Classes
             {
                 return shallBeginSearch(enemy, timeBeforeSearch);
             }
+        }
+
+        private bool shallBeStealthyDuringSearch(SAINEnemy enemy)
+        {
+            return enemy.EnemyHeardFromPeace;
         }
 
         private bool shallSearchCauseLooting(SAINEnemy enemy)
@@ -122,7 +134,8 @@ namespace SAIN.SAINComponent.Classes
 
         private bool shallBeginSearch(SAINEnemy enemy, float timeBeforeSearch)
         {
-            if (SAINBot.Info.PersonalitySettings.Search.WillSearchForEnemy
+            var searchSettings = SAINBot.Info.PersonalitySettings.Search;
+            if (searchSettings.WillSearchForEnemy
                 && !SAINBot.Suppression.IsSuppressed
                 && !enemy.IsVisible
                 && !BotOwner.Memory.IsUnderFire)
@@ -136,8 +149,10 @@ namespace SAIN.SAINComponent.Classes
                 {
                     return true;
                 }
-                else if ((enemy.Seen || enemy.Heard)
-                    && enemy.TimeSinceLastKnownUpdated >= timeBeforeSearch)
+                else 
+                if (enemy.Heard &&
+                    searchSettings.WillSearchFromAudio &&
+                    enemy.TimeSinceHeard >= timeBeforeSearch)
                 {
                     return true;
                 }
@@ -147,19 +162,22 @@ namespace SAIN.SAINComponent.Classes
 
         private bool shallContinueSearch(SAINEnemy enemy, float timeBeforeSearch)
         {
-            if (SAINBot.Info.PersonalitySettings.Search.WillSearchForEnemy
+            var searchSettings = SAINBot.Info.PersonalitySettings.Search;
+            if (searchSettings.WillSearchForEnemy
                 && !SAINBot.Suppression.IsSuppressed
                 && !enemy.IsVisible
                 && !BotOwner.Memory.IsUnderFire)
             {
-                timeBeforeSearch = Mathf.Clamp(timeBeforeSearch / 4f, 0.2f, 30f);
+                timeBeforeSearch = Mathf.Clamp(timeBeforeSearch / 3f, 0f, 60f);
 
                 if (enemy.Seen && enemy.TimeSinceSeen >= timeBeforeSearch)
                 {
                     return true;
                 }
-                else if ((enemy.Seen || enemy.Heard)
-                    && enemy.TimeSinceLastKnownUpdated >= timeBeforeSearch)
+                else
+                if (enemy.Heard &&
+                    searchSettings.WillSearchFromAudio &&
+                    enemy.TimeSinceHeard >= timeBeforeSearch)
                 {
                     return true;
                 }
@@ -439,6 +457,7 @@ namespace SAIN.SAINComponent.Classes
             float speed = 1f;
             float pose = 1f;
             _setMaxSpeedPose = false;
+            bool shallBeStealthy = SAINBot.Enemy != null && shallBeStealthyDuringSearch(SAINBot.Enemy);
             // Environment id of 0 means a bot is outside.
             if (shallSprint || Player.IsSprintEnabled || _Running)
             {
@@ -453,6 +472,11 @@ namespace SAIN.SAINComponent.Classes
                     speed = 0.33f;
                     pose = 1f;
                 }
+                else if (shallBeStealthy)
+                {
+                    speed = 0.33f;
+                    pose = 0.7f;
+                }
                 else
                 {
                     speed = 1f;
@@ -463,10 +487,11 @@ namespace SAIN.SAINComponent.Classes
             {
                 speed = persSettings.Search.SneakySpeed;
                 pose = persSettings.Search.SneakyPose;
-            } 
-            else
+            }
+            else if (shallBeStealthy)
             {
-                //speed = DecideSpeed(FinalDestination, out pose);
+                speed = 0f;
+                pose = 0f;
             }
 
             if (!shallSprint && SAINBot.Mover.SprintController.Running)

@@ -281,6 +281,7 @@
     <Compile Include="Helpers\SAINWeaponInfo.cs" />
     <Compile Include="Helpers\SAINGearInfoHandler.cs" />
     <Compile Include="Helpers\UpdateSettingClass.cs" />
+    <Compile Include="Layers\Combat\Solo\FreezeAction.cs" />
     <Compile Include="Layers\SAINAvoidThreatLayer.cs" />
     <Compile Include="Layers\Combat\Solo\Cover\DoSurgeryAction.cs" />
     <Compile Include="Layers\Combat\Solo\FlankAction.cs" />

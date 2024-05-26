@@ -1,7 +1,4 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
-using EFT;
-using SAIN.SAINComponent;
+﻿using EFT;
 using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo

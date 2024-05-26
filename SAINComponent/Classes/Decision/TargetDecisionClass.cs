@@ -58,7 +58,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 Decision = SoloDecision.Search;
             }
-            else if (SAINBot.Decision.EnemyDecisions.StartHoldInCover())
+            else if (SAINBot.Decision.EnemyDecisions.shallHoldInCover())
             {
                 Decision = SoloDecision.HoldInCover;
             }

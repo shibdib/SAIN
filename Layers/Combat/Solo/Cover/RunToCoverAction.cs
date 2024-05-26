@@ -121,7 +121,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             }
 
             CoverPoint fallback = SAINBot.Cover.FallBackPoint;
-            SoloDecision currentDecision = SAINBot.Memory.Decisions.Main.Current;
+            SoloDecision currentDecision = SAINBot.Decision.CurrentSoloDecision;
 
             if (currentDecision == SoloDecision.Retreat
                 && fallback != null

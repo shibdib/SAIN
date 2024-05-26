@@ -15,8 +15,11 @@ namespace SAIN.Components
 {
     public class SAINGameworldComponent : MonoBehaviour
     {
+        public static SAINGameworldComponent Instance { get; private set; }
+
         private void Awake()
         {
+            Instance = this;
             SAINBotController = this.GetOrAddComponent<SAINBotController>();
             ExtractFinder = this.GetOrAddComponent<Extract.ExtractFinderComponent>();
         }

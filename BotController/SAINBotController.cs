@@ -5,6 +5,7 @@ using Interpolation;
 using SAIN.BotController.Classes;
 using SAIN.Components.BotController;
 using SAIN.Helpers;
+using SAIN.Layers;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Enemy;
@@ -83,12 +84,35 @@ namespace SAIN.Components
             TimeVision.Update();
             WeatherVision.Update();
             LineOfSightManager.Update();
-
+            showBotInfoDebug();
             //CoverManager.Update();
             //PathManager.Update();
             //AddNavObstacles();
             //UpdateObstacles();
         }
+
+        private void showBotInfoDebug()
+        {
+            foreach (var bot in Bots.Values)
+            {
+                if (bot != null && !_debugObjects.ContainsKey(bot))
+                {
+                    GUIObject obj = DebugGizmos.CreateLabel(bot.Position, "");
+                    _debugObjects.Add(bot, obj);
+                }
+            }
+            foreach (var obj in _debugObjects)
+            {
+                if (obj.Value != null)
+                {
+                    obj.Value.WorldPos = obj.Key.Position;
+                    obj.Value.StringBuilder.Clear();
+                    DebugOverlay.AddBaseInfo(obj.Key, obj.Key.BotOwner, obj.Value.StringBuilder);
+                }
+            }
+        }
+
+        private readonly Dictionary<BotComponent, GUIObject> _debugObjects = new Dictionary<BotComponent, GUIObject>();
 
         public IEnumerator PlayShootSoundCoroutine(Player player)
         {

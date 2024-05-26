@@ -41,6 +41,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             CheckAddEnemy();
             updateEnemies();
+            checkDiscrepency();
             checkActiveEnemies();
             updateDebug();
         }
@@ -157,6 +158,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 activeEnemy.Update();
             }
             removeInvalidEnemies();
+
+            if (!SAINBot.BotActive)
+            {
+                return;
+            }
             if (_enemyUpdateCoroutine == null)
             {
                 _enemyUpdateCoroutine = SAINBot.StartCoroutine(updateValidAIEnemies(2));
@@ -366,10 +372,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (dogFightTarget?.IsValid == true)
             {
                 setActiveEnemy(dogFightTarget);
-                if (BotOwner.Memory.GoalEnemy != dogFightTarget.EnemyInfo)
-                {
-                    BotOwner.Memory.GoalEnemy = dogFightTarget.EnemyInfo;
-                }
+                setGoalEnemy(dogFightTarget.EnemyInfo);
                 return;
             }
             checkGoalEnemy();
@@ -379,11 +382,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 if (visibileEnemy != null)
                 {
                     setActiveEnemy(visibileEnemy);
-                    if (BotOwner.Memory.GoalEnemy != visibileEnemy.EnemyInfo)
-                    {
-                        BotOwner.Memory.GoalEnemy = visibileEnemy.EnemyInfo;
-                    }
+                    setGoalEnemy(visibileEnemy.EnemyInfo);
                 }
+            }
+        }
+
+        private void setGoalEnemy(EnemyInfo enemyInfo)
+        {
+            if (BotOwner.Memory.GoalEnemy != enemyInfo)
+            {
+                BotOwner.Memory.GoalEnemy = enemyInfo;
             }
         }
 

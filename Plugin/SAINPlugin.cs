@@ -23,7 +23,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using static EFT.SpeedTree.TreeWind;
 using static SAIN.AssemblyInfoClass;
 
 namespace SAIN
@@ -67,7 +66,7 @@ namespace SAIN
             if (_excludedIDs.Count > 0)
                 _excludedIDs.Clear();
 
-            if (_sainIDs.Count > 0) 
+            if (_sainIDs.Count > 0)
                 _sainIDs.Clear();
         }
 
@@ -78,8 +77,8 @@ namespace SAIN
                 return true;
             }
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaBosses &&
-                !EnumValues.WildSpawn.IsGoons(wildSpawnType) && 
-                (EnumValues.WildSpawn.IsBoss(wildSpawnType) || 
+                !EnumValues.WildSpawn.IsGoons(wildSpawnType) &&
+                (EnumValues.WildSpawn.IsBoss(wildSpawnType) ||
                 EnumValues.WildSpawn.IsFollower(wildSpawnType)))
             {
                 return true;
@@ -178,7 +177,7 @@ namespace SAIN
         {
             var patches = new List<Type>() {
                 //typeof(Patches.Generic.ShallRunAwayGrenadePatch),
-                
+
                 typeof(Patches.Generic.SetPanicPointPatch),
                 typeof(Patches.Generic.AddPointToSearchPatch),
                 typeof(Patches.Generic.CalcPowerPatch),

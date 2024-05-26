@@ -110,41 +110,41 @@ namespace SAIN.Layers.Combat.Solo
 
         public override bool IsActive()
         {
-            bool active = SAINBot?.BotActive == true && CurrentDecision != SoloDecision.None;
+            bool active = SAINBot != null && CurrentDecision != SoloDecision.None;
             if (SAINBot != null && SAINBot.SAINSoloActive != active)
             {
                 SAINBot.SAINSoloActive = active;
+            }
+            if (SAINBot == null)
+            {
+                Logger.LogError("SAIN Is null!");
             }
             return active;
         }
 
         public override bool IsCurrentActionEnding()
         {
-            if (SAINBot?.BotActive == true)
+            if (NoCoverUseDogFight && SAINBot.Cover.CoverPoints.Count > 0)
             {
-                if (NoCoverUseDogFight && SAINBot.Cover.CoverPoints.Count > 0)
-                {
-                    NoCoverUseDogFight = false;
-                    return true;
-                }
-
-                // this is dumb im sorry
-                if (!_doSurgeryAction
-                    && SAINBot.Decision.CurrentSelfDecision == SelfDecision.Surgery
-                    && SAINBot.Cover.BotIsAtCoverInUse())
-                {
-                    _doSurgeryAction = true;
-                    return true;
-                }
-
-                return CurrentDecision != LastActionDecision;
+                NoCoverUseDogFight = false;
+                return true;
             }
-            return true;
+
+            // this is dumb im sorry
+            if (!_doSurgeryAction
+                && SAINBot.Decision.CurrentSelfDecision == SelfDecision.Surgery
+                && SAINBot.Cover.BotIsAtCoverInUse())
+            {
+                _doSurgeryAction = true;
+                return true;
+            }
+
+            return CurrentDecision != LastActionDecision;
         }
 
         bool _doSurgeryAction;
 
         private SoloDecision LastActionDecision = SoloDecision.None;
-        public SoloDecision CurrentDecision => SAINBot.Memory.Decisions.Main.Current;
+        public SoloDecision CurrentDecision => SAINBot.Decision.CurrentSoloDecision;
     }
 }

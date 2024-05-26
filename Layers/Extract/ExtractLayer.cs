@@ -5,6 +5,8 @@ using System.Linq;
 using EFT.Interactive;
 using Comfort.Common;
 using SAIN.SAINComponent.Classes;
+using UnityEngine;
+using static DrakiaXYZ.BigBrain.Brains.CustomLayer;
 
 namespace SAIN.Layers
 {
@@ -18,29 +20,35 @@ namespace SAIN.Layers
 
         public override Action GetNextAction()
         {
-            return new Action(typeof(ExtractAction), "Extract");
+            return new Action(typeof(ExtractAction), $"Extract : {SAINBot.Memory.Extract.ExtractReason}");
         }
 
         public override bool IsActive()
         {
-            if (SAINBot == null) return false;
-            //if (SAIN.SAINEnabled == false) return false;
+            bool active = SAINBot != null && allowedToExtract() && hasExtractReason() && hasExtractLocation();
+            setActive(active);
+            return active;
+        }
 
-            if (!SAINBot.Info.FileSettings.Mind.EnableExtracts || !SAINBot.Info.GlobalSettings.Extract.EnableExtractsGlobal)
-            {
-                return false;
-            }
+        private bool allowedToExtract()
+        {
+            return 
+                SAINBot.Info.FileSettings.Mind.EnableExtracts &&
+                SAINBot.Info.GlobalSettings.Extract.EnableExtractsGlobal &&
+                Components.BotController.BotExtractManager.IsBotAllowedToExfil(SAINBot);
+        }
 
-            if (!Components.BotController.BotExtractManager.IsBotAllowedToExfil(SAINBot))
-            {
-                return false;
-            }
+        private bool hasExtractReason()
+        {
+            return 
+                ExtractFromTime() ||
+                ExtractFromInjury() ||
+                ExtractFromLoot() ||
+                ExtractFromExternal();
+        }
 
-            if (!ExtractFromTime() && !ExtractFromInjury() && !ExtractFromLoot() && !ExtractFromExternal())
-            {
-                return false;
-            }
-
+        private bool hasExtractLocation()
+        {
             if (SAINBot.Memory.Extract.ExfilPosition == null)
             {
                 BotController.BotExtractManager.TryFindExfilForBot(SAINBot);
@@ -53,11 +61,17 @@ namespace SAIN.Layers
             {
                 SAINBot.Memory.Extract.ExfilPoint = null;
                 SAINBot.Memory.Extract.ExfilPosition = null;
-
                 return false;
             }
-
             return true;
+        }
+
+        private void setActive(bool value)
+        {
+            if (SAINBot != null && SAINBot.SAINExtractActive != value)
+            {
+                SAINBot.SAINExtractActive = value;
+            }
         }
 
         private bool IsInExtractArea()
@@ -93,6 +107,11 @@ namespace SAIN.Layers
         {
             if (SAINBot.Memory.Health.Dying && !BotOwner.Medecine.FirstAid.HaveSmth2Use)
             {
+                if (_nextSayNeedMedsTime < Time.time)
+                {
+                    _nextSayNeedMedsTime = Time.time + 10;
+                    SAINBot.Talk.GroupSay(EPhraseTrigger.NeedMedkit, null, true, 20);
+                }
                 if (!Logged)
                 {
                     Logged = true;
@@ -100,12 +119,20 @@ namespace SAIN.Layers
                 }
                 if (SAINBot.Enemy == null || SAINBot.Enemy.TimeSinceSeen > 30f)
                 {
+                    if (_nextSayImLeavingTime < Time.time)
+                    {
+                        _nextSayImLeavingTime = Time.time + 10;
+                        SAINBot.Talk.GroupSay(EPhraseTrigger.OnYourOwn, null, true, 20);
+                    }
                     SAINBot.Memory.Extract.ExtractReason = EExtractReason.Injured;
                     return true;
                 }
             }
             return false;
         }
+
+        private float _nextSayImLeavingTime;
+        private float _nextSayNeedMedsTime;
 
         // Looting Bots Integration
         private bool ExtractFromLoot()

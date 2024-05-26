@@ -48,6 +48,18 @@ namespace SAIN.Preset.GlobalSettings
         [Default(true)]
         public bool LimitAIvsAI = true;
 
+        [Name("Max AI vs AI audio range for Distant Bots")]
+        [Description("Bots will not hear gunshots from other bots past this distance (meters) if they are far away (around 250 meters) from the player")]
+        [Default(125f)]
+        [Advanced]
+        public float LimitAIvsAIMaxAudioRange = 125f;
+
+        [Name("Max AI vs AI audio range for Very Distant Bots")]
+        [Description("Bots will not hear gunshots from other bots past this distance (meters) if they are VERY far away (around 400 meters) from the player")]
+        [Default(80f)]
+        [Advanced]
+        public float LimitAIvsAIMaxAudioRangeVeryFar = 80f;
+
         [Name("Bot Grenades")]
         [Default(true)]
         public bool BotsUseGrenades = true;

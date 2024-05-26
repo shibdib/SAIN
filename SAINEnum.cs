@@ -24,6 +24,8 @@ namespace SAIN
         ReturnFire,
         ShootDistantEnemy,
         AvoidGrenade,
+        Freeze,
+        CreepOnEnemy,
 
         UnstuckSearch,
         UnstuckMoveToCover,

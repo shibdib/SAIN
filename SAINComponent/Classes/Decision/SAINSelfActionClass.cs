@@ -30,7 +30,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             if (!UsingMeds && Player != null)
             {
-                if (SAINBot.Memory.Decisions.Self.Current == SelfDecision.Reload)
+                if (SAINBot.Decision.CurrentSelfDecision == SelfDecision.Reload)
                 {
                     TryReload();
                     return;
@@ -44,7 +44,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                         return;
                     }
 
-                    switch (SAINBot.Memory.Decisions.Self.Current)
+                    switch (SAINBot.Decision.CurrentSelfDecision)
                     {
                         case SelfDecision.Reload:
                             TryReload();

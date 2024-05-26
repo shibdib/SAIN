@@ -25,7 +25,6 @@ namespace SAIN.Layers
         public override string GetName() => LayerName;
 
         public SAINBotController BotController => SAINPlugin.BotController;
-        public DecisionWrapper Decisions => SAINBot?.Memory?.Decisions;
 
         private BotComponent _SAIN = null;
         public BotComponent SAINBot

@@ -35,6 +35,6 @@ namespace SAIN.Layers.Combat.Run
         }
 
         private SoloDecision LastActionDecision = SoloDecision.None;
-        public SoloDecision CurrentDecision => SAINBot.Memory.Decisions.Main.Current;
+        public SoloDecision CurrentDecision => SAINBot.Decision.CurrentSoloDecision;
     }
 }

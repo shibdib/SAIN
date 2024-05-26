@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes
     {
         public SAINMemoryClass(BotComponent sain) : base(sain)
         {
-            Decisions = new DecisionWrapper(sain);
+            //Decisions = new DecisionWrapper(sain);
             Health = new HealthTracker(sain);
             Location = new LocationTracker(sain);
         }
@@ -28,6 +28,17 @@ namespace SAIN.SAINComponent.Classes
             Health.Update();
             Location.Update();
             checkResetUnderFire();
+        }
+
+        public Action<SAINEnemy> OnEnemyHeardFromPeace { get; set; }
+
+        public void EnemyWasHeard(SAINEnemy enemy)
+        {
+            if (SAINBot.HasEnemy || !BotOwner.Memory.IsPeace)
+            {
+                return;
+            }
+            OnEnemyHeardFromPeace?.Invoke(enemy);
         }
 
         public void SetUnderFire(IPlayer source, Vector3 position)
@@ -78,7 +89,7 @@ namespace SAIN.SAINComponent.Classes
 
         public Vector3 UnderFireFromPosition { get; set; }
 
-        public DecisionWrapper Decisions { get; private set; }
+        //public DecisionWrapper Decisions { get; private set; }
 
         public SAINExtract Extract { get; private set; } = new SAINExtract();
 

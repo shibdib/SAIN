@@ -32,7 +32,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return;
             }
-            var CurrentDecision = SAINBot.Memory.Decisions.Main.Current;
+            var CurrentDecision = SAINBot.Decision.CurrentSoloDecision;
             var enemy = SAINBot.Enemy;
             if (enemy == null || Player.IsSprintEnabled || DontLean.Contains(CurrentDecision) || SAINBot.Suppression.IsSuppressed)
             {

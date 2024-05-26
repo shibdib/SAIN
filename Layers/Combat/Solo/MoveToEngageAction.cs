@@ -1,11 +1,6 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
-using EFT;
-using SAIN.SAINComponent.SubComponents;
-using SAIN.SAINComponent;
-using UnityEngine;
-using UnityEngine.AI;
+﻿using EFT;
 using SAIN.SAINComponent.Classes.Enemy;
+using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo
 {

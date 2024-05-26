@@ -32,30 +32,36 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            if (SAINBot.Enemy == null)
+            // Scavs will speak out and be more vocal
+            if (!HaveTalked &&
+                SAINBot.Info.Profile.IsScav &&
+                (BotOwner.Position - TargetPosition).sqrMagnitude < 50f * 50f)
             {
-                float targetDistSqr = (BotOwner.Position - TargetPosition).sqrMagnitude;
-                // Scavs will speak out and be more vocal
-                if (!HaveTalked
-                    && SAINBot.Info.WildSpawnType == WildSpawnType.assault
-                    && targetDistSqr < 40f * 40f)
+                HaveTalked = true;
+                if (EFTMath.RandomBool(60))
                 {
-                    HaveTalked = true;
-                    if (EFTMath.RandomBool(40))
-                    {
-                        SAINBot.Talk.Say(EPhraseTrigger.OnMutter, ETagStatus.Aware, true);
-                    }
+                    SAINBot.Talk.Say(EPhraseTrigger.OnMutter, ETagStatus.Aware, true);
                 }
             }
 
-            CheckShouldSprint();
+            bool isBeingStealthy = SAINBot.Enemy?.EnemyHeardFromPeace == true;
+            if (isBeingStealthy)
+            {
+                SprintEnabled = false;
+            }
+            else
+            {
+                CheckShouldSprint();
+            }
+
             Search.Search(SprintEnabled);
             Steer();
 
             if (!SprintEnabled)
             {
                 Shoot.Update();
-                CheckWeapon();
+                if (!isBeingStealthy)
+                    CheckWeapon();
             }
         }
 
@@ -148,7 +154,7 @@ namespace SAIN.Layers.Combat.Solo
                 //SteerByPriority(false);
                 //return;
             }
-            if (!SteerByPriority(false) 
+            if (!SteerByPriority(false)
                 && !SAINBot.Steering.LookToLastKnownEnemyPosition())
             {
                 LookToMovingDirection();
@@ -158,13 +164,13 @@ namespace SAIN.Layers.Combat.Solo
         private bool CanSeeDangerOrCorner(out Vector3 point)
         {
             point = Vector3.zero;
-            
+
             if (Search.SearchMovePoint == null || Search.CurrentState == ESearchMove.MoveToDangerPoint)
             {
                 LookPoint = Vector3.zero;
                 return false;
             }
-            
+
             if (CheckSeeTimer < Time.time)
             {
                 LookPoint = Vector3.zero;
@@ -189,14 +195,14 @@ namespace SAIN.Layers.Combat.Solo
                         LookPoint = Search.SearchMovePoint.Corner + Vector3.up;
                     }
                 }
-                
+
                 if (LookPoint != Vector3.zero)
                 {
                     //LookPoint.y = 0;
                     //LookPoint += headPosition;
                 }
             }
-            
+
             point = LookPoint;
             return point != Vector3.zero;
         }

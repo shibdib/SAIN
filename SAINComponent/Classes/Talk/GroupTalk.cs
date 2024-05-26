@@ -125,7 +125,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool ShallReportReloading()
         {
             if (_nextReportReloadTime < Time.time
-                && SAINBot.Memory.Decisions.Self.Current == SelfDecision.Reload)
+                && SAINBot.Decision.CurrentSelfDecision == SelfDecision.Reload)
             {
                 _nextReportReloadTime = Time.time + _reportReloadingFreq;
                 return SAINBot.Talk.GroupSay(reloadPhrases.PickRandom(), null, false, _reportReloadingChance);
@@ -484,7 +484,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 && EFTMath.RandomBool(_talkRetreatChance)
                 && SAINBot.HasEnemy
                 && (SAINBot.Enemy.IsVisible == true || SAINBot.Enemy.InLineOfSight)
-                && SAINBot.Decision.RetreatDecisions.Contains(SAINBot.Memory.Decisions.Main.Current))
+                && SAINBot.Decision.RetreatDecisions.Contains(SAINBot.Decision.CurrentSoloDecision))
             {
                 _nextCheckTalkRetreatTime = Time.time + _talkRetreatFreq;
                 return SAINBot.Talk.Say(_talkRetreatTrigger, _talkRetreatMask, _talkRetreatGroupDelay);
@@ -536,7 +536,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool TalkBotDecision(out EPhraseTrigger trigger, out ETagStatus mask)
         {
             mask = ETagStatus.Combat;
-            switch (SAINBot.Memory.Decisions.Self.Current)
+            switch (SAINBot.Decision.CurrentSelfDecision)
             {
                 case SelfDecision.RunAway:
                     trigger = EPhraseTrigger.OnYourOwn;
@@ -560,8 +560,8 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             if (CommandSayTimer < Time.time)
             {
-                var mySquadDecision = SAINBot.Memory.Decisions.Squad.Current;
-                var myCurrentDecision = SAINBot.Memory.Decisions.Main.Current;
+                var mySquadDecision = SAINBot.Decision.CurrentSquadDecision;
+                var myCurrentDecision = SAINBot.Decision.CurrentSoloDecision;
 
                 CommandSayTimer = Time.time + SAINBot.Info.FileSettings.Mind.SquadLeadTalkFreq;
                 var commandTrigger = EPhraseTrigger.PhraseNone;

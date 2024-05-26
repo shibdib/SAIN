@@ -124,7 +124,6 @@ namespace SAIN.SAINComponent.Classes
         public EAimDownSightsStatus GetADSStatus(Vector3 targetPosition)
         {
             var enemy = SAINBot.Enemy;
-            var decisions = SAINBot.Memory.Decisions;
             float sqrMagToTarget = (targetPosition - SAINBot.Position).sqrMagnitude;
 
             EAimDownSightsStatus result;
@@ -132,7 +131,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 result = EAimDownSightsStatus.Sprinting;
             }
-            else if (decisions.Main.Current == SoloDecision.ShootDistantEnemy)
+            else if (SAINBot.Decision.CurrentSoloDecision == SoloDecision.ShootDistantEnemy)
             {
                 result = EAimDownSightsStatus.StandAndShoot;
             }
@@ -148,13 +147,13 @@ namespace SAIN.SAINComponent.Classes
             {
                 result = EAimDownSightsStatus.EnemyHeardRecent;
             }
-            else if (decisions.Squad.Current == SquadDecision.Suppress && SAINBot.ManualShootReason == BotComponent.EShootReason.SquadSuppressing)
+            else if (SAINBot.Decision.CurrentSquadDecision == SquadDecision.Suppress && SAINBot.ManualShootReason == BotComponent.EShootReason.SquadSuppressing)
             {
                 result = EAimDownSightsStatus.Suppressing;
             }
             else
             {
-                switch (decisions.Main.Current)
+                switch (SAINBot.Decision.CurrentSoloDecision)
                 {
                     case SoloDecision.RunToCover:
                     case SoloDecision.MoveToCover:

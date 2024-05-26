@@ -63,7 +63,6 @@ namespace SAIN.Layers
             try
             {
                 var info = sain.Info;
-                var decisions = sain.Memory.Decisions;
                 stringBuilder.AppendLine($"Name: [{sain.Person.Name}] Nickname: [{sain.Player.Profile.Nickname}] Personality: [{info.Personality}] Type: [{info.Profile.WildSpawnType}]");
                 stringBuilder.AppendLine($"Suppression Status: Num: [{sain.Suppression?.SuppressionNumber}] IsSuppressed: [{sain.Suppression?.IsSuppressed}] IsHeavySuppressed: [{sain.Suppression?.IsHeavySuppressed}]");
                 stringBuilder.AppendLine($"Steering: [{sain.Steering.CurrentSteerPriority}]");
@@ -79,21 +78,11 @@ namespace SAIN.Layers
 
                 stringBuilder.AppendLine($"Indoors? {sain.Memory.Location.IsIndoors} EnvironmentID: {sain.Player?.AIData.EnvironmentId}");
 
-                if (decisions.Main.Current != SoloDecision.None)
-                {
-                    stringBuilder.AppendLabeledValue("Main Decision", $"Current: {decisions.Main.Current} Last: {decisions.Main.Last}", Color.white, Color.yellow, true);
-                }
-                if (decisions.Squad.Current != SquadDecision.None)
-                {
-                    stringBuilder.AppendLabeledValue("Squad Decision", $"Current: {decisions.Squad.Current} Last: {decisions.Squad.Last}", Color.white, Color.yellow, true);
-                }
-                if (decisions.Self.Current != SelfDecision.None)
-                {
-                    stringBuilder.AppendLabeledValue("Self Decision", $"Current: {decisions.Self.Current} Last: {decisions.Self.Last}", Color.white, Color.yellow, true);
-                }
+                stringBuilder.AppendLabeledValue("Main Decision", $"Current: {sain.Decision.CurrentSoloDecision} Last: {sain.Decision.OldSoloDecision}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Squad Decision", $"Current: {sain.Decision.CurrentSquadDecision} Last: {sain.Decision.OldSquadDecision}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Self Decision", $"Current: {sain.Decision.CurrentSelfDecision} Last: {sain.Decision.OldSelfDecision}", Color.white, Color.yellow, true);
 
-                var state = sain.Search.CurrentState;
-                if (state != SAINComponent.Classes.ESearchMove.None)
+                if (sain.Decision.CurrentSoloDecision == SoloDecision.Search)
                 {
                     stringBuilder.AppendLabeledValue("Searching", $"Current State: {sain.Search.CurrentState} Next: {sain.Search.NextState} Last: {sain.Search.LastState}", Color.white, Color.yellow, true);
                 }
@@ -107,7 +96,7 @@ namespace SAIN.Layers
 
                 if (sain.HasEnemy)
                 {
-                    stringBuilder.AppendLine("Active Enemy Info");
+                    stringBuilder.AppendLine();
                     CreateEnemyInfo(stringBuilder, sain.Enemy);
                 }
 

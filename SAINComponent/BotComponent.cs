@@ -92,6 +92,8 @@ namespace SAIN.SAINComponent
                 SpaceAwareness = new SAINBotSpaceAwareness(this);
                 DoorOpener = new SAINDoorOpener(this, person.BotOwner);
                 Medical = new SAINMedical(this);
+
+                BotOwner.OnBotStateChange += resetBot;
             }
             catch (Exception ex)
             {
@@ -131,47 +133,68 @@ namespace SAIN.SAINComponent
             return true;
         }
 
+
+        private void resetBot(EBotState state)
+        {
+            Decision.ResetDecisions();
+        }
+
         public float TimeBotCreated { get; private set; }
 
-        public bool SAINLayersActive => SAINSoloActive || SAINSquadActive || SAINAvoidActive;
+        public bool SAINLayersActive => SAINSoloActive || SAINSquadActive || SAINAvoidActive || SAINExtractActive;
 
         public bool SAINSoloActive { get; set; }
         public bool SAINSquadActive { get; set; }
         public bool SAINAvoidActive { get; set; }
+        public bool SAINExtractActive { get; set; }
 
         private void Update()
         {
-            if (BotOwner == null || this == null || Player == null)
+            if (Player == null)
             {
+                //Logger.LogWarning("Dispose SAIN Player == null");
                 Dispose();
                 return;
             }
-            if (IsDead || Singleton<GameWorld>.Instance == null)
+            if (BotOwner == null)
             {
+                //Logger.LogWarning("Dispose SAIN BotOwner == null");
                 Dispose();
                 return;
             }
+            if (IsDead)
+            {
+                //Logger.LogWarning("Dispose SAIN IsDead");
+                Dispose();
+                return;
+            }
+            if (Singleton<GameWorld>.Instance == null)
+            {
+                //Logger.LogWarning("Dispose SAIN Singleton<GameWorld>.Instance == null");
+                Dispose();
+                return;
+            }
+
+            handlePatrolData();
+            EnemyController.Update();
+            AILimit.UpdateAILimit();
+            Decision.Update();
 
             if (GameIsEnding || !BotActive)
             {
-                StopAllCoroutines();
+                //StopAllCoroutines();
                 return;
             }
 
-            checkLayerActive();
-            handlePatrolData();
 
-            AILimit.UpdateAILimit();
             if (AILimit.LimitAIThisFrame)
             {
                 //return;
             }
-
+            Info.Update();
             DoorOpener.Update();
-            Decision.Update();
             Search.Update();
             Memory.Update();
-            EnemyController.Update();
             FriendlyFireClass.Update();
             Vision.Update();
             Equipment.Update();
@@ -180,7 +203,6 @@ namespace SAIN.SAINComponent
             Hearing.Update();
             Talk.Update();
             Cover.Update();
-            Info.Update();
             Squad.Update();
             SelfActions.Update();
             Grenade.Update();
@@ -238,26 +260,35 @@ namespace SAIN.SAINComponent
 
         private void handlePatrolData()
         {
-            if (CurrentTargetPosition == null
-                && !Extracting)
+            if (!SAINLayersActive && 
+                PatrolDataPaused)
             {
                 PatrolDataPaused = false;
                 BotOwner.PatrollingData?.Unpause();
                 if (!_speedReset)
                 {
-                    _speedReset = true;
-                    BotOwner.SetTargetMoveSpeed(1f);
-                    BotOwner.Mover.SetPose(1f);
+                    _speedReset = true; 
+                    resetSpeed();
                 }
-                return;
             }
-
-            PatrolDataPaused = true;
-            BotOwner.PatrollingData?.Pause();
-            if (_speedReset)
+            if (SAINLayersActive && 
+                !PatrolDataPaused)
             {
-                _speedReset = false;
+                PatrolDataPaused = true;
+                BotOwner.PatrollingData?.Pause();
+                if (_speedReset)
+                {
+                    _speedReset = false;
+                }
             }
+        }
+
+        private void resetSpeed()
+        {
+            BotOwner.SetTargetMoveSpeed(1f);
+            BotOwner.Mover.SetPose(1f);
+            Mover.SetTargetMoveSpeed(1f);
+            Mover.SetTargetPose(1f);
         }
 
         private bool _speedReset;
@@ -329,35 +360,20 @@ namespace SAIN.SAINComponent
             WalkToCoverSuppress = 3,
         }
 
-        private bool SAINActive => BigBrainHandler.IsBotUsingSAINLayer(BotOwner);
-
-        public void checkLayerActive()
-        {
-            if (RecheckTimer < Time.time)
-            {
-                CombatLayersActive = BigBrainHandler.IsBotUsingSAINCombatLayer(BotOwner);
-                if (SAINActive)
-                {
-                    RecheckTimer = Time.time + 0.5f;
-                }
-                else
-                {
-                    RecheckTimer = Time.time + 0.05f;
-                }
-            }
-        }
-
-        public bool CombatLayersActive { get; private set; }
-
-        private float RecheckTimer = 0f;
-
         public void Dispose()
         {
             try
             {
+                Logger.LogWarning($"SAIN Disposed");
+
                 OnSAINDisposed?.Invoke(ProfileId, BotOwner);
 
                 StopAllCoroutines();
+
+                if (BotOwner != null)
+                {
+                    BotOwner.OnBotStateChange -= resetBot;
+                }
 
                 Search.Dispose();
                 Memory.Dispose();
@@ -534,8 +550,6 @@ namespace SAIN.SAINComponent
         public bool BotActive =>
             IsDead == false
             && BotOwner.isActiveAndEnabled
-            //&& BotOwner.enabled
-            //&& Player.enabled
             && BotOwner.BotState == EBotState.Active;
 
         //&& BotOwner.StandBy.StandByType == BotStandByType.active

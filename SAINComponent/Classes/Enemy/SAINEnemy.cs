@@ -8,6 +8,7 @@ using UnityEngine.AI;
 using UnityEngine.UIElements;
 using static DrakiaXYZ.BigBrain.Brains.CustomLayer;
 using static SAIN.SAINComponent.Classes.Enemy.SAINEnemy;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
@@ -28,6 +29,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             Path = new SAINEnemyPath(this);
             KnownPlaces = new EnemyKnownPlaces(this);
         }
+        public bool EnemyNotLooking => IsVisible && !EnemyStatus.EnemyLookingAtMe && !EnemyStatus.ShotAtMeRecently;
 
         public readonly string EnemyName;
 
@@ -362,18 +364,24 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 if (!wasGunfire)
                 {
                     talkNoise(soundType == SAINSoundType.Conversation);
+                    if (!SAINBot.HasEnemy)
+                    {
+                        EnemyHeardFromPeace = true;
+                    }
                 }
             }
         }
 
+        public bool EnemyHeardFromPeace = false;
+
         private void talkNoise(bool conversation)
         {
             if (_nextSayNoise < Time.time
-                && (SAINBot.Talk.GroupTalk.FriendIsClose || SAINBot.Equipment.HasEarPiece)
+                && SAINBot.Talk.GroupTalk.FriendIsClose
                 && SAINBot.Squad.BotInGroup
-                && (SAINBot.Enemy == null || SAINBot.Enemy.TimeSinceSeen > 15f))
+                && (SAINBot.Enemy == null || SAINBot.Enemy.TimeSinceSeen > 20f))
             {
-                _nextSayNoise = Time.time + 8f;
+                _nextSayNoise = Time.time + 12f;
                 if (EFTMath.RandomBool(40))
                 {
                     SAINBot.Talk.TalkAfterDelay(conversation ? EPhraseTrigger.OnEnemyConversation : EPhraseTrigger.NoisePhrase);

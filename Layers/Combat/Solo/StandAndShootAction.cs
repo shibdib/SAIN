@@ -1,12 +1,4 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
-using EFT;
-using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents;
-using SAIN.Components;
-using UnityEngine;
-using UnityEngine.AI;
+﻿using EFT;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -21,18 +13,6 @@ namespace SAIN.Layers.Combat.Solo
             SAINBot.Steering.SteerByPriority();
             SAINBot.Mover.Pose.SetPoseToCover();
             Shoot.Update();
-
-            return;
-
-            if (SAINBot.Cover.BotIsAtCoverInUse())
-            {
-                return;
-            }
-            else
-            {
-                bool prone = SAINBot.Mover.Prone.ShallProne(true);
-                SAINBot.Mover.Prone.SetProne(prone);
-            }
         }
 
         public override void Start()
@@ -40,10 +20,7 @@ namespace SAIN.Layers.Combat.Solo
             SAINBot.Mover.StopMove();
             SAINBot.Mover.Lean.HoldLean(0.5f);
             BotOwner.Mover.SprintPause(0.5f);
-            _stopMoveTime = Time.time + 0.5f;
         }
-
-        private float _stopMoveTime;
 
         public override void Stop()
         {

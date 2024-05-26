@@ -79,7 +79,7 @@ namespace SAIN.SAINComponent.Classes
         private readonly float SuppressionAddDefault = 2f;
         private float SuppressionDecayTimer;
 
-        public void AddSuppression(float num = -1)
+        public void AddSuppression(float sqrMag, float num = -1)
         {
             if (num < 0)
             {

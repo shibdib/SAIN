@@ -41,7 +41,7 @@ namespace SAIN.Layers.Combat.Solo
                     else if (TryJumpTimer < Time.time)
                     {
                         TryJumpTimer = Time.time + 3f;
-                        if (!_shallBunnyHop 
+                        if (!_shallBunnyHop
                             && EFTMath.RandomBool(SAINBot.Info.PersonalitySettings.Rush.BunnyHopChance))
                         {
                             _shallBunnyHop = true;
@@ -70,7 +70,7 @@ namespace SAIN.Layers.Combat.Solo
             if (NewDestTimer < Time.time)
             {
                 Vector3 Destination = EnemyPos;
-                if (SAINBot.Enemy.Path.PathDistance > 5f 
+                if (SAINBot.Enemy.Path.PathDistance > 5f
                     && SAINBot.Mover.SprintController.RunToPoint(Destination))
                 {
                     NewDestTimer = Time.time + 2f;
@@ -107,14 +107,14 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
-            _shallTryJump = SAINBot.Info.PersonalitySettings.Rush.CanJumpCorners 
+            _shallTryJump = SAINBot.Info.PersonalitySettings.Rush.CanJumpCorners
                 //&& Bot.Decision.CurrentSquadDecision != SquadDecision.PushSuppressedEnemy
                 && EFTMath.RandomBool(SAINBot.Info.PersonalitySettings.Rush.JumpCornerChance);
 
             _shallBunnyHop = false;
         }
 
-        bool _shallTryJump = false;
+        private bool _shallTryJump = false;
 
         public override void Stop()
         {

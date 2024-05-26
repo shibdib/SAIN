@@ -213,10 +213,14 @@ namespace SAIN.SAINComponent.Classes
                 SAIN.SelfActions.TryReload();
                 return;
             }
-            var enemy = SAIN.Enemy;
+            SAINEnemy enemy = SAIN.Enemy;
             if (enemy != null)
             {
-                if (enemy.IsVisible && enemy.RealDistance < 40f)
+                if (enemy.EnemyNotLooking)
+                {
+                    BotOwner.BotLight?.TurnOff(false);
+                }
+                else if (enemy.IsVisible && enemy.RealDistance < 40f)
                 {
                     BotOwner.BotLight?.TurnOn(true);
                 }
@@ -240,8 +244,16 @@ namespace SAIN.SAINComponent.Classes
                         && !SAIN.NoBushESP.NoBushESPActive 
                         && FriendlyFire.ClearShot)
                     {
-                        ReadyToShoot();
-                        Shoot.Update();
+                        if (enemy.EnemyNotLooking && 
+                            SAIN.Decision.CurrentSoloDecision == SoloDecision.CreepOnEnemy)
+                        {
+
+                        }
+                        else
+                        {
+                            ReadyToShoot();
+                            Shoot.Update();
+                        }
                     }
                 }
                 else
