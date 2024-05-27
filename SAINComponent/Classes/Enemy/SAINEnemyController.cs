@@ -155,23 +155,36 @@ namespace SAIN.SAINComponent.Classes.Enemy
             var activeEnemy = ActiveEnemy;
             if (activeEnemy?.IsValid == true)
             {
-                activeEnemy.Update();
+                //activeEnemy.Update();
             }
+
             removeInvalidEnemies();
 
             if (!SAINBot.BotActive)
             {
                 return;
             }
+
+            updateAllEnemies();
+
             if (_enemyUpdateCoroutine == null)
             {
-                if (BotOwner.isActiveAndEnabled)
-                    _enemyUpdateCoroutine = SAINBot.StartCoroutine(updateValidAIEnemies(2));
+                //_enemyUpdateCoroutine = SAINBot.StartCoroutine(updateValidAIEnemies(2));
             }
             if (_enemyHumanUpdateCoroutine == null)
             {
-                if (BotOwner.isActiveAndEnabled)
-                    _enemyHumanUpdateCoroutine = SAINBot.StartCoroutine(updateValidHumanEnemies(1));
+                //_enemyHumanUpdateCoroutine = SAINBot.StartCoroutine(updateValidHumanEnemies(1));
+            }
+        }
+
+        private void updateAllEnemies()
+        {
+            foreach (var enemy in Enemies.Values)
+            {
+                if (enemy?.IsValid == true)
+                {
+                    enemy.Update();
+                }
             }
         }
 

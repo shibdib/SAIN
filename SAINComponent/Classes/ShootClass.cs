@@ -319,7 +319,8 @@ namespace SAIN.SAINComponent.Classes
             Vector3? target = null;
             if (enemy != null && enemy.IsVisible && enemy.CanShoot)
             {
-                if (!enemy.IsAI && SAINPlugin.LoadedPreset.GlobalSettings.General.HeadShotProtection)
+                if (!enemy.IsAI && 
+                    SAINPlugin.LoadedPreset.GlobalSettings.Aiming.HeadShotProtection)
                 {
                     target = enemy.CenterMass;
                 }

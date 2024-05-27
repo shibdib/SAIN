@@ -40,7 +40,7 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("High Elevation Vision Modifier")]
         [Description(
-            "Bots will see sprinting players this much slower when the enemy's altitude is higher than the bot when the vision angle difference is equal or greater than HighElevationMaxAngle. " +
+            "Bots will see players this much slower when the enemy's altitude is higher than the bot when the vision angle difference is equal or greater than HighElevationMaxAngle. " +
             "Higher is slower speed, so 1.2 would result in bots taking 20% longer to spot an enemy")]
         [Default(1.2f)]
         [MinMax(1f, 5f, 100f)]
@@ -61,6 +61,53 @@ namespace SAIN.Preset.GlobalSettings
         [Default(0.85f)]
         [MinMax(0.01f, 1f, 100f)]
         public float LowElevationVisionModifier = 0.85f;
+
+        [Name("Bot Reaction and Accuracy Changes Toggle - Experimental")]
+        [Section("Unseen Bot")]
+        [Experimental]
+        [Description("Experimental: Bots will have slightly reduced accuracy and vision speed if you are not looking in their direction. " +
+            "So if a bot notices and starts shooting you while your back is turned, they will be less accurate and notice you more slowly.")]
+        [Default(true)]
+        public bool NotLookingToggle = true;
+
+        [Name("Bot Reaction and Accuracy Changes Time Limit")]
+        [Section("Unseen Bot")]
+        [Experimental]
+        [Description("The Maximum Time that a bot can be shooting at you before the reduced spread not longer has an affect. " +
+            "So if a bot is shooting at you from the back for X seconds, after that time it will no longer reduce their accuracy to give you a better chance to react.")]
+        [Default(4f)]
+        [MinMax(0.5f, 20f, 100f)]
+        [Advanced]
+        public float NotLookingTimeLimit = 4f;
+
+        [Name("Bot Reaction and Accuracy Changes Angle")]
+        [Section("Unseen Bot")]
+        [Experimental]
+        [Advanced]
+        [Description("The Maximum Angle for the player to be considered looking at a bot.")]
+        [Default(45f)]
+        [MinMax(5f, 45f, 1f)]
+        public float NotLookingAngle = 45f;
+
+        [Name("Bot Reaction Multiplier When Out of Sight")]
+        [Section("Unseen Bot")]
+        [Experimental]
+        [Description("How much to multiply bot vision speed by if you aren't looking at them when they notice you. Higher = More time before reacting.")]
+        [Default(1.1f)]
+        [MinMax(1f, 2f, 100f)]
+        [Advanced]
+        public float NotLookingVisionSpeedModifier = 1.1f;
+
+        [Name("Bot Accuracy and Spread Increase When Out of Sight")]
+        [Section("Unseen Bot")]
+        [Experimental]
+        [Description("How much additional random Spread to add to a bot's aim if the player isn't look at them." +
+            " 1 means it will randomize in a 1 meter sphere around their original aim target in addition to existing random spread." +
+            " Higher = More spread and less accurate bots.")]
+        [Default(0.33f)]
+        [MinMax(0.1f, 1.5f, 100f)]
+        [Advanced]
+        public float NotLookingAccuracyAmount = 0.33f;
 
         [Name("Nighttime Vision Modifier")]
         [Description(

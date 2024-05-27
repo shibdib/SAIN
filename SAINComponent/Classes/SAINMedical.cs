@@ -120,7 +120,7 @@ namespace SAIN.SAINComponent.Classes
             return useSurgery;
         }
 
-        public bool _canStartSurgery => BotOwner.Medecine.SurgicalKit.ShallStartUse() && !BotOwner.Medecine.FirstAid.IsBleeding;
+        public bool _canStartSurgery => BotOwner?.Medecine?.SurgicalKit?.ShallStartUse() == true && BotOwner?.Medecine?.FirstAid?.IsBleeding == false;
 
         private bool checkAllClear(bool surgeryStarted)
         {
@@ -176,6 +176,5 @@ namespace SAIN.SAINComponent.Classes
 
         private bool _allClear;
         private float _nextCheckEnemiesTime;
-
     }
 }

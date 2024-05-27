@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINNotLooking
     {
-        private static GeneralSettings Settings => SAINPlugin.LoadedPreset.GlobalSettings.General;
+        private static LookSettings Settings => SAINPlugin.LoadedPreset.GlobalSettings.Look;
 
         public static float GetSpreadIncrease(IPlayer person, BotOwner botOwner)
         {

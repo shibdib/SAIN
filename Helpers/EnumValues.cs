@@ -36,12 +36,17 @@ namespace SAIN.Helpers
 
             public static bool IsPMC(WildSpawnType type)
             {
-                return type.ToString() == "sptUsec" || type.ToString() == "sptBear";
+                return type == Bear || type == Usec;
             }
 
             public static bool IsGoons(WildSpawnType type)
             {
                 return Goons.Contains(type);
+            }
+
+            public static bool IsCultist(WildSpawnType type)
+            {
+                return Cultists.Contains(type);
             }
 
             public static WildSpawnType[] Scavs =
@@ -58,6 +63,13 @@ namespace SAIN.Helpers
                 WildSpawnType.bossKnight,
                 WildSpawnType.followerBigPipe,
                 WildSpawnType.followerBirdEye,
+            };
+
+            public static WildSpawnType[] Cultists =
+            {
+                WildSpawnType.sectactPriestEvent,
+                WildSpawnType.sectantPriest,
+                WildSpawnType.sectantWarrior,
             };
 
             public static readonly WildSpawnType Usec = Parse<WildSpawnType>("sptUsec");

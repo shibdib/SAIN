@@ -8,6 +8,7 @@ using UnityEngine;
 using static Mono.Security.X509.X520;
 using SAIN.Helpers;
 using EFT.UI;
+using Diz.LanguageExtensions;
 
 namespace SAIN
 {
@@ -52,7 +53,8 @@ namespace SAIN
         public static void LogAndNotifyError(object data, ENotificationDurationType duration = ENotificationDurationType.Long)
         {
             Log(LogLevel.Error, data);
-            NotifyMessage(data, duration, ENotificationIconType.Alert, Color.red, true);
+            string message = CreateErrorMessage(data);
+            NotificationManagerClass.DisplayMessageNotification(message, duration, ENotificationIconType.Alert, Color.red);
         }
 
         public static void NotifyMessage(object data, 

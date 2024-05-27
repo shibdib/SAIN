@@ -121,10 +121,15 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private void getDecision()
         {
-            if (shallDogfight())
+            if (CurrentSoloDecision != SoloDecision.RushEnemy && 
+                shallDogfight())
             {
                 SetDecisions(SoloDecision.DogFight, SquadDecision.None, SelfDecision.None);
                 return;
+            }
+            else if (DogFightTarget != null)
+            {
+                DogFightTarget = null;
             }
 
             if (shallAvoidGrenade())
@@ -135,7 +140,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             if (CheckContinueRetreat())
             {
-                //return;
+                return;
             }
 
             if (SelfActionDecisions.GetDecision(out SelfDecision selfDecision))

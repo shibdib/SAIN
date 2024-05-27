@@ -15,42 +15,21 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Update()
         {
-            if (SAINBot.Steering.SteerByPriority())
+            var SquadLeadPos = SAINBot.Squad.LeaderComponent?.Position;
+            if (SquadLeadPos != null)
             {
-                SAINBot.Mover.Sprint(false);
+                SAINBot.Mover.GoToPoint(SquadLeadPos.Value, out _);
+                CheckShouldSprint(SquadLeadPos.Value);
             }
-            else
-            {
-                Regroup();
-            }
+            SAINBot.Mover.SetTargetPose(1f);
+            SAINBot.Mover.SetTargetMoveSpeed(1f);
+            SAINBot.DoorOpener.Update();
         }
 
         private float UpdateTimer = 0f;
 
-        private void Regroup()
-        {
-            if (UpdateTimer < Time.time)
-            {
-                UpdateTimer = Time.time + 3f;
-                MoveToLead();
-            }
-        }
-
         public override void Start()
         {
-            MoveToLead();
-        }
-
-        private void MoveToLead()
-        {
-            var SquadLeadPos = SAINBot.Squad.LeaderComponent?.BotOwner?.Position;
-            if (SquadLeadPos != null && SAINBot.Mover.GoToPoint(SquadLeadPos.Value, out _))
-            {
-                SAINBot.Mover.SetTargetPose(1f);
-                SAINBot.Mover.SetTargetMoveSpeed(1f);
-                CheckShouldSprint(SquadLeadPos.Value);
-                BotOwner.DoorOpener.Update();
-            }
         }
 
         private void CheckShouldSprint(Vector3 pos)
@@ -60,7 +39,11 @@ namespace SAIN.Layers.Combat.Squad
             float leadDist = (pos - BotOwner.Position).magnitude;
             float enemyDist = hasEnemy ? (SAINBot.Enemy.EnemyIPlayer.Position - BotOwner.Position).magnitude : 999f;
 
-            bool sprint = hasEnemy && leadDist > 30f && !enemyLOS && enemyDist > 50f;
+            bool sprint = 
+                hasEnemy && 
+                leadDist > 30f && 
+                !enemyLOS && 
+                enemyDist > 50f;
 
             if (SAINBot.Steering.SteerByPriority(false))
             {

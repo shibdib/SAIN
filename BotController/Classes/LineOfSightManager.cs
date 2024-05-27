@@ -173,10 +173,13 @@ namespace SAIN.Components
                 if (player != null 
                     && player.Transform != null)
                 {
-                    if (player.IsAI && 
-                        player.AIData.BotOwner?.BotState != EBotState.Active)
+                    if (player.IsAI)
                     {
-                        continue;
+                        if (player.AIData.BotOwner?.BotState != EBotState.Active ||
+                            player.AIData.BotOwner?.StandBy?.StandByType != BotStandByType.active)
+                        {
+                            continue;
+                        }
                     }
                     _validPlayers.Add(player);
                 }

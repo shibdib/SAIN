@@ -262,13 +262,7 @@ namespace SAIN.Patches.Vision
         [PatchPrefix]
         public static void PatchPrefix(ref float __result, EnemyInfo __instance)
         {
-            if (SAINPlugin.IsBotExluded(__instance.Owner))
-            {
-                __result *= SAINEnemyVision.GetGainSightModifier(__instance, null);
-                return;
-            }
-
-            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPostPatch))
+            if (SAINEnableClass.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPostPatch))
                 && __instance.Person != null)
             {
                 SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
@@ -293,13 +287,7 @@ namespace SAIN.Patches.Vision
         [PatchPostfix]
         public static void PatchPostfix(ref float __result, EnemyInfo __instance)
         {
-            if (SAINPlugin.IsBotExluded(__instance.Owner))
-            {
-                __result *= SAINEnemyVision.GetGainSightModifier(__instance, null);
-                return;
-            }
-            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionSpeedPostPatch))
-                && __instance.Person != null)
+            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPostPatch)))
             {
                 SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
                 if (enemy != null)
@@ -337,7 +325,7 @@ namespace SAIN.Patches.Vision
                     visibility /= gearInfo.GetStealthModifier(__instance.Distance);
                 }
 
-                if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(VisionDistancePosePatch)))
+                if (SAINEnableClass.GetSAIN(__instance.Owner, out var sain, nameof(VisionDistancePosePatch)))
                 {
                     SAINEnemy sainEnemy = sain.EnemyController.GetEnemy(player.ProfileId);
                     if (sainEnemy?.EnemyStatus.PositionalFlareEnabled == true && sainEnemy?.Heard == true)

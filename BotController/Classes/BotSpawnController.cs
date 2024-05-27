@@ -28,7 +28,7 @@ namespace SAIN.Components.BotController
         public Dictionary<string, BotComponent> SAINBotDictionary = new Dictionary<string, BotComponent>();
         private BotSpawner BotSpawner => BotController?.BotSpawner;
 
-        public static readonly List<WildSpawnType> ExclusionList = new List<WildSpawnType>
+        public static readonly List<WildSpawnType> StrictExclusionList = new List<WildSpawnType>
         {
             WildSpawnType.bossZryachiy,
             WildSpawnType.followerZryachiy,

@@ -36,7 +36,9 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool GetDecision(out SelfDecision Decision)
         {
-            if ( SAINBot.Enemy == null && BotOwner?.Medecine?.Using == false && LowOnAmmo(0.75f) )
+            if (SAINBot.Enemy == null && 
+                BotOwner?.Medecine?.Using == false && 
+                LowOnAmmo(0.75f))
             {
                 SAINBot.SelfActions.TryReload();
                 Decision = SelfDecision.None;
@@ -86,12 +88,12 @@ namespace SAIN.SAINComponent.Classes.Decision
             if (grenadePos != null)
             {
                 return true;
-                Vector3 headPos = SAINBot.Transform.HeadPosition;
-                Vector3 direction = grenadePos.Value - headPos;
-                if (!Physics.Raycast(headPos, direction.normalized, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
-                {
-                    return true;
-                }
+                //Vector3 headPos = SAINBot.Transform.HeadPosition;
+                //Vector3 direction = grenadePos.Value - headPos;
+                //if (!Physics.Raycast(headPos, direction.normalized, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
+                //{
+                //    return true;
+                //}
             }
             return false;
         }
@@ -133,6 +135,11 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool CheckContinueSelfAction(out SelfDecision Decision)
         {
+            if (BotOwner?.Medecine == null)
+            {
+                Decision = SelfDecision.None;
+                return false;
+            }
             if (CurrentSelfAction != SelfDecision.None)
             {
                 if (CurrentSelfAction == SelfDecision.Surgery 
@@ -163,19 +170,25 @@ namespace SAIN.SAINComponent.Classes.Decision
         }
 
         private bool ContinueRunGrenade => CurrentSelfAction == SelfDecision.RunAwayGrenade && SAINBot.Grenade.GrenadeDangerPoint != null;
-        public bool UsingMeds => BotOwner.Medecine.Using;
+
+        public bool UsingMeds => BotOwner.Medecine?.Using == true;
+
         private bool ContinueReload => BotOwner.WeaponManager.Reload?.Reloading == true; //  && !StartCancelReload()
+
         public bool CanUseStims
         {
             get
             {
-                var stims = BotOwner.Medecine.Stimulators;
-                return stims.HaveSmt && Time.time - stims.LastEndUseTime > 3f && stims.CanUseNow() && !SAINBot.Memory.Health.Healthy;
+                var stims = BotOwner.Medecine?.Stimulators;
+                return stims?.HaveSmt == true && Time.time - stims.LastEndUseTime > 3f && stims?.CanUseNow() == true && !SAINBot.Memory.Health.Healthy;
             }
         }
-        public bool CanUseFirstAid => BotOwner.Medecine.FirstAid.ShallStartUse();
-        public bool CanUseSurgery => BotOwner.Medecine.SurgicalKit.ShallStartUse() && !BotOwner.Medecine.FirstAid.IsBleeding;
-        public bool CanReload => BotOwner.WeaponManager.IsReady && !BotOwner.WeaponManager.HaveBullets;
+
+        public bool CanUseFirstAid => BotOwner.Medecine?.FirstAid?.ShallStartUse() == true;
+
+        public bool CanUseSurgery => BotOwner.Medecine?.SurgicalKit?.ShallStartUse() == true && BotOwner.Medecine?.FirstAid?.IsBleeding == false;
+
+        public bool CanReload => BotOwner.WeaponManager?.IsReady == true && BotOwner.WeaponManager?.HaveBullets == false;
 
         private bool StartUseStims()
         {

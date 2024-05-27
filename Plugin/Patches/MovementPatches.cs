@@ -40,7 +40,7 @@ namespace SAIN.Patches.Generic
                 return true;
             }
 
-            if (SAINPlugin.GetSAIN(____owner, out var sain, nameof(DoorOpenerPatch)))
+            if (SAINEnableClass.GetSAIN(____owner, out var sain, nameof(DoorOpenerPatch)))
             {
                 __result = sain.DoorOpener.Update();
                 return false;

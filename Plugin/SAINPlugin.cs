@@ -5,7 +5,6 @@ using DrakiaXYZ.VersionChecker;
 using EFT;
 using HarmonyLib;
 using SAIN.Components;
-using SAIN.Components.BotController;
 using SAIN.Editor;
 using SAIN.Helpers;
 using SAIN.Layers;
@@ -15,13 +14,11 @@ using SAIN.Patches.Shoot;
 using SAIN.Patches.Vision;
 using SAIN.Plugin;
 using SAIN.Preset;
-using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Mover;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using static SAIN.AssemblyInfoClass;
 
@@ -36,109 +33,14 @@ namespace SAIN
     [BepInIncompatibility("com.dvize.NoGrenadeESP")]
     public class SAINPlugin : BaseUnityPlugin
     {
-        public static bool IsBotExluded(BotOwner botOwner)
-        {
-            if (_excludedIDs.Contains(botOwner.ProfileId))
-            {
-                return true;
-            }
-            if (_sainIDs.Contains(botOwner.ProfileId))
-            {
-                return false;
-            }
-            bool isExcluded = IsBotExluded(botOwner.Profile.Info.Settings.Role, botOwner.Profile.Nickname);
-            if (isExcluded)
-            {
-                _excludedIDs.Add(botOwner.ProfileId);
-            }
-            else
-            {
-                _sainIDs.Add(botOwner.ProfileId);
-            }
-            return isExcluded;
-        }
-
-        private static List<string> _excludedIDs = new List<string>();
-        private static List<string> _sainIDs = new List<string>();
-
-        public static void ClearExcludedIDs()
-        {
-            if (_excludedIDs.Count > 0)
-                _excludedIDs.Clear();
-
-            if (_sainIDs.Count > 0)
-                _sainIDs.Clear();
-        }
-
-        public static bool IsBotExluded(WildSpawnType wildSpawnType, string nickname)
-        {
-            if (BotSpawnController.ExclusionList.Contains(wildSpawnType))
-            {
-                return true;
-            }
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaBosses &&
-                !EnumValues.WildSpawn.IsGoons(wildSpawnType) &&
-                (EnumValues.WildSpawn.IsBoss(wildSpawnType) ||
-                EnumValues.WildSpawn.IsFollower(wildSpawnType)))
-            {
-                return true;
-            }
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaScavs &&
-                EnumValues.WildSpawn.IsScav(wildSpawnType))
-            {
-                if (!SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaPlayerScavs && isPlayerScav(nickname))
-                {
-                    return false;
-                }
-                return true;
-            }
-            return false;
-        }
-
-        private static bool isPlayerScav(string nickname)
-        {
-            // Pattern: xxx (xxx)
-            string pattern = "\\w+.[(]\\w+[)]";
-            Regex regex = new Regex(pattern);
-            if (regex.Matches(nickname).Count > 0)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool GetSAIN(BotOwner botOwner, out BotComponent sain, string patchName)
-        {
-            sain = null;
-            if (SAINPlugin.BotController == null)
-            {
-                SAIN.Logger.LogError($"Bot Controller Null in [{patchName}]");
-                return false;
-            }
-            return SAINPlugin.BotController.GetSAIN(botOwner, out sain);
-        }
-
-        public static bool GetSAIN(Player player, out BotComponent sain, string patchName)
-        {
-            sain = null;
-            if (player != null && !player.IsAI)
-            {
-                return false;
-            }
-            if (SAINPlugin.BotController == null)
-            {
-                SAIN.Logger.LogError($"Bot Controller Null in [{patchName}]");
-                return false;
-            }
-            return SAINPlugin.BotController.GetSAIN(player, out sain);
-        }
-
         public static bool DebugMode => EditorDefaults.GlobalDebugMode;
         public static bool DrawDebugGizmos => EditorDefaults.DrawDebugGizmos;
         public static PresetEditorDefaults EditorDefaults => PresetHandler.EditorDefaults;
 
         public static SoloDecision ForceSoloDecision = SoloDecision.None;
+
         public static SquadDecision ForceSquadDecision = SquadDecision.None;
+
         public static SelfDecision ForceSelfDecision = SelfDecision.None;
 
         private void Awake()
@@ -275,13 +177,9 @@ namespace SAIN
             ModDetection.Update();
             SAINEditor.Update();
             GameWorldHandler.Update();
-
-            //SAINBotSpaceAwareness.Update();
-
-            //SAINVaultClass.DebugVaultPointCount();
+            SAINEnableClass.Update();
 
             LoadedPreset.GlobalSettings.Personality.Update();
-            //BigBrainHandler.CheckLayers();
         }
 
         private void Start() => SAINEditor.Init();
@@ -289,5 +187,7 @@ namespace SAIN
         private void LateUpdate() => SAINEditor.LateUpdate();
 
         private void OnGUI() => SAINEditor.OnGUI();
+
+        public static bool IsBotExluded(BotOwner botOwner) => SAINEnableClass.IsSAINDisabledForBot(botOwner);
     }
 }

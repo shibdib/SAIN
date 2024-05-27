@@ -27,6 +27,9 @@ namespace SAIN.Preset.GlobalSettings
         [Name("General")]
         public GeneralSettings General = new GeneralSettings();
 
+        [Name("SAIN Enabled For Bot Types")]
+        public SAINEnableSettings SAINEnabled = new SAINEnableSettings();
+
         [Name("Aiming")]
         public AimSettings Aiming = new AimSettings();
 

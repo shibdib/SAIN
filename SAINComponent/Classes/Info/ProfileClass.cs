@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.Info
             IsPMC = EnumValues.WildSpawn.IsPMC(WildSpawnType);
             if (IsPMC && SAINPlugin.DebugMode)
             {
-                Logger.LogInfo("Found PMC");
+                Logger.LogInfo($"Found PMC: [{WildSpawnType}]");
             }
             SetDiffModifier(BotDifficulty);
         }
@@ -37,6 +37,7 @@ namespace SAIN.SAINComponent.Classes.Info
         public bool IsFollower { get; private set; }
         public bool IsScav { get; private set; }
         public bool IsPMC { get; private set; }
+        public bool IsPlayerScav { get; private set; }
 
         public BotDifficulty BotDifficulty => BotOwner.Profile.Info.Settings.BotDifficulty;
 

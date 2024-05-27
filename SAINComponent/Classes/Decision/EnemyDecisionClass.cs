@@ -304,8 +304,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private float _nextGrenadeCheckTime;
 
-        private static readonly float RushEnemyMaxPathDistance = 12.5f;
-        private static readonly float RushEnemyMaxPathDistanceSprint = 30f;
+        private static readonly float RushEnemyMaxPathDistance = 10f;
+        private static readonly float RushEnemyMaxPathDistanceSprint = 20f;
         private static readonly float RushEnemyLowAmmoRatio = 0.4f;
 
         private bool shallRushEnemy(SAINEnemy enemy)
@@ -441,6 +441,12 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
+
+            if (SAINBot.Decision.CurrentSoloDecision == SoloDecision.RushEnemy)
+            {
+                return false;
+            }
+
             var currentSolo = SAINBot.Decision.CurrentSoloDecision;
             if (Time.time - SAINBot.Cover.LastHitTime < 2f 
                 && currentSolo != SoloDecision.RunAway 

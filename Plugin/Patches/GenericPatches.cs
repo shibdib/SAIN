@@ -84,7 +84,7 @@ namespace SAIN.Patches.Generic
             {
                 return;
             }
-            if (SAINPlugin.GetSAIN(__instance.Owner, out var sain, nameof(HaveSeenEnemyPatch))
+            if (SAINEnableClass.GetSAIN(__instance.Owner, out var sain, nameof(HaveSeenEnemyPatch))
                 //&& sain.Info.Profile.IsPMC
                 && sain.EnemyController.CheckAddEnemy(__instance.Person)?.Heard == true)
             {
@@ -125,7 +125,8 @@ namespace SAIN.Patches.Generic
             {
                 return true;
             }
-            if (SAINPlugin.GetSAIN(___botOwner_0, out var sain, nameof(StopSetToNavMeshPatch)) && !sain.Mover.SprintController.ShallResetToNavMesh())
+            if (SAINEnableClass.GetSAIN(___botOwner_0, out var sain, nameof(StopSetToNavMeshPatch)) && 
+                !sain.Mover.SprintController.ShallResetToNavMesh())
             {
                 return false;
             }
@@ -188,8 +189,7 @@ namespace SAIN.Patches.Generic
                 }
                 ___bool_1 = true;
                 ___botOwner_0.WeaponManager.Selector.TakePrevWeapon();
-                if (___botOwner_0.isActiveAndEnabled)
-                    SAINPlugin.BotController?.StartCoroutine(TakePrevWeapon(___botOwner_0));
+                SAINPlugin.BotController?.StartCoroutine(TakePrevWeapon(___botOwner_0));
             }
             return false;
         }
@@ -234,7 +234,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static void PatchPrefix(ref Player __instance)
         {
-            if (SAINPlugin.GetSAIN(__instance, out var sain, nameof(OnMakingShotRecoilPatch)))
+            if (SAINEnableClass.GetSAIN(__instance, out var sain, nameof(OnMakingShotRecoilPatch)))
             {
                 sain.Info.WeaponInfo.Recoil.WeaponShot();
             }
@@ -294,7 +294,7 @@ namespace SAIN.Patches.Generic
             BotsGroup group = enemyInfo.GroupOwner;
             for (int i = 0; i < group.MembersCount; i++)
             {
-                if (SAINPlugin.GetSAIN(group.Member(i), out BotComponent sain, nameof(ShallKnowEnemyPatch))
+                if (SAINEnableClass.GetSAIN(group.Member(i), out BotComponent sain, nameof(ShallKnowEnemyPatch))
                     && EnemySenseRecently(sain, enemyInfo))
                 {
                     return true;

@@ -96,7 +96,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                     if (Time.time - _timeOffMeshStart > 3f && _nextResetTime < Time.time)
                     {
                         _nextResetTime = Time.time + 5f;
-                        Logger.LogWarning($"{BotOwner.name} is off navmesh! Trying to fix...");
+                        //Logger.LogWarning($"{BotOwner.name} is off navmesh! Trying to fix...");
                         SAINBot.Mover.ResetPath(0.33f);
                     }
                 }
@@ -182,9 +182,10 @@ namespace SAIN.SAINComponent.Classes.Debug
                     break;
                 }
                 _botStuckAfterVault = botIsStuck;
-                Logger.LogWarning($"{BotOwner.name} has vaulted to somewhere they can't get down from! Trying to fix...");
+                //Logger.LogWarning($"{BotOwner.name} has vaulted to somewhere they can't get down from! Trying to fix...");
 
-                if (!isHumanVisible() && !isHumanClose())
+                if (!isHumanVisible() && 
+                    !isHumanClose())
                 {
                     teleport(preVaultPosition);
                     break;
@@ -206,9 +207,9 @@ namespace SAIN.SAINComponent.Classes.Debug
         private void teleport(Vector3 position)
         {
             Player.Teleport(position + Vector3.up * 0.25f);
-            Logger.LogWarning($"{BotOwner.name} has teleported because no human players are visible to them, and no human players are close.");
-            BotOwner.Mover.Stop();
-            BotOwner.Mover.RecalcWay();
+            Logger.LogWarning($"{BotOwner.name} has teleported because they were stuck after vaulting, and no human players are visible to them, and no human players are close.");
+            BotOwner.Mover?.Stop();
+            BotOwner.Mover?.RecalcWay();
         }
 
         private bool isHumanVisible()

@@ -44,11 +44,12 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return true;
             }
-            if (shallRegroup())
-            {
-                Decision = SquadDecision.Regroup;
-                return true;
-            }
+
+            //if (shallRegroup())
+            //{
+            //    Decision = SquadDecision.Regroup;
+            //    return true;
+            //}
 
             return false;
         }
@@ -73,7 +74,8 @@ namespace SAIN.SAINComponent.Classes.Decision
                     return false;
                 }
             }
-            if (SAINBot.Squad.LeaderComponent != null && shallGroupSearch())
+            if (SAINBot.Squad.LeaderComponent != null && 
+                shallGroupSearch())
             {
                 Decision = SquadDecision.GroupSearch;
                 return true;

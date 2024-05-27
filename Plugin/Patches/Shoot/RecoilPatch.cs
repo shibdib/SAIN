@@ -43,7 +43,9 @@ namespace SAIN.Patches.Shoot
             Vector3 finalOffset = badShootOffset + (aimUpgradeByTime * (aimOffset + recoilOffset));
 
             IPlayer person = ___botOwner_0?.Memory?.GoalEnemy?.Person;
-            if (person != null && SAINPlugin.LoadedPreset.GlobalSettings.General.NotLookingToggle)
+            if (person != null && 
+                !person.IsAI &&
+                SAINPlugin.LoadedPreset.GlobalSettings.Look.NotLookingToggle)
             {
                 finalOffset += NotLookingOffset(person, ___botOwner_0);
             }
@@ -54,19 +56,17 @@ namespace SAIN.Patches.Shoot
 
         private static Vector3 NotLookingOffset(IPlayer person, BotOwner botOwner)
         {
-            if (person.IsAI == false)
+            float ExtraSpread = SAINNotLooking.GetSpreadIncrease(person, botOwner);
+            if (ExtraSpread > 0)
             {
-                float ExtraSpread = SAINNotLooking.GetSpreadIncrease(person, botOwner);
-                if (ExtraSpread > 0)
+                Vector3 vectorSpread = UnityEngine.Random.insideUnitSphere * ExtraSpread;
+                vectorSpread.y = 0;
+                if (SAINPlugin.DebugMode && DebugTimer < Time.time)
                 {
-                    Vector3 vectorSpread = UnityEngine.Random.insideUnitSphere * ExtraSpread;
-                    if (SAINPlugin.DebugMode && DebugTimer < Time.time)
-                    {
-                        DebugTimer = Time.time + 10f;
-                        Logger.LogDebug($"Increasing Spread because Player isn't looking. Magnitude: [{vectorSpread.magnitude}]");
-                    }
-                    return vectorSpread;
+                    DebugTimer = Time.time + 10f;
+                    Logger.LogDebug($"Increasing Spread because Player isn't looking. Magnitude: [{vectorSpread.magnitude}]");
                 }
+                return vectorSpread;
             }
             return Vector3.zero;
         }
@@ -85,20 +85,7 @@ namespace SAIN.Patches.Shoot
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ____owner)
         {
-            if (SAINPlugin.IsBotExluded(____owner))
-            {
-                return true;
-            }
-            if (SAINPlugin.BotController == null)
-            {
-                Logger.LogError($"Bot Controller Null in [{nameof(RecoilPatch)}]");
-                return true;
-            }
-            if (SAINPlugin.BotController.GetSAIN(____owner, out BotComponent sain))
-            {
-                return false;
-            }
-            return true;
+            return SAINPlugin.IsBotExluded(____owner);
         }
     }
 

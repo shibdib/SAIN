@@ -54,10 +54,7 @@ namespace SAIN.Preset.GlobalSettings.Categories
 
         public static readonly List<Brain> Others = new List<Brain>
         {
-            Brain.ArenaFighter,
             Brain.Obdolbs,
-            Brain.ExUsec,
-            Brain.SectantWarrior,
         };
 
         public static readonly List<Brain> Bosses = new List<Brain>

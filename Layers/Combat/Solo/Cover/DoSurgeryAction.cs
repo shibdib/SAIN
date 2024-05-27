@@ -29,7 +29,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 SAINBot.Mover.SetTargetPose(0f);
                 tryStartSurgery();
             }
-
             SAINBot.Steering.SteerByPriority();
         }
 
@@ -42,8 +41,22 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 && surgery.ShallStartUse())
             {
                 SAINBot.Medical.Surgery.SurgeryStarted = true;
-                surgery.ApplyToCurrentPart();
+                surgery.ApplyToCurrentPart(new System.Action(onSurgeryDone));
             }
+            if (_actionStartedTime + 20f < Time.time)
+            {
+                SAINBot.Player?.ActiveHealthController?.RestoreFullHealth();
+                SAINBot.Decision.ResetDecisions();
+            }
+        }
+
+        private void onSurgeryDone()
+        {
+            if (SAINBot.Enemy == null || SAINBot.Enemy.TimeSinceSeen > 60f)
+            {
+                SAINBot.Player?.ActiveHealthController?.RestoreFullHealth();
+            }
+            SAINBot.Decision.ResetDecisions();
         }
 
         private bool _allClear;
@@ -53,9 +66,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             SAINBot.Mover.StopMove();
             _startSurgeryTime = Time.time + 1f;
+            _actionStartedTime = Time.time;
         }
 
         private float _startSurgeryTime;
+        private float _actionStartedTime;
 
         public override void Stop()
         {

@@ -29,6 +29,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             Path = new SAINEnemyPath(this);
             KnownPlaces = new EnemyKnownPlaces(this);
         }
+
         public bool EnemyNotLooking => IsVisible && !EnemyStatus.EnemyLookingAtMe && !EnemyStatus.ShotAtMeRecently;
 
         public readonly string EnemyName;
@@ -283,7 +284,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             Vector3 headPos = person.MainParts[BodyPartType.head].Position;
             Vector3 floorPos = person.Position;
-            Vector3 centerMass = Vector3.Lerp(headPos, floorPos, 0.3125f);
+            Vector3 centerMass = Vector3.Lerp(headPos, floorPos, SAINPlugin.LoadedPreset.GlobalSettings.Aiming.CenterMassVal);
 
             if (person.IsYourPlayer && SAINPlugin.DebugMode && _debugCenterMassTime < Time.time)
             {

@@ -166,15 +166,7 @@ namespace SAIN.SAINComponent.Classes
 
         private bool checkIfSoundHeard(IPlayer player, Vector3 position, float power, AISoundType soundType, out float distance)
         {
-            float range = power;
-
-            float rangeModifier = getSoundRangeModifier(soundType);
-            if (rangeModifier != 1f)
-            {
-                range = Mathf.Round(range * rangeModifier * 100) / 100;
-            }
-
-            return DoIHearSound(player, position, range, soundType, out distance);
+            return DoIHearSound(player, position, power, soundType, out distance);
         }
 
         private float getSoundRangeModifier(AISoundType soundType)
@@ -468,7 +460,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 dispersionModifier = Mathf.Lerp(1f, 0.5f, dotProduct);
             }
-            Logger.LogInfo($"Dispersion Modifier for Sound [{dispersionModifier}] Dot Product [{dotProduct}]");
+            //Logger.LogInfo($"Dispersion Modifier for Sound [{dispersionModifier}] Dot Product [{dotProduct}]");
             return dispersionModifier;
         }
 
@@ -499,7 +491,7 @@ namespace SAIN.SAINComponent.Classes
             float randomY = UnityEngine.Random.Range(-randomHeight, randomHeight);
             float randomZ = UnityEngine.Random.Range(-dispersion, dispersion);
 
-            Logger.LogInfo($"Random Height: [{randomHeight}]");
+            //Logger.LogInfo($"Random Height: [{randomHeight}]");
 
             Vector3 randomdirection = new Vector3(randomX, 0, randomZ);
             if (min > 0 && randomdirection.magnitude < min)
@@ -590,13 +582,26 @@ namespace SAIN.SAINComponent.Classes
             float num2 = distance - closehearing;
             float num3 = 1f - num2 / num;
 
-            return EFTMath.Random(0f, 1f) < num3 + 0.1f;
+            return EFTMath.Random(0f, 1f) < num3 + 0.2f;
         }
 
         public bool DoIHearSound(IPlayer iPlayer, Vector3 position, float range, AISoundType type, out float soundDistance)
         {
             bool wasHeard = false;
             soundDistance = (SAINBot.Position - position).magnitude;
+
+            if (type == AISoundType.step && 
+                !CheckFootStepDetectChance(soundDistance))
+            {
+                return false;
+            }
+
+            float rangeModifier = getSoundRangeModifier(type);
+            if (rangeModifier != 1f)
+            {
+                range = Mathf.Round(range * rangeModifier * 100) / 100;
+            }
+
             // Is sound within hearing Distance at all?
             if (soundDistance < range)
             {

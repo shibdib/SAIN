@@ -300,6 +300,7 @@
     <Compile Include="Plugin\DependencyChecker.cs" />
     <Compile Include="Plugin\External.cs" />
     <Compile Include="Plugin\ModDetection.cs" />
+    <Compile Include="Plugin\SAINEnableClass.cs" />
     <Compile Include="Plugin\SAINInterop.cs" />
     <Compile Include="Preset\BotSettings\SAINSettings\Categories\SAINBossSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\TalkSettings.cs" />
@@ -313,6 +314,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\DebugSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\NoBushESPSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\LootingBotsSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\SAINEnableSettings.cs" />
     <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
     <Compile Include="SAINComponent\Classes\Enemy\EEnemyAction.cs" />

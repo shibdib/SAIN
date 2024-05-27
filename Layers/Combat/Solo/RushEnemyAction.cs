@@ -38,7 +38,8 @@ namespace SAIN.Layers.Combat.Solo
                     {
                         SAINBot.Mover.TryJump();
                     }
-                    else if (TryJumpTimer < Time.time)
+                    else if (TryJumpTimer < Time.time &&
+                            SAINBot.Player.IsSprintEnabled)
                     {
                         TryJumpTimer = Time.time + 3f;
                         if (!_shallBunnyHop
@@ -70,7 +71,7 @@ namespace SAIN.Layers.Combat.Solo
             if (NewDestTimer < Time.time)
             {
                 Vector3 Destination = EnemyPos;
-                if (SAINBot.Enemy.Path.PathDistance > 5f
+                if (SAINBot.Enemy.Path.PathDistance > 1f
                     && SAINBot.Mover.SprintController.RunToPoint(Destination))
                 {
                     NewDestTimer = Time.time + 2f;
@@ -85,7 +86,7 @@ namespace SAIN.Layers.Combat.Solo
                 }
             }
 
-            if (_shallTryJump && TryJumpTimer < Time.time)
+            if (_shallTryJump && TryJumpTimer < Time.time && SAINBot.Player.IsSprintEnabled)
             {
                 //&& Bot.Enemy.Path.PathDistance > 3f
                 var corner = SAINBot.Enemy?.LastCornerToEnemy;

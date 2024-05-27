@@ -97,7 +97,7 @@ namespace SAIN.SAINComponent
             }
             catch (Exception ex)
             {
-                Logger.LogError("Init SAIN ERROR, Disposing.");
+                Logger.LogError("Init SAIN ERROR, Disposing...");
                 Logger.LogError(ex);
                 Dispose();
                 return false;
@@ -129,6 +129,15 @@ namespace SAIN.SAINComponent
             Medical.Init();
 
             TimeBotCreated = Time.time;
+
+            if (Info.Profile.IsPMC && 
+                person.BotOwner.Brain.BaseBrain.ShortName() != "pmcBot")
+            {
+                Logger.LogAndNotifyError($"{BotOwner.name} is a PMC but does not have [pmcBot] Base Brain! Current Brain Assignment: [{person.BotOwner.Brain.BaseBrain.ShortName()}] : SAIN Server mod is either missing or another mod is overwriting it. Destroying SAIN for this bot...");
+                Logger.LogError("Init SAIN ERROR, Disposing...");
+                Dispose();
+                return false;
+            }
 
             return true;
         }
@@ -364,7 +373,7 @@ namespace SAIN.SAINComponent
         {
             try
             {
-                Logger.LogWarning($"SAIN Disposed");
+                //Logger.LogWarning($"SAIN Disposed");
 
                 OnSAINDisposed?.Invoke(ProfileId, BotOwner);
 
@@ -550,7 +559,10 @@ namespace SAIN.SAINComponent
         public bool BotActive =>
             IsDead == false
             && BotOwner.isActiveAndEnabled
-            && BotOwner.BotState == EBotState.Active;
+            && Player.gameObject.activeInHierarchy
+            && BotOwner.gameObject.activeInHierarchy
+            && BotOwner.BotState == EBotState.Active
+            && BotOwner.StandBy.StandByType == BotStandByType.active;
 
         //&& BotOwner.StandBy.StandByType == BotStandByType.active
         //&& BotOwner.isActiveAndEnabled ;
