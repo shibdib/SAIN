@@ -12,13 +12,11 @@ using Comfort.Common;
 using SAIN.SAINComponent.Classes;
 using SAIN.Helpers;
 using System.Collections.Generic;
-using static UnityEngine.EventSystems.EventTrigger;
 using UnityEngine.UIElements;
 using EFT.InventoryLogic;
 using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
-using System.Windows.Forms;
 using SAIN.Preset.GlobalSettings;
 
 namespace SAIN.Patches.Vision
@@ -209,7 +207,7 @@ namespace SAIN.Patches.Vision
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ___botOwner_0, ref bool ____isInDarkPlace)
         {
-            if (____isInDarkPlace 
+            if (____isInDarkPlace
                 && !SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.AllowLightOnForDarkBuildings)
             {
                 ____isInDarkPlace = false;
@@ -252,6 +250,7 @@ namespace SAIN.Patches.Vision
             return settings.TurnLightOffNoEnemyRAIDERROGUE;
         }
     }
+
     public class VisionSpeedPrePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

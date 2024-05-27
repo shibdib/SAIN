@@ -53,9 +53,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            if (!SAINBot.BotActive || 
-                SAINBot.GameIsEnding || 
-                !SAINBot.SAINLayersActive)
+            if (!SAINBot.SAINLayersActive)
             {
                 ActivateCoverFinder(false);
                 return;
@@ -142,6 +140,13 @@ namespace SAIN.SAINComponent.Classes
 
         public void CheckResetCoverInUse()
         {
+            CoverPoint coverInUse = SAINBot.Cover.CoverInUse;
+            if (coverInUse != null && coverInUse.IsBad)
+            {
+                SAINBot.Cover.CoverInUse = null;
+                return;
+            }
+
             SoloDecision decision = SAINBot.Decision.CurrentSoloDecision;
             if (decision != SoloDecision.MoveToCover
                 && decision != SoloDecision.RunToCover
@@ -183,12 +188,6 @@ namespace SAIN.SAINComponent.Classes
         public void SortPointsByPathDist()
         {
             CoverFinderComponent.OrderPointsByPathDist(CoverPoints, SAINBot);
-        }
-
-        private bool GetPointToHideFrom(out Vector3? target)
-        {
-            target = SAINBot.Grenade.GrenadeDangerPoint ?? SAINBot.CurrentTargetPosition;
-            return target != null;
         }
 
         public bool DuckInCover()

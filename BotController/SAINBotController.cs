@@ -79,6 +79,7 @@ namespace SAIN.Components
             TimeVision.Update();
             WeatherVision.Update();
             LineOfSightManager.Update();
+
             //showBotInfoDebug();
             //CoverManager.Update();
             //PathManager.Update();
@@ -427,6 +428,8 @@ namespace SAIN.Components
         {
             try
             {
+                LineOfSightManager.Dispose();
+
                 StopAllCoroutines();
 
                 GameWorld.OnDispose -= Dispose;
@@ -435,6 +438,7 @@ namespace SAIN.Components
 
                 AISoundPlayed -= SoundPlayed;
                 PlayerTalk -= PlayerTalked;
+
                 Singleton<BotEventHandler>.Instance.OnGrenadeThrow -= GrenadeThrown;
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= GrenadeExplosion;
 
@@ -445,6 +449,7 @@ namespace SAIN.Components
                         bot.Value?.Dispose();
                     }
                 }
+
                 Bots.Clear();
                 Destroy(this);
             }

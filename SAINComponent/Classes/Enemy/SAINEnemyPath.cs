@@ -24,7 +24,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
             if (isCurrentEnemy && !Enemy.IsAI)
             {
-                timeAdd = 0.5f;
+                timeAdd = 0.25f;
             }
 
             if (CheckPathTimer + timeAdd < Time.time)

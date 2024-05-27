@@ -15,6 +15,8 @@ using SAIN.Layers.Combat.Solo;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
 using static UnityEngine.UI.GridLayoutGroup;
+using SAIN.Helpers;
+using Comfort.Common;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -33,48 +35,81 @@ namespace SAIN.Layers.Combat.Solo.Cover
             SAINBot.Mover.SetTargetMoveSpeed(1f);
             SAINBot.Mover.SetTargetPose(1f);
 
-            CoverPoint coverInUse = SAINBot.Cover.CoverInUse;
-
             if (_nextUpdateCoverTime < Time.time)
             {
                 _nextUpdateCoverTime = Time.time + 0.1f;
-                if (coverInUse == null)
-                {
-                    var points = SAINBot.Cover.CoverPoints;
-                    for (int i = 0; i < points.Count; i++)
-                    {
-                        var coverPoint = points[i];
-                        if (coverPoint != null
-                            && !coverPoint.Spotted
-                            && SAINBot.Mover.GoToPoint(coverPoint.Position, out _, 0.2f))
-                        {
-                            coverInUse = coverPoint;
-                            SAINBot.Cover.CoverInUse = coverPoint;
-                            CoverDestination = coverPoint;
-                            RecalcPathTimer = Time.time + 2f;
-                            break;
-                        }
-                    }
-                }
 
-                if (coverInUse != null 
-                    && RecalcPathTimer < Time.time)
-                {
-                    RecalcPathTimer = Time.time + 1f;
-                    if (!SAINBot.Mover.GoToPoint(coverInUse.Position, out _, 0.2f))
-                    {
-                        SAINBot.Cover.CoverInUse = null;
-                        _nextUpdateCoverTime = -1f;
-                    }
-                }
+                findCover();
+                reCheckCover();
             }
 
-            if (coverInUse == null)
+            if (SAINBot.Cover.CoverInUse == null)
             {
                 SAINBot.Mover.DogFight.DogFightMove(false);
             }
 
             EngageEnemy();
+        }
+
+        private void findCover()
+        {
+            CoverPoint coverInUse = SAINBot.Cover.CoverInUse;
+            if (coverInUse == null || coverInUse.IsBad)
+            {
+                if (shallFallback())
+                {
+                    RecalcPathTimer = Time.time + 1f;
+                    return;
+                }
+
+                SAINBot.Cover.SortPointsByPathDist();
+
+                var points = SAINBot.Cover.CoverPoints;
+                for (int i = 0; i < points.Count; i++)
+                {
+                    var coverPoint = points[i];
+                    if (checkMoveToCover(coverPoint))
+                    {
+                        RecalcPathTimer = Time.time + 1f;
+                        return;
+                    }
+                }
+            }
+        }
+
+        private bool shallFallback()
+        {
+            return SAINBot.Decision.CurrentSelfDecision != SelfDecision.None &&
+                checkMoveToCover(SAINBot.Cover.FallBackPoint);
+        }
+
+        private void reCheckCover()
+        {
+            CoverPoint coverInUse = SAINBot.Cover.CoverInUse;
+            if (coverInUse != null
+                && RecalcPathTimer < Time.time)
+            {
+                RecalcPathTimer = Time.time + 1f;
+                if (!checkMoveToCover(coverInUse))
+                {
+                    SAINBot.Cover.CoverInUse = null;
+                    _nextUpdateCoverTime = -1f;
+                }
+            }
+        }
+
+        private bool checkMoveToCover(CoverPoint coverPoint)
+        {
+            if (coverPoint != null &&
+                !coverPoint.Spotted && 
+                !coverPoint.IsBad && 
+                SAINBot.Mover.GoToPoint(coverPoint.Position, out _, 0.2f))
+            {
+                SAINBot.Cover.CoverInUse = coverPoint;
+                CoverDestination = coverPoint;
+                return true;
+            }
+            return false;
         }
 
         private float FindTargetCoverTimer = 0f;
@@ -88,23 +123,58 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (SAINBot.Enemy?.IsVisible == false 
                 && BotOwner.WeaponManager.HaveBullets 
-                && SAINBot.Enemy.TimeSinceLastKnownUpdated < 30f 
-                && SAINBot.Enemy.Path.BlindCornerToEnemy != null
-                && SAINBot.Enemy.LastKnownPosition != null
-                && (SAINBot.Enemy.Path.BlindCornerToEnemy.Value - SAINBot.Enemy.LastKnownPosition.Value).sqrMagnitude < 2f * 2f)
+                && SAINBot.Enemy.TimeSinceLastKnownUpdated < 30f)
             {
-                SuppressPosition(SAINBot.Enemy.Path.BlindCornerToEnemy.Value);
+                Vector3? suppressTarget = findSuppressTarget();
+                if (suppressTarget != null)
+                {
+                    SuppressPosition(suppressTarget.Value);
+                    return;
+                }
             }
-            else
+
+            if (suppressing)
             {
+                suppressing = false;
                 SAINBot.Shoot(false, Vector3.zero);
-                SAINBot.Steering.SteerByPriority(false);
-                Shoot.Update();
             }
+
+            if (!SAINBot.Steering.SteerByPriority(false))
+            {
+                SAINBot.Steering.LookToLastKnownEnemyPosition();
+            }
+            Shoot.Update();
+        }
+
+        bool suppressing;
+
+        private Vector3? findSuppressTarget()
+        {
+            Vector3? lastKnown = SAINBot.Enemy?.LastKnownPosition;
+            if (lastKnown != null)
+            {
+                float maxRange = 3f.Sqr();
+
+                Vector3? blindCorner = SAINBot.Enemy.Path.BlindCornerToEnemy;
+                if (blindCorner != null
+                    && (blindCorner.Value - lastKnown.Value).sqrMagnitude < maxRange)
+                {
+                    return blindCorner;
+                }
+
+                Vector3? lastCorner = SAINBot.Enemy.Path.LastCornerToEnemy;
+                if (lastCorner != null
+                    && (lastCorner.Value - lastKnown.Value).sqrMagnitude < maxRange)
+                {
+                    return lastCorner;
+                }
+            }
+            return null;
         }
 
         private void SuppressPosition(Vector3 position)
         {
+            suppressing = true;
             if (SuppressTimer < Time.time
                 && SAINBot.Shoot(true, position, true, BotComponent.EShootReason.WalkToCoverSuppress))
             {
@@ -129,7 +199,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             SAINBot.Mover.DogFight.ResetDogFightStatus();
             SAINBot.Cover.CheckResetCoverInUse();
-            SAINBot.Shoot(false, Vector3.zero);
+            if (suppressing)
+            {
+                suppressing = false;
+                SAINBot.Shoot(false, Vector3.zero);
+            }
         }
 
         public override void BuildDebugText(StringBuilder stringBuilder)

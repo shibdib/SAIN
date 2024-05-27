@@ -14,53 +14,139 @@ using SAIN.SAINComponent.Classes.Mover;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents;
 using System.Collections;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using SAIN.Plugin;
+using UnityEngine.UIElements;
 
 namespace SAIN.Components
 {
     public class LineOfSightManager : SAINControl
     {
+        public LineOfSightManager()
+        {
+            PresetHandler.PresetsUpdated += updateSettings;
+            updateSettings();
+        }
+
+        private void updateSettings()
+        {
+            MinJobSize = Mathf.RoundToInt(SAINPlugin.LoadedPreset.GlobalSettings.Performance.MinJobSize);
+            SpherecastRadius = SAINPlugin.LoadedPreset.GlobalSettings.Performance.SpherecastRadius;
+            maxBotsPerFrame = Mathf.RoundToInt(SAINPlugin.LoadedPreset.GlobalSettings.Performance.MaxBotsToCheckVisionPerFrame);
+        }
+
         public void Update()
         {
             if (_jobCoroutine == null)
             {
-                _jobCoroutine = BotController.StartCoroutine(raycastJobLoop());
+                _jobCoroutine = BotController.StartCoroutine(
+                    raycastJobLoop());
+            }
+            if (_updateBotVsBotVision == null)
+            {
+                //_updateBotVsBotVision = BotController.StartCoroutine
+                //    (checkVisionForBots(true, _localVisionCheckListAI));
+            }
+            if (_updateBotVsHumanVision == null)
+            {
+                //_updateBotVsHumanVision = BotController.StartCoroutine
+                //    (checkVisionForBots(false, _localVisionCheckListHumans));
             }
         }
 
+        public void Dispose()
+        {
+            PresetHandler.PresetsUpdated -= updateSettings;
+        }
+
         private Coroutine _jobCoroutine;
+        private Coroutine _updateBotVsBotVision;
+        private Coroutine _updateBotVsHumanVision;
+
+        private IEnumerator checkVisionForBots(bool forAI, List<BotComponent> _localList)
+        {
+            //WaitForSeconds wait = new WaitForSeconds(delay);
+            while (true)
+            {
+                _localList.AddRange(Bots.Values);
+
+                int totalUpdated = 0;
+                foreach (var bot in _localList)
+                {
+                    if (bot != null && bot.BotActive)
+                    {
+                        int numUpdated = bot.Vision.BotLook.UpdateLook(forAI);
+                        totalUpdated += numUpdated;
+                        if (numUpdated > 0)
+                        {
+                            yield return null;
+                        }
+                        //if (forAI &&
+                        //    _nextLogUpdatedTime2 < Time.time)
+                        //{
+                        //    _nextLogUpdatedTime2 = Time.time + 1f;
+                        //    Logger.LogDebug($"Updated Vision for [{numUpdated}] enemies for [{bot.BotOwner.name}]");
+                        //}
+                    }
+                }
+
+                //if (forAI && 
+                //    _nextLogUpdatedTime < Time.time)
+                //{
+                //    _nextLogUpdatedTime = Time.time + 5f;
+                //    Logger.LogDebug($"Updated Vision for [{totalUpdated}] enemies for [{_localList.Count}] Bots.");
+                //}
+
+                _localList.Clear();
+
+                yield return null;
+            }
+        }
+
+        private static float _nextLogUpdatedTime;
+        private static float _nextLogUpdatedTime2;
+
+        private readonly List<BotComponent> _localVisionCheckListAI = new List<BotComponent>();
+        private readonly List<BotComponent> _localVisionCheckListHumans = new List<BotComponent>();
 
         private IEnumerator raycastJobLoop()
         {
             WaitForSeconds wait = new WaitForSeconds(0.05f);
             while (true)
             {
+                int max = maxBotsPerFrame;
                 if (Bots != null)
                 {
                     _localBotList.AddRange(Bots.Values);
                     int i = 0;
                     foreach (var Bot in _localBotList)
                     {
-                        if (Bot?.BotActive == true)
+                        if (Bot?.BotActive == true && 
+                            Bot.NextCheckVisiblePlayerTime < Time.time)
                         {
                             _tempBotList.Add(Bot);
                             i++;
-                            if (i > 3)
+                            if (i > max)
                             {
                                 i = 0;
                                 yield return doRaycasts(_tempBotList);
+                                _tempBotList.Clear();
                             }
                         }
                     }
+
                     if (_tempBotList.Count > 0)
                     {
                         yield return doRaycasts(_tempBotList);
+                        _tempBotList.Clear();
                     }
+
                     _localBotList.Clear();
                 }
                 yield return wait;
             }
         }
+
+        private int maxBotsPerFrame = 3;
 
         private readonly List<BotComponent> _localBotList = new List<BotComponent>();
         private readonly List<BotComponent> _tempBotList = new List<BotComponent>();
@@ -68,19 +154,17 @@ namespace SAIN.Components
         private IEnumerator doRaycasts(List<BotComponent> botList)
         {
             CheckVisiblePlayers(botList);
+
             yield return null;
+
             CheckHumanVisibility(botList);
-            botList.Clear();
-        }
 
-        private Vector3 HeadPos(Player player)
-        {
-            return player.MainParts[BodyPartType.head].Position;
-        }
-
-        private Vector3 BodyPos(Player player)
-        {
-            return player.MainParts[BodyPartType.body].Position;
+            float time = Time.time;
+            foreach (var bot in botList)
+            {
+                if (bot != null)
+                    bot.NextCheckVisiblePlayerTime = time + 0.1f;
+            }
         }
 
         private readonly List<Player> _humanPlayers = new List<Player>();
@@ -88,22 +172,9 @@ namespace SAIN.Components
 
         private void CheckHumanVisibility(List<BotComponent> botList)
         {
-            _humanPlayers.Clear();
-            int partCount = 0;
-            foreach (var player in Players)
-            {
-                if (player != null 
-                    && player.Transform != null 
-                    //&& player.Transform.Original != null 
-                    && player.IsAI == false)
-                {
-                    if (partCount == 0)
-                    {
-                        partCount = player.MainParts.Count;
-                    }
-                    _humanPlayers.Add(player);
-                }
-            }
+            getHumanPlayers(_humanPlayers, out int partCount);
+
+            //Logger.LogInfo(_humanPlayers.Count);
 
             int total = botList.Count * _humanPlayers.Count * partCount;
 
@@ -112,37 +183,63 @@ namespace SAIN.Components
                 return;
             }
 
-            NativeArray<SpherecastCommand> allSpherecastCommands = new NativeArray<SpherecastCommand>(total, Allocator.TempJob);
-            NativeArray<RaycastHit> allRaycastHits = new NativeArray<RaycastHit>(total, Allocator.TempJob);
+            Logger.LogInfo(total);
 
-            total = 0;
+            NativeArray<SpherecastCommand> allSpherecastCommands = new NativeArray<SpherecastCommand>(total, Allocator.TempJob);
+            setSpherecastTargetsHumanVisibility(botList, _humanPlayers, allSpherecastCommands);
+
+            NativeArray<RaycastHit> allRaycastHits = new NativeArray<RaycastHit>(total, Allocator.TempJob);
+            SpherecastCommand.ScheduleBatch(allSpherecastCommands, allRaycastHits, MinJobSize).Complete();
+
+            analyzeHitsHumanVisibility(botList, _humanPlayers, allRaycastHits);
+
+            allSpherecastCommands.Dispose();
+            allRaycastHits.Dispose();
+            _humanPlayers.Clear();
+        }
+
+        private void setSpherecastTargetsHumanVisibility(List<BotComponent> botList, List<Player> players, NativeArray<SpherecastCommand> allSpherecastCommands)
+        {
+            int total = 0;
             for (int i = 0; i < botList.Count; i++)
             {
                 var bot = botList[i];
-                Vector3 head = bot.BotOwner.LookSensor._headPoint;
+                Vector3 head = getHeadPoint(bot);
                 for (int j = 0; j < _humanPlayers.Count; j++)
                 {
                     Player player = _humanPlayers[j];
                     foreach (var part in player.MainParts.Values)
                     {
-                        Vector3 target = part.Position;
-                        Vector3 direction = target - head;
-                        allSpherecastCommands[total] = new SpherecastCommand(head, SpherecastRadius, direction.normalized, direction.magnitude, SightLayers);
                         total++;
+                        Vector3 target = getTarget(part, head);
+                        Vector3 direction = target - head;
+
+                        float maxRange;
+                        if (head == Vector3.zero || bot == null)
+                        {
+                            maxRange = 0f;
+                        }
+                        else
+                        {
+                            maxRange = direction.magnitude;
+                        }
+
+                        allSpherecastCommands[total] = new SpherecastCommand(head, SpherecastRadius, direction.normalized, maxRange, SightLayer);
                     }
                 }
             }
+        }
 
-            SpherecastCommand.ScheduleBatch(allSpherecastCommands, allRaycastHits, MinJobSize).Complete();
-
-            total = 0;
+        private void analyzeHitsHumanVisibility(List<BotComponent> botList, List<Player> players, NativeArray<RaycastHit> allRaycastHits)
+        {
+            int total = 0;
             for (int i = 0; i < botList.Count; i++)
             {
                 var bot = botList[i];
                 Vector3 head = bot.BotOwner.LookSensor._headPoint;
-                for (int j = 0; j < _humanPlayers.Count; j++)
+                for (int j = 0; j < players.Count; j++)
                 {
-                    Player player = _humanPlayers[j];
+                    Player player = players[j];
                     bool lineOfSight = false;
                     foreach (var part in player.MainParts.Values)
                     {
@@ -159,10 +256,6 @@ namespace SAIN.Components
                     }
                 }
             }
-
-            allSpherecastCommands.Dispose();
-            allRaycastHits.Dispose();
-            _humanPlayers.Clear();
         }
 
         private void CheckVisiblePlayers(List<BotComponent> botList)
@@ -170,20 +263,12 @@ namespace SAIN.Components
             _validPlayers.Clear();
             foreach (var player in Players)
             {
-                if (player != null 
-                    && player.Transform != null)
+                if (shallCheckPlayer(player))
                 {
-                    if (player.IsAI)
-                    {
-                        if (player.AIData.BotOwner?.BotState != EBotState.Active ||
-                            player.AIData.BotOwner?.StandBy?.StandByType != BotStandByType.active)
-                        {
-                            continue;
-                        }
-                    }
                     _validPlayers.Add(player);
                 }
             }
+
             int total = botList.Count * _validPlayers.Count;
 
             if (total <= 0)
@@ -191,48 +276,69 @@ namespace SAIN.Components
                 return;
             }
 
+            Logger.LogInfo(total);
+
             NativeArray<SpherecastCommand> allSpherecastCommands = new NativeArray<SpherecastCommand>(total, Allocator.TempJob);
+
+            setSpherecastTargetsVisiblePlayers(botList, _validPlayers, allSpherecastCommands);
+
             NativeArray<RaycastHit> allRaycastHits = new NativeArray<RaycastHit>(total, Allocator.TempJob);
 
-            total = 0;
+            SpherecastCommand.ScheduleBatch(allSpherecastCommands, allRaycastHits, MinJobSize).Complete();
+
+            analyzeHitsVisiblePlayers(botList, _validPlayers, allRaycastHits);
+
+            allSpherecastCommands.Dispose();
+            allRaycastHits.Dispose();
+            _validPlayers.Clear();
+        }
+
+        private void setSpherecastTargetsVisiblePlayers(List<BotComponent> botList, List<Player> players, NativeArray<SpherecastCommand> allSpherecastCommands)
+        {
+            int total = 0;
             for (int i = 0; i < botList.Count; i++)
             {
                 var bot = botList[i];
-                Vector3 head = HeadPos(bot.BotOwner.GetPlayer);
+                Vector3 head = getHeadPoint(bot);
 
-                for (int j = 0; j < _validPlayers.Count; j++)
+                for (int j = 0; j < players.Count; j++)
                 {
-                    Player player = _validPlayers[j];
-                    Vector3 target = BodyPos(player);
+                    Player player = players[j];
+                    Vector3 target = getTarget(player.MainParts[BodyPartType.body], head);
                     Vector3 direction = target - head;
 
                     float magnitude = direction.magnitude;
-                    float max = player.IsAI ? player.AIData.BotOwner.LookSensor.VisibleDist : magnitude;
+                    float max = player.IsAI ? player.AIData.BotOwner.LookSensor.VisibleDist * 1.5f : magnitude;
 
-                    if (!player.HealthController.IsAlive || (player.IsAI && player.AIData.BotOwner.BotState != EBotState.Active) || player.ProfileId == bot.Player.ProfileId)
+                    if (bot == null ||
+                        head == Vector3.zero ||
+                        !player.HealthController.IsAlive ||
+                        player.ProfileId == bot.Player.ProfileId)
                     {
                         max = 0f;
                     }
 
-                    float rayDistance = Mathf.Clamp(magnitude, 0f, max);
-                    allSpherecastCommands[total] = new SpherecastCommand(head, SpherecastRadius, direction.normalized, rayDistance, SightLayers );
+                    float maxRange = Mathf.Clamp(magnitude, 0f, max);
+                    allSpherecastCommands[total] = new SpherecastCommand(head, SpherecastRadius, direction.normalized, maxRange, SightLayer);
                     total++;
                 }
             }
+        }
 
-            SpherecastCommand.ScheduleBatch(allSpherecastCommands, allRaycastHits, MinJobSize).Complete();
-
-            total = 0;
+        private void analyzeHitsVisiblePlayers(List<BotComponent> botList, List<Player> players, NativeArray<RaycastHit> allRaycastHits)
+        {
+            int total = 0;
             for (int i = 0; i < botList.Count; i++)
             {
                 BotComponent bot = botList[i];
                 var visPlayers = bot.Memory.VisiblePlayers;
                 visPlayers.Clear();
-                for (int j = 0; j < _validPlayers.Count; j++)
+                for (int j = 0; j < players.Count; j++)
                 {
-                    Player player = _validPlayers[j];
+                    Player player = players[j];
 
-                    if (player != null && player.ProfileId != bot.Player.ProfileId)
+                    if (player != null && 
+                        player.ProfileId != bot.Player.ProfileId)
                     {
                         bool lineOfSight = allRaycastHits[total].collider == null && player.HealthController.IsAlive;
                         if (lineOfSight)
@@ -244,101 +350,85 @@ namespace SAIN.Components
                         {
                             sainEnemy.Vision.InLineOfSight = lineOfSight;
                         }
-                        //if (bot.BotOwner?.EnemiesController.IsEnemy(player) == true)
-                        //{
-                        //    var sainEnemy = bot.EnemyController.CheckAddEnemy(player);
-                        //    if (sainEnemy?.IsAI == true)
-                        //    {
-                        //        sainEnemy.Vision.InLineOfSight = lineOfSight;
-                        //    }
-                        //}
                     }
                     total++;
                 }
             }
-
-            allSpherecastCommands.Dispose();
-            allRaycastHits.Dispose();
-            _validPlayers.Clear();
         }
 
-        private void GlobalRaycastJobOld()
+        private void getHumanPlayers(List<Player> playerList, out int partCount)
         {
-            int total = _tempBotList.Count * Players.Count;
-
-            NativeArray<SpherecastCommand> allSpherecastCommands = new NativeArray<SpherecastCommand>(
-                total,
-                Allocator.TempJob
-            );
-            NativeArray<RaycastHit> allRaycastHits = new NativeArray<RaycastHit>(
-                total,
-                Allocator.TempJob
-            );
-
-            total = 0;
-            for (int i = 0; i < _tempBotList.Count; i++)
+            playerList.Clear();
+            partCount = 0;
+            foreach (var player in Players)
             {
-                var bot = _tempBotList[i];
-                Vector3 head = HeadPos(bot.BotOwner.GetPlayer);
-
-                for (int j = 0; j < Players.Count; j++)
+                if (player != null &&
+                    player.Transform != null &&
+                    !player.IsAI)
                 {
-                    Player player = Players[j];
-                    Vector3 target = BodyPos(player);
-                    Vector3 direction = target - head;
-                    float magnitude = direction.magnitude;
-                    float max = player.IsAI ? player.AIData.BotOwner.LookSensor.VisibleDist : magnitude;
-
-                    if (!player.HealthController.IsAlive || (player.IsAI && player.AIData.BotOwner.BotState != EBotState.Active))
+                    if (partCount == 0)
                     {
-                        max = 0f;
+                        partCount = player.MainParts.Count;
                     }
-
-                    float rayDistance = Mathf.Clamp(magnitude, 0f, max);
-
-                    allSpherecastCommands[total] = new SpherecastCommand(
-                        head,
-                        SpherecastRadius,
-                        direction.normalized,
-                        rayDistance,
-                        SightLayers
-                    );
-                    total++;
+                    playerList.Add(player);
                 }
             }
-
-            JobHandle spherecastJob = SpherecastCommand.ScheduleBatch(
-                allSpherecastCommands,
-                allRaycastHits,
-                MinJobSize
-            );
-
-            spherecastJob.Complete();
-            total = 0;
-
-            for (int i = 0; i < _tempBotList.Count; i++)
-            {
-                var visPlayers = _tempBotList[i].Memory.VisiblePlayers;
-                visPlayers.Clear();
-                for (int j = 0; j < Players.Count; j++)
-                {
-                    Player player = Players[j];
-                    if (allRaycastHits[total].collider == null && player != null && player.HealthController.IsAlive)
-                    {
-                        visPlayers.Add(player);
-                        string id = player.ProfileId;
-                    }
-                    total++;
-                }
-            }
-
-            allSpherecastCommands.Dispose();
-            allRaycastHits.Dispose();
         }
 
-        private readonly float SpherecastRadius = 0.025f;
-        private LayerMask SightLayers => LayerMaskClass.HighPolyWithTerrainMask;
-        private readonly int MinJobSize = 1;
+        private bool shallCheckPlayer(Player player)
+        {
+            if (player == null || player.Transform == null)
+            {
+                return false;
+            }
+            if (player.IsAI)
+            {
+                if (player.AIData.BotOwner?.BotState != EBotState.Active ||
+                    player.AIData.BotOwner?.StandBy?.StandByType != BotStandByType.active)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private Vector3 getHeadPoint(BotComponent bot)
+        {
+            if (bot == null)
+            {
+                Logger.LogError("BotComponent Null");
+            }
+            var botOwner = bot?.BotOwner;
+            if (botOwner == null)
+            {
+                Logger.LogError("botOwner Null");
+            }
+            var lookSensor = botOwner?.LookSensor;
+            if (lookSensor == null)
+            {
+                Logger.LogError("lookSensor Null");
+            }
+            Vector3 head = lookSensor != null ? lookSensor._headPoint : Vector3.zero;
+            return head;
+        }
+
+        private Vector3 getTarget(EnemyPart part, Vector3 head)
+        {
+            Vector3 target;
+            if (part.Collider != null)
+            {
+                target = part.Collider.GetRandomPointToCastLocal(head);
+            }
+            else
+            {
+                target = part.Position;
+            }
+            return target;
+        }
+
+        private float SpherecastRadius = 0.025f;
+        private LayerMask SightLayer => LayerMaskClass.HighPolyWithTerrainMask;
+        private int MinJobSize = 2;
         private List<Player> Players => EFTInfo.AlivePlayers;
     }
 }

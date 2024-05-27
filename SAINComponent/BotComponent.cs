@@ -3,6 +3,7 @@ using EFT;
 using EFT.InventoryLogic;
 using SAIN.Components;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.BaseClasses;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Debug;
@@ -48,6 +49,8 @@ namespace SAIN.SAINComponent
         public Action<string, BotOwner> OnSAINDisposed { get; set; }
         public SAINPersonClass Person { get; private set; }
         public SAINMedical Medical { get; private set; }
+
+        public float NextCheckVisiblePlayerTime;
 
         public bool Init(SAINPersonClass person)
         {
@@ -131,7 +134,7 @@ namespace SAIN.SAINComponent
             TimeBotCreated = Time.time;
 
             if (Info.Profile.IsPMC && 
-                person.BotOwner.Brain.BaseBrain.ShortName() != "pmcBot")
+                person.BotOwner.Brain.BaseBrain.ShortName() != Brain.PMC.ToString())
             {
                 Logger.LogAndNotifyError($"{BotOwner.name} is a PMC but does not have [pmcBot] Base Brain! Current Brain Assignment: [{person.BotOwner.Brain.BaseBrain.ShortName()}] : SAIN Server mod is either missing or another mod is overwriting it. Destroying SAIN for this bot...");
                 Logger.LogError("Init SAIN ERROR, Disposing...");
@@ -184,22 +187,23 @@ namespace SAIN.SAINComponent
                 return;
             }
 
-            handlePatrolData();
-            EnemyController.Update();
-            AILimit.UpdateAILimit();
-            Decision.Update();
-
             if (GameIsEnding || !BotActive)
             {
-                //StopAllCoroutines();
+                StopAllCoroutines();
                 Cover.ActivateCoverFinder(false);
                 return;
             }
 
+            handlePatrolData();
+            EnemyController.Update();
+
+            AILimit.UpdateAILimit();
             if (AILimit.LimitAIThisFrame)
             {
                 //return;
             }
+
+            Decision.Update();
             Info.Update();
             DoorOpener.Update();
             Search.Update();
@@ -223,7 +227,6 @@ namespace SAIN.SAINComponent
             SpaceAwareness.Update();
             Medical.Update();
 
-            //BotOwner.DoorOpener.Update();
             UpdateGoalTarget();
 
             if (_nextCheckReloadTime < Time.time)

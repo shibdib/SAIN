@@ -315,6 +315,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\NoBushESPSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\LootingBotsSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\SAINEnableSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\PerformanceSettings.cs" />
     <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
     <Compile Include="SAINComponent\Classes\Enemy\EEnemyAction.cs" />

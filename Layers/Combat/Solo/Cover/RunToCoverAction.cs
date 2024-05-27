@@ -38,7 +38,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     && SAINBot.Player.IsSprintEnabled
                     && _moveSuccess
                     && SAINBot.Cover.CoverInUse != null
-                    && sqrMag < SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN * SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN * 1.2f
+                    && sqrMag < SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN.Sqr() * 1.2f
                     && _jumpTimer < Time.time)
                 {
                     _jumpTimer = Time.time + 5f;
@@ -47,7 +47,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 // Stop sprinting if close enough so you can navigate properly
                 else if (_moveSuccess
                     && (_sprinting || SAINBot.Player.IsSprintEnabled)
-                    && sqrMag < SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN * SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN)
+                    && sqrMag < SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN.Sqr())
                 {
                     SAINBot.Mover.Sprint(false);
                     _sprinting = false;

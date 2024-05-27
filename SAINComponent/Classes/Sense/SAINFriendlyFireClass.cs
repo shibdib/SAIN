@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes
             }
             if (CheckFriendlyFireTimer < Time.time)
             {
-                CheckFriendlyFireTimer = Time.time + 0.25f;
+                CheckFriendlyFireTimer = Time.time + 0.1f;
                 FriendlyFireStatus = CheckFriendlyFire();
             }
             if (FriendlyFireStatus == FriendlyFireStatus.FriendlyBlock)
@@ -54,17 +54,10 @@ namespace SAIN.SAINComponent.Classes
             }
             if (target == null)
             {
-                target = SAINBot.Enemy?.EnemyChestPosition;
+                target = BotOwner.AimingData?.RealTargetPoint;
             }
-            if (target == null)
-            {
-                if (BotOwner.AimingData == null)
-                {
-                    return friendlyFire;
-                }
-                target = BotOwner.AimingData.EndTargetPoint;
-            }
-            if (target != null && BotOwner.ShootData?.CheckFriendlyFire(BotOwner.WeaponRoot.position, target.Value) == true)
+            if (target != null && 
+                BotOwner.ShootData?.CheckFriendlyFire(BotOwner.WeaponRoot.position, target.Value) == true)
             {
                 friendlyFire = FriendlyFireStatus.FriendlyBlock;
             }

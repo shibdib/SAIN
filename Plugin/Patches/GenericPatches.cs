@@ -23,6 +23,20 @@ using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.Patches.Generic
 {
+    public class DisableLookSensorPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(LookSensor), "CheckAllEnemies");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(BotOwner ____botOwner)
+        {
+            return SAINEnableClass.isBotExcluded(____botOwner);
+        }
+    }
+
     public class CalcPowerPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

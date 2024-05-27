@@ -80,6 +80,7 @@ namespace SAIN
             var patches = new List<Type>() {
                 //typeof(Patches.Generic.ShallRunAwayGrenadePatch),
 
+                //typeof(Patches.Generic.DisableLookSensorPatch),
                 typeof(Patches.Generic.SetPanicPointPatch),
                 typeof(Patches.Generic.AddPointToSearchPatch),
                 typeof(Patches.Generic.CalcPowerPatch),

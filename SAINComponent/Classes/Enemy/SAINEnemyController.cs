@@ -44,7 +44,27 @@ namespace SAIN.SAINComponent.Classes.Enemy
             checkDiscrepency();
             checkActiveEnemies();
             updateDebug();
+            checkIsAtPeace();
         }
+
+        private void checkIsAtPeace()
+        {
+            bool wasAtPeace = _atPeace;
+            if (ActiveEnemies.Count > 0)
+            {
+                if (_atPeace)
+                    _atPeace = false;
+            }
+            else if (!_atPeace)
+            {
+                _atPeace = true;
+                _timePeaceStart = Time.time;
+            }
+        }
+
+        private bool _atPeace;
+        private float _timePeaceStart;
+        public bool NoEnemyContact => _atPeace && Time.time - _timePeaceStart > 3f;
 
         private void checkDiscrepency()
         {

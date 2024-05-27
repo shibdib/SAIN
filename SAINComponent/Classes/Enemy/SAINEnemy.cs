@@ -30,6 +30,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
             KnownPlaces = new EnemyKnownPlaces(this);
         }
 
+        public float NextCheckLookTime;
+
         public bool EnemyNotLooking => IsVisible && !EnemyStatus.EnemyLookingAtMe && !EnemyStatus.ShotAtMeRecently;
 
         public readonly string EnemyName;
@@ -125,7 +127,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 // If the enemy is an in-active bot or haven't sensed them in a very long time, just set them as inactive.
                 if (!ShallUpdateEnemy)
                 {
-                    //return false;
+                    return false;
                 }
                 // have we seen them very recently?
                 if (IsVisible || (Seen && TimeSinceSeen < 30f))
@@ -190,23 +192,21 @@ namespace SAIN.SAINComponent.Classes.Enemy
             && TimeSinceLastKnownUpdated < 600f
             && TimeSinceLastKnownUpdated >= 0f;
 
-        private bool _isActive => !IsAI || Player.AIData.BotOwner.BotState == EBotState.Active;
-
         public void Update()
         {
-            bool isCurrent = IsCurrentEnemy;
-            updateActiveState(isCurrent);
-            Vision.Update(isCurrent);
-            KnownPlaces.Update(isCurrent);
-            Path.Update(isCurrent);
-
             if (ShallUpdateEnemy)
             {
-                //Path.Update(isCurrent);
+                bool isCurrent = IsCurrentEnemy;
+                updateActiveState(isCurrent);
+                Vision.Update(isCurrent);
+                KnownPlaces.Update(isCurrent);
+                Path.Update(isCurrent);
             }
             else
             {
-                //Path.Clear();
+                Vision.UpdateCanShoot(true);
+                Vision.UpdateVisible(true);
+                Path.Clear();
             }
         }
 
@@ -217,7 +217,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 _hasBeenActive = true;
             }
-            if (isCurrent)
+            if (isCurrent || IsVisible)
             {
                 TimeLastActive = Time.time;
             }
@@ -383,7 +383,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 && (SAINBot.Enemy == null || SAINBot.Enemy.TimeSinceSeen > 20f))
             {
                 _nextSayNoise = Time.time + 12f;
-                if (EFTMath.RandomBool(40))
+                if (EFTMath.RandomBool(35))
                 {
                     SAINBot.Talk.TalkAfterDelay(conversation ? EPhraseTrigger.OnEnemyConversation : EPhraseTrigger.NoisePhrase);
                 }
@@ -435,12 +435,14 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public EnemyPathDistance CheckPathDistance() => Path.CheckPathDistance();
 
-        // ActiveEnemy Properties
         public IPlayer EnemyIPlayer => EnemyPerson.IPlayer;
 
         public Player EnemyPlayer => EnemyPerson.Player;
+
         public float TimeEnemyCreated { get; private set; }
+
         public float TimeSinceEnemyCreated => Time.time - TimeEnemyCreated;
+
         public Vector3? LastKnownPosition => KnownPlaces.LastKnownPlace?.Position;
 
         public EnemyKnownPlaces KnownPlaces { get; private set; }
@@ -450,21 +452,31 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public float TimeSinceLastKnownUpdated => Time.time - TimeLastKnownUpdated;
 
         public Vector3 EnemyPosition => EnemyTransform.Position;
+
         public Vector3 EnemyDirection => EnemyTransform.Direction(SAINBot.Transform.Position);
+
         public Vector3 EnemyHeadPosition => EnemyTransform.HeadPosition;
+
         public Vector3 EnemyChestPosition => EnemyTransform.CenterPosition;
 
-        // Look Properties
         public bool InLineOfSight => Vision.InLineOfSight;
 
         public bool IsVisible => Vision.IsVisible;
+
         public bool CanShoot => Vision.CanShoot;
+
         public bool Seen => Vision.Seen;
+
         public Vector3? LastCornerToEnemy => Path.LastCornerToEnemy;
+
         public float LastChangeVisionTime => Vision.LastChangeVisionTime;
+
         public bool EnemyLookingAtMe => EnemyStatus.EnemyLookingAtMe;
+
         public Vector3? LastSeenPosition => KnownPlaces.LastSeenPlace?.Position;
+
         public float VisibleStartTime => Vision.VisibleStartTime;
+
         public float TimeSinceSeen => Vision.TimeSinceSeen;
 
         public float RealDistance
@@ -481,10 +493,15 @@ namespace SAIN.SAINComponent.Classes.Enemy
         }
 
         private float _realDistance;
+
         public bool CanSeeLastCornerToEnemy => Path.CanSeeLastCornerToEnemy;
+
         public NavMeshPath PathToEnemy => Path.PathToEnemy;
+
         public SAINEnemyStatus EnemyStatus { get; private set; }
+
         public SAINEnemyVision Vision { get; private set; }
+
         public SAINEnemyPath Path { get; private set; }
     }
 }
