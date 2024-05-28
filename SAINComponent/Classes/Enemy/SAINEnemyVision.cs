@@ -283,7 +283,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     }
 
                     // Testing, will log results
-                    getVisionAngleCoef(enemyInfo);
+                    //getVisionAngleCoef(enemyInfo);
                 }
             }
 
@@ -312,7 +312,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             enemyDir.y = 0f;
             float angle = Vector3.Angle(myLookDir, enemyDir);
 
-            if (angle < _periphVisionStart)
+            if (angle < _periphVisionStart || angle > 90)
             {
                 return 1f;
             }

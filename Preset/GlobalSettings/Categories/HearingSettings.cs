@@ -55,7 +55,7 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(1f, 150f, 100f)]
         [Default(50f)]
         [Advanced]
-        public float BaseSoundRange_FallLanding = 50;
+        public float MaxSoundRange_FallLanding = 70;
 
         [MinMax(1f, 150f, 100f)]
         [Default(35f)]

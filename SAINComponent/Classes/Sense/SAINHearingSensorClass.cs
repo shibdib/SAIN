@@ -157,8 +157,8 @@ namespace SAIN.SAINComponent.Classes
                 iPlayer?.IsYourPlayer == true &&
                 _nextChecktime < Time.time)
             {
-                Logger.LogDebug($"MainPlayer Footstep Sound Range {power}");
-                _nextChecktime = Time.time + 1f;
+                //Logger.LogDebug($"MainPlayer Footstep Sound Range {power}");
+                //_nextChecktime = Time.time + 1f;
             }
 
             bool wasHeard = checkIfSoundHeard(iPlayer, soundPosition, power, type, out float distance);
@@ -176,7 +176,7 @@ namespace SAIN.SAINComponent.Classes
             return DoIHearSound(player, position, power, soundType, out distance);
         }
 
-        private float getSoundRangeModifier(AISoundType soundType)
+        private float getSoundRangeModifier(AISoundType soundType, float soundDistance)
         {
             float modifier = 1f;
             var globalHearing = GlobalSettings.Hearing;
@@ -195,7 +195,8 @@ namespace SAIN.SAINComponent.Classes
                 modifier *= hearSense;
             }
 
-            if (soundType == AISoundType.step)
+            if (soundType == AISoundType.step && 
+                soundDistance > 15f)
             {
                 if (!SAINBot.Equipment.HasEarPiece)
                 {
@@ -577,17 +578,33 @@ namespace SAIN.SAINComponent.Classes
 
         private bool CheckFootStepDetectChance(float distance)
         {
-            float closehearing = 10f;
-            float farhearing = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxFootstepAudioDistance;
-
+            float closehearing = 3f;
             if (distance <= closehearing)
             {
                 return true;
             }
 
+            float farhearing = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxFootstepAudioDistance;
             if (distance > farhearing)
             {
                 return false;
+            }
+
+            // Random chance to hear at any range within maxdistance if a bot is stationary or moving slow
+            bool midRange = distance < farhearing * 0.66f;
+            if (midRange && 
+                Player.Velocity.magnitude < 0.5f && 
+                EFTMath.RandomBool(5))
+            {
+                return true;
+            }
+
+            // Random chance to hear at any range within maxdistance if a bot has headphones
+            if (midRange && 
+                SAINBot.Equipment.HasEarPiece && 
+                EFTMath.RandomBool(5))
+            {
+                return true;
             }
 
             float num = farhearing - closehearing;
@@ -608,7 +625,7 @@ namespace SAIN.SAINComponent.Classes
                 return false;
             }
 
-            float rangeModifier = getSoundRangeModifier(type);
+            float rangeModifier = getSoundRangeModifier(type, soundDistance);
             if (rangeModifier != 1f)
             {
                 range = Mathf.Round(range * rangeModifier * 100) / 100;

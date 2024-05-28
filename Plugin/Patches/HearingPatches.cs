@@ -120,8 +120,8 @@ namespace SAIN.Patches.Hearing
             return AccessTools.Method(typeof(Player), "PlayGroundedSound");
         }
 
-        [PatchPostfix]
-        public static void PatchPostfix(Player __instance, float fallHeight, float jumpHeight, float ____nextJumpAfter)
+        [PatchPrefix]
+        public static void PatchPrefix(Player __instance, float fallHeight, float jumpHeight, float ____nextJumpAfter)
         {
             if (Time.realtimeSinceStartup < ____nextJumpAfter)
             {
@@ -134,13 +134,13 @@ namespace SAIN.Patches.Hearing
             float num = Mathf.Max(fallHeight, jumpHeight);
             if (num > __instance.LandingThreshold && __instance.CheckSurface())
             {
-                float baseRange = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_FallLanding;
+                float baseRange = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxSoundRange_FallLanding;
                 float modifier = Mathf.InverseLerp(0.1f, __instance.LandingThreshold * 2.5f, num);
                 float max = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxFootstepAudioDistance;
                 float result = Mathf.Clamp(baseRange * modifier, 0f, max);
 
-                if (__instance.IsYourPlayer)
-                    Logger.LogDebug($"FallSound Range {result} Mod: {modifier}");
+                //if (__instance.IsYourPlayer)
+                //    Logger.LogDebug($"FallSound Range {result} Mod: {modifier}");
 
                 SAINBotController.Instance?.PlayAISound(__instance, SAINSoundType.FootStep, __instance.Position, result);
             }
@@ -165,8 +165,8 @@ namespace SAIN.Patches.Hearing
                 float max = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxFootstepAudioDistance;
                 float result = Mathf.Clamp(baseRange * volume, 0f, max);
 
-                if (__instance.IsYourPlayer)
-                    Logger.LogDebug($"Turn Sound: {result} Mod: {volume}");
+                //if (__instance.IsYourPlayer)
+                //    Logger.LogDebug($"Turn Sound: {result} Mod: {volume}");
 
                 SAINBotController.Instance?.PlayAISound(__instance, SAINSoundType.TurnSound, __instance.Position, result);
             }
@@ -207,8 +207,8 @@ namespace SAIN.Patches.Hearing
             float baseRange = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_AimingandGearRattle;
             float range = __instance.MovementContext.CovertEquipmentNoise * volume * baseRange;
 
-            if (__instance.IsYourPlayer)
-                Logger.LogInfo($"Gear Sound Range {range}");
+            //if (__instance.IsYourPlayer)
+            //    Logger.LogInfo($"Gear Sound Range {range}");
 
             range = Mathf.Clamp(range, 0f, 70f);
             SAINBotController.Instance?.PlayAISound(__instance, SAINSoundType.GearSound, __instance.Position, range);
