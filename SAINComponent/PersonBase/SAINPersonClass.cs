@@ -9,17 +9,16 @@ namespace SAIN.SAINComponent.BaseClasses
     {
         public SAINPersonClass(IPlayer person) : base(person)
         {
-            Name = Player.name;
+            Name = Player?.name;
             Transform = new SAINPersonTransformClass(this);
             Profile = person.Profile;
-            ProfileId = person.Profile.ProfileId;
-            Nickname = person.Profile.Nickname;
-            AIData = person.AIData;
-            BotOwner = person.AIData.BotOwner;
-            IsAI = person.AIData.BotOwner != null;
+            ProfileId = person.Profile?.ProfileId;
+            Nickname = person.Profile?.Nickname;
+            BotOwner = person.AIData?.BotOwner;
+            IsAI = person.IsAI;
             if (IsAI)
             {
-                SAIN = person.AIData.BotOwner.GetComponent<BotComponent>();
+                SAIN = person.AIData?.BotOwner?.GetComponent<BotComponent>();
             }
             IsSAINBot = SAIN != null;
         }
@@ -37,7 +36,6 @@ namespace SAIN.SAINComponent.BaseClasses
         public readonly string Name;
         public readonly bool IsAI;
         public readonly bool IsSAINBot;
-        public readonly AIData AIData;
         public readonly BotOwner BotOwner;
         public readonly BotComponent SAIN;
     }

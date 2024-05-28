@@ -283,6 +283,8 @@ namespace SAIN.SAINComponent.Classes
             SearchMovePoint?.DrawDebug();
         }
 
+        public SAINEnemy SearchTarget { get; set; }
+
         private float _nextCheckPosTime;
 
         public bool SearchedTargetPosition { get; private set; }

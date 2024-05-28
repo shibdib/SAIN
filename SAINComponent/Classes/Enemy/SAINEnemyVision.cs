@@ -281,10 +281,61 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     {
                         result *= 0.9f;
                     }
+
+                    // Testing, will log results
+                    getVisionAngleCoef(enemyInfo);
                 }
             }
 
             return result;
         }
+
+        private static bool _reduceVisionSpeedOnPeriphVis = true;
+        private static float _periphVisionStart = 30f;
+        private static float _maxPeriphVisionSpeedReduction = 0.5f;
+
+        private static float getVisionAngleCoef(EnemyInfo enemyInfo)
+        {
+            if (!_reduceVisionSpeedOnPeriphVis)
+            {
+                return 1f;
+            }
+
+            if (!enemyInfo.Owner.LookSensor.IsPointInVisibleSector(enemyInfo.CurrPosition))
+            {
+                return 1f;
+            }
+
+            Vector3 myLookDir = enemyInfo.Owner.LookDirection;
+            myLookDir.y = 0f;
+            Vector3 enemyDir = enemyInfo.Direction;
+            enemyDir.y = 0f;
+            float angle = Vector3.Angle(myLookDir, enemyDir);
+
+            if (angle < _periphVisionStart)
+            {
+                return 1f;
+            }
+
+            float maxVisionAngle = enemyInfo.Owner.Settings.FileSettings.Core.VisibleAngle / 2f;
+
+            float angleDiff = maxVisionAngle - _periphVisionStart;
+            float enemyAngleDiff = angle - _periphVisionStart;
+
+            float modifier = 1f - enemyAngleDiff / angleDiff;
+
+            float finalModifier = Mathf.Lerp(_maxPeriphVisionSpeedReduction, 1f, modifier);
+
+            if (enemyInfo.Person.IsYourPlayer && 
+                _nextLogTime < Time.time)
+            {
+                _nextLogTime = Time.time + 0.25f;
+                Logger.LogDebug($"{enemyInfo.Owner.name} Vision Angle Coef: Final Modifier: [{finalModifier}] Angle: [{angle}] Enemy Angle Difference: [{enemyAngleDiff}] Max Vision Angle: [{maxVisionAngle}]");
+            }
+
+            return finalModifier;
+        }
+
+        private static float _nextLogTime;
     }
 }

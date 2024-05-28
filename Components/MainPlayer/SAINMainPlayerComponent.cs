@@ -17,7 +17,7 @@ namespace SAIN.Components
         public void Awake()
         {
             SAINPerson = new SAINPersonClass(MainPlayer);
-            MainPlayerLight = MainPlayer.GetOrAddComponent<SAINFlashLightComponent>();
+            MainPlayerLight = MainPlayer?.GetOrAddComponent<SAINFlashLightComponent>();
             CamoClass = new SAINCamoClass(this);
         }
 

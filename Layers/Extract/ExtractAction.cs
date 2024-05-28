@@ -3,7 +3,6 @@ using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using UnityEngine;
-using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents;
 using SAIN.SAINComponent;
 using Systems.Effects;
@@ -13,6 +12,7 @@ using SAIN.Components.BotController;
 using UnityEngine.AI;
 using SAIN.Helpers;
 using SAIN.Components;
+using SAIN.SAINComponent.Classes.Memory;
 
 namespace SAIN.Layers
 {

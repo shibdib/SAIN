@@ -113,11 +113,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         public bool SteerByPriority(bool lookRandom = true)
         {
             SteerRandomToggle = lookRandom;
-
             var priority = UpdateBotSteering();
-
             HeardSoundSanityCheck();
-
             switch (priority)
             {
                 case SteerPriority.None: 
@@ -156,6 +153,10 @@ namespace SAIN.SAINComponent.Classes.Mover
                     }
                     BotOwner.AimingData?.NodeUpdate();
                     // Steering is handled by aim code in eft manually, so do nothing here.
+                    break;
+
+                case SteerPriority.Aiming:
+                    LookToEnemy();
                     break;
 
                 case SteerPriority.Enemy:
@@ -664,6 +665,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         None,
         Shooting,
         ManualShooting,
+        Aiming,
         Enemy,
         Hear,
         LastSeenEnemy,

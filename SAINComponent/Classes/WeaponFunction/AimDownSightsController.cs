@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
     public class AimDownSightsController : SAINBase, ISAINClass
     {
@@ -36,8 +36,8 @@ namespace SAIN.SAINComponent.Classes
             Vector3? targetPos = SAINBot.CurrentTargetPosition;
 
             // If a bot is sneaky, don't change ADS if their enemy is close to avoid alerting them.
-            if (SAINBot.Info.PersonalitySettings.Search.Sneaky && targetPos != null 
-                && SAINBot.Enemy?.IsVisible != true 
+            if (SAINBot.Info.PersonalitySettings.Search.Sneaky && targetPos != null
+                && SAINBot.Enemy?.IsVisible != true
                 && (targetPos.Value - SAINBot.Position).sqrMagnitude < 30f * 30f)
             {
                 return;

@@ -1,17 +1,14 @@
 ﻿using BepInEx.Logging;
 using EFT;
-using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Decision;
 using SAIN.SAINComponent.Classes.Talk;
-using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.Classes.Mover;
-using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents;
 using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
     public class SAINBotGrenadeClass : SAINBase, ISAINClass
     {

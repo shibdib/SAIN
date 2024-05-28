@@ -385,8 +385,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private void removeLastEnemy(string id)
         {
-            if (LastEnemy?.EnemyPerson != null
-                && LastEnemy.EnemyPerson.ProfileId == id)
+            if (LastEnemy != null && LastEnemy.EnemyProfileId == id)
             {
                 LastEnemy = null;
             }

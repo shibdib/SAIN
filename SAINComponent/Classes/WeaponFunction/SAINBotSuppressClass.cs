@@ -1,27 +1,16 @@
 ﻿using BepInEx.Logging;
 using EFT;
-using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Decision;
 using SAIN.SAINComponent.Classes.Talk;
-using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.Classes.Mover;
-using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents;
 using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
 using SAIN.Helpers;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
-    public enum ESuppressionStatus
-    {
-        None = 0,
-        Low = 1,
-        Medium = 2,
-        High = 3,
-        Extreme = 4,
-    }
     public class SAINBotSuppressClass : SAINBase, ISAINClass
     {
         public ESuppressionStatus SuppressionStatus { get; private set; }
@@ -67,7 +56,7 @@ namespace SAIN.SAINComponent.Classes
 
         public float SuppressionNumber { get; private set; }
         public float SuppressionAmount => IsSuppressed ? SuppressionNumber - SuppressionThreshold : 0;
-        public float SuppressionStatModifier => 1 + (SuppressionAmount * (SuppressionSpreadMultiPerPoint));
+        public float SuppressionStatModifier => 1 + SuppressionAmount * SuppressionSpreadMultiPerPoint;
         public bool IsSuppressed => SuppressionNumber > SuppressionThreshold;
         public bool IsHeavySuppressed => SuppressionNumber > SuppressionHeavyThreshold;
 

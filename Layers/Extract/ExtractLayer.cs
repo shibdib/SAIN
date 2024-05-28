@@ -4,9 +4,9 @@ using System;
 using System.Linq;
 using EFT.Interactive;
 using Comfort.Common;
-using SAIN.SAINComponent.Classes;
 using UnityEngine;
 using static DrakiaXYZ.BigBrain.Brains.CustomLayer;
+using SAIN.SAINComponent.Classes.Memory;
 
 namespace SAIN.Layers
 {

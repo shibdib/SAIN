@@ -130,7 +130,7 @@ namespace SAIN.SAINComponent.Classes
             if (_canStartSurgery)
             {
                 var enemy = SAINBot.Enemy;
-                if (enemy == null)
+                if (SAINBot.EnemyController.NoEnemyContact)
                 {
                     if (SAINBot.CurrentTargetPosition == null)
                     {
