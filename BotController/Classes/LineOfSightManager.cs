@@ -16,6 +16,7 @@ using SAIN.SAINComponent.SubComponents;
 using System.Collections;
 using SAIN.Plugin;
 using UnityEngine.UIElements;
+using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.Components
 {
@@ -205,12 +206,15 @@ namespace SAIN.Components
             {
                 var bot = botList[i];
                 Vector3 head = getHeadPoint(bot);
+
                 for (int j = 0; j < _humanPlayers.Count; j++)
                 {
                     Player player = _humanPlayers[j];
+
                     foreach (var part in player.MainParts.Values)
                     {
                         total++;
+
                         Vector3 target = getTarget(part, head);
                         Vector3 direction = target - head;
 
@@ -236,11 +240,12 @@ namespace SAIN.Components
             for (int i = 0; i < botList.Count; i++)
             {
                 var bot = botList[i];
-                Vector3 head = bot.BotOwner.LookSensor._headPoint;
+
                 for (int j = 0; j < players.Count; j++)
                 {
                     Player player = players[j];
                     bool lineOfSight = false;
+
                     foreach (var part in player.MainParts.Values)
                     {
                         if (!lineOfSight)
@@ -249,7 +254,8 @@ namespace SAIN.Components
                         }
                         total++;
                     }
-                    var sainEnemy = bot.EnemyController.GetEnemy(player.ProfileId);
+
+                    SAINEnemy sainEnemy = bot?.EnemyController?.GetEnemy(player.ProfileId);
                     if (sainEnemy != null)
                     {
                         sainEnemy.Vision.InLineOfSight = lineOfSight;
@@ -331,20 +337,28 @@ namespace SAIN.Components
             for (int i = 0; i < botList.Count; i++)
             {
                 BotComponent bot = botList[i];
-                var visPlayers = bot.Memory.VisiblePlayers;
-                visPlayers.Clear();
+
+                var visPlayers = bot?.Memory?.VisiblePlayers;
+                visPlayers?.Clear();
+
                 for (int j = 0; j < players.Count; j++)
                 {
                     Player player = players[j];
 
                     if (player != null && 
+                        bot != null &&
+                        bot?.Player != null &&
                         player.ProfileId != bot.Player.ProfileId)
                     {
-                        bool lineOfSight = allRaycastHits[total].collider == null && player.HealthController.IsAlive;
+                        bool lineOfSight = 
+                            allRaycastHits[total].collider == null && 
+                            player.HealthController.IsAlive;
+
                         if (lineOfSight)
                         {
                             visPlayers.Add(player);
                         }
+
                         var sainEnemy = bot.EnemyController.CheckAddEnemy(player);
                         if (sainEnemy?.IsAI == true)
                         {
@@ -396,17 +410,20 @@ namespace SAIN.Components
         {
             if (bot == null)
             {
-                Logger.LogError("BotComponent Null");
+                //Logger.LogError("BotComponent Null");
+                return Vector3.zero;
             }
             var botOwner = bot?.BotOwner;
             if (botOwner == null)
             {
-                Logger.LogError("botOwner Null");
+                //Logger.LogError("botOwner Null");
+                return Vector3.zero;
             }
             var lookSensor = botOwner?.LookSensor;
             if (lookSensor == null)
             {
-                Logger.LogError("lookSensor Null");
+                //Logger.LogError("lookSensor Null");
+                return Vector3.zero;
             }
             Vector3 head = lookSensor != null ? lookSensor._headPoint : Vector3.zero;
             return head;

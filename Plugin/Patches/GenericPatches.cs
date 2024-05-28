@@ -202,7 +202,6 @@ namespace SAIN.Patches.Generic
                     ___float_0 += 5f;
                 }
                 ___bool_1 = true;
-                ___botOwner_0.WeaponManager.Selector.TakePrevWeapon();
                 SAINPlugin.BotController?.StartCoroutine(TakePrevWeapon(___botOwner_0));
             }
             return false;
@@ -210,7 +209,7 @@ namespace SAIN.Patches.Generic
 
         private static IEnumerator TakePrevWeapon(BotOwner bot)
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.25f);
             if (bot != null && bot.GetPlayer != null && bot.GetPlayer.HealthController.IsAlive)
             {
                 bot.WeaponManager?.Selector?.TakePrevWeapon();

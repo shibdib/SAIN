@@ -40,7 +40,7 @@ namespace SAIN.Helpers
                 {
                     nextShootTime = Time.time + 0.1f;
                     SAINSoundType sainType = soundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot;
-                    SAINBotController.Instance?.PlayAISound(player, sainType, player.WeaponRoot.position, range * RainSoundModifier());
+                    SAINPlugin.BotController?.PlayAISound(player, sainType, player.WeaponRoot.position, range * RainSoundModifier());
                     Logger.LogWarning($"Could not find Weapon Info for [{player.Profile.Nickname}]!");
                 }
             }
@@ -55,7 +55,7 @@ namespace SAIN.Helpers
 
             if (RainCheckTimer < Time.time)
             {
-                RainCheckTimer = Time.time + 3f;
+                RainCheckTimer = Time.time + 5f;
                 // Grabs the current rain Rounding
                 float Rain = WeatherController.Instance.WeatherCurve.Rain;
                 RainModifier = 1f;

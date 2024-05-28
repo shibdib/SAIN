@@ -32,7 +32,7 @@ namespace SAIN
                 Player.WeaponRoot != null)
             {
                 SAINSoundType sainType = soundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot;
-                SAINBotController.Instance?.PlayAISound(Player, sainType, Player.WeaponRoot.position, range);
+                SAINPlugin.BotController?.PlayAISound(Player, sainType, Player.WeaponRoot.position, range);
             }
         }
 

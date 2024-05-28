@@ -197,7 +197,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 if (_nextCheckBlindCornerTime < Time.time)
                 {
-                    _nextCheckBlindCornerTime = Time.time + 0.5f;
+                    _nextCheckBlindCornerTime = Time.time + 0.33f;
 
                     _blindCorner = Vector.FindFirstBlindCorner(BotOwner, PathToEnemy);
 

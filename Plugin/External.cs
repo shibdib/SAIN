@@ -35,7 +35,7 @@ namespace SAIN.Plugin
 
         public static void GetExtractedBots(List<string> list)
         {
-            var botController = SAINBotController.Instance;
+            var botController = SAINPlugin.BotController;
             if (botController == null)
             {
                 Logger.LogWarning("SAIN Bot Controller is Null, cannot retrieve Extracted Bots List.");
@@ -53,7 +53,7 @@ namespace SAIN.Plugin
 
         public static void GetExtractionInfos(List<ExtractionInfo> list)
         {
-            var botController = SAINBotController.Instance;
+            var botController = SAINPlugin.BotController;
             if (botController == null)
             {
                 Logger.LogWarning("SAIN Bot Controller is Null, cannot retrieve Extracted Bots List.");

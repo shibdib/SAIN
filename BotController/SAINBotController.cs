@@ -22,8 +22,6 @@ namespace SAIN.Components
 {
     public class SAINBotController : MonoBehaviour
     {
-        public static SAINBotController Instance;
-
         public Action<SAINSoundType, Vector3, Player, float> AISoundPlayed { get; set; }
         public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; set; }
         public Action<Vector3> BulletImpact { get; set; }
@@ -45,7 +43,6 @@ namespace SAIN.Components
 
         private void Awake()
         {
-            Instance = this;
             GameWorld.OnDispose += Dispose;
 
             BotSpawnController.Awake();
@@ -70,12 +67,13 @@ namespace SAIN.Components
                 {
                     return;
                 }
-                if (!_playerSoundPlayers.ContainsKey(player))
+                string id = player.ProfileId;
+                if (!_playerSoundPlayers.ContainsKey(id))
                 {
-                    _playerSoundPlayers.Add(player, new PlayerSoundPlayer(player.IsAI));
+                    _playerSoundPlayers.Add(id, new PlayerSoundPlayer(player.IsAI));
                     player.OnPlayerDeadOrUnspawn += removePlayerSoundPlayer;
                 }
-                if (_playerSoundPlayers.TryGetValue(player, out var soundPlayer) && 
+                if (_playerSoundPlayers.TryGetValue(id, out var soundPlayer) && 
                     soundPlayer.ShallPlayAISound(power))
                 {
                     playSound(soundType, position, player, power);
@@ -88,7 +86,7 @@ namespace SAIN.Components
             if (player != null)
             {
                 player.OnPlayerDeadOrUnspawn -= removePlayerSoundPlayer;
-                _playerSoundPlayers.Remove(player);
+                _playerSoundPlayers.Remove(player.ProfileId);
             }
         }
 
@@ -122,7 +120,7 @@ namespace SAIN.Components
             }
         }
 
-        private readonly Dictionary<Player, PlayerSoundPlayer> _playerSoundPlayers = new Dictionary<Player, PlayerSoundPlayer>();
+        private readonly Dictionary<string, PlayerSoundPlayer> _playerSoundPlayers = new Dictionary<string, PlayerSoundPlayer>();
 
         private void Update()
         {

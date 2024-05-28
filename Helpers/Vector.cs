@@ -43,7 +43,7 @@ namespace SAIN.Helpers
                         {
                             DebugGizmos.Sphere(cornerB, 0.025f, 5f);
                         }
-                        Vector3 result = AdjustCornerPosition(cornerA, cornerB, cornerC, 0.2f);
+                        Vector3 result = AdjustCornerPosition(cornerA, cornerB, cornerC, 0.15f);
                         return new Vector3?(result + (botOwner.WeaponRoot.position - botOwner.Position));
                     }
                 }

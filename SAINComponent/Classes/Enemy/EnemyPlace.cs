@@ -185,7 +185,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (_nextCheckSightTime < Time.time)
             {
-                _nextCheckSightTime = Time.time + 0.5f;
+                _nextCheckSightTime = Time.time + 0.33f;
                 Vector3 pos = Position + Vector3.up;
                 Vector3 direction = pos - origin;
                 _inSightNow = !Physics.Raycast(pos, direction, direction.magnitude, mask);

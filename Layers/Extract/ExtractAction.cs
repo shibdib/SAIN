@@ -195,7 +195,7 @@ namespace SAIN.Layers
             if (ExtractTimer < Time.time)
             {
                 Logger.LogInfo($"{BotOwner.name} Extracted at {point} for extract {SAINBot.Memory.Extract.ExfilPoint.Settings.Name} at {System.DateTime.UtcNow}");
-                SAINBotController.Instance?.BotExtractManager?.LogExtractionOfBot(BotOwner, point, SAINBot.Memory.Extract.ExtractReason.ToString(), SAINBot.Memory.Extract.ExfilPoint);
+                SAINPlugin.BotController?.BotExtractManager?.LogExtractionOfBot(BotOwner, point, SAINBot.Memory.Extract.ExtractReason.ToString(), SAINBot.Memory.Extract.ExfilPoint);
 
                 var botgame = Singleton<IBotGame>.Instance;
                 Player player = SAINBot.Player;

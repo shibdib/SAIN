@@ -320,6 +320,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return false;
             }
+
             if (enemy.IsVisible)
             {
                 LookToEnemy(enemy);
@@ -327,22 +328,33 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
 
             EnemyPlace lastKnownPlace = enemy.KnownPlaces.LastKnownPlace;
-            if (lastKnownPlace != null)
+            if (lastKnownPlace?.PersonalClearLineOfSight(BotOwner.LookSensor._headPoint, LayerMaskClass.HighPolyWithTerrainMask) == true)
             {
-                if (lastKnownPlace.PersonalClearLineOfSight(BotOwner.LookSensor._headPoint, LayerMaskClass.HighPolyWithTerrainMask))
-                {
-                    LookToPoint(lastKnownPlace.Position + _weaponRootOffset);
-                    return true;
-                }
-                Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
-                if (blindCornerToEnemy != null && (blindCornerToEnemy.Value - SAINBot.Transform.HeadPosition).sqrMagnitude > 1.5f)
-                {
-                    LookToPoint(blindCornerToEnemy.Value);
-                    return true;
-                }
                 LookToPoint(lastKnownPlace.Position + _weaponRootOffset);
                 return true;
             }
+
+            Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
+            if (blindCornerToEnemy != null &&
+                (blindCornerToEnemy.Value - SAINBot.Transform.HeadPosition).sqrMagnitude > 1.5f)
+            {
+                LookToPoint(blindCornerToEnemy.Value);
+                return true;
+            }
+
+            Vector3? lastCorner = enemy.Path.LastCornerToEnemy;
+            if (lastCorner != null && enemy.CanSeeLastCornerToEnemy)
+            {
+                LookToPoint(lastCorner.Value + _weaponRootOffset);
+                return true;
+            }
+
+            if (lastKnownPlace != null)
+            {
+                LookToPoint(lastKnownPlace.Position + _weaponRootOffset);
+                return true;
+            }
+
             return false;
         }
 

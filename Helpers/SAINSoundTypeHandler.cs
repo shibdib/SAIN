@@ -50,7 +50,7 @@ namespace SAIN.Components.Helpers
                 }
             }
 
-            SAINBotController.Instance?.PlayAISound(player, soundType, player.Position + Vector3.up, soundDist);
+            SAINPlugin.BotController?.PlayAISound(player, soundType, player.Position + Vector3.up, soundDist);
         }
     }
 }

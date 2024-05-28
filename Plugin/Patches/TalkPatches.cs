@@ -27,12 +27,11 @@ namespace SAIN.Patches.Talk
         [PatchPrefix]
         public static void PatchPrefix(Player __instance, float damage)
         {
-            if (__instance.HealthController.IsAlive &&
+            if (__instance?.HealthController?.IsAlive == true &&
                 (!__instance.MovementContext.PhysicalConditionIs(EPhysicalCondition.OnPainkillers) || damage > 4f) &&
-                __instance.IsAI && 
-                __instance.Speaker != null)
+                __instance.IsAI)
             {
-                __instance.Speaker.Play(EPhraseTrigger.OnBeingHurt, __instance.HealthStatus, true, null);
+                __instance.Speaker?.Play(EPhraseTrigger.OnBeingHurt, __instance.HealthStatus, true, null);
             }
         }
     }
@@ -73,37 +72,34 @@ namespace SAIN.Patches.Talk
         [PatchPrefix]
         public static bool PatchPrefix(Player __instance, EPhraseTrigger @event, ETagStatus mask, bool aggressive)
         {
-            if (__instance?.HealthController?.IsAlive == false)
+            if (__instance?.HealthController?.IsAlive == true)
             {
-                return true;
-            }
+                switch (@event)
+                {
+                    case EPhraseTrigger.OnDeath:
+                    case EPhraseTrigger.OnBeingHurt:
+                    case EPhraseTrigger.OnAgony:
+                    case EPhraseTrigger.OnBreath:
+                        SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
+                        return true;
 
-            switch (@event)
-            {
-                case EPhraseTrigger.OnDeath:
-                case EPhraseTrigger.OnBeingHurt:
-                case EPhraseTrigger.OnAgony:
+                    default:
+                        break;
+                }
+
+                BotOwner botOwner = __instance?.AIData?.BotOwner;
+                if (botOwner == null)
+                {
                     SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
                     return true;
-                default:
-                    break;
-            }
+                }
 
-            BotOwner botOwner = __instance?.AIData?.BotOwner;
-            if (botOwner == null)
-            {
-                SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
-                return true;
-            }
-
-            // If handling of bots talking is disabled, let the original method run
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
-            {
-                return true;
-            }
-            if (SAINPlugin.IsBotExluded(botOwner))
-            {
-                return true;
+                // If handling of bots talking is disabled, let the original method run
+                if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
+                {
+                    return true;
+                }
+                return SAINPlugin.IsBotExluded(botOwner);
             }
             return false;
         }
@@ -124,15 +120,11 @@ namespace SAIN.Patches.Talk
             {
                 return true;
             }
-            if (___botOwner_0.HealthController?.IsAlive == false)
+            if (___botOwner_0?.HealthController?.IsAlive == false)
             {
                 return false;
             }
-            if (SAINPlugin.IsBotExluded(___botOwner_0))
-            {
-                return true;
-            }
-            return false;
+            return SAINPlugin.IsBotExluded(___botOwner_0);
         }
     }
 
@@ -154,11 +146,7 @@ namespace SAIN.Patches.Talk
             {
                 return true;
             }
-            if (SAINPlugin.IsBotExluded(___botOwner_0))
-            {
-                return true;
-            }
-            return false;
+            return SAINPlugin.IsBotExluded(___botOwner_0);
         }
     }
 }

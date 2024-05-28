@@ -40,6 +40,10 @@ namespace SAIN
 
         private static bool shallExclude(BotOwner botOwner)
         {
+            if (botOwner != null)
+            {
+                botOwner.GetPlayer.OnIPlayerDeadOrUnspawn += clearBot;
+            }
             if (isBotExcluded(botOwner))
             {
                 _excludedBots.Add(botOwner.name);
@@ -60,6 +64,17 @@ namespace SAIN
 
             if (_enabledBots.Count > 0)
                 _enabledBots.Clear();
+        }
+
+        private static void clearBot(IPlayer player)
+        {
+            if (player != null)
+            {
+                player.OnIPlayerDeadOrUnspawn -= clearBot;
+                string id = player.ProfileId;
+                _excludedBots.Remove(id);
+                _enabledBots.Remove(id);
+            }
         }
 
         public static bool isBotExcluded(BotOwner botOwner)
@@ -91,7 +106,7 @@ namespace SAIN
         {
             return
                 WildSpawn.IsPMC(wildSpawnType) ||
-                SAINBotController.Instance?.Bots?.ContainsKey(botOwner.name) == true;
+                SAINPlugin.BotController?.Bots?.ContainsKey(botOwner.name) == true;
         }
 
         private static bool excludeBoss(WildSpawnType wildSpawnType)

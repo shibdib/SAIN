@@ -5,6 +5,7 @@ using System.Text;
 using SAIN.SAINComponent;
 using SAIN.Layers.Combat.Solo.Cover;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -117,10 +118,17 @@ namespace SAIN.Layers.Combat.Solo
             }
             if (SAINBot == null)
             {
-                Logger.LogError("SAIN Is null!");
+                if (_nextLogErrorTime < Time.time)
+                {
+                    _nextLogErrorTime = Time.time + 10f;
+                    Logger.LogError($"SAIN Is null for {BotOwner?.name} : {BotOwner?.Profile?.Info?.Settings?.Role} : {BotOwner?.Profile?.Nickname}");
+                }
+                return false;
             }
             return active;
         }
+
+        private static float _nextLogErrorTime;
 
         public override bool IsCurrentActionEnding()
         {

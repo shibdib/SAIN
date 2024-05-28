@@ -187,23 +187,22 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void Say(EPhraseTrigger trigger, bool demand = false, float delay = 0f, ETagStatus mask = (ETagStatus)0, int probability = 100, bool aggressive = false)
         {
-            if (Player?.HealthController?.IsAlive != true)
+            if (Player?.HealthController?.IsAlive == true)
             {
-                return;
-            }
-            if (trigger == EPhraseTrigger.MumblePhrase)
-            {
-                trigger = ((aggressive || Time.time < Player.Awareness) ? EPhraseTrigger.OnFight : EPhraseTrigger.OnMutter);
-            }
-            if (!Player.Speaker.OnDemandOnly || demand)
-            {
-                if (demand || probability > 99 || probability > UnityEngine.Random.Range(0, 100))
+                if (trigger == EPhraseTrigger.MumblePhrase)
                 {
-                    ETagStatus etagStatus = (aggressive || Player.Awareness > Time.time) ? ETagStatus.Combat : ETagStatus.Unaware;
-                    SAINPlugin.BotController?.PlayerTalk?.Invoke(trigger, etagStatus, Player);
-                    BotOwner.BotsGroup.GroupTalk.PhraseSad(BotOwner, trigger);
-                    PersonalPhraseDict[trigger].TimeLastSaid = Time.time;
-                    Player.Speaker.Play(trigger, SAINBot.Memory.Health.HealthStatus | mask | etagStatus, demand, null);
+                    trigger = ((aggressive || Time.time < Player.Awareness) ? EPhraseTrigger.OnFight : EPhraseTrigger.OnMutter);
+                }
+                if (!Player.Speaker.OnDemandOnly || demand)
+                {
+                    if (demand || probability > 99 || probability > UnityEngine.Random.Range(0, 100))
+                    {
+                        ETagStatus etagStatus = (aggressive || Player.Awareness > Time.time) ? ETagStatus.Combat : ETagStatus.Unaware;
+                        SAINPlugin.BotController?.PlayerTalk?.Invoke(trigger, etagStatus, Player);
+                        BotOwner.BotsGroup.GroupTalk.PhraseSad(BotOwner, trigger);
+                        PersonalPhraseDict[trigger].TimeLastSaid = Time.time;
+                        Player.Speaker.Play(trigger, SAINBot.Memory.Health.HealthStatus | mask | etagStatus, demand, null);
+                    }
                 }
             }
         }
