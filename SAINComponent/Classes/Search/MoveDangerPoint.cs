@@ -1,30 +1,12 @@
 ﻿using EFT;
 using SAIN.Helpers;
-using System;
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
 using System.Collections;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.Search
 {
-    public sealed class PeekPosition
-    {
-        public PeekPosition(Vector3 point, Vector3 danger)
-        {
-            Point = point;
-            Vector3 direction = danger - point;
-            DangerDir = direction;
-            DangerDirNormal = direction.Normalize(out float magnitude);
-            DangerDistance = magnitude;
-        }
-
-        public readonly Vector3 DangerDir;
-        public readonly Vector3 DangerDirNormal;
-        public readonly float DangerDistance;
-        public readonly Vector3 Point;
-    }
-
     public sealed class MoveDangerPoint
     {
         public MoveDangerPoint(Vector3 start, Vector3 end, Vector3 dangerPoint, Vector3 corner)

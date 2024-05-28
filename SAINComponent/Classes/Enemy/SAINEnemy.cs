@@ -1,14 +1,9 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using SAIN.Helpers;
 using SAIN.SAINComponent.BaseClasses;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
-using static DrakiaXYZ.BigBrain.Brains.CustomLayer;
-using static SAIN.SAINComponent.Classes.Enemy.SAINEnemy;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
@@ -45,8 +40,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     //Logger.LogDebug("Enemy Player is Null. Removing...");
                     return false;
                 }
-                // Redundant Checks
-                // Common checks between PMC and bots
                 if (EnemyPlayer == null)
                 {
                     //Logger.LogDebug("Enemy is Null. Removing...");
@@ -61,7 +54,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 BotOwner botOwner = EnemyPlayer?.AIData?.BotOwner;
                 if (EnemyPlayer?.IsAI == true && botOwner == null)
                 {
-                    Logger.LogDebug("Enemy is AI, but Bot is null. Removing...");
+                    Logger.LogDebug("Enemy is AI, but BotOwner is null. Removing...");
                     return false;
                 }
                 if (botOwner != null && botOwner.ProfileId == BotOwner.ProfileId)
@@ -129,6 +122,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 {
                     return false;
                 }
+
+                if (IsCurrentEnemy)
+                {
+                    return true;
+                }
+
                 // have we seen them very recently?
                 if (IsVisible || (Seen && TimeSinceSeen < 30f))
                 {
@@ -194,9 +193,9 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void Update()
         {
-            if (ShallUpdateEnemy)
+            bool isCurrent = IsCurrentEnemy;
+            if (ShallUpdateEnemy || isCurrent)
             {
-                bool isCurrent = IsCurrentEnemy;
                 updateActiveState(isCurrent);
                 Vision.Update(isCurrent);
                 KnownPlaces.Update(isCurrent);
@@ -212,7 +211,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private void updateActiveState(bool isCurrent)
         {
-            if (isCurrent && 
+            if (isCurrent &&
                 !_hasBeenActive)
             {
                 _hasBeenActive = true;
@@ -298,7 +297,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public void UpdateHeardPosition(Vector3 position, bool wasGunfire, bool arrived = false)
         {
             EnemyPlace place = KnownPlaces.AddPersonalHeardPlace(position, arrived, wasGunfire);
-            if (place != null 
+            if (place != null
                 && _nextReportHeardTime < Time.time)
             {
                 _nextReportHeardTime = Time.time + _reportHeardFreq;

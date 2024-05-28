@@ -8,11 +8,11 @@ using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.SAINComponent.Classes.Sense
 {
-    public class DazzleClass : SAINBase, ISAINClass
+    public class FlashLightDazzleClass : SAINBase, ISAINClass
     {
-        TemporaryStatModifiers Modifiers = new TemporaryStatModifiers(1f, 1f, 1f, 1f, 1f);
+        private TemporaryStatModifiers Modifiers = new TemporaryStatModifiers(1f, 1f, 1f, 1f, 1f);
 
-        public DazzleClass(BotComponent owner) : base(owner)
+        public FlashLightDazzleClass(BotComponent owner) : base(owner)
         {
         }
 
@@ -28,16 +28,15 @@ namespace SAIN.SAINComponent.Classes.Sense
         {
         }
 
-
-        public void CheckIfDazzleApplied(SAINEnemy enemy)
+        private SAINFlashLightComponent getFlashlight(SAINEnemy enemy)
         {
             if (enemy == null)
             {
-                return;
+                return null;
             }
-            var person = enemy.EnemyIPlayer;
+
             SAINFlashLightComponent flashlight = null;
-            if (enemy.EnemyPerson.IsSAINBot)
+            if (enemy.EnemyPerson?.IsSAINBot == true)
             {
                 flashlight = enemy.EnemyPerson?.SAIN?.FlashLight;
             }
@@ -45,34 +44,33 @@ namespace SAIN.SAINComponent.Classes.Sense
             {
                 flashlight = GameWorldHandler.SAINMainPlayer?.MainPlayerLight;
             }
-            else
+
+            if (flashlight == null)
             {
                 flashlight = enemy.EnemyPlayer?.GetComponent<SAINFlashLightComponent>();
             }
 
+            return flashlight;
+        }
+
+        public void CheckIfDazzleApplied(SAINEnemy enemy)
+        {
+            if (enemy?.EnemyIPlayer == null)
+            {
+                return;
+            }
+
+            SAINFlashLightComponent flashlight = getFlashlight(enemy);
             if (flashlight != null)
             {
-                if (flashlight.WhiteLight)
+                bool usingNVGs = BotOwner.NightVision.UsingNow;
+                if (flashlight.WhiteLight || (usingNVGs && flashlight.IRLight))
                 {
-                    EnemyWithFlashlight(person);
+                    EnemyWithFlashlight(enemy.EnemyIPlayer);
                 }
-                else if (flashlight.Laser)
+                else if (flashlight.Laser || (usingNVGs && flashlight.IRLaser))
                 {
-                    EnemyWithLaser(person);
-                }
-                else
-                {
-                    if (BotOwner.NightVision.UsingNow)
-                    {
-                        if (flashlight.IRLight)
-                        {
-                            EnemyWithFlashlight(person);
-                        }
-                        else if (flashlight.IRLaser)
-                        {
-                            EnemyWithLaser(person);
-                        }
-                    }
+                    EnemyWithLaser(enemy.EnemyIPlayer);
                 }
             }
         }
@@ -136,8 +134,8 @@ namespace SAIN.SAINComponent.Classes.Sense
             }
         }
 
-        static float MaxDazzleRange => SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.MaxDazzleRange;
-        static float Effectiveness => SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.DazzleEffectiveness;
+        private static float MaxDazzleRange => SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.MaxDazzleRange;
+        private static float Effectiveness => SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.DazzleEffectiveness;
 
         public void ApplyDazzle(float dazzleModif, float gainSightModif)
         {
@@ -152,7 +150,6 @@ namespace SAIN.SAINComponent.Classes.Sense
             Modifiers.Modifiers.GainSightCoef = gainSightModif;
             Modifiers.Modifiers.ScatteringCoef = Mathf.Clamp(dazzleModif, 1f, 5f) * Effectiveness * 3;
             Modifiers.Modifiers.PriorityScatteringCoef = Mathf.Clamp(dazzleModif, 1f, 2.5f) * Effectiveness;
-
 
             BotOwner.Settings.Current.Apply(Modifiers.Modifiers, 0.1f);
         }

@@ -424,17 +424,21 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        public void UpdateSharedEnemyStatus(IPlayer player, EEnemyAction action, BotComponent sain)
+        public void UpdateSharedEnemyStatus(IPlayer player, EEnemyAction action, BotComponent sain, SAINSoundType soundType, Vector3 position)
         {
             if (sain == null)
             {
                 return;
             }
+
+            float maxRangeSqr = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxRangeToReportEnemyActionNoHeadset.Sqr();
+
             foreach (var member in Members.Values)
             {
-                if (member == sain || member == null) { continue; }
+                if (member == null || member.ProfileId == sain.ProfileId) { continue; }
 
-                if (!member.Equipment.HasEarPiece && (member.Position - sain.Position).sqrMagnitude > 50f * 50f)
+                if (!member.Equipment.HasEarPiece && 
+                    (member.Position - sain.Position).sqrMagnitude > maxRangeSqr)
                 {
                     continue;
                 }
@@ -442,7 +446,11 @@ namespace SAIN.BotController.Classes
                 SAINEnemy memberEnemy = member.EnemyController.CheckAddEnemy(player);
                 if (memberEnemy != null)
                 {
-                    memberEnemy.EnemyStatus.VulnerableAction = action;
+                    memberEnemy.SetHeardStatus(true, position, soundType);
+                    if (action != EEnemyAction.None)
+                    {
+                        memberEnemy.EnemyStatus.VulnerableAction = action;
+                    }
                 }
             }
         }

@@ -16,6 +16,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.Components
 {
@@ -57,13 +58,13 @@ namespace SAIN.Components
 
             Singleton<BotEventHandler>.Instance.OnGrenadeThrow += GrenadeThrown;
             Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += GrenadeExplosion;
-            AISoundPlayed += playSound;
             PlayerTalk += playerTalked;
         }
 
         public void PlayAISound(Player player, SAINSoundType soundType, Vector3 position, float power)
         {
-            if (player != null)
+            if (player != null && 
+                player.HealthController?.IsAlive == true)
             {
                 if (player.IsAI && player.AIData.BotOwner?.BotState != EBotState.Active)
                 {
@@ -111,7 +112,7 @@ namespace SAIN.Components
 
             public bool ShallPlayAISound(float power)
             {
-                if (_nextPlaySoundTime < Time.time || _lastSoundPower > power)
+                if (_nextPlaySoundTime < Time.time || _lastSoundPower > power * 1.25f)
                 {
                     _nextPlaySoundTime = Time.time + _freq;
                     _lastSoundPower = power;
@@ -172,15 +173,24 @@ namespace SAIN.Components
 
         private readonly Dictionary<BotComponent, GUIObject> _debugObjects = new Dictionary<BotComponent, GUIObject>();
 
-        public IEnumerator PlayShootSoundCoroutine(Player player)
+        private IEnumerator playShootSoundCoroutine(Player player)
         {
             yield return null;
-            AudioHelpers.TryPlayShootSound(player);
+            if (player != null && player.HealthController?.IsAlive == true)
+                AudioHelpers.TryPlayShootSound(player);
         }
 
         public void PlayShootSound(Player player)
         {
-            StartCoroutine(PlayShootSoundCoroutine(player));
+            StartCoroutine(playShootSoundCoroutine(player));
+        }
+
+        private Vector3 randomizePos(Vector3 position, float distance, float dispersionFactor = 20f)
+        {
+            float disp = distance / dispersionFactor;
+            Vector3 random = UnityEngine.Random.insideUnitSphere * disp;
+            random.y = 0;
+            return position + random;
         }
 
         private void playerTalked(EPhraseTrigger phrase, ETagStatus mask, Player player)
@@ -189,6 +199,16 @@ namespace SAIN.Components
             {
                 return;
             }
+
+            if (phrase == EPhraseTrigger.OnDeath)
+            {
+                return;
+            }
+
+            bool isPain = phrase == EPhraseTrigger.OnAgony || phrase == EPhraseTrigger.OnBeingHurt;
+            float painRange = 50f;
+            float breathRange = player.HeavyBreath ? 50f : 30f;
+
             foreach (var bot in Bots)
             {
                 BotComponent sain = bot.Value;
@@ -197,9 +217,29 @@ namespace SAIN.Components
                 {
                     if (!sain.EnemyController.IsPlayerFriendly(player))
                     {
+                        if (isPain)
+                        {
+                            SAINEnemy enemy = sain.EnemyController.CheckAddEnemy(player);
+                            if (enemy != null && enemy.RealDistance <= painRange)
+                            {
+                                Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
+                                enemy.SetHeardStatus(true, randomizedPos, SAINSoundType.Pain);
+                            }
+                            continue;
+                        }
+                        if (phrase == EPhraseTrigger.OnBreath)
+                        {
+                            SAINEnemy enemy = sain.EnemyController.CheckAddEnemy(player);
+                            if (enemy != null && enemy.RealDistance <= breathRange)
+                            {
+                                Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
+                                enemy.SetHeardStatus(true, randomizedPos, SAINSoundType.Breathing);
+                            }
+                            continue;
+                        }
                         sain.Talk.EnemyTalk.SetEnemyTalk(player);
                     }
-                    else
+                    else if (!isPain && phrase != EPhraseTrigger.OnBreath)
                     {
                         sain.Talk.EnemyTalk.SetFriendlyTalked(player);
                     }
@@ -321,7 +361,11 @@ namespace SAIN.Components
             }
 
             BotEventHandler?.PlaySound(player, player.Position, range, baseSoundType);
-            StartCoroutine(delayHearAction(player, range, soundType));
+            AISoundPlayed?.Invoke(soundType, position, player, range);
+            if (baseSoundType == AISoundType.step)
+            {
+                StartCoroutine(delayHearAction(player, range, soundType));
+            }
         }
 
         private BotEventHandler BotEventHandler;
@@ -366,14 +410,20 @@ namespace SAIN.Components
                         {
                             Enemy.EnemyStatus.VulnerableAction = SAINComponent.Classes.Enemy.EEnemyAction.UsingSurgery;
                         }
-                        else
+                        else if (soundType == SAINSoundType.Gunshot 
+                            || soundType == SAINSoundType.SuppressedGunShot 
+                            || soundType == SAINSoundType.FootStep)
                         {
                             shallUpdateSquad = false;
                         }
 
                         if (shallUpdateSquad)
                         {
-                            bot.Squad.SquadInfo.UpdateSharedEnemyStatus(Enemy.EnemyIPlayer, Enemy.EnemyStatus.VulnerableAction, bot);
+                            float dispersion = Enemy.RealDistance / 20f;
+                            Vector3 random = UnityEngine.Random.insideUnitSphere * dispersion;
+                            random.y = 0f;
+                            Enemy.SetHeardStatus(true, Enemy.EnemyPosition + random, soundType);
+                            bot.Squad.SquadInfo.UpdateSharedEnemyStatus(Enemy.EnemyIPlayer, Enemy.EnemyStatus.VulnerableAction, bot, soundType, Enemy.EnemyPosition + random);
                         }
                     }
                 }
@@ -518,7 +568,6 @@ namespace SAIN.Components
 
                 Patches.Vision.AIVisionUpdateLimitPatch.LookUpdates.Clear();
 
-                AISoundPlayed -= playSound;
                 PlayerTalk -= playerTalked;
 
                 Singleton<BotEventHandler>.Instance.OnGrenadeThrow -= GrenadeThrown;

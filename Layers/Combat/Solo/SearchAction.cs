@@ -1,6 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes;
+using SAIN.SAINComponent.Classes.Search;
 using UnityEngine;
 using UnityEngine.AI;
 

@@ -6,22 +6,9 @@ using System.Drawing;
 using System.IO;
 using UnityEngine;
 using UnityEngine.AI;
-using static EFT.SpeedTree.TreeWind;
-using static UnityEngine.Rendering.PostProcessing.HistogramMonitor;
 
-namespace SAIN.SAINComponent.Classes
+namespace SAIN.SAINComponent.Classes.Search
 {
-    public enum SearchStates
-    {
-        None,
-        FindRoute,
-        MoveToCorner,
-        CheckCorners,
-        HoldPosition,
-        Wait,
-        RushEnemy,
-    }
-
     public class SAINSearchClass : SAINBase, ISAINClass
     {
         public SAINSearchClass(BotComponent sain) : base(sain)
@@ -65,7 +52,7 @@ namespace SAIN.SAINComponent.Classes
 
             SAINEnemy enemy = SAINBot.Enemy;
 
-            if ((enemy != null && enemy.Seen) || 
+            if (enemy != null && enemy.Seen ||
                 enemy != null && enemy.Heard && SAINBot.Info.PersonalitySettings.Search.WillSearchFromAudio)
             {
                 wantToSearch = shallSearch(enemy, timeBeforeSearch);
@@ -83,7 +70,7 @@ namespace SAIN.SAINComponent.Classes
 
         private bool shallSearch(SAINEnemy enemy, float timeBeforeSearch)
         {
-            if (shallBeStealthyDuringSearch(enemy) && 
+            if (shallBeStealthyDuringSearch(enemy) &&
                 SAINBot.Decision.EnemyDecisions.UnFreezeTime > Time.time &&
                 enemy.TimeSinceLastKnownUpdated > 10f)
             {
@@ -149,7 +136,7 @@ namespace SAIN.SAINComponent.Classes
                 {
                     return true;
                 }
-                else 
+                else
                 if (enemy.Heard &&
                     searchSettings.WillSearchFromAudio &&
                     enemy.TimeSinceHeard >= timeBeforeSearch)
@@ -240,7 +227,7 @@ namespace SAIN.SAINComponent.Classes
             if (SearchedTargetPosition || _finishedSearchPath)
             {
                 Vector3? newTarget = SearchMovePos(out bool hasTarget, true);
-                
+
                 if (newTarget != null
                     && CalculatePath(newTarget.Value) != NavMeshPathStatus.PathInvalid)
                 {
@@ -258,7 +245,7 @@ namespace SAIN.SAINComponent.Classes
                 Vector3? newTarget = SearchMovePos(out bool hasTarget);
 
                 if (newTarget != null
-                    && hasTarget 
+                    && hasTarget
                     && (newTarget.Value - FinalDestination).sqrMagnitude > 2f * 2f
                     && CalculatePath(newTarget.Value) != NavMeshPathStatus.PathInvalid)
                 {
@@ -305,7 +292,7 @@ namespace SAIN.SAINComponent.Classes
                     for (int i = 0; i < knownPlaces.Count; i++)
                     {
                         EnemyPlace enemyPlace = knownPlaces[i];
-                        if (enemyPlace != null 
+                        if (enemyPlace != null
                             && !enemyPlace.HasArrivedPersonal)
                         {
                             hasTarget = true;
@@ -437,7 +424,7 @@ namespace SAIN.SAINComponent.Classes
             }
 
             _Running = false;
-            if (shallSprint 
+            if (shallSprint
                 && SAINBot.Mover.SprintController.RunToPoint(destination))
             {
                 _Running = true;
@@ -510,7 +497,7 @@ namespace SAIN.SAINComponent.Classes
                         _finishedPeek = false;
                         FinalDestination = finalDestination;
                     }
-                    if ((shallSprint || SearchMovePoint == null) 
+                    if ((shallSprint || SearchMovePoint == null)
                         && MoveToPoint(FinalDestination, shallSprint))
                     {
                         ActiveDestination = FinalDestination;
@@ -562,7 +549,7 @@ namespace SAIN.SAINComponent.Classes
                         SAINBot.Mover.SetTargetPose(pose);
                     }
 
-                    if (BotIsAtPoint(ActiveDestination) 
+                    if (BotIsAtPoint(ActiveDestination)
                         && MoveToPoint(SearchMovePoint.EndPeekPosition, shallSprint))
                     {
                         ActiveDestination = SearchMovePoint.EndPeekPosition;
@@ -643,8 +630,8 @@ namespace SAIN.SAINComponent.Classes
 
         private bool CheckIfStuck()
         {
-            bool botIsStuck = 
-                (!SAINBot.BotStuck.BotHasChangedPosition && SAINBot.BotStuck.TimeSpentNotMoving > 3f) 
+            bool botIsStuck =
+                !SAINBot.BotStuck.BotHasChangedPosition && SAINBot.BotStuck.TimeSpentNotMoving > 3f
                 || SAINBot.BotStuck.BotIsStuck;
 
             if (botIsStuck && UnstuckMoveTimer < Time.time)

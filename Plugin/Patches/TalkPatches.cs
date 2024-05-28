@@ -83,6 +83,7 @@ namespace SAIN.Patches.Talk
                 case EPhraseTrigger.OnDeath:
                 case EPhraseTrigger.OnBeingHurt:
                 case EPhraseTrigger.OnAgony:
+                    SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
                     return true;
                 default:
                     break;

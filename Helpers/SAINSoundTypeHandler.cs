@@ -7,21 +7,14 @@ using System.Threading.Tasks;
 using SAIN.Components;
 using EFT;
 using BepInEx.Logging;
+using UnityEngine;
 
 namespace SAIN.Components.Helpers
 {
     public class SAINSoundTypeHandler
     {
-        protected static ManualLogSource Logger;
-        protected static SAINBotController BotController => SAINPlugin.BotController;
-
         public static void AISoundFileChecker(string sound, Player player)
         {
-            if (BotController == null || BotController.Bots == null || BotController.Bots.Count == 0)
-            {
-                return;
-            }
-
             SAINSoundType soundType = SAINSoundType.None;
             var Item = player.HandsController.Item;
             float soundDist = 20f;
@@ -33,37 +26,31 @@ namespace SAIN.Components.Helpers
                     if (sound == "Pin")
                     {
                         soundType = SAINSoundType.GrenadePin;
-                        soundDist = 25f;
+                        soundDist = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_GrenadePinDraw;
                     }
                     if (sound == "Draw")
                     {
                         soundType = SAINSoundType.GrenadeDraw;
-                        soundDist = 25f;
+                        soundDist = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_GrenadePinDraw;
                     }
                 }
                 else if (Item is MedsClass)
                 {
                     soundType = SAINSoundType.Heal;
+                    soundDist = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_Healing;
                     if (sound == "CapRemove" || sound == "Inject")
                     {
-                        soundDist = 20f;
-                    }
-                    else
-                    {
-                        soundDist = 20f;
+                        soundDist *= 0.5f;
                     }
                 }
                 else
                 {
                     soundType = SAINSoundType.Reload;
-                    if (sound == "MagOut")
-                    {
-                        soundDist = 20f;
-                    }
+                    soundDist = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_Reload;
                 }
             }
 
-            BotController?.AISoundPlayed?.Invoke(soundType, player.Position, player, soundDist);
+            SAINBotController.Instance?.PlayAISound(player, soundType, player.Position + Vector3.up, soundDist);
         }
     }
 }

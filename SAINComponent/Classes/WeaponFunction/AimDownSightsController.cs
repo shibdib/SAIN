@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.Search;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
 using System.Collections.Generic;

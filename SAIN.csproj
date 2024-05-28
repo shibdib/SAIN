@@ -318,6 +318,8 @@
     <Compile Include="Preset\GlobalSettings\Categories\PerformanceSettings.cs" />
     <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
+    <Compile Include="SAINComponent\Classes\Search\PeekPosition.cs" />
+    <Compile Include="SAINComponent\Classes\Search\ESearchStates.cs" />
     <Compile Include="SAINComponent\Classes\WeaponFunction\ESuppressionStatus.cs" />
     <Compile Include="SAINComponent\Classes\Memory\EEnemyTargetType.cs" />
     <Compile Include="SAINComponent\Classes\Memory\EExtractReason.cs" />
@@ -336,7 +338,7 @@
     <Compile Include="SAINComponent\Classes\Enemy\EnemyBase.cs" />
     <Compile Include="SAINComponent\Classes\Enemy\EnemyKnownPlaces.cs" />
     <Compile Include="SAINComponent\Classes\Enemy\EnemyPlace.cs" />
-    <Compile Include="SAINComponent\Classes\ESearchMove.cs" />
+    <Compile Include="SAINComponent\Classes\Search\ESearchMove.cs" />
     <Compile Include="SAINComponent\Classes\Mover\DogFight.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINDoorOpener.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINMovementPlanController.cs" />
@@ -350,7 +352,7 @@
     <Compile Include="SAINComponent\Classes\Enemy\SAINEnemyStatus.cs" />
     <Compile Include="SAINComponent\Classes\Enemy\SAINEnemyVision.cs" />
     <Compile Include="SAINComponent\Classes\SAINNotLooking.cs" />
-    <Compile Include="SAINComponent\Classes\SAINSearchClass.cs" />
+    <Compile Include="SAINComponent\Classes\Search\SAINSearchClass.cs" />
     <Compile Include="SAINComponent\Classes\Sense\SAINConcealment.cs" />
     <Compile Include="SAINComponent\Classes\Sense\SAINBotSpaceAwareness.cs" />
     <Compile Include="SAINComponent\Classes\Sense\SAINSound.cs" />
@@ -455,7 +457,7 @@
     <Compile Include="SAINComponent\SubComponents\CoverFinder\CoverPointClass.cs" />
     <Compile Include="SAINComponent\Classes\Decision\SAINDecisionClass.cs" />
     <Compile Include="SAINComponent\Classes\Sense\SAINHearingSensorClass.cs" />
-    <Compile Include="SAINComponent\Classes\MoveDangerPoint.cs" />
+    <Compile Include="SAINComponent\Classes\Search\MoveDangerPoint.cs" />
     <Compile Include="SAINComponent\Classes\Decision\SquadDecisionClass.cs" />
     <Compile Include="SAINComponent\Classes\Talk\SquadLeaderClass.cs" />
     <Compile Include="BotController\Classes\CoverManager.cs" />
@@ -466,7 +468,7 @@
     <Compile Include="Helpers\AudioHelpers.cs" />
     <Compile Include="Helpers\DebugGizmos.cs" />
     <Compile Include="Helpers\EFTMath.cs" />
-    <Compile Include="SAINComponent\Classes\Sense\DazzleClass.cs" />
+    <Compile Include="SAINComponent\Classes\Sense\FlashLightDazzleClass.cs" />
     <Compile Include="Helpers\JsonUtility.cs" />
     <Compile Include="Helpers\ShootHelpers.cs" />
     <Compile Include="Helpers\Vector.cs" />

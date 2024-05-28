@@ -1,10 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.InventoryLogic;
 using EFT.Weather;
-using Interpolation;
-using SAIN.Preset.GlobalSettings.Categories;
-using System.Collections.Generic;
+using SAIN.Components;
 using UnityEngine;
 using static EFT.Player;
 
@@ -33,16 +30,17 @@ namespace SAIN.Helpers
                             soundType = weaponInfo.AISoundType;
                         }
 
-                        info.PlayAISound(range * RainSoundModifier(), soundType);
+                        info.PlayShootSound(range * RainSoundModifier(), soundType);
                         return;
                     }
                 }
 
                 // If for some reason we can't get the weapon info on this player, just play the default sound
-                if (nextShootTime < Time.time && Singleton<BotEventHandler>.Instantiated)
+                if (nextShootTime < Time.time)
                 {
                     nextShootTime = Time.time + 0.1f;
-                    Singleton<BotEventHandler>.Instance.PlaySound(player, player.WeaponRoot.position, range * RainSoundModifier(), soundType);
+                    SAINSoundType sainType = soundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot;
+                    SAINBotController.Instance?.PlayAISound(player, sainType, player.WeaponRoot.position, range * RainSoundModifier());
                     Logger.LogWarning($"Could not find Weapon Info for [{player.Profile.Nickname}]!");
                 }
             }
@@ -57,7 +55,7 @@ namespace SAIN.Helpers
 
             if (RainCheckTimer < Time.time)
             {
-                RainCheckTimer = Time.time + 10f;
+                RainCheckTimer = Time.time + 3f;
                 // Grabs the current rain Rounding
                 float Rain = WeatherController.Instance.WeatherCurve.Rain;
                 RainModifier = 1f;

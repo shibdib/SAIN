@@ -6,6 +6,71 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class HearingSettings
     {
+        [Name("Max Footstep Audio Distance")]
+        [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters.")]
+        [Default(70f)]
+        [MinMax(10f, 150f, 1f)]
+        public float MaxFootstepAudioDistance = 70f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(60f)]
+        [Advanced]
+        public float BaseSoundRange_Looting = 60f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(30f)]
+        [Advanced]
+        public float BaseSoundRange_MovementTurnSkid = 30f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(35f)]
+        [Advanced]
+        public float BaseSoundRange_GrenadePinDraw = 35f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(50f)]
+        [Advanced]
+        public float BaseSoundRange_Prone = 50f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(40f)]
+        [Advanced]
+        public float BaseSoundRange_Healing = 40f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(30f)]
+        [Advanced]
+        public float BaseSoundRange_Reload = 30f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(55f)]
+        [Advanced]
+        public float BaseSoundRange_Surgery = 55f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(10f)]
+        [Advanced]
+        public float BaseSoundRange_DryFire = 10f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(50f)]
+        [Advanced]
+        public float BaseSoundRange_FallLanding = 50;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(35f)]
+        [Advanced]
+        public float BaseSoundRange_AimingandGearRattle = 35f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(40f)]
+        [Advanced]
+        public float BaseSoundRange_EatDrink = 40f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Default(50f)]
+        public float MaxRangeToReportEnemyActionNoHeadset = 50f;
+
         [Name("Hearing Delay / Reaction Time with Active Enemy")]
         [MinMax(0.0f, 1f, 100f)]
         [Default(0.2f)]
@@ -34,13 +99,13 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("Subsonic Sound Modifier")]
         [Description("Audible Gun Range is multiplied by this number when using a suppressor and subsonic ammo")]
-        [Default(0.25f)]
+        [Default(0.33f)]
         [MinMax(0.1f, 0.95f, 100f)]
         public float SubsonicModifier = 0.33f;
 
         [Name("Hearing Distances by Ammo Type")]
         [Description("How far a bot can hear a gunshot when fired from each specific caliber listed here.")]
-        [MinMax(30f, 400f, 1f)]
+        [MinMax(30f, 400f, 10f)]
         [Advanced]
         [DefaultDictionary(nameof(HearingDistancesDefaults))]
         public Dictionary<ICaliber, float> HearingDistances = new Dictionary<ICaliber, float>(HearingDistancesDefaults);

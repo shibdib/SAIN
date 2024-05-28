@@ -1,4 +1,4 @@
-﻿namespace SAIN.SAINComponent.Classes
+﻿namespace SAIN.SAINComponent.Classes.Search
 {
     public enum ESearchMove
     {

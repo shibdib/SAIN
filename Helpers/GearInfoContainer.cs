@@ -2,6 +2,7 @@
 using EFT;
 using EFT.InventoryLogic;
 using Interpolation;
+using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
 using static EFT.Player;
@@ -25,20 +26,15 @@ namespace SAIN
             Slots.Clear();
         }
 
-        public void PlayAISound(float range, AISoundType soundType)
+        public void PlayShootSound(float range, AISoundType soundType)
         {
-            if (Player?.AIData != null 
-                && _nextShootSoundTime < Time.time 
-                && Singleton<BotEventHandler>.Instantiated)
+            if (Player != null && 
+                Player.WeaponRoot != null)
             {
-                float timeAdd = Player.AIData.IsAI ? 1f : 0.1f;
-                _nextShootSoundTime = Time.time + timeAdd;
-                Singleton<BotEventHandler>.Instance.PlaySound(Player, Player.WeaponRoot.position, range, soundType);
-                SAINPlugin.BotController.AISoundPlayed?.Invoke(soundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot, Player.WeaponRoot.position, Player, range);
+                SAINSoundType sainType = soundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot;
+                SAINBotController.Instance?.PlayAISound(Player, sainType, Player.WeaponRoot.position, range);
             }
         }
-
-        private float _nextShootSoundTime;
 
         public void CheckForNewGear()
         {

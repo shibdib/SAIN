@@ -12,6 +12,7 @@ using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.Classes.Info;
 using SAIN.SAINComponent.Classes.Memory;
 using SAIN.SAINComponent.Classes.Mover;
+using SAIN.SAINComponent.Classes.Search;
 using SAIN.SAINComponent.Classes.Talk;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.SubComponents;

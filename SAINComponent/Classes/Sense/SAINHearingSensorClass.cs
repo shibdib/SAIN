@@ -18,9 +18,6 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
-using static RootMotion.FinalIK.AimPoser;
-using static RootMotion.FinalIK.InteractionTrigger;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -286,7 +283,9 @@ namespace SAIN.SAINComponent.Classes
 
             Vector3 vector = getSoundDispersion(person, soundPosition, type);
 
-            if (person != null && bulletFelt && isGunSound)
+            if (person != null && 
+                bulletFelt && 
+                isGunSound)
             {
                 Vector3 to = vector + person.LookDirection;
 
@@ -298,12 +297,14 @@ namespace SAIN.SAINComponent.Classes
                 }
             }
 
-            if (!reacting && !wasHeard)
+            if (!reacting && 
+                !wasHeard)
             {
                 return false;
             }
 
-            if (!reacting && !shallChaseGunshot(shooterDistance, soundPosition))
+            if (!reacting && 
+                !shallChaseGunshot(shooterDistance, soundPosition))
             {
                 return reacting;
             }
@@ -370,7 +371,7 @@ namespace SAIN.SAINComponent.Classes
 
         private IEnumerator baseHearDelay()
         {
-            if (BotOwner?.Memory.IsPeace == true)
+            if (SAINBot?.EnemyController?.NoEnemyContact == true)
             {
                 yield return new WaitForSeconds(SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayAtPeace);
             }
@@ -577,7 +578,7 @@ namespace SAIN.SAINComponent.Classes
         private bool CheckFootStepDetectChance(float distance)
         {
             float closehearing = 10f;
-            float farhearing = SAINBot.Info.FileSettings.Hearing.MaxFootstepAudioDistance;
+            float farhearing = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxFootstepAudioDistance;
 
             if (distance <= closehearing)
             {

@@ -181,7 +181,6 @@ namespace SAIN
         GrenadePin,
         GrenadeExplosion,
         GrenadeDraw,
-        Injury,
         Jump,
         Door,
         DoorBreach,
@@ -192,6 +191,9 @@ namespace SAIN
         Conversation,
         Surgery,
         DryFire,
+        TurnSound,
+        Breathing,
+        Pain,
     }
 
     public enum ELocation
