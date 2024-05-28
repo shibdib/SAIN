@@ -336,7 +336,7 @@
     <Compile Include="SAINComponent\Classes\Enemy\EnemyBase.cs" />
     <Compile Include="SAINComponent\Classes\Enemy\EnemyKnownPlaces.cs" />
     <Compile Include="SAINComponent\Classes\Enemy\EnemyPlace.cs" />
-    <Compile Include="SAINComponent\Classes\Memory\ESearchMove.cs" />
+    <Compile Include="SAINComponent\Classes\ESearchMove.cs" />
     <Compile Include="SAINComponent\Classes\Mover\DogFight.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINDoorOpener.cs" />
     <Compile Include="SAINComponent\Classes\Mover\SAINMovementPlanController.cs" />
