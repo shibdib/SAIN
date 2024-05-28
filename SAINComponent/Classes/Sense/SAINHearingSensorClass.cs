@@ -156,6 +156,14 @@ namespace SAIN.SAINComponent.Classes
                 return false;
             }
 
+            if (type == AISoundType.step && 
+                iPlayer?.IsYourPlayer == true &&
+                _nextChecktime < Time.time)
+            {
+                Logger.LogDebug($"MainPlayer Footstep Sound Range {power}");
+                _nextChecktime = Time.time + 1f;
+            }
+
             bool wasHeard = checkIfSoundHeard(iPlayer, soundPosition, power, type, out float distance);
             bool bulletFelt = BulletFelt(iPlayer, type, soundPosition);
 
@@ -163,6 +171,8 @@ namespace SAIN.SAINComponent.Classes
                 (wasHeard || bulletFelt) && 
                 ReactToSound(iPlayer, soundPosition, distance, wasHeard, bulletFelt, type);
         }
+
+        private static float _nextChecktime;
 
         private bool checkIfSoundHeard(IPlayer player, Vector3 position, float power, AISoundType soundType, out float distance)
         {
@@ -192,13 +202,14 @@ namespace SAIN.SAINComponent.Classes
             {
                 if (!SAINBot.Equipment.HasEarPiece)
                 {
-                    modifier *= 0.625f;
+                    modifier *= 0.65f;
                 }
                 if (SAINBot.Equipment.HasHeavyHelmet)
                 {
                     modifier *= 0.8f;
                 }
-                if (SAINBot.Memory.Health.Dying)
+                if (SAINBot.Memory.Health.Dying && 
+                    !SAINBot.Memory.Health.OnPainKillers)
                 {
                     modifier *= 0.8f;
                 }

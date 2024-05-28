@@ -69,7 +69,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                         {
                             Decision = SelfDecision.FirstAid;
                         }
-                        else if (SAINBot.Medical.Surgery.ShallTrySurgery())
+                        else if (SAINBot.Medical.Surgery.AreaClearForSurgery)
                         {
                             Decision = SelfDecision.Surgery;
                         }
@@ -142,31 +142,42 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             if (CurrentSelfAction != SelfDecision.None)
             {
-                if (CurrentSelfAction == SelfDecision.Surgery 
-                    && SAINBot.Medical.Surgery.ShallTrySurgery())
+                if (CurrentSelfAction == SelfDecision.Surgery)
                 {
-                    Decision = CurrentSelfAction;
-                    return true;
+                    if (SAINBot.Medical.Surgery.AreaClearForSurgery)
+                    {
+                        if (checkDecisionTooLong())
+                        {
+                            SAINBot.Medical.TryCancelHeal();
+                            Decision = SelfDecision.None;
+                            return false;
+                        }
+                        Decision = CurrentSelfAction;
+                        return true;
+                    }
+                    else
+                    {
+                        SAINBot.Medical.TryCancelHeal();
+                        Decision = SelfDecision.None;
+                        return false;
+                    }
                 }
                 else if (Time.time - SAINBot.Decision.ChangeDecisionTime > 5f)
                 {
-                    if (CurrentSelfAction != SelfDecision.Surgery)
-                    {
-                        Decision = SelfDecision.None;
-                        TryFixBusyHands();
-                        return false;
-                    }
-                    else if (Time.time - SAINBot.Decision.ChangeDecisionTime > 30f)
-                    {
-                        Decision = SelfDecision.None;
-                        TryFixBusyHands();
-                        return false;
-                    }
+                    SAINBot.Medical.TryCancelHeal();
+                    Decision = SelfDecision.None;
+                    TryFixBusyHands();
+                    return false;
                 }
             }
             bool continueAction = UsingMeds || ContinueReload || ContinueRunGrenade;
             Decision = continueAction ? CurrentSelfAction : SelfDecision.None;
             return continueAction;
+        }
+
+        private bool checkDecisionTooLong()
+        {
+            return Time.time - SAINBot.Decision.ChangeDecisionTime > 30f;
         }
 
         private bool ContinueRunGrenade => CurrentSelfAction == SelfDecision.RunAwayGrenade && SAINBot.Grenade.GrenadeDangerPoint != null;

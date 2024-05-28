@@ -142,9 +142,16 @@ namespace SAIN.SAINComponent
                 return false;
             }
 
+            if (EFTMath.RandomBool(1) && 
+                SAINPlugin.LoadedPreset.GlobalSettings.General.RandomSpeedHacker)
+            {
+                IsSpeedHacker = true;
+            }
+
             return true;
         }
 
+        public bool IsSpeedHacker { get; private set; }
 
         private void resetBot(EBotState state)
         {
@@ -247,7 +254,34 @@ namespace SAIN.SAINComponent
             {
                 Shoot(false, Vector3.zero);
             }
+
+            if (IsSpeedHacker)
+            {
+                if (defaultMoveSpeed == 0)
+                {
+                    defaultMoveSpeed = Player.MovementContext.MaxSpeed;
+                    defaultSprintSpeed = Player.MovementContext.SprintSpeed;
+                }
+                Player.Grounder.enabled = Enemy == null;
+                if (Enemy != null)
+                {
+                    Player.MovementContext.SetCharacterMovementSpeed(350, true);
+                    Player.MovementContext.SprintSpeed = 50f;
+                    Player.ChangeSpeed(100f);
+                    Player.UpdateSpeedLimit(100f, Player.ESpeedLimit.SurfaceNormal);
+                    Player.MovementContext.ChangeSpeedLimit(100f, Player.ESpeedLimit.SurfaceNormal);
+                    BotOwner.SetTargetMoveSpeed(100f);
+                }
+                else
+                {
+                    Player.MovementContext.SetCharacterMovementSpeed(defaultMoveSpeed, false);
+                    Player.MovementContext.SprintSpeed = defaultSprintSpeed;
+                }
+            }
         }
+
+        private float defaultMoveSpeed;
+        private float defaultSprintSpeed;
 
         private float _nextCheckReloadTime;
         public SAINDoorOpener DoorOpener { get; private set; }

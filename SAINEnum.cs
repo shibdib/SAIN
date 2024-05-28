@@ -172,11 +172,12 @@ namespace SAIN
 
     public enum SAINSoundType
     {
+        None,
         FootStep,
         Prone,
         Looting,
         Reload,
-        Aim,
+        GearSound,
         GrenadePin,
         GrenadeExplosion,
         GrenadeDraw,
@@ -186,11 +187,11 @@ namespace SAIN
         DoorBreach,
         Gunshot,
         SuppressedGunShot,
-        None,
         Heal,
         Food,
         Conversation,
         Surgery,
+        DryFire,
     }
 
     public enum ELocation

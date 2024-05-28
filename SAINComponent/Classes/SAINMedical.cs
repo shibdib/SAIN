@@ -10,6 +10,7 @@ using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
 using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.Helpers;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -23,6 +24,18 @@ namespace SAIN.SAINComponent.Classes
         }
 
         public BotSurgery Surgery { get; private set; }
+
+        public void TryCancelHeal()
+        {
+            if (_nextCancelTime < Time.time)
+            {
+                _nextCancelTime = Time.time + _cancelFreq;
+                BotOwner.Medecine?.FirstAid?.CancelCurrent();
+            }
+        }
+
+        private float _nextCancelTime;
+        private float _cancelFreq = 1f;
 
         public void Init()
         {
@@ -92,9 +105,26 @@ namespace SAIN.SAINComponent.Classes
 
         private static readonly float StartSurgery_SeenRecentTime = 90f;
 
+        public bool AreaClearForSurgery
+        {
+            get
+            {
+                if (_nextCheckClearTime < Time.time)
+                {
+                    _nextCheckClearTime = Time.time + _checkClearFreq;
+                    _areaClear = ShallTrySurgery();
+                }
+                return _areaClear;
+            }
+        }
+
+        private bool _areaClear;
+        private float _nextCheckClearTime;
+        private float _checkClearFreq = 0.5f;
+
         public bool ShallTrySurgery()
         {
-            const float useSurgDist = 50f;
+            const float useSurgDist = 100f;
             bool useSurgery = false;
 
             if (_canStartSurgery)
@@ -106,7 +136,7 @@ namespace SAIN.SAINComponent.Classes
                     {
                         useSurgery = true;
                     }
-                    else if ((SAINBot.CurrentTargetPosition.Value - SAINBot.Position).sqrMagnitude > useSurgDist * useSurgDist)
+                    else if ((SAINBot.CurrentTargetPosition.Value - SAINBot.Position).sqrMagnitude > useSurgDist.Sqr())
                     {
                         useSurgery = true;
                     }
@@ -129,21 +159,21 @@ namespace SAIN.SAINComponent.Classes
                 float timeAdd = surgeryStarted ? 0.5f : 0.1f;
                 _nextCheckEnemiesTime = Time.time + timeAdd;
 
-                float minPathDist = surgeryStarted ? 15f : 50f;
-                float minTimeSinceSeen = surgeryStarted ? 3f : 60f;
+                float minPathDist = surgeryStarted ? 50f : 100f;
+                float minTimeSinceLastKnown = surgeryStarted ? 30f : 60f;
 
-                _allClear = checkEnemies(minPathDist, minTimeSinceSeen);
+                _allClear = checkEnemies(minPathDist, minTimeSinceLastKnown);
             }
             return _allClear;
         }
 
-        private bool checkEnemies(float minPathDist, float minTimeSinceSeen)
+        private bool checkEnemies(float minPathDist, float minTimeSinceLastKnown)
         {
             bool allClear = true;
             var enemies = SAINBot.EnemyController.Enemies;
             foreach (var enemy in enemies.Values)
             {
-                if (!checkThisEnemy(enemy, minPathDist, minTimeSinceSeen))
+                if (!checkThisEnemy(enemy, minPathDist, minTimeSinceLastKnown))
                 {
                     allClear = false;
                     break;
@@ -152,7 +182,7 @@ namespace SAIN.SAINComponent.Classes
             return allClear;
         }
 
-        private bool checkThisEnemy(SAINEnemy enemy, float minPathDist, float minTimeSinceSeen)
+        private bool checkThisEnemy(SAINEnemy enemy, float minPathDist, float minTimeSinceLastKnown)
         {
             if (enemy?.EnemyPlayer?.HealthController.IsAlive == true
                 && (enemy.Seen || enemy.Heard)
@@ -162,7 +192,11 @@ namespace SAIN.SAINComponent.Classes
                 {
                     return false;
                 }
-                if (enemy.Seen && enemy.TimeSinceSeen < minTimeSinceSeen)
+                if (enemy.LastKnownPosition == null)
+                {
+                    return true;
+                }
+                if (enemy.TimeSinceLastKnownUpdated < minTimeSinceLastKnown)
                 {
                     return false;
                 }

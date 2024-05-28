@@ -183,7 +183,7 @@ namespace SAIN.Components
                 return;
             }
 
-            Logger.LogInfo(total);
+            //Logger.LogInfo(total);
 
             NativeArray<SpherecastCommand> allSpherecastCommands = new NativeArray<SpherecastCommand>(total, Allocator.TempJob);
             setSpherecastTargetsHumanVisibility(botList, _humanPlayers, allSpherecastCommands);
@@ -276,7 +276,7 @@ namespace SAIN.Components
                 return;
             }
 
-            Logger.LogInfo(total);
+            //Logger.LogInfo(total);
 
             NativeArray<SpherecastCommand> allSpherecastCommands = new NativeArray<SpherecastCommand>(total, Allocator.TempJob);
 

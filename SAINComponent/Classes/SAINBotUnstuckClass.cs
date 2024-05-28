@@ -409,7 +409,7 @@ namespace SAIN.SAINComponent.Classes.Debug
             {
                 if (DebugStuckTimer < Time.time && TimeSinceStuck > 5f)
                 {
-                    DebugStuckTimer = Time.time + 5f;
+                    DebugStuckTimer = Time.time + 10f;
                     Logger.LogWarning($"[{BotOwner.name}] has been stuck for [{TimeSinceStuck}] seconds " +
                         $"on [{StuckHit.transform?.name}] object " +
                         $"at [{StuckHit.transform?.position}] " +

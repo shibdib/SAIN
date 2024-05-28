@@ -91,18 +91,13 @@ namespace SAIN.Helpers
         {
             var core = EFTCoreContainer.Core;
             core.SCAV_GROUPS_TOGETHER = true;
-            core.DIST_NOT_TO_GROUP = 75f;
-            core.DIST_NOT_TO_GROUP_SQR = 75f * 75f;
-            core.MIN_DIST_TO_STOP_RUN = 0f;
+            core.DIST_NOT_TO_GROUP = 50f;
+            core.DIST_NOT_TO_GROUP_SQR = 50f * 50f;
+            //core.MIN_DIST_TO_STOP_RUN = 0f;
             core.CAN_SHOOT_TO_HEAD = false;
             core.ARMOR_CLASS_COEF = 6f;
-            core.SHOTGUN_POWER = 40f;
-            core.RIFLE_POWER = 50f;
-            core.PISTOL_POWER = 20f;
-            core.SMG_POWER = 60f;
-            core.SNIPE_POWER = 5f;
-            core.SOUND_DOOR_OPEN_METERS = 30f;
-            core.SOUND_DOOR_BREACH_METERS = 60f;
+            core.SOUND_DOOR_OPEN_METERS = 40f;
+            core.SOUND_DOOR_BREACH_METERS = 70f;
             core.JUMP_SPREAD_DIST = 70f;
             core.BASE_WALK_SPEREAD2 = 70f;
             core.PRONE_POSE = 0.5f;

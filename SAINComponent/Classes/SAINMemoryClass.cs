@@ -176,8 +176,12 @@ namespace SAIN.SAINComponent.Classes
                 {
                     HealthStatusChanged?.Invoke(HealthStatus);
                 }
+
+                OnPainKillers = Player.MovementContext.PhysicalConditionIs(EPhysicalCondition.OnPainkillers);
             }
         }
+
+        public bool OnPainKillers { get; private set; }
 
         public void Dispose() { }
 

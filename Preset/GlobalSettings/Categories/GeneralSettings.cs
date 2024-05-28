@@ -23,6 +23,11 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0.1f, 5f, 100f)]
         public float GlobalDifficultyModifier = 1f;
 
+        [Name("Random Speed Hacker AI")]
+        [Description("Emulate the real Live-Like experience! 1% of bots will be a speed-hacker.")]
+        [Default(false)]
+        public bool RandomSpeedHacker = false;
+
         [Name("Performance Mode")]
         [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN. Can cause bots to take too long to find cover to go to.")]
         [Default(false)]

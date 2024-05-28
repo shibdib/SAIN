@@ -46,10 +46,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return;
             }
-            if (SAINBot.CurrentTargetPosition != null)
-            {
-                updateLookDirection();
-            }
+            updateLookDirection();
         }
 
         public void SetAimTarget(Vector3? target)
@@ -572,23 +569,26 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (RandomLookTimer < Time.time)
             {
                 _lookRandomToggle = !_lookRandomToggle;
-                Vector3 newRandomPos = findRandomLookPos();
+                Vector3 newRandomPos = findRandomLookPos(out bool isRandom);
                 if (newRandomPos != Vector3.zero)
                 {
-                    RandomLookTimer = Time.time + 2f * Random.Range(0.66f, 1.33f);
+                    float baseTime = isRandom ? 2f : 4f;
+                    RandomLookTimer = Time.time + baseTime * Random.Range(0.66f, 1.33f);
                     randomLookPosition = newRandomPos;
                 }
             }
         }
 
-        private Vector3 findRandomLookPos()
+        private Vector3 findRandomLookPos(out bool isRandomLook)
         {
+            isRandomLook = false;
             Vector3 randomLookPosition = Vector3.zero;
             if (_lookRandomToggle)
             {
                 randomLookPosition = generateRandomLookPos();
                 if (randomLookPosition != Vector3.zero)
                 {
+                    isRandomLook = true;
                     return randomLookPosition;
                 }
             }

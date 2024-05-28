@@ -11,6 +11,7 @@ using SAIN.Layers;
 using SAIN.Patches.Generic;
 using SAIN.Patches.Hearing;
 using SAIN.Patches.Shoot;
+using SAIN.Patches.Talk;
 using SAIN.Patches.Vision;
 using SAIN.Plugin;
 using SAIN.Preset;
@@ -79,8 +80,8 @@ namespace SAIN
         {
             var patches = new List<Type>() {
                 //typeof(Patches.Generic.ShallRunAwayGrenadePatch),
-
                 //typeof(Patches.Generic.DisableLookSensorPatch),
+
                 typeof(Patches.Generic.SetPanicPointPatch),
                 typeof(Patches.Generic.AddPointToSearchPatch),
                 typeof(Patches.Generic.CalcPowerPatch),
@@ -90,7 +91,6 @@ namespace SAIN
                 typeof(Patches.Generic.TurnDamnLightOffPatch),
                 typeof(Patches.Generic.RotateClampPatch),
                 typeof(Patches.Generic.HealCancelPatch),
-                typeof(Patches.Generic.DoorOpenerPatch),
                 typeof(Patches.Generic.GetBotController),
                 typeof(Patches.Generic.GetBotSpawner),
                 typeof(Patches.Generic.GrenadeThrownActionPatch),
@@ -106,7 +106,11 @@ namespace SAIN
                 //typeof(Patches.Generic.SkipLookForCoverPatch),
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
 
-                typeof(Patches.Hearing.LootingSoundPatch),
+                typeof(Patches.Generic.SteeringPatch),
+                typeof(Patches.Generic.DoorOpenerPatch),
+                
+                typeof(Patches.Hearing.DryShotPatch),
+                typeof(Patches.Hearing.FallSoundPatch),
                 typeof(Patches.Hearing.TurnSoundPatch),
                 typeof(Patches.Hearing.ProneSoundPatch),
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
@@ -119,6 +123,8 @@ namespace SAIN
                 typeof(Patches.Hearing.SetInHandsFoodPatch),
                 typeof(Patches.Hearing.SetInHandsMedsPatch),
 
+                typeof(Patches.Talk.JumpPainPatch),
+                typeof(Patches.Talk.PlayerHurtPatch),
                 typeof(Patches.Talk.PlayerTalkPatch),
                 typeof(Patches.Talk.BotTalkPatch),
                 typeof(Patches.Talk.BotTalkManualUpdatePatch),

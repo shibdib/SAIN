@@ -57,9 +57,71 @@ namespace SAIN.Components
 
             Singleton<BotEventHandler>.Instance.OnGrenadeThrow += GrenadeThrown;
             Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += GrenadeExplosion;
-            AISoundPlayed += SoundPlayed;
-            PlayerTalk += PlayerTalked;
+            AISoundPlayed += playSound;
+            PlayerTalk += playerTalked;
         }
+
+        public void PlayAISound(Player player, SAINSoundType soundType, Vector3 position, float power)
+        {
+            if (player != null)
+            {
+                if (player.IsAI && player.AIData.BotOwner?.BotState != EBotState.Active)
+                {
+                    return;
+                }
+                if (!_playerSoundPlayers.ContainsKey(player))
+                {
+                    _playerSoundPlayers.Add(player, new PlayerSoundPlayer(player.IsAI));
+                    player.OnPlayerDeadOrUnspawn += removePlayerSoundPlayer;
+                }
+                if (_playerSoundPlayers.TryGetValue(player, out var soundPlayer) && 
+                    soundPlayer.ShallPlayAISound(power))
+                {
+                    playSound(soundType, position, player, power);
+                }
+            }
+        }
+
+        private void removePlayerSoundPlayer(Player player)
+        {
+            if (player != null)
+            {
+                player.OnPlayerDeadOrUnspawn -= removePlayerSoundPlayer;
+                _playerSoundPlayers.Remove(player);
+            }
+        }
+
+        private class PlayerSoundPlayer
+        {
+            public PlayerSoundPlayer(bool isAI)
+            {
+                if (isAI)
+                {
+                    _freq = 0.5f;
+                }
+                else
+                {
+                    _freq = 0.1f;
+                }
+            }
+
+            private readonly float _freq;
+            private float _lastSoundPower;
+            private float _nextPlaySoundTime;
+
+            public bool ShallPlayAISound(float power)
+            {
+                if (_nextPlaySoundTime < Time.time || _lastSoundPower > power)
+                {
+                    _nextPlaySoundTime = Time.time + _freq;
+                    _lastSoundPower = power;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        private readonly Dictionary<Player, PlayerSoundPlayer> _playerSoundPlayers = new Dictionary<Player, PlayerSoundPlayer>();
 
         private void Update()
         {
@@ -121,7 +183,7 @@ namespace SAIN.Components
             StartCoroutine(PlayShootSoundCoroutine(player));
         }
 
-        private void PlayerTalked(EPhraseTrigger phrase, ETagStatus mask, Player player)
+        private void playerTalked(EPhraseTrigger phrase, ETagStatus mask, Player player)
         {
             if (player == null || Bots == null)
             {
@@ -230,16 +292,39 @@ namespace SAIN.Components
             }
         }
 
-        public void SoundPlayed(SAINSoundType soundType, Vector3 position, Player player, float range)
+        public void playSound(SAINSoundType soundType, Vector3 position, Player player, float range)
         {
             if (Bots.Count == 0 || player == null)
             {
                 return;
             }
 
-            Singleton<BotEventHandler>.Instance?.PlaySound(player, player.Position, range, AISoundType.step);
+            AISoundType baseSoundType;
+            switch (soundType)
+            {
+                case SAINSoundType.Gunshot:
+                    baseSoundType = AISoundType.gun;
+                    break;
+
+                case SAINSoundType.SuppressedGunShot:
+                    baseSoundType = AISoundType.silencedGun;
+                    break;
+
+                default:
+                    baseSoundType = AISoundType.step; 
+                    break;
+            }
+
+            if (BotEventHandler == null)
+            {
+                BotEventHandler = Singleton<BotEventHandler>.Instance;
+            }
+
+            BotEventHandler?.PlaySound(player, player.Position, range, baseSoundType);
             StartCoroutine(delayHearAction(player, range, soundType));
         }
+
+        private BotEventHandler BotEventHandler;
 
         private IEnumerator delayHearAction(Player player, float range, SAINSoundType soundType, float delay = 0.25f)
         {
@@ -249,15 +334,12 @@ namespace SAIN.Components
             {
                 yield break;
             }
+
             foreach (var bot in Bots.Values)
             {
-                if (IsBotActive(bot))
+                if (IsBotActive(bot) && 
+                    player.ProfileId != bot.Player.ProfileId)
                 {
-                    if (player.ProfileId == bot.Player.ProfileId)
-                    {
-                        continue;
-                    }
-
                     SAINEnemy Enemy = bot.EnemyController.GetEnemy(player.ProfileId);
                     if (Enemy?.EnemyPerson.IsActive == true
                         && Enemy.IsValid
@@ -268,7 +350,7 @@ namespace SAIN.Components
                         {
                             Enemy.EnemyStatus.EnemyHasGrenadeOut = true;
                         }
-                        else if (soundType == SAINSoundType.Reload)
+                        else if (soundType == SAINSoundType.Reload || soundType == SAINSoundType.DryFire)
                         {
                             Enemy.EnemyStatus.EnemyIsReloading = true;
                         }
@@ -436,8 +518,8 @@ namespace SAIN.Components
 
                 Patches.Vision.AIVisionUpdateLimitPatch.LookUpdates.Clear();
 
-                AISoundPlayed -= SoundPlayed;
-                PlayerTalk -= PlayerTalked;
+                AISoundPlayed -= playSound;
+                PlayerTalk -= playerTalked;
 
                 Singleton<BotEventHandler>.Instance.OnGrenadeThrow -= GrenadeThrown;
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= GrenadeExplosion;

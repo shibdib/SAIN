@@ -324,7 +324,14 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (SAINBot.Player.IsSprintEnabled)
             {
-                Player.MovementContext.SprintSpeed = 2f;
+                if (SAINBot.IsSpeedHacker)
+                {
+                    Player.MovementContext.SprintSpeed = 50f;
+                }
+                else
+                {
+                    Player.MovementContext.SprintSpeed = 2f;
+                }
             }
         }
 

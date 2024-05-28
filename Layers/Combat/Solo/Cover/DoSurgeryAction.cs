@@ -22,14 +22,28 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Update()
         {
-            _allClear = SAINBot.Medical.Surgery.ShallTrySurgery();
-            if (_allClear)
+            if (SAINBot.Medical.Surgery.AreaClearForSurgery)
             {
                 SAINBot.Mover.SetTargetMoveSpeed(0f);
                 SAINBot.Mover.SetTargetPose(0f);
                 tryStartSurgery();
             }
-            SAINBot.Steering.SteerByPriority();
+            else
+            {
+                SAINBot.Medical.TryCancelHeal();
+                SAINBot.Mover.DogFight.DogFightMove(false);
+            }
+            if (!SAINBot.Steering.SteerByPriority(false))
+            {
+                if (SAINBot.Enemy != null)
+                {
+                    SAINBot.Steering.LookToLastKnownEnemyPosition();
+                }
+                else
+                {
+                    SAINBot.Steering.LookToRandomPosition();
+                }
+            }
         }
 
         private void tryStartSurgery()
