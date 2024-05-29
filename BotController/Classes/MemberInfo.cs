@@ -1,4 +1,5 @@
-﻿using SAIN.SAINComponent;
+﻿using EFT;
+using SAIN.SAINComponent;
 
 namespace SAIN.BotController.Classes
 {
@@ -7,8 +8,9 @@ namespace SAIN.BotController.Classes
         public MemberInfo(BotComponent sain)
         {
             SAIN = sain;
+            Player = sain.Player;
             ProfileId = sain.ProfileId;
-            Nickname = sain.Player.Profile.Nickname;
+            Nickname = sain.Player?.Profile?.Nickname;
 
             HealthStatus = sain.Memory.Health.HealthStatus;
 
@@ -44,10 +46,12 @@ namespace SAIN.BotController.Classes
         }
 
         public readonly BotComponent SAIN;
+        public readonly Player Player;
         public readonly string ProfileId;
         public readonly string Nickname;
 
         public bool HasEnemy => SAIN?.HasEnemy == true;
+
         public ETagStatus HealthStatus;
 
         public SoloDecision SoloDecision { get; private set; }

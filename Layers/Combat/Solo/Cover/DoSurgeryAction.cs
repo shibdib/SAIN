@@ -60,7 +60,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (_actionStartedTime + 20f < Time.time)
             {
                 SAINBot.Player?.ActiveHealthController?.RestoreFullHealth();
-                SAINBot.Decision.ResetDecisions();
+                SAINBot.Decision.ResetDecisions(true);
             }
         }
 
@@ -70,7 +70,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 SAINBot.Player?.ActiveHealthController?.RestoreFullHealth();
             }
-            SAINBot.Decision.ResetDecisions();
+            SAINBot.Decision.ResetDecisions(true);
         }
 
         private bool _allClear;

@@ -190,7 +190,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (Subscribed)
             {
                 Subscribed = false;
-                PresetHandler.PresetsUpdated -= updateConfigSettings;
+                PresetHandler.OnPresetUpdated -= updateConfigSettings;
 
                 var squad = SAINBot?.Squad?.SquadInfo;
                 if (squad != null)
@@ -223,7 +223,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 Subscribed = true;
 
-                PresetHandler.PresetsUpdated += updateConfigSettings;
+                PresetHandler.OnPresetUpdated += updateConfigSettings;
 
                 squad.MemberKilled += OnFriendlyDown;
                 squad.OnSoundHeard += onNoiseHeard;

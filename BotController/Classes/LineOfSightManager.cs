@@ -24,7 +24,7 @@ namespace SAIN.Components
     {
         public LineOfSightManager()
         {
-            PresetHandler.PresetsUpdated += updateSettings;
+            PresetHandler.OnPresetUpdated += updateSettings;
             updateSettings();
         }
 
@@ -56,7 +56,7 @@ namespace SAIN.Components
 
         public void Dispose()
         {
-            PresetHandler.PresetsUpdated -= updateSettings;
+            PresetHandler.OnPresetUpdated -= updateSettings;
         }
 
         private Coroutine _jobCoroutine;
@@ -124,6 +124,7 @@ namespace SAIN.Components
                         if (Bot?.BotActive == true && 
                             Bot.NextCheckVisiblePlayerTime < Time.time)
                         {
+                            Bot.NextCheckVisiblePlayerTime = Time.time + 0.1f;
                             _tempBotList.Add(Bot);
                             i++;
                             if (i > max)
@@ -155,10 +156,8 @@ namespace SAIN.Components
         private IEnumerator doRaycasts(List<BotComponent> botList)
         {
             CheckVisiblePlayers(botList);
-
-            yield return null;
-
             CheckHumanVisibility(botList);
+            yield return null;
 
             float time = Time.time;
             foreach (var bot in botList)
@@ -213,8 +212,6 @@ namespace SAIN.Components
 
                     foreach (var part in player.MainParts.Values)
                     {
-                        total++;
-
                         Vector3 target = getTarget(part, head);
                         Vector3 direction = target - head;
 
@@ -229,6 +226,8 @@ namespace SAIN.Components
                         }
 
                         allSpherecastCommands[total] = new SpherecastCommand(head, SpherecastRadius, direction.normalized, maxRange, SightLayer);
+
+                        total++;
                     }
                 }
             }
@@ -321,11 +320,12 @@ namespace SAIN.Components
                         !player.HealthController.IsAlive ||
                         player.ProfileId == bot.Player.ProfileId)
                     {
-                        max = 0f;
+                        max = 0.1f;
                     }
 
                     float maxRange = Mathf.Clamp(magnitude, 0f, max);
                     allSpherecastCommands[total] = new SpherecastCommand(head, SpherecastRadius, direction.normalized, maxRange, SightLayer);
+
                     total++;
                 }
             }

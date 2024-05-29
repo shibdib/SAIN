@@ -18,7 +18,7 @@ namespace SAIN.SAINComponent.Classes.Info
             Recoil = new Recoil(sain);
             Firerate = new Firerate(sain);
             Firemode = new Firemode(sain);
-            PresetHandler.PresetsUpdated += forceRecheckWeapon;
+            PresetHandler.OnPresetUpdated += forceRecheckWeapon;
         }
 
         private void forceRecheckWeapon()
@@ -164,7 +164,7 @@ namespace SAIN.SAINComponent.Classes.Info
             Recoil.Dispose();
             Firerate.Dispose();
             Firemode.Dispose();
-            PresetHandler.PresetsUpdated -= forceRecheckWeapon;
+            PresetHandler.OnPresetUpdated -= forceRecheckWeapon;
         }
 
         public float SwapToSemiDist { get; private set; } = 50f;

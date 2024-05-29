@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes.Info
         public void Init()
         {
             GetFileSettings();
-            PresetHandler.PresetsUpdated += GetFileSettings;
+            PresetHandler.OnPresetUpdated += GetFileSettings;
             WeaponInfo.Init();
             Profile.Init();
         }
@@ -36,7 +36,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Dispose()
         {
-            PresetHandler.PresetsUpdated -= GetFileSettings;
+            PresetHandler.OnPresetUpdated -= GetFileSettings;
             WeaponInfo.Dispose();
             Profile.Dispose();
         }

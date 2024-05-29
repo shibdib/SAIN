@@ -9,8 +9,8 @@ namespace SAIN.Preset.GlobalSettings
         public float MinJobSize = 2;
 
         [Advanced]
-        [MinMax(0.001f, 0.1f, 1000f)]
-        public float SpherecastRadius = 0.001f;
+        [MinMax(0.01f, 0.1f, 1000f)]
+        public float SpherecastRadius = 0.025f;
 
         [Advanced]
         [MinMax(1f, 20f, 1f)]

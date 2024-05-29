@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             _randomizationFactor = Random.Range(0.75f, 1.25f);
             UpdateSettings();
-            PresetHandler.PresetsUpdated += UpdateSettings;
+            PresetHandler.OnPresetUpdated += UpdateSettings;
             if (Singleton<BotEventHandler>.Instance != null)
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += tryFakeDeathGrenade;
@@ -65,7 +65,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Dispose()
         {
-            PresetHandler.PresetsUpdated -= UpdateSettings;
+            PresetHandler.OnPresetUpdated -= UpdateSettings;
             if (Singleton<BotEventHandler>.Instance != null )
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= tryFakeDeathGrenade;
@@ -295,10 +295,9 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
 
             if (SAINBot != null 
-                && player != null 
                 && SAINBot.ProfileId != player.ProfileId)
             {
-                SAINBot.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position + UnityEngine.Random.onUnitSphere + Vector3.up, SAINSoundType.Conversation);
+                SAINBot.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position + UnityEngine.Random.onUnitSphere + Vector3.up, SAINSoundType.Conversation, true);
 
                 if (CanRespondToEnemyVoice
                     && _nextResponseTime < Time.time)

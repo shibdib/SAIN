@@ -67,30 +67,6 @@ namespace SAIN.SAINComponent.Classes.Decision
         private Coroutine mainDecisionCoroutine;
         bool stopped = false;
 
-        private IEnumerator mainDecisionLoop()
-        {
-            while (true)
-            {
-                if (BotOwner == null || SAINBot == null)
-                {
-                    // || !SAINBot.BotActive || SAINBot.GameIsEnding
-                    ResetDecisions();
-                    stopped = true;
-                    yield break;
-                }
-
-                float delay = HasDecision ? getDecisionFreq : getDecisionFreqAtPeace;
-
-                if (_nextGetDecisionTime + delay < Time.time)
-                {
-                    _nextGetDecisionTime = Time.time;
-                    EnemyDistance = SAINBot.HasEnemy ? SAINBot.Enemy.CheckPathDistance() : EnemyPathDistance.NoEnemy;
-                    getDecision();
-                }
-                yield return null;
-            }
-        }
-
 
         private float _nextGetDecisionTime;
         private const float getDecisionFreq = 0.1f;
@@ -255,12 +231,15 @@ namespace SAIN.SAINComponent.Classes.Decision
             return newDecision;
         }
 
-        public void ResetDecisions()
+        public void ResetDecisions(bool active)
         {
             if (HasDecision)
             {
                 SetDecisions(SoloDecision.None, SquadDecision.None, SelfDecision.None);
-                BotOwner.CalcGoal();
+                if (active)
+                {
+                    BotOwner.CalcGoal();
+                }
             }
         }
 

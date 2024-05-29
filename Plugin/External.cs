@@ -141,7 +141,7 @@ namespace SAIN.Plugin
             bot.Memory.GoalTarget.Clear();
             bot.Memory.GoalEnemy = null;
             component.EnemyController.ClearEnemy();
-            component.Decision.ResetDecisions();
+            component.Decision.ResetDecisions(true);
 
             return true;
         }

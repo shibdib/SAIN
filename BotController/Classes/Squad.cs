@@ -1,6 +1,7 @@
 ﻿using EFT;
 using Interpolation;
 using SAIN.Helpers;
+using SAIN.Plugin;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Enemy;
@@ -15,13 +16,22 @@ namespace SAIN.BotController.Classes
 {
     public class Squad
     {
-        public readonly Dictionary<ESquadRole, BotComponent> Roles 
+        public readonly Dictionary<ESquadRole, BotComponent> Roles
             = new Dictionary<ESquadRole, BotComponent>();
 
         public Squad()
         {
             CheckSquadTimer = Time.time + 10f;
+            PresetHandler.OnPresetUpdated += updateSettings;
+            updateSettings();
         }
+
+        private void updateSettings()
+        {
+            maxReportActionRangeSqr = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxRangeToReportEnemyActionNoHeadset.Sqr();
+        }
+
+        private float maxReportActionRangeSqr;
 
         public void ReportEnemyPosition(SAINEnemy reportedEnemy, EnemyPlace place, bool seen)
         {
@@ -71,8 +81,8 @@ namespace SAIN.BotController.Classes
             foreach (var member in Members)
             {
                 SAINEnemy enemy = member.Value?.Enemy;
-                if (enemy?.EnemyPlayer != null 
-                    && enemy.EnemyPlayer.ProfileId == profileId 
+                if (enemy?.EnemyPlayer != null
+                    && enemy.EnemyPlayer.ProfileId == profileId
                     && enemy.EnemyStatus.EnemyIsSuppressed)
                 {
                     suppressingMember = member.Value;
@@ -92,6 +102,7 @@ namespace SAIN.BotController.Classes
         }
 
         public Action<PlaceForCheck> OnSoundHeard { get; set; }
+
         public Action<EnemyPlace, SAINEnemy> OnEnemyHeard { get; set; }
 
         public void AddPointToSearch(Vector3 position, float soundPower, BotComponent sain, AISoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
@@ -113,15 +124,17 @@ namespace SAIN.BotController.Classes
                 case AISoundType.silencedGun:
                     sainSoundType = SAINSoundType.SuppressedGunShot;
                     break;
+
                 case AISoundType.gun:
                     sainSoundType = SAINSoundType.Gunshot;
                     break;
+
                 default:
                     sainSoundType = SAINSoundType.None;
                     break;
             }
 
-            sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, position, sainSoundType);
+            sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, position, sainSoundType, true);
 
             bool isDanger = soundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
@@ -132,7 +145,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        public readonly Dictionary<IPlayer, PlaceForCheck> PlayerPlaceChecks = new Dictionary<IPlayer, PlaceForCheck>();
+        public readonly Dictionary<string, PlaceForCheck> PlayerPlaceChecks = new Dictionary<string, PlaceForCheck>();
 
         private PlaceForCheck AddNewPlaceForCheck(BotOwner botOwner, Vector3 position, PlaceForCheckType checkType, IPlayer player)
         {
@@ -143,22 +156,20 @@ namespace SAIN.BotController.Classes
             {
                 // Too many places were being sent to a bot, causing confused behavior.
                 // This way I'm tying 1 placeforcheck to each player and updating it based on new info.
-                PlaceForCheck oldPlace = null;
-                if (PlayerPlaceChecks.ContainsKey(player))
+                if (PlayerPlaceChecks.TryGetValue(player.ProfileId, out PlaceForCheck oldPlace))
                 {
-                    oldPlace = PlayerPlaceChecks[player];
-                    if (oldPlace != null 
+                    if (oldPlace != null
                         && (oldPlace.BasePoint - position).sqrMagnitude <= dontLerpDist * dontLerpDist)
                     {
                         Vector3 averagePosition = averagePosition = Vector3.Lerp(oldPlace.BasePoint, hitPosition, 0.5f);
 
-                        if (FindNavMesh(averagePosition, out hitPosition, navSampleDist) 
+                        if (FindNavMesh(averagePosition, out hitPosition, navSampleDist)
                             && CanPathToPoint(hitPosition, botOwner) != NavMeshPathStatus.PathInvalid)
                         {
                             GroupPlacesForCheck.Remove(oldPlace);
                             PlaceForCheck replacementPlace = new PlaceForCheck(hitPosition, checkType);
                             GroupPlacesForCheck.Add(replacementPlace);
-                            PlayerPlaceChecks[player] = replacementPlace;
+                            PlayerPlaceChecks[player.ProfileId] = replacementPlace;
                             CalcGoalForBot(botOwner);
                             return replacementPlace;
                         }
@@ -212,14 +223,15 @@ namespace SAIN.BotController.Classes
 
         private void AddOrUpdatePlaceForPlayer(PlaceForCheck place, IPlayer player)
         {
-            if (PlayerPlaceChecks.ContainsKey(player))
+            string id = player.ProfileId;
+            if (PlayerPlaceChecks.ContainsKey(id))
             {
-                PlayerPlaceChecks[player] = place;
+                PlayerPlaceChecks[id] = place;
             }
             else
             {
                 player.OnIPlayerDeadOrUnspawn += clearPlayerPlace;
-                PlayerPlaceChecks.Add(player, place);
+                PlayerPlaceChecks.Add(id, place);
             }
         }
 
@@ -229,15 +241,18 @@ namespace SAIN.BotController.Classes
             {
                 return;
             }
+
             player.OnIPlayerDeadOrUnspawn -= clearPlayerPlace;
-            if (PlayerPlaceChecks.ContainsKey(player))
+            string id = player.ProfileId;
+
+            if (PlayerPlaceChecks.ContainsKey(id))
             {
-                GroupPlacesForCheck.Remove(PlayerPlaceChecks[player]);
-                PlayerPlaceChecks.Remove(player);
+                GroupPlacesForCheck.Remove(PlayerPlaceChecks[id]);
+                PlayerPlaceChecks.Remove(id);
 
                 foreach (var bot in Members.Values)
                 {
-                    if (bot != null 
+                    if (bot != null
                         && bot.BotOwner != null)
                     {
                         try
@@ -262,6 +277,7 @@ namespace SAIN.BotController.Classes
         public bool SquadReady { get; private set; }
 
         public Action<IPlayer, DamageInfo, float> LeaderKilled { get; set; }
+
         public Action<IPlayer, DamageInfo, float> MemberKilled { get; set; }
 
         public Action<BotComponent, float> NewLeaderFound { get; set; }
@@ -295,11 +311,11 @@ namespace SAIN.BotController.Classes
 
         public bool MemberHasDecision(params SoloDecision[] decisionsToCheck)
         {
-            foreach (var member in Members)
+            foreach (var member in MemberInfos.Values)
             {
-                if (member.Value != null)
+                if (member != null && member.SAIN != null)
                 {
-                    var memberDecision = member.Value.Decision.CurrentSoloDecision;
+                    var memberDecision = member.SoloDecision;
                     foreach (var decision in decisionsToCheck)
                     {
                         if (decision == memberDecision)
@@ -314,11 +330,11 @@ namespace SAIN.BotController.Classes
 
         public bool MemberHasDecision(params SquadDecision[] decisionsToCheck)
         {
-            foreach (var member in Members)
+            foreach (var member in MemberInfos.Values)
             {
-                if (member.Value != null)
+                if (member != null && member.SAIN != null)
                 {
-                    var memberDecision = member.Value.Decision.CurrentSquadDecision;
+                    var memberDecision = member.SquadDecision;
                     foreach (var decision in decisionsToCheck)
                     {
                         if (decision == memberDecision)
@@ -333,11 +349,11 @@ namespace SAIN.BotController.Classes
 
         public bool MemberHasDecision(params SelfDecision[] decisionsToCheck)
         {
-            foreach (var member in Members)
+            foreach (var member in MemberInfos.Values)
             {
-                if (member.Value != null)
+                if (member != null && member.SAIN != null)
                 {
-                    var memberDecision = member.Value.Decision.CurrentSelfDecision;
+                    var memberDecision = member.SelfDecision;
                     foreach (var decision in decisionsToCheck)
                     {
                         if (decision == memberDecision)
@@ -383,9 +399,9 @@ namespace SAIN.BotController.Classes
             if (!SquadReady && CheckSquadTimer < Time.time && Members.Count > 0)
             {
                 SquadReady = true;
-                FindSquadLeader(); 
+                FindSquadLeader();
                 // Timer before starting to recheck
-                RecheckSquadTimer = Time.time + 10f; 
+                RecheckSquadTimer = Time.time + 10f;
                 if (Members.Count > 1)
                 {
                     GetSquadPersonality();
@@ -424,6 +440,36 @@ namespace SAIN.BotController.Classes
             }
         }
 
+        public void Dispose()
+        {
+            if (MemberInfos.Count > 0)
+            {
+                foreach (var id in MemberInfos.Keys)
+                {
+                    RemoveMember(id);
+                }
+            }
+            PresetHandler.OnPresetUpdated -= updateSettings;
+            MemberInfos.Clear();
+            Members.Clear();
+        }
+
+        private bool isInCommunicationRange(BotComponent a, BotComponent b)
+        {
+            if (a != null && b != null)
+            {
+                if (a.Equipment.HasEarPiece && b.Equipment.HasEarPiece)
+                {
+                    return true;
+                }
+                if ((a.Position - b.Position).sqrMagnitude <= maxReportActionRangeSqr) 
+                { 
+                    return true; 
+                }
+            }
+            return false;
+        }
+
         public void UpdateSharedEnemyStatus(IPlayer player, EEnemyAction action, BotComponent sain, SAINSoundType soundType, Vector3 position)
         {
             if (sain == null)
@@ -431,25 +477,24 @@ namespace SAIN.BotController.Classes
                 return;
             }
 
+            bool iHaveEarpeace = sain.Equipment.HasEarPiece;
+
             float maxRangeSqr = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxRangeToReportEnemyActionNoHeadset.Sqr();
 
             foreach (var member in Members.Values)
             {
-                if (member == null || member.ProfileId == sain.ProfileId) { continue; }
-
-                if (!member.Equipment.HasEarPiece && 
-                    (member.Position - sain.Position).sqrMagnitude > maxRangeSqr)
+                if (member != null &&
+                    member.ProfileId != sain.ProfileId &&
+                    isInCommunicationRange(sain, member))
                 {
-                    continue;
-                }
-
-                SAINEnemy memberEnemy = member.EnemyController.CheckAddEnemy(player);
-                if (memberEnemy != null)
-                {
-                    memberEnemy.SetHeardStatus(true, position, soundType);
-                    if (action != EEnemyAction.None)
+                    SAINEnemy memberEnemy = member.EnemyController.CheckAddEnemy(player);
+                    if (memberEnemy != null)
                     {
-                        memberEnemy.EnemyStatus.VulnerableAction = action;
+                        memberEnemy.SetHeardStatus(true, position, soundType, false);
+                        if (action != EEnemyAction.None)
+                        {
+                            memberEnemy.EnemyStatus.VulnerableAction = action;
+                        }
                     }
                 }
             }
@@ -474,7 +519,7 @@ namespace SAIN.BotController.Classes
 
             MemberKilled?.Invoke(lastAggressor, lastDamageInfo, Time.time);
 
-            if (MemberInfos.TryGetValue(player?.ProfileId, out var member) 
+            if (MemberInfos.TryGetValue(player?.ProfileId, out var member)
                 && member != null)
             {
                 // If this killed Member is the squad leader then
@@ -496,6 +541,7 @@ namespace SAIN.BotController.Classes
         {
             if (SAINPlugin.DebugMode)
                 Logger.LogInfo($"Leader [{sain?.Player?.Profile.Nickname}] Extracted for Squad: [{Id}]");
+
             RemoveMember(sain?.ProfileId);
         }
 
@@ -616,7 +662,13 @@ namespace SAIN.BotController.Classes
                 memberInfo.Dispose();
                 MemberInfos.Remove(id);
             }
+            if (Members.Count == 0)
+            {
+                OnSquadEmpty?.Invoke(this);
+            }
         }
+
+        public Action<Squad> OnSquadEmpty { get; set; }
 
         public readonly Dictionary<string, BotComponent> Members = new Dictionary<string, BotComponent>();
         public readonly Dictionary<string, MemberInfo> MemberInfos = new Dictionary<string, MemberInfo>();

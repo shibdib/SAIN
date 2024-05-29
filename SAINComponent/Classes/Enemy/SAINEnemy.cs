@@ -294,11 +294,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return centerMass;
         }
 
-        public void UpdateHeardPosition(Vector3 position, bool wasGunfire, bool arrived = false)
+        public void UpdateHeardPosition(Vector3 position, bool wasGunfire, bool shallReport, bool arrived = false)
         {
-            EnemyPlace place = KnownPlaces.AddPersonalHeardPlace(position, arrived, wasGunfire);
-            if (place != null
-                && _nextReportHeardTime < Time.time)
+            EnemyPlace place = KnownPlaces.UpdatePersonalHeardPosition(position, arrived, wasGunfire);
+            if (shallReport && 
+                place != null && 
+                _nextReportHeardTime < Time.time)
             {
                 _nextReportHeardTime = Time.time + _reportHeardFreq;
                 SAINBot.Squad?.SquadInfo?.ReportEnemyPosition(this, place, false);
@@ -348,20 +349,29 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public Action<SAINEnemy> OnEnemyHeard;
 
-        public void SetHeardStatus(bool value, Vector3 pos, SAINSoundType soundType)
+        public void SetHeardStatus(bool value, Vector3 pos, SAINSoundType soundType, bool shallReport)
         {
-            if (value)
+            if (value && _heardTime < Time.time)
             {
+                _heardTime = Time.time + 0.05f;
+
                 if (!Heard)
                 {
                     Heard = true;
                 }
+
                 HeardRecently = true;
+
                 TimeLastHeard = Time.time;
+
                 bool wasGunfire = soundType == SAINSoundType.SuppressedGunShot || soundType == SAINSoundType.Gunshot;
-                UpdateHeardPosition(pos, wasGunfire);
+
+                UpdateHeardPosition(pos, wasGunfire, shallReport);
+
                 OnEnemyHeard?.Invoke(this);
-                if (!wasGunfire)
+
+                if (!wasGunfire && 
+                    shallReport)
                 {
                     talkNoise(soundType == SAINSoundType.Conversation);
                     if (!SAINBot.HasEnemy)
@@ -371,6 +381,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 }
             }
         }
+
+        private float _heardTime;
 
         public bool EnemyHeardFromPeace = false;
 

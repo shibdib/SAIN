@@ -5,7 +5,6 @@ using SAIN.SAINComponent.BaseClasses;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Enemy
@@ -115,27 +114,39 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float _nextLogTime;
 
+        private float _nextCheckActiveTime;
+
         private void checkActiveEnemies()
         {
+            if (_nextCheckActiveTime > Time.time)
+            {
+                return;
+            }
+
+            _nextCheckActiveTime = Time.time + 0.25f;
+
             if (ActiveEnemies.Count > 0)
-                ActiveEnemies.RemoveAll(x => x == null);
+            {
+                ActiveEnemies.RemoveAll(x => x == null || !x.IsValid);
+            }
 
             foreach (SAINEnemy enemy in Enemies.Values)
             {
                 if (enemy != null)
                 {
                     bool inList = ActiveEnemies.Contains(enemy);
-                    bool isActive = enemy.ActiveThreat;
-                    if (isActive && !inList)
+                    bool activeThreat = enemy.ActiveThreat;
+                    if (activeThreat && !inList)
                     {
                         ActiveEnemies.Add(enemy);
                     }
-                    else if (!isActive && inList)
+                    else if (!activeThreat && inList)
                     {
                         ActiveEnemies.Remove(enemy);
                     }
                 }
             }
+
             if (_nextLogActiveTime < Time.time && ActiveEnemies.Count > 0)
             {
                 _nextLogActiveTime = Time.time + 10f;
@@ -213,10 +224,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
             foreach (var keyPair in Enemies)
             {
                 var enemy = keyPair.Value;
-                if (enemy?.IsValid != true)
+                if (enemy?.IsValid == true)
                 {
-                    _idsToRemove.Add(keyPair.Key);
+                    continue;
                 }
+                _idsToRemove.Add(keyPair.Key);
             }
             foreach (var id in _idsToRemove)
             {
@@ -228,6 +240,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private readonly List<string> _idsToRemove = new List<string>();
 
         private Coroutine _enemyUpdateCoroutine;
+
         private Coroutine _enemyHumanUpdateCoroutine;
 
         private IEnumerator updateValidHumanEnemies(int maxPerFrame)
@@ -390,6 +403,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 LastEnemy = null;
             }
         }
+
         private void removeDogFightTarget(string id)
         {
             SAINEnemy dogFightTarget = SAINBot.Decision.DogFightTarget;
@@ -497,14 +511,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             return AreEnemiesSame(a?.EnemyIPlayer, b?.EnemyIPlayer);
         }
+
         public bool AreEnemiesSame(EnemyInfo a, SAINEnemy b)
         {
             return AreEnemiesSame(a?.Person, b?.EnemyIPlayer);
         }
+
         public bool AreEnemiesSame(EnemyInfo a, EnemyInfo b)
         {
             return AreEnemiesSame(a?.Person, b?.Person);
         }
+
         public bool AreEnemiesSame(IPlayer a, IPlayer b)
         {
             return a != null
@@ -573,6 +590,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             return $" [{player.Profile.Nickname}, {player.Profile.Info.Settings.Role}, {player.ProfileId}] ";
         }
+
         private string getBotInfo(IPlayer player)
         {
             return $" [{player.Profile.Nickname}, {player.Profile.Info.Settings.Role}, {player.ProfileId}] ";
@@ -618,7 +636,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return false;
         }
 
-
         public bool IsPlayerAnEnemy(string profileID)
         {
             return Enemies.ContainsKey(profileID) && Enemies[profileID] != null;
@@ -655,12 +672,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     if (BotOwner.BotsGroup.Allies.Contains(iPlayer))
                     {
                         return true;
-                    }
-                    // Checks if the player is an enemy by their role.
-                    var role = iPlayer.Profile.Info.Settings.Role;
-                    if (BotOwner.Settings.FileSettings.Mind.ENEMY_BOT_TYPES.Contains(role))
-                    {
-                        return false;
                     }
                 }
             }

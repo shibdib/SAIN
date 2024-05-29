@@ -139,7 +139,7 @@ namespace SAIN.SAINComponent
             if (Info.Profile.IsPMC && 
                 person.BotOwner.Brain.BaseBrain.ShortName() != Brain.PMC.ToString())
             {
-                Logger.LogAndNotifyError($"{BotOwner.name} is a PMC but does not have [pmcBot] Base Brain! Current Brain Assignment: [{person.BotOwner.Brain.BaseBrain.ShortName()}] : SAIN Server mod is either missing or another mod is overwriting it. Destroying SAIN for this bot...");
+                Logger.LogAndNotifyError($"{BotOwner.name} is a PMC but does not have [PMC] Base Brain! Current Brain Assignment: [{person.BotOwner.Brain.BaseBrain.ShortName()}] : SAIN Server mod is either missing or another mod is overwriting it. Destroying SAIN for this bot...");
                 Logger.LogError("Init SAIN ERROR, Disposing...");
                 Dispose();
                 return false;
@@ -154,11 +154,16 @@ namespace SAIN.SAINComponent
             return true;
         }
 
+        private void OnDisable()
+        {
+            Decision.ResetDecisions(false);
+        }
+
         public bool IsSpeedHacker { get; private set; }
 
         private void resetBot(EBotState state)
         {
-            Decision.ResetDecisions();
+            Decision.ResetDecisions(false);
         }
 
         public float TimeBotCreated { get; private set; }
@@ -193,6 +198,13 @@ namespace SAIN.SAINComponent
             if (Singleton<GameWorld>.Instance == null)
             {
                 //Logger.LogWarning("Dispose SAIN Singleton<GameWorld>.Instance == null");
+                Dispose();
+                return;
+            }
+
+            if (BotOwner.BotState == EBotState.Disposed)
+            {
+                Logger.LogWarning("Bot Disposed!");
                 Dispose();
                 return;
             }

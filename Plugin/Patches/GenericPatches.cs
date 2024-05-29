@@ -23,6 +23,32 @@ using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.Patches.Generic
 {
+    public class FixPatrolDataPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(GClass436), "method_4");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(List<BotOwner> followers, ref bool __result)
+        {
+            using (List<BotOwner>.Enumerator enumerator = followers.GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    if (enumerator.Current == null || enumerator.Current.BotFollower?.PatrolDataFollower?.HaveProblems == true)
+                    {
+                        __result = false;
+                        return false;
+                    }
+                }
+            }
+            __result = true;
+            return false;
+        }
+    }
+
     public class DisableLookSensorPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

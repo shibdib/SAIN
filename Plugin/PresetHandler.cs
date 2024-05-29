@@ -27,7 +27,7 @@ namespace SAIN.Plugin
 
         private const string Settings = "ConfigSettings";
 
-        public static Action PresetsUpdated;
+        public static Action OnPresetUpdated;
 
         public static readonly List<SAINPresetDefinition> CustomPresetOptions = new List<SAINPresetDefinition>();
 
@@ -154,7 +154,7 @@ namespace SAIN.Plugin
 
         public static void UpdateExistingBots()
         {
-            PresetsUpdated?.Invoke();
+            OnPresetUpdated?.Invoke();
         }
 
         private static bool CheckIfPresetLoaded(string presetName, out SAINPresetDefinition definition)

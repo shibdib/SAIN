@@ -20,24 +20,25 @@ namespace SAIN.BotController.Classes
         public void Update()
         {
             int count = 0;
-            foreach (var squad in Squads)
+            foreach (var squad in Squads.Values)
             {
-                if (squad.Value.Members.Count > 0)
+                if (squad != null)
                 {
-                    squad.Value.Update();
+                    squad.Update();
 
                     if (SAINPlugin.DebugMode && DebugTimer < Time.time)
                     {
                         DebugTimer = Time.time + 60f;
 
                         string debugText = $"Squad [{count}]: " +
-                            $"ID: [{squad.Value.GetId()}] " +
-                            $"Count: [{squad.Value.Members.Count}] " +
-                            $"Power: [{squad.Value.SquadPowerLevel}] " +
+                            $"ID: [{squad.GetId()}] " +
+                            $"Count: [{squad.Members.Count}] " +
+                            $"Power: [{squad.SquadPowerLevel}] " +
                             $"Members:";
-                        foreach (var member in squad.Value.MemberInfos)
+
+                        foreach (var member in squad.MemberInfos.Values)
                         {
-                            debugText += $" [{member.Value.Nickname}, {member.Value.PowerLevel}]";
+                            debugText += $" [{member.Nickname}, {member.PowerLevel}]";
                         }
 
                         Logger.LogDebug(debugText);
@@ -95,6 +96,7 @@ namespace SAIN.BotController.Classes
 
                 if (!Squads.ContainsKey(result.GUID))
                 {
+                    result.OnSquadEmpty += removeSquad;
                     Squads.Add(result.GUID, result);
                 }
             }
@@ -102,6 +104,15 @@ namespace SAIN.BotController.Classes
             result.AddMember(sain);
 
             return result;
+        }
+
+        private void removeSquad(Squad squad)
+        {
+            if (squad != null)
+            {
+                squad.OnSquadEmpty -= removeSquad;
+                squad.Dispose();
+            }
         }
     }
 }

@@ -158,10 +158,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void TalkAfterDelay(EPhraseTrigger phrase, ETagStatus? mask = null, float delay = 0.5f)
         {
-            if ((CanTalk && TimeUntilCanTalk < Time.time)
-                || phrase == EPhraseTrigger.OnDeath
-                || phrase == EPhraseTrigger.OnAgony
-                || phrase == EPhraseTrigger.OnBeingHurt)
+            if (CanTalk && TimeUntilCanTalk < Time.time)
             {
                 if (!PersonalPhraseDict.ContainsKey(phrase))
                 {
@@ -178,6 +175,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         }
 
         public EnemyTalk EnemyTalk { get; private set; }
+
         public GroupTalk GroupTalk { get; private set; }
 
         private void SendSayCommand(EPhraseTrigger type, ETagStatus mask)
@@ -187,8 +185,12 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void Say(EPhraseTrigger trigger, bool demand = false, float delay = 0f, ETagStatus mask = (ETagStatus)0, int probability = 100, bool aggressive = false)
         {
-            if (Player?.HealthController?.IsAlive == true)
+            if (Player?.HealthController?.IsAlive == true && 
+                Player.Speaker != null &&
+                _nextCanTalkTime < Time.time)
             {
+                _nextCanTalkTime = Time.time + 0.1f;
+
                 if (trigger == EPhraseTrigger.MumblePhrase)
                 {
                     trigger = ((aggressive || Time.time < Player.Awareness) ? EPhraseTrigger.OnFight : EPhraseTrigger.OnMutter);
@@ -207,6 +209,8 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
         }
 
+        private float _nextCanTalkTime;
+
         private void SendSayCommand(BotTalkPackage talkPackage)
         {
             SendSayCommand(talkPackage.phraseInfo.Phrase, talkPackage.Mask);
@@ -224,7 +228,9 @@ namespace SAIN.SAINComponent.Classes.Talk
                 etagStatus = ETagStatus.Solo;
             }
 
-            if (BotOwner.Memory.IsUnderFire)
+            if (BotOwner.Memory.IsUnderFire || 
+                SAINBot.Suppression.IsSuppressed || 
+                SAINBot.Suppression.IsHeavySuppressed)
             {
                 etagStatus |= ETagStatus.Combat;
             }
