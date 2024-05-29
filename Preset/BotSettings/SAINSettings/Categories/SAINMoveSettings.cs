@@ -4,7 +4,7 @@ using SAIN.Attributes;
 namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINMoveSettings
-    {   
+    {
         //[Hidden]
         //[JsonIgnore]
         //public float BASE_ROTATE_SPEED = 300;
@@ -26,7 +26,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float RUN_TO_COVER_MIN = 1f;
+        public float RUN_TO_COVER_MIN = 0.5f;
 
         // [Hidden]
         // [JsonIgnore]

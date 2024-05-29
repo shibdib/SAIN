@@ -13,7 +13,6 @@ using SAIN.Preset.GlobalSettings;
 using SAIN.Preset.GlobalSettings.Categories;
 using System.Collections.Generic;
 using System.Reflection;
-using static EFT.SpeedTree.TreeWind;
 
 namespace SAIN
 {
@@ -53,6 +52,7 @@ namespace SAIN
             BotUnstuckLayer.Name,
             SAINAvoidThreatLayer.Name,
         };
+
         public static readonly List<string> SAINCombatLayers = new List<string>
         {
             CombatSquadLayer.Name,

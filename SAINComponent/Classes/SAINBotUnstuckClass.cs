@@ -253,7 +253,7 @@ namespace SAIN.SAINComponent.Classes.Debug
         private bool tryVault()
         {
             Vector3 currentPos = SAINBot.Position;
-            if (Player.MovementContext.TryVaulting())
+            if (SAINBot.Mover.TryVault())
             {
                 _botVaultedTime = Time.time;
                 if (postVaultTracker != null)

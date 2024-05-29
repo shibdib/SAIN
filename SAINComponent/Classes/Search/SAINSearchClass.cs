@@ -418,14 +418,14 @@ namespace SAIN.SAINComponent.Classes.Search
         {
             RecalcPathTimer = Time.time + 2;
 
-            if (!shallSprint && SAINBot.Mover.SprintController.Running)
+            if (!shallSprint)
             {
                 SAINBot.Mover.SprintController.CancelRun();
             }
 
             _Running = false;
             if (shallSprint
-                && SAINBot.Mover.SprintController.RunToPoint(destination))
+                && SAINBot.Mover.SprintController.RunToPoint(destination, Mover.ESprintUrgency.Middle))
             {
                 _Running = true;
                 return true;

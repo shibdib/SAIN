@@ -303,6 +303,7 @@
     <Compile Include="Plugin\SAINEnableClass.cs" />
     <Compile Include="Plugin\SAINInterop.cs" />
     <Compile Include="Preset\BotSettings\SAINSettings\Categories\SAINBossSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\GlobalMoveSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\TalkSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\LocationSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\BotBrains.cs" />

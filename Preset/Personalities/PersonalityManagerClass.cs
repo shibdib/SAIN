@@ -34,9 +34,13 @@ namespace SAIN.Preset.Personalities
             {
                 foreach (var item in EnumValues.Personalities)
                 {
-                    if (SAINPresetClass.Import(out PersonalitySettingsClass personality, Preset.Info.Name, item.ToString(), nameof(PersonalityDictionary)))
+                    if (SAINPresetClass.Import(out PersonalitySettingsClass personality, Preset.Info.Name, item.ToString(), nameof(Personalities)))
                     {
                         PersonalityDictionary.Add(item, personality);
+                    }
+                    else
+                    {
+                        //Logger.LogWarning($"Could not import {item.ToString()} for {Preset.Info.Name}");
                     }
                 }
             }

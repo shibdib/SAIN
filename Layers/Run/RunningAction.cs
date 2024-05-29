@@ -32,7 +32,7 @@ namespace SAIN.Layers.Combat.Run
             if ((nextRandomRunTime < Time.time 
                 || !SAINBot.Mover.SprintController.Running)
                 && findRandomPlace(out var path) 
-                && SAINBot.Mover.SprintController.RunToPoint(_runDestination))
+                && SAINBot.Mover.SprintController.RunToPoint(_runDestination, SAINComponent.Classes.Mover.ESprintUrgency.High))
             {
                 nextRandomRunTime = Time.time + 20f;
             }

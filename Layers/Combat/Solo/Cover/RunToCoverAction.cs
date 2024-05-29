@@ -10,6 +10,7 @@ using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SAIN.Layers.Combat.Solo;
 using UnityEngine.AI;
 using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.Mover;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -163,7 +164,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
             // Testing new pathfinder for running
             if (shallRun(destination))
             {
-                result = SAINBot.Mover.SprintController.RunToPoint(destination);
+                ESprintUrgency urgency = BotOwner.Memory.IsUnderFire || SAINBot.Suppression.IsSuppressed || SAINBot.Suppression.IsHeavySuppressed ? ESprintUrgency.High : ESprintUrgency.Middle;
+                result = SAINBot.Mover.SprintController.RunToPoint(destination, urgency);
                 //result = BotOwner.BotRun.Run(destination, false, 0.25f);
                 if (result)
                 {

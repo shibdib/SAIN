@@ -72,7 +72,7 @@ namespace SAIN.Layers.Combat.Solo
             {
                 Vector3 Destination = EnemyPos;
                 if (SAINBot.Enemy.Path.PathDistance > 1f
-                    && SAINBot.Mover.SprintController.RunToPoint(Destination))
+                    && SAINBot.Mover.SprintController.RunToPoint(Destination, SAINComponent.Classes.Mover.ESprintUrgency.High))
                 {
                     NewDestTimer = Time.time + 2f;
                 }

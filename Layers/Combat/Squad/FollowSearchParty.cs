@@ -38,7 +38,7 @@ namespace SAIN.Layers.Combat.Squad
                     }
                     if (sqrMag > 30f * 30f)
                     {
-                        SAINBot.Mover.SprintController.RunToPoint(_leaderPosition);
+                        SAINBot.Mover.SprintController.RunToPoint(_leaderPosition, SAINComponent.Classes.Mover.ESprintUrgency.Middle);
                     }
                     else if (sqrMag > 10f * 10f)
                     {

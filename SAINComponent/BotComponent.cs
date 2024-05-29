@@ -1,4 +1,5 @@
 ﻿using Comfort.Common;
+using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using EFT.InventoryLogic;
 using SAIN.Components;
@@ -20,6 +21,7 @@ using System;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent
 {
@@ -168,12 +170,13 @@ namespace SAIN.SAINComponent
 
         public float TimeBotCreated { get; private set; }
 
-        public bool SAINLayersActive => SAINSoloActive || SAINSquadActive || SAINAvoidActive || SAINExtractActive;
+        public bool SAINLayersActive => SAINSoloActive || SAINSquadActive || SAINAvoidActive || SAINExtractActive || SAINRunActive;
 
         public bool SAINSoloActive { get; set; }
         public bool SAINSquadActive { get; set; }
         public bool SAINAvoidActive { get; set; }
         public bool SAINExtractActive { get; set; }
+        public bool SAINRunActive { get; set; }
 
         private void Update()
         {
@@ -325,7 +328,10 @@ namespace SAIN.SAINComponent
                 PatrolDataPaused)
             {
                 PatrolDataPaused = false;
-                BotOwner.PatrollingData?.Unpause();
+
+                if (!BrainManager.IsCustomLayerActive(BotOwner))
+                    BotOwner.PatrollingData?.Unpause();
+
                 if (!_speedReset)
                 {
                     _speedReset = true; 

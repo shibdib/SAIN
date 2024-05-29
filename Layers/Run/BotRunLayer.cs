@@ -24,7 +24,12 @@ namespace SAIN.Layers.Combat.Run
 
         public override bool IsActive()
         {
-            return SAINPlugin.EditorDefaults.ForceBotsToRunAround;
+            bool active = SAINPlugin.EditorDefaults.ForceBotsToRunAround;
+            if (SAINBot != null)
+            {
+                SAINBot.SAINRunActive = active;
+            }
+            return active;
         }
 
         public override bool IsCurrentActionEnding()

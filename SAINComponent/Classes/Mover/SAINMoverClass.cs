@@ -104,14 +104,54 @@ namespace SAIN.SAINComponent.Classes.Mover
         public void Update()
         {
             SetStamina();
-
             Pose.Update();
             Lean.Update();
-            //SideStep.Update();
             Prone.Update();
             BlindFire.Update();
             SprintController.Update();
+            checkSetBotToNavMesh();
         }
+
+        private void checkSetBotToNavMesh()
+        {
+            if (Player.UpdateQueue != EUpdateQueue.Update)
+            {
+                return;
+            }
+            // Is the bot currently Moving somewhere?
+            if (SprintController.Running || 
+                BotOwner.Mover?.HavePath == true)
+            {
+                return;
+            }
+            // Did the bot jump recently?
+            if (Time.time - TimeLastJumped < _timeAfterJumpVaultReset)
+            {
+                return;
+            }
+            // Did the bot vault recently?
+            if (Time.time - TimeLastVaulted < _timeAfterJumpVaultReset)
+            {
+                return;
+            }
+            // Reset to navmesh 
+            ResetToNavMesh();
+        }
+
+        public void ResetToNavMesh()
+        {
+            Vector3 position = SAINBot.Position;
+            if ((_prevLinkPos - position).sqrMagnitude > 0f)
+            {
+                Vector3 castPoint = position + Vector3.up * 0.3f;
+                BotOwner.Mover.SetPlayerToNavMesh(position, castPoint);
+                _prevLinkPos = position;
+            }
+        }
+
+        private Vector3 _prevLinkPos;
+
+        private readonly float _timeAfterJumpVaultReset = 1f;
 
         public void Dispose()
         {
@@ -373,8 +413,9 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void SetStamina()
         {
-            if (SAINBot.CurrentTargetPosition != null 
-                && !SAINBot.Extracting 
+            if (SAINBot.SAINLayersActive
+                && !SAINBot.SAINExtractActive && 
+                !SprintController.Running
                 && CurrentStamina < 0.1f)
             {
                 Player.Physical.Stamina.UpdateStamina(Player.Physical.Stamina.TotalCapacity / 4f);
@@ -411,20 +452,11 @@ namespace SAIN.SAINComponent.Classes.Mover
                 stop(forDuration);
                 return;
             }
-            if (delay > 0 && 
-                !_stopping && 
+            if (!_stopping && 
                 BotOwner?.Mover?.IsMoving == true)
             {
                 _stopping = true;
-
-                if (BotOwner.isActiveAndEnabled)
-                {
-                    SAINBot.StartCoroutine(StopAfterDelay(delay, forDuration));
-                }
-                else
-                {
-                    StopAfterDelay(delay, forDuration);
-                }
+                SAINBot.StartCoroutine(StopAfterDelay(delay, forDuration));
             }
         }
 
@@ -457,14 +489,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void ResetPath(float delay)
         {
-            if (BotOwner.isActiveAndEnabled)
-            {
-                SAINBot.StartCoroutine(resetPath(0.2f));
-            }
-            else
-            {
-                resetPath(0.2f);
-            }
+            SAINBot.StartCoroutine(resetPath(0.2f));
         }
 
         private IEnumerator resetPath(float delay)
@@ -483,20 +508,46 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (value)
             {
-                SAINBot.Steering.LookToMovingDirection();
+                //SAINBot.Steering.LookToMovingDirection();
                 FastLean(0f);
             }
             BotOwner.Mover.Sprint(value);
         }
 
-        public void TryJump()
+        public void EnableSprintPlayer(bool value)
         {
-            if (JumpTimer < Time.time && CanJump)
+            if (value)
             {
-                JumpTimer = Time.time + 0.5f;
-                Player.MovementContext.TryJump();
+                FastLean(0f);
             }
+            Player.EnableSprint(value);
         }
+
+        public bool TryJump()
+        {
+            if (_nextJumpTime < Time.time && 
+                CanJump)
+            {
+                _nextJumpTime = Time.time + 0.5f;
+                Player.MovementContext?.TryJump();
+                TimeLastJumped = Time.time;
+                return true;
+            }
+            return false;
+        }
+
+        public bool TryVault()
+        {
+            bool vaulted = Player?.MovementContext?.TryVaulting() == true;
+            if (vaulted)
+            {
+                TimeLastVaulted = Time.time;
+            }
+            return vaulted;
+        }
+
+        public float TimeLastJumped { get; private set; }
+        public float TimeLastVaulted { get; private set; }
 
         public void FastLean(LeanSetting value)
         {
@@ -537,10 +588,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
-        private bool isShoulderSwapped => Player.MovementContext.LeftStanceController.LeftStance;
+        private bool isShoulderSwapped => Player.MovementContext?.LeftStanceController?.LeftStance == true;
 
-        public bool CanJump => Player.MovementContext.CanJump;
+        public bool CanJump => Player.MovementContext?.CanJump == true;
 
-        private float JumpTimer = 0f;
+        private float _nextJumpTime = 0f;
     }
 }
