@@ -151,6 +151,7 @@ namespace SAIN.Patches.Generic
             }
         }
     }
+
     public class StopSetToNavMeshPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -161,16 +162,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0)
         {
-            if (SAINPlugin.IsBotExluded(___botOwner_0))
-            {
-                return true;
-            }
-            if (SAINEnableClass.GetSAIN(___botOwner_0, out var sain, nameof(StopSetToNavMeshPatch)) && 
-                !sain.Mover.SprintController.ShallResetToNavMesh())
-            {
-                return false;
-            }
-            return true;
+            return SAINPlugin.IsBotExluded(___botOwner_0);
         }
     }
 
