@@ -33,8 +33,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private bool isEnemyInVisibleSector()
         {
-            float maxHorizontal = Enemy.SAINBot.Info.FileSettings.Core.VisibleAngle / 2f;
-            return AngleToEnemyHorizontal < maxHorizontal;
+            return AngleToEnemy <= MaxVisionAngle;
         }
 
         private float getAngleToEnemy(bool setYto0)
@@ -48,6 +47,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
             return Vector3.Angle(direction, lookDir);
         }
+
+        public float MaxVisionAngle => Enemy.SAINBot.Info.FileSettings.Core.VisibleAngle / 2f;
 
         public float AngleToEnemy
         {
@@ -189,7 +190,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (_nextCheckVisTime < Time.time)
             {
                 _nextCheckVisTime = Time.time + 0.1f;
-                _gainSightModifier = GetGainSightModifier(EnemyInfo, SAIN) * calcRepeatSeenCoef();
+                _gainSightModifier = GetGainSightModifier(EnemyInfo, Enemy) * calcRepeatSeenCoef();
                 _visionDistanceModifier = 0f;
             }
         }
@@ -266,7 +267,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float _visionDistanceModifier;
         private float _nextCheckVisTime;
 
-        public static float GetGainSightModifier(EnemyInfo enemyInfo, BotComponent sain)
+        public static float GetGainSightModifier(EnemyInfo enemyInfo, SAINEnemy sainEnemy)
         {
             float result = 1f;
             float dist = (enemyInfo.Owner.Position - enemyInfo.CurrPosition).magnitude;
@@ -329,20 +330,51 @@ namespace SAIN.SAINComponent.Classes.Enemy
                         result *= SAINNotLooking.GetVisionSpeedDecrease(enemyInfo);
                     }
 
-                    SAINEnemy sainEnemy = sain?.EnemyController.GetEnemy(player.ProfileId);
-                    if (sainEnemy?.EnemyStatus.PositionalFlareEnabled == true
-                        && sainEnemy.Heard
-                        && sainEnemy.TimeSinceHeard < 300f)
-                    {
-                        result *= 0.9f;
-                    }
-
-                    // Testing, will log results
-                    //getVisionAngleCoef(enemyInfo);
+                    result = calcSainEnemyMods(sainEnemy, result);
                 }
             }
 
             return result;
+        }
+
+        private static float calcSainEnemyMods(SAINEnemy sainEnemy, float sightCoef)
+        {
+            if (sainEnemy != null)
+            {
+                if (sainEnemy.EnemyStatus.PositionalFlareEnabled
+                    && sainEnemy.Heard
+                    && sainEnemy.TimeSinceHeard < 300f)
+                {
+                    sightCoef *= 0.9f;
+                }
+                if (!sainEnemy.IsCurrentEnemy)
+                {
+                    SAINEnemy activeEnemy = sainEnemy.SAINBot.Enemy;
+                    if (activeEnemy != null)
+                    {
+                        Vector3? activeEnemyLastKnown = activeEnemy.LastKnownPosition;
+                        if (activeEnemyLastKnown != null)
+                        {
+                            Vector3 currentEnemyDir = (activeEnemyLastKnown.Value - sainEnemy.SAINBot.Position).normalized;
+                            Vector3 myDir = sainEnemy.EnemyDirection.normalized;
+
+                            float angle = Vector3.Angle(currentEnemyDir, myDir);
+
+                            float minAngle = 10f;
+                            float maxAngle = sainEnemy.Vision.MaxVisionAngle;
+                            if (angle > 10 && angle < maxAngle)
+                            {
+                                float num = angle - minAngle;
+                                float num2 = maxAngle - minAngle;
+                                float ratio = 1f - num2 / num;
+                                float reductionMod = Mathf.Lerp(0.65f, 1f, ratio);
+                                sightCoef /= reductionMod;
+                            }
+                        }
+                    }
+                }
+            }
+            return sightCoef;
         }
 
         private static bool _reduceVisionSpeedOnPeriphVis = true;

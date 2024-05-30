@@ -215,6 +215,10 @@ namespace SAIN.SAINComponent.Classes
                 {
                     modifier *= 0.85f;
                 }
+                if (Player.HeavyBreath)
+                {
+                    modifier *= 0.65f;
+                }
             }
 
             return modifier;
@@ -439,8 +443,8 @@ namespace SAIN.SAINComponent.Classes
 
         private float getBaseDispersion(float shooterDistance, AISoundType soundType)
         {
-            const float dispGun = 17.5f;
             const float dispSuppGun = 12.5f;
+            const float dispGun = 17.5f;
             const float dispStep = 6.25f;
 
             float dispersion;
@@ -578,25 +582,28 @@ namespace SAIN.SAINComponent.Classes
 
         private bool CheckFootStepDetectChance(float distance)
         {
-            float closehearing = 3f;
+            bool hasheadPhones = SAINBot.Equipment.HasEarPiece;
+
+            float closehearing = hasheadPhones ? 3f : 0f;
             if (distance <= closehearing)
             {
                 return true;
             }
 
-            float farhearing = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxFootstepAudioDistance;
+            float farhearing = hasheadPhones ? SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxFootstepAudioDistance : SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxFootstepAudioDistanceNoHeadphones;
             if (distance > farhearing)
             {
                 return false;
             }
 
             // Random chance to hear at any range within maxdistance if a bot is stationary or moving slow
+
+            float minimumChance = 0f;
             bool midRange = distance < farhearing * 0.66f;
             if (midRange && 
-                Player.Velocity.magnitude < 0.5f && 
-                EFTMath.RandomBool(5))
+                Player.Velocity.magnitude < 0.5f)
             {
-                return true;
+                minimumChance += 5f;
             }
 
             // Random chance to hear at any range within maxdistance if a bot has headphones
@@ -604,14 +611,17 @@ namespace SAIN.SAINComponent.Classes
                 SAINBot.Equipment.HasEarPiece && 
                 EFTMath.RandomBool(5))
             {
-                return true;
+                minimumChance += 5f;
             }
 
             float num = farhearing - closehearing;
             float num2 = distance - closehearing;
-            float num3 = 1f - num2 / num;
 
-            return EFTMath.Random(0f, 1f) < num3 + 0.2f;
+            float chanceToHear = 1f - num2 / num;
+
+            chanceToHear = Mathf.Clamp(chanceToHear, minimumChance, 1f);
+
+            return EFTMath.RandomBool(chanceToHear);
         }
 
         public bool DoIHearSound(IPlayer iPlayer, Vector3 position, float range, AISoundType type, out float soundDistance)

@@ -265,12 +265,27 @@ namespace SAIN.Patches.Generic
 
     internal class ForceNoHeadAimPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(EnemyInfo).GetMethod("method_7");
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(EnemyInfo), "method_7");
+        }
 
         [PatchPrefix]
-        public static void PatchPrefix(ref bool withLegs, ref bool canBehead)
+        public static void PatchPrefix(ref bool withLegs, ref bool canBehead, EnemyInfo __instance)
         {
-            canBehead = false;
+            if (!__instance.Person.IsAI)
+            {
+                canBehead = 
+                    SAINPlugin.LoadedPreset.GlobalSettings.Aiming.PMCSAimForHead &&
+                    EnumValues.WildSpawn.IsPMC(__instance.Owner.Profile.Info.Settings.Role);
+
+                withLegs = true;
+            }
+            else
+            {
+                canBehead = true;
+                withLegs = true;
+            }
         }
     }
 

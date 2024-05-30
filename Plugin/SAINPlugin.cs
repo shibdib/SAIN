@@ -112,7 +112,7 @@ namespace SAIN
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
                 typeof(Patches.Hearing.OnMakingShotPatch),
                 typeof(Patches.Hearing.HearingSensorPatch),
-                //typeof(Patches.Hearing.DryShotPatch),
+                typeof(Patches.Hearing.DryShotPatch),
                 typeof(Patches.Hearing.FallSoundPatch),
                 typeof(Patches.Hearing.TurnSoundPatch),
                 typeof(Patches.Hearing.ProneSoundPatch),
@@ -129,6 +129,8 @@ namespace SAIN
                 typeof(Patches.Talk.BotTalkPatch),
                 typeof(Patches.Talk.BotTalkManualUpdatePatch),
 
+                typeof(Patches.Vision.SetPartPriorityPatch),
+                typeof(Patches.Vision.GlobalLookSettingsPatch),
                 typeof(Patches.Vision.WeatherTimeVisibleDistancePatch),
                 typeof(Patches.Vision.NoAIESPPatch),
                 typeof(Patches.Vision.BotLightTurnOnPatch),

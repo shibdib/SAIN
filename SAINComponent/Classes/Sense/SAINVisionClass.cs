@@ -4,6 +4,7 @@ using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.Sense;
 using System.Reflection;
 using UnityEngine;
+
 // Found in Botowner.Looksensor
 using LookAllData = GClass522;
 using EnemyVisionCheck = GClass501;
@@ -37,58 +38,52 @@ namespace SAIN.SAINComponent.Classes
 
         public static float GetVisibilityModifier(Player player)
         {
-            float result = 1f;
-            if (player == null)
+            if (player != null)
             {
-                return result;
-            }
-            var pose = player.Pose;
-            float speed = player.Velocity.magnitude / 5f; // 5f is the observed max sprinting speed with gameplays (with Realism, which gives faster sprinting)
-            if (player.MovementContext.IsSprintEnabled)
-            {
-                Preset.GlobalSettings.LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
-                result *= Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Mathf.InverseLerp(0, 5f, player.Velocity.magnitude));
-            }
-            else switch (pose)
+                var pose = player.Pose;
+                float speed = player.Velocity.magnitude / 5f; // 5f is the observed max sprinting speed with gameplays (with Realism, which gives faster sprinting)
+                if (player.MovementContext.IsSprintEnabled)
                 {
-                    case EPlayerPose.Stand:
-                        //result *= 1.15f;
-                        break;
+                    Preset.GlobalSettings.LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
+                    float velocityFactor = Mathf.InverseLerp(0, 5f, player.Velocity.magnitude);
+                    return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, velocityFactor);
+                }
 
+                switch (pose)
+                {
                     case EPlayerPose.Duck:
-                        result *= 0.85f;
-                        break;
+                        return 0.85f;
 
                     case EPlayerPose.Prone:
-                        result *= 0.6f;
-                        break;
+                        return 0.6f;
 
                     default:
                         break;
                 }
-
-            result = result.Round100();
-            //Logger.LogInfo($"Result: {result} Speed: {speed} Pose: {pose} Sprint? {player.MovementContext.IsSprintEnabled}");
-            return result;
+            }
+            return 1f;
         }
 
         public static float GetRatioPartsVisible(EnemyInfo enemyInfo, out int visibleCount)
         {
             var enemyParts = enemyInfo.AllActiveParts;
-            int partCount = enemyParts.Count;
+            int partCount = enemyParts.Count + 1;
             visibleCount = 0;
 
-            foreach ( var part in enemyParts )
+            var bodyPartData = enemyInfo.BodyData().Value;
+            if (bodyPartData.IsVisible || bodyPartData.LastVisibilityCastSucceed)
             {
-                if (part.Value?.LastVisibilityCastSucceed == true)
-                {
-                    visibleCount++;
-                }
-                else if (part.Value.IsVisible == true)
+                visibleCount++;
+            }
+
+            foreach (var part in enemyParts)
+            {
+                if (part.Value.LastVisibilityCastSucceed || part.Value.IsVisible)
                 {
                     visibleCount++;
                 }
             }
+
 
             if (_nextLogTime < Time.time && visibleCount > 0 && !enemyInfo.Person.IsAI)
             {
@@ -96,7 +91,7 @@ namespace SAIN.SAINComponent.Classes
                 //Logger.LogDebug($"Visible Ratio for Enemy Parts: [{(float)visibleCount / (float)partCount}] for Bot [{enemyInfo.Owner.name}]");
             }
 
-            return (float) visibleCount / (float) partCount;
+            return (float)visibleCount / (float)partCount;
         }
 
         private static float _nextLogTime;
@@ -153,7 +148,7 @@ namespace SAIN.SAINComponent.Classes
             int updated = 0;
             foreach (SAINEnemy enemy in SAINBot.EnemyController.Enemies.Values)
             {
-                if (enemy?.IsValid == true && 
+                if (enemy?.IsValid == true &&
                     enemy.NextCheckLookTime < Time.time &&
                     enemy.IsAI == forAI)
                 {

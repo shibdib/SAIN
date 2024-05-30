@@ -9,6 +9,11 @@ namespace SAIN.Preset.GlobalSettings
         [Default(true)]
         public bool HeadShotProtection = true;
 
+        [Name("Headshot Protection for PMCs")]
+        [Description("Force PMCs to aim for center of mass.")]
+        [Default(true)]
+        public bool HeadShotProtectionPMC = true;
+
         [Name("Center Mass Point")]
         [Description("The place where bots will target if headshot protection is on. A value of 0 will be directly on your head, a value of 1 will be directly at the floor below you at your feet.")]
         [Advanced]
@@ -25,5 +30,8 @@ namespace SAIN.Preset.GlobalSettings
         [Description("if this toggle is disabled, all bots will have Faster CQB Reactions turned OFF, so their individual settings will be ignored.")]
         [Default(true)]
         public bool FasterCQBReactionsGlobal = true;
+
+        [Default(false)]
+        public bool PMCSAimForHead = false;
     }
 }

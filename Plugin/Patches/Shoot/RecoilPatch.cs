@@ -14,6 +14,7 @@ using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.Classes.Mover;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents;
+using SAIN.SAINComponent.Classes.Enemy;
 
 namespace SAIN.Patches.Shoot
 {
@@ -38,11 +39,23 @@ namespace SAIN.Patches.Shoot
             Vector3 recoilOffset = ___botOwner_0.RecoilData.RecoilOffset;
             Vector3 realTargetPoint = ___botOwner_0.AimingData.RealTargetPoint;
 
+            IPlayer person = ___botOwner_0?.Memory?.GoalEnemy?.Person;
+            if (SAINEnableClass.GetSAIN(___botOwner_0, out var bot, nameof(AimOffsetPatch)))
+            {
+                SAINEnemy enemy = bot.EnemyController.CheckAddEnemy(person);
+                if (enemy != null)
+                {
+                    aimUpgradeByTime /= enemy.EnemyAim.AimAndScatterMultiplier;
+                }
+                float distance = (realTargetPoint - ___botOwner_0.WeaponRoot.position).magnitude;
+                float scaled = distance / 20f;
+                recoilOffset = bot.Info.WeaponInfo.Recoil.CurrentRecoilOffset * scaled;
+            }
+
             // Applies aiming offset, recoil offset, and scatter offsets
             // Default Setup :: Vector3 finalTarget = __instance.RealTargetPoint + badShootOffset + (AimUpgradeByTime * (AimOffset + ___botOwner_0.RecoilData.RecoilOffset));
-            Vector3 finalOffset = badShootOffset + (aimUpgradeByTime * (aimOffset + recoilOffset));
+            Vector3 finalOffset = badShootOffset + (aimUpgradeByTime * aimOffset) + recoilOffset;
 
-            IPlayer person = ___botOwner_0?.Memory?.GoalEnemy?.Person;
             if (person != null && 
                 !person.IsAI &&
                 SAINPlugin.LoadedPreset.GlobalSettings.Look.NotLookingToggle)

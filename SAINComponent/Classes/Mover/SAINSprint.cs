@@ -25,6 +25,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         ArrivingAtDestination = 6,
         CantSprint = 7,
     }
+
     public class SAINSprint : SAINBase, ISAINClass
     {
         static SAINSprint()
@@ -42,13 +43,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (Running)
-            {
-                _timeRunning = Time.time;
-            }
         }
-
-        private float _timeRunning;
 
         public bool Running => _runToPointCoroutine != null;
 
@@ -62,33 +57,23 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
-        public bool ShallResetToNavMesh()
+        public bool RunToPoint(Vector3 point, ESprintUrgency urgency, bool checkSameWay = true)
         {
-            if (Running)
+            if (checkSameWay && 
+                Running && 
+                (LastRunDestination - point).sqrMagnitude < 0.1f)
             {
-                return false;
+                return true;
             }
-            if (_timeRunning + 1f < Time.time)
-            {
-                return false;
-            }
-            return true;
-        }
 
-        public bool RunToPoint(Vector3 point, ESprintUrgency urgency)
-        {
             if (SAINBot.Mover.CanGoToPoint(point, out NavMeshPath path))
             {
-                LastRunDestination = path.corners[path.corners.Length - 1];
-                if (_runToPointCoroutine != null)
-                {
-                    SAINBot.StopCoroutine(_runToPointCoroutine);
-                    _runToPointCoroutine = null;
-                }
+                LastRunDestination = point; 
+                CancelRun();
                 CurrentPath = path;
                 _lastUrgency = urgency;
                 _runToPointCoroutine = SAINBot.StartCoroutine(RunToPoint(path, urgency));
-                return _runToPointCoroutine != null;
+                return Running;
             }
             return false;
         }
@@ -99,24 +84,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool RecalcPath()
         {
-            if (CurrentPath == null)
-            {
-                return false;
-            }
-
-            if (SAINBot.Mover.CanGoToPoint(CurrentPath.corners[CurrentPath.corners.Length - 1], out NavMeshPath path))
-            {
-                LastRunDestination = path.corners[path.corners.Length - 1];
-                if (_runToPointCoroutine != null)
-                {
-                    SAINBot.StopCoroutine(_runToPointCoroutine);
-                    _runToPointCoroutine = null;
-                }
-                CurrentPath = path;
-                _runToPointCoroutine = SAINBot.StartCoroutine(RunToPoint(path, _lastUrgency));
-                return true;
-            }
-            return false;
+            return RunToPoint(LastRunDestination, _lastUrgency, false);
         }
 
         public Vector3 LastRunDestination { get; private set; }
@@ -134,7 +102,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             return _currentPath.corners[_currentIndex];
         }
 
-        private Vector3 _nextCorner;
         private int _currentIndex = 0;
         private NavMeshPath _currentPath;
 
@@ -231,11 +198,15 @@ namespace SAIN.SAINComponent.Classes.Mover
                     move((destination - SAINBot.Position).normalized);
                     distToCurrent = distanceToCurrentCornerSqr();
 
+                    DistanceToCurrentCorner = distToCurrent;
+
                     yield return null;
                 }
                 moveToNextCorner(path);
             }
         }
+
+        public float DistanceToCurrentCorner { get; private set; }
 
         private bool checkMissedCorner(Vector3 currentCorner, float dotProduct)
         {

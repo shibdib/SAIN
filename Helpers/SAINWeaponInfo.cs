@@ -45,6 +45,14 @@ namespace SAIN
             return 50f;
         }
 
+        public float Durability
+        {
+            get
+            {
+                return Weapon.Repairable.Durability / (float)Weapon.Repairable.TemplateDurability;
+            }
+        }
+
         public bool TryCalculate(bool skipTimer = false)
         {
             if (Weapon == null)

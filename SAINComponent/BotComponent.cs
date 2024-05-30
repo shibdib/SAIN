@@ -100,6 +100,7 @@ namespace SAIN.SAINComponent
                 SpaceAwareness = new SAINBotSpaceAwareness(this);
                 DoorOpener = new SAINDoorOpener(this, person.BotOwner);
                 Medical = new SAINMedical(this);
+                BotLight = new BotLightController(this);
 
                 BotOwner.OnBotStateChange += resetBot;
             }
@@ -135,6 +136,7 @@ namespace SAIN.SAINComponent
             BotHitReaction.Init();
             SpaceAwareness.Init();
             Medical.Init();
+            BotLight.Init();
 
             TimeBotCreated = Time.time;
 
@@ -251,6 +253,7 @@ namespace SAIN.SAINComponent
             BotHitReaction.Update();
             SpaceAwareness.Update();
             Medical.Update();
+            BotLight.Update();
 
             UpdateGoalTarget();
 
@@ -467,6 +470,7 @@ namespace SAIN.SAINComponent
                 BotHitReaction?.Dispose();
                 SpaceAwareness?.Dispose();
                 Medical?.Dispose();
+                BotLight?.Dispose();
 
                 try
                 {
@@ -579,6 +583,7 @@ namespace SAIN.SAINComponent
             return null;
         }
 
+        public BotLightController BotLight { get; private set; }
         public SAINBotSpaceAwareness SpaceAwareness { get; private set; }
         public SAINBotHitReaction BotHitReaction { get; private set; }
         public AimDownSightsController AimDownSightsController { get; private set; }

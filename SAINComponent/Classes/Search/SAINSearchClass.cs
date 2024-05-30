@@ -92,7 +92,18 @@ namespace SAIN.SAINComponent.Classes.Search
 
         private bool shallBeStealthyDuringSearch(SAINEnemy enemy)
         {
-            return enemy.EnemyHeardFromPeace;
+            if (!SAINPlugin.LoadedPreset.GlobalSettings.Mind.SneakyBots)
+            {
+                return false;
+            }
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Mind.OnlySneakyPersonalitiesSneaky && 
+                !SAINBot.Info.PersonalitySettings.Search.Sneaky)
+            {
+                return false;
+            }
+
+            return enemy.EnemyHeardFromPeace &&
+                (FinalDestination - SAINBot.Position).sqrMagnitude < SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaximumDistanceToBeSneaky.Sqr();
         }
 
         private bool shallSearchCauseLooting(SAINEnemy enemy)
@@ -440,6 +451,18 @@ namespace SAIN.SAINComponent.Classes.Search
         private bool _Running;
         private bool _setMaxSpeedPose;
 
+        private void handleLight()
+        {
+            if (_Running || SAINBot.Mover.SprintController.Running)
+            {
+                return;
+            }
+            if (BotOwner.Mover?.IsMoving == true)
+            {
+                SAINBot.BotLight.HandleLightForSearch(BotOwner.Mover.DirCurPoint.magnitude);
+            }
+        }
+
         private void SwitchSearchModes(bool shallSprint)
         {
             var persSettings = SAINBot.Info.PersonalitySettings;
@@ -483,10 +506,7 @@ namespace SAIN.SAINComponent.Classes.Search
                 pose = 0f;
             }
 
-            if (!shallSprint && SAINBot.Mover.SprintController.Running)
-            {
-                SAINBot.Mover.SprintController.CancelRun();
-            }
+            handleLight();
 
             LastState = CurrentState;
             switch (LastState)
@@ -503,6 +523,7 @@ namespace SAIN.SAINComponent.Classes.Search
                         ActiveDestination = FinalDestination;
                         CurrentState = ESearchMove.DirectMove;
                         NextState = ESearchMove.None;
+                        MoveToPoint(FinalDestination, shallSprint);
                     }
                     else if (SearchMovePoint != null && MoveToPoint(SearchMovePoint.StartPeekPosition, shallSprint))
                     {
@@ -526,14 +547,6 @@ namespace SAIN.SAINComponent.Classes.Search
                     }
 
                     MoveToPoint(FinalDestination, shallSprint);
-                    //if (BotIsAtPoint(FinalDestination))
-                    //{
-                    //    SearchedTargetPosition = true;
-                    //} else
-                    if (ShallRecalcPath())
-                    {
-                        //MoveToPoint(FinalDestination, shallSprint);
-                    }
                     break;
 
                 case ESearchMove.MoveToStartPeek:

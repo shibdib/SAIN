@@ -58,7 +58,6 @@ namespace SAIN.Helpers
         }
 
         public static EFTCore EFTCore => EFTCoreContainer.Core;
-        public static float LAY_DOWN_ANG_SHOOT => EFTCore.LAY_DOWN_ANG_SHOOT;
         public static float Gravity => EFTCore.G;
         public static float SMOKE_GRENADE_RADIUS_COEF => EFTCore.SMOKE_GRENADE_RADIUS_COEF;
     }
@@ -90,20 +89,29 @@ namespace SAIN.Helpers
         public static void UpdateCoreSettings()
         {
             var core = EFTCoreContainer.Core;
+
             core.SCAV_GROUPS_TOGETHER = true;
             core.DIST_NOT_TO_GROUP = 50f;
-            core.DIST_NOT_TO_GROUP_SQR = 50f * 50f;
+            core.DIST_NOT_TO_GROUP_SQR = core.DIST_NOT_TO_GROUP.Sqr();
+
             //core.MIN_DIST_TO_STOP_RUN = 0f;
+
             core.CAN_SHOOT_TO_HEAD = false;
+
             core.ARMOR_CLASS_COEF = 6f;
+
             core.SOUND_DOOR_OPEN_METERS = 40f;
             core.SOUND_DOOR_BREACH_METERS = 70f;
-            core.JUMP_SPREAD_DIST = 70f;
-            core.BASE_WALK_SPEREAD2 = 70f;
+            core.JUMP_SPREAD_DIST = 65f;
+            core.BASE_WALK_SPEREAD2 = 65f;
+
             core.PRONE_POSE = 0.5f;
             core.MOVE_COEF = 1.3f;
+
             core.FLARE_POWER = 1.75f;
             core.FLARE_TIME = 2.5f;
+
+            core.SHOOT_TO_CHANGE_RND_PART_DELTA = 2f;
         }
 
         public static void UpdateArmorClassCoef(float coef)

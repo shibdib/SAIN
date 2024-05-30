@@ -68,7 +68,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public int AIMING_TYPE = 4;
+        public int AIMING_TYPE = 1;
 
         [Name("Friendly Fire Spherecast Size")]
         [Description("")]
@@ -112,6 +112,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [MinMax(0f, 25f, 10f)]
         [Advanced]
         public float BASE_HIT_AFFECTION_MAX_ANG = 5f;
+
+        [Hidden]
+        [JsonIgnore]
+        public float ANY_PART_SHOOT_TIME = 0f;
 
         [Hidden]
         [JsonIgnore]

@@ -98,6 +98,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public float TimePositionUpdated;
         public float TimeSincePositionUpdated => Time.time - TimePositionUpdated;
 
+        public float Distance(Vector3 toPoint)
+        {
+            return (_position - toPoint).magnitude;
+        }
+
+        public float DistanceSqr(Vector3 toPoint)
+        {
+            return (_position - toPoint).sqrMagnitude;
+        }
+
+
         public bool HasArrivedPersonal
         {
             get

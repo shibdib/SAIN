@@ -35,7 +35,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             if (CurrentRecoilOffset != Vector3.zero)
             {
                 Vector3 decayedRecoil = Vector3.Lerp(CurrentRecoilOffset, Vector3.zero, SAINPlugin.LoadedPreset.GlobalSettings.Shoot.RecoilDecay);
-                if ((decayedRecoil -  CurrentRecoilOffset).sqrMagnitude < 0.05f)
+                if ((decayedRecoil -  CurrentRecoilOffset).sqrMagnitude < 0.025f)
                 {
                     decayedRecoil = Vector3.zero;
                 }
@@ -63,14 +63,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public Vector3 CalculateRecoil(Vector3 currentRecoil)
         {
-            float distance = SAINBot.DistanceToAimTarget;
-
-            // Reduces scatter recoil at very close range. Clamps Distance between 3 and 20 then scale to 0.25 to 1.
-            // So if a target is 3m or less Distance, their recoil scaling will be 25% its original value
-            distance = Mathf.Clamp(distance, 3f, 20f);
-            distance /= 20f;
-            distance = distance * 0.75f + 0.25f;
-
             float weaponhorizrecoil = CalcHorizRecoil(SAINBot.Info.WeaponInfo.RecoilForceUp);
             float weaponvertrecoil = CalcVertRecoil(SAINBot.Info.WeaponInfo.RecoilForceBack);
 

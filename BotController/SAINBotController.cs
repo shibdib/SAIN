@@ -387,6 +387,13 @@ namespace SAIN.Components
                         && Enemy.IsValid
                         && Enemy.RealDistance <= range)
                     {
+                        float chance2Hear = chanceToHearAction(Enemy, range, Enemy.RealDistance);
+                        if (chance2Hear == 0 || 
+                            !EFTMath.RandomBool(chance2Hear))
+                        {
+                            continue;
+                        }
+
                         bool shallUpdateSquad = true;
                         if (soundType == SAINSoundType.GrenadePin || soundType == SAINSoundType.GrenadeDraw)
                         {
@@ -426,6 +433,25 @@ namespace SAIN.Components
                     }
                 }
             }
+        }
+
+        private float chanceToHearAction(SAINEnemy enemy, float range, float distance)
+        {
+            var hearSettings = SAINPlugin.LoadedPreset.GlobalSettings.Hearing;
+            float max = enemy.SAINBot.Equipment.HasEarPiece ? hearSettings.MaxFootstepAudioDistance : hearSettings.MaxFootstepAudioDistanceNoHeadphones;
+            if (distance > max)
+            {
+                return 0f;
+            }
+            float min = 15f;
+            if (distance < min)
+            {
+                return 100f;
+            }
+            float num = max - min;
+            float num2 = distance - min;
+            float ratio = 1f - num2 / num;
+            return ratio * 100f;
         }
 
         private void GrenadeExplosion(Vector3 explosionPosition, string playerProfileID, bool isSmoke, float smokeRadius, float smokeLifeTime)
