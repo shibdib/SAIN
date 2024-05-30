@@ -1,22 +1,9 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
-using EFT;
-using SAIN.SAINComponent.Classes.Decision;
-using SAIN.SAINComponent.Classes.Talk;
-using SAIN.SAINComponent.Classes.WeaponFunction;
-using SAIN.SAINComponent.Classes.Mover;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents;
+﻿using EFT;
+using SAIN.Helpers;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Text;
 using UnityEngine;
-using SAIN.SAINComponent.SubComponents.CoverFinder;
-using SAIN.Layers.Combat.Solo;
-using UnityEngine.AI;
-using UnityEngine.UIElements;
-using static UnityEngine.UI.GridLayoutGroup;
-using SAIN.Helpers;
-using Comfort.Common;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -101,8 +88,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private bool checkMoveToCover(CoverPoint coverPoint)
         {
             if (coverPoint != null &&
-                !coverPoint.Spotted && 
-                !coverPoint.IsBad && 
+                !coverPoint.Spotted &&
+                !coverPoint.IsBad &&
                 SAINBot.Mover.GoToPoint(coverPoint.Position, out _, 0.2f))
             {
                 SAINBot.Cover.CoverInUse = coverPoint;
@@ -121,8 +108,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private void EngageEnemy()
         {
-            if (SAINBot.Enemy?.IsVisible == false 
-                && BotOwner.WeaponManager.HaveBullets 
+            if (SAINBot.Enemy?.IsVisible == false
+                && BotOwner.WeaponManager.HaveBullets
                 && SAINBot.Enemy.TimeSinceLastKnownUpdated < 30f)
             {
                 Vector3? suppressTarget = findSuppressTarget();
@@ -146,7 +133,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             Shoot.Update();
         }
 
-        bool suppressing;
+        private bool suppressing;
 
         private Vector3? findSuppressTarget()
         {
