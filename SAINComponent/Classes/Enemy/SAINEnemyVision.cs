@@ -31,17 +31,72 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float _realLostVisionTime;
 
+        private bool isEnemyInVisibleSector()
+        {
+            float maxHorizontal = Enemy.SAINBot.Info.FileSettings.Core.VisibleAngle / 2f;
+            return AngleToEnemyHorizontal < maxHorizontal;
+        }
+
+        private float getAngleToEnemy(bool setYto0)
+        {
+            Vector3 direction = EnemyPosition - Enemy.SAINBot.Position;
+            Vector3 lookDir = BotOwner.LookDirection;
+            if (setYto0)
+            {
+                direction.y = 0;
+                lookDir.y = 0;
+            }
+            return Vector3.Angle(direction, lookDir);
+        }
+
+        public float AngleToEnemy
+        {
+            get
+            {
+                getAngles();
+                return _angleToEnemy;
+            }
+        }
+
+        public float AngleToEnemyHorizontal
+        {
+            get
+            {
+                getAngles();
+                return _angleToEnemyHoriz;
+            }
+        }
+
+        private void getAngles()
+        {
+            if (_calcAngleTime < Time.time)
+            {
+                _calcAngleTime = Time.time + _calcAngleFreq;
+                _angleToEnemy = getAngleToEnemy(false);
+                _angleToEnemyHoriz = getAngleToEnemy(true);
+            }
+        }
+
+        private float _angleToEnemyHoriz;
+        private float _angleToEnemy;
+        private float _calcAngleTime;
+        private float _calcAngleFreq = 0.1f;
+
         public void UpdateVisible(bool forceOff)
         {
             bool wasVisible = IsVisible;
             bool lineOfSight = InLineOfSight || SAIN.Memory.VisiblePlayers.Contains(EnemyPlayer);
+
             if (forceOff)
             {
                 IsVisible = false;
             }
             else
             {
-                IsVisible = EnemyInfo?.IsVisible == true && lineOfSight;
+                IsVisible = 
+                    EnemyInfo?.IsVisible == true && 
+                    lineOfSight && 
+                    isEnemyInVisibleSector();
             }
 
             if (IsVisible)

@@ -296,6 +296,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void UpdateHeardPosition(Vector3 position, bool wasGunfire, bool shallReport, bool arrived = false)
         {
+            EnemyMoveDirection = EnemyPlayer.MovementContext.MovementDirection;
+
             EnemyPlace place = KnownPlaces.UpdatePersonalHeardPosition(position, arrived, wasGunfire);
             if (shallReport && 
                 place != null && 
@@ -308,6 +310,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void UpdateSeenPosition(Vector3 position)
         {
+            EnemyMoveDirection = EnemyPlayer.MovementContext.MovementDirection;
+
             var place = KnownPlaces.UpdateSeenPlace(position);
             if (_nextReportSightTime < Time.time)
             {
@@ -381,6 +385,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 }
             }
         }
+
+        public Vector3 EnemyMoveDirection { get; set; }
 
         private float _heardTime;
 

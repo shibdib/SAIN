@@ -13,7 +13,7 @@ namespace SAIN.Layers.Combat.Solo
             SAINBot.Mover.SetTargetPose(0f);
             if (!SAINBot.Steering.SteerByPriority(false))
             {
-                SAINBot.Steering.LookToLastKnownEnemyPosition();
+                SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy);
             }
             Shoot.Update();
         }

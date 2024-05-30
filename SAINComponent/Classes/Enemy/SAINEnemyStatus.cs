@@ -62,6 +62,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
+
         public SAINEnemyStatus(SAINEnemy enemy) : base(enemy)
         {
         }

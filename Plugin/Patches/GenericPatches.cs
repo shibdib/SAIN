@@ -1,25 +1,16 @@
 ﻿using Aki.Reflection.Patching;
-using EFT;
-using EFT.Interactive;
-using HarmonyLib;
-using SAIN.Components;
-using SAIN.Helpers;
-using System.Reflection;
-using System.Collections.Generic;
-using UnityEngine;
-using DrakiaXYZ.BigBrain.Brains;
-using UnityEngine.AI;
-using SAIN.Layers;
-using Comfort.Common;
-using EFT.HealthSystem;
 using Aki.Reflection.Utils;
-using System;
-using System.Linq;
+using EFT;
+using HarmonyLib;
+using SAIN.Helpers;
 using SAIN.SAINComponent;
-using Audio.Data;
-using EFT.UI;
-using System.Collections;
 using SAIN.SAINComponent.Classes.Enemy;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
 
 namespace SAIN.Patches.Generic
 {
@@ -385,11 +376,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ___botOwner_0)
         {
-            if (SAINPlugin.IsBotExluded(___botOwner_0))
-            {
-                return true;
-            }
-            return false;
+            return SAINPlugin.IsBotExluded(___botOwner_0);
         }
     }
 

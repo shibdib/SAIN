@@ -148,14 +148,8 @@ namespace SAIN.Layers.Combat.Solo
 
         private void Steer()
         {
-            if (BotOwner.Memory.IsUnderFire)
-            {
-                //SAIN.Mover.Sprint(false);
-                //SteerByPriority(false);
-                //return;
-            }
             if (!SteerByPriority(false)
-                && !SAINBot.Steering.LookToLastKnownEnemyPosition())
+                && !SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy))
             {
                 LookToMovingDirection();
             }

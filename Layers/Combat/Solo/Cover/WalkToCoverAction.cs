@@ -141,7 +141,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (!SAINBot.Steering.SteerByPriority(false))
             {
-                SAINBot.Steering.LookToLastKnownEnemyPosition();
+                SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy);
             }
             Shoot.Update();
         }
