@@ -31,12 +31,12 @@ namespace SAIN.SAINComponent.Classes
             }
             if (SAINBot.Enemy != null)
             {
-                DropBackpack();
+                //DropBackpack();
             }
             if (_wantToDrop && _nextTryDropTime < Time.time)
             {
-                _nextTryDropTime = Time.time + 0.5f;
-                executeDrop();
+               // _nextTryDropTime = Time.time + 0.5f;
+               // executeDrop();
             }
         }
 

@@ -322,7 +322,7 @@
     <Compile Include="SAINComponent\Classes\Enemy\EnemyAim.cs" />
     <Compile Include="SAINComponent\Classes\Enemy\EnemyVisionDistanceClass.cs" />
     <Compile Include="SAINComponent\Classes\Enemy\GainSightClass.cs" />
-    <Compile Include="SAINComponent\Classes\SAINAILimit - Copy.cs" />
+    <Compile Include="SAINComponent\Classes\BotBackpackDropClass.cs" />
     <Compile Include="SAINComponent\Classes\Search\PeekPosition.cs" />
     <Compile Include="SAINComponent\Classes\Search\ESearchStates.cs" />
     <Compile Include="SAINComponent\Classes\WeaponFunction\AimClass.cs" />
