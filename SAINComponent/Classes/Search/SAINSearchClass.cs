@@ -506,7 +506,19 @@ namespace SAIN.SAINComponent.Classes.Search
                 pose = 0f;
             }
 
-            handleLight();
+            if (shallBeStealthy || persSettings.Search.Sneaky)
+            {
+                SAINBot.BotLight.ToggleLight(false);
+            }
+            else
+            {
+                handleLight();
+            }
+
+            if (BotOwner.WeaponManager?.Reload?.Reloading == true)
+            {
+                CurrentState = ESearchMove.Wait;
+            }
 
             LastState = CurrentState;
             switch (LastState)

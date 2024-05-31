@@ -238,23 +238,17 @@ namespace SAIN.SAINComponent.Classes
 
         private void aimAtEnemy()
         {
-            if (BotOwner.WeaponManager.HaveBullets)
+            Vector3? pointToShoot = GetPointToShoot();
+            if (pointToShoot != null)
             {
-                Vector3? pointToShoot = GetPointToShoot();
-                if (pointToShoot != null)
+                if (BotOwner.AimingData.IsReady
+                    && !BotComponent.NoBushESP.NoBushESPActive
+                    && FriendlyFire.ClearShot)
                 {
-                    if (BotOwner.AimingData.IsReady
-                        && !BotComponent.NoBushESP.NoBushESPActive
-                        && FriendlyFire.ClearShot)
-                    {
-                        ReadyToShoot();
-                        Shoot.Update();
-                    }
-                    return;
+                    ReadyToShoot();
+                    Shoot.Update();
                 }
             }
-
-            BotOwner.AimingData.LoseTarget();
         }
 
         private Vector3? blindShootTarget(SAINEnemy enemy)
@@ -374,12 +368,6 @@ namespace SAIN.SAINComponent.Classes
         public override void Update()
         {
             if (!this.botOwner_0.WeaponManager.HaveBullets)
-            {
-                return;
-            }
-            Vector3 position = this.botOwner_0.GetPlayer.PlayerBones.WeaponRoot.position;
-            Vector3 realTargetPoint = this.botOwner_0.AimingData.RealTargetPoint;
-            if (this.botOwner_0.ShootData.CheckFriendlyFire(position, realTargetPoint))
             {
                 return;
             }

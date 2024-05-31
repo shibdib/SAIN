@@ -27,6 +27,12 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Update()
         {
+            if (BotOwner.WeaponManager.Reload.Reloading || 
+                SAINBot.Decision.CurrentSelfDecision == SelfDecision.Reload)
+            {
+                BotOwner.WeaponManager.Reload.Reload();
+            }
+
             SAINBot.Mover.SetTargetMoveSpeed(1f);
             SAINBot.Mover.SetTargetPose(1f);
 
@@ -39,7 +45,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     && SAINBot.Player.IsSprintEnabled
                     && _moveSuccess
                     && SAINBot.Cover.CoverInUse != null
-                    && sqrMag < SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN.Sqr() * 1.2f
+                    && sqrMag < 2f
                     && _jumpTimer < Time.time)
                 {
                     _jumpTimer = Time.time + 5f;
@@ -55,21 +61,21 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
             }
 
-            if (!BotOwner.Mover.IsMoving)
-            {
-                //_coverDestination = null;
-            }
-
             if (_recalcMoveTimer < Time.time)
             {
-                _moveSuccess = moveToCover(out bool sprinting, out CoverPoint coverDestination);
+                _moveSuccess = moveToCover(out bool sprinting, out CoverPoint coverDestination, false);
+                if (!_moveSuccess)
+                {
+                    _moveSuccess = moveToCover(out sprinting, out coverDestination, true);
+                }
+
                 _sprinting = sprinting;
                 SAINBot.Cover.CoverInUse = coverDestination;
 
                 if (_moveSuccess)
                 {
-                    _recalcMoveTimer = Time.time + 2f;
-                    _shallJumpToCover = EFTMath.RandomBool(8) 
+                    _recalcMoveTimer = Time.time + 1f;
+                    _shallJumpToCover = EFTMath.RandomBool(3) 
                         && _sprinting
                         && BotOwner.Memory.IsUnderFire
                         && SAINBot.Info.Profile.IsPMC;
@@ -103,36 +109,23 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private Vector3 _runDestination;
         private CoverPoint _coverDestination;
 
-        private bool moveToCover(out bool sprinting, out CoverPoint coverDestination)
+        private bool moveToCover(out bool sprinting, out CoverPoint coverDestination, bool tryWalk)
         {
-            CoverPoint coverInUse = SAINBot.Cover.CoverInUse;
-            if (coverInUse != null)
+            if (tryRun(SAINBot.Cover.CoverInUse, out sprinting, tryWalk))
             {
-                if (_coverDestination != null && _coverDestination == coverInUse)
-                {
-                    coverDestination = _coverDestination;
-                    sprinting = _sprinting;
-                    return true;
-                }
-                if (tryRun(coverInUse, out sprinting))
-                {
-                    coverDestination = coverInUse;
-                    return true;
-                }
+                coverDestination = SAINBot.Cover.CoverInUse;
+                return true;
             }
 
             CoverPoint fallback = SAINBot.Cover.FallBackPoint;
             SoloDecision currentDecision = SAINBot.Decision.CurrentSoloDecision;
 
-            if (currentDecision == SoloDecision.Retreat
-                && fallback != null
-                && fallback.IsSafePath)
+            if (currentDecision == SoloDecision.Retreat && 
+                fallback != null && 
+                tryRun(fallback, out sprinting, tryWalk))
             {
-                if (tryRun(fallback, out sprinting))
-                {
-                    coverDestination = fallback;
-                    return true;
-                }
+                coverDestination = fallback;
+                return true;
             }
 
             SAINBot.Cover.SortPointsByPathDist();
@@ -143,11 +136,25 @@ namespace SAIN.Layers.Combat.Solo.Cover
             for (int i = 0; i < coverPoints.Count; i++)
             {
                 CoverPoint coverPoint = coverPoints[i];
-
-                if (tryRun(coverPoint, out sprinting))
+                if (tryRun(coverPoint, out sprinting, tryWalk))
                 {
                     coverDestination = coverPoint;
                     return true;
+                }
+            }
+
+            if (SAINBot.Decision.CurrentSoloDecision == SoloDecision.AvoidGrenade)
+            {
+                coverPoints = SAINBot.Cover.CoverFinder.OldCoverPoints;
+                for (int i = 0; i < coverPoints.Count; i++)
+                {
+                    CoverPoint coverPoint = coverPoints[i];
+
+                    if (tryRun(coverPoint, out sprinting, tryWalk))
+                    {
+                        coverDestination = coverPoint;
+                        return true;
+                    }
                 }
             }
 
@@ -155,38 +162,58 @@ namespace SAIN.Layers.Combat.Solo.Cover
             return false;
         }
 
-        private bool tryRun(CoverPoint coverPoint, out bool sprinting)
+        private bool tryRun(CoverPoint coverPoint, out bool sprinting, bool tryWalk)
         {
             bool result = false;
             sprinting = false;
+
+            if (coverPoint == null || coverPoint.IsBad)
+            {
+                return false;
+            }
+
             Vector3 destination = coverPoint.Position;
 
-            // Testing new pathfinder for running
-            if (shallRun(destination))
+            Vector3? grenadePos = SAINBot.Grenade.GrenadeDangerPoint;
+            if (grenadePos != null && 
+                (grenadePos.Value - destination).sqrMagnitude < 3f.Sqr())
             {
-                ESprintUrgency urgency = BotOwner.Memory.IsUnderFire || SAINBot.Suppression.IsSuppressed || SAINBot.Suppression.IsHeavySuppressed ? ESprintUrgency.High : ESprintUrgency.Middle;
+                return false;
+            }
+
+            // Testing new pathfinder for running
+            if (!tryWalk)
+            {
+                //  && shallRun(destination)
+                bool isUrgent = 
+                    BotOwner.Memory.IsUnderFire ||
+                    SAINBot.Suppression.IsSuppressed ||
+                    SAINBot.Decision.CurrentSelfDecision != SelfDecision.None;
+
+                ESprintUrgency urgency = isUrgent ? ESprintUrgency.High : ESprintUrgency.Middle;
+
                 result = SAINBot.Mover.SprintController.RunToPoint(destination, urgency);
                 //result = BotOwner.BotRun.Run(destination, false, 0.25f);
                 if (result)
                 {
                     sprinting = true;
+                    return true;
                 }
             }
 
-            if (!result)
+            if (tryWalk)
             {
-                bool shallProne = SAINBot.Mover.Prone.ShallProneHide();
                 bool shallCrawl = SAINBot.Decision.CurrentSelfDecision != SelfDecision.None
                     && coverPoint.Status == CoverStatus.FarFromCover
-                    && shallProne;
+                    && SAINBot.Mover.Prone.ShallProneHide();
 
                 //result = SAIN.Mover.GoToPoint(destination, out _, -1, shallCrawl, true);
-                result = SAINBot.Mover.GoToPoint(destination, out _, 0.25f, shallCrawl);
+                result = SAINBot.Mover.GoToPoint(destination, out _, 0.25f, shallCrawl, false, true);
             }
             return result;
         }
 
-        private bool shallRun(Vector3 destination) => (destination - SAINBot.Position).sqrMagnitude > SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN * SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN * 1f;
+        private bool shallRun(Vector3 destination) => (destination - SAINBot.Position).sqrMagnitude > SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN.Sqr();
 
         private bool _moveSuccess;
         private float _recalcMoveTimer;

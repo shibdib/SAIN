@@ -74,34 +74,25 @@ namespace SAIN.Patches.Talk
         {
             if (__instance?.HealthController?.IsAlive == true)
             {
+                SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
+
                 switch (@event)
                 {
                     case EPhraseTrigger.OnDeath:
                     case EPhraseTrigger.OnBeingHurt:
                     case EPhraseTrigger.OnAgony:
                     case EPhraseTrigger.OnBreath:
-                        SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
                         return true;
 
                     default:
                         break;
                 }
 
-                BotOwner botOwner = __instance?.AIData?.BotOwner;
-                if (botOwner == null)
-                {
-                    SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
-                    return true;
-                }
-
                 // If handling of bots talking is disabled, let the original method run
-                if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
-                {
-                    return true;
-                }
-                return SAINPlugin.IsBotExluded(botOwner);
+                return SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching || 
+                    SAINPlugin.IsBotExluded(__instance.AIData?.BotOwner);
             }
-            return false;
+            return true;
         }
     }
 

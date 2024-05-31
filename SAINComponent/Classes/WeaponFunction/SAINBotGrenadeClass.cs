@@ -22,19 +22,20 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Update()
         {
-            GrenadeDangerPoint = findGrenadeDangerPoint();
+            DangerGrenade = findGrenadeDangerPoint();
         }
 
-        private Vector3? findGrenadeDangerPoint()
+        private GrenadeTracker findGrenadeDangerPoint()
         {
             ActiveGrenades.RemoveAll(x => x == null || x.Grenade == null);
             for (int i = 0; i < ActiveGrenades.Count; i++)
             {
                 GrenadeTracker tracker = ActiveGrenades[i];
-                if (tracker != null && tracker.Grenade != null && tracker.GrenadeSpotted)
+                if (tracker != null && 
+                    tracker.Grenade != null && 
+                    tracker.GrenadeSpotted)
                 {
-                    DangerGrenade = tracker.Grenade;
-                    return tracker.DangerPoint;
+                    return tracker;
                 }
             }
             return null;
@@ -44,8 +45,9 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
         }
 
-        public Vector3? GrenadeDangerPoint { get; private set; }
-        public Grenade DangerGrenade { get; private set; }
+        public GrenadeTracker DangerGrenade { get; private set; }
+
+        public Vector3? GrenadeDangerPoint => DangerGrenade?.DangerPoint;
 
         public GrenadeThrowType GetThrowType(out GrenadeThrowDirection direction, out Vector3 ThrowAtPoint)
         {

@@ -18,12 +18,12 @@ namespace SAIN.SAINComponent.Classes.Info
         {
             Profile = new ProfileClass(sain);
             WeaponInfo = new WeaponInfoClass(sain);
+            PresetHandler.OnPresetUpdated += GetFileSettings;
+            GetFileSettings();
         }
 
         public void Init()
         {
-            GetFileSettings();
-            PresetHandler.OnPresetUpdated += GetFileSettings;
             WeaponInfo.Init();
             Profile.Init();
         }
@@ -243,7 +243,7 @@ namespace SAIN.SAINComponent.Classes.Info
                     return setting.Value.SAINPersonality;
                 }
             }
-            if (Profile.IsPMC)
+            if (Profile.IsPMC && EFTMath.RandomBool(40))
             {
                 return EPersonality.Chad;
             }

@@ -30,6 +30,8 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 Player.OnDamageReceived += GetHit;
             }
+            GroupTalk.Init();
+            EnemyTalk.Init();
         }
 
         private void GetHit(float damage, EBodyPart bodyPart, EDamageType type, float damageReducedByArmor, MaterialType special = MaterialType.None)
@@ -112,9 +114,16 @@ namespace SAIN.SAINComponent.Classes.Talk
                 Player.OnDamageReceived -= GetHit;
             }
             PersonalPhraseDict.Clear();
+            GroupTalk.Dispose();
+            EnemyTalk.Dispose();
         }
 
         public bool CanTalk => SAINBot.Info.FileSettings.Mind.CanTalk;
+
+        public bool CanSay(EPhraseTrigger trigger)
+        {
+            return BotOwner.BotsGroup.GroupTalk.CanSay(BotOwner, trigger);
+        }
 
         public bool Say(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false)
         {
@@ -127,7 +136,8 @@ namespace SAIN.SAINComponent.Classes.Talk
                 || phrase == EPhraseTrigger.OnAgony 
                 || phrase == EPhraseTrigger.OnBeingHurt)
             {
-                if (withGroupDelay && !BotOwner.BotsGroup.GroupTalk.CanSay(BotOwner, phrase))
+                if (withGroupDelay && 
+                    !CanSay(phrase))
                 {
                     return false;
                 }
@@ -260,7 +270,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                         break;
                 }
             }
-            else if (BotOwner.Memory.GoalTarget.HavePlaceTarget())
+            else if (!SAINBot.EnemyController.NoEnemyContact)
             {
                 etagStatus |= ETagStatus.Aware;
             }
@@ -303,7 +313,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     if (!TalkPriorityActive)
                     {
                         TalkPriorityActive = true;
-                        TalkPriorityTimer = Time.time + 0.2f;
+                        TalkPriorityTimer = Time.time + 0.35f;
                     }
                 }
             }
@@ -362,6 +372,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             AddPhrase(EPhraseTrigger.Gogogo, 10, 40f, dictionary);
             AddPhrase(EPhraseTrigger.Going, 11, 60f, dictionary);
             AddPhrase(EPhraseTrigger.OnFight, 38, 1f, dictionary);
+            AddPhrase(EPhraseTrigger.BadWork, 37, 1f, dictionary);
             AddPhrase(EPhraseTrigger.OnEnemyShot, 13, 3f, dictionary);
             AddPhrase(EPhraseTrigger.OnLostVisual, 14, 10f, dictionary);
             AddPhrase(EPhraseTrigger.OnRepeatedContact, 15, 5f, dictionary);

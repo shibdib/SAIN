@@ -43,11 +43,6 @@ namespace SAIN.SAINComponent.Classes.Mover
                 moveSettings.FIRST_TURN_SPEED = 150f;
                 moveSettings.FIRST_TURN_BIG_SPEED = 240f;
             }
-            if (!SAINBot.SAINLayersActive)
-            {
-                return;
-            }
-            updateLookDirection();
         }
 
         public void SetAimTarget(Vector3? target)
@@ -62,7 +57,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 aimData.LoseTarget();
                 return;
             }
-            aimData.SetTarget(target.Value); 
+            aimData.SetTarget(target.Value);
             aimData.NodeUpdate();
         }
 
@@ -85,24 +80,6 @@ namespace SAIN.SAINComponent.Classes.Mover
         }
 
         private static FieldInfo aimStatusField;
-
-        private float updateSteerTimer;
-
-        private SteerPriority UpdateBotSteering(bool skipTimer = false)
-        {
-            if (skipTimer || updateSteerTimer < Time.time)
-            {
-                var lastPriority = CurrentSteerPriority;
-                CurrentSteerPriority = FindSteerPriority();
-                if (CurrentSteerPriority != lastPriority)
-                {
-                    LastSteerPriority = lastPriority;
-                }
-
-                updateSteerTimer = Time.time + 0.05f;
-            }
-            return CurrentSteerPriority;
-        }
 
         public void Dispose()
         {
@@ -134,13 +111,13 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (target != null)
             {
-                if (angleFromLookDir(target.Value) < 5)
+                if (angleFromLookDir(target.Value) < 10)
                 {
-                    BotOwner.AimingData?.NodeUpdate();
+                    //BotOwner.AimingData?.NodeUpdate();
                 }
                 else
                 {
-                    LookToPoint(target.Value);
+                    //LookToPoint(target.Value);
                 }
             }
         }
@@ -220,7 +197,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     break;
             }
 
-            return CurrentSteerPriority != SteerPriority.None && CurrentSteerPriority != SteerPriority.Random;
+            return CurrentSteerPriority != SteerPriority.None;
         }
 
         private void HeardSoundSanityCheck()
@@ -231,7 +208,6 @@ namespace SAIN.SAINComponent.Classes.Mover
                 {
                     Logger.LogDebug("Bot was told to steer toward something they heard, but the place to check is null.");
                 }
-                UpdateBotSteering(true);
             }
         }
 
@@ -249,6 +225,10 @@ namespace SAIN.SAINComponent.Classes.Mover
         public SteerPriority FindSteerPriority()
         {
             // return values are ordered by priority, so the targets get less "important" as they descend down this function.
+            if (SAINBot.Mover.SprintController.Running)
+            {
+                return SteerPriority.RunningPath;
+            }
             if (Player.IsSprintEnabled)
             {
                 return SteerPriority.Sprinting;
@@ -260,7 +240,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (LookToAimTarget())
             {
-                return SteerPriority.Shooting;
+                return SteerPriority.Aiming;
             }
             if (BotOwner.Memory.IsUnderFire)
             {
@@ -415,27 +395,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 rotateSpeed = SAINBot.HasEnemy ? baseTurnSpeed : baseTurnSpeedNoEnemy;
             }
-            _targetLookDir = direction;
-            _targetLookSpeed = rotateSpeed;
+            BotOwner.Steering.LookToDirection(direction, rotateSpeed);
         }
-
-        private void updateLookDirection()
-        {
-            if (_updateLookTime < Time.time && _targetLookDir != Vector3.zero)
-            {
-                //_updateLookTime = Time.time + 0.1f;
-                sendLookCommand(_targetLookDir, _targetLookSpeed);
-            }
-        }
-
-        private void sendLookCommand(Vector3 direction, float speed)
-        {
-            BotOwner.Steering.LookToDirection(direction, speed);
-        }
-
-        private Vector3 _targetLookDir;
-        private float _targetLookSpeed;
-        private float _updateLookTime;
 
         public void LookToPoint(Vector3? point, float rotateSpeed = -1)
         {

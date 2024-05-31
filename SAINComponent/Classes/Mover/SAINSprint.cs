@@ -57,7 +57,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
-        public bool RunToPoint(Vector3 point, ESprintUrgency urgency, bool checkSameWay = true)
+        public bool RunToPoint(Vector3 point, ESprintUrgency urgency, bool checkSameWay = true, System.Action callback = null)
         {
             if (checkSameWay && 
                 Running && 
@@ -72,7 +72,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 CancelRun();
                 CurrentPath = path;
                 _lastUrgency = urgency;
-                _runToPointCoroutine = SAINBot.StartCoroutine(RunToPoint(path, urgency));
+                _runToPointCoroutine = SAINBot.StartCoroutine(RunToPoint(path, urgency, callback));
                 return Running;
             }
             return false;
@@ -105,10 +105,11 @@ namespace SAIN.SAINComponent.Classes.Mover
         private int _currentIndex = 0;
         private NavMeshPath _currentPath;
 
-        private IEnumerator RunToPoint(NavMeshPath path, ESprintUrgency urgency)
+        private IEnumerator RunToPoint(NavMeshPath path, ESprintUrgency urgency, System.Action callback = null)
         {
             _currentPath = path;
 
+            BotOwner.Mover.Stop();
             BotOwner.Mover.IsMoving = true;
             float startTime = Time.time;
             _currentIndex = 1;
@@ -119,7 +120,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             // Start running!
             yield return runPath(path, urgency);
 
-            OnRunComplete?.Invoke();
+            callback?.Invoke();
 
             CurrentRunStatus = RunStatus.None;
         }
@@ -142,8 +143,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             return null;
         }
 
-        public Action OnRunComplete;
-
         private int totalCorners()
         {
             return _currentPath != null ? _currentPath.corners.Length - 1 : 0;
@@ -151,7 +150,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool onLastCorner()
         {
-            return _currentPath != null ? totalCorners() == _currentIndex : false;
+            return _currentPath != null ? totalCorners() <= _currentIndex : false;
         }
 
         private static GlobalMoveSettings _moveSettings => SAINPlugin.LoadedPreset.GlobalSettings.Move;
@@ -199,6 +198,12 @@ namespace SAIN.SAINComponent.Classes.Mover
                     distToCurrent = distanceToCurrentCornerSqr();
 
                     DistanceToCurrentCorner = distToCurrent;
+
+                    if (onLastCorner() && 
+                        distToCurrent <= _moveSettings.BotSprintFinalDestReachDist)
+                    {
+                        yield break;
+                    }
 
                     yield return null;
                 }

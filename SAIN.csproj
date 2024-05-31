@@ -320,6 +320,9 @@
     <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
     <Compile Include="SAINComponent\Classes\Enemy\EnemyAim.cs" />
+    <Compile Include="SAINComponent\Classes\Enemy\EnemyVisionDistanceClass.cs" />
+    <Compile Include="SAINComponent\Classes\Enemy\GainSightClass.cs" />
+    <Compile Include="SAINComponent\Classes\SAINAILimit - Copy.cs" />
     <Compile Include="SAINComponent\Classes\Search\PeekPosition.cs" />
     <Compile Include="SAINComponent\Classes\Search\ESearchStates.cs" />
     <Compile Include="SAINComponent\Classes\WeaponFunction\AimClass.cs" />

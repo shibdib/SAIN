@@ -8,67 +8,6 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
-    public class SAINEnemyPartData
-    {
-        public SAINEnemyPartData(EnemyPart part, EnemyPartData partData)
-        {
-            Part = part;
-            BodyPartType = part.BodyPartType;
-            PartData = partData;
-        }
-
-        public readonly EnemyPart Part;
-
-        public readonly BodyPartType BodyPartType;
-
-        public readonly EnemyPartData PartData;
-
-        public Vector3 Position
-        {
-            get
-            {
-                return Part.Position;
-            }
-        }
-
-        public bool Visible => PartData.IsVisible;
-        public bool CanShoot => PartData.CanShoot;
-    }
-
-    public class SAINEnemyPartsClass : Dictionary<BodyPartType, SAINEnemyPartData>
-    {
-        public void Init(EnemyInfo enemyInfo)
-        {
-            foreach (var enemyPart in enemyInfo.AllActiveParts)
-            {
-                this.Add(enemyPart.Key.BodyPartType, new SAINEnemyPartData(enemyPart.Key, enemyPart.Value));
-            }
-
-            if (!enemyInfo.Person.IsAI)
-            {
-                checkPartsDebug();
-            }
-        }
-
-        private void checkPartsDebug()
-        {
-            foreach (BodyPartType partType in EnumValues.GetEnum<BodyPartType>())
-            {
-                if (!this.ContainsKey(partType))
-                {
-                    Logger.LogInfo($"{partType} is missing");
-                }
-                else if (this.TryGetValue(partType, out var partData))
-                {
-                    if (partData.Part.Collider == null)
-                    {
-                        Logger.LogInfo($"{partType} has null collider");
-                    }
-                }
-            }
-        }
-    }
-
     public class SAINEnemy : SAINBase, ISAINClass
     {
         public EnemyAim EnemyAim { get; private set; }
@@ -83,17 +22,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
             IsAI = enemyInfo.Person.IsAI;
             EnemyProfileId = person.ProfileId;
 
-            EnemyParts = new SAINEnemyPartsClass();
-            EnemyParts.Init(enemyInfo);
-
             EnemyStatus = new SAINEnemyStatus(this);
             Vision = new SAINEnemyVision(this);
             Path = new SAINEnemyPath(this);
             KnownPlaces = new EnemyKnownPlaces(this);
             EnemyAim = new EnemyAim(this);
         }
-
-        public readonly SAINEnemyPartsClass EnemyParts;
 
         public float NextCheckLookTime;
 

@@ -101,6 +101,7 @@ namespace SAIN.SAINComponent
                 DoorOpener = new SAINDoorOpener(this, person.BotOwner);
                 Medical = new SAINMedical(this);
                 BotLight = new BotLightController(this);
+                BackpackDropper = new BotBackpackDropClass(this);
 
                 BotOwner.OnBotStateChange += resetBot;
             }
@@ -137,6 +138,7 @@ namespace SAIN.SAINComponent
             SpaceAwareness.Init();
             Medical.Init();
             BotLight.Init();
+            BackpackDropper.Init();
 
             TimeBotCreated = Time.time;
 
@@ -256,20 +258,6 @@ namespace SAIN.SAINComponent
             BotLight.Update();
 
             UpdateGoalTarget();
-
-            if (_nextCheckReloadTime < Time.time)
-            {
-                _nextCheckReloadTime = Time.time + 0.5f;
-                if (!BotOwner.WeaponManager.HaveBullets)
-                {
-                    SelfActions.TryReload();
-                }
-            }
-
-            if (BotOwner.WeaponManager.Reload.Reloading)
-            {
-                BotOwner.WeaponManager.Reload.Reload();
-            }
 
             if (ManualShootReason != EShootReason.None && (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 1f < Time.time))
             {
@@ -471,6 +459,7 @@ namespace SAIN.SAINComponent
                 SpaceAwareness?.Dispose();
                 Medical?.Dispose();
                 BotLight?.Dispose();
+                BackpackDropper?.Dispose();
 
                 try
                 {
@@ -583,6 +572,8 @@ namespace SAIN.SAINComponent
             return null;
         }
 
+        
+        public BotBackpackDropClass BackpackDropper { get; private set; }
         public BotLightController BotLight { get; private set; }
         public SAINBotSpaceAwareness SpaceAwareness { get; private set; }
         public SAINBotHitReaction BotHitReaction { get; private set; }

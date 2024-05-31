@@ -56,7 +56,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (BotOwner.DoorOpener.Interacting)
             {
-                this.BotOwner.Steering.SetYAngle(0f);
+                //this.BotOwner.Steering.SetYAngle(0f);
                 if (this._traversingEnd < Time.time)
                 {
                     BotOwner.DoorOpener.Interacting = false;
@@ -177,14 +177,14 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (Etype == EInteractionType.Breach || ModDetection.ProjectFikaLoaded)
             {
-                _traversingEnd = Time.time + 2f;
+                _traversingEnd = Time.time + 0.75f;
                 doDefaultInteract(door, Etype);
                 door.interactWithoutAnimation = noAnimation;
                 door.Snap = snap;
                 return;
             }
 
-            _traversingEnd = Time.time + 0.35f;
+            _traversingEnd = Time.time + 0.45f;
             bool inverted = false;
             if (ShallInvertDoorAngle(door))
             {
@@ -332,25 +332,26 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void TryInteract()
         {
-            const float pauseTime = 0.5f;
+            const float pauseTime = 0.25f;
 
             float time = Time.time;
             float num = time - this._comeToDoorLast;
-            this.BotOwner.Mover.SprintPause(pauseTime * 2f);
+            this.BotOwner.Mover.SprintPause(0.5f);
             //this.BotOwner.Mover.MovementPause(pauseTime);
 
             if (num > 3f)
             {
                 _comeToDoorLast = time;
-                return;
+                //return;
             }
-            if (!_currentDoor.Operatable || BotOwner.DoorOpener.CanOpenDoorNow)
+            if (!_currentDoor.Operatable)
             {
+                // || BotOwner.DoorOpener.CanOpenDoorNow
                 return;
             }
             if (_currentDoor.DoorState == EDoorState.Interacting)
             {
-                _nextPosibleDoorOpenTime = Time.time + pauseTime;
+                _nextPosibleDoorOpenTime = Time.time + 0.1f;
                 return;
             }
             _shallStartInteract = false;
@@ -358,12 +359,12 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 if (_currentDoor.DoorState == EDoorState.Open)
                 {
-                    _nextPosibleDoorOpenTime = Time.time + pauseTime;
+                    _nextPosibleDoorOpenTime = Time.time + 1f;
                     Interact(_currentDoor, EInteractionType.Close);
                 }
                 return;
             }
-            _nextPosibleDoorOpenTime = Time.time + pauseTime;
+            _nextPosibleDoorOpenTime = Time.time + 3f;
             Interact(_currentDoor, EInteractionType.Open);
         }
 

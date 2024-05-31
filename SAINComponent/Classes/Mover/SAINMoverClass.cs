@@ -431,15 +431,23 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void SetTargetMoveSpeed(float speed)
         {
-            if (SprintController.Running || Player.IsSprintEnabled)
-            {
-                BotOwner.Mover?.SetTargetMoveSpeed(1f);
-            }
-            else
+            if (canSetSpeed())
             {
                 BotOwner.Mover?.SetTargetMoveSpeed(speed);
             }
         }
+
+        private bool canSetSpeed()
+        {
+            if (SprintController.Running || Player.IsSprintEnabled)
+            {
+                _changSpeedSprintTime = Time.time + 0.33f;
+                BotOwner.Mover?.SetTargetMoveSpeed(1f);
+            }
+            return _changSpeedSprintTime < Time.time;
+        }
+
+        private float _changSpeedSprintTime;
 
         public void StopMove(float delay = 0.1f, float forDuration = 0f)
         {

@@ -39,6 +39,11 @@ namespace SAIN.Preset.GlobalSettings
         public float BotSprintBaseReachDist = 0.15f;
 
         [Advanced]
+        [MinMax(0.1f, 1.5f, 100f)]
+        [Default(0.5f)]
+        public float BotSprintFinalDestReachDist= 0.5f;
+
+        [Advanced]
         [MinMax(0.01f, 1.5f, 100f)]
         [Default(0.5f)]
         public float BotSprintBufferDist = 0.5f;

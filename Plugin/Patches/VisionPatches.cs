@@ -103,6 +103,7 @@ namespace SAIN.Patches.Vision
         {
             __instance.CHECK_HEAD_ANY_DIST = false;
             __instance.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
+            __instance.SHOOT_FROM_EYES = false;
         }
     }
 
@@ -333,32 +334,9 @@ namespace SAIN.Patches.Vision
                 if (enemy != null)
                 {
                     __result *= enemy.Vision.GainSightCoef;
-
-                    if (!__instance.Person.IsAI)
-                    {
-                        float partRatio = SAINVisionClass.GetRatioPartsVisible(__instance, out int visibleCount);
-                        float ratio = calcSpeedFromRatio(partRatio);
-                        __result /= ratio;
-                        if (visibleCount > 0)
-                        {
-                            //Logger.LogInfo($"vision speed ratio from parts visible {ratio} : part ratio: {partRatio} Visible Part Count: {visibleCount} AllParts Count: {__instance.AllActiveParts.Count + 1}");
-                        }
-                    }
-
-                    __result = Mathf.Clamp(__result, 0.1f, 8888f);
-                    return;
                 }
             }
-
-            __result *= SAINEnemyVision.GetGainSightModifier(__instance, null);
-            __result = Mathf.Clamp(__result, 0.1f, 8888f);
-        }
-
-        private static float calcSpeedFromRatio(float partRatio)
-        {
-            float min = 0.6f;
-            float max = 1.1f;
-            return Mathf.Lerp(min, max, partRatio);
+            //__result = Mathf.Clamp(__result, 0.1f, 8888f);
         }
     }
 
@@ -369,150 +347,19 @@ namespace SAIN.Patches.Vision
             return AccessTools.Method(typeof(EnemyInfo), "CheckVisibility");
         }
 
-        private static float calcSpeedFromRatio(float partRatio)
-        {
-            float min = 0.5f;
-            float max = 1f;
-            return Mathf.Lerp(min, max, partRatio);
-        }
-
-        private static float calcSprintMod(Player player)
-        {
-            if (player.MovementContext.IsSprintEnabled)
-            {
-                LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
-                float velocityFactor = Mathf.InverseLerp(0, 5f, player.Velocity.magnitude);
-                return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, velocityFactor);
-            }
-            return 1f;
-        }
-
-        private static float calcAngleMod(SAINEnemy enemy)
-        {
-            float minAngle = 45f;
-            float angleToEnemy = enemy.Vision.AngleToEnemy;
-            float maxAngle = enemy.Vision.MaxVisionAngle;
-            if (angleToEnemy > minAngle &&
-                angleToEnemy < maxAngle)
-            {
-                float num = maxAngle - minAngle;
-                float num2 = angleToEnemy - minAngle;
-                float ratio = 1f - num2 / num;
-                float min = 0.25f;
-                float max = 1f;
-                return Mathf.InverseLerp(min, max, ratio);
-            }
-            return 1f;
-        }
-
-        private static float calcGearStealthMod(Player player, float distance)
-        {
-            var gearInfo = SAINGearInfoHandler.GetGearInfo(player);
-            if (gearInfo != null)
-            {
-                return gearInfo.GetStealthModifier(distance);
-            }
-            return 1f;
-        }
-
         [PatchPrefix]
         public static void PatchPrefix(ref float addVisibility, EnemyInfo __instance)
         {
-            //var stringBuilder = new StringBuilder();
-            Player player = EFTInfo.GetPlayer(__instance?.Person?.ProfileId);
-            if (player != null)
+            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPostPatch)))
             {
-                float visibility = 1f;
-                // Increase or decrease vis distance based on pose and if sprinting.
-                float sprintMod = calcSprintMod(player);
-
-                if (sprintMod != 1f)
+                SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
+                if (enemy != null)
                 {
-                    visibility /= sprintMod;
-                    //stringBuilder.AppendLine($"sprintMod {sprintMod}");
+                    addVisibility += enemy.Vision.VisionDistance;
                 }
-
-                float stealthMod = calcGearStealthMod(player, __instance.Distance);
-                if (stealthMod != 1f)
-                {
-                    visibility /= stealthMod;
-                    //stringBuilder.AppendLine($"stealthMod div {stealthMod}");
-                }
-
-                if (SAINEnableClass.GetSAIN(__instance.Owner, out var sain, nameof(VisionDistancePosePatch)))
-                {
-                    SAINEnemy sainEnemy = sain.EnemyController.GetEnemy(player.ProfileId);
-                    if (sainEnemy != null)
-                    {
-                        if (sainEnemy.EnemyStatus.PositionalFlareEnabled)
-                        {
-                            visibility *= 1.25f;
-                            //stringBuilder.AppendLine($"PosFlare {1.25f}");
-                        }
-
-                        float anglemod = calcAngleMod(sainEnemy);
-                        if (anglemod != 1f)
-                        {
-                            visibility *= anglemod;
-                            //stringBuilder.AppendLine($"anglemod {anglemod}");
-                        }
-
-                        if (sainEnemy.EnemyStatus.ShotAtMeRecently)
-                        {
-                            visibility *= 1.25f;
-                        }
-
-                        //if (sainEnemy.HeardRecently)
-                        //{
-                        //    if (player.AIData.GetFlare)
-                        //    {
-                        //        // if player shot a weapon recently
-                        //        // if player is using suppressed weapon, and has shot recently, don't increase vis distance as much.
-                        //        bool suppressedFlare = false;
-                        //        if (player.HandsController.Item is Weapon weapon)
-                        //        {
-                        //            var weaponInfo = SAINGearInfoHandler.GetGearInfo(player);
-                        //            suppressedFlare = weaponInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
-                        //        }
-                        //
-                        //        // increase visiblity
-                        //        visibility *= suppressedFlare ? 1.05f : 1.15f;
-                        //        if (suppressedFlare)
-                        //        {
-                        //            stringBuilder.AppendLine($"suppressedFlare {1.05f}");
-                        //        }
-                        //        else
-                        //        {
-                        //
-                        //            stringBuilder.AppendLine($"Flare {1.15f}");
-                        //        }
-                        //    }
-                        //}
-
-                    }
-                }
-
-                // Reduce vision distance for ai vs ai vision checks
-                if (player.IsAI
-                    && SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI)
-                {
-                    visibility *= 0.8f;
-                }
-
-                float defaultVisDist = __instance.Owner.LookSensor.VisibleDist;
-                float visionDist = (defaultVisDist * visibility) - defaultVisDist;
-
-                if (!__instance.Person.IsAI && _nextLogTime < Time.time)
-                {
-                    _nextLogTime = Time.time + 0.5f;
-                    //stringBuilder.AppendLine($"Adding [{visionDist}] (mod: {visibility}) meters to base vision distance [{__instance.Owner.LookSensor.VisibleDist}] for [{__instance.Owner.name}] for reasons: ");
-                    //Logger.LogDebug(stringBuilder.ToString());
-                }
-
-                addVisibility += visionDist;
             }
         }
-        private static float _nextLogTime;
+
     }
 
     public class CheckFlashlightPatch : ModulePatch

@@ -18,36 +18,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (!SAINBot.PatrolDataPaused || !SAINBot.SAINLayersActive)
-            {
-                return;
-            }
-
-            FindObjectsInFront();
-            if (Player.IsSprintEnabled)
-            {
-                _targetPoseLevel = 1f;
-            }
-
-            if (_targetPoseLevel == 1f && BotOwner.Mover.TargetPose != 1f)
-            {
-                _updatePoseTimer = Time.time + 0.25f;
-                BotOwner.Mover?.SetPose(_targetPoseLevel);
-                return;
-            }
-            if (_updatePoseTimer < Time.time)
-            {
-                _updatePoseTimer = Time.time + 0.25f;
-                BotOwner.Mover?.SetPose(_targetPoseLevel);
-
-                if (SAINBot.Mover.CurrentStamina > 0.1f)
-                {
-                    //BotOwner.Mover?.SetPose(_targetPoseLevel);
-                }
-            }
         }
-
-        private float _updatePoseTimer;
 
         public void Dispose()
         {
@@ -55,19 +26,34 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool SetPoseToCover()
         {
+            FindObjectsInFront();
             return SetTargetPose(ObjectTargetPoseCover);
         }
 
         public void SetTargetPose(float num)
         {
-            _targetPoseLevel = num;
+            if (canChangePose())
+            {
+                BotOwner.Mover?.SetPose(num);
+            }
         }
+
+        private bool canChangePose()
+        {
+            if (Player.IsSprintEnabled)
+            {
+                _stopSprintPoseTime = Time.time + 0.33f;
+            }
+            return _stopSprintPoseTime < Time.time;
+        }
+
+        private float _stopSprintPoseTime;
 
         public bool SetTargetPose(float? num)
         {
             if (num != null)
             {
-                _targetPoseLevel = num.Value;
+                SetTargetPose(num.Value);
             }
             return num != null;
         }

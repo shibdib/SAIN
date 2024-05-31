@@ -36,6 +36,12 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool GetDecision(out SelfDecision Decision)
         {
+            if (StartRunGrenade())
+            {
+                Decision = SelfDecision.RunAwayGrenade;
+                return true;
+            }
+
             if (SAINBot.Enemy == null && 
                 BotOwner?.Medecine?.Using == false && 
                 LowOnAmmo(0.75f))
@@ -45,39 +51,38 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
 
-            if (!CheckContinueSelfAction(out Decision))
+            if (CheckContinueSelfAction(out Decision))
             {
-                if (StartRunGrenade())
+                return true;
+            }
+
+            if (StartBotReload())
+            {
+                Decision = SelfDecision.Reload;
+                return true;
+            }
+
+            if (_nextCheckHealTime < Time.time)
+            {
+                _nextCheckHealTime = Time.time + 1f;
+                if (StartUseStims())
                 {
-                    Decision = SelfDecision.RunAwayGrenade;
+                    Decision = SelfDecision.Stims;
+                    return true;
                 }
-                else if (StartBotReload())
+                if (StartFirstAid())
                 {
-                    Decision = SelfDecision.Reload;
+                    Decision = SelfDecision.FirstAid;
+                    return true;
                 }
-                else
+                if (SAINBot.Medical.Surgery.AreaClearForSurgery)
                 {
-                    if (_nextCheckHealTime < Time.time && 
-                        !SAINBot.Memory.Health.Healthy)
-                    {
-                        _nextCheckHealTime = Time.time + 1f;
-                        if (StartUseStims())
-                        {
-                            Decision = SelfDecision.Stims;
-                        }
-                        else if (StartFirstAid())
-                        {
-                            Decision = SelfDecision.FirstAid;
-                        }
-                        else if (SAINBot.Medical.Surgery.AreaClearForSurgery)
-                        {
-                            Decision = SelfDecision.Surgery;
-                        }
-                    }
+                    Decision = SelfDecision.Surgery;
+                    return true;
                 }
             }
 
-            return Decision != SelfDecision.None;
+            return false;
         }
 
         private float _nextCheckHealTime;
@@ -135,7 +140,45 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool CheckContinueSelfAction(out SelfDecision Decision)
         {
-            if (BotOwner?.Medecine == null)
+            float timeSinceChange = _timeSinceChangeDecision;
+
+            if (ContinueRunGrenade && 
+                timeSinceChange < 10f)
+            {
+                Decision = SelfDecision.RunAwayGrenade;
+                return true;
+            }
+
+            if (CurrentSelfAction == SelfDecision.Reload)
+            {
+                bool reloading = BotOwner.WeaponManager.Reload?.Reloading == true;
+                if (!reloading && 
+                    !StartBotReload())
+                {
+                    Decision = SelfDecision.None;
+                    return false;
+                }
+
+                if (reloading)
+                {
+                    if (timeSinceChange < 5f)
+                    {
+                        Decision = SelfDecision.Reload;
+                        return true;
+                    }
+                    else
+                    {
+                        SAINBot.SelfActions.BotCancelReload();
+                        Decision = SelfDecision.None;
+                        return false;
+                    }
+                }
+                Decision = SelfDecision.Reload;
+                return true;
+            }
+
+            if (BotOwner?.Medecine == null && 
+                CurrentSelfAction != SelfDecision.Reload)
             {
                 Decision = SelfDecision.None;
                 return false;
@@ -162,11 +205,18 @@ namespace SAIN.SAINComponent.Classes.Decision
                         return false;
                     }
                 }
-                else if (Time.time - SAINBot.Decision.ChangeDecisionTime > 5f)
+                else if (CurrentSelfAction != SelfDecision.Reload &&
+                    timeSinceChange > 5f)
                 {
                     SAINBot.Medical.TryCancelHeal();
                     Decision = SelfDecision.None;
                     TryFixBusyHands();
+                    return false;
+                }
+                else if (timeSinceChange > 10f)
+                {
+                    SAINBot.SelfActions.BotCancelReload();
+                    Decision = SelfDecision.None;
                     return false;
                 }
             }
@@ -175,6 +225,8 @@ namespace SAIN.SAINComponent.Classes.Decision
             return continueAction;
         }
 
+        private float _timeSinceChangeDecision => Time.time - SAINBot.Decision.ChangeDecisionTime;
+
         private bool checkDecisionTooLong()
         {
             return Time.time - SAINBot.Decision.ChangeDecisionTime > 30f;
@@ -182,9 +234,9 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool ContinueRunGrenade => CurrentSelfAction == SelfDecision.RunAwayGrenade && SAINBot.Grenade.GrenadeDangerPoint != null;
 
-        public bool UsingMeds => BotOwner.Medecine?.Using == true;
+        public bool UsingMeds => BotOwner.Medecine?.Using == true && CurrentSelfAction != SelfDecision.None;
 
-        private bool ContinueReload => BotOwner.WeaponManager.Reload?.Reloading == true; //  && !StartCancelReload()
+        private bool ContinueReload => BotOwner.WeaponManager.Reload?.Reloading == true && CurrentSelfAction == SelfDecision.Reload; //  && !StartCancelReload()
 
         public bool CanUseStims
         {
@@ -321,6 +373,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartBotReload()
         {
+            if (BotOwner.WeaponManager?.Reload.Reloading == true)
+            {
+                return true;
+            }
             // Only allow reloading every 1 seconds to avoid spamming reload when the weapon data is bad
             if (NextReloadTime > Time.time)
             {
