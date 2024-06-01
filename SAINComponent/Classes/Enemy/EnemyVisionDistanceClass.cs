@@ -38,15 +38,15 @@ namespace SAIN.SAINComponent.Classes.Enemy
             bool posFlare = status.PositionalFlareEnabled;
             bool shotAtMe = status.ShotAtMeRecently;
 
-            float positionalFlareMod = posFlare ? 1.25f : 1f;
-            float underFire = shotAtMe ? 1.25f : 1f;
+            float positionalFlareMod = posFlare ? 1.5f : 1f;
+            float underFire = shotAtMe ? 1.5f : 1f;
 
             // Reduce vision distance for ai vs ai vision checks
             bool shallLimit = Enemy.IsAI
                 && Enemy.SAINBot.CurrentAILimit != AILimitSetting.Close
                 && SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI;
 
-            float aiReduction = shallLimit ? 0.8f : 1f;
+            float aiReduction = shallLimit ? 0.75f : 1f;
 
             float finalModifier = (sprint * angle * flareMod * positionalFlareMod * underFire * aiReduction) / gear;
 

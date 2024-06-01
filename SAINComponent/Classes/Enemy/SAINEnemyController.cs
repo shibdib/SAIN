@@ -423,7 +423,13 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 setGoalEnemy(dogFightTarget.EnemyInfo);
                 return;
             }
-            checkGoalEnemy();
+            checkGoalEnemy(); 
+            checkVisibleEnemies();
+            checkShotAtMe();
+        }
+
+        private void checkVisibleEnemies()
+        {
             if (ActiveEnemy?.IsVisible == false)
             {
                 SAINEnemy visibileEnemy = checkIfAnyEnemyVisible();
@@ -431,6 +437,22 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 {
                     setActiveEnemy(visibileEnemy);
                     setGoalEnemy(visibileEnemy.EnemyInfo);
+                }
+            }
+        }
+
+        private void checkShotAtMe()
+        {
+            if (ActiveEnemy != null)
+            {
+                return;
+            }
+            foreach (var enemy in Enemies.Values)
+            {
+                if (enemy?.IsValid == true && enemy.EnemyStatus.ShotAtMeRecently)
+                {
+                    setActiveEnemy(enemy);
+                    return;
                 }
             }
         }
@@ -449,8 +471,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
             SAINEnemy sainEnemy = ActiveEnemy;
             if (goalEnemy == null)
             {
-                if (sainEnemy != null)
+                if (sainEnemy != null && 
+                    !sainEnemy.EnemyStatus.ShotAtMeRecently &&
+                    !sainEnemy.IsVisible)
+                {
                     setActiveEnemy(null);
+                }
 
                 return;
             }

@@ -239,7 +239,7 @@ namespace SAIN.SAINComponent.Classes
         private bool BulletFelt(IPlayer person, AISoundType type, Vector3 pos)
         {
             const float bulletfeeldistance = 500f;
-            const float DotThreshold = 0.85f;
+            const float DotThreshold = 0.5f;
 
             bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
 
@@ -259,9 +259,9 @@ namespace SAIN.SAINComponent.Classes
                     {
                         Logger.LogInfo($"Got Shot Direction from [{person.Profile?.Nickname}] to [{BotOwner?.name}] : Dot Product Result: [{dot}]");
 
-                        Vector3 start = person.MainParts[BodyPartType.head].Position;
-                        DebugGizmos.Ray(start, shotDirectionNormal, Color.red, 3f, 0.05f, true, 3f);
-                        DebugGizmos.Ray(start, botDirectionNormal, Color.yellow, 3f, 0.05f, true, 3f);
+                        //Vector3 start = person.MainParts[BodyPartType.head].Position;
+                        //DebugGizmos.Ray(start, shotDirectionNormal, Color.red, 3f, 0.05f, true, 3f);
+                        //DebugGizmos.Ray(start, botDirectionNormal, Color.yellow, 3f, 0.05f, true, 3f);
                     }
                     return true;
                 }
@@ -292,12 +292,10 @@ namespace SAIN.SAINComponent.Classes
                 bulletFelt && 
                 isGunSound)
             {
-                Vector3 to = vector + person.LookDirection;
-
                 float maxSuppressionDist = SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaxSuppressionDistance;
-                if (DidShotFlyByMe(vector, to, maxSuppressionDist, out Vector3 projectionPoint))
+                if (DidShotFlyByMe(person, maxSuppressionDist, out Vector3 projectionPoint, out float projectionPointDist))
                 {
-                    SAINBot.StartCoroutine(delayReact(vector, to, type, person, shooterDistance, projectionPoint));
+                    SAINBot.StartCoroutine(delayReact(vector, type, person, shooterDistance, projectionPoint, projectionPointDist));
                     reacting = true;
                 }
             }
@@ -386,28 +384,28 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private IEnumerator delayReact(Vector3 vector, Vector3 to, AISoundType type, IPlayer person, float shooterDistance, Vector3 projectionPoint)
+        private IEnumerator delayReact(Vector3 soundPos, AISoundType type, IPlayer person, float shooterDistance, Vector3 projectionPoint, float projectionPointDist)
         {
             yield return baseHearDelay();
 
             if (SAINBot?.Player?.HealthController?.IsAlive == true &&
                 person?.HealthController?.IsAlive == true)
             {
-                float sqrMagnitude = (projectionPoint - SAINBot.Position).sqrMagnitude;
                 float maxUnderFireDist = SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaxUnderFireDistance;
-                bool underFire = sqrMagnitude <= maxUnderFireDist * maxUnderFireDist;
+                bool underFire = projectionPointDist <= maxUnderFireDist;
                 if (underFire)
                 {
-                    BotOwner?.HearingSensor?.OnEnemySounHearded?.Invoke(vector, to.magnitude, type);
-                    SAINBot.Memory.SetUnderFire(person, vector);
+                    BotOwner?.HearingSensor?.OnEnemySounHearded?.Invoke(soundPos, shooterDistance, type);
+                    SAINBot.Memory.SetUnderFire(person, soundPos);
                 }
-                SAINBot.Suppression.AddSuppression(sqrMagnitude);
+                SAINBot.Suppression.AddSuppression(projectionPointDist);
                 SAINEnemy enemy = SAINBot.EnemyController.CheckAddEnemy(person);
                 if (enemy != null)
                 {
                     enemy.SetEnemyAsSniper(shooterDistance > 100f);
                     enemy.EnemyStatus.ShotAtMeRecently = true;
                 }
+                CheckCalcGoal();
             }
         }
 
@@ -537,47 +535,40 @@ namespace SAIN.SAINComponent.Classes
             return source + randomPoint;
         }
 
-        private bool DidShotFlyByMe(Vector3 from, Vector3 to, float maxDist, out Vector3 projectionPoint)
+        private bool DidShotFlyByMe(IPlayer player, float maxDist, out Vector3 projectionPoint, out float distance)
         {
-            projectionPoint = GetProjectionPoint(SAINBot.Position + Vector3.up, from, to);
-            Vector3 direction = projectionPoint - from;
+            projectionPoint = calcProjectionPoint(player);
+            distance = (projectionPoint - SAINBot.Position).magnitude;
+            bool shotNearMe = distance <= maxDist;
 
-            bool shotNearMe = 
-                (projectionPoint - SAINBot.Position).sqrMagnitude <= maxDist * maxDist && 
-                !Physics.Raycast(from, direction, direction.magnitude * 0.95f, LayerMaskClass.HighPolyWithTerrainMask);
-
+            // if the direction the player shot hits a wall, and the point that they hit is further than our input max distance, the shot did not fly by the bot.
+            Vector3 weaponRoot = player.WeaponRoot.position;
+            Vector3 direction = projectionPoint - weaponRoot;
             if (shotNearMe && 
-                SAINPlugin.DebugMode && 
-                SAINPlugin.EditorDefaults.DebugHearing)
+                Physics.Raycast(player.WeaponRoot.position, direction, out var hit, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask) && 
+                (hit.point - SAINBot.Position).magnitude > maxDist)
             {
-                DebugGizmos.Sphere(projectionPoint, 0.1f, Color.red, true, 3f);
-                DebugGizmos.Ray(projectionPoint, from - projectionPoint, Color.red, 5f, 0.05f, true, 3f, true);
+                return false;
+            }
+
+            if (SAINPlugin.EditorDefaults.DebugHearing && 
+                shotNearMe)
+            {
+                DebugGizmos.Sphere(projectionPoint, 0.25f, Color.red, true, 60f);
+                DebugGizmos.Line(projectionPoint, player.WeaponRoot.position, Color.red, 0.1f, true, 60f, true);
             }
 
             return shotNearMe;
         }
 
-        public static Vector3 GetProjectionPoint(Vector3 p, Vector3 p1, Vector3 p2)
+        public Vector3 calcProjectionPoint(IPlayer player)
         {
-            float num = p1.z - p2.z;
-
-            if (num == 0f)
-            {
-                return new Vector3(p.x, p1.y, p1.z);
-            }
-
-            float num2 = p2.x - p1.x;
-
-            if (num2 == 0f)
-            {
-                return new Vector3(p1.x, p1.y, p.z);
-            }
-
-            float num3 = p1.x * p2.z - p2.x * p1.z;
-            float num4 = num2 * p.x - num * p.z;
-            float num5 = -(num2 * num3 + num * num4) / (num2 * num2 + num * num);
-
-            return new Vector3(-(num3 + num2 * num5) / num, p1.y, num5);
+            Vector3 lookDir = player.LookDirection.normalized;
+            Vector3 shotPos = player.WeaponRoot.position;
+            Vector3 botDir = SAINBot.Position - shotPos;
+            float dist = botDir.magnitude;
+            Vector3 projectionPoint = shotPos + lookDir * dist;
+            return projectionPoint;
         }
 
         private bool CheckFootStepDetectChance(float distance)
