@@ -23,11 +23,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 float opticMod = OpticModifier;
                 float result = visibility * pose * opticMod;
 
-                if (EnemyPlayer.IsYourPlayer && _nextLogTime < Time.time)
-                {
-                    _nextLogTime = Time.time + 1f;
-                    Logger.LogDebug($"Aim Modifier for [{BotOwner.name}] Result: [{result}] : PoseFactor: [{pose}] : Pose Level: [{PoseLevel}] : VisFactor: [{visibility}] : Optic Mod: {opticMod} Enemy Distance: {Enemy.RealDistance}");
-                }
+                //if (EnemyPlayer.IsYourPlayer && _nextLogTime < Time.time)
+                //{
+                //    _nextLogTime = Time.time + 1f;
+                //    Logger.LogDebug($"Aim Modifier for [{BotOwner.name}] Result: [{result}] : PoseFactor: [{pose}] : Pose Level: [{PoseLevel}] : VisFactor: [{visibility}] : Optic Mod: {opticMod} Enemy Distance: {Enemy.RealDistance}");
+                //}
 
                 return result;
             }
@@ -90,7 +90,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     float num2 = enemyDistance - min;
                     float scaled = 1f - num2 / num;
                     float result = Mathf.Lerp(multi, 1f, scaled);
-                    Logger.LogInfo($"{result} : Dist: {enemyDistance}");
+                    //Logger.LogInfo($"{result} : Dist: {enemyDistance}");
                     return result;
                 }
                 return 1f;

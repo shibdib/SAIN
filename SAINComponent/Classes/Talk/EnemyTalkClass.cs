@@ -363,8 +363,8 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (player == null
                 || SAINBot == null
                 || !player.HealthController.IsAlive
-                || (player.Position - SAINBot.Position).sqrMagnitude > 100f * 100f
-                || SAINBot.ProfileId == player.ProfileId)
+                || SAINBot.ProfileId == player.ProfileId
+                || (player.Position - SAINBot.Position).sqrMagnitude > 100f * 100f)
             {
                 return;
             }
