@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SAIN.Preset.GlobalSettings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,6 +33,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
+        private static AimSettings _aimSettings => SAINPlugin.LoadedPreset.GlobalSettings.Aiming;
+
         private float OpticModifier
         {
             get
@@ -41,48 +44,54 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 {
                     return 1f;
                 }
+
                 float enemyDistance = Enemy.RealDistance;
-                bool isAiming = BotOwner.WeaponManager?.ShootController?.IsAiming == true;
+
                 if (gear.HasOptic)
                 {
-                    if (enemyDistance >= 100f && 
-                        isAiming)
+                    if (enemyDistance >= _aimSettings.OpticFarDistance)
                     {
-                        return 1.2f;
+                        return _aimSettings.OpticFarMulti;
                     }
-                    else if (enemyDistance <= 75f)
+                    else if (enemyDistance <= _aimSettings.OpticCloseDistance)
                     {
-                        return 0.8f;
+                        return _aimSettings.OpticCloseMulti;
                     }
                 }
+
                 if (gear.HasRedDot)
                 {
-                    if (enemyDistance <= 75f && 
-                        isAiming)
+                    if (enemyDistance <= _aimSettings.RedDotCloseDistance)
                     {
-                        return 1.15f;
+                        return _aimSettings.RedDotCloseMulti;
                     }
-                    else if (enemyDistance >= 125f)
+                    else if (enemyDistance >= _aimSettings.RedDotFarDistance)
                     {
-                        return 0.8f;
+                        return _aimSettings.RedDotFarMulti;
                     }
                 }
 
                 if (!gear.HasRedDot && 
                     !gear.HasOptic)
                 {
-                    if (enemyDistance >= 125f)
+                    float min = _aimSettings.IronSightScaleDistanceStart;
+                    if (enemyDistance < min)
                     {
-                        return 0.75f;
+                        return 1f;
                     }
-                    if (enemyDistance >= 100f)
+
+                    float multi = _aimSettings.IronSightFarMulti;
+                    float max = _aimSettings.IronSightScaleDistanceEnd;
+                    if (enemyDistance > max)
                     {
-                        return 0.825f;
+                        return multi;
                     }
-                    if (enemyDistance >= 75f)
-                    {
-                        return 0.9f;
-                    }
+                    float num = max - min;
+                    float num2 = enemyDistance - min;
+                    float scaled = 1f - num2 / num;
+                    float result = Mathf.Lerp(multi, 1f, scaled);
+                    Logger.LogInfo($"{result} : Dist: {enemyDistance}");
+                    return result;
                 }
                 return 1f;
             }
@@ -99,10 +108,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 if (EnemyPlayer.IsInPronePose)
                 {
-                    return 0.55f;
+                    return _aimSettings.ProneScatterMulti;
                 }
 
-                float min = 0.65f;
+                float min = _aimSettings.PoseLevelScatterMulti;
                 float max = 1f;
                 float result = Mathf.Lerp(min, max, PoseLevel);
 
@@ -150,7 +159,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             float ratio = (float)visCount / (float)totalCount;
 
-            float min = 0.65f;
+            float min = _aimSettings.PartVisScatterMulti;
             float max = 1f;
 
             float result = Mathf.Lerp(min, max, ratio);

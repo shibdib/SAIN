@@ -626,7 +626,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 && enemy.CanShoot 
                 && (SAINBot.Memory.Health.HealthStatus == ETagStatus.Healthy || SAINBot.Memory.Health.HealthStatus == ETagStatus.Injured))
             {
-                float timeAdd = 4f * UnityEngine.Random.Range(0.75f, 1.25f); ;
+                float timeAdd = 6f * UnityEngine.Random.Range(0.75f, 1.25f);
                 _nextShootDistTargetTime = Time.time + timeAdd;
                 _endShootDistTargetTime = Time.time + timeAdd / 3f;
                 return true;
