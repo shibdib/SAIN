@@ -53,12 +53,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
             float defaultVisDist = BotOwner.LookSensor.VisibleDist;
             float result = (defaultVisDist * finalModifier) - defaultVisDist;
 
-            if (EnemyPlayer.IsYourPlayer &&
-                _nextLogTime < Time.time)
-            {
-                _nextLogTime = Time.time + 0.5f;
-                Logger.LogWarning($"Result: [{result}] : Final Mod: {finalModifier} : defaultVisDist {defaultVisDist} : sprint {sprint} : gear {gear} : angle {angle} : flareMod {flareMod} : positionalFlareMod {positionalFlareMod} : underFire {underFire} : aiReduction {aiReduction} ");
-            }
+            // if (EnemyPlayer.IsYourPlayer &&
+            //     _nextLogTime < Time.time)
+            // {
+            //     _nextLogTime = Time.time + 0.5f;
+            //     Logger.LogWarning($"Result: [{result}] : Final Mod: {finalModifier} : defaultVisDist {defaultVisDist} : sprint {sprint} : gear {gear} : angle {angle} : flareMod {flareMod} : positionalFlareMod {positionalFlareMod} : underFire {underFire} : aiReduction {aiReduction} ");
+            // }
 
             return result;
         }
@@ -68,11 +68,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
             float velocity = Enemy.Vision.EnemyVelocity;
             float result = Mathf.Lerp(1f, _sprintMod, velocity);
 
-            if (EnemyPlayer.IsYourPlayer && 
-                _nextLogTime < Time.time)
-            {
-                Logger.LogWarning($"Velocity: [{velocity}] : Vision Distance mod: {result}");
-            }
+            // if (EnemyPlayer.IsYourPlayer && 
+            //     _nextLogTime < Time.time)
+            // {
+            //     Logger.LogWarning($"Velocity: [{velocity}] : Vision Distance mod: {result}");
+            // }
 
             return result;
         }
@@ -100,11 +100,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 float min = 0.25f;
                 float max = 1f;
                 float result = Mathf.InverseLerp(min, max, ratio);
-                if (EnemyPlayer.IsYourPlayer &&
-                    _nextLogTime < Time.time)
-                {
-                    Logger.LogWarning($"[{result}] : angleToEnemy: {angleToEnemy}");
-                }
+                // if (EnemyPlayer.IsYourPlayer &&
+                //     _nextLogTime < Time.time)
+                // {
+                //     Logger.LogWarning($"[{result}] : angleToEnemy: {angleToEnemy}");
+                // }
                 return Mathf.InverseLerp(min, max, ratio);
             }
             return 1f;

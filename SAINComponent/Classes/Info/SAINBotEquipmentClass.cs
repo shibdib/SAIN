@@ -1,17 +1,12 @@
 ﻿using EFT;
-using EFT.Ballistics;
 using EFT.InventoryLogic;
 using HarmonyLib;
-using Interpolation;
 using SAIN.Helpers;
-using SAIN.Preset.GlobalSettings.Categories;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using static EFT.Player;
 
 namespace SAIN.SAINComponent.Classes.Info
 {
@@ -26,23 +21,30 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public SAINBotEquipmentClass(BotComponent sain) : base(sain)
         {
-        }
-
-        public void Init()
-        {
             InventoryController = Reflection.GetValue<InventoryControllerClass>(Player, InventoryControllerProp);
             GearInfo = new GearInfo(Player, InventoryController);
         }
 
+        public void Init()
+        {
+        }
+
         public void Update()
         {
-            if (UpdateEquipmentTimer < Time.time)
+            if (_updateEquipTime < Time.time)
             {
-                UpdateEquipmentTimer = Time.time + 60f;
+                _updateEquipTime = Time.time + 60f;
                 GearInfo.Update();
-                UpdateWeapons(Player);
+                UpdateWeapons();
+            }
+            if (_checkCurrentWeaponTime < Time.time)
+            {
+                _checkCurrentWeaponTime = Time.time + 0.25f; 
+                checkCurrentWeapon();
             }
         }
+
+        private float _checkCurrentWeaponTime;
 
         public void Dispose()
         {
@@ -52,55 +54,88 @@ namespace SAIN.SAINComponent.Classes.Info
 
         // delete later
         public bool HasEarPiece => GearInfo.HasEarPiece;
+
         public bool HasHeavyHelmet => GearInfo.HasHeavyHelmet;
 
+        private float _updateEquipTime = 0f;
 
-        private float UpdateEquipmentTimer = 0f;
-
-        public void UpdateWeapons(Player player)
+        private void checkCurrentWeapon()
         {
-            if (player == null)
+            Weapon currentWeapon = BotOwner.WeaponManager.CurrentWeapon;
+            if (currentWeapon == null)
             {
+                CurrentWeaponInfo = null;
                 return;
             }
+            if (currentWeapon == PrimaryWeaponInfo?.Weapon)
+            {
+                if (CurrentWeaponInfo != PrimaryWeaponInfo)
+                {
+                    CurrentWeaponInfo = PrimaryWeaponInfo;
+                }
+                return;
+            }
+            if (currentWeapon == SecondaryWeaponInfo?.Weapon)
+            {
+                if (CurrentWeaponInfo != SecondaryWeaponInfo)
+                {
+                    CurrentWeaponInfo = SecondaryWeaponInfo;
+                }
+                return;
+            }
+            if (currentWeapon == HolsterWeaponInfo?.Weapon)
+            {
+                if (CurrentWeaponInfo != HolsterWeaponInfo)
+                {
+                    CurrentWeaponInfo = HolsterWeaponInfo;
+                }
+                return;
+            }
+        }
+
+        public void UpdateWeapons()
+        {
+            Weapon currentWeapon = BotOwner.WeaponManager.CurrentWeapon;
+
             Item primaryItem = GearInfo.GetItem(EquipmentSlot.FirstPrimaryWeapon);
             if (primaryItem != null && primaryItem is Weapon primaryWeapon)
             {
                 // if (SAINPlugin.DebugMode) Logger.LogWarning("Found FirstPrimary Weapon");
-                PrimaryWeapon.Update(primaryWeapon);
-                PrimaryWeapon.Log();
+                PrimaryWeaponInfo.Update(primaryWeapon);
+                PrimaryWeaponInfo.Log();
             }
             Item secondaryItem = GearInfo.GetItem(EquipmentSlot.SecondPrimaryWeapon);
             if (secondaryItem != null && secondaryItem is Weapon secondaryWeapon)
             {
-                // if (SAINPlugin.DebugMode) Logger.LogWarning("Found SecondPrimary Weapon");
-                SecondaryWeapon.Update(secondaryWeapon);
-                SecondaryWeapon.Log();
+                SecondaryWeaponInfo.Update(secondaryWeapon);
+                SecondaryWeaponInfo.Log();
             }
             Item holsterItem = GearInfo.GetItem(EquipmentSlot.Holster);
             if (holsterItem != null && holsterItem is Weapon holsterWeapon)
             {
-                // if (SAINPlugin.DebugMode) Logger.LogWarning("Found Holster Weapon");
-                HolsterWeapon.Update(holsterWeapon);
-                HolsterWeapon.Log();
+                HolsterWeaponInfo.Update(holsterWeapon);
+                HolsterWeaponInfo.Log();
             }
         }
 
-        public static float CalcEquipmentPower(Player player, Inventory inventory)
-        {
-            return 1f;
-        }
-
         public GearInfo GearInfo { get; private set; }
-        public WeaponInfo PrimaryWeapon { get; private set; } = new WeaponInfo();
-        public WeaponInfo SecondaryWeapon { get; private set; } = new WeaponInfo();
-        public WeaponInfo HolsterWeapon { get; private set; } = new WeaponInfo();
+        public WeaponInfo CurrentWeaponInfo { get; private set; }
+        public WeaponInfo PrimaryWeaponInfo { get; private set; } = new WeaponInfo();
+        public WeaponInfo SecondaryWeaponInfo { get; private set; } = new WeaponInfo();
+        public WeaponInfo HolsterWeaponInfo { get; private set; } = new WeaponInfo();
     }
 
     public class WeaponInfo
     {
+        public Weapon Weapon { get; private set; }
+
         public void Update(Weapon weapon)
         {
+            if (Weapon == null || Weapon != weapon)
+            {
+                Weapon = weapon;
+            }
+
             HasSuppressor = false;
             HasRedDot = false;
             HasOptic = false;
@@ -364,7 +399,6 @@ namespace SAIN.SAINComponent.Classes.Info
             Item item = InventoryController.Inventory.Equipment.GetSlot(slot).ContainedItem;
             return FindMaxAC(item, StaticArmorList);
         }
-
 
         private static readonly List<ArmorComponent> StaticArmorList = new List<ArmorComponent>();
     }

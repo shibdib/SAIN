@@ -2,13 +2,14 @@
 using EFT.InventoryLogic;
 using SAIN.Preset.GlobalSettings;
 using UnityEngine;
-using static WheelDrive;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
     public class GainSightClass : EnemyBase
     {
-        public GainSightClass(SAINEnemy enemy) : base(enemy) { }
+        public GainSightClass(SAINEnemy enemy) : base(enemy)
+        {
+        }
 
         public float GainSightCoef
         {
@@ -152,12 +153,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             float result = 1f * partMod * gearMod * flareMod * moveMod * elevMod * posFlareMod * thirdPartyMod * angleMod * notLookMod;
 
-            if (EnemyPlayer.IsYourPlayer &&
-                _nextLogTime < Time.time)
-            {
-                _nextLogTime = Time.time + 0.5f;
-                Logger.LogWarning($"Result: [{result}] : partMod {partMod} : gearMod {gearMod} : flareMod {flareMod} : moveMod {moveMod} : elevMod {elevMod} : posFlareMod {posFlareMod} : thirdPartyMod {thirdPartyMod} : angleMod {angleMod} : notLookMod {notLookMod} ");
-            }
+            // if (EnemyPlayer.IsYourPlayer &&
+            //     _nextLogTime < Time.time)
+            // {
+            //     _nextLogTime = Time.time + 0.5f;
+            //     Logger.LogWarning($"Result: [{result}] : partMod {partMod} : gearMod {gearMod} : flareMod {flareMod} : moveMod {moveMod} : elevMod {elevMod} : posFlareMod {posFlareMod} : thirdPartyMod {thirdPartyMod} : angleMod {angleMod} : notLookMod {notLookMod} ");
+            // }
 
             return result;
         }

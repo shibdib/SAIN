@@ -19,28 +19,81 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 float pose = PoseFactor;
                 float visibility = VisibilityFactor;
-                float result = visibility * pose;
+                float opticMod = OpticModifier;
+                float result = visibility * pose * opticMod;
 
                 if (EnemyPlayer.IsYourPlayer && _nextLogTime < Time.time)
                 {
                     _nextLogTime = Time.time + 1f;
-                    //Logger.LogDebug($"Aim Modifier for [{BotOwner.name}] Result: [{result}] : PoseFactor: [{pose}] : Pose Level: [{PoseLevel}] : VisFactor: [{visibility}]");
+                    Logger.LogDebug($"Aim Modifier for [{BotOwner.name}] Result: [{result}] : PoseFactor: [{pose}] : Pose Level: [{PoseLevel}] : VisFactor: [{visibility}] : Optic Mod: {opticMod} Enemy Distance: {Enemy.RealDistance}");
                 }
-
-                //if (Enemy.BotOwner.ShootData.ShootController.IsAiming)
-                //{
-                    //result *= 1.25f;
-                //}
 
                 return result;
             }
         }
 
+        private float OpticModifier
+        {
+            get
+            {
+                var gear = Enemy.SAINBot.Equipment.CurrentWeaponInfo;
+                if (gear == null)
+                {
+                    return 1f;
+                }
+                float enemyDistance = Enemy.RealDistance;
+                bool isAiming = BotOwner.WeaponManager?.ShootController?.IsAiming == true;
+                if (gear.HasOptic)
+                {
+                    if (enemyDistance >= 100f && 
+                        isAiming)
+                    {
+                        return 1.2f;
+                    }
+                    else if (enemyDistance <= 75f)
+                    {
+                        return 0.8f;
+                    }
+                }
+                if (gear.HasRedDot)
+                {
+                    if (enemyDistance <= 75f && 
+                        isAiming)
+                    {
+                        return 1.15f;
+                    }
+                    else if (enemyDistance >= 125f)
+                    {
+                        return 0.8f;
+                    }
+                }
+
+                if (!gear.HasRedDot && 
+                    !gear.HasOptic)
+                {
+                    if (enemyDistance >= 125f)
+                    {
+                        return 0.75f;
+                    }
+                    if (enemyDistance >= 100f)
+                    {
+                        return 0.825f;
+                    }
+                    if (enemyDistance >= 75f)
+                    {
+                        return 0.9f;
+                    }
+                }
+                return 1f;
+            }
+        }
+
+
         private float _nextLogTime;
 
         private float PoseLevel => EnemyPlayer.PoseLevel;
 
-        public float PoseFactor
+        private float PoseFactor
         {
             get
             {
@@ -57,7 +110,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public float VisibilityFactor
+        private float VisibilityFactor
         {
             get
             {
