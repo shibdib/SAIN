@@ -48,7 +48,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             float aiReduction = shallLimit ? 0.8f : 1f;
 
-            float finalModifier = sprint * gear * angle * flareMod * positionalFlareMod * underFire * aiReduction;
+            float finalModifier = (sprint * angle * flareMod * positionalFlareMod * underFire * aiReduction) / gear;
 
             float defaultVisDist = BotOwner.LookSensor.VisibleDist;
             float result = (defaultVisDist * finalModifier) - defaultVisDist;
