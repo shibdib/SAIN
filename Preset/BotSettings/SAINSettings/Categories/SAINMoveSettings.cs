@@ -26,7 +26,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float RUN_TO_COVER_MIN = 0.5f;
+        public float RUN_TO_COVER_MIN = 1.5f;
 
         // [Hidden]
         // [JsonIgnore]

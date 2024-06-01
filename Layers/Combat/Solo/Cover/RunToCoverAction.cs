@@ -181,8 +181,10 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 return false;
             }
 
+            bool tooCloseForRun = !tryWalk && (destination - SAINBot.Position).sqrMagnitude > SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN.Sqr();
+
             // Testing new pathfinder for running
-            if (!tryWalk)
+            if (!tryWalk && !tooCloseForRun)
             {
                 //  && shallRun(destination)
                 bool isUrgent = 
@@ -201,7 +203,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
             }
 
-            if (tryWalk)
+            if (tryWalk || tooCloseForRun)
             {
                 bool shallCrawl = SAINBot.Decision.CurrentSelfDecision != SelfDecision.None
                     && coverPoint.Status == CoverStatus.FarFromCover
