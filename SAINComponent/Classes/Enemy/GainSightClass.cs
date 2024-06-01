@@ -2,6 +2,7 @@
 using EFT.InventoryLogic;
 using SAIN.Preset.GlobalSettings;
 using UnityEngine;
+using static WheelDrive;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
@@ -136,22 +137,32 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float GetGainSightModifier()
         {
-            float result = 1f;
+            float partMod = calcPartsMod();
+            float gearMod = calcGearMod();
+            float flareMod = calcFlareMod();
+            float moveMod = calcMoveModifier();
+            float elevMod = calcElevationModifier();
+            float posFlareMod = calcPosFlareMod();
+            float thirdPartyMod = calcThirdPartyMod();
+            float angleMod = calcAngleMod();
 
-            result *= calcPartsMod();
-            result *= calcGearMod();
-            result *= calcFlareMod();
-            result *= calcMoveModifier();
-            result *= calcElevationModifier();
-            result *= calcSainEnemyMods();
-            result *= calcThirdPartyMod();
-            result *= calcAngleMod();
-
+            float notLookMod = 1f;
             if (!Enemy.IsAI)
-                result *= SAINNotLooking.GetVisionSpeedDecrease(Enemy.EnemyInfo);
+                notLookMod = SAINNotLooking.GetVisionSpeedDecrease(Enemy.EnemyInfo);
+
+            float result = 1f * partMod * gearMod * flareMod * moveMod * elevMod * posFlareMod * thirdPartyMod * angleMod * notLookMod;
+
+            if (EnemyPlayer.IsYourPlayer &&
+                _nextLogTime < Time.time)
+            {
+                _nextLogTime = Time.time + 0.5f;
+                Logger.LogWarning($"Result: [{result}] : partMod {partMod} : gearMod {gearMod} : flareMod {flareMod} : moveMod {moveMod} : elevMod {elevMod} : posFlareMod {posFlareMod} : thirdPartyMod {thirdPartyMod} : angleMod {angleMod} : notLookMod {notLookMod} ");
+            }
 
             return result;
         }
+
+        private static float _nextLogTime;
 
         private float calcPartsMod()
         {
@@ -195,7 +206,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private float calcSainEnemyMods()
+        private float calcPosFlareMod()
         {
             if (Enemy.EnemyStatus.PositionalFlareEnabled
                 && Enemy.Heard

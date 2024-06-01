@@ -1,4 +1,5 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.InventoryLogic;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
@@ -10,10 +11,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
     {
         public EnemyVisionDistanceClass(SAINEnemy enemy) : base(enemy)
         {
-            _enemyVision = enemy.Vision;
         }
-
-        private readonly SAINEnemyVision _enemyVision;
 
         public float VisionDistance
         {
@@ -55,18 +53,24 @@ namespace SAIN.SAINComponent.Classes.Enemy
             float defaultVisDist = BotOwner.LookSensor.VisibleDist;
             float result = (defaultVisDist * finalModifier) - defaultVisDist;
 
+            if (EnemyPlayer.IsYourPlayer &&
+                _nextLogTime < Time.time)
+            {
+                _nextLogTime = Time.time + 0.5f;
+                Logger.LogWarning($"Result: [{result}] : Final Mod: {finalModifier} : defaultVisDist {defaultVisDist} : sprint {sprint} : gear {gear} : angle {angle} : flareMod {flareMod} : positionalFlareMod {positionalFlareMod} : underFire {underFire} : aiReduction {aiReduction} ");
+            }
+
             return result;
         }
 
         private float calcMovementMod()
         {
-            float velocity = _enemyVision.EnemyVelocity;
+            float velocity = Enemy.Vision.EnemyVelocity;
             float result = Mathf.Lerp(1f, _sprintMod, velocity);
 
             if (EnemyPlayer.IsYourPlayer && 
                 _nextLogTime < Time.time)
             {
-                _nextLogTime = Time.time + 0.5f;
                 Logger.LogWarning($"Velocity: [{velocity}] : Vision Distance mod: {result}");
             }
 
@@ -80,17 +84,27 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float calcAngleMod()
         {
             // Reduce Bot Periph Vision
-            float minAngle = 45f;
             float angleToEnemy = Enemy.Vision.AngleToEnemy;
             float maxAngle = Enemy.Vision.MaxVisionAngle;
-            if (angleToEnemy > minAngle &&
-                angleToEnemy < maxAngle)
+            if (angleToEnemy > maxAngle)
+            {
+                return 0f;
+            }
+
+            float minAngle = 45f;
+            if (angleToEnemy > minAngle)
             {
                 float num = maxAngle - minAngle;
                 float num2 = angleToEnemy - minAngle;
                 float ratio = 1f - num2 / num;
                 float min = 0.25f;
                 float max = 1f;
+                float result = Mathf.InverseLerp(min, max, ratio);
+                if (EnemyPlayer.IsYourPlayer &&
+                    _nextLogTime < Time.time)
+                {
+                    Logger.LogWarning($"[{result}] : angleToEnemy: {angleToEnemy}");
+                }
                 return Mathf.InverseLerp(min, max, ratio);
             }
             return 1f;

@@ -89,13 +89,14 @@ namespace SAIN.SAINComponent.Classes.Talk
                 TauntFreq = PersonalitySettings.TauntFrequency * _randomizationFactor;
                 CanRespondToEnemyVoice = PersonalitySettings.CanRespondToEnemyVoice;
 
-                _friendlyResponseChance = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyReponseChance;
-                _friendlyResponseChanceAI = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyReponseChanceAI;
-                _friendlyResponseDistance = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyReponseDistance;
-                _friendlyResponseDistanceAI = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyReponseDistanceAI;
-                _friendlyResponseFrequencyLimit = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyResponseFrequencyLimit;
-                _friendlyResponseMinRandom = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyResponseMinRandomDelay;
-                _friendlyResponseMaxRandom = SAINPlugin.LoadedPreset.GlobalSettings.Talk.FriendlyResponseMaxRandomDelay;
+                var talkSettings = SAINPlugin.LoadedPreset.GlobalSettings.Talk;
+                _friendlyResponseChance = talkSettings.FriendlyReponseChance;
+                _friendlyResponseChanceAI = talkSettings.FriendlyReponseChanceAI;
+                _friendlyResponseDistance = talkSettings.FriendlyReponseDistance;
+                _friendlyResponseDistanceAI = talkSettings.FriendlyReponseDistanceAI;
+                _friendlyResponseFrequencyLimit = talkSettings.FriendlyResponseFrequencyLimit;
+                _friendlyResponseMinRandom = talkSettings.FriendlyResponseMinRandomDelay;
+                _friendlyResponseMaxRandom = talkSettings.FriendlyResponseMaxRandomDelay;
             }
             else
             {
@@ -320,7 +321,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 //if (player.IsYourPlayer)
                 //    Logger.LogInfo($"Starting Responding To Voice! Min Dist: {TauntDist} Chance: {chance}");
 
-                _nextResponseTime = Time.time + 1f;
+                _nextResponseTime = Time.time + 1.5f;
                 SAINBot.StartCoroutine(RespondToVoice(
                     trigger,
                     ETagStatus.Combat,
