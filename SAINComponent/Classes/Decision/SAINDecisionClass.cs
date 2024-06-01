@@ -114,7 +114,9 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return;
             }
 
-            if (CurrentSoloDecision != SoloDecision.RushEnemy && 
+            if (CurrentSoloDecision != SoloDecision.RushEnemy &&
+                CurrentSoloDecision != SoloDecision.RunToCover &&
+                CurrentSoloDecision != SoloDecision.Retreat &&
                 shallDogfight())
             {
                 SetDecisions(SoloDecision.DogFight, SquadDecision.None, SelfDecision.None);
@@ -245,6 +247,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallDogfight()
         {
+            if (BotOwner.WeaponManager.Reload.Reloading)
+            {
+                return false;
+            }
             if (CurrentSoloDecision == SoloDecision.DogFight
                 && DogFightTarget != null)
             {

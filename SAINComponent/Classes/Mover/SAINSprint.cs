@@ -182,10 +182,10 @@ namespace SAIN.SAINComponent.Classes.Mover
                         RecalcPath();
                         break;
                     }
-                    else if (timeSinceNoMove > _moveSettings.BotSprintTryJumpTime)
-                    {
-                        SAINBot.Mover.TryJump();
-                    }
+                    //else if (timeSinceNoMove > _moveSettings.BotSprintTryJumpTime)
+                    //{
+                    //    SAINBot.Mover.TryJump();
+                    //}
                     else if (timeSinceNoMove > _moveSettings.BotSprintTryVaultTime)
                     {
                         SAINBot.Mover.TryVault();

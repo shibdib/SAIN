@@ -34,16 +34,16 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool GetDecision(out SoloDecision Decision)
         {
-            if (SAINBot.Decision.CurrentSoloDecision != SoloDecision.RushEnemy &&
-                shallDogfight())
-            {
-                Decision = SoloDecision.DogFight;
-                return true;
-            }
-            else if (DogFightTarget != null)
-            {
-                DogFightTarget = null;
-            }
+            //if (SAINBot.Decision.CurrentSoloDecision != SoloDecision.RushEnemy &&
+            //    shallDogfight())
+            //{
+            //    Decision = SoloDecision.DogFight;
+            //    return true;
+            //}
+            //else if (DogFightTarget != null)
+            //{
+            //    DogFightTarget = null;
+            //}
 
             SAINEnemy enemy = SAINBot.Enemy;
             if (enemy == null)
