@@ -1,5 +1,6 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
+using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
 using UnityEngine;
 
@@ -9,7 +10,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
     {
         public EnemyVisionDistanceClass(SAINEnemy enemy) : base(enemy)
         {
+            _enemyVision = enemy.Vision;
         }
+
+        private readonly SAINEnemyVision _enemyVision;
 
         public float VisionDistance
         {
@@ -27,7 +31,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float CalcVisionDistance()
         {
             // Increase or decrease vis distance based on pose and if sprinting.
-            float sprint = calcSprintMod();
+            float sprint = calcMovementMod();
             float gear = calcGearStealthMod();
             float angle = calcAngleMod();
             float flareMod = getFlare();
@@ -38,7 +42,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             float positionalFlareMod = posFlare ? 1.25f : 1f;
             float underFire = shotAtMe ? 1.25f : 1f;
-
 
             // Reduce vision distance for ai vs ai vision checks
             bool shallLimit = Enemy.IsAI
@@ -55,17 +58,24 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return result;
         }
 
-        private float calcSprintMod()
+        private float calcMovementMod()
         {
-            // Increase vision distance if their enemy is sprinting
-            if (EnemyPlayer.MovementContext.IsSprintEnabled)
+            float velocity = _enemyVision.EnemyVelocity;
+            float result = Mathf.Lerp(1f, _sprintMod, velocity);
+
+            if (EnemyPlayer.IsYourPlayer && 
+                _nextLogTime < Time.time)
             {
-                LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
-                float velocityFactor = Mathf.InverseLerp(0, 5f, EnemyPlayer.Velocity.magnitude);
-                return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, velocityFactor);
+                _nextLogTime = Time.time + 0.5f;
+                Logger.LogWarning($"Velocity: [{velocity}] : Vision Distance mod: {result}");
             }
-            return 1f;
+
+            return result;
         }
+
+        private static float _nextLogTime;
+
+        private static float _sprintMod => SAINPlugin.LoadedPreset.GlobalSettings.Look.MovementDistanceModifier;
 
         private float calcAngleMod()
         {

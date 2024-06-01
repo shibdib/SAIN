@@ -17,6 +17,24 @@ namespace SAIN.SAINComponent.Classes.Enemy
             UpdateCanShoot(false);
         }
 
+        public float EnemyVelocity
+        {
+            get
+            {
+                float rawVelocity = EnemyPlayer.Velocity.magnitude;
+                if (rawVelocity <= 0.01f)
+                {
+                    return 0f;
+                }
+                else
+                {
+                    const float max = 5f;
+                    rawVelocity = Mathf.Clamp(rawVelocity, 0f, max);
+                    return rawVelocity / max;
+                }
+            }
+        }
+
         public bool FirstContactOccured { get; private set; }
 
         public bool ShallReportRepeatContact { get; set; }

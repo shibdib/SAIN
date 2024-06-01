@@ -24,7 +24,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 if (EnemyPlayer.IsYourPlayer && _nextLogTime < Time.time)
                 {
                     _nextLogTime = Time.time + 1f;
-                    Logger.LogDebug($"Aim Modifier for [{BotOwner.name}] Result: [{result}] : PoseFactor: [{pose}] : Pose Level: [{PoseLevel}] : VisFactor: [{visibility}]");
+                    //Logger.LogDebug($"Aim Modifier for [{BotOwner.name}] Result: [{result}] : PoseFactor: [{pose}] : Pose Level: [{PoseLevel}] : VisFactor: [{visibility}]");
                 }
 
                 //if (Enemy.BotOwner.ShootData.ShootController.IsAiming)
@@ -46,10 +46,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 if (EnemyPlayer.IsInPronePose)
                 {
-                    return 0.45f;
+                    return 0.55f;
                 }
 
-                float min = 0.55f;
+                float min = 0.65f;
                 float max = 1f;
                 float result = Mathf.Lerp(min, max, PoseLevel);
 
@@ -97,7 +97,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             float ratio = (float)visCount / (float)totalCount;
 
-            float min = 0.5f;
+            float min = 0.65f;
             float max = 1f;
 
             float result = Mathf.Lerp(min, max, ratio);

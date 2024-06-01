@@ -25,10 +25,19 @@ namespace SAIN.Preset.GlobalSettings
         [Name("Sprinting Vision Modifier")]
         [Description(
             "Bots will see sprinting players this much faster, at any range." +
-            "Higher is slower speed, so 0.66 would result in bots taking 0.66 times longer to spot an sprinting enemy")]
+            "Higher is slower speed, so 0.66 would result in bots spotting an enemy who is sprinting 0.66x faster. So if they usually would take 10 seconds to spot someone, it would instead take around 6.6 seconds.")]
         [Default(0.66f)]
         [MinMax(0.01f, 1f, 100f)]
         public float SprintingVisionModifier = 0.66f;
+
+        [Name("Movement Vision Distance Modifier")]
+        [Description(
+            "Bots will see moving players this much further. " +
+            "Higher is further distance, so 1.75 would result in bots seeing enemies 1.75x further at max player speed. " +
+            "Scales with player velocity.")]
+        [Default(1.5f)]
+        [MinMax(1f, 3f, 100f)]
+        public float MovementDistanceModifier = 1.5f;
 
         [Name("High Elevation Angle Range")]
         [Description(
