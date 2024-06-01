@@ -118,8 +118,8 @@ namespace SAIN.Preset.Personalities
 
                     behavior.Talk.CanTaunt = true;
                     behavior.Talk.CanRespondToEnemyVoice = true;
-                    behavior.Talk.TauntFrequency = 6;
-                    behavior.Talk.TauntMaxDistance = 75f;
+                    behavior.Talk.TauntFrequency = 8;
+                    behavior.Talk.TauntMaxDistance = 65f;
                     behavior.Talk.ConstantTaunt = true;
                     behavior.Talk.FrequentTaunt = true;
                     behavior.Talk.CanFakeDeathRare = true;
@@ -189,8 +189,8 @@ namespace SAIN.Preset.Personalities
 
                     behavior.Talk.CanTaunt = true;
                     behavior.Talk.CanRespondToEnemyVoice = true;
-                    behavior.Talk.TauntFrequency = 1;
-                    behavior.Talk.TauntMaxDistance = 100f;
+                    behavior.Talk.TauntFrequency = 4;
+                    behavior.Talk.TauntMaxDistance = 75f;
                     behavior.Talk.ConstantTaunt = true;
                     behavior.Talk.FrequentTaunt = true;
                     behavior.Talk.CanFakeDeathRare = true;
@@ -330,8 +330,8 @@ namespace SAIN.Preset.Personalities
 
                     behavior.Talk.CanTaunt = true;
                     behavior.Talk.CanRespondToEnemyVoice = false;
-                    behavior.Talk.TauntFrequency = 10;
-                    behavior.Talk.TauntMaxDistance = 70f;
+                    behavior.Talk.TauntFrequency = 15;
+                    behavior.Talk.TauntMaxDistance = 50f;
                     behavior.Talk.FrequentTaunt = true;
                     behavior.Talk.ConstantTaunt = false;
                     behavior.Talk.CanFakeDeathRare = false;
@@ -618,6 +618,8 @@ namespace SAIN.Preset.Personalities
                     behavior.Cover.MoveToCoverNoEnemyPose = 1f;
 
                     behavior.Talk.CanRespondToEnemyVoice = true;
+                    behavior.Talk.TauntFrequency = 10;
+                    behavior.Talk.TauntMaxDistance = 50f;
 
                     behavior.Search.WillSearchForEnemy = true;
                     behavior.Search.WillSearchFromAudio = true;

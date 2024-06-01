@@ -1,15 +1,11 @@
 using Comfort.Common;
 using EFT;
-using Mono.Security.X509.Extensions;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.BotSettings.SAINSettings;
-using SAIN.Preset.GlobalSettings;
-using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.Preset.Personalities;
 using System.Collections;
 using UnityEngine;
-using static SAIN.Preset.Personalities.PersonalitySettingsClass;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
@@ -47,8 +43,8 @@ namespace SAIN.SAINComponent.Classes.Talk
                         _nextCheckTime = time + 15f;
                         return;
                     }
-                    if (CanTaunt 
-                        && _tauntTimer < time 
+                    if (CanTaunt
+                        && _tauntTimer < time
                         && TauntEnemy())
                     {
                         _nextCheckTime = time + 1f;
@@ -66,7 +62,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         public void Dispose()
         {
             PresetHandler.OnPresetUpdated -= UpdateSettings;
-            if (Singleton<BotEventHandler>.Instance != null )
+            if (Singleton<BotEventHandler>.Instance != null)
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= tryFakeDeathGrenade;
             }
@@ -75,7 +71,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         private PersonalityTalkSettings PersonalitySettings => SAINBot?.Info?.PersonalitySettings.Talk;
         private SAINSettingsClass FileSettings => SAINBot?.Info?.FileSettings;
 
-        float FakeDeathChance = 2f;
+        private float FakeDeathChance = 2f;
 
         private void UpdateSettings()
         {
@@ -87,7 +83,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 CanTaunt = PersonalitySettings.CanTaunt && FileSettings.Mind.BotTaunts;
                 TauntDist = PersonalitySettings.TauntMaxDistance * _randomizationFactor;
                 TauntFreq = PersonalitySettings.TauntFrequency * _randomizationFactor;
-                CanRespondToEnemyVoice = PersonalitySettings.CanRespondToEnemyVoice;
+                _canRespondToEnemy = PersonalitySettings.CanRespondToEnemyVoice;
 
                 var talkSettings = SAINPlugin.LoadedPreset.GlobalSettings.Talk;
                 _friendlyResponseChance = talkSettings.FriendlyReponseChance;
@@ -107,7 +103,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool CanTaunt = true;
         private bool CanFakeDeath = false;
         private bool CanBegForLife = false;
-        private bool CanRespondToEnemyVoice = true;
+        private bool _canRespondToEnemy = true;
         private float TauntDist = 50f;
         private float TauntFreq = 5f;
 
@@ -134,7 +130,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 && EFTMath.RandomBool(FakeDeathChance)
                 && !isSmoke
                 && SAINBot.Enemy != null
-                && _fakeDeathTimer < Time.time 
+                && _fakeDeathTimer < Time.time
                 && playerProfileID != SAINBot.ProfileId
                 && (grenadeExplosionPosition - SAINBot.Position).sqrMagnitude < 25f * 25f)
             {
@@ -176,10 +172,10 @@ namespace SAIN.SAINComponent.Classes.Talk
             return false;
         }
 
-        public bool IsBeggingForLife 
-        { 
-            get 
-            { 
+        public bool IsBeggingForLife
+        {
+            get
+            {
                 if (_isBegging && _beggingTimer < Time.time)
                 {
                     _isBegging = false;
@@ -201,7 +197,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             bool tauntEnemy = false;
             var enemy = SAINBot.Enemy;
 
-            if (enemy != null 
+            if (enemy != null
                 && (enemy.EnemyPosition - SAINBot.Position).sqrMagnitude <= TauntDist * TauntDist)
             {
                 if (SAINBot.Info.PersonalitySettings.Talk.ConstantTaunt)
@@ -228,10 +224,10 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             if (tauntEnemy)
             {
-                if (enemy != null 
-                    && !enemy.IsVisible 
+                if (enemy != null
+                    && !enemy.IsVisible
                     && (enemy.Seen || enemy.Heard)
-                    && enemy.TimeSinceSeen > 8f 
+                    && enemy.TimeSinceSeen > 8f
                     && EFTMath.RandomBool(20))
                 {
                     SAINBot.Talk.Say(EPhraseTrigger.OnLostVisual, ETagStatus.Combat, true);
@@ -252,10 +248,10 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 yield break;
             }
-            if (sourcePlayer == null || 
-                BotOwner == null || 
-                Player == null || 
-                SAINBot == null || 
+            if (sourcePlayer == null ||
+                BotOwner == null ||
+                Player == null ||
+                SAINBot == null ||
                 sourcePlayer.ProfileId == SAINBot.ProfileId)
             {
                 yield break;
@@ -269,9 +265,9 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             yield return new WaitForSeconds(delay);
 
-            if (sourcePlayer == null || 
-                BotOwner == null || 
-                Player == null || 
+            if (sourcePlayer == null ||
+                BotOwner == null ||
+                Player == null ||
                 SAINBot == null)
             {
                 yield break;
@@ -313,15 +309,16 @@ namespace SAIN.SAINComponent.Classes.Talk
                 SAINBot.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position + UnityEngine.Random.onUnitSphere + Vector3.up, SAINSoundType.Conversation, true);
             }
 
-            if (CanRespondToEnemyVoice && _nextResponseTime < Time.time)
+            if (_canRespondToEnemy &&
+                _nextResponseTime < Time.time)
             {
-                float chance = 65;
+                float chance = 60;
                 EPhraseTrigger trigger = EFTMath.RandomBool(90) ? EPhraseTrigger.OnFight : EPhraseTrigger.BadWork;
 
                 //if (player.IsYourPlayer)
                 //    Logger.LogInfo($"Starting Responding To Voice! Min Dist: {TauntDist} Chance: {chance}");
 
-                _nextResponseTime = Time.time + 1.5f;
+                _nextResponseTime = Time.time + 2f;
                 SAINBot.StartCoroutine(RespondToVoice(
                     trigger,
                     ETagStatus.Combat,
@@ -363,16 +360,16 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void SetFriendlyTalked(Player player)
         {
-            if (player == null 
-                || SAINBot == null 
-                || !player.HealthController.IsAlive 
-                || (player.Position - SAINBot.Position).sqrMagnitude > 100f * 100f 
+            if (player == null
+                || SAINBot == null
+                || !player.HealthController.IsAlive
+                || (player.Position - SAINBot.Position).sqrMagnitude > 100f * 100f
                 || SAINBot.ProfileId == player.ProfileId)
             {
                 return;
             }
 
-            if ((BotOwner.Memory.IsPeace || SAINBot.Squad.HumanFriendClose)
+            if ((BotOwner.Memory.IsPeace || (SAINBot.Squad.HumanFriendClose && !player.IsAI))
                 && _nextResponseTime < Time.time)
             {
                 _nextResponseTime = Time.time + _friendlyResponseFrequencyLimit;
@@ -422,9 +419,10 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool _isBegging;
         private float _fakeDeathTimer = 0f;
         private float _begTimer = 0f;
-        private static readonly EPhraseTrigger[] BegPhrases = 
-        { 
-            EPhraseTrigger.Stop, 
+
+        private static readonly EPhraseTrigger[] BegPhrases =
+        {
+            EPhraseTrigger.Stop,
             EPhraseTrigger.HoldFire,
             EPhraseTrigger.GetBack
         };
