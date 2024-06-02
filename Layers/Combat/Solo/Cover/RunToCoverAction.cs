@@ -173,6 +173,38 @@ namespace SAIN.Layers.Combat.Solo.Cover
             return false;
         }
 
+        private bool checkIfPointGoodEnough(CoverPoint coverPoint)
+        {
+            if (!coverPoint.IsBad)
+            {
+                return true;
+            }
+            Vector3 coverPos = coverPoint.Position;
+            Vector3 directionToCollider = coverPoint.Collider.transform.position - coverPos;
+            Vector3 target = findTarget();
+            Vector3 directionToTarget = target - coverPos;
+            return Vector3.Dot(directionToCollider.normalized, directionToTarget.normalized) > 0.1f;
+        }
+
+        private Vector3 findTarget()
+        {
+            Vector3 target;
+            Vector3? grenade = SAINBot.Grenade.GrenadeDangerPoint;
+            if (grenade != null)
+            {
+                target = grenade.Value;
+            }
+            else if (SAINBot.CurrentTargetPosition != null)
+            {
+                target = SAINBot.CurrentTargetPosition.Value;
+            }
+            else
+            {
+                target = Vector3.zero;
+            }
+            return target;
+        }
+
         private bool tryRun(CoverPoint coverPoint, out bool sprinting, bool tryWalk)
         {
             bool result = false;
@@ -241,7 +273,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
-            if (SAINBot.Decision.CurrentSelfDecision == SelfDecision.RunAwayGrenade
+            if (SAINBot.Decision.CurrentSoloDecision == SoloDecision.AvoidGrenade
                 && SAINBot.Talk.GroupTalk.FriendIsClose)
             {
                 SAINBot.Talk.TalkAfterDelay(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat, 0.33f);

@@ -229,12 +229,15 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
         }
 
+        private bool isAvoidingGrenade => Bot.Decision.CurrentSoloDecision == SoloDecision.AvoidGrenade;
+
         private IEnumerator RecheckCoverPoints(List<CoverPoint> coverPoints, bool limit = true)
         {
-           // if (!limit || (limit && HavePositionsChanged()))
-            if (HavePositionsChanged())
+            // if (!limit || (limit && HavePositionsChanged()))
+            bool avoidingGrenade = isAvoidingGrenade;
+            if (HavePositionsChanged() || avoidingGrenade)
             {
-                bool shallLimit = limit && shallLimitProcessing();
+                bool shallLimit = limit && !avoidingGrenade && shallLimitProcessing();
                 WaitForSeconds wait = new WaitForSeconds(0.05f);
 
                 CoverFinderStatus lastStatus = CurrentStatus;
@@ -244,7 +247,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 bool updated = false;
                 if (coverInUse != null)
                 {
-                    if (!PointStillGood(coverInUse, out updated, out ECoverFailReason failReason))
+                    if (!PointStillGood(coverInUse, avoidingGrenade, out updated, out ECoverFailReason failReason))
                     {
                         //Logger.LogWarning(failReason);
                         coverInUse.IsBad = true;
@@ -259,7 +262,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 for (int i = coverPoints.Count - 1; i >= 0; i--)
                 {
                     var coverPoint = coverPoints[i];
-                    if (!PointStillGood(coverPoint, out updated, out ECoverFailReason failReason))
+                    if (!PointStillGood(coverPoint, avoidingGrenade, out updated, out ECoverFailReason failReason))
                     {
                         //Logger.LogWarning(failReason);
                         coverPoint.IsBad = true;
@@ -520,29 +523,37 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 _totalChecked++;
 
                 waitCount++;
+
+                bool failed = false;
                 ECoverFailReason failReason = ECoverFailReason.None;
-                // The main Calculations
-                if (!filterColliderByName(collider))
+                CoverPoint newPoint = null;
+
+                if (!failed &&
+                    filterColliderByName(collider))
                 {
-                    if (!ColliderAlreadyUsed(collider))
-                    {
-                        if (CoverAnalyzer.CheckCollider(collider, out var newPoint, out failReason))
-                        {
-                            CoverPoints.Add(newPoint);
-                        }
-                    }
-                    else
-                    {
-                        failReason = ECoverFailReason.ColliderUsed;
-                    }
-                }
-                else
-                {
+                    failed = true;
                     failReason = ECoverFailReason.ExcludedName;
                 }
 
-                //if (failReason != ECoverFailReason.None)
-                //    Logger.LogWarning(failReason);
+                if (!failed && 
+                    ColliderAlreadyUsed(collider))
+                {
+                    failed = true;
+                    failReason = ECoverFailReason.ColliderUsed;
+                }
+
+                // The main Calculations
+                if (!failed && 
+                    !CoverAnalyzer.CheckCollider(collider, out newPoint, out failReason))
+                {
+                    failed = true;
+                }
+
+                if (!failed && 
+                    newPoint != null)
+                {
+                    CoverPoints.Add(newPoint);
+                }
 
                 int coverCount = CoverPoints.Count;
 
@@ -611,28 +622,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return safestResult ?? result;
         }
 
-        private IEnumerator checkPathSafety(List<CoverPoint> coverPoints)
-        {
-            for (int i = 0; i < coverPoints.Count; i++)
-            {
-                var cover = coverPoints[i];
-                if (cover != null && !cover.IsBad)
-                {
-                    cover.CheckPathSafety(out bool didCheck);
-                    if (didCheck)
-                    {
-                        yield return null;
-                    }
-                }
-            }
-            yield return null;
-        }
-
         private float DebugLogTimer = 0f;
 
         public List<SpottedCoverPoint> SpottedCoverPoints { get; private set; } = new List<SpottedCoverPoint>();
 
-        public bool PointStillGood(CoverPoint coverPoint, out bool updated, out ECoverFailReason failReason)
+        public bool PointStillGood(CoverPoint coverPoint, bool avoidingGrenade, out bool updated, out ECoverFailReason failReason)
         {
             updated = false;
             failReason = ECoverFailReason.None;
@@ -641,7 +635,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 failReason = ECoverFailReason.NullOrBad;
                 return false;
             }
-            if (!coverPoint.ShallUpdate)
+            if (!coverPoint.ShallUpdate && !avoidingGrenade)
             {
                 return true;
             }

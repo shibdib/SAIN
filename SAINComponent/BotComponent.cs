@@ -102,6 +102,7 @@ namespace SAIN.SAINComponent
                 Medical = new SAINMedical(this);
                 BotLight = new BotLightController(this);
                 BackpackDropper = new BotBackpackDropClass(this);
+                CurrentTarget = new CurrentTargetClass(this);
 
                 BotOwner.OnBotStateChange += resetBot;
             }
@@ -225,13 +226,8 @@ namespace SAIN.SAINComponent
 
             handlePatrolData();
             EnemyController.Update();
-
             AILimit.UpdateAILimit();
-            if (AILimit.LimitAIThisFrame)
-            {
-                //return;
-            }
-
+            CurrentTarget.Update();
             Decision.Update();
             Info.Update();
             DoorOpener.Update();
@@ -256,8 +252,6 @@ namespace SAIN.SAINComponent
             SpaceAwareness.Update();
             Medical.Update();
             BotLight.Update();
-
-            UpdateGoalTarget();
 
             if (ManualShootReason != EShootReason.None && (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 1f < Time.time))
             {
@@ -361,15 +355,7 @@ namespace SAIN.SAINComponent
                 {
                     return BotOwner.AimingData.LastDist2Target;
                 }
-                if (Enemy != null)
-                {
-                    return Enemy.RealDistance;
-                }
-                else if (CurrentTargetPosition != null)
-                {
-                    return (CurrentTargetPosition.Value - Position).magnitude;
-                }
-                return 200f;
+                return CurrentTarget.CurrentTargetDistance;
             }
         }
 
@@ -478,101 +464,13 @@ namespace SAIN.SAINComponent
             StopAllCoroutines();
         }
 
-        private void UpdateGoalTarget()
-        {
-            if (updateGoalTargetTimer < Time.time)
-            {
-                updateGoalTargetTimer = Time.time + 0.5f;
-                var Target = GoalTargetPosition;
-                if (Target != null)
-                {
-                    if ((Target.Value - Position).sqrMagnitude < 2f)
-                    {
-                        Talk.GroupSay(EPhraseTrigger.Clear, null, true, 40);
-                        BotOwner.Memory.GoalTarget.Clear();
-                        BotOwner.CalcGoal();
-                    }
-                    else if (BotOwner.Memory.GoalTarget.CreatedTime > 120f
-                        && Enemy == null
-                        && Decision.CurrentSoloDecision != SoloDecision.Search)
-                    {
-                        BotOwner.Memory.GoalTarget.Clear();
-                        BotOwner.CalcGoal();
-                    }
-                }
-            }
-        }
+        public Vector3? CurrentTargetPosition => CurrentTarget.CurrentTargetPosition;
 
-        private float updateGoalTargetTimer;
+        public Vector3? CurrentTargetDirection => CurrentTarget.CurrentTargetDirection;
 
-        public Vector3? GoalTargetPosition => BotOwner.Memory.GoalTarget.Position;
+        public float CurrentTargetDistance => CurrentTarget.CurrentTargetDistance;
 
-        public Vector3? CurrentTargetPosition
-        {
-            get
-            {
-                if (_nextGetTargetTime < Time.time)
-                {
-                    bool hadNoTarget = _currentTarget == null;
-                    _nextGetTargetTime = Time.time + 0.05f;
-                    _currentTarget = getTarget();
-
-                    if (_currentTarget != null)
-                    {
-                        DirectionToCurrentTarget = _currentTarget.Value - Position;
-                        if (hadNoTarget)
-                        {
-                            TimeTargetFound = Time.time;
-                        }
-                        CurrentTargetDistance = (_currentTarget.Value - Position).magnitude;
-                    }
-                    else
-                    {
-                        DirectionToCurrentTarget = Vector3.zero;
-                        CurrentTargetDistance = 0f;
-                    }
-                }
-                return _currentTarget;
-            }
-        }
-
-        public Vector3 DirectionToCurrentTarget { get; private set; }
-
-        public float TimeTargetFound { get; private set; }
-        public float TimeSinceTargetFound => Time.time - TimeTargetFound;
-
-        public float CurrentTargetDistance { get; private set; }
-
-        private float _nextGetTargetTime;
-        private Vector3? _currentTarget;
-
-        private Vector3? getTarget()
-        {
-            if (HasEnemy)
-            {
-                if (Enemy.IsVisible || (Enemy.Seen && Enemy.TimeSinceSeen < 1f))
-                {
-                    return Enemy.EnemyPosition;
-                }
-                var lastKnownPlace = Enemy.KnownPlaces.LastKnownPlace;
-                if (lastKnownPlace != null)
-                {
-                    return lastKnownPlace.Position;
-                }
-                if (Enemy.KnownPlaces.LastSeenPlace != null)
-                {
-                    return Enemy.KnownPlaces.LastSeenPlace.Position;
-                }
-                if (Enemy.KnownPlaces.LastHeardPlace != null)
-                {
-                    return Enemy.KnownPlaces.LastHeardPlace.Position;
-                }
-                return Enemy.EnemyPosition;
-            }
-            return null;
-        }
-
-        
+        public CurrentTargetClass CurrentTarget { get; private set; }
         public BotBackpackDropClass BackpackDropper { get; private set; }
         public BotLightController BotLight { get; private set; }
         public SAINBotSpaceAwareness SpaceAwareness { get; private set; }

@@ -1,8 +1,4 @@
-﻿using BepInEx.Logging;
-using EFT;
-using EFT.InventoryLogic;
-using SAIN.Components;
-using SAIN.SAINComponent;
+﻿using EFT;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Decision
@@ -36,14 +32,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool GetDecision(out SelfDecision Decision)
         {
-            if (StartRunGrenade())
-            {
-                Decision = SelfDecision.RunAwayGrenade;
-                return true;
-            }
-
-            if (SAINBot.Enemy == null && 
-                BotOwner?.Medecine?.Using == false && 
+            if (SAINBot.Enemy == null &&
+                BotOwner?.Medecine?.Using == false &&
                 LowOnAmmo(0.75f))
             {
                 SAINBot.SelfActions.TryReload();
@@ -87,22 +77,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private float _nextCheckHealTime;
 
-        private bool StartRunGrenade()
-        {
-            var grenadePos = SAINBot.Grenade.GrenadeDangerPoint; 
-            if (grenadePos != null)
-            {
-                return true;
-                //Vector3 headPos = SAINBot.Transform.HeadPosition;
-                //Vector3 direction = grenadePos.Value - headPos;
-                //if (!Physics.Raycast(headPos, direction.normalized, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
-                //{
-                //    return true;
-                //}
-            }
-            return false;
-        }
-
         private void TryFixBusyHands()
         {
             if (BusyHandsTimer > Time.time)
@@ -142,17 +116,10 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             float timeSinceChange = _timeSinceChangeDecision;
 
-            if (ContinueRunGrenade && 
-                timeSinceChange < 10f)
-            {
-                Decision = SelfDecision.RunAwayGrenade;
-                return true;
-            }
-
             if (CurrentSelfAction == SelfDecision.Reload)
             {
                 bool reloading = BotOwner.WeaponManager.Reload?.Reloading == true;
-                if (!reloading && 
+                if (!reloading &&
                     !StartBotReload())
                 {
                     Decision = SelfDecision.None;
@@ -177,7 +144,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return true;
             }
 
-            if (BotOwner?.Medecine == null && 
+            if (BotOwner?.Medecine == null &&
                 CurrentSelfAction != SelfDecision.Reload)
             {
                 Decision = SelfDecision.None;
@@ -220,7 +187,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     return false;
                 }
             }
-            bool continueAction = UsingMeds || ContinueReload || ContinueRunGrenade;
+            bool continueAction = UsingMeds || ContinueReload;
             Decision = continueAction ? CurrentSelfAction : SelfDecision.None;
             return continueAction;
         }
@@ -231,8 +198,6 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             return Time.time - SAINBot.Decision.ChangeDecisionTime > 30f;
         }
-
-        private bool ContinueRunGrenade => CurrentSelfAction == SelfDecision.RunAwayGrenade && SAINBot.Grenade.GrenadeDangerPoint != null;
 
         public bool UsingMeds => BotOwner.Medecine?.Using == true && CurrentSelfAction != SelfDecision.None;
 
@@ -282,7 +247,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             return takeStims;
         }
-
 
         private bool StartFirstAid()
         {
@@ -370,7 +334,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-
         private bool StartBotReload()
         {
             if (BotOwner.WeaponManager?.Reload.Reloading == true)
@@ -414,56 +377,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             return needToReload;
-        }
-
-
-        private bool StartSurgery()
-        {
-            const float useSurgDist = 50f;
-            bool useSurgery = false;
-
-            if (CanUseSurgery)
-            {
-                var enemy = SAINBot.Enemy;
-                if (enemy == null)
-                {
-                    if (SAINBot.CurrentTargetPosition == null)
-                    {
-                        useSurgery = true;
-                    }
-                    else if ((SAINBot.CurrentTargetPosition.Value - SAINBot.Position).sqrMagnitude > useSurgDist * useSurgDist)
-                    {
-                        useSurgery = true;
-                    }
-                }
-                else
-                {
-                    var pathStatus = enemy.CheckPathDistance();
-                    bool SeenRecent = enemy.TimeSinceSeen < StartSurgery_SeenRecentTime;
-
-                    if (!SeenRecent && pathStatus != EnemyPathDistance.Far && pathStatus != EnemyPathDistance.Close && pathStatus != EnemyPathDistance.VeryClose)
-                    {
-                        useSurgery = true;
-                    }
-                }
-
-                if (SAINBot.HasEnemy)
-                {
-                    foreach (var enemyInfo in SAINBot.EnemyController.Enemies)
-                    {
-                        if (enemyInfo.Value.InLineOfSight)
-                        {
-                            useSurgery = false;
-                        }
-                        else if (enemyInfo.Value.TimeSinceSeen < StartSurgery_SeenRecentTime)
-                        {
-                            useSurgery = false;
-                        }
-                    }
-                }
-            }
-
-            return useSurgery;
         }
 
         public bool LowOnAmmo(float ratio = 0.3f)

@@ -37,11 +37,9 @@ namespace SAIN
     {
         None = 0,
         Reload = 1,
-        RunAway = 2,
-        FirstAid = 3,
-        RunAwayGrenade = 4,
-        Stims = 5,
-        Surgery = 6,
+        FirstAid = 2,
+        Stims = 3,
+        Surgery = 4,
     }
 
     public enum FriendlyFireStatus

@@ -406,17 +406,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private void removeDogFightTarget(string id)
         {
-            SAINEnemy dogFightTarget = SAINBot.Decision.DogFightTarget;
+            SAINEnemy dogFightTarget = SAINBot.Decision.DogFightDecision.DogFightTarget;
             if (dogFightTarget?.EnemyPerson != null
                 && dogFightTarget.EnemyPerson.ProfileId == id)
             {
-                SAINBot.Decision.DogFightTarget = null;
+                SAINBot.Decision.DogFightDecision.DogFightTarget = null;
             }
         }
 
         private void CheckAddEnemy()
         {
-            SAINEnemy dogFightTarget = SAINBot.Decision.DogFightTarget;
+            SAINEnemy dogFightTarget = SAINBot.Decision.DogFightDecision.DogFightTarget;
             if (dogFightTarget?.IsValid == true)
             {
                 setActiveEnemy(dogFightTarget);

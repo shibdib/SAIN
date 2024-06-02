@@ -12,141 +12,6 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
-    public class CoverPointController : MonoBehaviour
-    {
-        public CoverPointComponent AddCoverPoint(Collider collider, BotComponent sain, Vector3 point, NavMeshPath path)
-        {
-            if (collider == null) return null;
-            CoverPointComponent coverPoint = collider.gameObject.GetOrAddComponent<CoverPointComponent>();
-            coverPoint?.AddOrUpdateCoverPoint(sain, point, path);
-            return coverPoint;
-        }
-
-        public Dictionary<Collider, CoverPointComponent> WorldCoverPoints = new Dictionary<Collider, CoverPointComponent>();
-    }
-
-
-    public class CoverPointComponent : MonoBehaviour
-    {
-        public void Awake()
-        {
-            Collider = this.GetComponent<Collider>();
-        }
-
-        public CoverPointNew AddOrUpdateCoverPoint(BotComponent sain, Vector3 point, NavMeshPath pathToPoint)
-        {
-            if (!CoverPoints.ContainsKey(sain.ProfileId))
-            {
-                sain.OnSAINDisposed += RemoveCoverPoint;
-                CoverPoints.Add(sain.ProfileId, new CoverPointNew(sain, point, Collider, pathToPoint));
-            }
-            else
-            {
-                CoverPoints[sain.ProfileId].Position = point;
-            }
-            if (!_initialized)
-            {
-                _initialized = true;
-            }
-            return CoverPoints[sain.ProfileId];
-        }
-
-        private void RemoveCoverPoint(string profileId, BotOwner bot)
-        {
-            if (CoverPoints.ContainsKey(profileId))
-            {
-                CoverPointNew coverPoint = CoverPoints[profileId];
-                if (coverPoint?.SAIN != null)
-                {
-                    coverPoint.SAIN.OnSAINDisposed -= RemoveCoverPoint;
-                }
-                CoverPoints.Remove(profileId);
-            }
-        }
-
-        public void Update()
-        {
-            if (!_initialized)
-            {
-                return;
-            }
-
-            // If this component has had no coverpoints cached for bots for 10 seconds, destroy the component.
-            if (CoverPoints.Count == 0)
-            {
-                if (_timeDictEmpty == 0)
-                {
-                    _timeDictEmpty = Time.time + 10f;
-                }
-                if (_timeDictEmpty < Time.time)
-                {
-                    Dispose();
-                    return;
-                }
-            }
-            else if (_timeDictEmpty != 0)
-            {
-                _timeDictEmpty = 0;
-            }
-        }
-
-        private float _timeDictEmpty;
-
-        public void Dispose()
-        {
-            CoverPoints.Clear();
-            Destroy(this);
-        }
-
-        public readonly Dictionary<string, CoverPointNew> CoverPoints = new Dictionary<string, CoverPointNew> ();
-
-        public Collider Collider { get; private set; }
-        private bool _initialized = false;
-    }
-
-    public sealed class CoverPointNew
-    {
-        public readonly BotComponent SAIN;
-        public readonly Collider Collider;
-
-        public Vector3 Position 
-        { 
-            get 
-            {
-                return _position;
-            }
-            set 
-            {
-                TimeUpdated = Time.time;
-                _position = value;
-            }
-        }
-
-        private Vector3 _position;
-
-        public float TimeSinceUpdated => Time.time - TimeUpdated;
-        public float TimeUpdated { get; private set; }
-
-        public NavMeshPath PathToCover;
-        public readonly float CoverValue;
-        public readonly float CoverHeight;
-        public float PathLengthToCover;
-        public readonly float TimeCreated;
-
-        public CoverPointNew(BotComponent sain, Vector3 point, Collider collider, NavMeshPath path)
-        {
-            SAIN = sain;
-            Position = point;
-            Collider = collider;
-            PathToCover = path;
-            TimeCreated = Time.time;
-
-            Vector3 size = collider.bounds.size;
-            CoverHeight = size.y;
-            CoverValue = (size.x + size.y + size.z).Round10();
-        }
-    }
-
     public class CoverPoint
     {
         public CoverPoint(BotComponent sain, Vector3 point, Collider collider, NavMeshPath pathToPoint)
@@ -173,11 +38,30 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
             set
             {
-                _position = value;
-                TimeLastUpdated = Time.time;
+                setPosition(value);
             }
         }
+
+        private void setPosition(Vector3 value)
+        {
+            _position = value;
+            calcDirection(value);
+            TimeLastUpdated = Time.time;
+        }
+
+        private void calcDirection(Vector3 value)
+        {
+            Vector3 dir = ColliderPosition - value;
+            DirectionToCollider = dir;
+            DirectionToColliderNormal = dir.normalized;
+        }
+
         private Vector3 _position;
+
+        public Vector3 DirectionToCollider { get; private set; }
+        public Vector3 DirectionToColliderNormal { get; private set; }
+
+        public Vector3 ColliderPosition => Collider.transform.position;
 
         public float TimeLastUpdated;
         public float TimeLastUsed = 0f;

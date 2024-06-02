@@ -34,17 +34,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool GetDecision(out SoloDecision Decision)
         {
-            //if (SAINBot.Decision.CurrentSoloDecision != SoloDecision.RushEnemy &&
-            //    shallDogfight())
-            //{
-            //    Decision = SoloDecision.DogFight;
-            //    return true;
-            //}
-            //else if (DogFightTarget != null)
-            //{
-            //    DogFightTarget = null;
-            //}
-
             SAINEnemy enemy = SAINBot.Enemy;
             if (enemy == null)
             {
@@ -122,129 +111,14 @@ namespace SAIN.SAINComponent.Classes.Decision
                 Decision = SoloDecision.DebugNoDecision;
             }
 
-            if (Decision != SoloDecision.MoveToCover && Decision != SoloDecision.RunToCover)
+            if (Decision != SoloDecision.MoveToCover && 
+                Decision != SoloDecision.RunToCover)
             {
                 StartRunCoverTimer = 0f;
             }
 
             return true;
         }
-
-        private bool shallDogfight()
-        {
-            return findDogFightTarget();
-        }
-
-        private bool shallClearDogfightTarget(SAINEnemy enemy)
-        {
-            if (enemy == null)
-            {
-                return true;
-            }
-            if (enemy.Player?.HealthController.IsAlive == false)
-            {
-                return true;
-            }
-            float pathDist = enemy.Path.PathDistance;
-            if (pathDist > _dogFightEndDist)
-            {
-                return true;
-            }
-            if (!enemy.IsVisible && enemy.TimeSinceSeen > 2f)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private bool findDogFightTarget()
-        {
-            if (DogFightTarget != null && 
-                shallDogFightEnemy(DogFightTarget))
-            {
-                return true;
-            }
-
-            if (_changeDFTargetTime < Time.time)
-            {
-                _changeDFTargetTime = Time.time + 0.5f;
-
-                clearDFTargets();
-                SAINEnemy newTarget = selectDFTarget();
-                if (newTarget != null)
-                {
-                    DogFightTarget = newTarget;
-                    return true;
-                }
-
-                getNewDFTargets();
-                DogFightTarget = selectDFTarget();
-
-                return DogFightTarget != null;
-            }
-
-            if (DogFightTarget != null && 
-                shallClearDogfightTarget(DogFightTarget))
-            {
-                DogFightTarget = null;
-            }
-
-            return DogFightTarget != null;
-        }
-
-        private float _changeDFTargetTime;
-
-        private void clearDFTargets()
-        {
-            int count = _dogFightTargets.Count;
-            for (int i = count - 1; i >= 0; i--)
-            {
-                if (shallClearDogfightTarget(_dogFightTargets[i]))
-                {
-                    _dogFightTargets.RemoveAt(i);
-                }
-            }
-        }
-
-        private void getNewDFTargets()
-        {
-            _dogFightTargets.Clear();
-
-            var enemies = SAINBot.EnemyController.Enemies;
-            foreach (var enemy in enemies.Values)
-            {
-                if (shallDogFightEnemy(enemy))
-                {
-                    _dogFightTargets.Add(enemy);
-                }
-            }
-        }
-
-        private SAINEnemy selectDFTarget()
-        {
-            int count = _dogFightTargets.Count;
-            if (count > 0)
-            {
-                if (count > 1)
-                {
-                    _dogFightTargets.Sort((x, y) => x.RealDistance.CompareTo(y.RealDistance));
-                }
-                return _dogFightTargets[0];
-            }
-            return null;
-        }
-
-        private readonly List<SAINEnemy> _dogFightTargets = new List<SAINEnemy>();
-
-        public SAINEnemy DogFightTarget { get; set; }
-
-        private bool shallDogFightEnemy(SAINEnemy enemy)
-        {
-            return enemy?.IsValid == true && enemy.IsVisible && enemy.Path.PathDistance < _dogFightStartDist;
-        }
-
-        private float _dogFightStartDist = 4f;
-        private float _dogFightEndDist = 10f;
 
         private static readonly float GrenadeMaxEnemyDistance = 100f;
 

@@ -12,13 +12,16 @@ namespace SAIN.SAINComponent.Classes.Decision
 {
     public class SAINDecisionClass : SAINBase, ISAINClass
     {
-        public SAINDecisionClass(BotComponent sain) : base(sain)
+        public SAINDecisionClass(BotComponent bot) : base(bot)
         {
-            SelfActionDecisions = new SelfActionDecisionClass(sain);
-            EnemyDecisions = new EnemyDecisionClass(sain);
-            GoalTargetDecisions = new TargetDecisionClass(sain);
-            SquadDecisions = new SquadDecisionClass(sain);
+            SelfActionDecisions = new SelfActionDecisionClass(bot);
+            EnemyDecisions = new EnemyDecisionClass(bot);
+            GoalTargetDecisions = new TargetDecisionClass(bot);
+            SquadDecisions = new SquadDecisionClass(bot);
+            DogFightDecision = new DogFightDecisionClass(bot);
         }
+
+        public DogFightDecisionClass DogFightDecision { get; private set; }
 
         public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnDecisionMade;
 
@@ -44,32 +47,10 @@ namespace SAIN.SAINComponent.Classes.Decision
                 EnemyDistance = SAINBot.Enemy != null ? SAINBot.Enemy.CheckPathDistance() : EnemyPathDistance.NoEnemy;
                 getDecision();
             }
-            if (mainDecisionCoroutine == null && SAINBot.BotActive)
-            {
-                //stopped = false;
-                //mainDecisionCoroutine = SAINBot.StartCoroutine(mainDecisionLoop());
-            }
-            if (mainDecisionCoroutine != null && !SAINBot.BotActive)
-            {
-                //SAINBot.StopCoroutine(mainDecisionCoroutine);
-                //mainDecisionCoroutine = null;
-            }
-            if (stopped && mainDecisionCoroutine != null)
-            {
-                //Logger.LogError("stopped && mainDecisionCoroutine != null");
-            }
-            if (SAINBot.Enemy != null && !HasDecision)
-            {
-                //Logger.LogError("Have No Decision but enemy is not null!");
-            }
         }
 
-        private Coroutine mainDecisionCoroutine;
-        bool stopped = false;
-
-
         private float _nextGetDecisionTime;
-        private const float getDecisionFreq = 0.1f;
+        private const float getDecisionFreq = 0.05f;
         private const float getDecisionFreqAtPeace = 0.25f;
 
         public void Dispose()
@@ -103,6 +84,12 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return;
             }
 
+            if (DogFightDecision.ShallDogFight())
+            {
+                SetDecisions(SoloDecision.DogFight, SquadDecision.None, SelfDecision.None);
+                return;
+            }
+
             if (CheckContinueRetreat())
             {
                 return;
@@ -112,19 +99,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 SetDecisions(SoloDecision.Retreat, SquadDecision.None, selfDecision);
                 return;
-            }
-
-            if (CurrentSoloDecision != SoloDecision.RushEnemy &&
-                CurrentSoloDecision != SoloDecision.RunToCover &&
-                CurrentSoloDecision != SoloDecision.Retreat &&
-                shallDogfight())
-            {
-                SetDecisions(SoloDecision.DogFight, SquadDecision.None, SelfDecision.None);
-                return;
-            }
-            else if (DogFightTarget != null)
-            {
-                DogFightTarget = null;
             }
 
             if (SquadDecisions.GetDecision(out SquadDecision squadDecision))
@@ -244,72 +218,6 @@ namespace SAIN.SAINComponent.Classes.Decision
                 }
             }
         }
-
-        private bool shallDogfight()
-        {
-            if (BotOwner.WeaponManager.Reload.Reloading)
-            {
-                return false;
-            }
-            if (CurrentSoloDecision == SoloDecision.DogFight
-                && DogFightTarget != null)
-            {
-                checkClearDogFightTarget();
-                if (DogFightTarget != null)
-                {
-                    return true;
-                }
-            }
-            DogFightTarget = findDogFightTarget();
-            return DogFightTarget != null;
-        }
-
-        private void checkClearDogFightTarget()
-        {
-            if (DogFightTarget == null)
-            {
-                return;
-            }
-            if (DogFightTarget.Player?.HealthController.IsAlive == false)
-            {
-                DogFightTarget = null;
-                return;
-            }
-            float pathDist = DogFightTarget.Path.PathDistance;
-            if (pathDist > _dogFightEndDist)
-            {
-                DogFightTarget = null;
-                return;
-            }
-            if (!DogFightTarget.IsVisible && DogFightTarget.TimeSinceSeen > 2f)
-            {
-                DogFightTarget = null;
-                return;
-            }
-        }
-
-        private SAINEnemy findDogFightTarget()
-        {
-            var enemies = SAINBot.EnemyController.Enemies;
-            foreach (var enemy in enemies)
-            {
-                if (shallDogFightEnemy(enemy.Value))
-                {
-                    return enemy.Value;
-                }
-            }
-            return null;
-        }
-
-        public SAINEnemy DogFightTarget { get; set; }
-
-        private bool shallDogFightEnemy(SAINEnemy enemy)
-        {
-            return enemy?.IsValid == true && enemy.IsVisible && enemy.Path.PathDistance < _dogFightStartDist;
-        }
-
-        private float _dogFightStartDist = 4f;
-        private float _dogFightEndDist = 10f;
 
         private bool shallAvoidGrenade()
         {

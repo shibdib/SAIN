@@ -534,10 +534,6 @@ namespace SAIN.SAINComponent.Classes.Talk
             mask = ETagStatus.Combat;
             switch (SAINBot.Decision.CurrentSelfDecision)
             {
-                case SelfDecision.RunAway:
-                    trigger = EPhraseTrigger.OnYourOwn;
-                    break;
-
                 case SelfDecision.FirstAid:
                 case SelfDecision.Stims:
                 case SelfDecision.Surgery:
