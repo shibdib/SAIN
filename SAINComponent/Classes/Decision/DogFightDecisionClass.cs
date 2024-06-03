@@ -32,6 +32,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool checkDecisions()
         {
+            if (!BotOwner.WeaponManager.HaveBullets)
+            {
+                return false;
+            }
             SoloDecision currentDecision = Bot.Decision.CurrentSoloDecision;
             if (currentDecision == SoloDecision.RushEnemy)
             {
@@ -50,11 +54,9 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallClearDogfightTarget(SAINEnemy enemy)
         {
-            if (enemy == null)
-            {
-                return true;
-            }
-            if (enemy.Player?.HealthController.IsAlive == false)
+            if (enemy == null || 
+                !enemy.ShallUpdateEnemy || 
+                enemy.Player?.HealthController.IsAlive == false)
             {
                 return true;
             }
@@ -63,19 +65,21 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return true;
             }
-            if (!enemy.IsVisible && enemy.TimeSinceSeen > 2f)
-            {
-                return true;
-            }
-            return false;
+            return !enemy.IsVisible && enemy.TimeSinceSeen > 2f;
         }
 
         private bool findDogFightTarget()
         {
-            if (DogFightTarget != null &&
-                shallDogFightEnemy(DogFightTarget))
+            if (DogFightTarget != null)
             {
-                return true;
+                if (shallDogFightEnemy(DogFightTarget))
+                {
+                    return true;
+                }
+                if (shallClearDogfightTarget(DogFightTarget))
+                {
+                    DogFightTarget = null;
+                }
             }
 
             if (_changeDFTargetTime < Time.time)
@@ -94,12 +98,6 @@ namespace SAIN.SAINComponent.Classes.Decision
                 DogFightTarget = selectDFTarget();
 
                 return DogFightTarget != null;
-            }
-
-            if (DogFightTarget != null &&
-                shallClearDogfightTarget(DogFightTarget))
-            {
-                DogFightTarget = null;
             }
 
             return DogFightTarget != null;
@@ -153,7 +151,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallDogFightEnemy(SAINEnemy enemy)
         {
-            return enemy?.IsValid == true && enemy.IsVisible && enemy.Path.PathDistance < _dogFightStartDist;
+            return enemy?.IsValid == true && 
+                enemy.IsVisible && 
+                enemy.ShallUpdateEnemy && 
+                enemy.Path.PathDistance < _dogFightStartDist;
         }
 
         private float _dogFightStartDist = 4f;
