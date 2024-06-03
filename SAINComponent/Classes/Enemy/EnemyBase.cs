@@ -27,7 +27,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public SAINPersonClass EnemyPerson { get; private set; }
         public SAINPersonTransformClass EnemyTransform { get; private set; }
         public Vector3 EnemyPosition => EnemyTransform.Position;
-        public Vector3 EnemyDirection => EnemyTransform.Direction(SAIN.Position);
+        public Vector3 EnemyDirection => EnemyTransform.DirectionTo(SAIN.Position);
         public bool IsCurrentEnemy => Enemy?.IsCurrentEnemy == true;
     }
 }

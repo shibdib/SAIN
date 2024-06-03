@@ -15,62 +15,104 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class SAINSteeringClass : SAINBase, ISAINClass
     {
+        private enum ESteerSpeed
+        {
+            None = 0,
+            Enemy = 1,
+            Target = 2,
+        }
+
+        static SAINSteeringClass()
+        {
+            aimStatusField = AccessTools.Field(Helpers.HelpersGClass.AimDataType, "aimStatus_0");
+        }
+
         public SAINSteeringClass(BotComponent sain) : base(sain)
         {
         }
 
         public void Init()
         {
+            getDefaultSpeeds();
         }
 
         public void Update()
         {
-            var moveSettings = BotOwner.Settings.FileSettings.Move;
+            handleRotateSpeed();
+        }
+
+        private void handleRotateSpeed()
+        {
             if (Bot.HasEnemy)
             {
-                moveSettings.BASE_ROTATE_SPEED = 240f;
-                moveSettings.FIRST_TURN_SPEED = 215f;
-                moveSettings.FIRST_TURN_BIG_SPEED = 320f;
+                if (_steerStatus != ESteerSpeed.Enemy)
+                {
+                    _steerStatus = ESteerSpeed.Enemy;
+                    var moveSettings = BotOwner.Settings.FileSettings.Move;
+                    moveSettings.BASE_ROTATE_SPEED = 240f;
+                    moveSettings.FIRST_TURN_SPEED = 215f;
+                    moveSettings.FIRST_TURN_BIG_SPEED = 320f;
+                }
             }
             else if (Bot.CurrentTargetPosition != null)
             {
-                moveSettings.BASE_ROTATE_SPEED = 200f;
-                moveSettings.FIRST_TURN_SPEED = 180f;
-                moveSettings.FIRST_TURN_BIG_SPEED = 280f;
+                if (_steerStatus != ESteerSpeed.Target)
+                {
+                    _steerStatus = ESteerSpeed.Target;
+                    var moveSettings = BotOwner.Settings.FileSettings.Move;
+                    moveSettings.BASE_ROTATE_SPEED = 200f;
+                    moveSettings.FIRST_TURN_SPEED = 180f;
+                    moveSettings.FIRST_TURN_BIG_SPEED = 280f;
+                }
             }
             else
             {
-                moveSettings.BASE_ROTATE_SPEED = 180f;
-                moveSettings.FIRST_TURN_SPEED = 150f;
-                moveSettings.FIRST_TURN_BIG_SPEED = 240f;
+                if (_steerStatus != ESteerSpeed.None)
+                {
+                    _steerStatus = ESteerSpeed.None;
+                    var moveSettings = BotOwner.Settings.FileSettings.Move;
+                    moveSettings.BASE_ROTATE_SPEED = _baseSpeed;
+                    moveSettings.FIRST_TURN_SPEED = _firstTurnSpeed;
+                    moveSettings.FIRST_TURN_BIG_SPEED = _firstTurnBigSpeed;
+                }
             }
         }
+
+        private ESteerSpeed _steerStatus;
+
+        private void getDefaultSpeeds()
+        {
+            var moveSettings = BotOwner.Settings.FileSettings.Move;
+            _baseSpeed = moveSettings.BASE_ROTATE_SPEED;
+            _firstTurnSpeed = moveSettings.FIRST_TURN_SPEED;
+            _firstTurnBigSpeed = moveSettings.FIRST_TURN_BIG_SPEED;
+        }
+
+        private float _baseSpeed;
+        private float _firstTurnSpeed;
+        private float _firstTurnBigSpeed;
 
         public void SetAimTarget(Vector3? target)
         {
             var aimData = BotOwner.AimingData;
-            if (aimData == null)
+            if (aimData != null)
             {
-                return;
+                if (target == null)
+                {
+                    aimData.LoseTarget();
+                }
+                else
+                {
+                    aimData.SetTarget(target.Value);
+                    aimData.NodeUpdate();
+                }
             }
-            if (target == null)
-            {
-                aimData.LoseTarget();
-                return;
-            }
-            aimData.SetTarget(target.Value);
-            aimData.NodeUpdate();
         }
 
         public AimStatus AimStatus
         {
             get
             {
-                if (aimStatusField == null)
-                {
-                    aimStatusField = AccessTools.Field(Helpers.HelpersGClass.AimDataType, "aimStatus_0");
-                }
-
                 object aimStatus = aimStatusField.GetValue(BotOwner.AimingData);
                 if (aimStatus == null)
                 {
@@ -292,7 +334,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             foreach (var enemy in Bot.EnemyController.Enemies.Values)
             {
-                if (enemy?.IsValid == true && enemy.ShotByEnemyRecently)
+                if (enemy?.IsValid == true && 
+                    (enemy.EnemyStatus.ShotByEnemyRecently || enemy.EnemyStatus.ShotAtMeRecently))
                 {
                     return enemy;
                 }

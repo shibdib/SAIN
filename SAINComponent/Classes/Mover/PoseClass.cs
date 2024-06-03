@@ -18,6 +18,10 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
+            if (Player.IsSprintEnabled)
+            {
+                _stopSprintPoseTime = Time.time + 0.5f;
+            }
         }
 
         public void Dispose()
@@ -40,10 +44,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool canChangePose()
         {
-            if (Player.IsSprintEnabled)
-            {
-                _stopSprintPoseTime = Time.time + 0.33f;
-            }
             return _stopSprintPoseTime < Time.time;
         }
 
@@ -119,7 +119,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 DebugGizmos.Ray(start, direction, Color.red, rayLength, 0.05f, true, 0.5f, true);
                 if (Physics.Raycast(start, direction, rayLength, Mask))
                 {
-                    break;
+                    return FindCrouchHeight(targetHeight);
                 }
                 else
                 {
@@ -128,7 +128,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     targetHeight -= heightStep;
                 }
             }
-            return FindCrouchHeight(targetHeight);
+            return 1f;
         }
 
         private float FindCrouchHeightColliderSphereCast(Vector3 target, float rayLength = 3f, bool flatDir = true)
@@ -145,8 +145,9 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (Physics.SphereCast(start, 0.26f, direction, out var hitInfo, rayLength, Mask))
             {
                 targetHeight = hitInfo.collider.bounds.size.y;
+                return FindCrouchHeight(targetHeight);
             }
-            return FindCrouchHeight(targetHeight);
+            return 1f;
         }
 
         private float FindCrouchHeight(float height)

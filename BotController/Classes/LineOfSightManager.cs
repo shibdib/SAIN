@@ -434,6 +434,6 @@ namespace SAIN.Components
         private float SpherecastRadius = 0.025f;
         private LayerMask SightLayer => LayerMaskClass.HighPolyWithTerrainMask;
         private int MinJobSize = 2;
-        private List<Player> Players => EFTInfo.AlivePlayers;
+        private List<Player> Players => GameWorldInfo.AlivePlayers;
     }
 }

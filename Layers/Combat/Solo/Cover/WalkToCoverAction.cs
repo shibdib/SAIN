@@ -21,6 +21,13 @@ namespace SAIN.Layers.Combat.Solo.Cover
             SAINBot.Mover.SetTargetMoveSpeed(1f);
             SAINBot.Mover.SetTargetPose(1f);
 
+            if (SAINBot.Cover.CoverPoints.Count == 0)
+            {
+                SAINBot.Mover.DogFight.DogFightMove(false);
+                EngageEnemy();
+                return;
+            }
+
             if (_nextUpdateCoverTime < Time.time)
             {
                 _nextUpdateCoverTime = Time.time + 0.1f;
@@ -117,7 +124,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
             }
 
-            if (suppressing)
+            if (suppressing && _suppressTime < Time.time)
             {
                 suppressing = false;
                 SAINBot.ManualShoot.Shoot(false, Vector3.zero);
@@ -176,7 +183,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
-            //SAIN.Mover.Sprint(false);
         }
 
         public override void Stop()

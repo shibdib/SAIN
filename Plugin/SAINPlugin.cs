@@ -107,6 +107,7 @@ namespace SAIN
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
 
                 //typeof(Patches.Generic.SteeringPatch),
+                typeof(Patches.Generic.InBunkerPatch),
                 typeof(Patches.Generic.DoorOpenerPatch),
                 
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),

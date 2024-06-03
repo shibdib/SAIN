@@ -20,14 +20,27 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Update()
         {
+            SAINBot.Mover.SetTargetMoveSpeed(1f);
+            SAINBot.Mover.SetTargetPose(1f);
+
             if (BotOwner.WeaponManager.Reload.Reloading ||
                 SAINBot.Decision.CurrentSelfDecision == SelfDecision.Reload)
             {
                 BotOwner.WeaponManager.Reload.Reload();
             }
 
-            SAINBot.Mover.SetTargetMoveSpeed(1f);
-            SAINBot.Mover.SetTargetPose(1f);
+            if (SAINBot.Cover.CoverPoints.Count == 0)
+            {
+                SAINBot.Mover.SprintController.CancelRun();
+                SAINBot.Mover.DogFight.DogFightMove(false);
+                
+                if (!SAINBot.Steering.SteerByPriority(false))
+                {
+                    SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy);
+                }
+                Shoot.Update();
+                return;
+            }
 
             if (SAINBot.Cover.CoverInUse != null)
             {
@@ -172,17 +185,23 @@ namespace SAIN.Layers.Combat.Solo.Cover
             return false;
         }
 
-        private bool checkIfPointGoodEnough(CoverPoint coverPoint)
+        private bool checkIfPointGoodEnough(CoverPoint coverPoint, float minDot = 0.1f)
         {
+            if (coverPoint == null)
+            {
+                return false;
+            }
             if (!coverPoint.IsBad)
             {
                 return true;
             }
-            Vector3 coverPos = coverPoint.Position;
-            Vector3 directionToCollider = coverPoint.Collider.transform.position - coverPos;
             Vector3 target = findTarget();
-            Vector3 directionToTarget = target - coverPos;
-            return Vector3.Dot(directionToCollider.normalized, directionToTarget.normalized) > 0.1f;
+            if (target == Vector3.zero)
+            {
+                return true;
+            }
+            float dot = Vector3.Dot(coverPoint.DirectionToColliderNormal, (target - coverPoint.Position).normalized);
+            return dot > minDot;
         }
 
         private Vector3 findTarget()
@@ -204,49 +223,41 @@ namespace SAIN.Layers.Combat.Solo.Cover
             return target;
         }
 
+        private bool tooCloseToGrenade(Vector3 pos)
+        {
+            Vector3? grenadePos = SAINBot.Grenade.GrenadeDangerPoint;
+            if (grenadePos != null &&
+                (grenadePos.Value - pos).sqrMagnitude < 3f * 3f)
+            {
+                return true;
+            }
+            return false;
+        }
+
         private bool tryRun(CoverPoint coverPoint, out bool sprinting, bool tryWalk)
         {
             bool result = false;
             sprinting = false;
 
-            if (coverPoint == null)
+            if (!checkIfPointGoodEnough(coverPoint))
             {
                 return false;
             }
 
             Vector3 destination = coverPoint.Position;
 
-            Vector3? grenadePos = SAINBot.Grenade.GrenadeDangerPoint;
-            if (grenadePos != null &&
-                (grenadePos.Value - destination).sqrMagnitude < 3f.Sqr())
-            {
-                return false;
-            }
-
-            float distance = coverPoint.PathLength;
-
-            if (coverPoint.IsBad &&
-                distance > 8f)
+            if (tooCloseToGrenade(destination))
             {
                 return false;
             }
 
             // Testing new pathfinder for running
             if (!tryWalk &&
-                distance >= SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN)
+                coverPoint.PathLength >= SAINBot.Info.FileSettings.Move.RUN_TO_COVER_MIN && 
+                SAINBot.Mover.SprintController.RunToPoint(destination, getUrgency()))
             {
-                //  && shallRun(destination)
-                bool isUrgent =
-                    BotOwner.Memory.IsUnderFire ||
-                    SAINBot.Suppression.IsSuppressed ||
-                    SAINBot.Decision.CurrentSelfDecision != SelfDecision.None;
-
-                ESprintUrgency urgency = isUrgent ? ESprintUrgency.High : ESprintUrgency.Middle;
-                if (SAINBot.Mover.SprintController.RunToPoint(destination, urgency))
-                {
-                    sprinting = true;
-                    return true;
-                }
+                sprinting = true;
+                return true;
             }
 
             if (tryWalk)
@@ -259,6 +270,16 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 result = SAINBot.Mover.GoToPoint(destination, out _, 0.5f, shallCrawl, false, true);
             }
             return result;
+        }
+
+        private ESprintUrgency getUrgency()
+        {
+            bool isUrgent =
+                BotOwner.Memory.IsUnderFire ||
+                SAINBot.Suppression.IsSuppressed ||
+                SAINBot.Decision.CurrentSelfDecision != SelfDecision.None;
+
+            return isUrgent ? ESprintUrgency.High : ESprintUrgency.Middle;
         }
 
         private bool _moveSuccess;

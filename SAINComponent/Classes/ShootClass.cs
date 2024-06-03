@@ -255,7 +255,7 @@ namespace SAIN.SAINComponent.Classes
         {
             Vector3? result = null;
             if (!enemy.IsVisible
-                    && enemy.HeardRecently
+                    && enemy.EnemyStatus.HeardRecently
                     && enemy.InLineOfSight)
             {
                 EnemyPlace lastKnown = enemy.KnownPlaces.LastKnownPlace;

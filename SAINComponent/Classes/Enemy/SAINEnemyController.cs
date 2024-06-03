@@ -1,5 +1,6 @@
 ﻿using EFT;
 using EFT.Hideout;
+using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.SAINComponent.BaseClasses;
 using System.Collections;
@@ -15,7 +16,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public bool HasLastEnemy => LastEnemy?.EnemyPerson?.IsActive == true;
         public SAINEnemy ActiveEnemy { get; private set; }
         public SAINEnemy LastEnemy { get; private set; }
-        public bool IsHumanPlayerActiveEnemy => ActiveEnemy != null && ActiveEnemy.EnemyIPlayer != null && ActiveEnemy.EnemyIPlayer.AIData?.IsAI == false;
 
         public readonly Dictionary<string, SAINEnemy> Enemies = new Dictionary<string, SAINEnemy>();
 
@@ -565,12 +565,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (player == null)
             {
-                Logger.LogDebug("Cannot add null player as an enemy.");
+                //Logger.LogDebug("Cannot add null player as an enemy.");
                 return null;
             }
             if (!player.HealthController.IsAlive)
             {
-                Logger.LogDebug("Cannot add dead player as an enemy.");
+                //Logger.LogDebug("Cannot add dead player as an enemy.");
                 return null;
             }
             if (Enemies.TryGetValue(player.ProfileId, out SAINEnemy enemy))
@@ -591,12 +591,15 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
             if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(player, out EnemyInfo enemyInfo))
             {
-                SAINPersonClass enemySAINPerson = new SAINPersonClass(player);
-                SAINEnemy newEnemy = new SAINEnemy(Bot, enemySAINPerson, enemyInfo);
-                player.OnIPlayerDeadOrUnspawn += newEnemy.DeleteInfo;
-                Enemies.Add(player.ProfileId, newEnemy);
-                //Logger.LogDebug($"Added [{player.ProfileId}] to [{BotOwner?.name}'s] Enemy List");
-                return newEnemy;
+                PlayerComponent playerComponent = GameWorldHandler.SAINGameWorld.PlayerTracker.GetPlayerComponent(player.ProfileId);
+                if (playerComponent != null)
+                {
+                    SAINEnemy newEnemy = new SAINEnemy(Bot, playerComponent, enemyInfo);
+                    player.OnIPlayerDeadOrUnspawn += newEnemy.DeleteInfo;
+                    Enemies.Add(player.ProfileId, newEnemy);
+                    //Logger.LogDebug($"Added [{player.ProfileId}] to [{BotOwner?.name}'s] Enemy List");
+                    return newEnemy;
+                }
             }
             else
             {
@@ -667,7 +670,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (iPlayer != null)
             {
-                Player player = EFTInfo.GetPlayer(iPlayer);
+                Player player = GameWorldInfo.GetAlivePlayer(iPlayer);
                 if (player != null)
                 {
                     // Check that the source isn't from a member of the bot's group.

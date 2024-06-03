@@ -10,7 +10,7 @@ namespace SAIN.SAINComponent.Classes
         public SAINSoundCollection(IPlayer iPlayer)
         {
             IPlayer = iPlayer;
-            Player = EFTInfo.GetPlayer(iPlayer);
+            Player = GameWorldInfo.GetAlivePlayer(iPlayer);
             TimeCreated = Time.time;
 
             // Randomize the cleanup time to avoid doing it in batches.
@@ -22,7 +22,7 @@ namespace SAIN.SAINComponent.Classes
             if (getPlayerTimer < Time.time && Player == null && IPlayer != null) 
             {
                 getPlayerTimer = Time.time + 1f;
-                Player = EFTInfo.GetPlayer(IPlayer);
+                Player = GameWorldInfo.GetAlivePlayer(IPlayer);
                 if (Player == null)
                 {
                     //Logger.LogError("Player Null!");

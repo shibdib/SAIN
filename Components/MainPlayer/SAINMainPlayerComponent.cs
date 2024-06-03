@@ -17,13 +17,13 @@ namespace SAIN.Components
         public void Awake()
         {
             SAINPerson = new SAINPersonClass(MainPlayer);
-            MainPlayerLight = MainPlayer?.GetOrAddComponent<SAINFlashLightComponent>();
+            MainPlayerLight = MainPlayer?.GetOrAddComponent<FlashLightComponent>();
             CamoClass = new SAINCamoClass(this);
         }
 
         public SAINCamoClass CamoClass { get; private set; }
         public SAINPersonClass SAINPerson { get; private set; }
-        public SAINFlashLightComponent MainPlayerLight { get; private set; }
+        public FlashLightComponent MainPlayerLight { get; private set; }
 
         private void Start()
         {
@@ -40,19 +40,31 @@ namespace SAIN.Components
                 Dispose();
                 return;
             }
-            if (debugtimer < Time.time)
-            {
-                debugtimer = Time.time + 1f;
-                float speedRatio = MainPlayer.MovementContext.ClampedSpeed / MainPlayer.MovementContext.MaxSpeed;
-                //Logger.LogDebug(MainPlayer.MovementContext.ClampedSpeed);
-            }
-
-            //Logger.LogDebug(NavMesh.GetAreaCost(0));
-            //Logger.LogDebug(NavMesh.GetAreaCost(1));
-            //Logger.LogDebug(NavMesh.GetAreaCost(2));
-            //Logger.LogDebug(NavMesh.GetAreaCost(3));
-
+            navRayCastAllDir();
             //FindPlacesToShoot(PlacesToShootMe);
+        }
+
+        private void navRayCastAllDir()
+        {
+            Vector3 origin = MainPlayer.Position;
+            if (NavMesh.SamplePosition(origin, out var hit, 1f, -1))
+            {
+                origin = hit.position;
+            }
+            Vector3 direction;
+            int max = 30;
+            for (int i = 0; i < max; i++)
+            {
+                direction = UnityEngine.Random.onUnitSphere;
+                direction.y = 0;
+                direction = direction.normalized * 30f;
+                Vector3 target = origin + direction;
+                if (NavMesh.Raycast(origin, target, out var hit2, -1))
+                {
+                    target = hit2.position;
+                }
+                DebugGizmos.Line(origin, target, 0.05f, 0.25f, true);
+            }
         }
 
         public readonly List<Vector3> PlacesToShootMe = new List<Vector3>();

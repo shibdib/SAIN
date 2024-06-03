@@ -1,11 +1,8 @@
 ﻿using EFT;
 using SAIN.Helpers;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine.AI;
-using UnityEngine;
 using SAIN.SAINComponent.Classes.Enemy;
+using UnityEngine;
+using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
@@ -17,22 +14,11 @@ namespace SAIN.SAINComponent.Classes.Mover
         Shooting = 3,
     }
 
-    public class DogFight : SAINBase, ISAINClass
+    public class DogFight : SAINBase
     {
         public EDogFightStatus Status { get; private set; }
+
         public DogFight(BotComponent sain) : base(sain)
-        {
-        }
-
-        public void Init()
-        {
-        }
-
-        public void Update()
-        {
-        }
-
-        public void Dispose()
         {
         }
 
@@ -42,13 +28,15 @@ namespace SAIN.SAINComponent.Classes.Mover
                 Status = EDogFightStatus.None;
         }
 
+        private bool swingRight;
+
         public void DogFightMove(bool aggressive)
         {
             if (stopMoveToShoot())
             {
                 Status = EDogFightStatus.Shooting;
                 Bot.Mover.StopMove(0f);
-                float timeAdd = 0.33f * UnityEngine.Random.Range(0.5f, 1.33f);
+                float timeAdd = 0.5f * UnityEngine.Random.Range(0.5f, 1.33f);
                 Bot.Mover.Lean.HoldLean(timeAdd);
                 _updateDogFightTimer = Time.time + timeAdd;
                 return;
@@ -62,6 +50,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                     float baseTime = Bot.Enemy?.IsVisible == true ? 0.5f : 0.75f;
                     _updateDogFightTimer = Time.time + baseTime * UnityEngine.Random.Range(0.66f, 1.33f);
                     return;
+                }
+                else if (swing())
+                {
                 }
 
                 if (!aggressive)
@@ -81,10 +72,22 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
+        private bool swing()
+        {
+            swingRight = EFTMath.RandomBool();
+            return false;
+        }
+
         private bool stopMoveToShoot()
         {
             SAINEnemy enemy = Bot.Enemy;
-            return Status == EDogFightStatus.MovingToEnemy && enemy?.IsVisible == true && enemy.CanShoot;
+            if (enemy == null)
+            {
+                return false;
+            }
+            return Status == EDogFightStatus.MovingToEnemy && 
+                (enemy.InLineOfSight || enemy.IsVisible) && 
+                enemy.CanShoot;
         }
 
         private bool moveToEnemy()
@@ -96,7 +99,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool backUpFromEnemy()
         {
-            return 
+            return
                 findStrafePoint(out Vector3 backupPoint) &&
                 Bot.Mover.GoToPoint(backupPoint, out _, -1, false, false);
         }
@@ -106,8 +109,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         private Vector3? findBackupTarget()
         {
             SAINEnemy enemy = Bot.Enemy;
-            if (enemy != null && 
-                enemy.Seen && 
+            if (enemy != null &&
+                enemy.Seen &&
                 enemy.TimeSinceSeen < _enemyTimeSinceSeenThreshold)
             {
                 return Bot.Enemy.EnemyPosition;

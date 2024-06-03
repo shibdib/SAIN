@@ -63,24 +63,6 @@ namespace SAIN.Components.BotController
         private bool GameEnding = false;
         private bool Subscribed = false;
 
-        private void SetBrainInfo(BotOwner botOwner)
-        {
-            if (!SAINPlugin.EditorDefaults.CollectBotLayerBrainInfo)
-            {
-                return;
-            }
-
-            WildSpawnType role = botOwner.Profile.Info.Settings.Role;
-            string brain = botOwner.Brain.BaseBrain.ShortName();
-            BotType botType = BotTypeDefinitions.GetBotType(role);
-            if (botType.BaseBrain.IsNullOrEmpty())
-            {
-                botType.BaseBrain = brain;
-                Logger.LogInfo($"Set {role} BaseBrain to {brain}");
-                BotTypeDefinitions.ExportBotTypes();
-            }
-        }
-
         public BotComponent GetSAIN(BotOwner botOwner, StringBuilder debugString)
         {
             if (botOwner == null)
@@ -195,19 +177,11 @@ namespace SAIN.Components.BotController
             {
                 if (botOwner != null)
                 {
-                    var settings = botOwner.Profile?.Info?.Settings;
-                    if (settings == null)
-                    {
-                        return;
-                    }
-
-                    Player player = botOwner.GetPlayer;
                     botOwner.LeaveData.OnLeave += RemoveBot;
-                    SetBrainInfo(botOwner);
 
                     if (SAINPlugin.IsBotExluded(botOwner))
                     {
-                        AddNoBushESP(botOwner);
+                        botOwner.GetOrAddComponent<SAINNoBushESP>().Init(botOwner);
                         return;
                     }
 
@@ -226,17 +200,6 @@ namespace SAIN.Components.BotController
             {
                 Logger.LogError($"AddBot: Add Component Error: {ex}");
             }
-        }
-
-        public void AddNoBushESP(BotOwner botOwner)
-        {
-            botOwner.GetOrAddComponent<SAINNoBushESP>().Init(botOwner);
-        }
-
-        private bool CheckIfSAINEnabled(BotOwner botOwner)
-        {
-            Brain brain = BotBrains.Parse(botOwner.Brain.BaseBrain.ShortName());
-            return BotBrains.AllBrainsList.Contains(brain);
         }
 
         public void RemoveBot(BotOwner botOwner)

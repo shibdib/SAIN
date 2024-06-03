@@ -128,7 +128,7 @@ namespace SAIN.Layers
             if (enemy.Heard)
             {
                 stringBuilder.AppendLabeledValue("Time Since Heard", $"{enemy.TimeSinceHeard}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Heard Recently?", $"{enemy.HeardRecently}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Heard Recently?", $"{enemy.EnemyStatus.HeardRecently}", Color.white, Color.yellow, true);
             }
 
             var lastKnown = enemy.KnownPlaces.LastKnownPlace;

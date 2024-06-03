@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace SAIN.Components
 {
-    public class SAINFlashLightComponent : MonoBehaviour
+    public class FlashLightComponent : MonoBehaviour
     {
         private Player Player { get; set; }
         protected static ManualLogSource Logger { get; private set; }
@@ -19,7 +19,7 @@ namespace SAIN.Components
         private void Awake()
         {
             Player = GetComponent<Player>();
-            Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(SAINFlashLightComponent));
+            Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(FlashLightComponent));
             _lightDetection = new LightDetectionClass();
         }
 
@@ -74,7 +74,7 @@ namespace SAIN.Components
 
         public void CheckDevice(Player player, FieldInfo _tacticalModesField)
         {
-            if (Logger == null) Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(SAINFlashLightComponent));
+            if (Logger == null) Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(FlashLightComponent));
 
             if (player == null) return;
 

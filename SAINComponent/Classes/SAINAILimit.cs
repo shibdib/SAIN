@@ -8,6 +8,7 @@ using static SAIN.SAINComponent.BotComponent;
 using UnityEngine.UIElements;
 using UnityEngine;
 using Comfort.Common;
+using SAIN.Components;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -19,41 +20,32 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init() { }
 
-        public void Update() { }
-
-        public void UpdateAILimit()
+        public void Update()
         {
-            if (Bot == null || BotOwner == null)
-            {
-                return;
-            }
-            CheckForAILimit();
-            LimitAIThisFrame = ShallLimitAI();
+            checkAILimit();
         }
 
         public void Dispose() { }
 
-        public bool LimitAIThisFrame { get; private set; }
         public AILimitSetting CurrentAILimit { get; private set; }
 
-        private AILimitSetting CheckForAILimit()
+        private void checkAILimit()
         {
+            var result = CurrentAILimit;
             if (Bot.EnemyController.ActiveHumanEnemy)
             {
-                CurrentAILimit = AILimitSetting.Close;
-                return CurrentAILimit;
+                result = AILimitSetting.Close;
             }
-
-            if (CheckDistancesTimer < Time.time)
+            else if (_checkDistanceTime < Time.time)
             {
-                CheckDistancesTimer = Time.time + 3f;
+                _checkDistanceTime = Time.time + 3f;
                 var gameWorld = GameWorldHandler.SAINGameWorld;
-                if (gameWorld != null && gameWorld.FindClosestPlayer(out float closestPlayerSqrMag, Bot.Position) != null)
+                if (gameWorld != null && gameWorld.PlayerTracker.FindClosestHumanPlayer(out float closestPlayerSqrMag, Bot.Position) != null)
                 {
-                    CurrentAILimit = CheckDistances(closestPlayerSqrMag);
+                    result = CheckDistances(closestPlayerSqrMag);
                 }
             }
-            return CurrentAILimit;
+            CurrentAILimit = result;
         }
 
         private AILimitSetting CheckDistances(float closestPlayerSqrMag)
@@ -80,37 +72,6 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private float CheckDistancesTimer;
-
-        private bool ShallLimitAI()
-        {
-            float timeToAdd = 0f;
-            switch (CurrentAILimit)
-            {
-                case AILimitSetting.Far:
-                    timeToAdd = 0.1f;
-                    break;
-
-                case AILimitSetting.VeryFar:
-                    timeToAdd = 0.25f;
-                    break;
-
-                case AILimitSetting.Narnia:
-                    timeToAdd = 0.5f;
-                    break;
-
-                default:
-                    break;
-            }
-
-            if (CurrentAILimit != AILimitSetting.Close && AILimitTimer + timeToAdd > Time.time)
-            {
-                return true;
-            }
-            AILimitTimer = Time.time;
-            return false;
-        }
-
-        private float AILimitTimer;
+        private float _checkDistanceTime;
     }
 }

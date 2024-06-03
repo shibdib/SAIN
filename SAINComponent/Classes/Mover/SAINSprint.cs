@@ -61,7 +61,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (checkSameWay && 
                 Running && 
-                (LastRunDestination - point).sqrMagnitude < 0.1f)
+                (LastRunDestination - point).sqrMagnitude < 0.5f)
             {
                 return true;
             }
@@ -77,6 +77,8 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             return false;
         }
+
+        private float _timeStartRun;
 
         private ESprintUrgency _lastUrgency;
 
@@ -108,6 +110,9 @@ namespace SAIN.SAINComponent.Classes.Mover
         private IEnumerator RunToPoint(NavMeshPath path, ESprintUrgency urgency, System.Action callback = null)
         {
             _currentPath = path;
+            positionMoving = true;
+            _timeNotMoving = -1f;
+            _timeStartRun = Time.time;
 
             BotOwner.Mover.Stop();
             BotOwner.Mover.IsMoving = true;
@@ -115,7 +120,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             _currentIndex = 1;
 
             // First step, look towards the path we want to run
-            yield return firstTurn(path.corners[1]);
+            //yield return firstTurn(path.corners[1]);
 
             // Start running!
             yield return runPath(path, urgency);
@@ -177,7 +182,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     }
 
                     float timeSinceNoMove = timeSinceNotMoving;
-                    if (timeSinceNoMove > _moveSettings.BotSprintRecalcTime)
+                    if (timeSinceNoMove > _moveSettings.BotSprintRecalcTime && Time.time - _timeStartRun > 2f)
                     {
                         RecalcPath();
                         break;
@@ -389,12 +394,12 @@ namespace SAIN.SAINComponent.Classes.Mover
                 positionMoving = (Bot.Position - lastCheckPos).sqrMagnitude > _moveSettings.BotSprintNotMovingThreshold;
                 if (positionMoving)
                 {
-                    timeNotMoving = -1f;
+                    _timeNotMoving = -1f;
                     lastCheckPos = Bot.Position;
                 }
-                else if (timeNotMoving < 0)
+                else if (_timeNotMoving < 0)
                 {
-                    timeNotMoving = Time.time;
+                    _timeNotMoving = Time.time;
                 }
             }
         }
@@ -402,8 +407,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool positionMoving;
         private Vector3 lastCheckPos;
         private float nextCheckPosTime;
-        private float timeSinceNotMoving => positionMoving ? 0f : Time.time - timeNotMoving;
-        private float timeNotMoving;
+        private float timeSinceNotMoving => positionMoving ? 0f : Time.time - _timeNotMoving;
+        private float _timeNotMoving;
 
         private void updateVoxel()
         {

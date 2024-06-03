@@ -16,23 +16,38 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
         }
 
-        public void Update()
+        private bool checkAllowBlindFire()
         {
-            if (!Bot.PatrolDataPaused)
+            if (!Bot.SAINLayersActive ||
+                !BotOwner.WeaponManager.IsReady ||
+                !BotOwner.WeaponManager.HaveBullets ||
+                Bot.Player.IsSprintEnabled ||
+                Bot.Cover.CoverInUse == null)
             {
-                ResetBlindFire();
-                return;
+                return false;
             }
 
             SAINEnemy enemy = Bot.Enemy;
-            if (enemy == null || !enemy.Seen || enemy.TimeSinceSeen > 10f || !BotOwner.WeaponManager.IsReady || !BotOwner.WeaponManager.HaveBullets || Bot.Player.IsSprintEnabled || Bot.Cover.CoverInUse == null || !Bot.SAINLayersActive)
+            if (enemy == null ||
+                !enemy.Seen ||
+                enemy.TimeSinceSeen > 30f)
             {
-                ResetBlindFire();
-                return;
+                return false;
             }
+
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
                 && enemy.IsAI
                 && Bot.CurrentAILimit != AILimitSetting.Close)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public void Update()
+        {
+            if (!checkAllowBlindFire())
             {
                 ResetBlindFire();
                 return;
@@ -43,6 +58,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 WeaponPosOffset = BotOwner.WeaponRoot.position - Bot.Transform.Position;
             }
 
+            SAINEnemy enemy = Bot.Enemy;
             Vector3 targetPos;
             if (enemy.IsVisible)
             {

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using EFT;
+using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
@@ -62,11 +63,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-
-        public SAINEnemyStatus(SAINEnemy enemy) : base(enemy)
-        {
-        }
-
         public bool PositionalFlareEnabled
         {
             get
@@ -80,7 +76,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private const float _maxDistFromPosFlareEnabled = 10f;
+        public bool HeardRecently
+        {
+            get
+            {
+                return _heardRecently.Value;
+            }
+            set
+            {
+                _heardRecently.Value = value;
+            }
+        }
 
         public bool EnemyLookingAtMe
         {
@@ -98,9 +104,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private bool _enemyLookAtMe;
-        private float _nextCheckEnemyLookTime;
-
         public bool SearchStarted
         {
             get
@@ -117,11 +120,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public int NumberOfSearchesStarted { get; set; }
-        public float TimeSearchLastStarted { get; private set; }
-        public float TimeSinceSearchLastStarted => Time.time - TimeSearchLastStarted;
-
-        private readonly ExpirableBool _searchStarted = new ExpirableBool(300f, 0.85f, 1.15f);
+        public bool ShotByEnemyRecently
+        {
+            get
+            {
+                return _shotByEnemy.Value;
+            }
+            set
+            {
+                _shotByEnemy.Value = value;
+            }
+        }
 
         public bool EnemyUsingSurgery
         {
@@ -135,8 +144,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private readonly ExpirableBool _enemySurgery = new ExpirableBool(8f, 0.85f, 1.15f);
-
         public bool EnemyIsLooting
         {
             get
@@ -148,8 +155,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 _enemyLooting.Value = value;
             }
         }
-
-        private readonly ExpirableBool _enemyLooting = new ExpirableBool(30f, 0.85f, 1.15f);
 
         public bool EnemyIsSuppressed
         {
@@ -163,8 +168,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private readonly ExpirableBool _enemyIsSuppressed = new ExpirableBool(4f, 0.85f, 1.15f);
-
         public bool ShotAtMeRecently
         {
             get
@@ -176,8 +179,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 _enemyShotAtMe.Value = value;
             }
         }
-
-        private readonly ExpirableBool _enemyShotAtMe = new ExpirableBool(30f, 0.75f, 1.25f);
 
         public bool EnemyIsReloading
         {
@@ -191,8 +192,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private readonly ExpirableBool _enemyIsHealing = new ExpirableBool(4f, 0.75f, 1.25f);
-
         public bool EnemyHasGrenadeOut
         {
             get
@@ -204,8 +203,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 _enemyHasGrenade.Value = value;
             }
         }
-
-        private readonly ExpirableBool _enemyHasGrenade = new ExpirableBool(4f, 0.75f, 1.25f);
 
         public bool EnemyIsHealing
         {
@@ -219,6 +216,36 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
+        public int NumberOfSearchesStarted { get; set; }
+        public float TimeSearchLastStarted { get; private set; }
+        public float TimeSinceSearchLastStarted => Time.time - TimeSearchLastStarted;
+
+        public void RegisterShotByEnemy(DamageInfo damageInfo)
+        {
+            IPlayer player = damageInfo.Player?.iPlayer;
+            if (player != null && 
+                player.ProfileId == Enemy.EnemyProfileId)
+            {
+                ShotByEnemyRecently = true;
+            }
+        }
+
+        public SAINEnemyStatus(SAINEnemy enemy) : base(enemy)
+        {
+        }
+
+        private readonly ExpirableBool _heardRecently = new ExpirableBool(2f, 0.85f, 1.15f);
         private readonly ExpirableBool _enemyIsReloading = new ExpirableBool(4f, 0.75f, 1.25f);
+        private readonly ExpirableBool _enemyHasGrenade = new ExpirableBool(4f, 0.75f, 1.25f);
+        private readonly ExpirableBool _enemyIsHealing = new ExpirableBool(4f, 0.75f, 1.25f);
+        private readonly ExpirableBool _enemyShotAtMe = new ExpirableBool(30f, 0.75f, 1.25f);
+        private readonly ExpirableBool _enemyIsSuppressed = new ExpirableBool(4f, 0.85f, 1.15f);
+        private readonly ExpirableBool _enemyLooting = new ExpirableBool(30f, 0.85f, 1.15f);
+        private readonly ExpirableBool _enemySurgery = new ExpirableBool(8f, 0.85f, 1.15f);
+        private readonly ExpirableBool _searchStarted = new ExpirableBool(300f, 0.85f, 1.15f);
+        private readonly ExpirableBool _shotByEnemy = new ExpirableBool(2f, 0.75f, 1.25f);
+        private bool _enemyLookAtMe;
+        private float _nextCheckEnemyLookTime;
+        private const float _maxDistFromPosFlareEnabled = 10f;
     }
 }

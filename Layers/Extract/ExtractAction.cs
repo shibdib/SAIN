@@ -1,18 +1,12 @@
-﻿using BepInEx.Logging;
-using Comfort.Common;
-using DrakiaXYZ.BigBrain.Brains;
+﻿using Comfort.Common;
 using EFT;
-using UnityEngine;
-using SAIN.SAINComponent.SubComponents;
-using SAIN.SAINComponent;
-using Systems.Effects;
 using EFT.Interactive;
-using System.Linq;
 using SAIN.Components.BotController;
-using UnityEngine.AI;
 using SAIN.Helpers;
-using SAIN.Components;
 using SAIN.SAINComponent.Classes.Memory;
+using Systems.Effects;
+using UnityEngine;
+using UnityEngine.AI;
 
 namespace SAIN.Layers
 {
@@ -21,6 +15,7 @@ namespace SAIN.Layers
         public static float MinDistanceToStartExtract { get; } = 6f;
 
         private static readonly string Name = typeof(ExtractAction).Name;
+
         public ExtractAction(BotOwner bot) : base(bot, Name)
         {
         }
@@ -29,14 +24,12 @@ namespace SAIN.Layers
 
         public override void Start()
         {
-            SAINBot.Extracting = true;
-            BotOwner.PatrollingData.Pause();
+            SAINBot.Memory.Extract.ExtractStatus = EExtractStatus.Extracting;
         }
 
         public override void Stop()
         {
-            SAINBot.Extracting = false;
-            BotOwner.PatrollingData.Unpause();
+            SAINBot.Memory.Extract.ExtractStatus = EExtractStatus.None;
             BotOwner.Mover.MovementResume();
         }
 
@@ -84,7 +77,7 @@ namespace SAIN.Layers
 
             if (ExtractStarted)
             {
-                SAINBot.Memory.Extract.ExtractStatus = EExtractStatus.ExtractingNow;
+                setStatus(EExtractStatus.ExtractingNow);
                 StartExtract(point);
                 SAINBot.Mover.SetTargetPose(0f);
                 SAINBot.Mover.SetTargetMoveSpeed(0f);
@@ -93,17 +86,16 @@ namespace SAIN.Layers
                     _sayExitLocatedTime = Time.time + 10;
                     SAINBot.Talk.GroupSay(EPhraseTrigger.ExitLocated, null, true, 70);
                 }
-
             }
             else
             {
                 if (fightingEnemy)
                 {
-                    SAINBot.Memory.Extract.ExtractStatus = EExtractStatus.Fighting;
+                    setStatus(EExtractStatus.Fighting);
                 }
                 else
                 {
-                    SAINBot.Memory.Extract.ExtractStatus = EExtractStatus.MovingTo;
+                    setStatus(EExtractStatus.MovingTo);
                 }
                 MoveToExtract(distance, point);
                 SAINBot.Mover.SetTargetPose(1f);
@@ -117,12 +109,17 @@ namespace SAIN.Layers
             }
         }
 
+        private void setStatus(EExtractStatus status)
+        {
+            SAINBot.Memory.Extract.ExtractStatus = status;
+        }
+
         private float _sayExitLocatedTime;
 
         private bool isFightingEnemy()
         {
-            return SAINBot.Enemy != null 
-                && SAINBot.Enemy.Seen 
+            return SAINBot.Enemy != null
+                && SAINBot.Enemy.Seen
                 && (SAINBot.Enemy.Path.PathDistance < 50f || SAINBot.Enemy.InLineOfSight);
         }
 
@@ -183,7 +180,7 @@ namespace SAIN.Layers
             if (ExtractTimer == -1f)
             {
                 ExtractTimer = BotController.BotExtractManager.GetExfilTime(SAINBot.Memory.Extract.ExfilPoint);
-                
+
                 // Needed to get car extracts working
                 activateExfil(SAINBot.Memory.Extract.ExfilPoint);
 
@@ -222,6 +219,7 @@ namespace SAIN.Layers
                     case EExfiltrationType.Individual:
                         exfil.SetStatusLogged(EExfiltrationStatus.RegularMode, "Proceed-3");
                         break;
+
                     case EExfiltrationType.SharedTimer:
                         exfil.SetStatusLogged(EExfiltrationStatus.Countdown, "Proceed-1");
 
@@ -231,6 +229,7 @@ namespace SAIN.Layers
                         }
 
                         break;
+
                     case EExfiltrationType.Manual:
                         exfil.SetStatusLogged(EExfiltrationStatus.AwaitsManualActivation, "Proceed-2");
                         break;

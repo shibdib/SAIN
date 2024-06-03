@@ -1,7 +1,5 @@
 ﻿using Comfort.Common;
-using DrakiaXYZ.BigBrain.Brains;
 using EFT;
-using EFT.InventoryLogic;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
@@ -16,33 +14,17 @@ using SAIN.SAINComponent.Classes.Mover;
 using SAIN.SAINComponent.Classes.Search;
 using SAIN.SAINComponent.Classes.Talk;
 using SAIN.SAINComponent.Classes.WeaponFunction;
-using SAIN.SAINComponent.SubComponents;
 using System;
-using System.Diagnostics;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent
 {
-    public enum ESAINLayer
-    {
-        None = 0,
-        Combat = 1,
-        Squad = 2,
-        Extract = 3,
-        Run = 4,
-        AvoidThreat = 5,
-    }
-
     public class BotComponent : MonoBehaviour, IBotComponent
     {
         public static bool TryAddBotComponent(BotOwner botOwner, out BotComponent sainComponent)
         {
-            Player player = EFTInfo.GetPlayer(botOwner?.ProfileId);
             GameObject gameObject = botOwner?.gameObject;
-
-            if (gameObject != null && player != null)
+            if (gameObject != null)
             {
                 // If Somehow this bot already has SAIN attached, destroy it.
                 if (gameObject.TryGetComponent(out sainComponent))
@@ -50,46 +32,112 @@ namespace SAIN.SAINComponent
                     sainComponent.Dispose();
                 }
 
-                // Create a new Component
-                sainComponent = gameObject.AddComponent<BotComponent>();
-                if (sainComponent?.Init(new SAINPersonClass(player)) == true)
+                PlayerComponent playerComponent = GameWorldHandler.SAINGameWorld.PlayerTracker.GetPlayerComponent(botOwner.ProfileId);
+                if (playerComponent != null)
                 {
-                    return true;
+                    playerComponent.InitBot(botOwner);
+                    // Create a new Component
+                    sainComponent = gameObject.AddComponent<BotComponent>();
+                    if (sainComponent?.Init(playerComponent) == true)
+                    {
+                        return true;
+                    }
                 }
             }
             sainComponent = null;
             return false;
         }
 
-        public Action<string, BotOwner> OnSAINDisposed { get; set; }
-        public SAINPersonClass Person { get; private set; }
+        public PlayerComponent PlayerComponent { get; private set; }
+        public bool BotActive { get; private set; }
+        public string ProfileId { get; private set; }
+
+        public Vector3? CurrentTargetPosition => CurrentTarget.CurrentTargetPosition;
+        public Vector3? CurrentTargetDirection => CurrentTarget.CurrentTargetDirection;
+        public float CurrentTargetDistance => CurrentTarget.CurrentTargetDistance;
+        public Vector3 Position => Person.Position;
+        public Vector3 LookDirection => Person.Transform.LookDirection;
+        public bool HasEnemy => EnemyController.HasEnemy;
+        public bool HasLastEnemy => EnemyController.HasLastEnemy;
+        public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
+        public BotOwner BotOwner => PlayerComponent.BotOwner;
+        public Player Player => PlayerComponent.Player;
+        public SAINPersonClass Person => PlayerComponent.Person;
+        public SAINEnemy Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;
+        public SAINEnemy LastEnemy => HasLastEnemy ? EnemyController.LastEnemy : null;
+        public SAINPersonTransformClass Transform => Person.Transform;
+
         public SAINMedical Medical { get; private set; }
+        public SAINActivationClass SAINActivation { get; private set; }
+        public SAINDoorOpener DoorOpener { get; private set; }
+        public ManualShootClass ManualShoot { get; private set; }
+        public CurrentTargetClass CurrentTarget { get; private set; }
+        public BotBackpackDropClass BackpackDropper { get; private set; }
+        public BotLightController BotLight { get; private set; }
+        public SAINBotSpaceAwareness SpaceAwareness { get; private set; }
+        public SAINBotHitReaction BotHitReaction { get; private set; }
+        public AimDownSightsController AimDownSightsController { get; private set; }
+        public SAINAILimit AILimit { get; private set; }
+        public SAINBotSuppressClass Suppression { get; private set; }
+        public SAINVaultClass Vault { get; private set; }
+        public SAINSearchClass Search { get; private set; }
+        public SAINMemoryClass Memory { get; private set; }
+        public SAINEnemyController EnemyController { get; private set; }
+        public SAINNoBushESP NoBushESP { get; private set; }
+        public SAINFriendlyFireClass FriendlyFireClass { get; private set; }
+        public SAINVisionClass Vision { get; private set; }
+        public SAINBotEquipmentClass Equipment { get; private set; }
+        public SAINMoverClass Mover { get; private set; }
+        public SAINBotUnstuckClass BotStuck { get; private set; }
+        public FlashLightComponent FlashLight { get; private set; }
+        public SAINHearingSensorClass Hearing { get; private set; }
+        public SAINBotTalkClass Talk { get; private set; }
+        public SAINDecisionClass Decision { get; private set; }
+        public SAINCoverClass Cover { get; private set; }
+        public SAINBotInfoClass Info { get; private set; }
+        public SAINSquadClass Squad { get; private set; }
+        public SAINSelfActionClass SelfActions { get; private set; }
+        public SAINBotGrenadeClass Grenade { get; private set; }
+        public SAINSteeringClass Steering { get; private set; }
+
+        public Action<string, BotOwner> OnSAINDisposed { get; set; }
+
+        public bool IsDead =>
+            PlayerComponent == null ||
+            BotOwner == null
+            || BotOwner.IsDead == true
+            || Player == null
+            || Player.HealthController.IsAlive == false;
+
+
+        public bool GameIsEnding =>
+            Singleton<IBotGame>.Instance == null
+            || Singleton<IBotGame>.Instance.Status == GameStatus.Stopping;
+
+        public float DistanceToAimTarget
+        {
+            get
+            {
+                if (BotOwner.AimingData != null)
+                {
+                    return BotOwner.AimingData.LastDist2Target;
+                }
+                return CurrentTarget.CurrentTargetDistance;
+            }
+        }
 
         public float NextCheckVisiblePlayerTime;
 
-        public bool Init(SAINPersonClass person)
+        public bool Init(PlayerComponent playerComponent)
         {
-            if (person == null)
-            {
-                Logger.LogAndNotifyError("Person is Null in SAINComponent Init");
-                return false;
-            }
+            PlayerComponent = playerComponent;
+            ProfileId = playerComponent.ProfileId;
 
-            GameWorld.OnDispose += Dispose;
-
-            Person = person;
-            BotOwner = person.BotOwner;
-            ProfileId = person.ProfileId;
-            Player = person.Player;
-
-            Player.OnPlayerDeadOrUnspawn += botKilled;
-
-            try 
+            try
             {
                 NoBushESP = this.GetOrAddComponent<SAINNoBushESP>();
-                NoBushESP.Init(person.BotOwner, this);
-
-                FlashLight = person.Player.gameObject.AddComponent<SAINFlashLightComponent>();
+                NoBushESP.Init(playerComponent.BotOwner, this);
+                FlashLight = playerComponent.Player.GetOrAddComponent<FlashLightComponent>();
 
                 // Must be first, other classes use it
                 Squad = new SAINSquadClass(this);
@@ -115,64 +163,85 @@ namespace SAIN.SAINComponent
                 AimDownSightsController = new AimDownSightsController(this);
                 BotHitReaction = new SAINBotHitReaction(this);
                 SpaceAwareness = new SAINBotSpaceAwareness(this);
-                DoorOpener = new SAINDoorOpener(this, person.BotOwner);
+                DoorOpener = new SAINDoorOpener(this, playerComponent.BotOwner);
                 Medical = new SAINMedical(this);
                 BotLight = new BotLightController(this);
                 BackpackDropper = new BotBackpackDropClass(this);
                 CurrentTarget = new CurrentTargetClass(this);
                 ManualShoot = new ManualShootClass(this);
-
-                BotOwner.OnBotStateChange += resetBot;
+                SAINActivation = new SAINActivationClass(this);
             }
             catch (Exception ex)
             {
-                Logger.LogError("Init SAIN ERROR, Disposing...");
+                Logger.LogError("Error When Creating Classes, Disposing...");
                 Logger.LogError(ex);
                 Dispose();
                 return false;
             }
 
-
-            Search.Init();
-            Memory.Init();
-            EnemyController.Init();
-            FriendlyFireClass.Init();
-            Vision.Init();
-            Equipment.Init();
-            Mover.Init();
-            BotStuck.Init();
-            Hearing.Init();
-            Talk.Init();
-            Decision.Init();
-            Cover.Init();
-            Info.Init();
-            Squad.Init();
-            SelfActions.Init();
-            Grenade.Init();
-            Steering.Init();
-            Vault.Init();
-            Suppression.Init();
-            AILimit.Init();
-            AimDownSightsController.Init();
-            BotHitReaction.Init();
-            SpaceAwareness.Init();
-            Medical.Init();
-            BotLight.Init();
-            BackpackDropper.Init();
-
-            if (!verifyBrain(person))
+            try
             {
-                Logger.LogError("Init SAIN ERROR, Disposing...");
+                Search.Init();
+                Memory.Init();
+                EnemyController.Init();
+                FriendlyFireClass.Init();
+                Vision.Init();
+                Equipment.Init();
+                Mover.Init();
+                BotStuck.Init();
+                Hearing.Init();
+                Talk.Init();
+                Decision.Init();
+                Cover.Init();
+                Info.Init();
+                Squad.Init();
+                SelfActions.Init();
+                Grenade.Init();
+                Steering.Init();
+                Vault.Init();
+                Suppression.Init();
+                AILimit.Init();
+                AimDownSightsController.Init();
+                BotHitReaction.Init();
+                SpaceAwareness.Init();
+                Medical.Init();
+                BotLight.Init();
+                BackpackDropper.Init();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Error When Initializing Classes, Disposing...");
+                Logger.LogError(ex);
                 Dispose();
                 return false;
             }
 
-            if (EFTMath.RandomBool(1) && 
-                SAINPlugin.LoadedPreset.GlobalSettings.General.RandomSpeedHacker)
+            try
             {
-                IsSpeedHacker = true;
-            }
+                if (!verifyBrain(Person))
+                {
+                    Logger.LogError("Init SAIN ERROR, Disposing...");
+                    Dispose();
+                    return false;
+                }
 
+                if (EFTMath.RandomBool(1) &&
+                    SAINPlugin.LoadedPreset.GlobalSettings.General.RandomSpeedHacker)
+                {
+                    IsSpeedHacker = true;
+                }
+
+                BotOwner.OnBotStateChange += resetBot;
+                GameWorld.OnDispose += Dispose;
+                Player.OnPlayerDeadOrUnspawn += botKilled;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Error When Finishing Bot Initialization, Disposing...");
+                Logger.LogError(ex);
+                Dispose();
+                return false;
+            }
             return true;
         }
 
@@ -187,72 +256,94 @@ namespace SAIN.SAINComponent
             return true;
         }
 
-
         private void OnDisable()
         {
-            Decision.ResetDecisions(false);
+            BotActive = false;
             StopAllCoroutines();
+            Decision?.ResetDecisions(false);
+            Cover?.ActivateCoverFinder(false);
         }
 
         public bool IsSpeedHacker { get; private set; }
+        public bool SAINLayersActive => SAINActivation.SAINLayersActive;
+
+        public ESAINLayer ActiveLayer
+        {
+            get
+            {
+                return SAINActivation.ActiveLayer;
+            }
+            set
+            {
+                SAINActivation.SetActiveLayer(value);
+            }
+        }
 
         private void resetBot(EBotState state)
         {
             Decision.ResetDecisions(false);
         }
 
-        public bool SAINLayersActive => ActiveLayer != ESAINLayer.None;
-
-        public ESAINLayer ActiveLayer { get; set; }
-
 
         private void Update()
         {
-            if (Player == null || BotOwner == null || IsDead || BotOwner.BotState == EBotState.Disposed)
+            if (BotActive)
+            {
+                EnemyController.Update();
+                AILimit.Update();
+                CurrentTarget.Update();
+                Decision.Update();
+                Info.Update();
+                SAINActivation.Update();
+
+                DoorOpener.Update();
+                Search.Update();
+                Memory.Update();
+                FriendlyFireClass.Update();
+                Vision.Update();
+                Equipment.Update();
+                Mover.Update();
+                BotStuck.Update();
+                Hearing.Update();
+                Talk.Update();
+                Cover.Update();
+                Squad.Update();
+                SelfActions.Update();
+                Grenade.Update();
+                Steering.Update();
+                Vault.Update();
+                Suppression.Update();
+                AimDownSightsController.Update();
+                BotHitReaction.Update();
+                SpaceAwareness.Update();
+                Medical.Update();
+                BotLight.Update();
+                ManualShoot.Update();
+
+                handleDumbShit();
+            }
+        }
+
+        private void LateUpdate()
+        {
+            if (IsDead || BotOwner.BotState == EBotState.Disposed)
             {
                 Dispose();
                 return;
             }
 
-            if (GameIsEnding || !BotActive)
+            BotActive =
+                !GameIsEnding &&
+                BotOwner.isActiveAndEnabled &&
+                Player.gameObject.activeInHierarchy &&
+                BotOwner.gameObject.activeInHierarchy &&
+                BotOwner.BotState == EBotState.Active &&
+                BotOwner.StandBy.StandByType == BotStandByType.active;
+
+            if (!BotActive)
             {
-                StopAllCoroutines();
-                Cover.ActivateCoverFinder(false);
-                return;
+                OnDisable();
             }
-
-            handlePatrolData();
-
-            EnemyController.Update();
-            AILimit.UpdateAILimit();
-            CurrentTarget.Update();
-            Decision.Update();
-            Info.Update();
-            DoorOpener.Update();
-            Search.Update();
-            Memory.Update();
-            FriendlyFireClass.Update();
-            Vision.Update();
-            Equipment.Update();
-            Mover.Update();
-            BotStuck.Update();
-            Hearing.Update();
-            Talk.Update();
-            Cover.Update();
-            Squad.Update();
-            SelfActions.Update();
-            Grenade.Update();
-            Steering.Update();
-            Vault.Update();
-            Suppression.Update();
-            AimDownSightsController.Update();
-            BotHitReaction.Update();
-            SpaceAwareness.Update();
-            Medical.Update();
-            BotLight.Update();
-            ManualShoot.Update();
-
-            handleDumbShit();
         }
 
         private void handleDumbShit()
@@ -285,61 +376,6 @@ namespace SAIN.SAINComponent
         private float defaultMoveSpeed;
         private float defaultSprintSpeed;
 
-        public SAINDoorOpener DoorOpener { get; private set; }
-        public bool PatrolDataPaused { get; private set; }
-        public bool Extracting { get; set; }
-
-        private void handlePatrolData()
-        {
-            if (!SAINLayersActive && 
-                PatrolDataPaused)
-            {
-                PatrolDataPaused = false;
-
-                if (!BrainManager.IsCustomLayerActive(BotOwner))
-                    BotOwner.PatrollingData?.Unpause();
-
-                if (!_speedReset)
-                {
-                    _speedReset = true; 
-                    resetSpeed();
-                }
-            }
-            if (SAINLayersActive && 
-                !PatrolDataPaused)
-            {
-                PatrolDataPaused = true;
-                BotOwner.PatrollingData?.Pause();
-                if (_speedReset)
-                {
-                    _speedReset = false;
-                }
-            }
-        }
-
-        private void resetSpeed()
-        {
-            BotOwner.SetTargetMoveSpeed(1f);
-            BotOwner.Mover.SetPose(1f);
-            Mover.SetTargetMoveSpeed(1f);
-            Mover.SetTargetPose(1f);
-        }
-
-        private bool _speedReset;
-        public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
-
-        public float DistanceToAimTarget
-        {
-            get
-            {
-                if (BotOwner.AimingData != null)
-                {
-                    return BotOwner.AimingData.LastDist2Target;
-                }
-                return CurrentTarget.CurrentTargetDistance;
-            }
-        }
-
         private void botKilled(Player player)
         {
             if (player != null)
@@ -351,37 +387,27 @@ namespace SAIN.SAINComponent
 
         public void Dispose()
         {
+            OnDisable();
+
             try
             {
-                //Logger.LogWarning($"SAIN Disposed");
-
-                GameWorld.OnDispose -= Dispose;
-                OnSAINDisposed?.Invoke(ProfileId, BotOwner);
-
-                StopAllCoroutines();
-
-                if (BotOwner != null)
-                {
-                    BotOwner.OnBotStateChange -= resetBot;
-                }
-
-                Search.Dispose();
-                Memory.Dispose();
-                EnemyController.Dispose();
-                FriendlyFireClass.Dispose();
-                Vision.Dispose();
-                Equipment.Dispose();
-                Mover.Dispose();
-                BotStuck.Dispose();
-                Hearing.Dispose();
-                Talk.Dispose();
-                Decision.Dispose();
-                Cover.Dispose();
-                Info.Dispose();
-                Squad.Dispose();
-                SelfActions.Dispose();
-                Grenade.Dispose();
-                Steering.Dispose();
+                Search?.Dispose();
+                Memory?.Dispose();
+                EnemyController?.Dispose();
+                FriendlyFireClass?.Dispose();
+                Vision?.Dispose();
+                Equipment?.Dispose();
+                Mover?.Dispose();
+                BotStuck?.Dispose();
+                Hearing?.Dispose();
+                Talk?.Dispose();
+                Decision?.Dispose();
+                Cover?.Dispose();
+                Info?.Dispose();
+                Squad?.Dispose();
+                SelfActions?.Dispose();
+                Grenade?.Dispose();
+                Steering?.Dispose();
                 Enemy?.Dispose();
                 Vault?.Dispose();
                 Suppression?.Dispose();
@@ -392,17 +418,30 @@ namespace SAIN.SAINComponent
                 Medical?.Dispose();
                 BotLight?.Dispose();
                 BackpackDropper?.Dispose();
-
-                try
-                {
-                    GameObject.Destroy(NoBushESP);
-                    GameObject.Destroy(FlashLight);
-                }
-                catch { }
-
-                Destroy(this);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Dispose Classes Error: {ex}");
+            }
+
+            try
+            {
+                GameObject.Destroy(NoBushESP);
+                GameObject.Destroy(FlashLight);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Dispose Components Error: {ex}");
+            }
+
+            if (BotOwner != null)
+            {
+                BotOwner.OnBotStateChange -= resetBot;
+            }
+            GameWorld.OnDispose -= Dispose;
+            OnSAINDisposed?.Invoke(ProfileId, BotOwner);
+
+            Destroy(this);
         }
 
         private void OnDestroy()
@@ -410,72 +449,5 @@ namespace SAIN.SAINComponent
             StopAllCoroutines();
         }
 
-        public Vector3? CurrentTargetPosition => CurrentTarget.CurrentTargetPosition;
-
-        public Vector3? CurrentTargetDirection => CurrentTarget.CurrentTargetDirection;
-
-        public float CurrentTargetDistance => CurrentTarget.CurrentTargetDistance;
-
-        public ManualShootClass ManualShoot { get; private set; }
-        public CurrentTargetClass CurrentTarget { get; private set; }
-        public BotBackpackDropClass BackpackDropper { get; private set; }
-        public BotLightController BotLight { get; private set; }
-        public SAINBotSpaceAwareness SpaceAwareness { get; private set; }
-        public SAINBotHitReaction BotHitReaction { get; private set; }
-        public AimDownSightsController AimDownSightsController { get; private set; }
-        public SAINAILimit AILimit { get; private set; }
-        public SAINBotSuppressClass Suppression { get; private set; }
-        public SAINVaultClass Vault { get; private set; }
-        public SAINSearchClass Search { get; private set; }
-        public SAINEnemy Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;
-        public SAINEnemy LastEnemy => HasLastEnemy ? EnemyController.LastEnemy : null;
-        public SAINPersonTransformClass Transform => Person.Transform;
-        public SAINMemoryClass Memory { get; private set; }
-        public SAINEnemyController EnemyController { get; private set; }
-        public SAINNoBushESP NoBushESP { get; private set; }
-        public SAINFriendlyFireClass FriendlyFireClass { get; private set; }
-        public SAINVisionClass Vision { get; private set; }
-        public SAINBotEquipmentClass Equipment { get; private set; }
-        public SAINMoverClass Mover { get; private set; }
-        public SAINBotUnstuckClass BotStuck { get; private set; }
-        public SAINFlashLightComponent FlashLight { get; private set; }
-        public SAINHearingSensorClass Hearing { get; private set; }
-        public SAINBotTalkClass Talk { get; private set; }
-        public SAINDecisionClass Decision { get; private set; }
-        public SAINCoverClass Cover { get; private set; }
-        public SAINBotInfoClass Info { get; private set; }
-        public SAINSquadClass Squad { get; private set; }
-        public SAINSelfActionClass SelfActions { get; private set; }
-        public SAINBotGrenadeClass Grenade { get; private set; }
-        public SAINSteeringClass Steering { get; private set; }
-
-        public bool IsDead =>
-            BotOwner == null
-            || BotOwner.IsDead == true
-            || Player == null
-            || Player.HealthController.IsAlive == false;
-
-        public bool BotActive =>
-            IsDead == false
-            && BotOwner.isActiveAndEnabled
-            && Player.gameObject.activeInHierarchy
-            && BotOwner.gameObject.activeInHierarchy
-            && BotOwner.BotState == EBotState.Active
-            && BotOwner.StandBy.StandByType == BotStandByType.active;
-
-        //&& BotOwner.StandBy.StandByType == BotStandByType.active
-        //&& BotOwner.isActiveAndEnabled ;
-
-        public bool GameIsEnding =>
-            Singleton<IBotGame>.Instance == null
-            || Singleton<IBotGame>.Instance.Status == GameStatus.Stopping;
-
-        public Vector3 Position => Person.Position;
-        public Vector3 LookDirection => Person.Transform.LookDirection;
-        public bool HasEnemy => EnemyController.HasEnemy;
-        public bool HasLastEnemy => EnemyController.HasLastEnemy;
-        public BotOwner BotOwner { get; private set; }
-        public string ProfileId { get; private set; }
-        public Player Player { get; private set; }
     }
 }

@@ -3,8 +3,9 @@
     public enum EExtractStatus
     {
         None = 0,
-        MovingTo = 1,
-        Fighting = 2,
-        ExtractingNow = 3,
+        Extracting = 1,
+        MovingTo = 2,
+        Fighting = 3,
+        ExtractingNow = 4,
     }
 }

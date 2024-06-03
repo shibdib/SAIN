@@ -28,26 +28,26 @@ namespace SAIN.SAINComponent.Classes.Sense
         {
         }
 
-        private SAINFlashLightComponent getFlashlight(SAINEnemy enemy)
+        private FlashLightComponent getFlashlight(SAINEnemy enemy)
         {
             if (enemy == null)
             {
                 return null;
             }
 
-            SAINFlashLightComponent flashlight = null;
+            FlashLightComponent flashlight = null;
             if (enemy.EnemyPerson?.IsSAINBot == true)
             {
-                flashlight = enemy.EnemyPerson?.SAIN?.FlashLight;
+                flashlight = enemy.EnemyPerson?.BotComponent?.FlashLight;
             }
-            else if (EFTInfo.IsEnemyMainPlayer(enemy))
+            else if (GameWorldInfo.IsEnemyMainPlayer(enemy))
             {
                 flashlight = GameWorldHandler.SAINMainPlayer?.MainPlayerLight;
             }
 
             if (flashlight == null)
             {
-                flashlight = enemy.EnemyPlayer?.GetComponent<SAINFlashLightComponent>();
+                flashlight = enemy.EnemyPlayer?.GetComponent<FlashLightComponent>();
             }
 
             return flashlight;
@@ -60,7 +60,7 @@ namespace SAIN.SAINComponent.Classes.Sense
                 return;
             }
 
-            SAINFlashLightComponent flashlight = getFlashlight(enemy);
+            FlashLightComponent flashlight = getFlashlight(enemy);
             if (flashlight != null)
             {
                 bool usingNVGs = BotOwner.NightVision.UsingNow;

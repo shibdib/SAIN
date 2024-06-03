@@ -21,7 +21,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 SideStepSetting = SideStepSetting.None;
             }
 
-            if (!Bot.PatrolDataPaused)
+            if (!Bot.SAINLayersActive)
             {
                 ResetSideStep(currentSideStep);
                 return;

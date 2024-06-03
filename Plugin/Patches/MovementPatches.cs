@@ -12,9 +12,22 @@ using SAIN.Layers;
 using System;
 using UnityEngine.UIElements;
 using EFT.HealthSystem;
+using EFT.EnvironmentEffect;
 
 namespace SAIN.Patches.Generic
 {
+    public class InBunkerPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(EnvironmentManager), "SetTriggerForPlayer");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(IPlayer player, IndoorTrigger trigger)
+        {
+        }
+    }
     public class SteeringPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

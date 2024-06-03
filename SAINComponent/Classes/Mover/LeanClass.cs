@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (!Bot.PatrolDataPaused || !Bot.SAINLayersActive)
+            if (!Bot.SAINLayersActive)
             {
                 ResetLean();
                 return;

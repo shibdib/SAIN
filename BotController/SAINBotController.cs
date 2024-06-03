@@ -1,12 +1,10 @@
-using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
-using Interpolation;
+using EFT.EnvironmentEffect;
 using SAIN.BotController.Classes;
 using SAIN.Components.BotController;
 using SAIN.Helpers;
 using SAIN.Layers;
-using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Enemy;
 using System;
@@ -15,8 +13,6 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.Components
 {
@@ -41,6 +37,26 @@ namespace SAIN.Components
         public BotSpawnController BotSpawnController { get; private set; } = new BotSpawnController();
         public BotSquads BotSquads { get; private set; } = new BotSquads();
 
+        public void PlayerEnviromentChanged(IPlayer player, IndoorTrigger trigger)
+        {
+            if (player == null)
+            {
+                return;
+            }
+        }
+
+        public BotComponent GetBotByProfileId(string profileId)
+        {
+            foreach (var bot in Bots.Values)
+            {
+                if (bot != null && bot.ProfileId == profileId)
+                {
+                    return bot;
+                }
+            }
+            return null;
+        }
+
         private void Awake()
         {
             GameWorld.OnDispose += Dispose;
@@ -60,7 +76,7 @@ namespace SAIN.Components
 
         public void PlayAISound(Player player, SAINSoundType soundType, Vector3 position, float power)
         {
-            if (player != null && 
+            if (player != null &&
                 player.HealthController?.IsAlive == true)
             {
                 if (player.IsAI && player.AIData.BotOwner?.BotState != EBotState.Active)
@@ -73,7 +89,7 @@ namespace SAIN.Components
                     _playerSoundPlayers.Add(id, new PlayerSoundPlayer(player.IsAI));
                     player.OnPlayerDeadOrUnspawn += removePlayerSoundPlayer;
                 }
-                if (_playerSoundPlayers.TryGetValue(id, out var soundPlayer) && 
+                if (_playerSoundPlayers.TryGetValue(id, out var soundPlayer) &&
                     soundPlayer.ShallPlayAISound(power))
                 {
                     playSound(soundType, position, player, power);
@@ -124,11 +140,6 @@ namespace SAIN.Components
 
         private void Update()
         {
-            if (GameWorld == null)
-            {
-                Dispose();
-                return;
-            }
             if (BotGame == null)
             {
                 return;
@@ -332,11 +343,48 @@ namespace SAIN.Components
 
         public void playSound(SAINSoundType soundType, Vector3 position, Player player, float range)
         {
-            if (Bots.Count == 0 || player == null)
+            if (playerIsAlive(player))
             {
-                return;
+                StartCoroutine(delaySoundHeard(player, position, range, soundType));
             }
+        }
 
+        private BotEventHandler BotEventHandler;
+
+        private IEnumerator delaySoundHeard(Player player, Vector3 position, float range, SAINSoundType soundType, float delay = 0.25f)
+        {
+            yield return new WaitForSeconds(delay);
+
+            if (playerIsAlive(player))
+            {
+                AISoundType baseSoundType = playBotEvent(player, position, range, soundType);
+                AISoundPlayed?.Invoke(soundType, position, player, range);
+
+                if (baseSoundType == AISoundType.step)
+                {
+                    foreach (var bot in Bots.Values)
+                    {
+                        updateActionForBotEnemy(bot, player, range, soundType);
+                    }
+                }
+            }
+        }
+
+        private bool playerIsAlive(Player player) => player != null && player.HealthController.IsAlive;
+
+        private AISoundType playBotEvent(Player player, Vector3 position, float range, SAINSoundType soundType)
+        {
+            AISoundType baseSoundType = getBaseSoundType(soundType);
+            if (BotEventHandler == null)
+            {
+                BotEventHandler = Singleton<BotEventHandler>.Instance;
+            }
+            BotEventHandler?.PlaySound(player, position, range, baseSoundType);
+            return baseSoundType;
+        }
+
+        private AISoundType getBaseSoundType(SAINSoundType soundType)
+        {
             AISoundType baseSoundType;
             switch (soundType)
             {
@@ -349,87 +397,64 @@ namespace SAIN.Components
                     break;
 
                 default:
-                    baseSoundType = AISoundType.step; 
+                    baseSoundType = AISoundType.step;
                     break;
             }
-
-            if (BotEventHandler == null)
-            {
-                BotEventHandler = Singleton<BotEventHandler>.Instance;
-            }
-
-            BotEventHandler?.PlaySound(player, player.Position, range, baseSoundType);
-            AISoundPlayed?.Invoke(soundType, position, player, range);
-            if (baseSoundType == AISoundType.step)
-            {
-                StartCoroutine(delayHearAction(player, range, soundType));
-            }
+            return baseSoundType;
         }
 
-        private BotEventHandler BotEventHandler;
-
-        private IEnumerator delayHearAction(Player player, float range, SAINSoundType soundType, float delay = 0.25f)
+        private void updateActionForBotEnemy(BotComponent bot, Player player, float range, SAINSoundType soundType)
         {
-            yield return new WaitForSeconds(delay);
-
-            if (player == null || !player.HealthController.IsAlive)
+            if (IsBotActive(bot) &&
+                player.ProfileId != bot.Player.ProfileId)
             {
-                yield break;
-            }
-
-            foreach (var bot in Bots.Values)
-            {
-                if (IsBotActive(bot) && 
-                    player.ProfileId != bot.Player.ProfileId)
+                SAINEnemy Enemy = bot.EnemyController.GetEnemy(player.ProfileId);
+                if (Enemy?.EnemyPerson.IsActive == true
+                    && Enemy.IsValid
+                    && Enemy.RealDistance <= range)
                 {
-                    SAINEnemy Enemy = bot.EnemyController.GetEnemy(player.ProfileId);
-                    if (Enemy?.EnemyPerson.IsActive == true
-                        && Enemy.IsValid
-                        && Enemy.RealDistance <= range)
+                    float chance2Hear = chanceToHearAction(Enemy, range, Enemy.RealDistance);
+                    if (chance2Hear == 0 ||
+                        !EFTMath.RandomBool(chance2Hear))
                     {
-                        float chance2Hear = chanceToHearAction(Enemy, range, Enemy.RealDistance);
-                        if (chance2Hear == 0 || 
-                            !EFTMath.RandomBool(chance2Hear))
-                        {
-                            continue;
-                        }
+                        return;
+                    }
 
-                        bool shallUpdateSquad = true;
-                        if (soundType == SAINSoundType.GrenadePin || soundType == SAINSoundType.GrenadeDraw)
-                        {
-                            Enemy.EnemyStatus.EnemyHasGrenadeOut = true;
-                        }
-                        else if (soundType == SAINSoundType.Reload || soundType == SAINSoundType.DryFire)
-                        {
-                            Enemy.EnemyStatus.EnemyIsReloading = true;
-                        }
-                        else if (soundType == SAINSoundType.Looting)
-                        {
-                            Enemy.EnemyStatus.EnemyIsLooting = true;
-                        }
-                        else if (soundType == SAINSoundType.Heal)
-                        {
-                            Enemy.EnemyStatus.EnemyIsHealing = true;
-                        }
-                        else if (soundType == SAINSoundType.Surgery)
-                        {
-                            Enemy.EnemyStatus.VulnerableAction = SAINComponent.Classes.Enemy.EEnemyAction.UsingSurgery;
-                        }
-                        else if (soundType == SAINSoundType.Gunshot 
-                            || soundType == SAINSoundType.SuppressedGunShot 
-                            || soundType == SAINSoundType.FootStep)
-                        {
-                            shallUpdateSquad = false;
-                        }
+                    bool shallUpdateSquad = true;
+                    if (soundType == SAINSoundType.GrenadePin || soundType == SAINSoundType.GrenadeDraw)
+                    {
+                        Enemy.EnemyStatus.EnemyHasGrenadeOut = true;
+                    }
+                    else if (soundType == SAINSoundType.Reload || soundType == SAINSoundType.DryFire)
+                    {
+                        Enemy.EnemyStatus.EnemyIsReloading = true;
+                    }
+                    else if (soundType == SAINSoundType.Looting)
+                    {
+                        Enemy.EnemyStatus.EnemyIsLooting = true;
+                    }
+                    else if (soundType == SAINSoundType.Heal)
+                    {
+                        Enemy.EnemyStatus.EnemyIsHealing = true;
+                    }
+                    else if (soundType == SAINSoundType.Surgery)
+                    {
+                        Enemy.EnemyStatus.VulnerableAction = SAINComponent.Classes.Enemy.EEnemyAction.UsingSurgery;
+                    }
+                    else if (soundType == SAINSoundType.Gunshot
+                        || soundType == SAINSoundType.SuppressedGunShot
+                        || soundType == SAINSoundType.FootStep)
+                    {
+                        shallUpdateSquad = false;
+                    }
 
-                        if (shallUpdateSquad)
-                        {
-                            float dispersion = Enemy.RealDistance / 20f;
-                            Vector3 random = UnityEngine.Random.insideUnitSphere * dispersion;
-                            random.y = 0f;
-                            Enemy.SetHeardStatus(true, Enemy.EnemyPosition + random, soundType, false);
-                            bot.Squad.SquadInfo.UpdateSharedEnemyStatus(Enemy.EnemyIPlayer, Enemy.EnemyStatus.VulnerableAction, bot, soundType, Enemy.EnemyPosition + random);
-                        }
+                    if (shallUpdateSquad)
+                    {
+                        float dispersion = Enemy.RealDistance / 20f;
+                        Vector3 random = UnityEngine.Random.insideUnitSphere * dispersion;
+                        random.y = 0f;
+                        Enemy.SetHeardStatus(true, Enemy.EnemyPosition + random, soundType, false);
+                        bot.Squad.SquadInfo.UpdateSharedEnemyStatus(Enemy.EnemyIPlayer, Enemy.EnemyStatus.VulnerableAction, bot, soundType, Enemy.EnemyPosition + random);
                     }
                 }
             }
@@ -460,7 +485,7 @@ namespace SAIN.Components
             {
                 return;
             }
-            Player player = EFTInfo.GetPlayer(playerProfileID);
+            Player player = GameWorldInfo.GetAlivePlayer(playerProfileID);
             if (player != null)
             {
                 if (!isSmoke)
@@ -551,7 +576,7 @@ namespace SAIN.Components
         {
             var danger = Vector.DangerPoint(position, force, mass);
             yield return null;
-            Player player = EFTInfo.GetPlayer(grenade.ProfileId);
+            Player player = GameWorldInfo.GetAlivePlayer(grenade.ProfileId);
             if (player == null)
             {
                 Logger.LogError($"Player Null from ID {grenade.ProfileId}");
@@ -584,13 +609,9 @@ namespace SAIN.Components
         {
             try
             {
-                LineOfSightManager.Dispose();
-
-                StopAllCoroutines();
-
                 GameWorld.OnDispose -= Dispose;
-
-                Patches.Vision.AIVisionUpdateLimitPatch.LookUpdates.Clear();
+                StopAllCoroutines();
+                LineOfSightManager?.Dispose();
 
                 PlayerTalk -= playerTalked;
 

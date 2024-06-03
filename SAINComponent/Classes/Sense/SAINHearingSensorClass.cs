@@ -226,7 +226,7 @@ namespace SAIN.SAINComponent.Classes
 
         private bool GetShotDirection(IPlayer person, out Vector3 result)
         {
-            Player player = EFTInfo.GetPlayer(person);
+            Player player = GameWorldInfo.GetAlivePlayer(person);
             if (player != null)
             {
                 result = player.LookDirection;
@@ -280,7 +280,7 @@ namespace SAIN.SAINComponent.Classes
             bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
             float shooterDistance = (BotOwner.Transform.position - soundPosition).magnitude;
 
-            Player player = EFTInfo.GetPlayer(person);
+            Player player = GameWorldInfo.GetAlivePlayer(person);
             if (player != null && !BotOwner.EnemiesController.IsEnemy(player))
             {
                 return false;

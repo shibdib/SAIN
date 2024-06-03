@@ -25,40 +25,27 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            subscribe();
+            Player.BeingHitAction += GetHit;
         }
-
 
         public void Update()
         {
-            subscribe();
         }
 
         public void Dispose()
         {
-            if (_subscribed && Player != null)
+            if (Player != null)
             {
                 Player.BeingHitAction -= GetHit;
             }
         }
-
-        private void subscribe()
-        {
-            if (!_subscribed && Player != null)
-            {
-                _subscribed = true;
-                Player.BeingHitAction += GetHit;
-            }
-        }
-
-        bool _subscribed;
 
         public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
             IPlayer player = damageInfo.Player?.iPlayer;
             if (player != null)
             {
-                PlayerWhoLastShotMe = EFTInfo.GetPlayer(player);
+                PlayerWhoLastShotMe = GameWorldInfo.GetAlivePlayer(player);
             }
             switch (bodyPart)
             {
@@ -87,7 +74,7 @@ namespace SAIN.SAINComponent.Classes
             SAINEnemy enemy = Bot.EnemyController.CheckAddEnemy(player);
             if (enemy != null)
             {
-                enemy.RegisterShotByEnemy(damageInfo);
+                enemy.EnemyStatus.RegisterShotByEnemy(damageInfo);
             }
         }
 
