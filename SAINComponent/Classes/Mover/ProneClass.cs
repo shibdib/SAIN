@@ -46,10 +46,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 if (Player.MovementContext.CanProne)
                 {
-                    var enemy = SAINBot.Enemy;
+                    var enemy = Bot.Enemy;
                     if (enemy != null)
                     {
-                        float distance = (enemy.EnemyPosition - SAINBot.Transform.Position).magnitude;
+                        float distance = (enemy.EnemyPosition - Bot.Transform.Position).magnitude;
                         if (distance > 20f)
                         {
                             if (withShoot)
@@ -68,10 +68,10 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (Player.MovementContext.CanProne)
             {
-                var enemy = SAINBot.Enemy;
+                var enemy = Bot.Enemy;
                 if (enemy != null)
                 {
-                    float distance = (enemy.EnemyPosition - SAINBot.Position).sqrMagnitude;
+                    float distance = (enemy.EnemyPosition - Bot.Position).sqrMagnitude;
                     if (distance > mindist * mindist)
                     {
                         if (withShoot)
@@ -89,13 +89,13 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (Player.MovementContext.CanProne)
             {
-                Vector3? targetPos = SAINBot.CurrentTargetPosition;
+                Vector3? targetPos = Bot.CurrentTargetPosition;
                 if (targetPos != null)
                 {
-                    float distance = (targetPos.Value - SAINBot.Transform.Position).magnitude;
+                    float distance = (targetPos.Value - Bot.Transform.Position).magnitude;
                     if (distance > mindist)
                     {
-                        if (SAINBot.Decision.CurrentSelfDecision == SelfDecision.None && !SAINBot.Suppression.IsHeavySuppressed)
+                        if (Bot.Decision.CurrentSelfDecision == SelfDecision.None && !Bot.Suppression.IsHeavySuppressed)
                         {
                             return !CanShootFromProne(targetPos.Value);
                         }
@@ -113,12 +113,12 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (BotLay.IsLay)
             {
-                var enemy = SAINBot.Enemy;
+                var enemy = Bot.Enemy;
                 if (enemy == null)
                 {
                     return true;
                 }
-                float distance = (enemy.EnemyPosition - SAINBot.Transform.Position).magnitude;
+                float distance = (enemy.EnemyPosition - Bot.Transform.Position).magnitude;
                 if (distance > mindist)
                 {
                     return !IsChestPosVisible(enemy.EnemyHeadPosition);
@@ -129,7 +129,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool IsChestPosVisible(Vector3 enemyHeadPos)
         {
-            Vector3 botPos = SAINBot.Transform.Position;
+            Vector3 botPos = Bot.Transform.Position;
             botPos += Vector3.up * 1f;
             Vector3 direction = botPos - enemyHeadPos;
             return !Physics.Raycast(enemyHeadPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
@@ -137,7 +137,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool CanShootFromProne(Vector3 target)
         {
-            Vector3 vector = SAINBot.Transform.Position + Vector3.up * 0.14f;
+            Vector3 vector = Bot.Transform.Position + Vector3.up * 0.14f;
             Vector3 vector2 = target + Vector3.up - vector;
             Vector3 from = vector2;
             from.y = vector.y;

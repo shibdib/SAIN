@@ -42,16 +42,6 @@ namespace SAIN.Components
                 _jobCoroutine = BotController.StartCoroutine(
                     raycastJobLoop());
             }
-            if (_updateBotVsBotVision == null)
-            {
-                //_updateBotVsBotVision = BotController.StartCoroutine
-                //    (checkVisionForBots(true, _localVisionCheckListAI));
-            }
-            if (_updateBotVsHumanVision == null)
-            {
-                //_updateBotVsHumanVision = BotController.StartCoroutine
-                //    (checkVisionForBots(false, _localVisionCheckListHumans));
-            }
         }
 
         public void Dispose()
@@ -60,8 +50,6 @@ namespace SAIN.Components
         }
 
         private Coroutine _jobCoroutine;
-        private Coroutine _updateBotVsBotVision;
-        private Coroutine _updateBotVsHumanVision;
 
         private IEnumerator checkVisionForBots(bool forAI, List<BotComponent> _localList)
         {
@@ -103,8 +91,8 @@ namespace SAIN.Components
             }
         }
 
-        private static float _nextLogUpdatedTime;
-        private static float _nextLogUpdatedTime2;
+        //private static float _nextLogUpdatedTime;
+        //private static float _nextLogUpdatedTime2;
 
         private readonly List<BotComponent> _localVisionCheckListAI = new List<BotComponent>();
         private readonly List<BotComponent> _localVisionCheckListHumans = new List<BotComponent>();

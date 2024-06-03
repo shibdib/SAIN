@@ -7,29 +7,21 @@ namespace SAIN
     {
         None,
         Retreat,
-        Fight,
         RunToCover,
         Search,
         HoldInCover,
         RunAway,
         DogFight,
-        Shoot,
         MoveToCover,
         StandAndShoot,
         ThrowGrenade,
         ShiftCover,
         RushEnemy,
         MoveToEngage,
-        Ambush,
-        ReturnFire,
         ShootDistantEnemy,
         AvoidGrenade,
         Freeze,
         CreepOnEnemy,
-
-        UnstuckSearch,
-        UnstuckMoveToCover,
-        UnstuckDogFight,
         DebugNoDecision
     }
 
@@ -99,11 +91,11 @@ namespace SAIN
 
     public enum CoverStatus
     {
-        InCover = 0,
-        CloseToCover = 1,
+        None = 0,
+        FarFromCover = 1,
         MidRangeToCover = 2,
-        FarFromCover = 3,
-        None = 4,
+        CloseToCover = 3,
+        InCover = 4,
     }
 
     public enum LeanSetting

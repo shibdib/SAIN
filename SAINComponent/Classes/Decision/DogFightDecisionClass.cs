@@ -32,14 +32,14 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool checkDecisions()
         {
-            SoloDecision currentDecision = SAINBot.Decision.CurrentSoloDecision;
+            SoloDecision currentDecision = Bot.Decision.CurrentSoloDecision;
             if (currentDecision == SoloDecision.RushEnemy)
             {
                 return false;
             }
             if (currentDecision == SoloDecision.Retreat || currentDecision == SoloDecision.RunToCover)
             {
-                bool lowOnAmmo = SAINBot.Decision.SelfActionDecisions.LowOnAmmo(0.3f);
+                bool lowOnAmmo = Bot.Decision.SelfActionDecisions.LowOnAmmo(0.3f);
                 if (lowOnAmmo)
                 {
                     return false;
@@ -123,7 +123,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             _dogFightTargets.Clear();
 
-            var enemies = SAINBot.EnemyController.Enemies;
+            var enemies = Bot.EnemyController.Enemies;
             foreach (var enemy in enemies.Values)
             {
                 if (shallDogFightEnemy(enemy))

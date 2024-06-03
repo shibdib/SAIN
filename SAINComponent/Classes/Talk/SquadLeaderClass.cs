@@ -24,12 +24,12 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Update()
         {
-            if (!SAINBot.BotActive || SAINBot.GameIsEnding)
+            if (!Bot.BotActive || Bot.GameIsEnding)
             {
                 return;
             }
 
-            if (!SAINBot.Squad.BotInGroup)
+            if (!Bot.Squad.BotInGroup)
             {
                 return;
             }

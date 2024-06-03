@@ -17,7 +17,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Init()
         {
-            SquadInfo = SAINPlugin.BotController.BotSquads.GetSquad(SAINBot);
+            SquadInfo = SAINPlugin.BotController.BotSquads.GetSquad(Bot);
         }
 
         public Squad SquadInfo { get; private set; }
@@ -30,7 +30,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private float UpdateMembersTimer = 0f;
 
-        public bool IAmLeader => SquadInfo.LeaderId == SAINBot.ProfileId;
+        public bool IAmLeader => SquadInfo.LeaderId == Bot.ProfileId;
 
         public BotComponent LeaderComponent => SquadInfo?.LeaderComponent;
 
@@ -63,8 +63,8 @@ namespace SAIN.SAINComponent.Classes.Info
             {
                 if (player != null &&
                     !player.IsAI &&
-                    SAINBot?.EnemyController?.IsPlayerFriendly(player) == true
-                    && (player.Position - SAINBot.Position).sqrMagnitude < distToCheck)
+                    Bot?.EnemyController?.IsPlayerFriendly(player) == true
+                    && (player.Position - Bot.Position).sqrMagnitude < distToCheck)
                 {
                     return true;
                 }
@@ -82,7 +82,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
                 if (LeaderComponent != null)
                 {
-                    DistanceToSquadLeader = (SAINBot.Position - LeaderComponent.Position).magnitude;
+                    DistanceToSquadLeader = (Bot.Position - LeaderComponent.Position).magnitude;
                 }
             }
         }
@@ -97,8 +97,8 @@ namespace SAIN.SAINComponent.Classes.Info
             foreach (var member in Members.Values)
             {
                 if (member != null && 
-                    member.ProfileId != SAINBot.ProfileId && 
-                    SAINBot.Memory.VisiblePlayers.Contains(member.Player))
+                    member.ProfileId != Bot.ProfileId && 
+                    Bot.Memory.VisiblePlayers.Contains(member.Player))
                 {
                     VisibleMembers.Add(member);
                 }

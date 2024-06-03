@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Layers.Combat.Solo;
+using SAIN.SAINComponent;
 
 namespace SAIN.Layers.Combat.Squad
 {
@@ -51,16 +52,13 @@ namespace SAIN.Layers.Combat.Squad
                 SquadDecision != SquadDecision.None &&
                 SAINBot.Decision.CurrentSelfDecision == SelfDecision.None;
 
-            if (SAINBot != null && 
-                SAINBot.SAINSquadActive != active)
+            if (active)
             {
-                SAINBot.SAINSquadActive = active;
-            }
-
-            if (active && 
-                SAINBot.Cover.CoverInUse != null)
-            {
-                SAINBot.Cover.CoverInUse = null;
+                SAINBot.ActiveLayer = ESAINLayer.Squad;
+                if (SAINBot.Cover.CoverInUse != null)
+                {
+                    SAINBot.Cover.CoverInUse = null;
+                }
             }
 
             return active;

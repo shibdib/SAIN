@@ -63,8 +63,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public Vector3 CalculateRecoil(Vector3 currentRecoil)
         {
-            float weaponhorizrecoil = CalcHorizRecoil(SAINBot.Info.WeaponInfo.RecoilForceUp);
-            float weaponvertrecoil = CalcVertRecoil(SAINBot.Info.WeaponInfo.RecoilForceBack);
+            float weaponhorizrecoil = CalcHorizRecoil(Bot.Info.WeaponInfo.RecoilForceUp);
+            float weaponvertrecoil = CalcVertRecoil(Bot.Info.WeaponInfo.RecoilForceBack);
 
             float addRecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.AddRecoil;
             float horizRecoil = (1f * (weaponhorizrecoil + addRecoil));
@@ -91,7 +91,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return vector;
         }
 
-        private float RecoilMultiplier => Mathf.Round(SAINBot.Info.FileSettings.Shoot.RecoilMultiplier * GlobalSettings.Shoot.GlobalRecoilMultiplier * 100f) / 100f;
+        private float RecoilMultiplier => Mathf.Round(Bot.Info.FileSettings.Shoot.RecoilMultiplier * GlobalSettings.Shoot.GlobalRecoilMultiplier * 100f) / 100f;
 
         float CalcVertRecoil(float recoilVal)
         {
@@ -100,7 +100,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 result = recoilVal / 150;
             }
-            result *= SAINBot.Info.WeaponInfo.FinalModifier;
+            result *= Bot.Info.WeaponInfo.FinalModifier;
             result *= UnityEngine.Random.Range(0.8f, 1.2f);
             return result;
         }
@@ -112,7 +112,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 result = recoilVal / 300;
             }
-            result *= SAINBot.Info.WeaponInfo.FinalModifier;
+            result *= Bot.Info.WeaponInfo.FinalModifier;
             result *= UnityEngine.Random.Range(0.8f, 1.2f);
             return result;
         }

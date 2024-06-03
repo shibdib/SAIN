@@ -79,17 +79,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
                         Logger.LogError("Bot's Goal Enemy Person is null");
                         return;
                     }
-                    if (goalEnemy.ProfileId == SAINBot.ProfileId)
+                    if (goalEnemy.ProfileId == Bot.ProfileId)
                     {
                         Logger.LogError("goalEnemy.ProfileId == SAINBot.ProfileId");
                         return;
                     }
-                    if (goalEnemy.ProfileId == SAINBot.Player.ProfileId)
+                    if (goalEnemy.ProfileId == Bot.Player.ProfileId)
                     {
                         Logger.LogError("goalEnemy.ProfileId == SAINBot.Player.ProfileId");
                         return;
                     }
-                    if (goalEnemy.ProfileId == SAINBot.BotOwner.ProfileId)
+                    if (goalEnemy.ProfileId == Bot.BotOwner.ProfileId)
                     {
                         Logger.LogError("goalEnemy.ProfileId == SAINBot.Player.ProfileId");
                         return;
@@ -130,6 +130,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 ActiveEnemies.RemoveAll(x => x == null || !x.IsValid);
             }
 
+            ActiveHumanEnemy = false;
             foreach (SAINEnemy enemy in Enemies.Values)
             {
                 if (enemy != null)
@@ -144,6 +145,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     {
                         ActiveEnemies.Remove(enemy);
                     }
+                    if (!ActiveHumanEnemy && 
+                        activeThreat && 
+                        !enemy.IsAI)
+                    {
+                        ActiveHumanEnemy = true;
+                    }
                 }
             }
 
@@ -157,6 +164,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 }
             }
         }
+
+        public bool ActiveHumanEnemy { get; private set; }
 
         private float _nextLogActiveTime;
 
@@ -191,21 +200,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             removeInvalidEnemies();
 
-            if (!SAINBot.BotActive)
+            if (!Bot.BotActive)
             {
                 return;
             }
 
             updateAllEnemies();
-
-            if (_enemyUpdateCoroutine == null)
-            {
-                //_enemyUpdateCoroutine = SAINBot.StartCoroutine(updateValidAIEnemies(2));
-            }
-            if (_enemyHumanUpdateCoroutine == null)
-            {
-                //_enemyHumanUpdateCoroutine = SAINBot.StartCoroutine(updateValidHumanEnemies(1));
-            }
         }
 
         private void updateAllEnemies()
@@ -238,10 +238,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
         }
 
         private readonly List<string> _idsToRemove = new List<string>();
-
-        private Coroutine _enemyUpdateCoroutine;
-
-        private Coroutine _enemyHumanUpdateCoroutine;
 
         private IEnumerator updateValidHumanEnemies(int maxPerFrame)
         {
@@ -315,17 +311,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     {
                         if (debugLastHeardPosition == null)
                         {
-                            debugLastHeardPosition = DebugGizmos.Line(ActiveEnemy.LastHeardPosition.Value, SAINBot.Position, Color.yellow, 0.01f, false, Time.deltaTime, true);
+                            debugLastHeardPosition = DebugGizmos.Line(ActiveEnemy.LastHeardPosition.Value, Bot.Position, Color.yellow, 0.01f, false, Time.deltaTime, true);
                         }
-                        DebugGizmos.UpdatePositionLine(ActiveEnemy.LastHeardPosition.Value, SAINBot.Position, debugLastHeardPosition);
+                        DebugGizmos.UpdatePositionLine(ActiveEnemy.LastHeardPosition.Value, Bot.Position, debugLastHeardPosition);
                     }
                     if (ActiveEnemy.LastSeenPosition != null)
                     {
                         if (debugLastSeenPosition == null)
                         {
-                            debugLastSeenPosition = DebugGizmos.Line(ActiveEnemy.LastSeenPosition.Value, SAINBot.Position, Color.red, 0.01f, false, Time.deltaTime, true);
+                            debugLastSeenPosition = DebugGizmos.Line(ActiveEnemy.LastSeenPosition.Value, Bot.Position, Color.red, 0.01f, false, Time.deltaTime, true);
                         }
-                        DebugGizmos.UpdatePositionLine(ActiveEnemy.LastSeenPosition.Value, SAINBot.Position, debugLastSeenPosition);
+                        DebugGizmos.UpdatePositionLine(ActiveEnemy.LastSeenPosition.Value, Bot.Position, debugLastSeenPosition);
                     }
                 }
                 else if (debugLastHeardPosition != null || debugLastSeenPosition != null)
@@ -406,17 +402,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private void removeDogFightTarget(string id)
         {
-            SAINEnemy dogFightTarget = SAINBot.Decision.DogFightDecision.DogFightTarget;
+            SAINEnemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
             if (dogFightTarget?.EnemyPerson != null
                 && dogFightTarget.EnemyPerson.ProfileId == id)
             {
-                SAINBot.Decision.DogFightDecision.DogFightTarget = null;
+                Bot.Decision.DogFightDecision.DogFightTarget = null;
             }
         }
 
         private void CheckAddEnemy()
         {
-            SAINEnemy dogFightTarget = SAINBot.Decision.DogFightDecision.DogFightTarget;
+            SAINEnemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
             if (dogFightTarget?.IsValid == true)
             {
                 setActiveEnemy(dogFightTarget);
@@ -581,7 +577,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 return enemy;
             }
-            if (player.ProfileId == SAINBot.Player.ProfileId)
+            if (player.ProfileId == Bot.Player.ProfileId)
             {
                 string debugString = $"Cannot add enemy {getBotInfo(player)} that matches this bot {getBotInfo(Player)}: ";
                 debugString = findSourceDebug(debugString);
@@ -596,7 +592,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(player, out EnemyInfo enemyInfo))
             {
                 SAINPersonClass enemySAINPerson = new SAINPersonClass(player);
-                SAINEnemy newEnemy = new SAINEnemy(SAINBot, enemySAINPerson, enemyInfo);
+                SAINEnemy newEnemy = new SAINEnemy(Bot, enemySAINPerson, enemyInfo);
                 player.OnIPlayerDeadOrUnspawn += newEnemy.DeleteInfo;
                 Enemies.Add(player.ProfileId, newEnemy);
                 //Logger.LogDebug($"Added [{player.ProfileId}] to [{BotOwner?.name}'s] Enemy List");
@@ -637,16 +633,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 var players = gameworld.AllAlivePlayersList;
                 if (players != null)
                 {
-                    foreach (var player in SAINBot.Memory.VisiblePlayers)
+                    foreach (var player in Bot.Memory.VisiblePlayers)
                     {
                         if (player != null
                             && !player.IsAI
-                            && SAINBot.EnemyController.IsPlayerAnEnemy(player.ProfileId))
+                            && Bot.EnemyController.IsPlayerAnEnemy(player.ProfileId))
                         {
                             Vector3 lookDir = player.LookDirection;
                             Vector3 playerHeadPos = player.MainParts[BodyPartType.head].Position;
 
-                            Vector3 botChestPos = SAINBot.Person.Transform.CenterPosition;
+                            Vector3 botChestPos = Bot.Person.Transform.CenterPosition;
                             Vector3 botDir = botChestPos - playerHeadPos;
 
                             if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
@@ -680,7 +676,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     {
                         return true;
                     }
-                    if (player.ProfileId == SAINBot.Person.Player.ProfileId)
+                    if (player.ProfileId == Bot.Person.Player.ProfileId)
                     {
                         return true;
                     }

@@ -165,8 +165,6 @@ namespace SAIN.Layers.Combat.Solo
             return null;
         }
 
-        private FlankRoute _flankRoute;
-
         public override void Start()
         {
         }

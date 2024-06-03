@@ -21,14 +21,14 @@ namespace SAIN.SAINComponent.Classes.Mover
                 SideStepSetting = SideStepSetting.None;
             }
 
-            if (!SAINBot.PatrolDataPaused)
+            if (!Bot.PatrolDataPaused)
             {
                 ResetSideStep(currentSideStep);
                 return;
             }
 
-            var enemy = SAINBot.Enemy;
-            var CurrentDecision = SAINBot.Decision.CurrentSoloDecision;
+            var enemy = Bot.Enemy;
+            var CurrentDecision = Bot.Decision.CurrentSoloDecision;
             if (enemy == null || CurrentDecision != SoloDecision.HoldInCover)
             {
                 ResetSideStep(currentSideStep);
@@ -36,7 +36,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
                 && enemy.IsAI
-                && SAINBot.CurrentAILimit != AILimitSetting.Close)
+                && Bot.CurrentAILimit != AILimitSetting.Close)
             {
                 ResetSideStep(currentSideStep);
                 return;
@@ -65,7 +65,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
 
             float value;
-            switch (SAINBot.Mover.Lean.LeanDirection)
+            switch (Bot.Mover.Lean.LeanDirection)
             {
                 case LeanSetting.Left:
                     value = -1f;

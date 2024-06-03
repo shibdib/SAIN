@@ -25,7 +25,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Update()
         {
-            if (!SAINBot.SAINLayersActive)
+            if (!Bot.SAINLayersActive)
             {
                 return;
             }
@@ -37,7 +37,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 }
                 _nextCheckTime = Time.time + 0.1f;
 
-                if (SAINBot.Decision.CurrentSelfDecision == SelfDecision.Reload)
+                if (Bot.Decision.CurrentSelfDecision == SelfDecision.Reload)
                 {
                     TryReload();
                     return;
@@ -54,7 +54,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     bool didHeal = false;
                     bool didReload = false;
 
-                    switch (SAINBot.Decision.CurrentSelfDecision)
+                    switch (Bot.Decision.CurrentSelfDecision)
                     {
                         case SelfDecision.Reload:
                             if (_healTime + 0.25f < Time.time)
@@ -191,7 +191,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
         }
 
-        private float StimTimer = 0f;
         private float _healTime = 0f;
     }
 }

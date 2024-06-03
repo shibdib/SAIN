@@ -332,8 +332,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void TryInteract()
         {
-            const float pauseTime = 0.25f;
-
             float time = Time.time;
             float num = time - this._comeToDoorLast;
             this.BotOwner.Mover.SprintPause(0.5f);

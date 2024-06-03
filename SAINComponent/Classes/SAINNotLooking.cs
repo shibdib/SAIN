@@ -73,7 +73,5 @@ namespace SAIN.SAINComponent.Classes
 
             return false;
         }
-
-        private static float DebugTimer;
     }
 }

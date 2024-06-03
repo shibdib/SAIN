@@ -56,7 +56,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
         }
 
-        private Vector3 _originPoint;
         public Vector3 TargetPoint
         {
             get
@@ -361,42 +360,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool filterColliderByName(Collider collider)
         {
-            if (collider == null)
-            {
-                return true;
-            }
-            if (_excludedColliderNames.Contains(collider.transform?.parent?.name))
-            {
-                //Logger.LogInfo($"Filtered collider.transform?.parent?.name [{collider.transform?.parent?.name}]");
-                return true;
-            }
-            return false;
-            if (_excludedColliderNames.Contains(collider.name))
-            {
-                Logger.LogInfo($"Filtered collider.name [{collider.name}]");
-                return true;
-            }
-            if (_excludedColliderNames.Contains(collider.gameObject?.name))
-            {
-                Logger.LogInfo($"Filtered collider.gameObject?.name [{collider.gameObject?.name}]");
-                return true;
-            }
-            if (_excludedColliderNames.Contains(collider.attachedRigidbody?.name))
-            {
-                Logger.LogInfo($"Filtered collider.attachedRigidbody?.name [{collider.attachedRigidbody?.name}]");
-                return true;
-            }
-            if (_excludedColliderNames.Contains(collider.transform?.name))
-            {
-                Logger.LogInfo($"Filtered collider.transform?.name [{collider.transform?.name}]");
-                return true;
-            }
-            if (_excludedColliderNames.Contains(collider.transform?.parent?.gameObject?.name))
-            {
-                Logger.LogInfo($"Filtered collider.transform?.parent?.gameObject?.name [{collider.transform?.parent?.gameObject?.name}]");
-                return true;
-            }
-            return false;
+            return collider != null && 
+                _excludedColliderNames.Contains(collider.transform?.parent?.name);
         }
 
         private IEnumerator recheckCoverLoop()

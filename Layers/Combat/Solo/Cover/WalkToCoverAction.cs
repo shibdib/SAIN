@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Text;
 using UnityEngine;
@@ -13,9 +14,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
         }
 
-        private float _nextCheckSpottedTime;
         private float _nextUpdateCoverTime;
-        private float _nextCheckMissingCoverPointTime;
 
         public override void Update()
         {
@@ -93,18 +92,16 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 SAINBot.Mover.GoToPoint(coverPoint.Position, out _, 0.2f))
             {
                 SAINBot.Cover.CoverInUse = coverPoint;
-                CoverDestination = coverPoint;
+                _coverDestination = coverPoint;
                 return true;
             }
             return false;
         }
 
-        private float FindTargetCoverTimer = 0f;
         private float RecalcPathTimer = 0f;
 
-        private CoverPoint CoverDestination;
-        private Vector3 DestinationPosition;
-        private float SuppressTimer;
+        private CoverPoint _coverDestination;
+        private float _suppressTime;
 
         private void EngageEnemy()
         {
@@ -123,7 +120,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (suppressing)
             {
                 suppressing = false;
-                SAINBot.Shoot(false, Vector3.zero);
+                SAINBot.ManualShoot.Shoot(false, Vector3.zero);
             }
 
             if (!SAINBot.Steering.SteerByPriority(false))
@@ -162,17 +159,17 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private void SuppressPosition(Vector3 position)
         {
             suppressing = true;
-            if (SuppressTimer < Time.time
-                && SAINBot.Shoot(true, position, true, BotComponent.EShootReason.WalkToCoverSuppress))
+            if (_suppressTime < Time.time
+                && SAINBot.ManualShoot.Shoot(true, position, true, EShootReason.WalkToCoverSuppress))
             {
                 SAINBot.Enemy.EnemyStatus.EnemyIsSuppressed = true;
                 if (SAINBot.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
                 {
-                    SuppressTimer = Time.time + 0.1f * Random.Range(0.75f, 1.25f);
+                    _suppressTime = Time.time + 0.1f * Random.Range(0.75f, 1.25f);
                 }
                 else
                 {
-                    SuppressTimer = Time.time + 0.5f * Random.Range(0.66f, 1.33f);
+                    _suppressTime = Time.time + 0.5f * Random.Range(0.66f, 1.33f);
                 }
             }
         }
@@ -189,7 +186,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (suppressing)
             {
                 suppressing = false;
-                SAINBot.Shoot(false, Vector3.zero);
+                SAINBot.ManualShoot.Shoot(false, Vector3.zero);
             }
         }
 
@@ -208,13 +205,13 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 stringBuilder.AppendLabeledValue("Current Target Position", null, Color.white, Color.yellow, true);
             }
 
-            if (CoverDestination != null)
+            if (_coverDestination != null)
             {
                 stringBuilder.AppendLine("Cover Destination");
-                stringBuilder.AppendLabeledValue("Status", $"{CoverDestination.Status}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Height / Value", $"{CoverDestination.CoverHeight} {CoverDestination.CoverValue}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Path Length", $"{CoverDestination.PathLength}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Straight Distance", $"{(CoverDestination.Position - SAINBot.Position).magnitude}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Status", $"{_coverDestination.Status}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Height / Value", $"{_coverDestination.CoverHeight} {_coverDestination.CoverValue}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Path Length", $"{_coverDestination.PathLength}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Straight Distance", $"{(_coverDestination.Position - SAINBot.Position).magnitude}", Color.white, Color.yellow, true);
             }
         }
     }

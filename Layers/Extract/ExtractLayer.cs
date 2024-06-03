@@ -7,6 +7,7 @@ using Comfort.Common;
 using UnityEngine;
 using static DrakiaXYZ.BigBrain.Brains.CustomLayer;
 using SAIN.SAINComponent.Classes.Memory;
+using SAIN.SAINComponent;
 
 namespace SAIN.Layers
 {
@@ -26,7 +27,10 @@ namespace SAIN.Layers
         public override bool IsActive()
         {
             bool active = SAINBot != null && allowedToExtract() && hasExtractReason() && hasExtractLocation();
-            setActive(active);
+            if (active)
+            {
+                SAINBot.ActiveLayer = ESAINLayer.Extract;
+            }
             return active;
         }
 
@@ -64,14 +68,6 @@ namespace SAIN.Layers
                 return false;
             }
             return true;
-        }
-
-        private void setActive(bool value)
-        {
-            if (SAINBot != null && SAINBot.SAINExtractActive != value)
-            {
-                SAINBot.SAINExtractActive = value;
-            }
         }
 
         private bool IsInExtractArea()

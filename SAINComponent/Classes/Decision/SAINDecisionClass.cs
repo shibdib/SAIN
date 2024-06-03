@@ -44,7 +44,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             if (_nextGetDecisionTime + delay < Time.time)
             {
                 _nextGetDecisionTime = Time.time;
-                EnemyDistance = SAINBot.Enemy != null ? SAINBot.Enemy.CheckPathDistance() : EnemyPathDistance.NoEnemy;
                 getDecision();
             }
         }
@@ -57,7 +56,18 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
         }
 
-        public EnemyPathDistance EnemyDistance { get; private set; }
+        public EnemyPathDistance EnemyDistance
+        {
+            get
+            {
+                var enemy = Bot.Enemy;
+                if (enemy != null)
+                {
+                    return enemy.CheckPathDistance();
+                }
+                return EnemyPathDistance.NoEnemy;
+            }
+        }
 
         public SoloDecision CurrentSoloDecision { get; private set; }
         public SoloDecision OldSoloDecision { get; private set; }
@@ -107,12 +117,6 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return;
             }
 
-            //if (CheckStuckDecision(out SoloDecision soloDecision))
-            //{
-            //    setDecision(soloDecision, SquadDecision.None, SelfDecision.None);
-            //    return;
-            //}
-
             if (EnemyDecisions.GetDecision(out SoloDecision soloDecision))
             {
                 SetDecisions(soloDecision, SquadDecision.None, SelfDecision.None);
@@ -149,16 +153,8 @@ namespace SAIN.SAINComponent.Classes.Decision
                 OnDecisionMade?.Invoke(solo, squad, self, Time.time);
                 checkSAINStart(); 
                 checkSAINEnd();
-                if (_nextLogTIme < Time.time)
-                {
-                    //_nextLogTIme = Time.time + 3f;
-                    //if (SAINBot.Enemy?.Player?.IsYourPlayer == true)
-                    //    Logger.LogWarning($"{BotOwner.name} : {solo} {squad} {self}");
-                }
             }
         }
-
-        private static float _nextLogTIme;
 
         private void checkSAINStart()
         {
@@ -221,11 +217,11 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallAvoidGrenade()
         {
-            Vector3? grenadePos = SAINBot.Grenade.GrenadeDangerPoint;
+            Vector3? grenadePos = Bot.Grenade.GrenadeDangerPoint;
             if (grenadePos != null)
             {
                 float pathDist = calcPathDist(grenadePos.Value);
-                return checkDistances(pathDist, (grenadePos.Value - SAINBot.Position).magnitude);
+                return checkDistances(pathDist, (grenadePos.Value - Bot.Position).magnitude);
             }
             return false;
         }
@@ -274,7 +270,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private float calcPathAndReturnDist(Vector3 point)
         {
-            Vector3 botPosition = SAINBot.Position;
+            Vector3 botPosition = Bot.Position;
             if (NavMesh.SamplePosition(point, out var hit, 5f, -1))
             {
                 if (NavMesh.SamplePosition(botPosition, out var botHit, 0.5f, -1))
@@ -300,17 +296,17 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
-            float timeChangeDec = SAINBot.Decision.TimeSinceChangeDecision;
+            float timeChangeDec = Bot.Decision.TimeSinceChangeDecision;
             if (timeChangeDec > 10)
             {
                 return false;
             }
             bool Running = CurrentSoloDecision == SoloDecision.Retreat || CurrentSoloDecision == SoloDecision.RunToCover;
-            if (Running && !SAINBot.BotStuck.BotHasChangedPosition && SAINBot.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 2f)
+            if (Running && !Bot.BotStuck.BotHasChangedPosition && Bot.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 2f)
             {
                 return false;
             }
-            CoverPoint pointInUse = SAINBot.Cover.CoverInUse;
+            CoverPoint pointInUse = Bot.Cover.CoverInUse;
             if (pointInUse != null && pointInUse.IsBad == false)
             {
                 if (pointInUse.Status == CoverStatus.InCover)
@@ -321,47 +317,5 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             return false;
         }
-
-        private bool CheckStuckDecision(out SoloDecision Decision)
-        {
-            Decision = SoloDecision.None;
-            bool stuck = SAINBot.BotStuck.BotIsStuck;
-
-            if (!stuck && FinalBotUnstuckTimer != 0f)
-            {
-                FinalBotUnstuckTimer = 0f;
-            }
-
-            if (stuck && BotUnstuckTimerDecision < Time.time)
-            {
-                if (FinalBotUnstuckTimer == 0f)
-                {
-                    FinalBotUnstuckTimer = Time.time + 10f;
-                }
-
-                BotUnstuckTimerDecision = Time.time + 5f;
-
-                var current = this.CurrentSoloDecision;
-                if (FinalBotUnstuckTimer < Time.time && SAINBot.HasEnemy)
-                {
-                    Decision = SoloDecision.UnstuckDogFight;
-                    return true;
-                }
-                if (current == SoloDecision.Search || current == SoloDecision.UnstuckSearch)
-                {
-                    Decision = SoloDecision.UnstuckMoveToCover;
-                    return true;
-                }
-                if (current == SoloDecision.MoveToCover || current == SoloDecision.UnstuckMoveToCover)
-                {
-                    Decision = SoloDecision.UnstuckSearch;
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private float BotUnstuckTimerDecision = 0f;
-        private float FinalBotUnstuckTimer = 0f;
     }
 }

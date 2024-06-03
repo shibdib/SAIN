@@ -1,6 +1,7 @@
 using EFT;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.WeaponFunction;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Mover
@@ -17,21 +18,21 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (!SAINBot.PatrolDataPaused)
+            if (!Bot.PatrolDataPaused)
             {
                 ResetBlindFire();
                 return;
             }
 
-            SAINEnemy enemy = SAINBot.Enemy;
-            if (enemy == null || !enemy.Seen || enemy.TimeSinceSeen > 10f || !BotOwner.WeaponManager.IsReady || !BotOwner.WeaponManager.HaveBullets || SAINBot.Player.IsSprintEnabled || SAINBot.Cover.CoverInUse == null || !SAINBot.SAINLayersActive)
+            SAINEnemy enemy = Bot.Enemy;
+            if (enemy == null || !enemy.Seen || enemy.TimeSinceSeen > 10f || !BotOwner.WeaponManager.IsReady || !BotOwner.WeaponManager.HaveBullets || Bot.Player.IsSprintEnabled || Bot.Cover.CoverInUse == null || !Bot.SAINLayersActive)
             {
                 ResetBlindFire();
                 return;
             }
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
                 && enemy.IsAI
-                && SAINBot.CurrentAILimit != AILimitSetting.Close)
+                && Bot.CurrentAILimit != AILimitSetting.Close)
             {
                 ResetBlindFire();
                 return;
@@ -39,7 +40,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (CurrentBlindFireSetting == 0)
             {
-                WeaponPosOffset = BotOwner.WeaponRoot.position - SAINBot.Transform.Position;
+                WeaponPosOffset = BotOwner.WeaponRoot.position - Bot.Transform.Position;
             }
 
             Vector3 targetPos;
@@ -69,7 +70,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 ResetBlindFire();
                 BlindFireTimer = Time.time + 0.5f;
-                SAINBot.Shoot(false, Vector3.zero);
+                Bot.ManualShoot.Shoot(false, Vector3.zero);
             }
             else
             {
@@ -79,11 +80,11 @@ namespace SAIN.SAINComponent.Classes.Mover
                     SetBlindFire(blindfire);
                 }
 
-                Vector3 start = SAINBot.Position;
+                Vector3 start = Bot.Position;
                 Vector3 blindFireDirection = Vector.Rotate(targetPos - start, Vector.RandomRange(3), Vector.RandomRange(3), Vector.RandomRange(3));
                 BlindFireTargetPos = blindFireDirection + start;
                 //SAIN.Steering.LookToPoint(BlindFireTargetPos);
-                SAINBot.Shoot(true, BlindFireTargetPos, false, BotComponent.EShootReason.Blindfire);
+                Bot.ManualShoot.Shoot(true, BlindFireTargetPos, false, EShootReason.Blindfire);
             }
         }
 
@@ -114,11 +115,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             int blindfire = 0;
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
 
-            Vector3 rayShoot = WeaponPosOffset + SAINBot.Transform.Position;
+            Vector3 rayShoot = WeaponPosOffset + Bot.Transform.Position;
             Vector3 direction = targetPos - rayShoot;
             if (Physics.Raycast(rayShoot, direction, direction.magnitude, mask))
             {
-                rayShoot = SAINBot.Transform.HeadPosition + Vector3.up * 0.15f;
+                rayShoot = Bot.Transform.HeadPosition + Vector3.up * 0.15f;
                 if (!Vector.Raycast(rayShoot, targetPos, mask))
                 {
                     blindfire = 1;
@@ -132,7 +133,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             int blindfire = 0;
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
 
-            Vector3 rayShoot = WeaponPosOffset + SAINBot.Transform.Position;
+            Vector3 rayShoot = WeaponPosOffset + Bot.Transform.Position;
             Vector3 direction = targetPos - rayShoot;
             if (Physics.Raycast(rayShoot, direction, direction.magnitude, mask))
             {

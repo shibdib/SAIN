@@ -43,7 +43,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             // Reduce vision distance for ai vs ai vision checks
             bool shallLimit = Enemy.IsAI
-                && Enemy.SAINBot.CurrentAILimit != AILimitSetting.Close
+                && Enemy.Bot.CurrentAILimit != AILimitSetting.Close
                 && SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI;
 
             float aiReduction = shallLimit ? 0.75f : 1f;
@@ -76,8 +76,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             return result;
         }
-
-        private static float _nextLogTime;
 
         private static float _sprintMod => SAINPlugin.LoadedPreset.GlobalSettings.Look.MovementDistanceModifier;
 

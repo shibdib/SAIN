@@ -25,9 +25,9 @@ namespace SAIN.Layers.Combat.Run
         public override bool IsActive()
         {
             bool active = SAINPlugin.EditorDefaults.ForceBotsToRunAround;
-            if (SAINBot != null)
+            if (active)
             {
-                SAINBot.SAINRunActive = active;
+                SAINBot.ActiveLayer = ESAINLayer.Run;
             }
             return active;
         }
@@ -39,7 +39,6 @@ namespace SAIN.Layers.Combat.Run
             return false;
         }
 
-        private SoloDecision LastActionDecision = SoloDecision.None;
         public SoloDecision CurrentDecision => SAINBot.Decision.CurrentSoloDecision;
     }
 }

@@ -104,7 +104,6 @@ namespace SAIN.Layers.Combat.Solo
 
         private bool _shallBunnyHop = false;
         private float NewDestTimer = 0f;
-        private Vector3? PushDestination;
 
         public override void Start()
         {

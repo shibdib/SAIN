@@ -69,7 +69,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                     return GrenadeThrowType.None;
                 }
 
-                float distance = (BotOwner.Position - SAINBot.Enemy.EnemyPosition).magnitude;
+                float distance = (BotOwner.Position - Bot.Enemy.EnemyPosition).magnitude;
 
                 if (distance <= 10f)
                 {
@@ -100,8 +100,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 return false;
             }
 
-            Vector3 headPos = SAINBot.Transform.HeadPosition;
-            Vector3 direction = SAINBot.Enemy.EnemyHeadPosition - headPos;
+            Vector3 headPos = Bot.Transform.HeadPosition;
+            Vector3 direction = Bot.Enemy.EnemyHeadPosition - headPos;
 
             float distance = direction.magnitude;
 
@@ -110,11 +110,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 return false;
             }
 
-            if (SAINBot.Enemy.LastSeenPosition == null)
+            if (Bot.Enemy.LastSeenPosition == null)
             {
                 return false;
             }
-            Vector3 lastKnownPos = SAINBot.Enemy.LastSeenPosition.Value;
+            Vector3 lastKnownPos = Bot.Enemy.LastSeenPosition.Value;
             lastKnownPos.y += 1.45f;
 
             Vector3 lastKnownDirection = lastKnownPos - headPos;
@@ -139,8 +139,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 return false;
             }
 
-            var enemyHead = SAINBot.Enemy.EnemyHeadPosition;
-            var botHead = SAINBot.Transform.HeadPosition;
+            var enemyHead = Bot.Enemy.EnemyHeadPosition;
+            var botHead = Bot.Transform.HeadPosition;
             var direction = enemyHead - botHead;
             float distance = direction.magnitude;
 
@@ -186,7 +186,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 return false;
             }
 
-            var enemy = SAINBot.Enemy;
+            var enemy = Bot.Enemy;
 
             if (enemy == null)
             {
@@ -202,9 +202,9 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void EnemyGrenadeThrown(Grenade grenade, Vector3 dangerPoint)
         {
-            if (SAINBot.BotActive && !SAINBot.GameIsEnding)
+            if (Bot.BotActive && !Bot.GameIsEnding)
             {
-                float reactionTime = GetReactionTime(SAINBot.Info.Profile.DifficultyModifier);
+                float reactionTime = GetReactionTime(Bot.Info.Profile.DifficultyModifier);
                 var tracker = BotOwner.gameObject.AddComponent<GrenadeTracker>();
                 tracker.Initialize(grenade, dangerPoint, reactionTime);
                 ActiveGrenades.Add(tracker);

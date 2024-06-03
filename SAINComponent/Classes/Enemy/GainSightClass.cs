@@ -98,7 +98,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float _maxDistRepeatHeard = 25f;
 
         private float _gainSightModifier;
-        private float _visionDistanceModifier;
         private float _nextCheckVisTime;
 
         private float calcGearMod()
@@ -163,7 +162,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return result;
         }
 
-        private static float _nextLogTime;
+        // private static float _nextLogTime;
 
         private float calcPartsMod()
         {
@@ -222,13 +221,13 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (!Enemy.IsCurrentEnemy)
             {
-                SAINEnemy activeEnemy = Enemy.SAINBot.Enemy;
+                SAINEnemy activeEnemy = Enemy.Bot.Enemy;
                 if (activeEnemy != null)
                 {
                     Vector3? activeEnemyLastKnown = activeEnemy.LastKnownPosition;
                     if (activeEnemyLastKnown != null)
                     {
-                        Vector3 currentEnemyDir = (activeEnemyLastKnown.Value - Enemy.SAINBot.Position).normalized;
+                        Vector3 currentEnemyDir = (activeEnemyLastKnown.Value - Enemy.Bot.Position).normalized;
                         Vector3 myDir = Enemy.EnemyDirection.normalized;
 
                         float angle = Vector3.Angle(currentEnemyDir, myDir);

@@ -39,7 +39,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             get
             {
-                var gear = Enemy.SAINBot.Equipment.CurrentWeaponInfo;
+                var gear = Enemy.Bot.Equipment.CurrentWeaponInfo;
                 if (gear == null)
                 {
                     return 1f;
@@ -96,9 +96,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return 1f;
             }
         }
-
-
-        private float _nextLogTime;
 
         private float PoseLevel => EnemyPlayer.PoseLevel;
 

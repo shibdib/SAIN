@@ -101,15 +101,13 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private void tryTalk()
         {
             if (_nextTalkClearTime < Time.time 
-                && _enemy.SAINBot.Talk.GroupSay(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 40))
+                && _enemy.Bot.Talk.GroupSay(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 40))
             {
                 _nextTalkClearTime = Time.time + 5f;
             }
         }
 
         private float _checkArrivedTime;
-        private float _nextCheckArrivedMyPlaces;
-        private float _nextCheckArrivedSquadPlaces;
         private const float _checkArriveFreq = 0.25f;
 
         private void checkIfArrived()
@@ -118,7 +116,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (_checkArrivedTime < time)
             {
                 _checkArrivedTime = time + _checkArriveFreq;
-                Vector3 myPosition = _enemy.SAINBot.Position;
+                Vector3 myPosition = _enemy.Bot.Position;
                 string id = _enemy.Player.ProfileId;
 
                 foreach (EnemyPlace place in AllEnemyPlaces)
@@ -247,7 +245,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (LastSeenPlace == null)
             {
-                LastSeenPlace = new EnemyPlace(_enemy.SAINBot.Player.ProfileId, position, 300f, true, _enemy.EnemyIPlayer);
+                LastSeenPlace = new EnemyPlace(_enemy.Bot.Player.ProfileId, position, 300f, true, _enemy.EnemyIPlayer);
                 LastSeenPlace.HasSeenPersonal = _enemy.IsVisible;
                 addPlace(LastSeenPlace);
             }
@@ -264,7 +262,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 _allEnemyPlaces.Add(enemyPlace);
                 updatePlaces(true);
-                OnEnemyPlaceAdded?.Invoke(enemyPlace, _enemy.SAINBot);
+                OnEnemyPlaceAdded?.Invoke(enemyPlace, _enemy.Bot);
             }
         }
 
@@ -302,7 +300,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return lastHeard;
             }
 
-            LastHeardPlace = new EnemyPlace(_enemy.SAINBot.Player.ProfileId, position, 300f, isGunFire, _enemy.EnemyIPlayer)
+            LastHeardPlace = new EnemyPlace(_enemy.Bot.Player.ProfileId, position, 300f, isGunFire, _enemy.EnemyIPlayer)
             {
                 HasArrivedPersonal = arrived,
             };

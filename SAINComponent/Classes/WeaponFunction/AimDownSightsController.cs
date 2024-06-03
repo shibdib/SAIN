@@ -34,17 +34,17 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void UpdateADSstatus()
         {
-            Vector3? targetPos = SAINBot.CurrentTargetPosition;
+            Vector3? targetPos = Bot.CurrentTargetPosition;
 
             // If a bot is sneaky, don't change ADS if their enemy is close to avoid alerting them.
-            if (SAINBot.Info.PersonalitySettings.Search.Sneaky && targetPos != null
-                && SAINBot.Enemy?.IsVisible != true
-                && (targetPos.Value - SAINBot.Position).sqrMagnitude < 30f * 30f)
+            if (Bot.Info.PersonalitySettings.Search.Sneaky && targetPos != null
+                && Bot.Enemy?.IsVisible != true
+                && (targetPos.Value - Bot.Position).sqrMagnitude < 30f * 30f)
             {
                 return;
             }
 
-            bool shallADS = ShallAimDownSights(SAINBot.CurrentTargetPosition);
+            bool shallADS = ShallAimDownSights(Bot.CurrentTargetPosition);
             SetADS(shallADS);
         }
 
@@ -56,7 +56,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 status = GetADSStatus(targetPosition.Value);
             }
-            float timeSinceChangeDecision = SAINBot.Decision.TimeSinceChangeDecision;
+            float timeSinceChangeDecision = Bot.Decision.TimeSinceChangeDecision;
             switch (status)
             {
                 case EAimDownSightsStatus.None:
@@ -67,7 +67,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                     break;
 
                 case EAimDownSightsStatus.StandAndShoot:
-                    result = SAINBot.Enemy != null && SAINBot.Enemy.RealDistance > 10f;
+                    result = Bot.Enemy != null && Bot.Enemy.RealDistance > 10f;
                     break;
 
                 case EAimDownSightsStatus.EnemyVisible:
@@ -79,15 +79,15 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                     break;
 
                 case EAimDownSightsStatus.MovingToCover:
-                    result = SAINBot.ManualShootReason == BotComponent.EShootReason.WalkToCoverSuppress;
+                    result = Bot.ManualShoot.Reason == EShootReason.WalkToCoverSuppress;
                     break;
 
                 case EAimDownSightsStatus.Suppressing:
-                    result = SAINBot.ManualShootReason == BotComponent.EShootReason.SquadSuppressing;
+                    result = Bot.ManualShoot.Reason == EShootReason.SquadSuppressing;
                     break;
 
                 case EAimDownSightsStatus.DogFight:
-                    result = SAINBot.Enemy != null && SAINBot.Enemy.RealDistance > 10;
+                    result = Bot.Enemy != null && Bot.Enemy.RealDistance > 10;
                     break;
 
                 case EAimDownSightsStatus.EnemySeenRecent:
@@ -124,15 +124,15 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public EAimDownSightsStatus GetADSStatus(Vector3 targetPosition)
         {
-            var enemy = SAINBot.Enemy;
-            float sqrMagToTarget = (targetPosition - SAINBot.Position).sqrMagnitude;
+            var enemy = Bot.Enemy;
+            float sqrMagToTarget = (targetPosition - Bot.Position).sqrMagnitude;
 
             EAimDownSightsStatus result;
-            if (SAINBot.Player.IsSprintEnabled)
+            if (Bot.Player.IsSprintEnabled)
             {
                 result = EAimDownSightsStatus.Sprinting;
             }
-            else if (SAINBot.Decision.CurrentSoloDecision == SoloDecision.ShootDistantEnemy)
+            else if (Bot.Decision.CurrentSoloDecision == SoloDecision.ShootDistantEnemy)
             {
                 result = EAimDownSightsStatus.StandAndShoot;
             }
@@ -148,13 +148,13 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 result = EAimDownSightsStatus.EnemyHeardRecent;
             }
-            else if (SAINBot.Decision.CurrentSquadDecision == SquadDecision.Suppress && SAINBot.ManualShootReason == BotComponent.EShootReason.SquadSuppressing)
+            else if (Bot.Decision.CurrentSquadDecision == SquadDecision.Suppress && Bot.ManualShoot.Reason == EShootReason.SquadSuppressing)
             {
                 result = EAimDownSightsStatus.Suppressing;
             }
             else
             {
-                switch (SAINBot.Decision.CurrentSoloDecision)
+                switch (Bot.Decision.CurrentSoloDecision)
                 {
                     case SoloDecision.RunToCover:
                     case SoloDecision.MoveToCover:
@@ -174,7 +174,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                         break;
 
                     case SoloDecision.Search:
-                        result = SAINBot.Search.CurrentState != ESearchMove.DirectMove ? EAimDownSightsStatus.SearchPeekWait : EAimDownSightsStatus.None;
+                        result = Bot.Search.CurrentState != ESearchMove.DirectMove ? EAimDownSightsStatus.SearchPeekWait : EAimDownSightsStatus.None;
                         break;
 
                     default:

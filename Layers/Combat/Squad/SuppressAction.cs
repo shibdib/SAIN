@@ -3,6 +3,7 @@ using EFT;
 using SAIN.Layers.Combat.Solo;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
+using SAIN.SAINComponent.Classes.WeaponFunction;
 using UnityEngine;
 
 namespace SAIN.Layers.Combat.Squad
@@ -49,7 +50,7 @@ namespace SAIN.Layers.Combat.Squad
                     }
                     else if (
                         WaitShootTimer < Time.time 
-                        && SAINBot.Shoot(true, target.Value, true, BotComponent.EShootReason.SquadSuppressing))
+                        && SAINBot.ManualShoot.Shoot(true, target.Value, true, EShootReason.SquadSuppressing))
                     {
                         enemy.EnemyStatus.EnemyIsSuppressed = true;
                         float waitTime = hasMachineGun ? 0.1f : 0.5f;
@@ -58,7 +59,7 @@ namespace SAIN.Layers.Combat.Squad
                 }
                 else
                 {
-                    SAINBot.Shoot(false, Vector3.zero);
+                    SAINBot.ManualShoot.Shoot(false, Vector3.zero);
                     SAINBot.Steering.SteerByPriority();
 
                     if (enemy.LastKnownPosition != null)
@@ -68,8 +69,6 @@ namespace SAIN.Layers.Combat.Squad
                 }
             }
         }
-
-        private float _recalcPathTimer;
 
         private float WaitShootTimer;
 

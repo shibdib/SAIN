@@ -118,7 +118,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
         }
 
         private Vector3 _runDestination;
-        private CoverPoint _coverDestination;
 
         private bool moveToCover(out bool sprinting, out CoverPoint coverDestination, bool tryWalk)
         {

@@ -50,7 +50,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             NavMeshPath path = new NavMeshPath();
             if (CheckColliderForCover(collider, out Vector3 place, false, out _, path, out failReason))
             {
-                newPoint = new CoverPoint(SAINBot, place, collider, path);
+                newPoint = new CoverPoint(Bot, place, collider, path);
                 newPoint.PathLength = path.CalculatePathLength();
                 return true;
             }
@@ -74,30 +74,27 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private bool CheckColliderForCover(Collider collider, out Vector3 place, bool checkSafety, out bool isSafe, NavMeshPath pathToPoint, out ECoverFailReason failReason)
         {
             isSafe = false;
-            if (GetPlaceToMove(collider, TargetPoint, OriginPoint, out place))
-            {
-                if (CheckPosition(place) && CheckHumanPlayerVisibility(place))
-                {
-                    if (CheckPath(place, checkSafety, out isSafe, pathToPoint))
-                    {
-                        failReason = ECoverFailReason.None;
-                        return true;
-                    }
-                    else
-                    {
-                        failReason = ECoverFailReason.BadPath;
-                    }
-                }
-                else
-                {
-                    failReason = ECoverFailReason.BadPosition;
-                }
-            }
-            else
+
+            if (!GetPlaceToMove(collider, TargetPoint, OriginPoint, out place))
             {
                 failReason = ECoverFailReason.NoPlaceToMove;
+                return false;
             }
-            return false;
+
+            if (!CheckPosition(place))
+            {
+                failReason = ECoverFailReason.BadPosition;
+                return false;
+            }
+
+            if (!CheckPath(place, checkSafety, out isSafe, pathToPoint))
+            {
+                failReason = ECoverFailReason.BadPath;
+                return false;
+            }
+
+            failReason = ECoverFailReason.None;
+            return true;
         }
 
         public static bool GetPlaceToMove(Collider collider, Vector3 targetPosition, Vector3 botPosition, out Vector3 place, float navSampleRange = 1f)
@@ -144,40 +141,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 return true;
             }
             return false;
-        }
-
-        private bool CheckHumanPlayerVisibility(Vector3 point)
-        {
-            // this function is all fucked up
-            return true;
-            //Player closestPlayer = GameWorldHandler.SAINGameWorld?.FindClosestPlayer(out float sqrDist, point);
-            if (SAINBot.EnemyController.IsHumanPlayerActiveEnemy == false 
-                && SAINBot.EnemyController.IsHumanPlayerLookAtMe(out Player lookingPlayer)
-                && lookingPlayer != null)
-            {
-                SAINEnemy enemy = SAINBot.EnemyController.GetEnemy(lookingPlayer.ProfileId);
-                var lastKnown = enemy?.LastKnownPosition;
-                if (lastKnown != null)
-                {
-                    bool VisibleCheckPass = (VisibilityCheck(point, lastKnown.Value));
-                    if (SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder)
-                    {
-                        if (VisibleCheckPass)
-                        {
-                            // Main Player does not have vision on coverpoint position
-                            Logger.LogWarning("PASS");
-                        }
-                        else
-                        {
-                            // Main Player has vision
-                            Logger.LogWarning("FAIL");
-                        }
-                    }
-
-                    return VisibleCheckPass;
-                }
-            }
-            return true;
         }
 
         private static bool CheckColliderDirection(Collider collider, Vector3 targetPosition, Vector3 botPosition)
@@ -261,7 +224,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool checkPathToEnemy(NavMeshPath path)
         {
-            SAINEnemy enemy = SAINBot.Enemy;
+            SAINEnemy enemy = Bot.Enemy;
             if (enemy != null 
                 && enemy.Path.PathToEnemy != null 
                 && !SAINBotSpaceAwareness.ArePathsDifferent(path, enemy.Path.PathToEnemy, 0.5f, 0.1f))
@@ -319,14 +282,14 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public bool CheckPositionVsOtherBots(Vector3 position)
         {
-            if (SAINBot.Squad.Members == null || SAINBot.Squad.Members.Count < 2)
+            if (Bot.Squad.Members == null || Bot.Squad.Members.Count < 2)
             {
                 return true;
             }
 
             const float DistanceToBotCoverThresh = 1f;
 
-            foreach (var member in SAINBot.Squad.Members.Values)
+            foreach (var member in Bot.Squad.Members.Values)
             {
                 if (member != null && member.BotOwner != BotOwner)
                 {

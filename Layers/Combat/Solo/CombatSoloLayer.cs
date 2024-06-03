@@ -1,11 +1,6 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
-using EFT;
-using System.Text;
-using SAIN.SAINComponent;
+﻿using EFT;
 using SAIN.Layers.Combat.Solo.Cover;
-using System.Collections.Generic;
-using UnityEngine;
+using SAIN.SAINComponent;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -19,9 +14,9 @@ namespace SAIN.Layers.Combat.Solo
 
         public override Action GetNextAction()
         {
-            SoloDecision Decision = CurrentDecision;
+            SoloDecision Decision = _currentDecision;
             var SelfDecision = SAINBot.Decision.CurrentSelfDecision;
-            LastActionDecision = Decision;
+            _lastDecision = Decision;
 
             if (_doSurgeryAction)
             {
@@ -44,41 +39,15 @@ namespace SAIN.Layers.Combat.Solo
                     return new Action(typeof(ShiftCoverAction), $"{Decision}");
 
                 case SoloDecision.RunToCover:
-                    if (SAINBot.Cover.CoverPoints.Count > 0)
-                    {
-                        return new Action(typeof(RunToCoverAction), $"{Decision}");
-                    }
-                    else
-                    {
-                        NoCoverUseDogFight = true;
-                        return new Action(typeof(DogFightAction), $"{Decision} : No Cover Found Yet! Using Dogfight");
-                    }
+                    return new Action(typeof(RunToCoverAction), $"{Decision}");
 
                 case SoloDecision.Retreat:
-                    if (SAINBot.Cover.CoverPoints.Count > 0)
-                    {
-                        return new Action(typeof(RunToCoverAction), $"{Decision} + {SelfDecision}");
-                    }
-                    else
-                    {
-                        NoCoverUseDogFight = true;
-                        return new Action(typeof(DogFightAction), $"{Decision} : No Cover Found Yet! Using Dogfight");
-                    }
+                    return new Action(typeof(RunToCoverAction), $"{Decision} + {SelfDecision}");
 
                 case SoloDecision.MoveToCover:
-                case SoloDecision.UnstuckMoveToCover:
-                    if (SAINBot.Cover.CoverPoints.Count > 0)
-                    {
-                        return new Action(typeof(WalkToCoverAction), $"{Decision}");
-                    }
-                    else
-                    {
-                        NoCoverUseDogFight = true;
-                        return new Action(typeof(DogFightAction), $"{Decision} : No Cover Found Yet! Using Dogfight");
-                    }
+                    return new Action(typeof(WalkToCoverAction), $"{Decision}");
 
                 case SoloDecision.DogFight:
-                case SoloDecision.UnstuckDogFight:
                     return new Action(typeof(DogFightAction), $"{Decision}");
 
                 case SoloDecision.ShootDistantEnemy:
@@ -95,11 +64,7 @@ namespace SAIN.Layers.Combat.Solo
                         return new Action(typeof(HoldinCoverAction), $"{Decision}");
                     }
 
-                case SoloDecision.Shoot:
-                    return new Action(typeof(ShootAction), $"{Decision}");
-
                 case SoloDecision.Search:
-                case SoloDecision.UnstuckSearch:
                     return new Action(typeof(SearchAction), $"{Decision}");
 
                 default:
@@ -107,37 +72,22 @@ namespace SAIN.Layers.Combat.Solo
             }
         }
 
-        bool NoCoverUseDogFight;
-
         public override bool IsActive()
         {
-            bool active = SAINBot != null && CurrentDecision != SoloDecision.None;
-            if (SAINBot != null && SAINBot.SAINSoloActive != active)
+            bool active = SAINBot != null && _currentDecision != SoloDecision.None;
+            if (active)
             {
-                SAINBot.SAINSoloActive = active;
+                SAINBot.ActiveLayer = ESAINLayer.Combat;
             }
-            if (SAINBot == null)
+            else
             {
-                if (_nextLogErrorTime < Time.time)
-                {
-                    _nextLogErrorTime = Time.time + 10f;
-                    Logger.LogError($"SAIN Is null for {BotOwner?.name} : {BotOwner?.Profile?.Info?.Settings?.Role} : {BotOwner?.Profile?.Nickname}");
-                }
-                return false;
+                SAINBot.ActiveLayer = ESAINLayer.None;
             }
             return active;
         }
 
-        private static float _nextLogErrorTime;
-
         public override bool IsCurrentActionEnding()
         {
-            if (NoCoverUseDogFight && SAINBot.Cover.CoverPoints.Count > 0)
-            {
-                NoCoverUseDogFight = false;
-                return true;
-            }
-
             // this is dumb im sorry
             if (!_doSurgeryAction
                 && SAINBot.Decision.CurrentSelfDecision == SelfDecision.Surgery
@@ -147,12 +97,12 @@ namespace SAIN.Layers.Combat.Solo
                 return true;
             }
 
-            return CurrentDecision != LastActionDecision;
+            return _currentDecision != _lastDecision;
         }
 
-        bool _doSurgeryAction;
+        private bool _doSurgeryAction;
 
-        private SoloDecision LastActionDecision = SoloDecision.None;
-        public SoloDecision CurrentDecision => SAINBot.Decision.CurrentSoloDecision;
+        private SoloDecision _lastDecision = SoloDecision.None;
+        public SoloDecision _currentDecision => SAINBot.Decision.CurrentSoloDecision;
     }
 }

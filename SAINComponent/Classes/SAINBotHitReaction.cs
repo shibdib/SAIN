@@ -52,8 +52,6 @@ namespace SAIN.SAINComponent.Classes
         }
 
         bool _subscribed;
-        private float HitReceiveTime = 0.33f;
-        private float HitRecoverBaseTime = 1f;
 
         public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
@@ -86,7 +84,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 //Logger.LogAndNotifyDebug($"{BotOwner.name} is hit in {HitReaction}");
             }
-            SAINEnemy enemy = SAINBot.EnemyController.CheckAddEnemy(player);
+            SAINEnemy enemy = Bot.EnemyController.CheckAddEnemy(player);
             if (enemy != null)
             {
                 enemy.RegisterShotByEnemy(damageInfo);

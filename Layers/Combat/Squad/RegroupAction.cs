@@ -26,8 +26,6 @@ namespace SAIN.Layers.Combat.Squad
             SAINBot.DoorOpener.Update();
         }
 
-        private float UpdateTimer = 0f;
-
         public override void Start()
         {
         }

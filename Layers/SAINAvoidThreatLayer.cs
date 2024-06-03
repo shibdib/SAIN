@@ -40,9 +40,9 @@ namespace SAIN.Layers
                 (CurrentDecision == SoloDecision.DogFight ||
                 CurrentDecision == SoloDecision.AvoidGrenade);
 
-            if (SAINBot != null && SAINBot.SAINAvoidActive != active)
+            if (SAINBot != null)
             {
-                SAINBot.SAINAvoidActive = active;
+                SAINBot.ActiveLayer = ESAINLayer.AvoidThreat;
             }
             return active;
         }

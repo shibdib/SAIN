@@ -41,7 +41,7 @@ namespace SAIN.SAINComponent.Classes.Memory
                 {
                     if (player != null)
                     {
-                        Logger.LogDebug($"Visible for {BotOwner.name} = {player.name} : {player.Side} : {player.ProfileId} : Is Friendly? {SAINBot.EnemyController.IsPlayerFriendly(player)}");
+                        Logger.LogDebug($"Visible for {BotOwner.name} = {player.name} : {player.Side} : {player.ProfileId} : Is Friendly? {Bot.EnemyController.IsPlayerFriendly(player)}");
                     }
                 }
             }
@@ -53,7 +53,7 @@ namespace SAIN.SAINComponent.Classes.Memory
 
         public void EnemyWasHeard(SAINEnemy enemy)
         {
-            if (SAINBot.HasEnemy || !BotOwner.Memory.IsPeace)
+            if (Bot.HasEnemy || !BotOwner.Memory.IsPeace)
             {
                 return;
             }

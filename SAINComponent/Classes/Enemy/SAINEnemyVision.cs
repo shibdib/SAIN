@@ -54,7 +54,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float getAngleToEnemy(bool setYto0)
         {
-            Vector3 direction = EnemyPosition - Enemy.SAINBot.Position;
+            Vector3 direction = EnemyPosition - Enemy.Bot.Position;
             Vector3 lookDir = BotOwner.LookDirection;
             if (setYto0)
             {
@@ -64,7 +64,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return Vector3.Angle(direction, lookDir);
         }
 
-        public float MaxVisionAngle => Enemy.SAINBot.Info.FileSettings.Core.VisibleAngle / 2f;
+        public float MaxVisionAngle => Enemy.Bot.Info.FileSettings.Core.VisibleAngle / 2f;
 
         public float AngleToEnemy
         {

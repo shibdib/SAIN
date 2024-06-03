@@ -31,7 +31,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void updateLightToggle()
         {
-            if (SAINBot.SAINLayersActive &&
+            if (Bot.SAINLayersActive &&
                 IsLightEnabled != wantLightOn &&
                 _nextLightChangeTime < Time.time)
             {
@@ -91,17 +91,17 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void HandleLightForEnemy()
         {
-            if (SAINBot.Decision.CurrentSoloDecision == SoloDecision.Search)
+            if (Bot.Decision.CurrentSoloDecision == SoloDecision.Search)
             {
                 return;
             }
 
-            SAINEnemy enemy = SAINBot.Enemy;
+            SAINEnemy enemy = Bot.Enemy;
             if (enemy != null)
             {
                 float maxTurnOnrange = 50f;
                 float? lastKnownDist = enemy.LastKnownDistanceSqr;
-                SoloDecision decision = SAINBot.Decision.CurrentSoloDecision;
+                SoloDecision decision = Bot.Decision.CurrentSoloDecision;
 
                 if (enemy.EnemyNotLooking)
                 {

@@ -25,6 +25,16 @@ using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent
 {
+    public enum ESAINLayer
+    {
+        None = 0,
+        Combat = 1,
+        Squad = 2,
+        Extract = 3,
+        Run = 4,
+        AvoidThreat = 5,
+    }
+
     public class BotComponent : MonoBehaviour, IBotComponent
     {
         public static bool TryAddBotComponent(BotOwner botOwner, out BotComponent sainComponent)
@@ -65,9 +75,16 @@ namespace SAIN.SAINComponent
                 return false;
             }
 
-            Person = person;
+            GameWorld.OnDispose += Dispose;
 
-            try
+            Person = person;
+            BotOwner = person.BotOwner;
+            ProfileId = person.ProfileId;
+            Player = person.Player;
+
+            Player.OnPlayerDeadOrUnspawn += botKilled;
+
+            try 
             {
                 NoBushESP = this.GetOrAddComponent<SAINNoBushESP>();
                 NoBushESP.Init(person.BotOwner, this);
@@ -103,6 +120,7 @@ namespace SAIN.SAINComponent
                 BotLight = new BotLightController(this);
                 BackpackDropper = new BotBackpackDropClass(this);
                 CurrentTarget = new CurrentTargetClass(this);
+                ManualShoot = new ManualShootClass(this);
 
                 BotOwner.OnBotStateChange += resetBot;
             }
@@ -113,6 +131,7 @@ namespace SAIN.SAINComponent
                 Dispose();
                 return false;
             }
+
 
             Search.Init();
             Memory.Init();
@@ -141,12 +160,8 @@ namespace SAIN.SAINComponent
             BotLight.Init();
             BackpackDropper.Init();
 
-            TimeBotCreated = Time.time;
-
-            if (Info.Profile.IsPMC && 
-                person.BotOwner.Brain.BaseBrain.ShortName() != Brain.PMC.ToString())
+            if (!verifyBrain(person))
             {
-                Logger.LogAndNotifyError($"{BotOwner.name} is a PMC but does not have [PMC] Base Brain! Current Brain Assignment: [{person.BotOwner.Brain.BaseBrain.ShortName()}] : SAIN Server mod is either missing or another mod is overwriting it. Destroying SAIN for this bot...");
                 Logger.LogError("Init SAIN ERROR, Disposing...");
                 Dispose();
                 return false;
@@ -161,9 +176,22 @@ namespace SAIN.SAINComponent
             return true;
         }
 
+        private bool verifyBrain(SAINPersonClass person)
+        {
+            if (Info.Profile.IsPMC &&
+                person.BotOwner.Brain.BaseBrain.ShortName() != Brain.PMC.ToString())
+            {
+                Logger.LogAndNotifyError($"{BotOwner.name} is a PMC but does not have [PMC] Base Brain! Current Brain Assignment: [{person.BotOwner.Brain.BaseBrain.ShortName()}] : SAIN Server mod is either missing or another mod is overwriting it. Destroying SAIN for this bot...");
+                return false;
+            }
+            return true;
+        }
+
+
         private void OnDisable()
         {
             Decision.ResetDecisions(false);
+            StopAllCoroutines();
         }
 
         public bool IsSpeedHacker { get; private set; }
@@ -173,46 +201,15 @@ namespace SAIN.SAINComponent
             Decision.ResetDecisions(false);
         }
 
-        public float TimeBotCreated { get; private set; }
+        public bool SAINLayersActive => ActiveLayer != ESAINLayer.None;
 
-        public bool SAINLayersActive => SAINSoloActive || SAINSquadActive || SAINAvoidActive || SAINExtractActive || SAINRunActive;
+        public ESAINLayer ActiveLayer { get; set; }
 
-        public bool SAINSoloActive { get; set; }
-        public bool SAINSquadActive { get; set; }
-        public bool SAINAvoidActive { get; set; }
-        public bool SAINExtractActive { get; set; }
-        public bool SAINRunActive { get; set; }
 
         private void Update()
         {
-            if (Player == null)
+            if (Player == null || BotOwner == null || IsDead || BotOwner.BotState == EBotState.Disposed)
             {
-                //Logger.LogWarning("Dispose SAIN Player == null");
-                Dispose();
-                return;
-            }
-            if (BotOwner == null)
-            {
-                //Logger.LogWarning("Dispose SAIN BotOwner == null");
-                Dispose();
-                return;
-            }
-            if (IsDead)
-            {
-                //Logger.LogWarning("Dispose SAIN IsDead");
-                Dispose();
-                return;
-            }
-            if (Singleton<GameWorld>.Instance == null)
-            {
-                //Logger.LogWarning("Dispose SAIN Singleton<GameWorld>.Instance == null");
-                Dispose();
-                return;
-            }
-
-            if (BotOwner.BotState == EBotState.Disposed)
-            {
-                Logger.LogWarning("Bot Disposed!");
                 Dispose();
                 return;
             }
@@ -225,6 +222,7 @@ namespace SAIN.SAINComponent
             }
 
             handlePatrolData();
+
             EnemyController.Update();
             AILimit.UpdateAILimit();
             CurrentTarget.Update();
@@ -252,12 +250,13 @@ namespace SAIN.SAINComponent
             SpaceAwareness.Update();
             Medical.Update();
             BotLight.Update();
+            ManualShoot.Update();
 
-            if (ManualShootReason != EShootReason.None && (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 1f < Time.time))
-            {
-                Shoot(false, Vector3.zero);
-            }
+            handleDumbShit();
+        }
 
+        private void handleDumbShit()
+        {
             if (IsSpeedHacker)
             {
                 if (defaultMoveSpeed == 0)
@@ -286,25 +285,8 @@ namespace SAIN.SAINComponent
         private float defaultMoveSpeed;
         private float defaultSprintSpeed;
 
-        private float _nextCheckReloadTime;
         public SAINDoorOpener DoorOpener { get; private set; }
         public bool PatrolDataPaused { get; private set; }
-
-        public bool IsHumanActiveEnemy
-        {
-            get
-            {
-                foreach (var enemy in EnemyController.ActiveEnemies)
-                {
-                    if (enemy != null && !enemy.IsAI)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
-
         public bool Extracting { get; set; }
 
         private void handlePatrolData()
@@ -345,7 +327,6 @@ namespace SAIN.SAINComponent
 
         private bool _speedReset;
         public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
-        public bool BotIsAlive => Player?.HealthController?.IsAlive == true;
 
         public float DistanceToAimTarget
         {
@@ -359,49 +340,13 @@ namespace SAIN.SAINComponent
             }
         }
 
-        public bool Shoot(bool value, Vector3 targetPos, bool checkFF = true, EShootReason reason = EShootReason.None)
+        private void botKilled(Player player)
         {
-            ManualShootTargetPosition = targetPos;
-            ManualShootReason = value ? reason : EShootReason.None;
-
-            if (value)
+            if (player != null)
             {
-                if (checkFF && !FriendlyFireClass.ClearShot)
-                {
-                    ManualShootReason = EShootReason.None;
-                    BotOwner.ShootData.EndShoot();
-                    return false;
-                }
-                else if (BotOwner.ShootData.Shoot())
-                {
-                    _timeStartManualShoot = Time.time;
-                    ManualShootReason = reason;
-                    return true;
-                }
-                else
-                {
-                    BotOwner.ShootData.EndShoot();
-                    ManualShootReason = EShootReason.None;
-                    return false;
-                }
+                player.OnPlayerDeadOrUnspawn -= botKilled;
             }
-            BotOwner.ShootData.EndShoot();
-            ManualShootReason = EShootReason.None;
-            return false;
-        }
-
-        private float _timeStartManualShoot;
-
-        public Vector3 ManualShootTargetPosition { get; private set; }
-
-        public EShootReason ManualShootReason { get; private set; }
-
-        public enum EShootReason
-        {
-            None = 0,
-            SquadSuppressing = 1,
-            Blindfire = 2,
-            WalkToCoverSuppress = 3,
+            Dispose();
         }
 
         public void Dispose()
@@ -410,6 +355,7 @@ namespace SAIN.SAINComponent
             {
                 //Logger.LogWarning($"SAIN Disposed");
 
+                GameWorld.OnDispose -= Dispose;
                 OnSAINDisposed?.Invoke(ProfileId, BotOwner);
 
                 StopAllCoroutines();
@@ -470,6 +416,7 @@ namespace SAIN.SAINComponent
 
         public float CurrentTargetDistance => CurrentTarget.CurrentTargetDistance;
 
+        public ManualShootClass ManualShoot { get; private set; }
         public CurrentTargetClass CurrentTarget { get; private set; }
         public BotBackpackDropClass BackpackDropper { get; private set; }
         public BotLightController BotLight { get; private set; }
@@ -525,10 +472,10 @@ namespace SAIN.SAINComponent
 
         public Vector3 Position => Person.Position;
         public Vector3 LookDirection => Person.Transform.LookDirection;
-        public BotOwner BotOwner => Person?.BotOwner;
-        public string ProfileId => Person?.ProfileId;
-        public Player Player => Person?.Player;
         public bool HasEnemy => EnemyController.HasEnemy;
         public bool HasLastEnemy => EnemyController.HasLastEnemy;
+        public BotOwner BotOwner { get; private set; }
+        public string ProfileId { get; private set; }
+        public Player Player { get; private set; }
     }
 }

@@ -36,7 +36,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     _nextCheckTime = time + 1f;
                     return;
                 }
-                if (SAINBot?.Enemy != null)
+                if (Bot?.Enemy != null)
                 {
                     if (ShallFakeDeath())
                     {
@@ -68,8 +68,8 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
         }
 
-        private PersonalityTalkSettings PersonalitySettings => SAINBot?.Info?.PersonalitySettings.Talk;
-        private SAINSettingsClass FileSettings => SAINBot?.Info?.FileSettings;
+        private PersonalityTalkSettings PersonalitySettings => Bot?.Info?.PersonalitySettings.Talk;
+        private SAINSettingsClass FileSettings => Bot?.Info?.FileSettings;
 
         private float FakeDeathChance = 2f;
 
@@ -111,14 +111,14 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             if (CanFakeDeath
                 && EFTMath.RandomBool(FakeDeathChance)
-                && SAINBot.Enemy != null
-                && !SAINBot.Squad.BotInGroup
+                && Bot.Enemy != null
+                && !Bot.Squad.BotInGroup
                 && _fakeDeathTimer < Time.time
-                && (SAINBot.Memory.Health.HealthStatus == ETagStatus.Dying || SAINBot.Memory.Health.HealthStatus == ETagStatus.BadlyInjured)
-                && (SAINBot.Enemy.EnemyPosition - BotOwner.Position).sqrMagnitude < 70f * 70f)
+                && (Bot.Memory.Health.HealthStatus == ETagStatus.Dying || Bot.Memory.Health.HealthStatus == ETagStatus.BadlyInjured)
+                && (Bot.Enemy.EnemyPosition - BotOwner.Position).sqrMagnitude < 70f * 70f)
             {
                 _fakeDeathTimer = Time.time + 30f;
-                SAINBot.Talk.Say(EPhraseTrigger.OnDeath);
+                Bot.Talk.Say(EPhraseTrigger.OnDeath);
                 return true;
             }
             return false;
@@ -129,13 +129,13 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (CanFakeDeath
                 && EFTMath.RandomBool(FakeDeathChance)
                 && !isSmoke
-                && SAINBot.Enemy != null
+                && Bot.Enemy != null
                 && _fakeDeathTimer < Time.time
-                && playerProfileID != SAINBot.ProfileId
-                && (grenadeExplosionPosition - SAINBot.Position).sqrMagnitude < 25f * 25f)
+                && playerProfileID != Bot.ProfileId
+                && (grenadeExplosionPosition - Bot.Position).sqrMagnitude < 25f * 25f)
             {
                 _fakeDeathTimer = Time.time + 30f;
-                SAINBot.Talk.Say(EPhraseTrigger.OnDeath);
+                Bot.Talk.Say(EPhraseTrigger.OnDeath);
             }
         }
 
@@ -150,7 +150,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 _begTimer = Time.time + 10f;
                 return false;
             }
-            Vector3? currentTarget = SAINBot.CurrentTargetPosition;
+            Vector3? currentTarget = Bot.CurrentTargetPosition;
             if (currentTarget == null)
             {
                 _begTimer = Time.time + 10f;
@@ -159,14 +159,14 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             _begTimer = Time.time + 3f;
 
-            bool shallBeg = SAINBot.Info.Profile.IsPMC ? !SAINBot.Squad.BotInGroup : SAINBot.Info.Profile.IsScav;
+            bool shallBeg = Bot.Info.Profile.IsPMC ? !Bot.Squad.BotInGroup : Bot.Info.Profile.IsScav;
             if (shallBeg
                 && CanBegForLife
-                && SAINBot.Memory.Health.HealthStatus != ETagStatus.Healthy
-                && (currentTarget.Value - SAINBot.Position).sqrMagnitude < 50f * 50f)
+                && Bot.Memory.Health.HealthStatus != ETagStatus.Healthy
+                && (currentTarget.Value - Bot.Position).sqrMagnitude < 50f * 50f)
             {
                 IsBeggingForLife = true;
-                SAINBot.Talk.Say(BegPhrases.PickRandom());
+                Bot.Talk.Say(BegPhrases.PickRandom());
                 return true;
             }
             return false;
@@ -195,18 +195,18 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool TauntEnemy()
         {
             bool tauntEnemy = false;
-            var enemy = SAINBot.Enemy;
+            var enemy = Bot.Enemy;
 
             if (enemy != null
-                && (enemy.EnemyPosition - SAINBot.Position).sqrMagnitude <= TauntDist * TauntDist)
+                && (enemy.EnemyPosition - Bot.Position).sqrMagnitude <= TauntDist * TauntDist)
             {
-                if (SAINBot.Info.PersonalitySettings.Talk.ConstantTaunt)
+                if (Bot.Info.PersonalitySettings.Talk.ConstantTaunt)
                 {
                     tauntEnemy = true;
                 }
                 else if (enemy.IsVisible || enemy.TimeSinceSeen < 5f)
                 {
-                    tauntEnemy = enemy.EnemyLookingAtMe || SAINBot.Info.PersonalitySettings.Talk.FrequentTaunt;
+                    tauntEnemy = enemy.EnemyLookingAtMe || Bot.Info.PersonalitySettings.Talk.FrequentTaunt;
                 }
             }
 
@@ -230,12 +230,12 @@ namespace SAIN.SAINComponent.Classes.Talk
                     && enemy.TimeSinceSeen > 8f
                     && EFTMath.RandomBool(20))
                 {
-                    SAINBot.Talk.Say(EPhraseTrigger.OnLostVisual, ETagStatus.Combat, true);
+                    Bot.Talk.Say(EPhraseTrigger.OnLostVisual, ETagStatus.Combat, true);
                 }
                 else
                 {
                     EPhraseTrigger trigger = EFTMath.RandomBool(90) ? EPhraseTrigger.OnFight : EPhraseTrigger.BadWork;
-                    SAINBot.Talk.Say(trigger, ETagStatus.Combat, false);
+                    Bot.Talk.Say(trigger, ETagStatus.Combat, false);
                 }
             }
 
@@ -251,12 +251,12 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (sourcePlayer == null ||
                 BotOwner == null ||
                 Player == null ||
-                SAINBot == null ||
-                sourcePlayer.ProfileId == SAINBot.ProfileId)
+                Bot == null ||
+                sourcePlayer.ProfileId == Bot.ProfileId)
             {
                 yield break;
             }
-            if ((sourcePlayer.Position - SAINBot.Position).sqrMagnitude > responseDist * responseDist)
+            if ((sourcePlayer.Position - Bot.Position).sqrMagnitude > responseDist * responseDist)
             {
                 //if (sourcePlayer.IsYourPlayer)
                 //    Logger.LogInfo("No Response. Too far");
@@ -268,7 +268,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (sourcePlayer == null ||
                 BotOwner == null ||
                 Player == null ||
-                SAINBot == null)
+                Bot == null)
             {
                 yield break;
             }
@@ -282,7 +282,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             if (friendly && !BotOwner.Memory.IsPeace)
             {
-                if (SAINBot.Talk.Say(trigger, null, false))
+                if (Bot.Talk.Say(trigger, null, false))
                 {
                     //if (sourcePlayer.IsYourPlayer)
                     //    Logger.LogInfo("Response Done");
@@ -295,7 +295,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 _nextGestureTime = Time.time + 3f;
                 Player.HandsController.ShowGesture(EGesture.Hello);
             }
-            if (SAINBot.Talk.Say(trigger, mask, false))
+            if (Bot.Talk.Say(trigger, mask, false))
             {
                 //if (sourcePlayer.IsYourPlayer)
                 //    Logger.LogInfo("Response Done");
@@ -304,9 +304,9 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void SetEnemyTalk(Player player)
         {
-            if ((player.Position - SAINBot.Position).sqrMagnitude < 70f.Sqr())
+            if ((player.Position - Bot.Position).sqrMagnitude < 70f.Sqr())
             {
-                SAINBot.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position + UnityEngine.Random.onUnitSphere + Vector3.up, SAINSoundType.Conversation, true);
+                Bot.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position + UnityEngine.Random.onUnitSphere + Vector3.up, SAINSoundType.Conversation, true);
             }
 
             if (_canRespondToEnemy &&
@@ -319,7 +319,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 //    Logger.LogInfo($"Starting Responding To Voice! Min Dist: {TauntDist} Chance: {chance}");
 
                 _nextResponseTime = Time.time + 2f;
-                SAINBot.StartCoroutine(RespondToVoice(
+                Bot.StartCoroutine(RespondToVoice(
                     trigger,
                     ETagStatus.Combat,
                     Random.Range(0.4f, 0.6f),
@@ -334,16 +334,16 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private bool shallBeChatty()
         {
-            if (SAINBot.Info.Profile.IsScav)
+            if (Bot.Info.Profile.IsScav)
             {
                 return SAINPlugin.LoadedPreset.GlobalSettings.Talk.TalkativeScavs;
             }
-            if (SAINBot.Info.Profile.IsPMC)
+            if (Bot.Info.Profile.IsPMC)
             {
                 return SAINPlugin.LoadedPreset.GlobalSettings.Talk.TalkativePMCs;
             }
-            var role = SAINBot.Info.Profile.WildSpawnType;
-            if ((SAINBot.Info.Profile.IsBoss || SAINBot.Info.Profile.IsFollower))
+            var role = Bot.Info.Profile.WildSpawnType;
+            if ((Bot.Info.Profile.IsBoss || Bot.Info.Profile.IsFollower))
             {
                 if ((role == WildSpawnType.bossKnight || role == WildSpawnType.followerBirdEye || role == WildSpawnType.followerBigPipe))
                 {
@@ -361,15 +361,15 @@ namespace SAIN.SAINComponent.Classes.Talk
         public void SetFriendlyTalked(Player player)
         {
             if (player == null
-                || SAINBot == null
+                || Bot == null
                 || !player.HealthController.IsAlive
-                || SAINBot.ProfileId == player.ProfileId
-                || (player.Position - SAINBot.Position).sqrMagnitude > 100f * 100f)
+                || Bot.ProfileId == player.ProfileId
+                || (player.Position - Bot.Position).sqrMagnitude > 100f * 100f)
             {
                 return;
             }
 
-            if ((BotOwner.Memory.IsPeace || (SAINBot.Squad.HumanFriendClose && !player.IsAI))
+            if ((BotOwner.Memory.IsPeace || (Bot.Squad.HumanFriendClose && !player.IsAI))
                 && _nextResponseTime < Time.time)
             {
                 _nextResponseTime = Time.time + _friendlyResponseFrequencyLimit;
@@ -379,9 +379,9 @@ namespace SAIN.SAINComponent.Classes.Talk
                     float maxDist = player.IsAI ? _friendlyResponseDistanceAI : _friendlyResponseDistance;
                     float chance = player.IsAI ? _friendlyResponseChanceAI : _friendlyResponseChance;
 
-                    SAINBot.StartCoroutine(RespondToVoice(
+                    Bot.StartCoroutine(RespondToVoice(
                         EPhraseTrigger.MumblePhrase,
-                        SAINBot.EnemyController.NoEnemyContact ? ETagStatus.Unaware : ETagStatus.Combat,
+                        Bot.EnemyController.NoEnemyContact ? ETagStatus.Unaware : ETagStatus.Combat,
                         Random.Range(_friendlyResponseMinRandom, _friendlyResponseMaxRandom),
                         player,
                         maxDist,
@@ -389,19 +389,19 @@ namespace SAIN.SAINComponent.Classes.Talk
                     ));
                 }
             }
-            else if (SAINBot?.Squad.SquadInfo != null
-                && SAINBot.Talk.GroupTalk.FriendIsClose
-                && (SAINBot.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.GigaChads
-                    || SAINBot.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.Elite)
-                && (SAINBot.Info.Personality == EPersonality.GigaChad
-                    || SAINBot.Info.Personality == EPersonality.Chad))
+            else if (Bot?.Squad.SquadInfo != null
+                && Bot.Talk.GroupTalk.FriendIsClose
+                && (Bot.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.GigaChads
+                    || Bot.Squad.SquadInfo.SquadPersonality != BotController.Classes.ESquadPersonality.Elite)
+                && (Bot.Info.Personality == EPersonality.GigaChad
+                    || Bot.Info.Personality == EPersonality.Chad))
             {
                 if (_saySilenceTime < Time.time)
                 {
                     _saySilenceTime = Time.time + 20f;
-                    SAINBot.StartCoroutine(RespondToVoice(
+                    Bot.StartCoroutine(RespondToVoice(
                         EPhraseTrigger.Silence,
-                        SAINBot.EnemyController.NoEnemyContact ? ETagStatus.Combat : ETagStatus.Aware,
+                        Bot.EnemyController.NoEnemyContact ? ETagStatus.Combat : ETagStatus.Aware,
                         Random.Range(0.2f, 0.5f),
                         player,
                         20f,

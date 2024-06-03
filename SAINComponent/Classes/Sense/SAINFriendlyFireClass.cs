@@ -19,7 +19,7 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
-                if (!SAINBot.SAINLayersActive)
+                if (!Bot.SAINLayersActive)
                 {
                     _ffStatus = FriendlyFireStatus.None;
                 }
@@ -55,7 +55,7 @@ namespace SAIN.SAINComponent.Classes
 
         public FriendlyFireStatus CheckFriendlyFire()
         {
-            if (!SAINBot.Squad.BotInGroup)
+            if (!Bot.Squad.BotInGroup)
             {
                 return FriendlyFireStatus.None;
             }

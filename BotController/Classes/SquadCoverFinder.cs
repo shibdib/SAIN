@@ -46,8 +46,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         }
 
-        private Coroutine FindCoverCoroutine;
-
         private IEnumerator FindCoverForMembers()
         {
             while (true)

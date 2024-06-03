@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void UpdateAILimit()
         {
-            if (SAINBot == null || BotOwner == null)
+            if (Bot == null || BotOwner == null)
             {
                 return;
             }
@@ -38,7 +38,7 @@ namespace SAIN.SAINComponent.Classes
 
         private AILimitSetting CheckForAILimit()
         {
-            if (SAINBot.IsHumanActiveEnemy)
+            if (Bot.EnemyController.ActiveHumanEnemy)
             {
                 CurrentAILimit = AILimitSetting.Close;
                 return CurrentAILimit;
@@ -48,7 +48,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 CheckDistancesTimer = Time.time + 3f;
                 var gameWorld = GameWorldHandler.SAINGameWorld;
-                if (gameWorld != null && gameWorld.FindClosestPlayer(out float closestPlayerSqrMag, SAINBot.Position) != null)
+                if (gameWorld != null && gameWorld.FindClosestPlayer(out float closestPlayerSqrMag, Bot.Position) != null)
                 {
                     CurrentAILimit = CheckDistances(closestPlayerSqrMag);
                 }

@@ -29,41 +29,41 @@ namespace SAIN.SAINComponent.Classes
             {
                 BackpackDropPosition = null;
             }
-            if (SAINBot.Enemy != null)
-            {
-                //DropBackpack();
-            }
-            if (_wantToDrop && _nextTryDropTime < Time.time)
-            {
-               // _nextTryDropTime = Time.time + 0.5f;
-               // executeDrop();
-            }
+            //if (Bot.Enemy != null)
+            //{
+            //    DropBackpack();
+            //}
+            //if (_wantToDrop && _nextTryDropTime < Time.time)
+            //{
+            //   _nextTryDropTime = Time.time + 0.5f;
+            //   executeDrop();
+            //}
         }
 
-        private float _nextTryDropTime;
+        //private float _nextTryDropTime;
 
         public void Dispose()
         { }
 
         public bool DropBackpack()
         {
-            Item backpack = _currentBackpack;
-            if (DroppedBackpack == null && backpack == null)
-            {
-                _wantToDrop = false;
-                BackpackStatus = EBackpackStatus.NoBackpack;
-                return false;
-            }
-            if (DroppedBackpack == null &&
-                backpack != null)
-            {
-                _wantToDrop = true;
-                return true;
-            }
+            //Item backpack = _currentBackpack;
+            //if (DroppedBackpack == null && backpack == null)
+            //{
+            //    _wantToDrop = false;
+            //    BackpackStatus = EBackpackStatus.NoBackpack;
+            //    return false;
+            //}
+            //if (DroppedBackpack == null &&
+            //    backpack != null)
+            //{
+            //    _wantToDrop = true;
+            //    return true;
+            //}
             return false;
         }
 
-        private bool _wantToDrop;
+        //private bool _wantToDrop;
 
         private void executeDrop()
         {
@@ -71,7 +71,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 return;
             }
-            _dropCoroutine = SAINBot.StartCoroutine(executeBackpackDrop());
+            _dropCoroutine = Bot.StartCoroutine(executeBackpackDrop());
         }
 
         private Coroutine _dropCoroutine;
@@ -92,16 +92,16 @@ namespace SAIN.SAINComponent.Classes
 
             if (_currentBackpack == null)
             {
-                _wantToDrop = false;
-                BackpackDropPosition = new Vector3?(SAINBot.Position);
+                //_wantToDrop = false;
+                BackpackDropPosition = new Vector3?(Bot.Position);
                 BackpackStatus = EBackpackStatus.Dropped;
-                Logger.LogInfo($"{BotOwner.name} Dropped Backpack at {SAINBot.Position} at {Time.time}");
+                Logger.LogInfo($"{BotOwner.name} Dropped Backpack at {Bot.Position} at {Time.time}");
             }
         }
 
         public EBackpackStatus BackpackStatus { get; private set; }
 
-        private Item _currentBackpack => SAINBot.Equipment.InventoryController?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Backpack)?.ContainedItem;
+        private Item _currentBackpack => Bot.Equipment.InventoryController?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Backpack)?.ContainedItem;
 
         public bool RetreiveBackpack()
         {

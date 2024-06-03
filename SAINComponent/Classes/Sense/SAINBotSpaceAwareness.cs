@@ -38,7 +38,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            if (SAINBot.HasEnemy && _findFlankTimer < Time.time && SAINBot.Enemy?.EnemyPlayer?.IsYourPlayer == true)
+            if (Bot.HasEnemy && _findFlankTimer < Time.time && Bot.Enemy?.EnemyPlayer?.IsYourPlayer == true)
             {
                 _findFlankTimer = Time.time + 1f;
                 // CurrentFlankRoute = FindFlankRoute();
@@ -60,7 +60,7 @@ namespace SAIN.SAINComponent.Classes
 
         public FlankRoute FindFlankRoute()
         {
-            SAINEnemy enemy = SAINBot.Enemy;
+            SAINEnemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 return null;
@@ -68,8 +68,8 @@ namespace SAIN.SAINComponent.Classes
 
             FlankRoute flankRoute = null;
 
-            Vector3 enemyPosition = SAINBot.Enemy.EnemyPosition;
-            Vector3 botPosition = SAINBot.Position;
+            Vector3 enemyPosition = Bot.Enemy.EnemyPosition;
+            Vector3 botPosition = Bot.Position;
 
             Vector3? middleNode = FindMiddlePoint(enemy.Path.PathToEnemy, enemy.Path.PathDistance, out int index);
 

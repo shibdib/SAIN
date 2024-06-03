@@ -58,8 +58,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             return num != null;
         }
 
-        private float _targetPoseLevel;
-
         public bool ObjectInFront => ObjectTargetPoseCover != null;
         public float? ObjectTargetPoseCover { get; private set; }
 
@@ -86,9 +84,9 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool FindCrouchFromCover(out float targetPose, bool useCollider = false)
         {
             targetPose = 1f;
-            if ((SAINBot.AILimit.CurrentAILimit == AILimitSetting.Close || SAINBot.Enemy?.IsAI == false))
+            if ((Bot.AILimit.CurrentAILimit == AILimitSetting.Close || Bot.Enemy?.IsAI == false))
             {
-                SAINEnemy enemy = SAINBot.Enemy;
+                SAINEnemy enemy = Bot.Enemy;
                 if (enemy?.LastKnownPosition != null)
                 {
                     Vector3 position = enemy.LastKnownPosition.Value + Vector3.up;
@@ -113,7 +111,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             LayerMask Mask = LayerMaskClass.HighPolyWithTerrainMask;
 
             Vector3 offset = Vector3.up * heightStep;
-            Vector3 start = SAINBot.Transform.Position + Vector3.up * StartHeight;
+            Vector3 start = Bot.Transform.Position + Vector3.up * StartHeight;
             Vector3 direction = target - start;
             float targetHeight = StartHeight;
             for (int i = 0; i <= max; i++)
@@ -136,7 +134,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private float FindCrouchHeightColliderSphereCast(Vector3 target, float rayLength = 3f, bool flatDir = true)
         {
             LayerMask Mask = LayerMaskClass.HighPolyWithTerrainMask;
-            Vector3 start = SAINBot.Transform.Position + Vector3.up * 0.75f;
+            Vector3 start = Bot.Transform.Position + Vector3.up * 0.75f;
             Vector3 direction = target - start;
             if (flatDir)
             {

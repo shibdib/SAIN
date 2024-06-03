@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            if (!SAINBot.PatrolDataPaused || !SAINBot.SAINLayersActive)
+            if (!Bot.PatrolDataPaused || !Bot.SAINLayersActive)
             {
                 ResetLean();
                 return;
@@ -32,16 +32,16 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return;
             }
-            var CurrentDecision = SAINBot.Decision.CurrentSoloDecision;
-            var enemy = SAINBot.Enemy;
-            if (enemy == null || Player.IsSprintEnabled || DontLean.Contains(CurrentDecision) || SAINBot.Suppression.IsSuppressed)
+            var CurrentDecision = Bot.Decision.CurrentSoloDecision;
+            var enemy = Bot.Enemy;
+            if (enemy == null || Player.IsSprintEnabled || DontLean.Contains(CurrentDecision) || Bot.Suppression.IsSuppressed)
             {
                 ResetLean();
                 return;
             }
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI 
                 && enemy.IsAI 
-                && SAINBot.CurrentAILimit != AILimitSetting.Close)
+                && Bot.CurrentAILimit != AILimitSetting.Close)
             {
                 ResetLean();
                 return;
@@ -87,7 +87,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             LastLeanDirection = LeanDirection;
             LeanDirection = LeanSetting.None;
-            SAINBot.Mover.FastLean(0f);
+            Bot.Mover.FastLean(0f);
         }
 
         public void FindLeanDirectionRayCast(Vector3 targetPos)
@@ -145,7 +145,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             var setting = GetSettingFromResults();
             LastLeanDirection = LeanDirection;
             LeanDirection = setting;
-            SAINBot.Mover.FastLean(setting);
+            Bot.Mover.FastLean(setting);
         }
 
         public LeanSetting GetSettingFromResults()
@@ -176,7 +176,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool CheckOffSetRay(Vector3 targetPos, float angle, float dist, out Vector3 Point)
         {
             Vector3 startPos = BotOwner.Position;
-            startPos.y = SAINBot.Transform.HeadPosition.y;
+            startPos.y = Bot.Transform.HeadPosition.y;
 
             if (dist > 0f)
             {

@@ -103,8 +103,6 @@ namespace SAIN.SAINComponent.Classes
 
         private bool _surgeryStarted;
 
-        private static readonly float StartSurgery_SeenRecentTime = 90f;
-
         public bool AreaClearForSurgery
         {
             get
@@ -129,14 +127,14 @@ namespace SAIN.SAINComponent.Classes
 
             if (_canStartSurgery)
             {
-                var enemy = SAINBot.Enemy;
-                if (SAINBot.EnemyController.NoEnemyContact)
+                var enemy = Bot.Enemy;
+                if (Bot.EnemyController.NoEnemyContact)
                 {
-                    if (SAINBot.CurrentTargetPosition == null)
+                    if (Bot.CurrentTargetPosition == null)
                     {
                         useSurgery = true;
                     }
-                    else if ((SAINBot.CurrentTargetPosition.Value - SAINBot.Position).sqrMagnitude > useSurgDist.Sqr())
+                    else if ((Bot.CurrentTargetPosition.Value - Bot.Position).sqrMagnitude > useSurgDist.Sqr())
                     {
                         useSurgery = true;
                     }
@@ -170,7 +168,7 @@ namespace SAIN.SAINComponent.Classes
         private bool checkEnemies(float minPathDist, float minTimeSinceLastKnown)
         {
             bool allClear = true;
-            var enemies = SAINBot.EnemyController.Enemies;
+            var enemies = Bot.EnemyController.Enemies;
             foreach (var enemy in enemies.Values)
             {
                 if (!checkThisEnemy(enemy, minPathDist, minTimeSinceLastKnown))

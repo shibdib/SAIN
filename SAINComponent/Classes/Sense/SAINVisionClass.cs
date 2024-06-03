@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            var Enemy = SAINBot.Enemy;
+            var Enemy = Bot.Enemy;
             if (Enemy?.EnemyIPlayer != null && Enemy?.IsVisible == true)
             {
                 FlashLightDazzle.CheckIfDazzleApplied(Enemy);
@@ -146,7 +146,7 @@ namespace SAIN.SAINComponent.Classes
         private int UpdateLookForEnemies(LookAllData lookAll, bool forAI)
         {
             int updated = 0;
-            foreach (SAINEnemy enemy in SAINBot.EnemyController.Enemies.Values)
+            foreach (SAINEnemy enemy in Bot.EnemyController.Enemies.Values)
             {
                 if (enemy?.IsValid == true &&
                     enemy.NextCheckLookTime < Time.time &&
