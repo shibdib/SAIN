@@ -1,4 +1,6 @@
 ﻿using BepInEx.Logging;
+using EFT;
+using SAIN.Plugin;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -20,19 +22,36 @@ namespace SAIN.Helpers
 
     public class DebugGizmos
     {
+        static DebugGizmos()
+        {
+            GameWorld.OnDispose += dispose; 
+            PresetHandler.OnEditorSettingsChanged += Update;
+        }
+
         public static void Update()
         {
             if (!DrawGizmos)
             {
-                if (DrawnGizmos.Count > 0)
+                clearGizmos();
+            }
+        }
+
+        private static void dispose()
+        {
+            clearGizmos();
+            GUIObjects.Clear();
+        }
+
+        private static void clearGizmos()
+        {
+            if (DrawnGizmos.Count > 0)
+            {
+                for (int i = 0; i < DrawnGizmos.Count; i++)
                 {
-                    for (int i = 0; i < DrawnGizmos.Count; i++)
-                    {
-                        if (DrawnGizmos[i] != null)
-                            Object.Destroy(DrawnGizmos[i]);
-                    }
-                    DrawnGizmos.Clear();
+                    if (DrawnGizmos[i] != null)
+                        Object.Destroy(DrawnGizmos[i]);
                 }
+                DrawnGizmos.Clear();
             }
         }
 

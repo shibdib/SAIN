@@ -74,21 +74,8 @@ namespace SAIN.Editor
             BotPersonalityEditor.PersonalityMenu();
         }
 
-        public static void Advanced()
+        private static void forceDecisions(int spacing)
         {
-            const int spacing = 4;
-
-            AttributesGUI.EditAllValuesInObj(PresetHandler.EditorDefaults, out bool newEdit);
-            if (newEdit)
-            {
-                PresetHandler.ExportEditorDefaults();
-            }
-
-            if (!PresetHandler.EditorDefaults.GlobalDebugMode)
-            {
-                return;
-            }
-
             Space(spacing);
 
             _forceDecisionMenuOpen = BuilderClass.ExpandableMenu("Force SAIN Bot Decisions", _forceDecisionMenuOpen);
@@ -145,8 +132,32 @@ namespace SAIN.Editor
                         EnumValues.GetEnum<SelfDecision>());
                 }
             }
+        }
 
-            _forceTalkMenuOpen = BuilderClass.ExpandableMenu("Force Bots to Say Phrase", _forceDecisionMenuOpen);
+        public static void Advanced()
+        {
+
+            AttributesGUI.EditAllValuesInObj(PresetHandler.EditorDefaults, out bool newEdit);
+            if (newEdit)
+            {
+                PresetHandler.ExportEditorDefaults();
+                PresetHandler.OnEditorSettingsChanged?.Invoke();
+            }
+
+            if (!PresetHandler.EditorDefaults.GlobalDebugMode)
+            {
+                return;
+            }
+
+            const int spacing = 4;
+            forceDecisions(spacing);
+            forceTalk(spacing);
+        }
+
+        private static void forceTalk(int spacing)
+        {
+            Space(spacing);
+            _forceTalkMenuOpen = BuilderClass.ExpandableMenu("Force Bots to Say Phrase", _forceTalkMenuOpen);
             if (_forceTalkMenuOpen)
             {
                 Space(5);

@@ -5,6 +5,7 @@ using System.Reflection;
 using System;
 using SAIN.SAINComponent;
 using SAIN.Components.BotController;
+using UnityEngine;
 
 namespace SAIN.Patches.Components
 {
@@ -26,6 +27,20 @@ namespace SAIN.Patches.Components
             {
                 Logger.LogError($" SAIN Add Component Error: {ex}");
             }
+        }
+    }
+
+    public class AddGameWorldPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(GameWorldUnityTickListener), "Create");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(GameObject gameObject)
+        {
+            GameWorldHandler.Create(gameObject);
         }
     }
 }

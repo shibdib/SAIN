@@ -307,13 +307,13 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
             CoverPoint pointInUse = Bot.Cover.CoverInUse;
-            if (pointInUse != null && pointInUse.IsBad == false)
+            if (pointInUse != null && 
+                //pointInUse.IsBad == false && 
+                //pointInUse.Spotted == false && 
+                pointInUse.Status != CoverStatus.InCover && 
+                (BotOwner.Mover.IsMoving || Bot.Mover.SprintController.Running))
             {
-                if (pointInUse.Status == CoverStatus.InCover)
-                {
-                    return false;
-                }
-                return BotOwner.Mover.IsMoving;
+                return true;
             }
             return false;
         }

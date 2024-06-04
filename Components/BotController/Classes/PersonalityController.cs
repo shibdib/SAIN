@@ -1,4 +1,5 @@
-﻿using SAIN.Components.BotController;
+﻿using SAIN.Components;
+using SAIN.Components.BotController;
 using SAIN.SAINComponent;
 using System;
 using System.Collections;
@@ -12,7 +13,8 @@ namespace SAIN.BotController.Classes
     public class PersonalityController : SAINControl
     {
         public static PersonalityController Instance;
-        public PersonalityController()
+
+        public PersonalityController(SAINBotController botController) : base(botController)
         {
             Instance = this;
         }

@@ -132,7 +132,7 @@ namespace SAIN.Attributes
 
         public bool CopyValue { get; private set; }
 
-        public bool DoNotShowGUI => Hidden || (Advanced && !SAINEditor.AdvancedBotConfigs) || (Debug && !SAINPlugin.DebugMode);
+        public bool DoNotShowGUI => Hidden || (Advanced && !SAINEditor.AdvancedBotConfigs); // || (Debug && !SAINPlugin.DebugMode)
 
         public EListType EListType { get; private set; } = EListType.None;
         public Type ListType { get; private set; }

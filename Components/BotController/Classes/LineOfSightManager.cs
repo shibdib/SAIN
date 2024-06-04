@@ -22,7 +22,7 @@ namespace SAIN.Components
 {
     public class LineOfSightManager : SAINControl
     {
-        public LineOfSightManager()
+        public LineOfSightManager(SAINBotController botController) : base(botController)
         {
             PresetHandler.OnPresetUpdated += updateSettings;
             updateSettings();

@@ -1,4 +1,5 @@
-﻿using SAIN.SAINComponent;
+﻿using SAIN.Components;
+using SAIN.SAINComponent;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,6 +12,8 @@ namespace SAIN.BotController.Classes
 {
     public class BotCoverController : SAINControl
     {
+        public BotCoverController(SAINBotController botController) : base(botController) { }
+
         public void FindCoverForBots()
         {
             if (_findCoverCoroutine == null)

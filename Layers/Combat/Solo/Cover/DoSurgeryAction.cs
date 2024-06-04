@@ -65,6 +65,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             var surgery = BotOwner.Medecine.SurgicalKit;
             if (_startSurgeryTime < Time.time
                 && !BotOwner.Mover.IsMoving
+                && !SAINBot.Mover.SprintController.Running
                 && !surgery.Using
                 && surgery.ShallStartUse())
             {

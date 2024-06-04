@@ -115,7 +115,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     _nextUpdateTargetTime = Time.time + 0.1f;
 
                     int targetCount;
-                    if (SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode)
+                    if (SAINPlugin.LoadedPreset.GlobalSettings.Performance.PerformanceMode)
                     {
                         if (Bot.Enemy != null)
                         {
@@ -281,7 +281,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private bool HavePositionsChanged()
         {
             float recheckThresh = 0.5f;
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode)
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Performance.PerformanceMode)
             {
                 recheckThresh = 1.5f;
             }
@@ -310,7 +310,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
             ProcessingLimited = false;
             SoloDecision soloDecision = Bot.Decision.CurrentSoloDecision;
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.PerformanceMode 
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Performance.PerformanceMode 
                 && soloDecision != SoloDecision.MoveToCover 
                 && soloDecision != SoloDecision.RunToCover 
                 && soloDecision != SoloDecision.Retreat 

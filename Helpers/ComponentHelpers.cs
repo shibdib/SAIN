@@ -25,7 +25,7 @@ namespace SAIN.Helpers
         {
             if (component == null)
             {
-                LogDebug("Component is already null, no need to dispose");
+                //LogDebug("Component is already null, no need to dispose");
                 return;
             }
 

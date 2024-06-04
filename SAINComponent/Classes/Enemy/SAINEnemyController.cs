@@ -177,11 +177,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 return null;
             }
-            foreach (var enemy in Enemies)
+            foreach (var enemy in Enemies.Values)
             {
-                if (enemy.Value?.IsVisible == true)
+                if (enemy?.IsValid == true && enemy.IsVisible)
                 {
-                    return enemy.Value;
+                    return enemy;
                 }
             }
             return null;
@@ -199,13 +199,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
 
             removeInvalidEnemies();
-
-            if (!Bot.BotActive)
-            {
-                return;
-            }
-
             updateAllEnemies();
+
+            if (ActiveEnemy != null && !ActiveEnemy.EnemyPerson.IsActive)
+            {
+                setActiveEnemy(null);
+            }
         }
 
         private void updateAllEnemies()
@@ -359,9 +358,49 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (Enemies.TryGetValue(id, out SAINEnemy enemy))
             {
+                if (enemy.EnemyPlayer == null)
+                {
+                    Enemies.Remove(id);
+                    removeEnemyInfo(enemy);
+                    return null;
+                }
                 return enemy;
             }
             return null;
+        }
+
+        private void removeEnemyInfo(SAINEnemy enemy)
+        {
+            if (enemy == null)
+            {
+                return;
+            }
+            if (enemy.EnemyIPlayer != null &&
+                BotOwner.EnemiesController.EnemyInfos.ContainsKey(enemy.EnemyIPlayer))
+            {
+                BotOwner.EnemiesController.Remove(enemy.EnemyIPlayer);
+                return;
+            }
+            EnemyInfo badInfo = null;
+            foreach (var enemyInfo in BotOwner.EnemiesController.EnemyInfos.Values)
+            {
+                if (enemyInfo?.Person != null && 
+                    enemyInfo.ProfileId == enemy.EnemyProfileId)
+                {
+                    badInfo  = enemyInfo;
+                    break;
+                }
+            }
+            removeEnemyInfo(badInfo);
+        }
+
+        private void removeEnemyInfo(EnemyInfo enemyInfo)
+        {
+            if (enemyInfo?.Person == null)
+            {
+                return;
+            }
+            BotOwner.EnemiesController.Remove(enemyInfo?.Person);
         }
 
         public void ClearEnemy()
@@ -379,6 +418,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 enemy.Dispose();
                 Enemies.Remove(id);
+                removeEnemyInfo(enemy);
                 //Logger.LogDebug($"Removed [{id}] from [{BotOwner?.name}'s] Enemy List");
             }
         }
@@ -457,7 +497,15 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (BotOwner.Memory.GoalEnemy != enemyInfo)
             {
-                BotOwner.Memory.GoalEnemy = enemyInfo;
+                try
+                {
+                    BotOwner.Memory.GoalEnemy = enemyInfo; 
+                    BotOwner.CalcGoal();
+                }
+                catch
+                {
+                    // Sometimes bsg code throws an error here :D
+                }
             }
         }
 
@@ -479,8 +527,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             if (goalEnemy?.Person != null && goalEnemy.Person.HealthController.IsAlive == false)
             {
-                BotOwner.Memory.GoalEnemy = null;
-                BotOwner.CalcGoal();
+                setGoalEnemy(null);
             }
             else
             {
@@ -503,9 +550,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private void setActiveEnemy(SAINEnemy enemy)
         {
-            if (enemy != null)
-                setLastEnemy(enemy);
-            ActiveEnemy = enemy;
+            if (enemy == null || (enemy.IsValid && enemy.EnemyPerson.IsActive))
+            {
+                if (ActiveEnemy != null && 
+                    ActiveEnemy.IsValid && 
+                    ActiveEnemy != enemy)
+                {
+                    setLastEnemy(ActiveEnemy);
+                }
+
+                ActiveEnemy = enemy;
+            }
         }
 
         private void setLastEnemy(SAINEnemy activeEnemy)

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using SAIN.Attributes;
+﻿using SAIN.Attributes;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
 using static SAIN.Helpers.JsonUtility;
@@ -26,8 +25,9 @@ namespace SAIN.Preset.GlobalSettings
 
         public GeneralSettings General = new GeneralSettings();
 
-        [Name("SAIN Enabled For Bot Types")]
-        public SAINEnableSettings SAINEnabled = new SAINEnableSettings();
+        [Name("Disable SAIN For Bot Types")]
+        [Description("If a option here is set to ON, they will use vanilla logic.")]
+        public DisableSAINSettings SAINDisabled = new DisableSAINSettings();
 
         public PerformanceSettings Performance = new PerformanceSettings();
 

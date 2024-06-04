@@ -9,13 +9,11 @@ using UnityEngine;
 
 namespace SAIN.Components.BotController
 {
-    public class WeatherVisionClass
+    public class WeatherVisionClass : SAINControl
     {
-        public readonly float UpdateWeatherVisibilitySec = 20f;
+        public WeatherVisionClass(SAINBotController botController) : base(botController) { }
 
-        public WeatherVisionClass()
-        {
-        }
+        public readonly float UpdateWeatherVisibilitySec = 20f;
 
         public void Update()
         {

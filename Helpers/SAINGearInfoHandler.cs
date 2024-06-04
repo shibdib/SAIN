@@ -5,16 +5,9 @@ namespace SAIN
 {
     public class SAINGearInfoHandler
     {
-        public static void Update()
+        static SAINGearInfoHandler()
         {
-            if (GameWorldHandler.SAINGameWorld == null)
-            {
-                if (WeaponInfos.Count > 0)
-                {
-                    ClearCache();
-                }
-                return;
-            }
+            GameWorld.OnDispose += ClearCache;
         }
 
         public static GearInfoContainer GetGearInfo(Player player)
@@ -55,6 +48,6 @@ namespace SAIN
             WeaponInfos.Clear();
         }
 
-        public static Dictionary<Player, GearInfoContainer> WeaponInfos = new Dictionary<Player, GearInfoContainer>();
+        public static readonly Dictionary<Player, GearInfoContainer> WeaponInfos = new Dictionary<Player, GearInfoContainer>();
     }
 }

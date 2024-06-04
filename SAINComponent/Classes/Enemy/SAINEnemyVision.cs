@@ -21,6 +21,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             get
             {
+                if (EnemyPlayer == null)
+                {
+                    return 0f;
+                }
                 float rawVelocity = EnemyPlayer.Velocity.magnitude;
                 if (rawVelocity <= 0.01f)
                 {

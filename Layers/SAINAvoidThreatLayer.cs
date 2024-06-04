@@ -23,7 +23,22 @@ namespace SAIN.Layers
             switch (_lastActionDecision)
             {
                 case SoloDecision.DogFight:
-                    return new Action(typeof(DogFightAction), $"Dog Fight - Enemy Close!");
+                    if (SAINBot.Decision.DogFightDecision.DogFightTarget != null)
+                    {
+                        return new Action(typeof(DogFightAction), $"Dog Fight - Enemy Close!");
+                    }
+                    else if (SAINBot.Cover.CoverInUse?.Spotted == true)
+                    {
+                        return new Action(typeof(DogFightAction), $"Dog Fight - My Cover is Spotted!");
+                    }
+                    else if (SAINBot.Decision.EnemyDecisions.ShotInCover)
+                    {
+                        return new Action(typeof(DogFightAction), $"Dog Fight - Shot while in cover!");
+                    }
+                    else
+                    {
+                        return new Action(typeof(DogFightAction), $"Dog Fight - No Reason");
+                    }
 
                 case SoloDecision.AvoidGrenade:
                     return new Action(typeof(RunToCoverAction), $"Avoid Grenade");

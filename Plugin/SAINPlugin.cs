@@ -8,6 +8,7 @@ using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
 using SAIN.Layers;
+using SAIN.Patches.Components;
 using SAIN.Patches.Generic;
 using SAIN.Patches.Hearing;
 using SAIN.Patches.Shoot;
@@ -82,6 +83,8 @@ namespace SAIN
                 //typeof(Patches.Generic.ShallRunAwayGrenadePatch),
                 //typeof(Patches.Generic.DisableLookSensorPatch),
 
+                typeof(Patches.Generic.FixItemTakerPatch),
+                typeof(Patches.Generic.FixItemTakerPatch2),
                 typeof(Patches.Generic.FixPatrolDataPatch),
                 typeof(Patches.Generic.SetPanicPointPatch),
                 typeof(Patches.Generic.AddPointToSearchPatch),
@@ -149,7 +152,8 @@ namespace SAIN
                 typeof(Patches.Shoot.SemiAutoPatch2),
                 typeof(Patches.Shoot.SemiAutoPatch3),
 
-                typeof(Patches.Components.AddComponentPatch)
+                typeof(Patches.Components.AddComponentPatch),
+                typeof(Patches.Components.AddGameWorldPatch),
             };
 
             // Reflection go brrrrrrrrrrrrrr
@@ -179,14 +183,8 @@ namespace SAIN
 
         private void Update()
         {
-            DebugGizmos.Update();
-            DebugOverlay.Update();
             ModDetection.Update();
             SAINEditor.Update();
-            GameWorldHandler.Update();
-            SAINEnableClass.Update();
-
-            LoadedPreset.GlobalSettings.Personality.Update();
         }
 
         private void Start() => SAINEditor.Init();

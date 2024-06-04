@@ -11,10 +11,6 @@ namespace SAIN.Layers
 {
     public static class DebugOverlay
     {
-        public static void Update()
-        {
-        }
-
         private static void DisplayPropertyAndFieldValues(object obj, StringBuilder stringBuilder)
         {
             if (obj == null)

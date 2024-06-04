@@ -352,7 +352,7 @@ namespace SAIN
                 return brainList;
             }
 
-            private static SAINEnableSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.SAINEnabled;
+            private static DisableSAINSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.SAINDisabled;
         }
     }
 }

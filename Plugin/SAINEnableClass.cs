@@ -13,13 +13,9 @@ namespace SAIN
 {
     public class SAINEnableClass
     {
-        public static void Update()
+        static SAINEnableClass()
         {
-            var gameWorld = Singleton<GameWorld>.Instance;
-            if (gameWorld == null)
-            {
-                clear();
-            }
+            GameWorld.OnDispose += clear;
         }
 
         public static bool IsSAINDisabledForBot(BotOwner botOwner)
@@ -197,6 +193,6 @@ namespace SAIN
             return GetSAIN(player?.AIData?.BotOwner, out sain, patchName);
         }
 
-        private static SAINEnableSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.SAINEnabled;
+        private static DisableSAINSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.SAINDisabled;
     }
 }

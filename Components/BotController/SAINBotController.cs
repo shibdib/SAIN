@@ -23,19 +23,51 @@ namespace SAIN.Components
         public Action<Vector3> BulletImpact { get; set; }
 
         public Dictionary<string, BotComponent> Bots => BotSpawnController.Bots;
-        public GameWorld GameWorld => Singleton<GameWorld>.Instance;
+        public GameWorld GameWorld => SAINGameWorld.GameWorld;
         public IBotGame BotGame => Singleton<IBotGame>.Instance;
-        public Player MainPlayer => Singleton<GameWorld>.Instance?.MainPlayer;
 
+        public BotEventHandler BotEventHandler
+        {
+            get
+            {
+                if (_eventHandler == null)
+                {
+                    _eventHandler = Singleton<BotEventHandler>.Instance;
+                    if (_eventHandler != null)
+                    {
+                        _eventHandler.OnGrenadeThrow += GrenadeThrown;
+                        _eventHandler.OnGrenadeExplosive += GrenadeExplosion;
+                    }
+                }
+                return _eventHandler;
+            }
+        }
+
+        private BotEventHandler _eventHandler;
+
+        public SAINGameworldComponent SAINGameWorld { get; private set; }
         public BotsController DefaultController { get; set; }
-        public BotSpawner BotSpawner { get; set; }
-        public CoverManager CoverManager { get; private set; } = new CoverManager();
-        public LineOfSightManager LineOfSightManager { get; private set; } = new LineOfSightManager();
-        public BotExtractManager BotExtractManager { get; private set; } = new BotExtractManager();
-        public TimeClass TimeVision { get; private set; } = new TimeClass();
-        public WeatherVisionClass WeatherVision { get; private set; } = new WeatherVisionClass();
-        public BotSpawnController BotSpawnController { get; private set; } = new BotSpawnController();
-        public BotSquads BotSquads { get; private set; } = new BotSquads();
+        public BotSpawner BotSpawner
+        {
+            get
+            {
+                return _spawner;
+            }
+            set
+            {
+                BotSpawnController.Subscribe(value);
+                _spawner = value;
+            }
+        }
+
+        private BotSpawner _spawner;
+        public CoverManager CoverManager { get; private set; }
+        public LineOfSightManager LineOfSightManager { get; private set; }
+        public BotExtractManager BotExtractManager { get; private set; }
+        public TimeClass TimeVision { get; private set; }
+        public WeatherVisionClass WeatherVision { get; private set; }
+        public BotSpawnController BotSpawnController { get; private set; }
+        public BotSquads BotSquads { get; private set; }
 
         public void PlayerEnviromentChanged(IPlayer player, IndoorTrigger trigger)
         {
@@ -59,19 +91,19 @@ namespace SAIN.Components
 
         private void Awake()
         {
-            GameWorld.OnDispose += Dispose;
+            SAINGameWorld = this.GetComponent<SAINGameworldComponent>();
 
-            BotSpawnController.Awake();
-            TimeVision.Awake();
-            LineOfSightManager.Awake();
-            CoverManager.Awake();
-            PathManager.Awake();
-            BotExtractManager.Awake();
-            BotSquads.Awake();
+            CoverManager = new CoverManager(this);
+            LineOfSightManager = new LineOfSightManager(this);
+            BotExtractManager = new BotExtractManager(this);
+            TimeVision = new TimeClass(this);
+            WeatherVision = new WeatherVisionClass(this);
+            BotSpawnController = new BotSpawnController(this);
+            BotSquads = new BotSquads(this);
+            PathManager = new PathManager(this);
 
-            Singleton<BotEventHandler>.Instance.OnGrenadeThrow += GrenadeThrown;
-            Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += GrenadeExplosion;
             PlayerTalk += playerTalked;
+            GameWorld.OnDispose += Dispose;
         }
 
         public void PlayAISound(Player player, SAINSoundType soundType, Vector3 position, float power)
@@ -349,9 +381,7 @@ namespace SAIN.Components
             }
         }
 
-        private BotEventHandler BotEventHandler;
-
-        private IEnumerator delaySoundHeard(Player player, Vector3 position, float range, SAINSoundType soundType, float delay = 0.25f)
+        private IEnumerator delaySoundHeard(Player player, Vector3 position, float range, SAINSoundType soundType, float delay = 0.1f)
         {
             yield return new WaitForSeconds(delay);
 
@@ -375,10 +405,6 @@ namespace SAIN.Components
         private AISoundType playBotEvent(Player player, Vector3 position, float range, SAINSoundType soundType)
         {
             AISoundType baseSoundType = getBaseSoundType(soundType);
-            if (BotEventHandler == null)
-            {
-                BotEventHandler = Singleton<BotEventHandler>.Instance;
-            }
             BotEventHandler?.PlaySound(player, position, range, baseSoundType);
             return baseSoundType;
         }
@@ -498,11 +524,15 @@ namespace SAIN.Components
 
                     float radius = smokeRadius * HelpersGClass.SMOKE_GRENADE_RADIUS_COEF;
                     Vector3 position = player.Position;
-                    foreach (var keyValuePair in DefaultController.Groups())
+
+                    if (DefaultController != null)
                     {
-                        foreach (BotsGroup botGroupClass in keyValuePair.Value.GetGroups(true))
+                        foreach (var keyValuePair in DefaultController.Groups())
                         {
-                            botGroupClass.AddSmokePlace(explosionPosition, smokeLifeTime, radius, position);
+                            foreach (BotsGroup botGroupClass in keyValuePair.Value.GetGroups(true))
+                            {
+                                botGroupClass.AddSmokePlace(explosionPosition, smokeLifeTime, radius, position);
+                            }
                         }
                     }
                 }
@@ -546,7 +576,7 @@ namespace SAIN.Components
 
         public static bool IsBotActive(BotComponent bot)
         {
-            return IsBotActive(bot?.BotOwner);
+            return IsBotActive(bot?.BotOwner) && bot.BotActive;
         }
 
         public static bool IsBotActive(Player player)
@@ -598,7 +628,7 @@ namespace SAIN.Components
         }
 
         public List<string> Groups = new List<string>();
-        public PathManager PathManager { get; private set; } = new PathManager();
+        public PathManager PathManager { get; private set; }
 
         private void OnDestroy()
         {
@@ -612,13 +642,17 @@ namespace SAIN.Components
                 GameWorld.OnDispose -= Dispose;
                 StopAllCoroutines();
                 LineOfSightManager?.Dispose();
+                BotSpawnController?.UnSubscribe();
 
                 PlayerTalk -= playerTalked;
 
-                Singleton<BotEventHandler>.Instance.OnGrenadeThrow -= GrenadeThrown;
-                Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= GrenadeExplosion;
+                if (BotEventHandler != null)
+                {
+                    BotEventHandler.OnGrenadeThrow -= GrenadeThrown;
+                    BotEventHandler.OnGrenadeExplosive -= GrenadeExplosion;
+                }
 
-                if (Bots.Count > 0)
+                if (Bots != null && Bots.Count > 0)
                 {
                     foreach (var bot in Bots)
                     {
@@ -626,17 +660,14 @@ namespace SAIN.Components
                     }
                 }
 
-                Bots.Clear();
-                Destroy(this);
+                Bots?.Clear();
             }
-            catch { }
-        }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Dispose SAIN BotController Error: {ex}");
+            }
 
-        public bool GetSAIN(string botName, out BotComponent bot)
-        {
-            StringBuilder debugString = null;
-            bot = BotSpawnController.GetSAIN(botName, debugString);
-            return bot != null;
+            Destroy(this);
         }
 
         public bool GetSAIN(BotOwner botOwner, out BotComponent bot)

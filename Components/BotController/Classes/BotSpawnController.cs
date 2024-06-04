@@ -1,32 +1,21 @@
 ﻿using EFT;
+using SAIN.SAINComponent;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Decision;
-using SAIN.SAINComponent.Classes.Talk;
-using SAIN.SAINComponent.Classes.WeaponFunction;
-using SAIN.SAINComponent.Classes.Mover;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents;
-using SAIN.Preset;
-using static EFT.SpeedTree.TreeWind;
-using SAIN.Preset.GlobalSettings.Categories;
-using SAIN.SAINComponent.BaseClasses;
 using System.Text;
-using SAIN.Helpers;
 
 namespace SAIN.Components.BotController
 {
     public class BotSpawnController : SAINControl
     {
-        public static BotSpawnController Instance;
-        public BotSpawnController() {
+        public BotSpawnController(SAINBotController botController) : base(botController)
+        {
             Instance = this;
         }
 
+        public static BotSpawnController Instance;
+
         public Dictionary<string, BotComponent> SAINBotDictionary = new Dictionary<string, BotComponent>();
-        private BotSpawner BotSpawner => BotController?.BotSpawner;
 
         public static readonly List<WildSpawnType> StrictExclusionList = new List<WildSpawnType>
         {
@@ -40,27 +29,54 @@ namespace SAIN.Components.BotController
 
         public void Update()
         {
-            if (BotSpawner != null)
+            if (Subscribed &&
+                GameEnding)
             {
-                if (!Subscribed && !GameEnding)
-                {
-                    BotSpawner.OnBotRemoved += RemoveBot;
-                    Subscribed = true;
-                }
-                if (Subscribed)
-                {
-                    var status = BotController?.BotGame?.Status;
-                    if (status == GameStatus.Stopping || status == GameStatus.Stopped || status == GameStatus.SoftStopping)
-                    {
-                        BotSpawner.OnBotRemoved -= RemoveBot;
-                        Subscribed = false;
-                        GameEnding = true;
-                    }
-                }
+                UnSubscribe();
             }
         }
 
-        private bool GameEnding = false;
+        public bool GameEnding
+        {
+            get
+            {
+                var status = GameStatus;
+                return status == GameStatus.Stopping || status == GameStatus.Stopped || status == GameStatus.SoftStopping;
+            }
+        }
+
+        private GameStatus GameStatus
+        {
+            get
+            {
+                var botGame = BotController?.BotGame;
+                if (botGame != null)
+                {
+                    return botGame.Status;
+                }
+                return GameStatus.Starting;
+            }
+        }
+
+        public void Subscribe(BotSpawner botSpawner)
+        {
+            if (!Subscribed)
+            {
+                botSpawner.OnBotRemoved += RemoveBot;
+                Subscribed = true;
+            }
+        }
+
+        public void UnSubscribe()
+        {
+            if (Subscribed &&
+                BotController?.BotSpawner != null)
+            {
+                BotController.BotSpawner.OnBotRemoved -= RemoveBot;
+                Subscribed = false;
+            }
+        }
+
         private bool Subscribed = false;
 
         public BotComponent GetSAIN(BotOwner botOwner, StringBuilder debugString)
@@ -80,7 +96,7 @@ namespace SAIN.Components.BotController
             string name = botOwner.name;
             BotComponent result = GetSAIN(name, debugString);
 
-            if ( result == null )
+            if (result == null)
             {
                 //debugString?.AppendLine( $"[{name}] not found in SAIN Bot Dictionary. Getting Component Manually..." );
 
@@ -92,12 +108,12 @@ namespace SAIN.Components.BotController
                 }
             }
 
-            if ( result == null )
+            if (result == null)
             {
                 //debugString?.AppendLine( $"[{name}] could not be retrieved from SAIN Bots. WildSpawnType: [{botOwner.Profile.Info.Settings.Role}] Returning Null" );
             }
 
-            if ( result == null && debugString != null )
+            if (result == null && debugString != null)
             {
                 //Logger.LogAndNotifyError( debugString, EFT.Communications.ENotificationDurationType.Long );
             }
@@ -136,15 +152,15 @@ namespace SAIN.Components.BotController
             }
 
             BotComponent result = null;
-            if ( SAINBotDictionary.ContainsKey(botName) )
+            if (SAINBotDictionary.ContainsKey(botName))
             {
                 result = SAINBotDictionary[botName];
             }
-            if ( result == null )
+            if (result == null)
             {
                 //debugString?.AppendLine( $"[{botName}] not found in SAIN Bot Dictionary. Comparing names manually to find the bot..." );
 
-                foreach ( var bot in SAINBotDictionary )
+                foreach (var bot in SAINBotDictionary)
                 {
                     if (bot.Value != null && bot.Value.name == botName)
                     {
@@ -154,13 +170,13 @@ namespace SAIN.Components.BotController
                     }
                 }
             }
-            if ( result == null )
+            if (result == null)
             {
                 //debugString?.AppendLine( $"[{botName}] Still not found in SAIN Bot Dictionary. Comparing Profile Id instead..." );
 
-                foreach ( var bot in SAINBotDictionary )
+                foreach (var bot in SAINBotDictionary)
                 {
-                    if ( bot.Value != null && bot.Value.ProfileId == botName )
+                    if (bot.Value != null && bot.Value.ProfileId == botName)
                     {
                         result = bot.Value;
                         //debugString?.AppendLine($"[{botName}] found after comparing profileID. Bot Name was [{bot.Value.name}]");

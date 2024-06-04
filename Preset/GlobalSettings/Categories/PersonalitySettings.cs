@@ -1,56 +1,42 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
+using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
     public class PersonalitySettings
     {
-        [Default(false)]
-        public bool AllGigaChads = false;
+        [Name("Force Single Personality For All Bots")]
+        [Description("All Spawned SAIN bots will be assigned the selected Personality, if any are set to true, no matter what.")]
+        [DefaultDictionary(nameof(ForcePersonalityDefaults))]
+        public Dictionary<EPersonality, bool> ForcePersonality = new Dictionary<EPersonality, bool>(ForcePersonalityDefaults);
 
-        [Default(false)]
-        public bool AllChads = false;
-
-        [Default(false)]
-        public bool AllRats = false;
-
-        public bool CheckForForceAllPers(out EPersonality result)
+        [JsonIgnore]
+        [Hidden]
+        public static readonly Dictionary<EPersonality, bool> ForcePersonalityDefaults = new Dictionary<EPersonality, bool>()
         {
-            result = EPersonality.Normal;
-            if (AllGigaChads)
+            { EPersonality.Wreckless, false},
+            { EPersonality.GigaChad, false },
+            { EPersonality.Chad, false },
+            { EPersonality.SnappingTurtle, false},
+            { EPersonality.Rat, false },
+            { EPersonality.Coward, false },
+            { EPersonality.Timmy, false},
+            { EPersonality.Normal, false},
+        };
+
+        public bool CheckForForceAllPers(out EPersonality personality)
+        {
+            foreach (var item in ForcePersonality)
             {
-                result = EPersonality.GigaChad;
-                return true;
+                if (item.Value == true)
+                {
+                    personality = item.Key;
+                    return true;
+                }
             }
-            if (AllChads)
-            {
-                result = EPersonality.Chad;
-                return true;
-            }
-            if (AllRats)
-            {
-                result = EPersonality.Rat;
-                return true;
-            }
+            personality = EPersonality.Normal;
             return false;
-        }
-
-        public void Update()
-        {
-            if (AllGigaChads)
-            {
-                AllChads = false;
-                AllRats = false;
-            }
-            if (AllChads)
-            {
-                AllGigaChads = false;
-                AllRats = false;
-            }
-            if (AllRats)
-            {
-                AllGigaChads = false;
-                AllChads = false;
-            }
         }
     }
 }

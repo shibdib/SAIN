@@ -407,7 +407,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     ShiftResetTimer = -1f;
                     return false;
                 }
-                if (!BotOwner.Mover.IsMoving)
+                if (!BotOwner.Mover.IsMoving && !Bot.Mover.SprintController.Running)
                 {
                     return false;
                 }
@@ -443,12 +443,16 @@ namespace SAIN.SAINComponent.Classes.Decision
                 && currentSolo != SoloDecision.Retreat
                 && currentSolo != SoloDecision.MoveToCover)
             {
+                ShotInCover = true;
                 return true;
             }
+            ShotInCover = false;
 
             var pathStatus = enemy.CheckPathDistance();
             return (pathStatus == EnemyPathDistance.VeryClose && Bot.Enemy.IsVisible) || Bot.Cover.CoverInUse?.Spotted == true;
         }
+
+        public bool ShotInCover;
 
         private bool shallMoveToEngage(SAINEnemy enemy)
         {

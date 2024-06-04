@@ -2,7 +2,7 @@
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class SAINEnableSettings
+    public class DisableSAINSettings
     {
         [Name("Vanilla Scavs")]
         [Description("REQUIRES RESTART OF GAME. Non Player-Scavs will have vanilla ai behavior. Disabling sain for player scavs is not currently possible.")]

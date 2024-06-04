@@ -14,6 +14,46 @@ using UnityEngine;
 
 namespace SAIN.Patches.Generic
 {
+    public static class GenericHelpers
+    {
+        public static bool CheckNotNull(BotOwner botOwner)
+        {
+            return botOwner != null &&
+                botOwner.gameObject != null &&
+                botOwner.gameObject.transform != null &&
+                botOwner.Transform != null &&
+                !botOwner.IsDead;
+        }
+    }
+
+    public class FixItemTakerPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotItemTaker), "method_11");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(BotOwner ___botOwner_0)
+        {
+            return GenericHelpers.CheckNotNull(___botOwner_0);
+        }
+    }
+
+    public class FixItemTakerPatch2 : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotItemTaker), "RefreshClosestItems");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(BotOwner ___botOwner_0)
+        {
+            return GenericHelpers.CheckNotNull(___botOwner_0);
+        }
+    }
+
     public class FixPatrolDataPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -28,7 +68,7 @@ namespace SAIN.Patches.Generic
             {
                 while (enumerator.MoveNext())
                 {
-                    if (enumerator.Current == null || enumerator.Current.BotFollower?.PatrolDataFollower?.HaveProblems == true)
+                    if (!GenericHelpers.CheckNotNull(enumerator.Current) || enumerator.Current.BotFollower?.PatrolDataFollower?.HaveProblems == true)
                     {
                         __result = false;
                         return false;

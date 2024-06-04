@@ -12,6 +12,10 @@ namespace SAIN.Components.BotController
     }
     public class TimeClass : SAINControl
     {
+        public TimeClass(SAINBotController botController) : base(botController)
+        {
+        }
+
         public void Update()
         {
             if (VisibilityTimer < Time.time)

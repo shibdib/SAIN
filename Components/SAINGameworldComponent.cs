@@ -1,264 +1,24 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Game.Spawning;
-using SAIN.Components.BotController;
 using SAIN.Helpers;
-using SAIN.Preset.GlobalSettings.Categories;
-using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SAIN.Components
 {
-    public class PlayerTracker
-    {
-        private SAINGameworldComponent SAINGameWorld;
-        private GameWorld GameWorld => Singleton<GameWorld>.Instance;
-
-        public PlayerComponent FindClosestHumanPlayer(out float closestPlayerSqrMag, Vector3 targetPosition, out Player player)
-        {
-            PlayerComponent closestPlayer = null;
-            closestPlayerSqrMag = float.MaxValue;
-            player = null;
-
-            foreach (var component in AlivePlayers.Values)
-            {
-                if (component != null &&
-                    component.Player != null &&
-                    !component.IsAI)
-                {
-                    float sqrMag = (component.Position - targetPosition).sqrMagnitude;
-                    if (sqrMag < closestPlayerSqrMag)
-                    {
-                        player = component.Player;
-                        closestPlayer = component;
-                        closestPlayerSqrMag = sqrMag;
-                    }
-                }
-            }
-            return closestPlayer;
-        }
-
-        public Player FindClosestHumanPlayer(out float closestPlayerSqrMag, Vector3 targetPosition)
-        {
-            FindClosestHumanPlayer(out closestPlayerSqrMag, targetPosition, out Player player);
-            return player;
-        }
-
-        public PlayerTracker(SAINGameworldComponent component)
-        {
-            SAINGameWorld = component;
-            GameWorld.OnPersonAdd += addPlayer;
-        }
-
-        public void Dispose()
-        {
-            var gameWorld = GameWorld;
-            if (gameWorld != null)
-            {
-                gameWorld.OnPersonAdd -= addPlayer;
-            }
-        }
-
-        public bool CheckAddPlayer(IPlayer player)
-        {
-            if (player != null)
-            {
-                if (AlivePlayers.ContainsKey(player.ProfileId))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public readonly Dictionary<string, PlayerComponent> AlivePlayers = new Dictionary<string, PlayerComponent>();
-
-        public readonly Dictionary<string, Player> DeadPlayers = new Dictionary<string, Player>();
-
-        private void addPlayer(IPlayer iPlayer)
-        {
-            if (iPlayer == null)
-            {
-                Logger.LogError($"Could not add PlayerComponent for Null IPlayer.");
-                return;
-            }
-
-            string id = iPlayer.ProfileId;
-            Player player = GetPlayer(iPlayer);
-            if (player == null)
-            {
-                Logger.LogError($"Could not add PlayerComponent for Null Player. IPlayer: {iPlayer.Profile?.Nickname} : {id}");
-                return;
-            }
-
-            player.OnPlayerDeadOrUnspawn += clearPlayer;
-
-            if (clearPlayer(id, out bool compDestroyed))
-            {
-                string playerInfo = $"{player.name} : {player.Profile?.Nickname} : {id}";
-                Logger.LogWarning($"PlayerComponent already exists for Player: {playerInfo}");
-                if (compDestroyed)
-                {
-                    Logger.LogWarning($"Destroyed old Component for: {playerInfo}");
-                }
-            }
-
-            PlayerComponent component = player.GetOrAddComponent<PlayerComponent>();
-            if (component?.Init(iPlayer, player) == true)
-            {
-                AlivePlayers.Add(id, component);
-            }
-            else
-            {
-                Logger.LogError($"Init PlayerComponent Failed for {player.name} : {player.ProfileId}");
-                GameObject.Destroy(component);
-            }
-        }
-
-        public PlayerComponent GetPlayerComponent(string profileId)
-        {
-            if (profileId.IsNullOrEmpty())
-            {
-                return null;
-            }
-            if (AlivePlayers.TryGetValue(profileId, out PlayerComponent component))
-            {
-                return component;
-            }
-            return null;
-        }
-
-        public PlayerComponent GetPlayerComponent(IPlayer iPlayer)
-        {
-            return GetPlayerComponent(iPlayer?.ProfileId);
-        }
-
-        public PlayerComponent GetPlayerComponent(Player player)
-        {
-            return GetPlayerComponent(player?.ProfileId);
-        }
-
-        public Player GetPlayer(IPlayer iPlayer)
-        {
-            Player player = null;
-            if (iPlayer is Player)
-            {
-                player = (Player)iPlayer;
-                if (player != null)
-                {
-                    Logger.LogInfo("Got player from cast");
-                }
-            }
-            else
-            {
-                Logger.LogInfo("failed to get player from cast");
-            }
-
-            return player ?? GetPlayer(iPlayer?.ProfileId);
-        }
-
-        public Player GetPlayer(string profileId)
-        {
-            if (profileId.IsNullOrEmpty())
-            {
-                return null;
-            }
-            return GameWorldInfo.GetAlivePlayer(profileId);
-        }
-
-        private void clearPlayer(Player player)
-        {
-            clearPlayer(player?.ProfileId, out _);
-            SAINGameWorld.StartCoroutine(addDeadPlayer(player));
-        }
-
-        private IEnumerator addDeadPlayer(Player player)
-        {
-            yield return null;
-
-            if (player != null)
-            {
-                if (DeadPlayers.Count > _maxDeadTracked)
-                {
-                    DeadPlayers.Remove(DeadPlayers.First().Key);
-                }
-                DeadPlayers.Add(player.ProfileId, player);
-            }
-            clearNullPlayers();
-        }
-
-        private bool clearPlayer(string id, out bool destroyedComponent)
-        {
-            destroyedComponent = false;
-            if (id.IsNullOrEmpty())
-            {
-                return false;
-            }
-            return removeId(id, out destroyedComponent);
-        }
-
-        private bool removeId(string id, out bool destroyedComponent)
-        {
-            destroyedComponent = false;
-            if (AlivePlayers.TryGetValue(id, out PlayerComponent playerComponent))
-            {
-                if (playerComponent != null)
-                {
-                    destroyedComponent = true;
-                    GameObject.Destroy(playerComponent);
-                }
-                AlivePlayers.Remove(id);
-                return true;
-            }
-            return false;
-        }
-
-        private void clearNullPlayers()
-        {
-            foreach (var player in AlivePlayers)
-            {
-                PlayerComponent component = player.Value;
-                if (component == null || 
-                    component.IPlayer == null || 
-                    component.Player == null)
-                {
-                    _ids.Add(player.Key);
-                }
-            }
-            foreach (var id in _ids)
-            {
-                removeId(id, out _);
-            }
-            _ids.Clear();
-        }
-
-        private readonly List<string> _ids = new List<string>();
-        private const int _maxDeadTracked = 30;
-    }
-
     public class SAINGameworldComponent : MonoBehaviour
     {
-        public static SAINGameworldComponent Instance { get; private set; }
+        public ELocation Location { get; private set; }
+        public GameWorld GameWorld { get; private set; }
+        public static SAINGameworldComponent Instance { get; set; }
         public PlayerTracker PlayerTracker { get; private set; }
-
-
-        private void Awake()
-        {
-            Instance = this;
-            GameWorld.OnDispose += dispose;
-            GameWorld = Singleton<GameWorld>.Instance;
-            PlayerTracker = new PlayerTracker(this);
-            SAINBotController = this.GetOrAddComponent<SAINBotController>();
-            ExtractFinder = this.GetOrAddComponent<Extract.ExtractFinderComponent>();
-            SAINMainPlayer = ComponentHelpers.AddOrDestroyComponent(SAINMainPlayer, GameWorld?.MainPlayer);
-        }
+        public SAINMainPlayerComponent SAINMainPlayer { get; private set; }
+        public SAINBotController SAINBotController { get; private set; }
+        public Extract.ExtractFinderComponent ExtractFinder { get; private set; }
+        public SpawnPointMarker[] SpawnPointMarkers { get; private set; }
 
         private void Update()
         {
@@ -268,37 +28,79 @@ namespace SAIN.Components
 
         private void findLocation()
         {
-            if (Location == ELocation.None)
+            if (!_foundLocation)
             {
-                Location = GameWorldHandler.FindLocation();
+                Location = parseLocation();
             }
         }
 
-        public ELocation Location { get; private set; }
-
-        private void dispose()
+        private ELocation parseLocation()
         {
-            GameWorld.OnDispose -= dispose;
-
-            try
+            ELocation Location = ELocation.None;
+            string locationString = GameWorld?.LocationId;
+            if (locationString.IsNullOrEmpty())
             {
-                PlayerTracker.Dispose();
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Dispose GameWorld Component Class Error: {e}");
+                return Location;
             }
 
-            try
+            switch (locationString.ToLower())
             {
-                ComponentHelpers.DestroyComponent(SAINBotController);
-                ComponentHelpers.DestroyComponent(SAINMainPlayer);
+                case "bigmap":
+                    Location = ELocation.Customs;
+                    break;
+
+                case "factory4_day":
+                    Location = ELocation.Factory;
+                    break;
+
+                case "factory4_night":
+                    Location = ELocation.FactoryNight;
+                    break;
+
+                case "interchange":
+                    Location = ELocation.Interchange;
+                    break;
+
+                case "laboratory":
+                    Location = ELocation.Labs;
+                    break;
+
+                case "lighthouse":
+                    Location = ELocation.Lighthouse;
+                    break;
+
+                case "rezervbase":
+                    Location = ELocation.Reserve;
+                    break;
+
+                case "sandbox":
+                    Location = ELocation.GroundZero;
+                    break;
+
+                case "shoreline":
+                    Location = ELocation.Shoreline;
+                    break;
+
+                case "tarkovstreets":
+                    Location = ELocation.Streets;
+                    break;
+
+                case "terminal":
+                    Location = ELocation.Terminal;
+                    break;
+
+                case "town":
+                    Location = ELocation.Town;
+                    break;
+
+                default:
+                    Location = ELocation.None;
+                    break;
             }
-            catch (Exception e)
-            {
-                Logger.LogError($"Dispose GameWorld SubComponent Error: {e}");
-            }
+            _foundLocation = true;
+            return Location;
         }
+
 
         public Player FindClosestPlayer(out float closestPlayerSqrMag, Vector3 targetPosition)
         {
@@ -354,10 +156,110 @@ namespace SAIN.Components
             return spawnPointPositions;
         }
 
-        public GameWorld GameWorld { get; private set; }
-        public SAINMainPlayerComponent SAINMainPlayer { get; private set; }
-        public SAINBotController SAINBotController { get; private set; }
-        public Extract.ExtractFinderComponent ExtractFinder { get; private set; }
-        public SpawnPointMarker[] SpawnPointMarkers { get; private set; }
+        private void Awake()
+        {
+            Instance = this;
+            GameWorld = this.GetComponent<GameWorld>();
+            if (GameWorld == null)
+            {
+                Logger.LogWarning($"GameWorld is null from GetComponent");
+            }
+            StartCoroutine(Init());
+        }
+
+        private IEnumerator Init()
+        {
+            yield return getGameWorld();
+
+            if (GameWorld == null)
+            {
+                Logger.LogWarning("GameWorld Null, cannot Init SAIN Gameworld! Check 2. Disposing Component...");
+                Dispose();
+                yield break;
+            }
+
+            PlayerTracker = new PlayerTracker(this);
+            SAINBotController = this.GetOrAddComponent<SAINBotController>();
+            ExtractFinder = this.GetOrAddComponent<Extract.ExtractFinderComponent>();
+            SAINMainPlayer = ComponentHelpers.AddOrDestroyComponent(SAINMainPlayer, GameWorld?.MainPlayer);
+            GameWorld.OnDispose += Dispose;
+
+            Logger.LogWarning("SAIN GameWorld Created.");
+        }
+
+        private IEnumerator getGameWorld()
+        {
+            if (GameWorld != null)
+            {
+                yield break;
+            }
+            if (GameWorld == null)
+            {
+                yield return new WaitForEndOfFrame();
+                GameWorld = findGameWorld();
+                if (GameWorld != null)
+                {
+                    Logger.LogWarning("Found GameWorld at EndOfFrame");
+                    yield break;
+                }
+            }
+            for (int i = 0; i < 30; i++)
+            {
+                if (GameWorld == null)
+                {
+                    yield return null;
+                    GameWorld = findGameWorld();
+                }
+                if (GameWorld != null)
+                {
+                    break;
+                }
+            }
+        }
+
+        private GameWorld findGameWorld()
+        {
+            GameWorld gameWorld = this.GetComponent<GameWorld>();
+            if (gameWorld == null)
+            {
+                gameWorld = Singleton<GameWorld>.Instance;
+            }
+            return gameWorld;
+        }
+
+        private void OnDestroy()
+        {
+            Instance = null;
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                PlayerTracker?.Dispose();
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Dispose GameWorld Component Class Error: {e}");
+            }
+
+            try
+            {
+                ComponentHelpers.DestroyComponent(SAINBotController);
+                ComponentHelpers.DestroyComponent(SAINMainPlayer);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Dispose GameWorld SubComponent Error: {e}");
+            }
+
+            Instance = null;
+            GameWorld.OnDispose -= Dispose;
+            Destroy(this);
+            Logger.LogWarning("SAIN GameWorld Destroyed.");
+        }
+
+        private bool _foundLocation = false;
     }
 }

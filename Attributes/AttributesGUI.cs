@@ -86,6 +86,11 @@ namespace SAIN.Attributes
                         EditFloatDictionary<IWeaponClass>(
                             value, attributes, out wasEdited);
                     }
+                    else if (value is Dictionary<EPersonality, bool>)
+                    {
+                        EditBoolDictionary<EPersonality>(
+                            value, attributes, out wasEdited);
+                    }
                     else if (value is List<WildSpawnType>)
                     {
                         ModifyLists.AddOrRemove(
@@ -124,6 +129,11 @@ namespace SAIN.Attributes
                 else if (value is Dictionary<IWeaponClass, float>)
                 {
                     EditFloatDictionary<IWeaponClass>(
+                        value, attributes, out wasEdited);
+                }
+                else if (value is Dictionary<EPersonality, bool>)
+                {
+                    EditBoolDictionary<EPersonality>(
                         value, attributes, out wasEdited);
                 }
                 else if (value is List<WildSpawnType>)
@@ -201,21 +211,26 @@ namespace SAIN.Attributes
 
             bool showResult = false;
             object originalValue = value;
+
             if (attributes.ValueType == typeof(bool))
             {
                 showResult = true;
                 value = Toggle((bool)value, (bool)value ? "On" : "Off", EUISoundType.MenuCheckBox, entryConfig.Toggle);
             }
-            else if (attributes.ValueType == typeof(float))
+            else if (attributes.ValueType == typeof(float) || attributes.ValueType == typeof(int))
             {
                 showResult = true;
                 float flValue = BuilderClass.CreateSlider((float)value, attributes.Min, attributes.Max, entryConfig.Toggle);
-                value = flValue.Round(attributes.Rounding);
+                if (attributes.ValueType == typeof(int))
+                {
+                    value = Mathf.RoundToInt(flValue);
+                }
+                else
+                {
+                    value = flValue.Round(attributes.Rounding);
+                }
             }
-            else if (attributes.ValueType == typeof(int))
-            {
-                //Logger.LogError("Int Not Implemented!");
-            }
+
             if (showResult && value != null)
             {
                 string dirtyString = TextField(value.ToString(), null, entryConfig.Result);
@@ -268,6 +283,63 @@ namespace SAIN.Attributes
             return EditValue(value, GetAttributeInfo(field), out wasEdited, entryConfig);
         }
 
+        public static void EditBoolDictionary<T>(object dictValue, AttributesInfoClass attributes, out bool edited) where T : Enum
+        {
+            edited = false;
+
+            BeginVertical(5f);
+
+            var defaultDictionary = attributes.DefaultDictionary as Dictionary<T, bool>;
+            var dictionary = dictValue as Dictionary<T, bool>;
+            List<T> list = dictionary.Keys.ToList();
+
+            CreateLabelStyle();
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                BeginHorizontal(150f);
+
+                var item = list[i];
+                var name = item.ToString();
+                Box(new GUIContent(name), LabelStyle, Height(DefaultEntryConfig.EntryHeight));
+                if (Toggle(dictionary[item], dictionary[item] ? "On" : "Off", EUISoundType.MenuCheckBox, DefaultEntryConfig.Toggle))
+                {
+                    // Option was selected, set all other values to false, other than the 1 selected
+                    for (int j = 0; j < list.Count; j++)
+                    {
+                        var item2 = list[j];
+                        bool selected = item2.ToString() == name;
+
+                        // Set all other options to false
+                        if (!selected && 
+                            dictionary[item2] != false)
+                        {
+                            dictionary[item2] = false;
+                            edited = true;
+                        }
+
+                        // Set the selected option to true
+                        if (selected && 
+                            dictionary[item2] != true)
+                        {
+                            dictionary[item2] = true;
+                            edited = true;
+                        }
+                    }
+                }
+                // Option was set to true, but is now set to false
+                else if (dictionary[item] != false)
+                {
+                    // Option deselected
+                    dictionary[item] = false;
+                    edited = true;
+                }
+                EndHorizontal(150f);
+            }
+
+            list.Clear();
+            EndVertical(5f);
+        }
         public static void EditFloatDictionary<T>(object dictValue, AttributesInfoClass attributes, out bool wasEdited) where T : Enum
         {
             BeginVertical(5f);
@@ -284,7 +356,7 @@ namespace SAIN.Attributes
             {
                 for (int i = 0; i < array.Length; i++)
                 {
-                    Logger.LogInfo(array[i]);
+                    //Logger.LogInfo(array[i]);
                 }
             }
             List<T> list = new List<T>();

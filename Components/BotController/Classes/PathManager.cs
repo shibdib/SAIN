@@ -4,14 +4,14 @@ using UnityEngine.AI;
 using SAIN.Helpers;
 using System.Collections.Generic;
 using System.Net;
+using SAIN.Plugin;
 
 namespace SAIN.Components.BotController
 {
     public class PathManager : SAINControl
     {
-        public PathManager()
+        public PathManager(SAINBotController botController) : base(botController)
         {
-            //Get8Directions();
         }
 
         private readonly Vector3[] Directions = new Vector3[8];

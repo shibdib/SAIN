@@ -1,4 +1,5 @@
-﻿using SAIN.Preset.GlobalSettings.Categories;
+﻿using SAIN.Components;
+using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
@@ -11,9 +12,9 @@ using UnityEngine.UIElements;
 
 namespace SAIN.BotController.Classes
 {
-    public class BotSquads : SAINControl 
+    public class BotSquads : SAINControl
     {
-        public BotSquads()
+        public BotSquads(SAINBotController botController) : base(botController)
         {
         }
 

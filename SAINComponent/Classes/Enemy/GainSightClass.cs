@@ -120,15 +120,20 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             getGear();
 
-            bool flare = EnemyPlayer.AIData.GetFlare;
-            bool usingSuppressor =
-                EnemyPlayer.HandsController.Item is Weapon weapon &&
-                _gearInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
-
-            // Only apply vision speed debuff from weather if their enemy has not shot an unsuppressed weapon
-            if (!flare || usingSuppressor)
+            var aiData = EnemyPlayer.AIData;
+            var handsController = EnemyPlayer.HandsController;
+            if (aiData != null && handsController != null)
             {
-                return SAINPlugin.BotController.WeatherVision.InverseWeatherModifier;
+                bool flare = aiData.GetFlare;
+                bool usingSuppressor =
+                    handsController.Item is Weapon weapon &&
+                    _gearInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
+
+                // Only apply vision speed debuff from weather if their enemy has not shot an unsuppressed weapon
+                if (!flare || usingSuppressor)
+                {
+                    return SAINPlugin.BotController.WeatherVision.InverseWeatherModifier;
+                }
             }
             return 1f;
         }

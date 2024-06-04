@@ -17,7 +17,7 @@ namespace SAIN.Components.BotController
 {
     public class BotExtractManager : SAINControl
     {
-        public BotExtractManager() { }
+        public BotExtractManager(SAINBotController botController) : base(botController) { }
 
         public float TotalRaidTime { get; private set; }
         

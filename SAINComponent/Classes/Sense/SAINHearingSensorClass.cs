@@ -374,21 +374,26 @@ namespace SAIN.SAINComponent.Classes
 
         private IEnumerator baseHearDelay()
         {
+            float delay;
             if (Bot?.EnemyController?.NoEnemyContact == true)
             {
-                yield return new WaitForSeconds(SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayAtPeace);
+                delay = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayAtPeace;
             }
             else
             {
-                yield return new WaitForSeconds(SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayWithEnemy);
+                delay = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayWithEnemy;
             }
+            delay = Mathf.Clamp(delay - 0.1f, 0f, 5f);
+            yield return new WaitForSeconds(delay);
         }
 
         private IEnumerator delayReact(Vector3 soundPos, AISoundType type, IPlayer person, float shooterDistance, Vector3 projectionPoint, float projectionPointDist)
         {
             yield return baseHearDelay();
 
-            if (Bot?.Player?.HealthController?.IsAlive == true &&
+            if (Bot != null && 
+                person != null && 
+                Bot?.Player?.HealthController?.IsAlive == true &&
                 person?.HealthController?.IsAlive == true)
             {
                 float maxUnderFireDist = SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaxUnderFireDistance;

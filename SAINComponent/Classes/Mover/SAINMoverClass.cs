@@ -361,7 +361,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return;
             }
             if (!_stopping && 
-                BotOwner?.Mover?.IsMoving == true)
+                (BotOwner?.Mover?.IsMoving == true || Bot.Mover.SprintController.Running))
             {
                 _stopping = true;
                 Bot.StartCoroutine(StopAfterDelay(delay, forDuration));

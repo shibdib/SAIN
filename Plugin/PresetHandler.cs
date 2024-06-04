@@ -28,6 +28,7 @@ namespace SAIN.Plugin
         private const string Settings = "ConfigSettings";
 
         public static Action OnPresetUpdated;
+        public static Action OnEditorSettingsChanged;
 
         public static readonly List<SAINPresetDefinition> CustomPresetOptions = new List<SAINPresetDefinition>();
 

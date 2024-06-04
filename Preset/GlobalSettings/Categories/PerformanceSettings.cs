@@ -4,6 +4,11 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class PerformanceSettings
     {
+        [Name("Performance Mode")]
+        [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN. Can cause bots to take too long to find cover to go to.")]
+        [Default(false)]
+        public bool PerformanceMode = false;
+
         [Advanced]
         [MinMax(1f, 20f, 1f)]
         public float MinJobSize = 2;
