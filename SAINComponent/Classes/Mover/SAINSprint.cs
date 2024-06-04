@@ -115,8 +115,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             _timeStartRun = Time.time;
 
             BotOwner.Mover.Stop();
-            BotOwner.Mover.IsMoving = true;
-            float startTime = Time.time;
+            //BotOwner.Mover.IsMoving = true;
             _currentIndex = 1;
 
             // First step, look towards the path we want to run

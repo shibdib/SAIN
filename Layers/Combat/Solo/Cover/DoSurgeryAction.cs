@@ -1,16 +1,6 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
-using EFT;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents;
-using SAIN.SAINComponent;
+﻿using EFT;
 using System.Text;
 using UnityEngine;
-using SAIN.SAINComponent.SubComponents.CoverFinder;
-using SAIN.Layers.Combat.Solo;
-using UnityEngine.AI;
-using SAIN.Helpers;
-using System.Collections;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -40,7 +30,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 SAINBot.Mover.DogFight.DogFightMove(false);
             }
 
-            if (!SAINBot.Steering.SteerByPriority(false) && 
+            if (!SAINBot.Steering.SteerByPriority(false) &&
                 !SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy))
             {
                 SAINBot.Steering.LookToRandomPosition();

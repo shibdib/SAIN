@@ -1,19 +1,8 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
-using EFT;
-using SAIN.SAINComponent.Classes.Decision;
-using SAIN.SAINComponent.Classes.Talk;
-using SAIN.SAINComponent.Classes.WeaponFunction;
-using SAIN.SAINComponent.Classes.Mover;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents;
-using SAIN.SAINComponent;
-using UnityEngine;
-using UnityEngine.AI;
+﻿using EFT;
+using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Collections.Generic;
 using System.Text;
-using SAIN.SAINComponent.SubComponents.CoverFinder;
-using SAIN.Layers.Combat.Solo;
+using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -27,7 +16,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             SAINBot.Steering.SteerByPriority();
             Shoot.Update();
-            if (NewPoint == null 
+            if (NewPoint == null
                 && FindPointToGo())
             {
                 SAINBot.Mover.SetTargetMoveSpeed(GetSpeed());
@@ -85,13 +74,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         CoverPoint shiftCoverTarget = coverPoints[i];
 
                         if (shiftCoverTarget.CoverHeight > coverInUse.CoverHeight
-                            && (!SAINPlugin.LoadedPreset.GlobalSettings.Cover.ShiftCoverMustBeSafe 
-                                || shiftCoverTarget.IsSafePath)
                             && !UsedPoints.Contains(shiftCoverTarget))
                         {
                             for (int j = 0; j < UsedPoints.Count; j++)
                             {
-                                if ((UsedPoints[j].Position - shiftCoverTarget.Position).sqrMagnitude > 5f 
+                                if ((UsedPoints[j].Position - shiftCoverTarget.Position).sqrMagnitude > 5f
                                     && SAINBot.Mover.GoToPoint(shiftCoverTarget.Position, out _))
                                 {
                                     SAINBot.Cover.CoverInUse = shiftCoverTarget;
