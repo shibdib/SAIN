@@ -198,11 +198,11 @@ namespace SAIN.SAINComponent.Classes
             if (soundType == AISoundType.step && 
                 soundDistance > 15f)
             {
-                if (!Bot.Equipment.HasEarPiece)
+                if (!Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece)
                 {
                     modifier *= 0.65f;
                 }
-                if (Bot.Equipment.HasHeavyHelmet)
+                if (Bot.PlayerComponent.Equipment.GearInfo.HasHeavyHelmet)
                 {
                     modifier *= 0.8f;
                 }
@@ -578,7 +578,7 @@ namespace SAIN.SAINComponent.Classes
 
         private bool CheckFootStepDetectChance(float distance)
         {
-            bool hasheadPhones = Bot.Equipment.HasEarPiece;
+            bool hasheadPhones = Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece;
 
             float closehearing = hasheadPhones ? 3f : 0f;
             if (distance <= closehearing)
@@ -604,7 +604,7 @@ namespace SAIN.SAINComponent.Classes
 
             // Random chance to hear at any range within maxdistance if a bot has headphones
             if (midRange && 
-                Bot.Equipment.HasEarPiece && 
+                Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece && 
                 EFTMath.RandomBool(5))
             {
                 minimumChance += 5f;

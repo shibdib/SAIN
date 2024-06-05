@@ -59,7 +59,6 @@ namespace SAIN.SAINComponent
         public SAINNoBushESP NoBushESP { get; private set; }
         public SAINFriendlyFireClass FriendlyFireClass { get; private set; }
         public SAINVisionClass Vision { get; private set; }
-        public SAINBotEquipmentClass Equipment { get; private set; }
         public SAINMoverClass Mover { get; private set; }
         public SAINBotUnstuckClass BotStuck { get; private set; }
         public FlashLightComponent FlashLight { get; private set; }
@@ -122,7 +121,6 @@ namespace SAIN.SAINComponent
                 // Must be first, other classes use it
                 Squad = new SAINSquadClass(this);
 
-                Equipment = new SAINBotEquipmentClass(this);
                 Info = new SAINBotInfoClass(this);
                 Memory = new SAINMemoryClass(this);
                 BotStuck = new SAINBotUnstuckClass(this);
@@ -165,7 +163,6 @@ namespace SAIN.SAINComponent
                 EnemyController.Init();
                 FriendlyFireClass.Init();
                 Vision.Init();
-                Equipment.Init();
                 Mover.Init();
                 BotStuck.Init();
                 Hearing.Init();
@@ -273,7 +270,6 @@ namespace SAIN.SAINComponent
                 Memory.Update();
                 FriendlyFireClass.Update();
                 Vision.Update();
-                Equipment.Update();
                 Mover.Update();
                 BotStuck.Update();
                 Hearing.Update();
@@ -359,7 +355,6 @@ namespace SAIN.SAINComponent
                 EnemyController?.Dispose();
                 FriendlyFireClass?.Dispose();
                 Vision?.Dispose();
-                Equipment?.Dispose();
                 Mover?.Dispose();
                 BotStuck?.Dispose();
                 Hearing?.Dispose();

@@ -489,7 +489,7 @@ namespace SAIN.Components
         private float chanceToHearAction(SAINEnemy enemy, float range, float distance)
         {
             var hearSettings = SAINPlugin.LoadedPreset.GlobalSettings.Hearing;
-            float max = enemy.Bot.Equipment.HasEarPiece ? hearSettings.MaxFootstepAudioDistance : hearSettings.MaxFootstepAudioDistanceNoHeadphones;
+            float max = enemy.Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece ? hearSettings.MaxFootstepAudioDistance : hearSettings.MaxFootstepAudioDistanceNoHeadphones;
             if (distance > max)
             {
                 return 0f;

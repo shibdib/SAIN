@@ -101,7 +101,7 @@ namespace SAIN.SAINComponent.Classes
 
         public EBackpackStatus BackpackStatus { get; private set; }
 
-        private Item _currentBackpack => Bot.Equipment.InventoryController?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Backpack)?.ContainedItem;
+        private Item _currentBackpack => Bot.PlayerComponent.Equipment.GearInfo.GetItem(EquipmentSlot.Backpack);
 
         public bool RetreiveBackpack()
         {

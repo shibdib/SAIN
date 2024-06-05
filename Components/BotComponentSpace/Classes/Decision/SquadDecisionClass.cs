@@ -157,7 +157,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private bool HasRadioComms => Bot.Equipment.HasEarPiece;
+        private bool HasRadioComms => Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece;
 
         float SquadDecision_SuppressFriendlyDistStart = 30f;
         float SquadDecision_SuppressFriendlyDistEnd = 50f;

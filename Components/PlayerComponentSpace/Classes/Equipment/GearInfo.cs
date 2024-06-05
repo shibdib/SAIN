@@ -7,17 +7,21 @@ namespace SAIN.SAINComponent.Classes.Info
 {
     public class GearInfo
     {
-        public GearInfo(Player player, InventoryControllerClass inventoryController)
+        public GearInfo(InventoryControllerClass inventoryController)
         {
-            Player = player;
             InventoryController = inventoryController;
         }
 
-        public readonly Player Player;
-
-        public readonly InventoryControllerClass InventoryController;
-
         public void Update()
+        {
+            if (_nextUpdateTime < Time.time)
+            {
+                _nextUpdateTime = Time.time + 5f;
+                checkAllGear();
+            }
+        }
+
+        private void checkAllGear()
         {
             HasEarPiece = GetItem(EquipmentSlot.Earpiece) != null;
 
@@ -30,8 +34,8 @@ namespace SAIN.SAINComponent.Classes.Info
             if (helmetItem != null)
             {
                 // Get a list of faceshield components attached to the headwear item, see if any have AC.
-                helmetItem.GetItemComponentsInChildrenNonAlloc(FaceShieldComponents);
-                foreach (var faceComponent in FaceShieldComponents)
+                helmetItem.GetItemComponentsInChildrenNonAlloc(_faceShieldComponents);
+                foreach (var faceComponent in _faceShieldComponents)
                 {
                     if (faceComponent.Item.IsArmorMod())
                     {
@@ -39,36 +43,37 @@ namespace SAIN.SAINComponent.Classes.Info
                         break;
                     }
                 }
-                FaceShieldComponents.Clear();
+                _faceShieldComponents.Clear();
             }
 
             // Reset previous results if any
             HasHeavyHelmet = false;
 
             // Get a list of armor components attached to the headwear item, check to see which has the highest AC, and check if any make the user deaf.
-            HelmetArmorClass = FindMaxAC(helmetItem, HelmetArmorComponents);
+            HelmetArmorClass = FindMaxAC(helmetItem);
 
-            if (HelmetArmorComponents.Count > 0)
+            foreach (ArmorComponent armor in _armorList)
             {
-                foreach (ArmorComponent armor in HelmetArmorComponents)
+                if (armor.Deaf == EDeafStrength.High)
                 {
-                    if (armor.Deaf == EDeafStrength.High)
-                    {
-                        HasHeavyHelmet = true;
-                        break;
-                    }
+                    HasHeavyHelmet = true;
+                    break;
                 }
-                HelmetArmorComponents.Clear();
             }
+            _armorList.Clear();
 
             int vestAC = FindMaxAC(EquipmentSlot.ArmorVest);
+            _armorList.Clear();
+
             int bodyAC = FindMaxAC(EquipmentSlot.TacticalVest);
+            _armorList.Clear();
+
             BodyArmorClass = Mathf.Max(vestAC, bodyAC);
 
             if (SAINPlugin.DebugMode)
             {
                 Logger.LogInfo(
-                    $" Found GearInfo for [{Player.Profile.Nickname}]:" +
+                    $" Found GearInfo: " +
                     $" Body Armor Class: [{BodyArmorClass}]" +
                     $" Helmet Armor Class [{HelmetArmorClass}]" +
                     $" Has Heavy Helmet? [{HasHeavyHelmet}]" +
@@ -85,11 +90,11 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public int HelmetArmorClass { get; private set; }
 
-        private readonly List<ArmorComponent> HelmetArmorComponents = new List<ArmorComponent>();
+        private readonly List<ArmorComponent> _helmetComponents = new List<ArmorComponent>();
 
         public bool HasFaceShield { get; private set; }
 
-        private readonly List<FaceShieldComponent> FaceShieldComponents = new List<FaceShieldComponent>();
+        private readonly List<FaceShieldComponent> _faceShieldComponents = new List<FaceShieldComponent>();
 
         public bool HasArmor => BodyArmorClass != 0;
 
@@ -100,21 +105,16 @@ namespace SAIN.SAINComponent.Classes.Info
             return InventoryController.Inventory.Equipment.GetSlot(slot).ContainedItem;
         }
 
-        private static int FindMaxAC(Item item, List<ArmorComponent> armorComponents)
+        private int FindMaxAC(Item item)
         {
             if (item == null) return 0;
 
-            armorComponents.Clear();
-            item.GetItemComponentsInChildrenNonAlloc(armorComponents, true);
-            return FindMaxAC(armorComponents);
-        }
+            item.GetItemComponentsInChildrenNonAlloc(_armorList, true);
 
-        private static int FindMaxAC(List<ArmorComponent> armorComponents)
-        {
             int result = 0;
-            for (int i = 0; i < armorComponents.Count; i++)
+            for (int i = 0; i < _armorList.Count; i++)
             {
-                ArmorComponent armor = armorComponents[i];
+                ArmorComponent armor = _armorList[i];
                 if (armor.ArmorClass > result)
                 {
                     result = armor.ArmorClass;
@@ -126,9 +126,13 @@ namespace SAIN.SAINComponent.Classes.Info
         private int FindMaxAC(EquipmentSlot slot)
         {
             Item item = InventoryController.Inventory.Equipment.GetSlot(slot).ContainedItem;
-            return FindMaxAC(item, StaticArmorList);
+            return FindMaxAC(item);
         }
 
-        private static readonly List<ArmorComponent> StaticArmorList = new List<ArmorComponent>();
+        private readonly List<ArmorComponent> _armorList = new List<ArmorComponent>();
+
+        private readonly InventoryControllerClass InventoryController;
+
+        private float _nextUpdateTime;
     }
 }

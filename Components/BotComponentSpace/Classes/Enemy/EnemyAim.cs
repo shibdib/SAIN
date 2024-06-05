@@ -39,15 +39,15 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             get
             {
-                var gear = Enemy.Bot.Equipment.CurrentWeaponInfo;
-                if (gear == null)
+                var weapon = Enemy.Bot.PlayerComponent.Equipment.CurrentWeapon;
+                if (weapon == null)
                 {
                     return 1f;
                 }
 
                 float enemyDistance = Enemy.RealDistance;
 
-                if (gear.HasOptic)
+                if (weapon.HasOptic)
                 {
                     if (enemyDistance >= _aimSettings.OpticFarDistance)
                     {
@@ -59,7 +59,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     }
                 }
 
-                if (gear.HasRedDot)
+                if (weapon.HasRedDot)
                 {
                     if (enemyDistance <= _aimSettings.RedDotCloseDistance)
                     {
@@ -71,8 +71,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     }
                 }
 
-                if (!gear.HasRedDot && 
-                    !gear.HasOptic)
+                if (!weapon.HasRedDot && 
+                    !weapon.HasOptic)
                 {
                     float min = _aimSettings.IronSightScaleDistanceStart;
                     if (enemyDistance < min)

@@ -2,99 +2,215 @@
 using SAIN.Helpers;
 using System;
 using System.Linq;
+using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Info
 {
     public class WeaponInfo
     {
+        public WeaponInfo(Weapon weapon)
+        {
+            Weapon = weapon;
+            WeaponClass = EnumValues.ParseWeaponClass(weapon.Template.weapClass);
+        }
+
         public Weapon Weapon { get; private set; }
 
-        public void Update(Weapon weapon)
+        private float _nextUpdateTime;
+
+        public void Update()
         {
-            if (Weapon == null || Weapon != weapon)
+            if (_nextUpdateTime > Time.time)
             {
-                Weapon = weapon;
+                return;
             }
+            _nextUpdateTime = Time.time + 10f;
+            checkAllMods();
+        }
+
+        private void checkAllMods()
+        {
+            var mods = Weapon?.Mods;
+            if (mods == null)
+            {
+                return;
+            }
+
+            float realismLoudness = 0;
+            float loudness = 0;
 
             HasSuppressor = false;
             HasRedDot = false;
             HasOptic = false;
 
-            WeaponClass = EnumValues.ParseWeaponClass(weapon.Template.weapClass);
-
-            // Another thing to fix later
-            var mods = weapon.Mods.ToArray();
-            // OLD:
-            // var mods = weapon.Mods;
-
-            for (int i = 0; i < mods.Length; i++)
+            foreach (var item in mods)
             {
-                CheckMod(mods[i]);
-                if (mods[i].Slots.Length > 0)
+                checkItemType(item.GetType());
+                calcLoudness(item, ref loudness, ref realismLoudness);
+
+                foreach (var slot in item.Slots)
                 {
-                    for (int j = 0; j < mods[i].Slots.Length; j++)
+                    if (slot.ContainedItem != null &&
+                        slot.ContainedItem is Mod mod)
                     {
-                        Item containedItem = mods[i].Slots[j].ContainedItem;
-                        if (containedItem != null && containedItem is Mod mod)
-                        {
-                            Type modType = mod.GetType();
-                            if (IsSilencer(modType))
-                            {
-                                HasSuppressor = true;
-                            }
-                            else if (IsOptic(modType))
-                            {
-                                HasOptic = true;
-                            }
-                            else if (IsRedDot(modType))
-                            {
-                                HasRedDot = true;
-                            }
-                        }
+                        checkItemType(mod.GetType());
+                        calcLoudness(mod, ref loudness, ref realismLoudness);
                     }
+                }
+            }
+
+            MuzzleLoudness = loudness;
+
+            if (ModDetection.RealismLoaded)
+            {
+                MuzzleLoudnessRealism = (realismLoudness / 200) + 1f;
+                CalculatedAudibleRange = BaseAudibleRange * SuppressorModifier * MuzzleLoudnessRealism;
+            }
+            else
+            {
+                CalculatedAudibleRange = BaseAudibleRange * SuppressorModifier + loudness;
+            }
+
+        }
+
+        private static void calcLoudness(Mod mod, ref float loudness, ref float realismLoudness)
+        {
+            // Calculate loudness
+            if (!ModDetection.RealismLoaded)
+            {
+                loudness += mod.Template.Loudness;
+            }
+            else
+            {
+                // For RealismMod: if the muzzle device has a silencer attached to it then it shouldn't contribute to the loudness stat.
+                Item containedItem = null;
+                if (mod.Slots.Length > 0)
+                {
+                    containedItem = mod.Slots[0].ContainedItem;
+                }
+                if (containedItem == null
+                    || (containedItem is Mod modItem && IsModSuppressor(modItem, out var suppressor)))
+                {
+                    realismLoudness += mod.Template.Loudness;
                 }
             }
         }
 
-        private void CheckMod(Mod mod)
+        public float Durability
+        {
+            get
+            {
+                return Weapon.Repairable.Durability / (float)Weapon.Repairable.TemplateDurability;
+            }
+        }
+
+        private static bool IsModSuppressor(Mod mod, out Item suppressor)
+        {
+            suppressor = null;
+            if (mod.Slots.Length > 0)
+            {
+                Item item = mod.Slots[0].ContainedItem;
+                if (item != null && mod.GetType() == TemplateIdToObjectMappingsClass.TypeTable[SuppressorTypeId])
+                {
+                    suppressor = item;
+                }
+            }
+            return suppressor != null;
+        }
+
+        public readonly IWeaponClass WeaponClass;
+
+        public readonly ICaliber AmmoCaliber;
+
+        public float CalculatedAudibleRange { get; private set; }
+
+        public AISoundType AISoundType => HasSuppressor ? AISoundType.silencedGun : AISoundType.gun;
+
+        public float BaseAudibleRange
+        {
+            get
+            {
+                if (SAINPlugin.LoadedPreset?.GlobalSettings?.Hearing?.HearingDistances.TryGetValue(AmmoCaliber, out var range) == true)
+                {
+                    return range;
+                }
+                Logger.LogError($"Cannot find base audible range for Caliber: [{AmmoCaliber}]");
+                return 150f;
+            }
+        }
+
+        public float MuzzleLoudness { get; private set; }
+
+        public float MuzzleLoudnessRealism { get; private set; }
+
+        public float SuppressorModifier
+        {
+            get
+            {
+                float supmod = 1f;
+                bool suppressed = HasSuppressor;
+
+                if (suppressed && Subsonic)
+                {
+                    supmod *= SAINPlugin.LoadedPreset.GlobalSettings.Hearing.SubsonicModifier;
+                }
+                else if (suppressed)
+                {
+                    supmod *= SAINPlugin.LoadedPreset.GlobalSettings.Hearing.SuppressorModifier;
+                }
+                return supmod;
+            }
+        }
+
+        public float SpeedFactor => 2f - Weapon.SpeedFactor;
+
+        private const float SuperSonicSpeed = 343.2f;
+
+        public bool Subsonic
+        {
+            get
+            {
+                if (Weapon == null)
+                {
+                    return false;
+                }
+                return Weapon.CurrentAmmoTemplate.InitialSpeed * SpeedFactor < SuperSonicSpeed;
+            }
+        }
+
+        public bool HasRedDot { get; private set; }
+        public bool HasOptic { get; private set; }
+        public bool HasSuppressor { get; private set; }
+
+        private void CheckModForSuppresorAndSights(Mod mod)
         {
             if (mod != null)
             {
                 Type modType = mod.GetType();
-                if (IsSilencer(modType))
-                {
-                    HasSuppressor = true;
-                }
-                else if (IsOptic(modType))
-                {
-                    HasOptic = true;
-                }
-                else if (IsRedDot(modType))
-                {
-                    HasRedDot = true;
-                }
+                checkItemType(modType);
             }
         }
 
-        public void Log()
+        private void checkItemType(Type type)
         {
-            if (SAINPlugin.DebugMode)
+            if (!HasSuppressor && 
+                isSuppressor(type))
             {
-                Logger.LogWarning(
-                    $"Found Weapon Info: " +
-                    $"Weapon Class: [{WeaponClass}] " +
-                    $"Has Red Dot? [{HasRedDot}] " +
-                    $"Has Optic? [{HasOptic}] " +
-                    $"Has Suppressor? [{HasSuppressor}]");
+                HasSuppressor = true;
+            }
+            else if (!HasOptic && 
+                IsOptic(type))
+            {
+                HasOptic = true;
+            }
+            else if (!HasRedDot && 
+                IsRedDot(type))
+            {
+                HasRedDot = true;
             }
         }
 
-        public IWeaponClass WeaponClass;
-        public bool HasRedDot;
-        public bool HasOptic;
-        public bool HasSuppressor;
-
-        private static bool IsSilencer(Type modType)
+        private static bool isSuppressor(Type modType)
         {
             return modType == TemplateIdToObjectMappingsClass.TypeTable[SuppressorTypeId];
         }

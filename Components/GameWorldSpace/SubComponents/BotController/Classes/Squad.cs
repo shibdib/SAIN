@@ -458,7 +458,8 @@ namespace SAIN.BotController.Classes
         {
             if (a != null && b != null)
             {
-                if (a.Equipment.HasEarPiece && b.Equipment.HasEarPiece)
+                if (a.PlayerComponent.Equipment.GearInfo.HasEarPiece && 
+                    b.PlayerComponent.Equipment.GearInfo.HasEarPiece)
                 {
                     return true;
                 }
@@ -477,7 +478,7 @@ namespace SAIN.BotController.Classes
                 return;
             }
 
-            bool iHaveEarpeace = sain.Equipment.HasEarPiece;
+            bool iHaveEarpeace = sain.PlayerComponent.Equipment.GearInfo.HasEarPiece;
 
             float maxRangeSqr = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxRangeToReportEnemyActionNoHeadset.Sqr();
 

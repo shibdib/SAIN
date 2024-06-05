@@ -1,31 +1,100 @@
 ﻿using EFT;
-using HarmonyLib;
-using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Info;
-using SAIN.SAINComponent;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using EFT.InventoryLogic;
+using HarmonyLib;
+using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes.Info;
+using System.Collections.Generic;
+using System.Reflection;
+using UnityEngine;
+using static EFT.Player;
 
 namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 {
-    public class EquipmentClass : PlayerComponentBase
+    public class SAINEquipmentClass : PlayerComponentBase
     {
-        static EquipmentClass()
-        {
-            InventoryControllerProp = AccessTools.Field(typeof(Player), "_inventoryController");
-        }
-        private static readonly FieldInfo InventoryControllerProp;
-
-        public EquipmentClass(PlayerComponent playerComponent) : base(playerComponent)
+        public SAINEquipmentClass(PlayerComponent playerComponent) : base(playerComponent)
         {
             InventoryController = (InventoryControllerClass)InventoryControllerProp.GetValue(Player);
-            GearInfo = new GearInfo(Player, InventoryController);
+            GearInfo = new GearInfo(InventoryController);
         }
+
+        public void PlayShootSound(float range, AISoundType soundType)
+        {
+            if (Player != null &&
+                Player.WeaponRoot != null)
+            {
+                var weapon = CurrentWeapon;
+                if (weapon != null)
+                {
+                    SAINSoundType sainType = weapon.AISoundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot;
+                    SAINPlugin.BotController?.PlayAISound(Player, sainType, Player.WeaponRoot.position, weapon.CalculatedAudibleRange);
+                }
+            }
+        }
+
+        public void Update()
+        {
+            GearInfo.Update();
+            updateWeapons();
+        }
+
+        private void updateWeapons()
+        {
+            if (_nextGetWeaponsTime < Time.time)
+            {
+                _nextGetWeaponsTime = Time.time + 10f;
+                getAllWeapons();
+            }
+            if (_nextUpdateTime < Time.time)
+            {
+                _nextUpdateTime = Time.time + 1f;
+                updateAllWeapons();
+            }
+        }
+
+        private float _nextGetWeaponsTime;
+        private float _nextUpdateTime;
+
+        private void getAllWeapons()
+        {
+            var equipment = InventoryController?.Inventory?.Equipment;
+            if (equipment == null)
+            {
+                return;
+            }
+
+            foreach (EquipmentSlot slot in _weaponSlots)
+            {
+                Item item = equipment.GetSlot(slot).ContainedItem;
+                if (item != null && item is Weapon weapon)
+                {
+                    if (!WeaponInfos.ContainsKey(slot))
+                    {
+                        WeaponInfos.Add(slot, new WeaponInfo(weapon));
+                    }
+                    else if (WeaponInfos.TryGetValue(slot, out WeaponInfo info) &&
+                        info.Weapon != weapon)
+                    {
+                        WeaponInfos[slot] = new WeaponInfo(weapon);
+                    }
+                }
+            }
+        }
+
+        private void updateAllWeapons()
+        {
+            foreach (var info in WeaponInfos.Values)
+            {
+                info?.Update();
+            }
+        }
+
+        private static readonly EquipmentSlot[] _weaponSlots = new EquipmentSlot[]
+        {
+            EquipmentSlot.FirstPrimaryWeapon,
+            EquipmentSlot.SecondPrimaryWeapon,
+            EquipmentSlot.Holster,
+        };
 
         public InventoryControllerClass InventoryController { get; private set; }
 
@@ -35,21 +104,38 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         {
             get
             {
-                var item = Player.HandsController.Item;
-                if (item != null && item is Weapon weapon)
+                var firearmController = Player.HandsController as FirearmController;
+                if (firearmController != null &&
+                    firearmController.Item is Weapon weapon)
                 {
-                    foreach (var weaponInfo in WeaponInfos)
+                    Weapon currWeapon = _currentWeapon?.Weapon;
+                    if (currWeapon != null && currWeapon == weapon)
                     {
-                        if (weapon == weaponInfo.Value.Weapon)
+                        return _currentWeapon;
+                    }
+
+                    foreach (var weaponInfo in WeaponInfos.Values)
+                    {
+                        if (weapon == weaponInfo.Weapon)
                         {
-                            return weaponInfo.Value;
+                            _currentWeapon = weaponInfo;
+                            break;
                         }
                     }
                 }
-                return null;
+                return _currentWeapon;
             }
         }
 
+        private WeaponInfo _currentWeapon;
+
         public Dictionary<EquipmentSlot, WeaponInfo> WeaponInfos { get; private set; } = new Dictionary<EquipmentSlot, WeaponInfo>();
+
+        static SAINEquipmentClass()
+        {
+            InventoryControllerProp = AccessTools.Field(typeof(Player), "_inventoryController");
+        }
+
+        private static readonly FieldInfo InventoryControllerProp;
     }
 }
