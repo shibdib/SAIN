@@ -3,6 +3,7 @@ using EFT.InventoryLogic;
 using Interpolation;
 using Newtonsoft.Json;
 using SAIN.Attributes;
+using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Preset.Personalities;
 using System.Collections.Generic;

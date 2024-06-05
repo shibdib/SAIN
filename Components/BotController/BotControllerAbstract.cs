@@ -13,7 +13,7 @@ namespace SAIN
         }
 
         public SAINBotController BotController { get; private set; }
-        public Dictionary<string, BotComponent> Bots => BotController?.BotSpawnController?.SAINBotDictionary;
+        public Dictionary<string, BotComponent> Bots => BotController?.BotSpawnController?.BotDictionary;
         public GameWorld GameWorld => BotController.GameWorld;
         public SAINGameworldComponent SAINGameWorld => BotController.SAINGameWorld;
     }

@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Components.PlayerComponentSpace;
 using System.Collections.Generic;
 
 namespace SAIN

@@ -2,6 +2,7 @@
 using EFT;
 using EFT.Weather;
 using SAIN.Components;
+using SAIN.Components.PlayerComponentSpace;
 using UnityEngine;
 using static EFT.Player;
 

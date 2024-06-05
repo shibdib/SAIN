@@ -1,9 +1,8 @@
 ﻿using BepInEx.Logging;
 using EFT;
 using SAIN.Attributes;
-using SAIN.Components;
+using SAIN.Components.PlayerComponentSpace;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.BaseClasses;
 using System.Collections.Generic;
 
 namespace SAIN
