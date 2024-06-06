@@ -3,6 +3,7 @@ using EFT;
 using EFT.EnvironmentEffect;
 using SAIN.BotController.Classes;
 using SAIN.Components.BotController;
+using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Layers;
 using SAIN.SAINComponent;
@@ -65,7 +66,7 @@ namespace SAIN.Components
         public LineOfSightManager LineOfSightManager { get; private set; }
         public BotExtractManager BotExtractManager { get; private set; }
         public TimeClass TimeVision { get; private set; }
-        public WeatherVisionClass WeatherVision { get; private set; }
+        public BotController.SAINWeatherClass WeatherVision { get; private set; }
         public BotSpawnController BotSpawnController { get; private set; }
         public BotSquads BotSquads { get; private set; }
 
@@ -97,7 +98,7 @@ namespace SAIN.Components
             LineOfSightManager = new LineOfSightManager(this);
             BotExtractManager = new BotExtractManager(this);
             TimeVision = new TimeClass(this);
-            WeatherVision = new WeatherVisionClass(this);
+            WeatherVision = new BotController.SAINWeatherClass(this);
             BotSpawnController = new BotSpawnController(this);
             BotSquads = new BotSquads(this);
             PathManager = new PathManager(this);
@@ -217,9 +218,34 @@ namespace SAIN.Components
         private IEnumerator playShootSoundCoroutine(Player player)
         {
             yield return null;
+
             if (player != null && player.HealthController?.IsAlive == true)
-                AudioHelpers.TryPlayShootSound(player);
+            {
+                PlayerComponent component = SAINGameworldComponent.Instance?.PlayerTracker.GetPlayerComponent(player);
+                if (component?.Equipment.PlayAIShootSound() == true)
+                {
+                    yield break;
+                }
+
+                // If for some reason we can't get the weapon info on this player, just play the default sound
+                if (_nextShootTime < Time.time)
+                {
+                    _nextShootTime = Time.time + 0.05f;
+
+                    float range = 125f;
+                    var weather = SAINWeatherClass.Instance;
+                    if (weather != null)
+                    {
+                        range *= weather.RainSoundModifier;
+                    }
+
+                    SAINPlugin.BotController?.PlayAISound(player, SAINSoundType.Gunshot, player.WeaponRoot.position, range);
+                    Logger.LogWarning($"Could not find Weapon Info for [{player.Profile.Nickname}]!");
+                }
+            }
         }
+
+        private float _nextShootTime;
 
         public void PlayShootSound(Player player)
         {

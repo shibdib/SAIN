@@ -1,9 +1,5 @@
-﻿using Comfort.Common;
-using EFT;
-using EFT.InventoryLogic;
+﻿using EFT;
 using SAIN.Components.PlayerComponentSpace;
-using SAIN.Helpers;
-using SAIN.Preset.GlobalSettings;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Enemy
@@ -69,7 +65,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             float velocity = Enemy.Vision.EnemyVelocity;
             float result = Mathf.Lerp(1f, _sprintMod, velocity);
 
-            // if (EnemyPlayer.IsYourPlayer && 
+            // if (EnemyPlayer.IsYourPlayer &&
             //     _nextLogTime < Time.time)
             // {
             //     Logger.LogWarning($"Velocity: [{velocity}] : Vision Distance mod: {result}");
@@ -126,14 +122,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             // if player shot a weapon recently
             // if player is using suppressed weapon, and has shot recently, don't increase vis distance as much.
-            bool usingSuppressor = false;
             bool flareEnabled = EnemyPlayer.AIData.GetFlare;
-            if (flareEnabled &&
-                EnemyPlayer.HandsController.Item is Weapon weapon)
-            {
-                var weaponInfo = SAINGearInfoHandler.GetGearInfo(EnemyPlayer);
-                usingSuppressor = weaponInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
-            }
+            bool usingSuppressor = Enemy.EnemyPlayerComponent?.Equipment.CurrentWeapon?.HasSuppressor == true;
 
             float flareMod;
             if (flareEnabled && !usingSuppressor)

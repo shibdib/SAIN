@@ -1,34 +1,62 @@
-﻿using EFT;
-using EFT.Weather;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EFT.Weather;
 using UnityEngine;
 
 namespace SAIN.Components.BotController
 {
-    public class WeatherVisionClass : SAINControl
+    public class SAINWeatherClass : SAINControl
     {
-        public WeatherVisionClass(SAINBotController botController) : base(botController) { }
+        public static SAINWeatherClass Instance { get; private set; }
+
+        public SAINWeatherClass(SAINBotController botController) : base(botController)
+        {
+            Instance = this;
+        }
 
         public readonly float UpdateWeatherVisibilitySec = 20f;
 
         public void Update()
         {
-            if (GetNewModifiersTimer < Time.time)
+            if (_getModifierTime < Time.time)
             {
-                GetNewModifiersTimer = Time.time + UpdateWeatherVisibilitySec;
+                _getModifierTime = Time.time + UpdateWeatherVisibilitySec;
                 VisibilityNum = CalcWeatherVisibility();
                 InverseWeatherModifier = Mathf.Sqrt(2f - VisibilityNum);
             }
         }
 
         public float VisibilityNum { get; private set; }
+
         public float InverseWeatherModifier { get; private set; }
 
-        private float GetNewModifiersTimer = 0f;
+        private float _getModifierTime = 0f;
+
+        public float RainSoundModifier
+        {
+            get
+            {
+                if (WeatherController.Instance?.WeatherCurve == null)
+                    return 1f;
+
+                if (_rainCheckTime < Time.time)
+                {
+                    _rainCheckTime = Time.time + 5f;
+                    // Grabs the current rain Rounding
+                    float Rain = WeatherController.Instance.WeatherCurve.Rain;
+                    _rainSoundMod = 1f;
+                    float max = 1f;
+                    float rainMin = 0.65f;
+
+                    Rain = InverseScaling(Rain, rainMin, max);
+
+                    // Combines ModifiersClass and returns
+                    _rainSoundMod *= Rain;
+                }
+                return _rainSoundMod;
+            }
+        }
+
+        private float _rainCheckTime = 0f;
+        private float _rainSoundMod;
 
         private static float CalcWeatherVisibility()
         {
@@ -36,7 +64,6 @@ namespace SAIN.Components.BotController
             {
                 return 1f;
             }
-
 
             IWeatherCurve weatherCurve = WeatherController.Instance.WeatherCurve;
 

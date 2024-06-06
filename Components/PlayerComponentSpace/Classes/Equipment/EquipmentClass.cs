@@ -1,5 +1,6 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
+using SAIN.Components.BotController;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
@@ -18,19 +19,34 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         public EquipmentClass EquipmentClass { get; private set; }
 
-        public void PlayShootSound(float range, AISoundType soundType)
+        public bool PlayAIShootSound()
         {
-            if (Player != null &&
-                Player.WeaponRoot != null)
+            var weapon = CurrentWeapon;
+            if (weapon == null)
             {
-                var weapon = CurrentWeapon;
-                if (weapon != null)
-                {
-                    SAINSoundType sainType = weapon.AISoundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot;
-                    SAINPlugin.BotController?.PlayAISound(Player, sainType, Player.WeaponRoot.position, weapon.CalculatedAudibleRange);
-                }
+                Logger.LogWarning("CurrentWeapon Null");
+                return false;
             }
+
+            if (_nextPlaySoundTime < Time.time)
+            {
+                _nextPlaySoundTime = Time.time + (PlayerComponent.IsAI ? 0.5f : 0.1f);
+                SAINSoundType sainType = weapon.AISoundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot;
+
+                float range = weapon.CalculatedAudibleRange;
+
+                var weather = SAINWeatherClass.Instance;
+                if (weather != null)
+                {
+                    range *= weather.RainSoundModifier;
+                }
+
+                SAINPlugin.BotController?.PlayAISound(Player, sainType, Player.WeaponRoot.position, range);
+            }
+            return true;
         }
+
+        private float _nextPlaySoundTime;
 
         public void Update()
         {

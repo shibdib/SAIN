@@ -454,7 +454,7 @@
     <Compile Include="Plugin\BigBrainHandler.cs" />
     <Compile Include="Plugin\GameWorldHandler.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\ShootClass.cs" />
-    <Compile Include="Components\GameWorldSpace\SubComponents\BotController\Classes\WeatherVisionClass.cs" />
+    <Compile Include="Components\GameWorldSpace\SubComponents\BotController\Classes\SAINWeatherClass.cs" />
     <Compile Include="Components\GameWorldSpace\SubComponents\BotController\Classes\TimeClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINVisionClass.cs" />
     <Compile Include="Components\GameWorldSpace\SubComponents\BotController\BotControllerAbstract.cs" />

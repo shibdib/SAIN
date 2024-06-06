@@ -3,9 +3,11 @@ using EFT.InventoryLogic;
 using Interpolation;
 using Newtonsoft.Json;
 using SAIN.Attributes;
+using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Preset.Personalities;
+using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
 using System.Data;
 using static EFT.Player;
@@ -93,63 +95,52 @@ namespace SAIN.Preset.GlobalSettings
         private float WeaponPower(Player player)
         {
             float result = 0f;
-            FirearmController controller = player.HandsController as FirearmController;
-            if (controller?.Item != null)
+            WeaponInfo weaponInfo = SAINGameworldComponent.Instance?.PlayerTracker.GetPlayerComponent(player)?.Equipment.CurrentWeapon;
+            if (weaponInfo != null)
             {
-                GearInfoContainer info = SAINGearInfoHandler.GetGearInfo(player);
-                if (info != null)
+                if (weaponInfo.HasSuppressor)
                 {
-                    var weaponInfo = info.GetWeaponInfo(controller.Item);
-                    if (weaponInfo != null)
-                    {
-                        weaponInfo.TryCalculate();
+                    result += SUPPRESSOR_POWER;
+                }
+                if (weaponInfo.HasRedDot)
+                {
+                    result += RED_DOT_POWER;
+                }
+                if (weaponInfo.HasOptic)
+                {
+                    result += OPTIC_POWER;
+                }
 
-                        if (weaponInfo.HasSuppressor)
-                        {
-                            result += SUPPRESSOR_POWER;
-                        }
-                        if (weaponInfo.HasRedDot)
-                        {
-                            result += RED_DOT_POWER;
-                        }
-                        if (weaponInfo.HasOptic)
-                        {
-                            result += OPTIC_POWER;
-                        }
-
-                        switch (weaponInfo.WeaponClass)
-                        {
-                            case IWeaponClass.pistol:
-                                result += PISTOL_POWER;
-                                break;
-                            case IWeaponClass.smg:
-                                result += SMG_POWER;
-                                break;
-                            case IWeaponClass.assaultCarbine:
-                                result += ASSAULT_CARBINE_POWER;
-                                break;
-                            case IWeaponClass.assaultRifle:
-                                result += ASSAULT_RIFLE_POWER;
-                                break;
-                            case IWeaponClass.machinegun:
-                                result += MG_POWER;
-                                break;
-                            case IWeaponClass.marksmanRifle:
-                                result += MARKSMAN_RIFLE_POWER;
-                                break;
-                            case IWeaponClass.sniperRifle:
-                                result += SNIPE_POWER;
-                                break;
-                            case IWeaponClass.shotgun:
-                                result += SHOTGUN_POWER;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                switch (weaponInfo.WeaponClass)
+                {
+                    case IWeaponClass.pistol:
+                        result += PISTOL_POWER;
+                        break;
+                    case IWeaponClass.smg:
+                        result += SMG_POWER;
+                        break;
+                    case IWeaponClass.assaultCarbine:
+                        result += ASSAULT_CARBINE_POWER;
+                        break;
+                    case IWeaponClass.assaultRifle:
+                        result += ASSAULT_RIFLE_POWER;
+                        break;
+                    case IWeaponClass.machinegun:
+                        result += MG_POWER;
+                        break;
+                    case IWeaponClass.marksmanRifle:
+                        result += MARKSMAN_RIFLE_POWER;
+                        break;
+                    case IWeaponClass.sniperRifle:
+                        result += SNIPE_POWER;
+                        break;
+                    case IWeaponClass.shotgun:
+                        result += SHOTGUN_POWER;
+                        break;
+                    default:
+                        break;
                 }
             }
-            //Logger.LogInfo($"Weapon Power Result: [{result}]");
             return result;
         }
 
