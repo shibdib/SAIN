@@ -1,8 +1,12 @@
 ﻿using EFT;
+using SAIN.Components.PlayerComponentSpace.Classes;
 using SAIN.Components.PlayerComponentSpace.Classes.Equipment;
+using SAIN.Helpers;
 using SAIN.SAINComponent;
 using System;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Profiling;
 
 namespace SAIN.Components.PlayerComponentSpace
 {
@@ -10,41 +14,81 @@ namespace SAIN.Components.PlayerComponentSpace
     {
         private void Update()
         {
+            updatePosition();
+
             if (IsActive)
             {
                 Equipment.Update();
+                navRayCastAllDir();
             }
         }
 
-        public bool IsActive => Person.IsActive;
+        private void updatePosition()
+        {
+            Position = Person.Transform.Position;
+            LookDirection = Person.Transform.LookDirection;
+        }
 
-        public Vector3 Position => Person.Transform.Position;
-        public Vector3 LookDirection => Person.Transform.LookDirection;
+        private void navRayCastAllDir()
+        {
+            if (SAINPlugin.DebugMode && 
+                SAINPlugin.DrawDebugGizmos && 
+                Player.IsYourPlayer)
+            {
+                Vector3 origin = Position;
+                if (NavMesh.SamplePosition(origin, out var hit, 1f, -1))
+                {
+                    origin = hit.position;
+                }
+                Vector3 direction;
+                int max = 30;
+                for (int i = 0; i < max; i++)
+                {
+                    direction = UnityEngine.Random.onUnitSphere;
+                    direction.y = 0;
+                    direction = direction.normalized * 30f;
+                    Vector3 target = origin + direction;
+                    if (NavMesh.Raycast(origin, target, out var hit2, -1))
+                    {
+                        target = hit2.position;
+                    }
+                    DebugGizmos.Line(origin, target, 0.05f, 0.25f, true);
+                }
+            }
+        }
+
+        public string ProfileId {  get; private set; }
+        public FlashLightClass Flashlight { get; private set; }
+        public PersonClass Person { get; private set; }
+        public SAINAIData AIData { get; private set; }
+        public SAINEquipmentClass Equipment { get; private set; }
+
+        public bool IsActive => Person.IsActive;
+        public Vector3 Position { get; private set; }
+        public Vector3 LookDirection { get; private set; }
+
         public Vector3 DirectionTo(Vector3 point) => Person.Transform.DirectionTo(point);
 
-        public TransformClass Transform => Person.Transform;
+        public PersonTransformClass Transform => Person.Transform;
         public Player Player => Person.Player;
         public IPlayer IPlayer => Person.IPlayer;
-        public string ProfileId => Person.ProfileId;
         public string Name => Person.Name;
         public BotOwner BotOwner => Person.BotOwner;
         public BotComponent BotComponent => Person.BotComponent;
         public bool IsAI => Person.IsAI;
         public bool IsSAINBot => Person.IsSAINBot;
 
-        public FlashLightComponent FlashlightComponent { get; private set; }
-        public SAINPersonClass Person { get; private set; }
-        public SAINAIData AIData { get; private set; }
-        public SAINEquipmentClass Equipment { get; private set; }
-
         public bool Init(IPlayer iPlayer, Player player)
         {
             try
             {
-                Person = new SAINPersonClass(iPlayer, player);
-                FlashlightComponent = player.GetOrAddComponent<FlashLightComponent>();
-                AIData = new SAINAIData();
+                ProfileId = iPlayer.ProfileId;
+                Person = new PersonClass(iPlayer, player);
+
+                Flashlight = new FlashLightClass(this);
                 Equipment = new SAINEquipmentClass(this);
+
+                AIData = new SAINAIData(Equipment.GearInfo, this);
             }
             catch (Exception ex)
             {

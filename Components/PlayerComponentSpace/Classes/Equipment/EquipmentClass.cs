@@ -1,10 +1,8 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
-using HarmonyLib;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 using static EFT.Player;
 
@@ -14,9 +12,11 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
     {
         public SAINEquipmentClass(PlayerComponent playerComponent) : base(playerComponent)
         {
-            InventoryController = (InventoryControllerClass)InventoryControllerProp.GetValue(Player);
-            GearInfo = new GearInfo(InventoryController);
+            EquipmentClass = playerComponent.Player.Equipment;
+            GearInfo = new GearInfo(this);
         }
+
+        public EquipmentClass EquipmentClass { get; private set; }
 
         public void PlayShootSound(float range, AISoundType soundType)
         {
@@ -130,12 +130,5 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         private WeaponInfo _currentWeapon;
 
         public Dictionary<EquipmentSlot, WeaponInfo> WeaponInfos { get; private set; } = new Dictionary<EquipmentSlot, WeaponInfo>();
-
-        static SAINEquipmentClass()
-        {
-            InventoryControllerProp = AccessTools.Field(typeof(Player), "_inventoryController");
-        }
-
-        private static readonly FieldInfo InventoryControllerProp;
     }
 }

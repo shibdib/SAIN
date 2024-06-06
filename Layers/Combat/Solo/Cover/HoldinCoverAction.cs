@@ -10,7 +10,6 @@ using UnityEngine.AI;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SAIN.Layers.Combat.Solo;
 using SAIN.Helpers;
-using SAIN.Components.MainPlayer;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {

@@ -5,10 +5,12 @@ using UnityEngine;
 using static SAIN.Helpers.HelpersGClass;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.Enemy;
+using System;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes.Sense
 {
-    public class FlashLightDazzleClass : SAINBase, ISAINClass
+    public class FlashLightDazzleClass : SAINBase
     {
         private TemporaryStatModifiers Modifiers = new TemporaryStatModifiers(1f, 1f, 1f, 1f, 1f);
 
@@ -16,122 +18,75 @@ namespace SAIN.SAINComponent.Classes.Sense
         {
         }
 
-        public void Init()
-        {
-        }
-
-        public void Update()
-        {
-        }
-
-        public void Dispose()
-        {
-        }
-
-        private FlashLightComponent getFlashlight(SAINEnemy enemy)
-        {
-            if (enemy == null)
-            {
-                return null;
-            }
-
-            FlashLightComponent flashlight = null;
-            if (enemy.EnemyPerson?.IsSAINBot == true)
-            {
-                flashlight = enemy.EnemyPerson?.BotComponent?.FlashLight;
-            }
-            else if (GameWorldInfo.IsEnemyMainPlayer(enemy))
-            {
-                flashlight = GameWorldHandler.SAINMainPlayer?.MainPlayerLight;
-            }
-
-            if (flashlight == null)
-            {
-                flashlight = enemy.EnemyPlayer?.GetComponent<FlashLightComponent>();
-            }
-
-            return flashlight;
-        }
-
         public void CheckIfDazzleApplied(SAINEnemy enemy)
         {
-            if (enemy?.EnemyIPlayer == null)
+            if (enemy?.IsValid == true && 
+                enemy.IsVisible)
             {
-                return;
-            }
-
-            FlashLightComponent flashlight = getFlashlight(enemy);
-            if (flashlight != null)
-            {
-                bool usingNVGs = BotOwner.NightVision.UsingNow;
-                if (flashlight.WhiteLight || (usingNVGs && flashlight.IRLight))
+                // If modifier is already applied, don't re-apply it
+                if (Modifiers.Modifiers.IsApplyed)
                 {
-                    EnemyWithFlashlight(enemy.EnemyIPlayer);
+                    return;
                 }
-                else if (flashlight.Laser || (usingNVGs && flashlight.IRLaser))
-                {
-                    EnemyWithLaser(enemy.EnemyIPlayer);
-                }
-            }
-        }
 
-        /// <summary>
-        /// Checks if the enemy is within range of the flashlight and applies dazzle and gain sight modifiers if so.
-        /// </summary>
-        /// <param value="BotOwner">The BotOwner object.</param>
-        /// <param value="person">The IPlayer object.</param>
-        public void EnemyWithFlashlight(IPlayer person)
-        {
-            Vector3 position = BotOwner.MyHead.position;
-            Vector3 weaponRoot = person.WeaponRoot.position;
-            float enemyDist = (position - weaponRoot).magnitude;
-
-            if (enemyDist < 80f)
-            {
-                if (FlashLightVisionCheck(person))
+                FlashLightClass flashlight = enemy?.EnemyPlayerComponent?.Flashlight;
+                if (flashlight != null)
                 {
-                    if (!Physics.Raycast(weaponRoot, (position - weaponRoot).normalized, (position - weaponRoot).magnitude, LayerMaskClass.HighPolyWithTerrainMask))
+                    bool usingNVGs = BotOwner.NightVision.UsingNow;
+                    if ((flashlight.WhiteLight || (usingNVGs && flashlight.IRLight)) &&
+                        enemyWithFlashlight(enemy))
                     {
-                        float gainSight = GetGainSightModifier(enemyDist);
-
-                        float dazzlemodifier = 1f;
-
-                        if (enemyDist < MaxDazzleRange)
-                            dazzlemodifier = GetDazzleModifier(person);
-
-                        ApplyDazzle(dazzlemodifier, gainSight);
+                        return;
+                    }
+                    else if ((flashlight.Laser || (usingNVGs && flashlight.IRLaser)) &&
+                        enemyWithLaser(enemy))
+                    {
+                        return;
                     }
                 }
             }
+        }
+
+        private bool enemyWithFlashlight(SAINEnemy enemy)
+        {
+            float dist = enemy.RealDistance;
+            if (dist < 80f && 
+                flashlightVisionCheck(enemy.EnemyIPlayer))
+            {
+                Vector3 botPos = BotOwner.MyHead.position;
+                Vector3 weaponRoot = enemy.EnemyPlayer.WeaponRoot.position;
+                if (!Physics.Raycast(weaponRoot, (botPos - weaponRoot).normalized, (botPos - weaponRoot).magnitude, LayerMaskClass.HighPolyWithTerrainMask))
+                {
+                    float gainSight = 0.66f;
+                    float dazzlemodifier = dist < MaxDazzleRange ? getDazzleModifier(enemy) : 1f;
+
+                    ApplyDazzle(dazzlemodifier, gainSight);
+                }
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
         /// Applies dazzle to the enemy if they are within the Max dazzle range and the raycast between the BotOwner and the enemy is not blocked.
         /// </summary>
-        public void EnemyWithLaser(IPlayer person)
+        private bool enemyWithLaser(SAINEnemy enemy)
         {
-            Vector3 position = BotOwner.MyHead.position;
-            Vector3 weaponRoot = person.WeaponRoot.position;
-            float enemyDist = (position - weaponRoot).magnitude;
-
-            if (enemyDist < 80f)
+            float dist = enemy.RealDistance;
+            if (dist < 100f &&
+                laserVisionCheck(enemy.EnemyIPlayer))
             {
-                if (LaserVisionCheck(person))
+                Vector3 botPos = BotOwner.MyHead.position;
+                Vector3 weaponRoot = enemy.EnemyPlayer.WeaponRoot.position;
+                if (!Physics.Raycast(weaponRoot, (botPos - weaponRoot).normalized, (botPos - weaponRoot).magnitude, LayerMaskClass.HighPolyWithTerrainMask))
                 {
-                    if (!Physics.Raycast(weaponRoot, (position - weaponRoot).normalized, (position - weaponRoot).magnitude, LayerMaskClass.HighPolyWithTerrainMask))
-                    {
-                        float gainSight = GetGainSightModifier(enemyDist);
-
-                        float dazzlemodifier = 1f;
-                        if (enemyDist < MaxDazzleRange)
-                        {
-                            dazzlemodifier = GetDazzleModifier(person);
-                        }
-
-                        ApplyDazzle(dazzlemodifier, gainSight);
-                    }
+                    float gainSight = 0.66f;
+                    float dazzlemodifier = dist < MaxDazzleRange ? getDazzleModifier(enemy) : 1f;
+                    ApplyDazzle(dazzlemodifier, gainSight);
                 }
+                return true;
             }
+            return false;
         }
 
         private static float MaxDazzleRange => SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.MaxDazzleRange;
@@ -139,12 +94,6 @@ namespace SAIN.SAINComponent.Classes.Sense
 
         public void ApplyDazzle(float dazzleModif, float gainSightModif)
         {
-            // If modifier is already applied, don't re-apply it
-            if (Modifiers.Modifiers.IsApplyed)
-            {
-                return;
-            }
-
             Modifiers.Modifiers.PrecicingSpeedCoef = Mathf.Clamp(dazzleModif, 1f, 5f) * Effectiveness;
             Modifiers.Modifiers.AccuratySpeedCoef = Mathf.Clamp(dazzleModif, 1f, 5f) * Effectiveness;
             Modifiers.Modifiers.GainSightCoef = gainSightModif;
@@ -154,74 +103,44 @@ namespace SAIN.SAINComponent.Classes.Sense
             BotOwner.Settings.Current.Apply(Modifiers.Modifiers, 0.1f);
         }
 
-        /// <summary>
-        /// Checks if the enemy is looking at the BotOwner using a flashlight vision check.
-        /// </summary>
-        /// <param value="BotOwner">The BotOwner to check.</param>
-        /// <param value="person">The enemy to check.</param>
-        /// <returns>True if the enemy is looking at the BotOwner, false otherwise.</returns>
-        private bool FlashLightVisionCheck(IPlayer person)
+        private bool flashlightVisionCheck(IPlayer person)
         {
-            Vector3 position = BotOwner.MyHead.position;
-            Vector3 weaponRoot = person.WeaponRoot.position;
-
-            float flashAngle = Mathf.Clamp(0.9770526f, 0.8f, 1f);
-            bool enemylookatme = Vector.IsAngLessNormalized(Vector.NormalizeFastSelf(position - weaponRoot), person.LookDirection, flashAngle);
-
-            return enemylookatme;
+            float flashAngle = 0.9770526f;
+            return enemyLookAtMe(person, flashAngle);
         }
 
-        /// <summary>
-        /// Checks if the enemy is looking at the BotOwner using a laser vision check.
-        /// </summary>
-        /// <param value="bot">The BotOwner to check.</param>
-        /// <param value="person">The enemy to check.</param>
-        /// <returns>True if the enemy is looking at the BotOwner, false otherwise.</returns>
-        private bool LaserVisionCheck(IPlayer person)
+        private bool laserVisionCheck(IPlayer person)
         {
-            Vector3 position = BotOwner.MyHead.position;
-            Vector3 weaponRoot = person.WeaponRoot.position;
-
             float laserAngle = 0.990f;
-            bool enemylookatme = Vector.IsAngLessNormalized(Vector.NormalizeFastSelf(position - weaponRoot), person.LookDirection, laserAngle);
-
-            return enemylookatme;
+            return enemyLookAtMe(person, laserAngle);
         }
 
-        /// <summary>
-        /// Calculates the dazzle modifier for a given BotOwner and ActiveEnemy.
-        /// </summary>
-        /// <param value="___botOwner_0">The BotOwner to calculate the dazzle modifier for.</param>
-        /// <param value="person">The ActiveEnemy Shining the flashlight</param>
-        /// <returns>The calculated dazzle modifier.</returns>
-        private float GetDazzleModifier(IPlayer person)
+        private bool enemyLookAtMe(IPlayer person, float num)
         {
             Vector3 position = BotOwner.MyHead.position;
             Vector3 weaponRoot = person.WeaponRoot.position;
-            float enemyDist = (position - weaponRoot).magnitude;
+            bool enemylookatme = Vector.IsAngLessNormalized(Vector.NormalizeFastSelf(position - weaponRoot), person.LookDirection, num);
+            return enemylookatme;
+        }
 
-            float dazzlemodifier = 1f - enemyDist / MaxDazzleRange;
-            dazzlemodifier = 2 * dazzlemodifier + 1f;
+        private float getDazzleModifier(SAINEnemy enemy)
+        {
+            float enemyDist = enemy.RealDistance;
+            float max = MaxDazzleRange;
+            float min = max / 2f;
 
-            if (BotOwner.NightVision.UsingNow)
+            float num = max - min;
+            float num2 = enemy.RealDistance - num;
+            float ratio = (num2 / num);
+            float result = Mathf.InverseLerp(1f, 2f, ratio);
+
+            if (BotOwner.NightVision.UsingNow && 
+                (enemy.EnemyPlayerComponent.Flashlight.WhiteLight || enemy.EnemyPlayerComponent.Flashlight.Laser))
             {
-                dazzlemodifier *= 1.5f;
+                result *= 1.5f;
             }
 
-            return dazzlemodifier;
-        }
-
-        /// <summary>
-        /// Calculates the gain sight modifier based on the Distance to the enemy.
-        /// </summary>
-        /// <param value="enemyDist">The Distance to the enemy.</param>
-        /// <returns>The gain sight modifier.</returns>
-        private float GetGainSightModifier(float enemyDist)
-        {
-            float gainsightdistance = Mathf.Clamp(enemyDist, 25f, 80f);
-            float gainsightmodifier = gainsightdistance / 80f;
-            float gainsightscaled = gainsightmodifier * 0.25f + 0.75f;
-            return gainsightscaled;
+            return result;
         }
     }
 }

@@ -2,7 +2,9 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.Visual;
+using HarmonyLib;
 using SAIN.Components.PlayerComponentSpace;
+using SAIN.SAINComponent;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,72 +12,65 @@ using UnityEngine;
 
 namespace SAIN.Components
 {
-    public class FlashLightComponent : MonoBehaviour
+    public class FlashLightClass : PlayerComponentBase
     {
-        private Player Player { get; set; }
-        protected static ManualLogSource Logger { get; private set; }
-
-        private LightDetectionClass _lightDetection;
-
-        private void Awake()
+        public FlashLightClass(PlayerComponent component) : base(component)
         {
-            Player = GetComponent<Player>();
-            Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(FlashLightComponent));
-            _lightDetection = new LightDetectionClass();
+            LightDetection = new LightDetectionClass(component);
         }
 
-        private void Update()
+        public bool UsingLight => Player.AIData?.UsingLight == true;
+        public LightDetectionClass LightDetection { get; private set; }
+
+        public void Update()
         {
-            // Check if the bot is alive before continuing
-            if (Player == null || Player.HealthController.IsAlive == false)
-            {
-                Dispose();
-                return;
-            }
+            clearPoints();
+            createPoints();
+            detectPoints();
+        }
 
-            var gameWorld = Singleton<GameWorld>.Instance;
-
-            if (gameWorld == null || gameWorld.RegisteredPlayers == null)
+        private void clearPoints()
+        {
+            var points = LightDetection.LightPoints;
+            if (points.Count > 0)
             {
-                Dispose();
-                return;
-            }
-
-            if (_nextPointCheckTime < Time.time)
-            {
-                _nextPointCheckTime = Time.time + 0.1f;
-                if (Player.IsAI)
-                {
-                    _lightDetection.DetectAndInvestigateFlashlight(Player);
-                }
-                else if ( WhiteLight || Laser || IRLight || IRLaser )
-                {
-                    bool onlyLaser = !WhiteLight && !IRLight && (Laser || IRLaser);
-                    _lightDetection.CreateDetectionPoints(Player, WhiteLight || Laser, onlyLaser);
-                }
+                points.RemoveAll(x => x.ShallExpire);
             }
         }
 
-        private float _nextPointCheckTime;
-
-        public void Dispose()
+        private void createPoints()
         {
-            try
+            if (!PlayerComponent.IsAI &&
+                _nextPointCreateTime < Time.time && 
+                UsingLight &&
+                ActiveModes.Count > 0)
             {
-                StopAllCoroutines();
-                Destroy(this);
+                _nextPointCreateTime = Time.time + 0.05f;
+                bool onlyLaser = !WhiteLight && !IRLight && (Laser || IRLaser);
+                LightDetection.CreateDetectionPoints(WhiteLight || Laser, onlyLaser);
             }
-            catch { }
         }
 
-        public bool IRLaser { get; private set; }
-        public bool IRLight { get; private set; }
-        public bool Laser { get; private set; }
-        public bool WhiteLight { get; private set; }
-
-        public void CheckDevice(Player player, FieldInfo _tacticalModesField)
+        private void detectPoints()
         {
-            if (Logger == null) Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(FlashLightComponent));
+            if (PlayerComponent.IsAI && 
+                _nextPointCheckTime < Time.time)
+            {
+                _nextPointCheckTime = Time.time + 0.05f;
+                LightDetection.DetectAndInvestigateFlashlight();
+            }
+        }
+
+        public readonly List<DeviceMode> ActiveModes = new List<DeviceMode>();
+
+        public bool IRLaser => ActiveModes.Contains(DeviceMode.IRLaser);
+        public bool IRLight => ActiveModes.Contains(DeviceMode.IRLight);
+        public bool Laser => ActiveModes.Contains(DeviceMode.VisibleLaser);
+        public bool WhiteLight => ActiveModes.Contains(DeviceMode.WhiteLight);
+
+        public void CheckDevice()
+        {
+            Player player = Player;
 
             if (player == null) return;
 
@@ -102,41 +97,51 @@ namespace SAIN.Components
                 return;
             }
 
-            WhiteLight = false;
-            Laser = false;
-            IRLight = false;
-            IRLaser = false;
+            bool WhiteLight = false;
+            bool Laser = false;
+            bool IRLight = false;
+            bool IRLaser = false;
+
+            ActiveModes.Clear();
+
             // Loop through all of the tacticalComboVisualControllers, then its modes, then that modes children, and look for a light
             foreach (TacticalComboVisualController tacticalComboVisualController in tacticalComboVisualControllers)
             {
                 List<Transform> tacticalModes = _tacticalModesField.GetValue(tacticalComboVisualController) as List<Transform>;
 
-                if (CheckWhiteLight(tacticalModes))
+                if (!WhiteLight && 
+                    CheckWhiteLight(tacticalModes))
                 {
-                    if (DebugFlash) Logger.LogDebug("Found Light!");
+                    if (_debugMode) Logger.LogDebug("Found Light!");
                     WhiteLight = true;
+                    ActiveModes.Add(DeviceMode.WhiteLight);
                 }
 
-                if (CheckVisibleLaser(tacticalModes))
+                if (!Laser && 
+                    CheckVisibleLaser(tacticalModes))
                 {
-                    if (DebugFlash) Logger.LogDebug("Found Visible Laser!");
+                    if (_debugMode) Logger.LogDebug("Found Visible Laser!");
                     Laser = true;
+                    ActiveModes.Add(DeviceMode.VisibleLaser);
                 }
 
-                if (CheckIRLight(tacticalModes))
+                if (!IRLight && 
+                    CheckIRLight(tacticalModes))
                 {
-                    if (DebugFlash) Logger.LogDebug("Found IR Light!");
+                    if (_debugMode) Logger.LogDebug("Found IR Light!");
                     IRLight = true;
+                    ActiveModes.Add(DeviceMode.IRLight);
                 }
 
-                if (CheckIRLaser(tacticalModes))
+                if (!IRLaser && 
+                    CheckIRLaser(tacticalModes))
                 {
-                    if (DebugFlash) Logger.LogDebug("Found IR Laser!");
+                    if (_debugMode) Logger.LogDebug("Found IR Laser!");
                     IRLaser = true;
+                    ActiveModes.Add(DeviceMode.IRLaser);
                 }
             }
         }
-        static bool DebugFlash => SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.DebugFlash;
 
         private bool CheckVisibleLaser(List<Transform> tacticalModes)
         {
@@ -209,5 +214,16 @@ namespace SAIN.Components
             }
             return false;
         }
+
+        private float _nextPointCheckTime;
+        private float _nextPointCreateTime;
+        static bool _debugMode => SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.DebugFlash;
+
+        static FlashLightClass()
+        {
+            _tacticalModesField = AccessTools.Field(typeof(TacticalComboVisualController), "list_0");
+        }
+
+        private static readonly FieldInfo _tacticalModesField;
     }
 }

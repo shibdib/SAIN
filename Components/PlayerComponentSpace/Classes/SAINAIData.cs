@@ -1,14 +1,47 @@
 ﻿using EFT.EnvironmentEffect;
+using SAIN.Components.PlayerComponentSpace.Classes.Equipment;
+using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes.Info;
 
-namespace SAIN.Components.PlayerComponentSpace
+namespace SAIN.Components.PlayerComponentSpace.Classes
 {
-    public class SAINAIData
+    public class SAINAIData : PlayerComponentBase
     {
-        public void updateEnvironment(IndoorTrigger trigger)
+        public AIGearModifierClass AIGearModifier { get; private set; }
+
+        public PlayerLocationClass PlayerLocation { get; private set; }
+
+        public SAINAIData(GearInfo gearInfo, PlayerComponent component) : base(component)
         {
-            InBunker = trigger?.IsBunker == true;
+            PlayerLocation = new PlayerLocationClass(this);
+            AIGearModifier = new AIGearModifierClass(this);
         }
 
-        public bool InBunker { get; set; }
+        public class PlayerLocationClass : AIDataBase
+        {
+            public float BunkerDepth { get; private set; }
+            public bool InBunker { get; private set; }
+
+            public PlayerLocationClass(SAINAIData aiData) : base(aiData)
+            {
+            }
+
+            public void updateEnvironment(IndoorTrigger trigger)
+            {
+                InBunker = trigger?.IsBunker == true;
+                BunkerDepth = InBunker ? trigger.BunkerDepth : 0f;
+            }
+        }
+    }
+
+    public abstract class AIDataBase
+    {
+        public AIDataBase(SAINAIData aidata)
+        {
+            AIData = aidata;
+        }
+
+        protected readonly SAINAIData AIData;
+        protected GearInfo GearInfo => AIData.PlayerComponent.Equipment.GearInfo;
     }
 }

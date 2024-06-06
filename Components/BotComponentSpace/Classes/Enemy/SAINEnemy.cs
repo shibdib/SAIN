@@ -38,8 +38,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public EnemyAim EnemyAim { get; private set; }
         public PlayerComponent EnemyPlayerComponent { get; private set; }
 
-        public SAINPersonClass EnemyPerson => EnemyPlayerComponent.Person;
-        public TransformClass EnemyTransform => EnemyPlayerComponent.Transform;
+        public PersonClass EnemyPerson => EnemyPlayerComponent.Person;
+        public PersonTransformClass EnemyTransform => EnemyPlayerComponent.Transform;
         public NavMeshPath PathToEnemy => Path.PathToEnemy;
 
         public SAINEnemy(BotComponent bot, PlayerComponent playerComponent, EnemyInfo enemyInfo) : base(bot)
@@ -105,6 +105,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return true;
             }
         }
+
+        public float NextCheckFlashLightTime;
 
         public bool ActiveThreat
         {
@@ -275,7 +277,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public Vector3 EnemyHeadPosition => EnemyTransform.HeadPosition;
 
-        public Vector3 EnemyChestPosition => EnemyTransform.CenterPosition;
+        public Vector3 EnemyChestPosition => EnemyTransform.BodyPosition;
 
         public bool InLineOfSight => Vision.InLineOfSight;
 

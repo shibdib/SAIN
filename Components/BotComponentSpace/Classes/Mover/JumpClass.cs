@@ -89,7 +89,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool CanJumpOffLedge(Vector3 direction, out Vector3 result)
         {
-            Vector3 start = Bot.Transform.CenterPosition;
+            Vector3 start = Bot.Transform.BodyPosition;
             var Mask = LayerMaskClass.HighPolyCollider;
             var Ray = new Ray(start, direction);
             result = Vector3.zero;

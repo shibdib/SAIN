@@ -11,12 +11,9 @@ namespace SAIN.SAINComponent.Classes.Info
         public WeaponInfo(Weapon weapon)
         {
             Weapon = weapon;
-            WeaponClass = EnumValues.ParseWeaponClass(weapon.Template.weapClass);
+            WeaponClass = TryGetWeaponClass(weapon);
+            AmmoCaliber = TryGetAmmoCaliber(weapon);
         }
-
-        public Weapon Weapon { get; private set; }
-
-        private float _nextUpdateTime;
 
         public void Update()
         {
@@ -27,6 +24,66 @@ namespace SAIN.SAINComponent.Classes.Info
             _nextUpdateTime = Time.time + 10f;
             checkAllMods();
         }
+
+        public Weapon Weapon { get; private set; }
+        public float Durability
+        {
+            get
+            {
+                return Weapon.Repairable.Durability / (float)Weapon.Repairable.TemplateDurability;
+            }
+        }
+        public IWeaponClass WeaponClass { get; private set; }
+        public ICaliber AmmoCaliber { get; private set; }
+        public float CalculatedAudibleRange { get; private set; }
+        public AISoundType AISoundType => HasSuppressor ? AISoundType.silencedGun : AISoundType.gun;
+        public float BaseAudibleRange
+        {
+            get
+            {
+                if (SAINPlugin.LoadedPreset?.GlobalSettings?.Hearing?.HearingDistances.TryGetValue(AmmoCaliber, out var range) == true)
+                {
+                    return range;
+                }
+                Logger.LogError($"Cannot find base audible range for Caliber: [{AmmoCaliber}]");
+                return 150f;
+            }
+        }
+        public float MuzzleLoudness { get; private set; }
+        public float MuzzleLoudnessRealism { get; private set; }
+        public float SuppressorModifier
+        {
+            get
+            {
+                float supmod = 1f;
+                bool suppressed = HasSuppressor;
+
+                if (suppressed && Subsonic)
+                {
+                    supmod *= SAINPlugin.LoadedPreset.GlobalSettings.Hearing.SubsonicModifier;
+                }
+                else if (suppressed)
+                {
+                    supmod *= SAINPlugin.LoadedPreset.GlobalSettings.Hearing.SuppressorModifier;
+                }
+                return supmod;
+            }
+        }
+        public float SpeedFactor => 2f - Weapon.SpeedFactor;
+        public bool Subsonic
+        {
+            get
+            {
+                if (Weapon == null)
+                {
+                    return false;
+                }
+                return Weapon.CurrentAmmoTemplate.InitialSpeed * SpeedFactor < SuperSonicSpeed;
+            }
+        }
+        public bool HasRedDot { get; private set; }
+        public bool HasOptic { get; private set; }
+        public bool HasSuppressor { get; private set; }
 
         private void checkAllMods()
         {
@@ -96,14 +153,6 @@ namespace SAIN.SAINComponent.Classes.Info
             }
         }
 
-        public float Durability
-        {
-            get
-            {
-                return Weapon.Repairable.Durability / (float)Weapon.Repairable.TemplateDurability;
-            }
-        }
-
         private static bool IsModSuppressor(Mod mod, out Item suppressor)
         {
             suppressor = null;
@@ -117,70 +166,6 @@ namespace SAIN.SAINComponent.Classes.Info
             }
             return suppressor != null;
         }
-
-        public readonly IWeaponClass WeaponClass;
-
-        public readonly ICaliber AmmoCaliber;
-
-        public float CalculatedAudibleRange { get; private set; }
-
-        public AISoundType AISoundType => HasSuppressor ? AISoundType.silencedGun : AISoundType.gun;
-
-        public float BaseAudibleRange
-        {
-            get
-            {
-                if (SAINPlugin.LoadedPreset?.GlobalSettings?.Hearing?.HearingDistances.TryGetValue(AmmoCaliber, out var range) == true)
-                {
-                    return range;
-                }
-                Logger.LogError($"Cannot find base audible range for Caliber: [{AmmoCaliber}]");
-                return 150f;
-            }
-        }
-
-        public float MuzzleLoudness { get; private set; }
-
-        public float MuzzleLoudnessRealism { get; private set; }
-
-        public float SuppressorModifier
-        {
-            get
-            {
-                float supmod = 1f;
-                bool suppressed = HasSuppressor;
-
-                if (suppressed && Subsonic)
-                {
-                    supmod *= SAINPlugin.LoadedPreset.GlobalSettings.Hearing.SubsonicModifier;
-                }
-                else if (suppressed)
-                {
-                    supmod *= SAINPlugin.LoadedPreset.GlobalSettings.Hearing.SuppressorModifier;
-                }
-                return supmod;
-            }
-        }
-
-        public float SpeedFactor => 2f - Weapon.SpeedFactor;
-
-        private const float SuperSonicSpeed = 343.2f;
-
-        public bool Subsonic
-        {
-            get
-            {
-                if (Weapon == null)
-                {
-                    return false;
-                }
-                return Weapon.CurrentAmmoTemplate.InitialSpeed * SpeedFactor < SuperSonicSpeed;
-            }
-        }
-
-        public bool HasRedDot { get; private set; }
-        public bool HasOptic { get; private set; }
-        public bool HasSuppressor { get; private set; }
 
         private void CheckModForSuppresorAndSights(Mod mod)
         {
@@ -256,6 +241,49 @@ namespace SAIN.SAINComponent.Classes.Info
             return false;
         }
 
+        private static IWeaponClass TryGetWeaponClass(Weapon weapon)
+        {
+            IWeaponClass WeaponClass = EnumValues.TryParse<IWeaponClass>(weapon.Template.weapClass);
+            if (WeaponClass == default)
+            {
+                WeaponClass = EnumValues.TryParse<IWeaponClass>(weapon.WeapClass);
+            }
+            return WeaponClass;
+        }
+
+        private static ICaliber TryGetAmmoCaliber(Weapon weapon)
+        {
+            ICaliber caliber = EnumValues.TryParse<ICaliber>(weapon.Template.ammoCaliber);
+            if (caliber == default)
+            {
+                caliber = EnumValues.TryParse<ICaliber>(weapon.AmmoCaliber);
+            }
+            return caliber;
+        }
+
+        private void Log()
+        {
+            if (SAINPlugin.DebugMode)
+            {
+                Logger.LogWarning(
+                    $"Found Weapon Info: " +
+                    $"Weapon: [{Weapon.ShortName}] " +
+                    $"Weapon Class: [{WeaponClass}] " +
+                    $"Ammo Caliber: [{AmmoCaliber}] " +
+                    $"Calculated Audible Range: [{CalculatedAudibleRange}] " +
+                    $"Base Audible Range: [{BaseAudibleRange}] " +
+                    $"Muzzle Loudness: [{MuzzleLoudness}] " +
+                    $"Muzzle Loudness Realism: [{MuzzleLoudnessRealism}] " +
+                    $"Speed Factor: [{SpeedFactor}] " +
+                    $"Subsonic: [{Subsonic}] " +
+                    $"Has Red Dot? [{HasRedDot}] " +
+                    $"Has Optic? [{HasOptic}] " +
+                    $"Has Suppressor? [{HasSuppressor}]");
+            }
+        }
+
+        private float _nextUpdateTime;
+        private const float SuperSonicSpeed = 343.2f;
         private static readonly string SuppressorTypeId = "550aa4cd4bdc2dd8348b456c";
         private static readonly string CollimatorTypeId = "55818ad54bdc2ddc698b4569";
         private static readonly string CompactCollimatorTypeId = "55818acf4bdc2dde698b456b";

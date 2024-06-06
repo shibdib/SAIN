@@ -2,6 +2,7 @@
 using EFT.InventoryLogic;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Preset.GlobalSettings;
+using SAIN.SAINComponent.Classes.Info;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Enemy
@@ -77,11 +78,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return 1f;
             }
 
-            float seenSpeedDiff = maxDist - minDist;
-            float distanceDiff = distance - minDist;
-            float scaled = distanceDiff / seenSpeedDiff;
-            float result = Mathf.Lerp(minSpeedCoef, 1f, scaled);
-            //Logger.LogInfo($"{check} Distance from Position: {distance} Result: {result}");
+            float num = maxDist - minDist;
+            float num2 = distance - minDist;
+            float ratio = num2 / num;
+            float result = Mathf.Lerp(minSpeedCoef, 1f, ratio);
+            Logger.LogInfo($"{check} Distance from Position: {distance} Result: {result}");
             return result;
         }
 
@@ -98,43 +99,22 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float calcGearMod()
         {
-            getGear();
-
-            if (_gearInfo != null)
-                return _gearInfo.GetStealthModifier(Enemy.RealDistance);
-
-            return 1f;
-        }
-
-        private void getGear()
-        {
-            if (_gearInfo == null)
-                _gearInfo = SAINGearInfoHandler.GetGearInfo(EnemyPlayer);
+            return Enemy.EnemyPlayerComponent.AIData.AIGearModifier.StealthModifier(Enemy.RealDistance);
         }
 
         private float calcFlareMod()
         {
-            getGear();
-
             var aiData = EnemyPlayer.AIData;
-            var handsController = EnemyPlayer.HandsController;
-            if (aiData != null && handsController != null)
-            {
-                bool flare = aiData.GetFlare;
-                bool usingSuppressor =
-                    handsController.Item is Weapon weapon &&
-                    _gearInfo?.GetWeaponInfo(weapon)?.HasSuppressor == true;
+            bool flare = aiData?.GetFlare == true;
+            bool usingSuppressor = Enemy.EnemyPlayerComponent?.Equipment.CurrentWeapon?.HasSuppressor == true;
 
-                // Only apply vision speed debuff from weather if their enemy has not shot an unsuppressed weapon
-                if (!flare || usingSuppressor)
-                {
-                    return SAINPlugin.BotController.WeatherVision.InverseWeatherModifier;
-                }
+            // Only apply vision speed debuff from weather if their enemy has not shot an unsuppressed weapon
+            if (!flare || usingSuppressor)
+            {
+                return SAINPlugin.BotController.WeatherVision.InverseWeatherModifier;
             }
             return 1f;
         }
-
-        private GearInfoContainer _gearInfo;
 
         private float GetGainSightModifier()
         {
@@ -153,12 +133,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             float result = 1f * partMod * gearMod * flareMod * moveMod * elevMod * posFlareMod * thirdPartyMod * angleMod * notLookMod;
 
-            // if (EnemyPlayer.IsYourPlayer &&
-            //     _nextLogTime < Time.time)
-            // {
-            //     _nextLogTime = Time.time + 0.5f;
-            //     Logger.LogWarning($"Result: [{result}] : partMod {partMod} : gearMod {gearMod} : flareMod {flareMod} : moveMod {moveMod} : elevMod {elevMod} : posFlareMod {posFlareMod} : thirdPartyMod {thirdPartyMod} : angleMod {angleMod} : notLookMod {notLookMod} ");
-            // }
+            if (EnemyPlayer.IsYourPlayer && result != 1f)
+            {
+                Logger.LogWarning($"GainSight Time Result: [{result}] : partMod {partMod} : gearMod {gearMod} : flareMod {flareMod} : moveMod {moveMod} : elevMod {elevMod} : posFlareMod {posFlareMod} : thirdPartyMod {thirdPartyMod} : angleMod {angleMod} : notLookMod {notLookMod} ");
+            }
 
             return result;
         }
@@ -169,13 +147,58 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (!Enemy.IsAI)
             {
-                float partRatio = SAINVisionClass.GetRatioPartsVisible(EnemyInfo, out int visibleCount);
-                float min = 0.6f;
-                float max = 1.1f;
-                float ratio = Mathf.Lerp(min, max, partRatio);
-                return ratio;
+                float max = 2f;
+                float partRatio = GetRatioPartsVisible(EnemyInfo, out int visibleCount);
+                if (visibleCount < 1)
+                {
+                    if (Enemy.EnemyPlayer.IsYourPlayer)
+                    {
+                        Logger.LogInfo($"part mod: result: {max} : part ratio {partRatio} : vis count: {visibleCount}");
+                    }
+                    return max;
+                }
+                float min = 0.9f;
+                if (partRatio >= 1f)
+                {
+                    if (Enemy.EnemyPlayer.IsYourPlayer)
+                    {
+                        Logger.LogInfo($"part mod: result: {min} : part ratio {partRatio} : vis count: {visibleCount}");
+                    }
+                    return min;
+                }
+                float result = Mathf.Lerp(max, min, partRatio);
+                if (Enemy.EnemyPlayer.IsYourPlayer)
+                {
+                    Logger.LogInfo($"part mod: result: {result} : part ratio {partRatio} : vis count: {visibleCount}");
+                }
+                return result;
             }
             return 1f;
+        }
+
+        private static float GetRatioPartsVisible(EnemyInfo enemyInfo, out int visibleCount)
+        {
+            var enemyParts = enemyInfo.AllActiveParts;
+            int partCount = 0;
+            visibleCount = 0;
+
+            var bodyPartData = enemyInfo.BodyData().Value;
+            if (bodyPartData.IsVisible || bodyPartData.LastVisibilityCastSucceed)
+            {
+                visibleCount++;
+            }
+            partCount++;
+
+            foreach (var part in enemyParts)
+            {
+                if (part.Value.LastVisibilityCastSucceed || part.Value.IsVisible)
+                {
+                    visibleCount++;
+                }
+                partCount++;
+            }
+
+            return (float)visibleCount / (float)partCount;
         }
 
         private float calcMoveModifier()
@@ -183,7 +206,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (EnemyPlayer.IsSprintEnabled)
             {
                 LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
-                return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Mathf.InverseLerp(0, 5f, EnemyPlayer.Velocity.magnitude)); // 5f is the observed max sprinting speed with gameplays (with Realism, which gives faster sprinting)
+                return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Enemy.Vision.EnemyVelocity);
             }
             return 1f;
         }
@@ -235,12 +258,15 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
                         float minAngle = 10f;
                         float maxAngle = Enemy.Vision.MaxVisionAngle;
-                        if (angle > 10 && angle < maxAngle)
+                        if (angle > minAngle && 
+                            angle < maxAngle)
                         {
-                            float num = angle - minAngle;
-                            float num2 = maxAngle - minAngle;
-                            float ratio = 1f - num2 / num;
-                            float reductionMod = Mathf.Lerp(0.65f, 1f, ratio);
+                            float num = maxAngle - minAngle;
+                            float num2 = angle - minAngle;
+
+                            float maxRatio = 1.5f;
+                            float ratio = num2 / num;
+                            float reductionMod = Mathf.Lerp(1f, maxRatio, ratio);
                             return reductionMod;
                         }
                     }
@@ -251,7 +277,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private static bool _reduceVisionSpeedOnPeriphVis = true;
         private static float _periphVisionStart = 30f;
-        private static float _maxPeriphVisionSpeedReduction = 0.5f;
+        private static float _maxPeriphVisionSpeedReduction = 3f;
 
         private float calcAngleMod()
         {
@@ -260,26 +286,24 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return 1f;
             }
 
-            if (!BotOwner.LookSensor.IsPointInVisibleSector(Enemy.EnemyPosition))
+            float angle = Enemy.Vision.AngleToEnemy;
+
+            float minAngle = _periphVisionStart;
+            if (angle < minAngle)
             {
                 return 1f;
             }
-
-            Vector3 myLookDir = BotOwner.LookDirection;
-            myLookDir.y = 0f;
-            Vector3 enemyDir = Enemy.EnemyDirection;
-            enemyDir.y = 0f;
-            float angle = Vector3.Angle(myLookDir, enemyDir);
-
-            if (angle < _periphVisionStart || angle > 90)
+            float maxAngle = Enemy.Vision.MaxVisionAngle;
+            float maxRatio = _maxPeriphVisionSpeedReduction;
+            if (angle > maxAngle)
             {
-                return 1f;
+                return maxRatio;
             }
 
-            float angleDiff = Enemy.Vision.MaxVisionAngle - _periphVisionStart;
-            float enemyAngleDiff = angle - _periphVisionStart;
-            float modifier = 1f - enemyAngleDiff / angleDiff;
-            return Mathf.Lerp(_maxPeriphVisionSpeedReduction, 1f, modifier);
+            float angleDiff = maxAngle - minAngle;
+            float enemyAngleDiff = angle - minAngle;
+            float ratio = enemyAngleDiff / angleDiff;
+            return Mathf.Lerp(1f, maxRatio, ratio);
         }
     }
 }

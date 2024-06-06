@@ -51,9 +51,9 @@ namespace SAIN.Preset.GlobalSettings
         [Description(
             "Bots will see players this much slower when the enemy's altitude is higher than the bot when the vision angle difference is equal or greater than HighElevationMaxAngle. " +
             "Higher is slower speed, so 1.2 would result in bots taking 20% longer to spot an enemy")]
-        [Default(1.2f)]
+        [Default(1.5f)]
         [MinMax(1f, 5f, 100f)]
-        public float HighElevationVisionModifier = 1.2f;
+        public float HighElevationVisionModifier = 1.5f;
 
         [Name("Low Elevation Angle Range")]
         [Description(
@@ -67,9 +67,9 @@ namespace SAIN.Preset.GlobalSettings
         [Description(
             "Bots will see sprinting players this much slower when the enemy's altitude is lower than the bot when the vision angle difference is equal or greater than LowElevationMaxAngle. " +
             "Higher is slower speed, so 0.85 would result in bots taking 15% shorter to spot an enemy")]
-        [Default(0.85f)]
+        [Default(0.75f)]
         [MinMax(0.01f, 1f, 100f)]
-        public float LowElevationVisionModifier = 0.85f;
+        public float LowElevationVisionModifier = 0.75f;
 
         [Name("Bot Reaction and Accuracy Changes Toggle - Experimental")]
         [Section("Unseen Bot")]

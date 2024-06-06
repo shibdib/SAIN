@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SAIN.Components.PlayerComponentSpace
 {
-    public class SAINPersonClass
+    public class PersonClass
     {
         public bool IsActive
         {
@@ -73,22 +73,22 @@ namespace SAIN.Components.PlayerComponentSpace
         public IPlayer IPlayer { get; private set; }
         public Player Player { get; private set; }
 
-        public SAINPersonClass(IPlayer iPlayer)
+        public PersonClass(IPlayer iPlayer)
         {
             IPlayer = iPlayer;
             Player = GameWorldInfo.GetAlivePlayer(iPlayer);
             Name = Player?.name;
-            Transform = new TransformClass(this);
+            Transform = new PersonTransformClass(this);
             ProfileId = iPlayer.Profile?.ProfileId;
             Nickname = iPlayer.Profile?.Nickname;
         }
 
-        public SAINPersonClass(IPlayer iPlayer, Player player)
+        public PersonClass(IPlayer iPlayer, Player player)
         {
             Player = player;
             IPlayer = iPlayer;
             Name = player?.name;
-            Transform = new TransformClass(this);
+            Transform = new PersonTransformClass(this);
             ProfileId = player.ProfileId;
             Nickname = player.Profile?.Nickname;
         }
@@ -110,7 +110,7 @@ namespace SAIN.Components.PlayerComponentSpace
         public bool IsSAINBot { get; private set; } = false;
         public BotOwner BotOwner { get; private set; }
         public BotComponent BotComponent { get; private set; }
-        public TransformClass Transform { get; private set; }
+        public PersonTransformClass Transform { get; private set; }
         public string ProfileId { get; private set; }
         public string Nickname { get; private set; }
         public string Name { get; private set; }

@@ -698,7 +698,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                             Vector3 lookDir = player.LookDirection;
                             Vector3 playerHeadPos = player.MainParts[BodyPartType.head].Position;
 
-                            Vector3 botChestPos = Bot.Person.Transform.CenterPosition;
+                            Vector3 botChestPos = Bot.Person.Transform.BodyPosition;
                             Vector3 botDir = botChestPos - playerHeadPos;
 
                             if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SAIN.Components.PlayerComponentSpace
 {
-    public class TransformClass
+    public class PersonTransformClass
     {
         //public bool TransformNull => Person == null || Person.PlayerNull || _transform == null || Person.Player == null || Person.Player.gameObject == null;
 
@@ -74,9 +74,9 @@ namespace SAIN.Components.PlayerComponentSpace
         }
 
         public Vector3 HeadPosition => _headPart.Position;
-        public Vector3 CenterPosition => _bodyPart.Position;
+        public Vector3 BodyPosition => _bodyPart.Position;
 
-        public TransformClass(SAINPersonClass person)
+        public PersonTransformClass(PersonClass person)
         {
             Person = person;
             _headPart = person.IPlayer.MainParts[BodyPartType.head];
@@ -84,7 +84,7 @@ namespace SAIN.Components.PlayerComponentSpace
             _transform = person.IPlayer.Transform;
         }
 
-        private readonly SAINPersonClass Person;
+        private readonly PersonClass Person;
         private readonly BifacialTransform _transform;
         private EnemyPart _headPart;
         private EnemyPart _bodyPart;

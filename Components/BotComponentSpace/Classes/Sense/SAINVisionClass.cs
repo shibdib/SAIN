@@ -29,39 +29,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            var Enemy = Bot.Enemy;
-            if (Enemy?.EnemyIPlayer != null && Enemy?.IsVisible == true)
-            {
-                FlashLightDazzle.CheckIfDazzleApplied(Enemy);
-            }
-        }
-
-        public static float GetVisibilityModifier(Player player)
-        {
-            if (player != null)
-            {
-                var pose = player.Pose;
-                float speed = player.Velocity.magnitude / 5f; // 5f is the observed max sprinting speed with gameplays (with Realism, which gives faster sprinting)
-                if (player.MovementContext.IsSprintEnabled)
-                {
-                    Preset.GlobalSettings.LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
-                    float velocityFactor = Mathf.InverseLerp(0, 5f, player.Velocity.magnitude);
-                    return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, velocityFactor);
-                }
-
-                switch (pose)
-                {
-                    case EPlayerPose.Duck:
-                        return 0.85f;
-
-                    case EPlayerPose.Prone:
-                        return 0.6f;
-
-                    default:
-                        break;
-                }
-            }
-            return 1f;
+            FlashLightDazzle.CheckIfDazzleApplied(Bot.Enemy);
         }
 
         public static float GetRatioPartsVisible(EnemyInfo enemyInfo, out int visibleCount)

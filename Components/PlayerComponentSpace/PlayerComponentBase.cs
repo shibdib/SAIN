@@ -2,6 +2,7 @@
 using EFT;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Preset.GlobalSettings;
+using UnityEngine;
 
 namespace SAIN.SAINComponent
 {
@@ -13,6 +14,10 @@ namespace SAIN.SAINComponent
         }
 
         public PlayerComponent PlayerComponent { get; private set; }
+
+        public Vector3 Position => PlayerComponent.Position;
+        public Vector3 LookDirection => PlayerComponent.LookDirection;
+        public PersonTransformClass Transform => PlayerComponent.Transform;
         public Player Player => PlayerComponent.Player;
         public IPlayer IPlayer => PlayerComponent.IPlayer;
     }

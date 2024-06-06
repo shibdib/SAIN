@@ -35,10 +35,10 @@ namespace SAIN.SAINComponent
         public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
         public BotOwner BotOwner => PlayerComponent.BotOwner;
         public Player Player => PlayerComponent.Player;
-        public SAINPersonClass Person => PlayerComponent.Person;
+        public PersonClass Person => PlayerComponent.Person;
         public SAINEnemy Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;
         public SAINEnemy LastEnemy => HasLastEnemy ? EnemyController.LastEnemy : null;
-        public TransformClass Transform => Person.Transform;
+        public PersonTransformClass Transform => Person.Transform;
 
         public SAINMedical Medical { get; private set; }
         public SAINActivationClass SAINActivation { get; private set; }
@@ -61,7 +61,7 @@ namespace SAIN.SAINComponent
         public SAINVisionClass Vision { get; private set; }
         public SAINMoverClass Mover { get; private set; }
         public SAINBotUnstuckClass BotStuck { get; private set; }
-        public FlashLightComponent FlashLight { get; private set; }
+        public FlashLightClass FlashLight => PlayerComponent.Flashlight;
         public SAINHearingSensorClass Hearing { get; private set; }
         public SAINBotTalkClass Talk { get; private set; }
         public SAINDecisionClass Decision { get; private set; }
@@ -108,7 +108,6 @@ namespace SAIN.SAINComponent
             {
                 NoBushESP = this.gameObject.AddComponent<SAINNoBushESP>();
                 NoBushESP.Init(playerComponent.BotOwner, this);
-                FlashLight = this.gameObject.AddComponent<FlashLightComponent>();
             }
             catch (Exception ex)
             {
@@ -215,7 +214,7 @@ namespace SAIN.SAINComponent
             return true;
         }
 
-        private bool verifyBrain(SAINPersonClass person)
+        private bool verifyBrain(PersonClass person)
         {
             if (Info.Profile.IsPMC &&
                 person.BotOwner.Brain.BaseBrain.ShortName() != Brain.PMC.ToString())
@@ -385,7 +384,6 @@ namespace SAIN.SAINComponent
             try
             {
                 GameObject.Destroy(NoBushESP);
-                GameObject.Destroy(FlashLight);
             }
             catch (Exception ex)
             {

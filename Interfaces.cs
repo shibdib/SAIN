@@ -18,7 +18,7 @@ namespace SAIN
     {
         bool Init(PlayerComponent playerComponent);
         PlayerComponent PlayerComponent { get; }
-        SAINPersonClass Person { get; }
+        PersonClass Person { get; }
         BotOwner BotOwner { get; }
         Player Player { get; }
     }

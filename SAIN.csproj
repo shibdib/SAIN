@@ -243,6 +243,10 @@
     <None Include="Plugin\VersionChecker\setbuild.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\PlayerComponentSpace\Classes\DeviceMode.cs" />
+    <Compile Include="Components\PlayerComponentSpace\Classes\Equipment\AIGearModifierClass.cs" />
+    <Compile Include="Components\PlayerComponentSpace\Classes\FlashLightPoint.cs" />
+    <Compile Include="Components\PlayerComponentSpace\ShootPlayerClass.cs" />
     <Compile Include="Preset\Editor\Attributes\AttributesGUI.cs" />
     <Compile Include="Preset\Editor\Attributes\AttributesInfoClass.cs" />
     <Compile Include="Preset\Editor\Attributes\GUIEntryConfig.cs" />
@@ -260,13 +264,11 @@
     <Compile Include="Components\GameWorldSpace\SubComponents\BotController\Classes\SquadPersonalityManager.cs" />
     <Compile Include="Components\GameWorldSpace\SubComponents\BotController\Classes\SquadPersonalitySettings.cs" />
     <Compile Include="Components\GameWorldSpace\SubComponents\Extract\ExtractFinderComponent.cs" />
-    <Compile Include="Components\PlayerComponentSpace\Classes\BaseMainPlayer.cs" />
-    <Compile Include="Components\PlayerComponentSpace\Classes\PlayerComponentBase.cs" />
+    <Compile Include="Components\PlayerComponentSpace\PlayerComponentBase.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\SAINCamoClass.cs" />
-    <Compile Include="Components\PlayerComponentSpace\SubComponents\SAINMainPlayerComponent.cs" />
     <Compile Include="Components\GameWorldSpace\Classes\PlayerTracker.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\SAINAIData.cs" />
-    <Compile Include="Components\PlayerComponentSpace\SubComponents\TimedVector3.cs" />
+    <Compile Include="Components\PlayerComponentSpace\Classes\TimedVector3.cs" />
     <Compile Include="Components\GameWorldSpace\SAINGameworldComponent.cs" />
     <Compile Include="Components\PlayerComponentSpace\PlayerComponent.cs" />
     <Compile Include="Preset\Editor\Category.cs" />
@@ -373,8 +375,8 @@
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\BotLightController.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ManualShootClass.cs" />
     <Compile Include="Components\BotComponentSpace\ESAINLayer.cs" />
-    <Compile Include="Components\PlayerComponentSpace\Classes\SAINPersonClass.cs" />
-    <Compile Include="Components\PlayerComponentSpace\Classes\TransformClass.cs" />
+    <Compile Include="Components\PlayerComponentSpace\PersonClass.cs" />
+    <Compile Include="Components\PlayerComponentSpace\PersonTransformClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\SAINMemoryClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\ProfileClass.cs" />
     <Compile Include="Preset\BotSettings\SAINSettings\SAINSettingsGroupClass.cs" />
@@ -497,10 +499,10 @@
     <Compile Include="Patches\Shoot\RateofFirePatch.cs" />
     <Compile Include="Patches\Shoot\RecoilPatch.cs" />
     <Compile Include="Patches\TalkPatches.cs" />
-    <Compile Include="Components\PlayerComponentSpace\SubComponents\FlashLightComponent.cs" />
+    <Compile Include="Components\PlayerComponentSpace\Classes\FlashLightClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\SAINSelfActionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\WeaponInfoClass.cs" />
-    <Compile Include="Components\PlayerComponentSpace\SubComponents\LightDetectionClass.cs" />
+    <Compile Include="Components\PlayerComponentSpace\Classes\LightDetectionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Talk\SAINBotTalkClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Talk\EnemyTalkClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Talk\EnemyTalkObject.cs" />
@@ -537,7 +539,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Components\PlayerComponentSpace\SubComponents\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />

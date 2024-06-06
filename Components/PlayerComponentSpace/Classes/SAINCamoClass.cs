@@ -1,21 +1,22 @@
-﻿using EFT.EnvironmentEffect;
+﻿using EFT;
+using EFT.EnvironmentEffect;
 using SAIN.Components.BotController;
-using SAIN.Components.MainPlayer;
+using SAIN.Components.PlayerComponentSpace;
 using SAIN.Editor;
 using SAIN.Helpers;
+using SAIN.SAINComponent;
 using UnityEngine;
 
 namespace SAIN.Components
 {
-    public class SAINCamoClass : BaseMainPlayer, iMainPlayer
+    public class SAINCamoClass : PlayerComponentBase
     {
-        public SAINCamoClass(SAINMainPlayerComponent playerComp) : base(playerComp)
+        public SAINCamoClass(PlayerComponent playerComp) : base(playerComp)
         {
         }
 
         public void Start()
         {
-            MainPlayerCollider = MainPlayer.GetComponent<Collider>();
             BushLayer = LayerMask.NameToLayer("Foliage");
             GrassLayer = LayerMask.NameToLayer("Grass");
         }
@@ -25,10 +26,12 @@ namespace SAIN.Components
 
         public void Update()
         {
-            if (MainPlayer != null)
+            Player player = Player;
+            if (player != null)
             {
                 if (FreqencyTimer < Time.time)
                 {
+                    Vector3 position = Position;
                     var botController = SAINPlugin.BotController;
                     if (botController != null)
                     {
@@ -37,7 +40,7 @@ namespace SAIN.Components
                     var envManger = EnvironmentManager.Instance;
                     if (envManger != null)
                     {
-                        EnvironmentType = envManger.GetEnvironmentByPos(MainPlayer.Position);
+                        EnvironmentType = envManger.GetEnvironmentByPos(position);
                     }
                     FreqencyTimer = Time.time + 0.5f;
 
@@ -45,14 +48,14 @@ namespace SAIN.Components
                     {
                         BushColliders[i] = null;
                     }
-                    NearBush = Physics.OverlapSphereNonAlloc(MainPlayer.MainParts[BodyPartType.body].Position, 2f, BushColliders, LayerMaskClass.HighPolyWithTerrainMaskAI) > 0;
+                    NearBush = Physics.OverlapSphereNonAlloc(player.MainParts[BodyPartType.body].Position, 2f, BushColliders, LayerMaskClass.HighPolyWithTerrainMaskAI) > 0;
 
                     bool inBush = false;
                     for (int i = 0; i < BushColliders.Length; i++)
                     {
                         if (BushColliders[i] != null)
                         {
-                            if ((BushColliders[i].transform.position - MainPlayer.Position).magnitude < 0.75f)
+                            if ((BushColliders[i].transform.position - position).magnitude < 0.75f)
                             {
                                 inBush = true;
                                 break;
@@ -65,7 +68,7 @@ namespace SAIN.Components
                     {
                         GrassColliders[i] = null;
                     }
-                    OnGrass = Physics.OverlapSphereNonAlloc(MainPlayer.Position, 0.5f, GrassColliders, GrassLayer) > 0;
+                    OnGrass = Physics.OverlapSphereNonAlloc(position, 0.5f, GrassColliders, GrassLayer) > 0;
                 }
             }
         }
@@ -76,18 +79,16 @@ namespace SAIN.Components
 
         public bool IsBushBetween(Vector3 start)
         {
-            Vector3 direction = MainPlayer.MainParts[BodyPartType.body].Position - start;
+            Vector3 direction = PlayerComponent.Transform.BodyPosition - start;
             return Physics.SphereCast(start, 0.1f, direction.normalized, out var hit, direction.magnitude, BushLayer);
         }
-
-        public Collider MainPlayerCollider { get; private set; }
 
         private float FreqencyTimer;
         public TimeOfDayEnum TimeOfDay { get; private set; }
         public bool NearBush { get; private set; }
         public bool InsideBush { get; private set; }
         public bool OnGrass { get; private set; }
-        public bool IsProne => MainPlayer.IsInPronePose;
+        public bool IsProne => Player.IsInPronePose;
         public EnvironmentType EnvironmentType { get; private set; }
 
         private Collider[] BushColliders = new Collider[5];
@@ -118,7 +119,7 @@ namespace SAIN.Components
                             guiRect.size = guiSize;
                             GUI.Box(guiRect, content, guiStyle);
                         }
-                        Color color = (bushPos - MainPlayer.Position).magnitude < 0.75f ? Color.blue : Color.green;
+                        Color color = (bushPos - Position).magnitude < 0.75f ? Color.blue : Color.green;
                         DebugGizmos.Sphere(bushPos, bush.bounds.size.magnitude, color, true, 1f);
                     }
                 }

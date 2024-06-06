@@ -19,6 +19,7 @@ using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.Preset.GlobalSettings;
 using System.Text;
+using SAIN.Components.PlayerComponentSpace;
 
 namespace SAIN.Patches.Vision
 {
@@ -283,23 +284,23 @@ namespace SAIN.Patches.Vision
 
     public class CheckFlashlightPatch : ModulePatch
     {
-        private static FieldInfo _tacticalModesField;
         private static MethodInfo _UsingLight;
 
         protected override MethodBase GetTargetMethod()
         {
             _UsingLight = AccessTools.PropertySetter(typeof(AIData), "UsingLight");
-            _tacticalModesField = AccessTools.Field(typeof(TacticalComboVisualController), "list_0");
             return AccessTools.Method(typeof(Player.FirearmController), "SetLightsState");
         }
 
         [PatchPostfix]
         public static void PatchPostfix(ref Player ____player)
         {
-            if (____player.gameObject.TryGetComponent<FlashLightComponent>(out var component))
+            if (____player.gameObject.TryGetComponent<PlayerComponent>(out var component))
             {
-                component.CheckDevice(____player, _tacticalModesField);
-                if (!component.WhiteLight && !component.Laser)
+                var flashLight = component.Flashlight;
+                flashLight.CheckDevice();
+
+                if (!flashLight.WhiteLight && !flashLight.Laser)
                 {
                     _UsingLight.Invoke(____player.AIData, new object[] { false });
                 }

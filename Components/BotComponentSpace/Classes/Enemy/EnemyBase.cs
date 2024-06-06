@@ -17,10 +17,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
         protected BotOwner BotOwner => Enemy.BotOwner;
         protected EnemyInfo EnemyInfo => Enemy.EnemyInfo;
 
-        protected SAINPersonClass EnemyPerson { get; private set; }
+        protected PersonClass EnemyPerson { get; private set; }
         protected Player EnemyPlayer => EnemyPerson.Player;
         protected IPlayer EnemyIPlayer => EnemyPerson.IPlayer;
-        protected TransformClass EnemyTransform => EnemyPerson.Transform;
+        protected PersonTransformClass EnemyTransform => EnemyPerson.Transform;
         protected Vector3 EnemyPosition => EnemyPerson.Transform.Position;
         protected Vector3 EnemyDirection => EnemyPerson.Transform.DirectionTo(Bot.Position);
     }
