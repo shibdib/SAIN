@@ -15,6 +15,9 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         {
             EquipmentClass = playerComponent.Player.Equipment;
             GearInfo = new GearInfo(this);
+
+            getAllWeapons();
+            updateAllWeapons();
         }
 
         public EquipmentClass EquipmentClass { get; private set; }
@@ -58,12 +61,10 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         {
             if (_nextGetWeaponsTime < Time.time)
             {
-                _nextGetWeaponsTime = Time.time + 10f;
                 getAllWeapons();
             }
             if (_nextUpdateTime < Time.time)
             {
-                _nextUpdateTime = Time.time + 1f;
                 updateAllWeapons();
             }
         }
@@ -73,17 +74,21 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private void getAllWeapons()
         {
-            var equipment = InventoryController?.Inventory?.Equipment;
+            var equipment = EquipmentClass;
             if (equipment == null)
             {
                 return;
             }
+
+            _nextGetWeaponsTime = Time.time + 10f;
 
             foreach (EquipmentSlot slot in _weaponSlots)
             {
                 Item item = equipment.GetSlot(slot).ContainedItem;
                 if (item != null && item is Weapon weapon)
                 {
+                    Logger.LogDebug("Found Weapon");
+
                     if (!WeaponInfos.ContainsKey(slot))
                     {
                         WeaponInfos.Add(slot, new WeaponInfo(weapon));
@@ -94,11 +99,16 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                         WeaponInfos[slot] = new WeaponInfo(weapon);
                     }
                 }
+                else
+                {
+                    Logger.LogDebug($"No Weapon In Slot {slot}");
+                }
             }
         }
 
         private void updateAllWeapons()
         {
+            _nextUpdateTime = Time.time + 1f;
             foreach (var info in WeaponInfos.Values)
             {
                 info?.Update();
@@ -112,17 +122,13 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
             EquipmentSlot.Holster,
         };
 
-        public InventoryControllerClass InventoryController { get; private set; }
-
         public GearInfo GearInfo { get; private set; }
 
         public WeaponInfo CurrentWeapon
         {
             get
             {
-                var firearmController = Player.HandsController as FirearmController;
-                if (firearmController != null &&
-                    firearmController.Item is Weapon weapon)
+                if (Player.HandsController.Item is Weapon weapon)
                 {
                     Weapon currWeapon = _currentWeapon?.Weapon;
                     if (currWeapon != null && currWeapon == weapon)
@@ -135,6 +141,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                         if (weapon == weaponInfo.Weapon)
                         {
                             _currentWeapon = weaponInfo;
+                            Player.AIData?.CalcPower();
                             break;
                         }
                     }

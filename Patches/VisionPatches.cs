@@ -253,6 +253,7 @@ namespace SAIN.Patches.Vision
                     enemy.EnemyPerson.IsActive)
                 {
                     __result *= enemy.Vision.GainSightCoef;
+                    enemy.Vision.LastGainSightResult = __result;
                 }
             }
             //__result = Mathf.Clamp(__result, 0.1f, 8888f);

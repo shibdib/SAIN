@@ -86,11 +86,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return result;
         }
 
-        private float _minSeenSpeedCoef = 1E-05f;
+        private float _minSeenSpeedCoef = 0.1f;
         private float _minDistRepeatSeen = 3f;
         private float _maxDistRepeatSeen = 15f;
 
-        private float _minHeardSpeedCoef = 0.2f;
+        private float _minHeardSpeedCoef = 0.25f;
         private float _minDistRepeatHeard = 5f;
         private float _maxDistRepeatHeard = 25f;
 
@@ -133,10 +133,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             float result = 1f * partMod * gearMod * flareMod * moveMod * elevMod * posFlareMod * thirdPartyMod * angleMod * notLookMod;
 
-            if (EnemyPlayer.IsYourPlayer && result != 1f)
-            {
-                Logger.LogWarning($"GainSight Time Result: [{result}] : partMod {partMod} : gearMod {gearMod} : flareMod {flareMod} : moveMod {moveMod} : elevMod {elevMod} : posFlareMod {posFlareMod} : thirdPartyMod {thirdPartyMod} : angleMod {angleMod} : notLookMod {notLookMod} ");
-            }
+            //if (EnemyPlayer.IsYourPlayer && result != 1f)
+            //{
+            //    Logger.LogWarning($"GainSight Time Result: [{result}] : partMod {partMod} : gearMod {gearMod} : flareMod {flareMod} : moveMod {moveMod} : elevMod {elevMod} : posFlareMod {posFlareMod} : thirdPartyMod {thirdPartyMod} : angleMod {angleMod} : notLookMod {notLookMod} ");
+            //}
 
             return result;
         }
@@ -151,26 +151,26 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 float partRatio = GetRatioPartsVisible(EnemyInfo, out int visibleCount);
                 if (visibleCount < 1)
                 {
-                    if (Enemy.EnemyPlayer.IsYourPlayer)
-                    {
-                        Logger.LogInfo($"part mod: result: {max} : part ratio {partRatio} : vis count: {visibleCount}");
-                    }
+                    //if (Enemy.EnemyPlayer.IsYourPlayer)
+                    //{
+                    //    Logger.LogInfo($"part mod: result: {max} : part ratio {partRatio} : vis count: {visibleCount}");
+                    //}
                     return max;
                 }
                 float min = 0.9f;
                 if (partRatio >= 1f)
                 {
-                    if (Enemy.EnemyPlayer.IsYourPlayer)
-                    {
-                        Logger.LogInfo($"part mod: result: {min} : part ratio {partRatio} : vis count: {visibleCount}");
-                    }
+                    //if (Enemy.EnemyPlayer.IsYourPlayer)
+                    //{
+                    //    Logger.LogInfo($"part mod: result: {min} : part ratio {partRatio} : vis count: {visibleCount}");
+                    //}
                     return min;
                 }
                 float result = Mathf.Lerp(max, min, partRatio);
-                if (Enemy.EnemyPlayer.IsYourPlayer)
-                {
-                    Logger.LogInfo($"part mod: result: {result} : part ratio {partRatio} : vis count: {visibleCount}");
-                }
+                //if (Enemy.EnemyPlayer.IsYourPlayer)
+                //{
+                //    Logger.LogInfo($"part mod: result: {result} : part ratio {partRatio} : vis count: {visibleCount}");
+                //}
                 return result;
             }
             return 1f;

@@ -46,8 +46,9 @@ namespace SAIN.Components
 
         private BotEventHandler _eventHandler;
 
-        public SAINGameworldComponent SAINGameWorld { get; private set; }
+        public GameWorldComponent SAINGameWorld { get; private set; }
         public BotsController DefaultController { get; set; }
+
         public BotSpawner BotSpawner
         {
             get
@@ -72,28 +73,12 @@ namespace SAIN.Components
 
         public void PlayerEnviromentChanged(IPlayer player, IndoorTrigger trigger)
         {
-            if (player == null)
-            {
-                return;
-            }
-        }
-
-        public BotComponent GetBotByProfileId(string profileId)
-        {
-            foreach (var bot in Bots.Values)
-            {
-                if (bot != null && bot.ProfileId == profileId)
-                {
-                    return bot;
-                }
-            }
-            return null;
+            SAINGameWorld.PlayerTracker.GetPlayerComponent(player?.ProfileId)?.AIData.PlayerLocation.updateEnvironment(trigger);
         }
 
         private void Awake()
         {
-            SAINGameWorld = this.GetComponent<SAINGameworldComponent>();
-
+            SAINGameWorld = this.GetComponent<GameWorldComponent>();
             CoverManager = new CoverManager(this);
             LineOfSightManager = new LineOfSightManager(this);
             BotExtractManager = new BotExtractManager(this);
@@ -102,74 +87,28 @@ namespace SAIN.Components
             BotSpawnController = new BotSpawnController(this);
             BotSquads = new BotSquads(this);
             PathManager = new PathManager(this);
-
-            PlayerTalk += playerTalked;
             GameWorld.OnDispose += Dispose;
         }
 
         public void PlayAISound(Player player, SAINSoundType soundType, Vector3 position, float power)
         {
             if (player != null &&
-                player.HealthController?.IsAlive == true)
+                player.HealthController?.IsAlive == true && 
+                player.gameObject.activeInHierarchy)
             {
-                if (player.IsAI && player.AIData.BotOwner?.BotState != EBotState.Active)
+                if (player.IsAI && 
+                    player.AIData.BotOwner?.BotState != EBotState.Active)
                 {
                     return;
                 }
-                string id = player.ProfileId;
-                if (!_playerSoundPlayers.ContainsKey(id))
-                {
-                    _playerSoundPlayers.Add(id, new PlayerSoundPlayer(player.IsAI));
-                    player.OnPlayerDeadOrUnspawn += removePlayerSoundPlayer;
-                }
-                if (_playerSoundPlayers.TryGetValue(id, out var soundPlayer) &&
-                    soundPlayer.ShallPlayAISound(power))
+
+                PlayerComponent playerComponent = SAINGameWorld.PlayerTracker.GetPlayerComponent(player.ProfileId);
+                if (playerComponent?.AIData.AISoundPlayer.ShallPlayAISound(power) == true)
                 {
                     playSound(soundType, position, player, power);
                 }
             }
         }
-
-        private void removePlayerSoundPlayer(Player player)
-        {
-            if (player != null)
-            {
-                player.OnPlayerDeadOrUnspawn -= removePlayerSoundPlayer;
-                _playerSoundPlayers.Remove(player.ProfileId);
-            }
-        }
-
-        private class PlayerSoundPlayer
-        {
-            public PlayerSoundPlayer(bool isAI)
-            {
-                if (isAI)
-                {
-                    _freq = 0.5f;
-                }
-                else
-                {
-                    _freq = 0.1f;
-                }
-            }
-
-            private readonly float _freq;
-            private float _lastSoundPower;
-            private float _nextPlaySoundTime;
-
-            public bool ShallPlayAISound(float power)
-            {
-                if (_nextPlaySoundTime < Time.time || _lastSoundPower > power * 1.25f)
-                {
-                    _nextPlaySoundTime = Time.time + _freq;
-                    _lastSoundPower = power;
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        private readonly Dictionary<string, PlayerSoundPlayer> _playerSoundPlayers = new Dictionary<string, PlayerSoundPlayer>();
 
         private void Update()
         {
@@ -213,6 +152,7 @@ namespace SAIN.Components
             }
         }
 
+
         private readonly Dictionary<BotComponent, GUIObject> _debugObjects = new Dictionary<BotComponent, GUIObject>();
 
         private IEnumerator playShootSoundCoroutine(Player player)
@@ -221,7 +161,7 @@ namespace SAIN.Components
 
             if (player != null && player.HealthController?.IsAlive == true)
             {
-                PlayerComponent component = SAINGameworldComponent.Instance?.PlayerTracker.GetPlayerComponent(player);
+                PlayerComponent component = GameWorldComponent.Instance?.PlayerTracker.GetPlayerComponent(player.ProfileId);
                 if (component?.Equipment.PlayAIShootSound() == true)
                 {
                     yield break;
@@ -260,9 +200,11 @@ namespace SAIN.Components
             return position + random;
         }
 
-        private void playerTalked(EPhraseTrigger phrase, ETagStatus mask, Player player)
+        public void PlayerTalked(EPhraseTrigger phrase, ETagStatus mask, Player player)
         {
-            if (player == null || Bots == null)
+            if (player == null || 
+                Bots == null || 
+                player.HealthController.IsAlive == false)
             {
                 return;
             }
@@ -275,6 +217,8 @@ namespace SAIN.Components
             bool isPain = phrase == EPhraseTrigger.OnAgony || phrase == EPhraseTrigger.OnBeingHurt;
             float painRange = 50f;
             float breathRange = player.HeavyBreath ? 50f : 25f;
+
+            PlayerTalk?.Invoke(phrase, mask, player);
 
             foreach (var bot in Bots)
             {
@@ -670,8 +614,6 @@ namespace SAIN.Components
                 LineOfSightManager?.Dispose();
                 BotSpawnController?.UnSubscribe();
 
-                PlayerTalk -= playerTalked;
-
                 if (BotEventHandler != null)
                 {
                     BotEventHandler.OnGrenadeThrow -= GrenadeThrown;
@@ -680,9 +622,9 @@ namespace SAIN.Components
 
                 if (Bots != null && Bots.Count > 0)
                 {
-                    foreach (var bot in Bots)
+                    foreach (var bot in Bots.Values)
                     {
-                        bot.Value?.Dispose();
+                        bot?.Dispose();
                     }
                 }
 
@@ -700,13 +642,6 @@ namespace SAIN.Components
         {
             StringBuilder debugString = null;
             bot = BotSpawnController.GetSAIN(botOwner, debugString);
-            return bot != null;
-        }
-
-        public bool GetSAIN(Player player, out BotComponent bot)
-        {
-            StringBuilder debugString = null;
-            bot = BotSpawnController.GetSAIN(player, debugString);
             return bot != null;
         }
     }

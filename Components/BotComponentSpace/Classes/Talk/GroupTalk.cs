@@ -158,7 +158,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
-            if (!BotOwner.BotsGroup.IsPlayerEnemy(player))
+            if (Bot.EnemyController.IsPlayerFriendly(player))
             {
                 return;
             }

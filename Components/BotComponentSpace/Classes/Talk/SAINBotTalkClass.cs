@@ -210,7 +210,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     if (demand || probability > 99 || probability > UnityEngine.Random.Range(0, 100))
                     {
                         ETagStatus etagStatus = (aggressive || Player.Awareness > Time.time) ? ETagStatus.Combat : ETagStatus.Unaware;
-                        SAINPlugin.BotController?.PlayerTalk?.Invoke(trigger, etagStatus, Player);
+                        SAINPlugin.BotController?.PlayerTalked(trigger, etagStatus, Player);
                         BotOwner.BotsGroup.GroupTalk.PhraseSad(BotOwner, trigger);
                         PersonalPhraseDict[trigger].TimeLastSaid = Time.time;
                         Player.Speaker.Play(trigger, Bot.Memory.Health.HealthStatus | mask | etagStatus, demand, null);

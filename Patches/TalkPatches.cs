@@ -14,6 +14,7 @@ using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents;
 using Comfort.Common;
 using SAIN.Helpers;
+using UnityEngine.UI;
 
 namespace SAIN.Patches.Talk
 {
@@ -72,26 +73,31 @@ namespace SAIN.Patches.Talk
         [PatchPrefix]
         public static bool PatchPrefix(Player __instance, EPhraseTrigger @event, ETagStatus mask, bool aggressive)
         {
-            if (__instance?.HealthController?.IsAlive == true)
+            switch (@event)
             {
-                SAINPlugin.BotController?.PlayerTalk?.Invoke(@event, mask, __instance);
+                case EPhraseTrigger.OnDeath:
+                case EPhraseTrigger.OnBeingHurt:
+                case EPhraseTrigger.OnAgony:
+                case EPhraseTrigger.OnBreath:
+                    SAINPlugin.BotController?.PlayerTalked(@event, mask, __instance);
+                    return true;
 
-                switch (@event)
-                {
-                    case EPhraseTrigger.OnDeath:
-                    case EPhraseTrigger.OnBeingHurt:
-                    case EPhraseTrigger.OnAgony:
-                    case EPhraseTrigger.OnBreath:
-                        return true;
-
-                    default:
-                        break;
-                }
-
-                // If handling of bots talking is disabled, let the original method run
-                return SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching || 
-                    SAINPlugin.IsBotExluded(__instance.AIData?.BotOwner);
+                default:
+                    break;
             }
+
+            if (__instance.IsAI)
+            {
+                if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching ||
+                    SAINPlugin.IsBotExluded(__instance.AIData?.BotOwner))
+                {
+                    SAINPlugin.BotController?.PlayerTalked(@event, mask, __instance);
+                    return true;
+                }
+                return false;
+            }
+
+            SAINPlugin.BotController?.PlayerTalked(@event, mask, __instance);
             return true;
         }
     }
@@ -106,38 +112,46 @@ namespace SAIN.Patches.Talk
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ___botOwner_0, EPhraseTrigger type, ETagStatus? additionalMask = null)
         {
-            // If handling of bots talking is disabled, let the original method run
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
+            bool skipCheck = false;
+            switch (type)
             {
+                case EPhraseTrigger.OnDeath:
+                case EPhraseTrigger.OnBeingHurt:
+                case EPhraseTrigger.OnAgony:
+                case EPhraseTrigger.OnBreath:
+                    skipCheck = true;
+                    break;
+
+                default:
+                    break;
+            }
+
+            // If handling of bots talking is disabled, let the original method run
+            if (skipCheck || 
+                SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching || 
+                ___botOwner_0?.HealthController?.IsAlive == false || 
+                SAINPlugin.IsBotExluded(___botOwner_0))
+            {
+                SAINPlugin.BotController?.PlayerTalked(type, additionalMask ?? ETagStatus.Combat, ___botOwner_0.GetPlayer);
                 return true;
             }
-            if (___botOwner_0?.HealthController?.IsAlive == false)
-            {
-                return false;
-            }
-            return SAINPlugin.IsBotExluded(___botOwner_0);
+            return false;
         }
     }
 
     public class BotTalkManualUpdatePatch : ModulePatch
     {
-        private static PropertyInfo BotTalk;
-
         protected override MethodBase GetTargetMethod()
         {
-            BotTalk = AccessTools.Property(typeof(BotOwner), "BotTalk");
-            return AccessTools.Method(BotTalk.PropertyType, "ManualUpdate");
+            return AccessTools.Method(typeof(BotTalk), "ManualUpdate");
         }
 
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ___botOwner_0)
         {
             // If handling of bots talking is disabled, let the original method run
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
-            {
-                return true;
-            }
-            return SAINPlugin.IsBotExluded(___botOwner_0);
+            return SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching || 
+                SAINPlugin.IsBotExluded(___botOwner_0);
         }
     }
 }

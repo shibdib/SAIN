@@ -71,7 +71,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 var component = EnemyPlayerComponent;
                 if (component == null)
                 {
-                    Logger.LogDebug("Enemy PlayerComponent is Null");
+                    Logger.LogError($"Enemy {EnemyName} PlayerComponent is Null");
                     return false;
                 }
                 var person = component.Person;

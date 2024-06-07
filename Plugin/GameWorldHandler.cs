@@ -16,10 +16,10 @@ namespace SAIN
                 SAINGameWorld.Dispose();
                 GameObject.Destroy(SAINGameWorld);
             }
-            SAINGameWorld = gameWorldObject.AddComponent<SAINGameworldComponent>();
+            SAINGameWorld = gameWorldObject.AddComponent<GameWorldComponent>();
         }
 
-        public static SAINGameworldComponent SAINGameWorld { get; private set; }
+        public static GameWorldComponent SAINGameWorld { get; private set; }
         public static SAINBotController SAINBotController => SAINGameWorld?.SAINBotController;
     }
 }

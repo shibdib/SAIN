@@ -111,6 +111,10 @@ namespace SAIN.Layers
             stringBuilder.AppendLabeledValue("Enemy Name", $"{enemy.EnemyPlayer?.Profile.Nickname}", Color.white, Color.red, true);
             stringBuilder.AppendLabeledValue("Enemy Power Level", $"{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}", Color.white, Color.red, true);
 
+            stringBuilder.AppendLabeledValue("Last GainSight Result", $"{enemy.Vision.LastGainSightResult}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("SeenCoef", $"{enemy.EnemyInfo.SeenCoef}", Color.white, Color.yellow, true);
+            //stringBuilder.AppendLabeledValue("PercentSpotted", $"{enemy.EnemyInfo.BodyData().Value?.PercentSpotted(out _)}", Color.white, Color.yellow, true);
+
             stringBuilder.AppendLabeledValue("Seen?", $"{enemy.Seen}", Color.white, enemy.Seen ? Color.red : Color.white, true);
             if (enemy.Seen)
             {
@@ -135,6 +139,8 @@ namespace SAIN.Layers
                 stringBuilder.AppendLabeledValue("Has Arrived?", $"Personal: {lastKnown.HasArrivedPersonal} / Squad: {lastKnown.HasArrivedSquad}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Has Seen?", $"Personal: {lastKnown.HasSeenPersonal} / Squad: {lastKnown.HasSeenSquad}", Color.white, Color.yellow, true);
             }
+
+
         }
 
         public static void AddAimData(BotOwner BotOwner, StringBuilder stringBuilder)

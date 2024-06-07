@@ -10,6 +10,7 @@ namespace SAIN.SAINComponent.Classes.Info
     {
         public WeaponInfo(Weapon weapon)
         {
+            Logger.LogDebug($"Created WeaponInfo for {weapon.ShortName}");
             Weapon = weapon;
             WeaponClass = TryGetWeaponClass(weapon);
             AmmoCaliber = TryGetAmmoCaliber(weapon);

@@ -187,6 +187,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public float TimeFirstSeen { get; private set; }
         public float TimeLastSeen { get; private set; }
         public float LastChangeVisionTime { get; private set; }
+        public float LastGainSightResult { get; set; }
         public float GainSightCoef => GainSight.GainSightCoef;
         public float VisionDistance => VisionDist.VisionDistance;
 

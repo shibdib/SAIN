@@ -73,24 +73,14 @@ namespace SAIN.Components.PlayerComponentSpace
         public IPlayer IPlayer { get; private set; }
         public Player Player { get; private set; }
 
-        public PersonClass(IPlayer iPlayer)
-        {
-            IPlayer = iPlayer;
-            Player = GameWorldInfo.GetAlivePlayer(iPlayer);
-            Name = Player?.name;
-            Transform = new PersonTransformClass(this);
-            ProfileId = iPlayer.Profile?.ProfileId;
-            Nickname = iPlayer.Profile?.Nickname;
-        }
-
         public PersonClass(IPlayer iPlayer, Player player)
         {
             Player = player;
             IPlayer = iPlayer;
             Name = player?.name;
-            Transform = new PersonTransformClass(this);
             ProfileId = player.ProfileId;
             Nickname = player.Profile?.Nickname;
+            Transform = new PersonTransformClass(this);
         }
 
         public void initBot(BotOwner botOwner)

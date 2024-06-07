@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using System.Collections;
@@ -19,7 +20,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public SAINEnemyController(BotComponent sain) : base(sain)
         {
+            if (_players == null)
+                _players = GameWorldComponent.Instance.PlayerTracker.AlivePlayers;
         }
+
+        private static Dictionary<string, PlayerComponent> _players;
 
         public void Init()
         {
@@ -614,44 +619,45 @@ namespace SAIN.SAINComponent.Classes.Enemy
             tryAddEnemy(player);
         }
 
-        private SAINEnemy tryAddEnemy(IPlayer player)
+        private SAINEnemy tryAddEnemy(IPlayer enemyPlayer)
         {
-            if (player == null)
+            if (enemyPlayer == null)
             {
                 //Logger.LogDebug("Cannot add null player as an enemy.");
                 return null;
             }
-            if (!player.HealthController.IsAlive)
+            if (!enemyPlayer.HealthController.IsAlive)
             {
                 //Logger.LogDebug("Cannot add dead player as an enemy.");
                 return null;
             }
-            if (Enemies.TryGetValue(player.ProfileId, out SAINEnemy enemy))
+            if (Enemies.TryGetValue(enemyPlayer.ProfileId, out SAINEnemy sainEnemy))
             {
-                return enemy;
+                return sainEnemy;
             }
-            if (player.ProfileId == Bot.Player.ProfileId)
+            if (enemyPlayer.ProfileId == Bot.Player.ProfileId)
             {
-                string debugString = $"Cannot add enemy {getBotInfo(player)} that matches this bot {getBotInfo(Player)}: ";
+                string debugString = $"Cannot add enemy {getBotInfo(enemyPlayer)} that matches this bot {getBotInfo(Player)}: ";
                 debugString = findSourceDebug(debugString);
                 Logger.LogDebug(debugString);
                 return null;
             }
-            if (player.IsAI && player.AIData?.BotOwner == null)
+            if (enemyPlayer.IsAI && enemyPlayer.AIData?.BotOwner == null)
             {
                 Logger.LogDebug("Cannot add ai as enemy with null Botowner");
                 return null;
             }
-            if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(player, out EnemyInfo enemyInfo))
+
+            PlayerComponent enemyPlayerComponent = GameWorldComponent.Instance.PlayerTracker.GetPlayerComponent(enemyPlayer.ProfileId);
+
+            if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(enemyPlayer, out EnemyInfo enemyInfo))
             {
-                PlayerComponent playerComponent = GameWorldHandler.SAINGameWorld.PlayerTracker.GetPlayerComponent(player.ProfileId);
-                if (playerComponent != null)
+                if (enemyPlayerComponent != null)
                 {
-                    SAINEnemy newEnemy = new SAINEnemy(Bot, playerComponent, enemyInfo);
-                    player.OnIPlayerDeadOrUnspawn += newEnemy.DeleteInfo;
-                    Enemies.Add(player.ProfileId, newEnemy);
+                    sainEnemy = new SAINEnemy(Bot, enemyPlayerComponent, enemyInfo);
+                    Enemies.Add(enemyPlayer.ProfileId, sainEnemy);
                     //Logger.LogDebug($"Added [{player.ProfileId}] to [{BotOwner?.name}'s] Enemy List");
-                    return newEnemy;
+                    return sainEnemy;
                 }
             }
             else

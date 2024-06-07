@@ -10,13 +10,13 @@ using UnityEngine;
 
 namespace SAIN.Components
 {
-    public class SAINGameworldComponent : MonoBehaviour
+    public class GameWorldComponent : MonoBehaviour
     {
-        public static SAINGameworldComponent Instance { get; set; }
+        public static GameWorldComponent Instance { get; set; }
 
         public ELocation Location { get; private set; }
         public GameWorld GameWorld { get; private set; }
-        public PlayerTracker PlayerTracker { get; private set; }
+        public PlayerSpawnTracker PlayerTracker { get; private set; }
         public SAINBotController SAINBotController { get; private set; }
         public Extract.ExtractFinderComponent ExtractFinder { get; private set; }
         public SpawnPointMarker[] SpawnPointMarkers { get; private set; }
@@ -153,7 +153,7 @@ namespace SAIN.Components
                 yield break;
             }
 
-            PlayerTracker = new PlayerTracker(this);
+            PlayerTracker = new PlayerSpawnTracker(this);
             SAINBotController = this.GetOrAddComponent<SAINBotController>();
             ExtractFinder = this.GetOrAddComponent<Extract.ExtractFinderComponent>();
             GameWorld.OnDispose += Dispose;

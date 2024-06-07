@@ -1,29 +1,21 @@
-﻿using BepInEx.Logging;
-using EFT;
+﻿using EFT;
+using SAIN.Preset.BotSettings.SAINSettings;
 using SAIN.Preset.GlobalSettings;
+using SAIN.Preset.Personalities;
 
 namespace SAIN.SAINComponent
 {
-    public abstract class SAINBase : SAINComponentAbstract
+    public abstract class SAINBase
     {
-        public SAINBase(BotComponent bot) : base (bot)
+        public SAINBase(BotComponent bot)
         {
-            BotOwner = bot.BotOwner;
-            Player = bot.Player;
-        }
-
-        public readonly BotOwner BotOwner;
-        public readonly Player Player;
-        public GlobalSettingsClass GlobalSettings => SAINPlugin.LoadedPreset?.GlobalSettings;
-    }
-
-    public class SAINComponentAbstract
-    {
-        public SAINComponentAbstract(BotComponent sain)
-        {
-            Bot = sain;
+            Bot = bot;
         }
 
         public BotComponent Bot { get; private set; }
+        public BotOwner BotOwner => Bot.Person.BotOwner;
+        public Player Player => Bot.Person.Player;
+        public IPlayer IPlayer => Bot.Person.IPlayer;
+        public GlobalSettingsClass GlobalSettings => SAINPlugin.LoadedPreset.GlobalSettings;
     }
 }

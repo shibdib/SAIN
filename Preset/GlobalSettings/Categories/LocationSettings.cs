@@ -95,51 +95,62 @@ namespace SAIN.Preset.GlobalSettings
         private float WeaponPower(Player player)
         {
             float result = 0f;
-            WeaponInfo weaponInfo = SAINGameworldComponent.Instance?.PlayerTracker.GetPlayerComponent(player)?.Equipment.CurrentWeapon;
-            if (weaponInfo != null)
-            {
-                if (weaponInfo.HasSuppressor)
-                {
-                    result += SUPPRESSOR_POWER;
-                }
-                if (weaponInfo.HasRedDot)
-                {
-                    result += RED_DOT_POWER;
-                }
-                if (weaponInfo.HasOptic)
-                {
-                    result += OPTIC_POWER;
-                }
 
-                switch (weaponInfo.WeaponClass)
-                {
-                    case IWeaponClass.pistol:
-                        result += PISTOL_POWER;
-                        break;
-                    case IWeaponClass.smg:
-                        result += SMG_POWER;
-                        break;
-                    case IWeaponClass.assaultCarbine:
-                        result += ASSAULT_CARBINE_POWER;
-                        break;
-                    case IWeaponClass.assaultRifle:
-                        result += ASSAULT_RIFLE_POWER;
-                        break;
-                    case IWeaponClass.machinegun:
-                        result += MG_POWER;
-                        break;
-                    case IWeaponClass.marksmanRifle:
-                        result += MARKSMAN_RIFLE_POWER;
-                        break;
-                    case IWeaponClass.sniperRifle:
-                        result += SNIPE_POWER;
-                        break;
-                    case IWeaponClass.shotgun:
-                        result += SHOTGUN_POWER;
-                        break;
-                    default:
-                        break;
-                }
+            PlayerComponent component = GameWorldComponent.Instance?.PlayerTracker.GetPlayerComponent(player?.ProfileId);
+            if (component == null)
+            {
+                Logger.LogError("Player Component Null");
+                return result;
+            }
+
+            WeaponInfo weaponInfo = component.Equipment.CurrentWeapon;
+            if (weaponInfo == null)
+            {
+                Logger.LogError("weaponInfo Null");
+                return result;
+            }
+
+            if (weaponInfo.HasSuppressor)
+            {
+                result += SUPPRESSOR_POWER;
+            }
+            if (weaponInfo.HasRedDot)
+            {
+                result += RED_DOT_POWER;
+            }
+            if (weaponInfo.HasOptic)
+            {
+                result += OPTIC_POWER;
+            }
+
+            switch (weaponInfo.WeaponClass)
+            {
+                case IWeaponClass.pistol:
+                    result += PISTOL_POWER;
+                    break;
+                case IWeaponClass.smg:
+                    result += SMG_POWER;
+                    break;
+                case IWeaponClass.assaultCarbine:
+                    result += ASSAULT_CARBINE_POWER;
+                    break;
+                case IWeaponClass.assaultRifle:
+                    result += ASSAULT_RIFLE_POWER;
+                    break;
+                case IWeaponClass.machinegun:
+                    result += MG_POWER;
+                    break;
+                case IWeaponClass.marksmanRifle:
+                    result += MARKSMAN_RIFLE_POWER;
+                    break;
+                case IWeaponClass.sniperRifle:
+                    result += SNIPE_POWER;
+                    break;
+                case IWeaponClass.shotgun:
+                    result += SHOTGUN_POWER;
+                    break;
+                default:
+                    break;
             }
             return result;
         }
