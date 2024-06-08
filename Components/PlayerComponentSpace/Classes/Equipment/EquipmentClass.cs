@@ -18,9 +18,18 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
             getAllWeapons();
             updateAllWeapons();
+            ReCalcPowerOfEquipment();
         }
 
         public EquipmentClass EquipmentClass { get; private set; }
+
+        private void ReCalcPowerOfEquipment()
+        {
+            if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(Player, out float power))
+            {
+                Player.AIData.PowerOfEquipment = power;
+            }
+        }
 
         public bool PlayAIShootSound()
         {
@@ -141,7 +150,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                         if (weapon == weaponInfo.Weapon)
                         {
                             _currentWeapon = weaponInfo;
-                            Player.AIData?.CalcPower();
+                            ReCalcPowerOfEquipment();
                             break;
                         }
                     }

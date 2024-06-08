@@ -7,17 +7,8 @@ using HarmonyLib;
 using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
-using SAIN.Layers;
-using SAIN.Patches.Components;
-using SAIN.Patches.Generic;
-using SAIN.Patches.Hearing;
-using SAIN.Patches.Shoot;
-using SAIN.Patches.Talk;
-using SAIN.Patches.Vision;
 using SAIN.Plugin;
 using SAIN.Preset;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.Classes.Mover;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -88,7 +79,6 @@ namespace SAIN
                 typeof(Patches.Generic.FixPatrolDataPatch),
                 typeof(Patches.Generic.SetPanicPointPatch),
                 typeof(Patches.Generic.AddPointToSearchPatch),
-                typeof(Patches.Generic.CalcPowerPatch),
                 typeof(Patches.Generic.BulletImpactSuppressionPatch),
                 typeof(Patches.Generic.HaveSeenEnemyPatch),
                 typeof(Patches.Generic.StopSetToNavMeshPatch),
@@ -112,7 +102,7 @@ namespace SAIN
                 //typeof(Patches.Generic.SteeringPatch),
                 typeof(Patches.Generic.InBunkerPatch),
                 typeof(Patches.Generic.DoorOpenerPatch),
-                
+
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
                 typeof(Patches.Hearing.OnMakingShotPatch),
                 typeof(Patches.Hearing.HearingSensorPatch),

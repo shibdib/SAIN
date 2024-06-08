@@ -94,25 +94,6 @@ namespace SAIN.Patches.Generic
         }
     }
 
-    public class CalcPowerPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(AIData), "CalcPower");
-        }
-
-        [PatchPrefix]
-        public static bool PatchPrefix(AIData __instance)
-        {
-            if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(__instance.Player, out float power))
-            {
-                __instance.PowerOfEquipment = power;
-                return false;
-            }
-            return true;
-        }
-    }
-
     public class AddPointToSearchPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
