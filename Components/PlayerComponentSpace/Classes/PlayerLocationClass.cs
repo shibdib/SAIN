@@ -11,7 +11,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes
         {
         }
 
-        public void updateEnvironment(IndoorTrigger trigger)
+        public void UpdateEnvironment(IndoorTrigger trigger)
         {
             InBunker = trigger?.IsBunker == true;
             BunkerDepth = InBunker ? trigger.BunkerDepth : 0f;

@@ -25,20 +25,23 @@ namespace SAIN.SAINComponent
         public bool BotActive { get; private set; }
         public string ProfileId { get; private set; }
 
-        public Vector3? CurrentTargetPosition => CurrentTarget.CurrentTargetPosition;
-        public Vector3? CurrentTargetDirection => CurrentTarget.CurrentTargetDirection;
-        public float CurrentTargetDistance => CurrentTarget.CurrentTargetDistance;
-        public Vector3 Position => Person.Position;
-        public Vector3 LookDirection => Person.Transform.LookDirection;
-        public bool HasEnemy => EnemyController.HasEnemy;
-        public bool HasLastEnemy => EnemyController.HasLastEnemy;
-        public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
+        public Vector3 Position => PlayerComponent.Position;
+        public Vector3 LookDirection => PlayerComponent.LookDirection;
         public BotOwner BotOwner => PlayerComponent.BotOwner;
         public Player Player => PlayerComponent.Player;
         public PersonClass Person => PlayerComponent.Person;
+        public PersonTransformClass Transform => PlayerComponent.Transform;
+
+        public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
+
+        public bool HasEnemy => EnemyController.HasEnemy;
+        public bool HasLastEnemy => EnemyController.HasLastEnemy;
         public SAINEnemy Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;
         public SAINEnemy LastEnemy => HasLastEnemy ? EnemyController.LastEnemy : null;
-        public PersonTransformClass Transform => Person.Transform;
+
+        public Vector3? CurrentTargetPosition => CurrentTarget.CurrentTargetPosition;
+        public Vector3? CurrentTargetDirection => CurrentTarget.CurrentTargetDirection;
+        public float CurrentTargetDistance => CurrentTarget.CurrentTargetDistance;
 
         public SAINMedical Medical { get; private set; }
         public SAINActivationClass SAINActivation { get; private set; }
@@ -303,7 +306,6 @@ namespace SAIN.SAINComponent
                 !GameIsEnding &&
                 BotOwner.isActiveAndEnabled &&
                 Player.gameObject.activeInHierarchy &&
-                BotOwner.gameObject.activeInHierarchy &&
                 BotOwner.BotState == EBotState.Active &&
                 BotOwner.StandBy.StandByType == BotStandByType.active;
 

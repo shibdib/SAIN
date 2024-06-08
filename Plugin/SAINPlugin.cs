@@ -7,6 +7,7 @@ using HarmonyLib;
 using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
+using SAIN.Patches.Generic;
 using SAIN.Plugin;
 using SAIN.Preset;
 using System;
@@ -74,6 +75,7 @@ namespace SAIN
                 //typeof(Patches.Generic.ShallRunAwayGrenadePatch),
                 //typeof(Patches.Generic.DisableLookSensorPatch),
 
+                typeof(Patches.Generic.SetEnvironmentPatch),
                 typeof(Patches.Generic.FixItemTakerPatch),
                 typeof(Patches.Generic.FixItemTakerPatch2),
                 typeof(Patches.Generic.FixPatrolDataPatch),

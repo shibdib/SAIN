@@ -19,6 +19,8 @@ namespace SAIN.Components
 {
     public class SAINBotController : MonoBehaviour
     {
+        public static SAINBotController Instance { get; private set; }  
+
         public Action<SAINSoundType, Vector3, Player, float> AISoundPlayed { get; set; }
         public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; set; }
         public Action<Vector3> BulletImpact { get; set; }
@@ -71,13 +73,14 @@ namespace SAIN.Components
         public BotSpawnController BotSpawnController { get; private set; }
         public BotSquads BotSquads { get; private set; }
 
-        public void PlayerEnviromentChanged(IPlayer player, IndoorTrigger trigger)
+        public void PlayerEnviromentChanged(string profileID, IndoorTrigger trigger)
         {
-            SAINGameWorld.PlayerTracker.GetPlayerComponent(player?.ProfileId)?.AIData.PlayerLocation.updateEnvironment(trigger);
+            SAINGameWorld.PlayerTracker.GetPlayerComponent(profileID)?.AIData.PlayerLocation.UpdateEnvironment(trigger);
         }
 
         private void Awake()
         {
+            Instance = this;
             SAINGameWorld = this.GetComponent<GameWorldComponent>();
             CoverManager = new CoverManager(this);
             LineOfSightManager = new LineOfSightManager(this);

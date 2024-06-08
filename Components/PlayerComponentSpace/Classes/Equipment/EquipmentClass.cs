@@ -3,6 +3,7 @@ using EFT.InventoryLogic;
 using SAIN.Components.BotController;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Info;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static EFT.Player;
@@ -21,15 +22,47 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
             ReCalcPowerOfEquipment();
         }
 
+        public void InitBot(BotOwner botOwner)
+        {
+            botOwner.WeaponManager.Selector.OnActiveEquipmentSlotChanged += slotSelected;
+        }
+
+
+        public void DisposeBot()
+        {
+            BotOwner botOwner = PlayerComponent.BotOwner;
+            if (botOwner != null)
+            {
+                botOwner.WeaponManager.Selector.OnActiveEquipmentSlotChanged -= slotSelected;
+            }
+        }
+
+        private void slotSelected(EquipmentSlot slot)
+        {
+            addWeaponFromSlot(slot);
+            if (WeaponInfos.TryGetValue(slot, out var weaponInfo))
+            {
+                CurrentWeapon = weaponInfo;
+                ReCalcPowerOfEquipment();
+            }
+        }
+
         public EquipmentClass EquipmentClass { get; private set; }
 
         private void ReCalcPowerOfEquipment()
         {
             if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(Player, out float power))
             {
-                Player.AIData.PowerOfEquipment = power;
+                float oldPower = Player.AIData.PowerOfEquipment;
+                if (oldPower != power)
+                {
+                    Player.AIData.PowerOfEquipment = power;
+                    OnPowerRecalced?.Invoke(power);
+                }
             }
         }
+
+        public Action<float> OnPowerRecalced { get; set; }
 
         public bool PlayAIShootSound()
         {
@@ -63,64 +96,46 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         public void Update()
         {
             GearInfo.Update();
-            updateWeapons();
+            updateAllWeapons();
         }
 
-        private void updateWeapons()
-        {
-            if (_nextGetWeaponsTime < Time.time)
-            {
-                getAllWeapons();
-            }
-            if (_nextUpdateTime < Time.time)
-            {
-                updateAllWeapons();
-            }
-        }
-
-        private float _nextGetWeaponsTime;
         private float _nextUpdateTime;
 
         private void getAllWeapons()
         {
-            var equipment = EquipmentClass;
-            if (equipment == null)
-            {
-                return;
-            }
-
-            _nextGetWeaponsTime = Time.time + 10f;
-
             foreach (EquipmentSlot slot in _weaponSlots)
             {
-                Item item = equipment.GetSlot(slot).ContainedItem;
-                if (item != null && item is Weapon weapon)
-                {
-                    Logger.LogDebug("Found Weapon");
+                addWeaponFromSlot(slot);
+            }
+        }
 
-                    if (!WeaponInfos.ContainsKey(slot))
-                    {
-                        WeaponInfos.Add(slot, new WeaponInfo(weapon));
-                    }
-                    else if (WeaponInfos.TryGetValue(slot, out WeaponInfo info) &&
-                        info.Weapon != weapon)
-                    {
-                        WeaponInfos[slot] = new WeaponInfo(weapon);
-                    }
-                }
-                else
+        private void addWeaponFromSlot(EquipmentSlot slot)
+        {
+            Item item = EquipmentClass.GetSlot(slot).ContainedItem;
+            if (item != null && item is Weapon weapon)
+            {
+                if (!WeaponInfos.ContainsKey(slot))
                 {
-                    Logger.LogDebug($"No Weapon In Slot {slot}");
+                    WeaponInfos.Add(slot, new WeaponInfo(weapon));
+                }
+                else if (WeaponInfos.TryGetValue(slot, out WeaponInfo info) &&
+                    info.Weapon != weapon)
+                {
+                    WeaponInfos[slot] = new WeaponInfo(weapon);
                 }
             }
         }
 
         private void updateAllWeapons()
         {
-            _nextUpdateTime = Time.time + 1f;
-            foreach (var info in WeaponInfos.Values)
+            if (_nextUpdateTime < Time.time)
             {
-                info?.Update();
+                _nextUpdateTime = Time.time + 1f;
+
+                foreach (var info in WeaponInfos.Values)
+                {
+                    info?.Update();
+                }
             }
         }
 
@@ -137,10 +152,14 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         {
             get
             {
+                if (PlayerComponent.IsAI)
+                {
+                    return _currentWeapon;
+                }
+
                 if (Player.HandsController.Item is Weapon weapon)
                 {
-                    Weapon currWeapon = _currentWeapon?.Weapon;
-                    if (currWeapon != null && currWeapon == weapon)
+                    if (_currentWeapon?.Weapon == weapon)
                     {
                         return _currentWeapon;
                     }
@@ -156,6 +175,10 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                     }
                 }
                 return _currentWeapon;
+            }
+            private set
+            {
+                _currentWeapon = value;
             }
         }
 

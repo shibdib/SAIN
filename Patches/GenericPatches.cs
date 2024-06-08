@@ -1,7 +1,9 @@
 ﻿using Aki.Reflection.Patching;
 using Aki.Reflection.Utils;
 using EFT;
+using EFT.EnvironmentEffect;
 using HarmonyLib;
+using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Enemy;
@@ -23,6 +25,20 @@ namespace SAIN.Patches.Generic
                 botOwner.gameObject.transform != null &&
                 botOwner.Transform != null &&
                 !botOwner.IsDead;
+        }
+    }
+
+    public class SetEnvironmentPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(AIData), "SetEnvironment");
+        }
+
+        [PatchPostfix]
+        public static void Patch(AIData __instance, IndoorTrigger trigger)
+        {
+            SAINBotController.Instance?.PlayerEnviromentChanged(__instance?.Player?.ProfileId, trigger);
         }
     }
 

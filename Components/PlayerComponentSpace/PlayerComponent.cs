@@ -6,7 +6,6 @@ using SAIN.SAINComponent;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Profiling;
 
 namespace SAIN.Components.PlayerComponentSpace
 {
@@ -31,33 +30,36 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private void navRayCastAllDir()
         {
-            if (SAINPlugin.DebugMode && 
-                SAINPlugin.DrawDebugGizmos && 
-                Player.IsYourPlayer)
+            if (!SAINPlugin.DebugMode ||
+                !SAINPlugin.DrawDebugGizmos ||
+                !Player.IsYourPlayer)
             {
-                Vector3 origin = Position;
-                if (NavMesh.SamplePosition(origin, out var hit, 1f, -1))
+                return;
+            }
+
+            Vector3 origin = Position;
+            if (NavMesh.SamplePosition(origin, out var hit, 1f, -1))
+            {
+                origin = hit.position;
+            }
+
+            Vector3 direction;
+            int max = 30;
+            for (int i = 0; i < max; i++)
+            {
+                direction = UnityEngine.Random.onUnitSphere;
+                direction.y = 0;
+                direction = direction.normalized * 30f;
+                Vector3 target = origin + direction;
+                if (NavMesh.Raycast(origin, target, out var hit2, -1))
                 {
-                    origin = hit.position;
+                    target = hit2.position;
                 }
-                Vector3 direction;
-                int max = 30;
-                for (int i = 0; i < max; i++)
-                {
-                    direction = UnityEngine.Random.onUnitSphere;
-                    direction.y = 0;
-                    direction = direction.normalized * 30f;
-                    Vector3 target = origin + direction;
-                    if (NavMesh.Raycast(origin, target, out var hit2, -1))
-                    {
-                        target = hit2.position;
-                    }
-                    DebugGizmos.Line(origin, target, 0.05f, 0.25f, true);
-                }
+                DebugGizmos.Line(origin, target, 0.05f, 0.25f, true);
             }
         }
 
-        public string ProfileId {  get; private set; }
+        public string ProfileId { get; private set; }
         public FlashLightClass Flashlight { get; private set; }
         public PersonClass Person { get; private set; }
         public SAINAIData AIData { get; private set; }
@@ -100,7 +102,8 @@ namespace SAIN.Components.PlayerComponentSpace
 
         public void InitBot(BotOwner botOwner)
         {
-            Person.initBot(botOwner);
+            Person.InitBot(botOwner);
+            Equipment.InitBot(botOwner);
         }
 
         private void OnDisable()
@@ -111,6 +114,7 @@ namespace SAIN.Components.PlayerComponentSpace
         private void OnDestroy()
         {
             StopAllCoroutines();
+            Equipment?.DisposeBot();
         }
     }
 }

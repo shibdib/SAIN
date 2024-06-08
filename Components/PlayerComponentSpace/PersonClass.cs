@@ -83,7 +83,7 @@ namespace SAIN.Components.PlayerComponentSpace
             Transform = new PersonTransformClass(this);
         }
 
-        public void initBot(BotOwner botOwner)
+        public void InitBot(BotOwner botOwner)
         {
             if (botOwner != null)
             {
