@@ -121,6 +121,7 @@ namespace SAIN.Components.PlayerComponentSpace
                         case boonie_MILTEC:
                         case boonie_CHIMERA:
                         case boonie_DOORKICKER:
+                        case boonie_JACK_PYKE:
                             gainVisionTime *= 1.2f;
                             break;
 
@@ -162,6 +163,7 @@ namespace SAIN.Components.PlayerComponentSpace
         private const string boonie_MILTEC = "5b4327aa5acfc400175496e0";
         private const string boonie_CHIMERA = "60b52e5bc7d8103275739d67";
         private const string boonie_DOORKICKER = "5d96141523f0ea1b7f2aacab";
+        private const string boonie_JACK_PYKE = "618aef6d0a5a59657e5f55ee";
         private const string helmet_TAN_ULACH = "5b40e2bc5acfc40016388216";
         private const string helmet_UNTAR_BLUE = "5aa7d03ae5b5b00016327db5";
 
