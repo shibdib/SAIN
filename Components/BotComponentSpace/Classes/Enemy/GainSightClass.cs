@@ -82,7 +82,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             float num2 = distance - minDist;
             float ratio = num2 / num;
             float result = Mathf.Lerp(minSpeedCoef, 1f, ratio);
-            Logger.LogInfo($"{check} Distance from Position: {distance} Result: {result}");
+            //Logger.LogInfo($"{check} Distance from Position: {distance} Result: {result}");
             return result;
         }
 

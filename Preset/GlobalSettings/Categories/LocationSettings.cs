@@ -55,26 +55,24 @@ namespace SAIN.Preset.GlobalSettings
         //public float ATTACHMENT_POWER = 5f;
         public float EARPRO_POWER = 30f;
 
-        public bool CalcPower(Player player, out float power)
+        public bool CalcPower(PlayerComponent playerComponent, out float power)
         {
             power = 0f;
-            if (player == null)
+            if (playerComponent == null)
             {
                 return false;
             }
 
-            power += WeaponPower(player);
+            power += WeaponPower(playerComponent);
             if (power == 0f)
             {
                 return false;
             }
 
-            power += RolePower(player.Profile.Info.Settings.Role);
-            power += ArmorPower(player);
+            power += RolePower(playerComponent.Player.Profile.Info.Settings.Role);
+            power += ArmorPower(playerComponent.Player);
 
-            //Logger.LogAndNotifyInfo($"Calculated Power: [{power}] for [{player.Profile.Nickname}]");
-
-            player.AIData.PowerOfEquipment = power;
+            playerComponent.Player.AIData.PowerOfEquipment = power;
 
             return true;
         }
@@ -92,18 +90,11 @@ namespace SAIN.Preset.GlobalSettings
             return 0f;
         }
 
-        private float WeaponPower(Player player)
+        private float WeaponPower(PlayerComponent player)
         {
             float result = 0f;
 
-            PlayerComponent component = GameWorldComponent.Instance?.PlayerTracker.GetPlayerComponent(player?.ProfileId);
-            if (component == null)
-            {
-                Logger.LogError("Player Component Null");
-                return result;
-            }
-
-            WeaponInfo weaponInfo = component.Equipment.CurrentWeapon;
+            WeaponInfo weaponInfo = player.Equipment.CurrentWeapon;
             if (weaponInfo == null)
             {
                 Logger.LogError("weaponInfo Null");

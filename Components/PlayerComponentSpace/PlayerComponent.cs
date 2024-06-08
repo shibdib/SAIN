@@ -4,6 +4,7 @@ using SAIN.Components.PlayerComponentSpace.Classes.Equipment;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -97,24 +98,32 @@ namespace SAIN.Components.PlayerComponentSpace
                 Logger.LogError(ex);
                 return false;
             }
+            Logger.LogDebug($"{Name} Player Component Created");
+            StartCoroutine(delayInit());
             return true;
+        }
+
+        private IEnumerator delayInit()
+        {
+            yield return null;
+            Equipment.Init();
         }
 
         public void InitBot(BotOwner botOwner)
         {
             Person.InitBot(botOwner);
-            Equipment.InitBot(botOwner);
         }
 
         private void OnDisable()
         {
+            //Logger.LogDebug($"{Name} Player Component Disabled");
             StopAllCoroutines();
         }
 
         private void OnDestroy()
         {
+            Logger.LogDebug($"{Name} Player Component Destroyed");
             StopAllCoroutines();
-            Equipment?.DisposeBot();
         }
     }
 }

@@ -2,6 +2,7 @@
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings.Categories;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -43,7 +44,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             CheckAddEnemy();
             updateEnemies();
-            checkDiscrepency();
+            //checkDiscrepency();
             checkActiveEnemies();
             updateDebug();
             checkIsAtPeace();
@@ -190,9 +191,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return null;
         }
 
-        private readonly List<SAINEnemy> _localAIEnemiesList = new List<SAINEnemy>();
-        private readonly List<SAINEnemy> _localHumanEnemiesList = new List<SAINEnemy>();
-
         private void updateEnemies()
         {
             var activeEnemy = ActiveEnemy;
@@ -240,68 +238,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
         }
 
         private readonly List<string> _idsToRemove = new List<string>();
-
-        private IEnumerator updateValidHumanEnemies(int maxPerFrame)
-        {
-            while (true)
-            {
-                int count = 0;
-                foreach (var enemy in Enemies)
-                {
-                    if (enemy.Value?.IsAI == false)
-                    {
-                        _localHumanEnemiesList.Add(enemy.Value);
-                    }
-                }
-                //Logger.LogDebug($"Updating {_localHumanEnemiesList.Count} Human Enemies for [{BotOwner?.name}]");
-                foreach (var enemy in _localHumanEnemiesList)
-                {
-                    if (enemy?.IsValid == true)
-                    {
-                        enemy.Update();
-                        count++;
-                        if (count >= maxPerFrame)
-                        {
-                            count = 0;
-                            yield return null;
-                        }
-                    }
-                }
-                _localHumanEnemiesList.Clear();
-                yield return null;
-            }
-        }
-
-        private IEnumerator updateValidAIEnemies(int maxPerFrame)
-        {
-            while (true)
-            {
-                int count = 0;
-                foreach (var enemy in Enemies)
-                {
-                    if (enemy.Value?.IsAI == true)
-                    {
-                        _localAIEnemiesList.Add(enemy.Value);
-                    }
-                }
-                //Logger.LogDebug($"Updating {_localAIEnemiesList.Count} AI Enemies for [{BotOwner?.name}]");
-                foreach (var enemy in _localAIEnemiesList)
-                {
-                    if (enemy?.IsValid == true)
-                    {
-                        enemy.Update();
-                        count++;
-                        if (count >= maxPerFrame)
-                        {
-                            count = 0;
-                            yield return null;
-                        }
-                    }
-                }
-                _localAIEnemiesList.Clear();
-                yield return null;
-            }
-        }
 
         private void updateDebug()
         {
@@ -384,6 +320,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 BotOwner.EnemiesController.Remove(enemy.EnemyIPlayer);
                 return;
             }
+
             EnemyInfo badInfo = null;
             foreach (var enemyInfo in BotOwner.EnemiesController.EnemyInfos.Values)
             {
@@ -394,16 +331,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     break;
                 }
             }
-            removeEnemyInfo(badInfo);
-        }
 
-        private void removeEnemyInfo(EnemyInfo enemyInfo)
-        {
-            if (enemyInfo?.Person == null)
+            if (badInfo?.Person != null)
             {
-                return;
+                BotOwner.EnemiesController.Remove(badInfo.Person);
             }
-            BotOwner.EnemiesController.Remove(enemyInfo?.Person);
         }
 
         public void ClearEnemy()
@@ -411,11 +343,34 @@ namespace SAIN.SAINComponent.Classes.Enemy
             setActiveEnemy(null);
         }
 
+        private void removeEnemy(IPlayer player)
+        {
+            if (player != null)
+            {
+                player.OnIPlayerDeadOrUnspawn -= removeEnemy;
+                RemoveEnemy(player.ProfileId);
+            }
+        }
+
         public void RemoveEnemy(string id)
         {
-            removeActiveEnemy(id);
-            removeLastEnemy(id);
-            removeDogFightTarget(id);
+            if (ActiveEnemy != null && 
+                ActiveEnemy.EnemyProfileId == id)
+            {
+                ActiveEnemy = null;
+            }
+            if (LastEnemy != null && 
+                LastEnemy.EnemyProfileId == id)
+            {
+                LastEnemy = null;
+            }
+
+            SAINEnemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
+            if (dogFightTarget != null && 
+                dogFightTarget.EnemyProfileId == id)
+            {
+                Bot.Decision.DogFightDecision.DogFightTarget = null;
+            }
 
             if (Enemies.TryGetValue(id, out SAINEnemy enemy))
             {
@@ -423,33 +378,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 Enemies.Remove(id);
                 removeEnemyInfo(enemy);
                 //Logger.LogDebug($"Removed [{id}] from [{BotOwner?.name}'s] Enemy List");
-            }
-        }
-
-        private void removeActiveEnemy(string id)
-        {
-            if (ActiveEnemy?.EnemyPerson != null
-                && ActiveEnemy.EnemyPerson.ProfileId == id)
-            {
-                ActiveEnemy = null;
-            }
-        }
-
-        private void removeLastEnemy(string id)
-        {
-            if (LastEnemy != null && LastEnemy.EnemyProfileId == id)
-            {
-                LastEnemy = null;
-            }
-        }
-
-        private void removeDogFightTarget(string id)
-        {
-            SAINEnemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
-            if (dogFightTarget?.EnemyPerson != null
-                && dogFightTarget.EnemyPerson.ProfileId == id)
-            {
-                Bot.Decision.DogFightDecision.DogFightTarget = null;
             }
         }
 
@@ -592,16 +520,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return AreEnemiesSame(a?.EnemyIPlayer, b?.EnemyIPlayer);
         }
 
-        public bool AreEnemiesSame(EnemyInfo a, SAINEnemy b)
-        {
-            return AreEnemiesSame(a?.Person, b?.EnemyIPlayer);
-        }
-
-        public bool AreEnemiesSame(EnemyInfo a, EnemyInfo b)
-        {
-            return AreEnemiesSame(a?.Person, b?.Person);
-        }
-
         public bool AreEnemiesSame(IPlayer a, IPlayer b)
         {
             return a != null
@@ -649,25 +567,24 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
 
             PlayerComponent enemyPlayerComponent = GameWorldComponent.Instance.PlayerTracker.GetPlayerComponent(enemyPlayer.ProfileId);
+            if (enemyPlayerComponent == null)
+            {
+                Logger.LogDebug("Cannot add ai as enemy with null Player Component");
+                return null;
+            }
 
-            if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(enemyPlayer, out EnemyInfo enemyInfo))
+            if (!BotOwner.EnemiesController.EnemyInfos.TryGetValue(enemyPlayer, out EnemyInfo enemyInfo))
             {
-                if (enemyPlayerComponent != null)
-                {
-                    sainEnemy = new SAINEnemy(Bot, enemyPlayerComponent, enemyInfo);
-                    Enemies.Add(enemyPlayer.ProfileId, sainEnemy);
-                    //Logger.LogDebug($"Added [{player.ProfileId}] to [{BotOwner?.name}'s] Enemy List");
-                    return sainEnemy;
-                }
+                string debugString = $"Player {enemyPlayer.Profile.Nickname} : Side: {enemyPlayer.Profile.Side} is not in Botowner's {Player.Profile.Nickname} : Side: {Player.Profile.Side} EnemyInfos dictionary.: ";
+                debugString = findSourceDebug(debugString);
+                Logger.LogDebug(debugString);
+                return null;
             }
-            else
-            {
-                //string debugString = $"Player {getBotInfo(player)} " +
-                //    $"is not in Bot {getBotInfo(player)} EnemyInfos list. Cannot Add them as a SAIN Enemy.";
-                //debugString = findSourceDebug(debugString);
-                //Logger.LogDebug(debugString);
-            }
-            return null;
+
+            sainEnemy = new SAINEnemy(Bot, enemyPlayerComponent, enemyInfo);
+            Enemies.Add(enemyPlayer.ProfileId, sainEnemy);
+            enemyPlayer.OnIPlayerDeadOrUnspawn += removeEnemy;
+            return sainEnemy;
         }
 
         private string getBotInfo(Player player)

@@ -145,14 +145,13 @@ namespace SAIN.Components
         {
             CheckVisiblePlayers(botList);
             CheckHumanVisibility(botList);
-            yield return null;
-
             float time = Time.time;
             foreach (var bot in botList)
             {
                 if (bot != null)
                     bot.NextCheckVisiblePlayerTime = time + 0.1f;
             }
+            yield return null;
         }
 
         private readonly List<Player> _humanPlayers = new List<Player>();
@@ -347,10 +346,14 @@ namespace SAIN.Components
                             visPlayers.Add(player);
                         }
 
-                        var sainEnemy = bot.EnemyController.CheckAddEnemy(player);
-                        if (sainEnemy?.IsAI == true)
+                        if (player.IsAI && 
+                            !bot.EnemyController.IsPlayerFriendly(player))
                         {
-                            sainEnemy.Vision.InLineOfSight = lineOfSight;
+                            var sainEnemy = bot.EnemyController.CheckAddEnemy(player);
+                            if (sainEnemy != null)
+                            {
+                                sainEnemy.Vision.InLineOfSight = lineOfSight;
+                            }
                         }
                     }
                     total++;

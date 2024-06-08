@@ -6,7 +6,6 @@ using SAIN.SAINComponent.Classes.Info;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static EFT.Player;
 
 namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 {
@@ -16,49 +15,24 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         {
             EquipmentClass = playerComponent.Player.Equipment;
             GearInfo = new GearInfo(this);
+        }
 
+        public void Init()
+        {
             getAllWeapons();
             updateAllWeapons();
             ReCalcPowerOfEquipment();
-        }
-
-        public void InitBot(BotOwner botOwner)
-        {
-            botOwner.WeaponManager.Selector.OnActiveEquipmentSlotChanged += slotSelected;
-        }
-
-
-        public void DisposeBot()
-        {
-            BotOwner botOwner = PlayerComponent.BotOwner;
-            if (botOwner != null)
-            {
-                botOwner.WeaponManager.Selector.OnActiveEquipmentSlotChanged -= slotSelected;
-            }
-        }
-
-        private void slotSelected(EquipmentSlot slot)
-        {
-            addWeaponFromSlot(slot);
-            if (WeaponInfos.TryGetValue(slot, out var weaponInfo))
-            {
-                CurrentWeapon = weaponInfo;
-                ReCalcPowerOfEquipment();
-            }
         }
 
         public EquipmentClass EquipmentClass { get; private set; }
 
         private void ReCalcPowerOfEquipment()
         {
-            if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(Player, out float power))
+            float oldPower = Player.AIData.PowerOfEquipment;
+            if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(PlayerComponent, out float power) && 
+                oldPower != power)
             {
-                float oldPower = Player.AIData.PowerOfEquipment;
-                if (oldPower != power)
-                {
-                    Player.AIData.PowerOfEquipment = power;
-                    OnPowerRecalced?.Invoke(power);
-                }
+                OnPowerRecalced?.Invoke(power);
             }
         }
 
@@ -152,11 +126,6 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         {
             get
             {
-                if (PlayerComponent.IsAI)
-                {
-                    return _currentWeapon;
-                }
-
                 if (Player.HandsController.Item is Weapon weapon)
                 {
                     if (_currentWeapon?.Weapon == weapon)
@@ -175,10 +144,6 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                     }
                 }
                 return _currentWeapon;
-            }
-            private set
-            {
-                _currentWeapon = value;
             }
         }
 
