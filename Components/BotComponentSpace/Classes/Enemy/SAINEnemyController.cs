@@ -354,19 +354,19 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void RemoveEnemy(string id)
         {
-            if (ActiveEnemy != null && 
+            if (ActiveEnemy != null &&
                 ActiveEnemy.EnemyProfileId == id)
             {
                 ActiveEnemy = null;
             }
-            if (LastEnemy != null && 
+            if (LastEnemy != null &&
                 LastEnemy.EnemyProfileId == id)
             {
                 LastEnemy = null;
             }
 
             SAINEnemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
-            if (dogFightTarget != null && 
+            if (dogFightTarget != null &&
                 dogFightTarget.EnemyProfileId == id)
             {
                 Bot.Decision.DogFightDecision.DogFightTarget = null;
@@ -374,12 +374,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             if (Enemies.TryGetValue(id, out SAINEnemy enemy))
             {
+                ActiveEnemies.Remove(enemy);
                 enemy.Dispose();
                 Enemies.Remove(id);
                 removeEnemyInfo(enemy);
+                OnEnemyRemoved?.Invoke(id);
                 //Logger.LogDebug($"Removed [{id}] from [{BotOwner?.name}'s] Enemy List");
             }
         }
+
+        public System.Action<string> OnEnemyRemoved { get; set; }
 
         private void CheckAddEnemy()
         {
@@ -549,10 +553,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 //Logger.LogDebug("Cannot add dead player as an enemy.");
                 return null;
             }
-            if (Enemies.TryGetValue(enemyPlayer.ProfileId, out SAINEnemy sainEnemy))
-            {
-                return sainEnemy;
-            }
             if (enemyPlayer.ProfileId == Bot.Player.ProfileId)
             {
                 string debugString = $"Cannot add enemy {getBotInfo(enemyPlayer)} that matches this bot {getBotInfo(Player)}: ";
@@ -560,6 +560,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 Logger.LogDebug(debugString);
                 return null;
             }
+
             if (enemyPlayer.IsAI && enemyPlayer.AIData?.BotOwner == null)
             {
                 Logger.LogDebug("Cannot add ai as enemy with null Botowner");
@@ -573,6 +574,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return null;
             }
 
+            if (Enemies.TryGetValue(enemyPlayer.ProfileId, out SAINEnemy sainEnemy))
+            {
+                return sainEnemy;
+            }
+
             if (!BotOwner.EnemiesController.EnemyInfos.TryGetValue(enemyPlayer, out EnemyInfo enemyInfo))
             {
                 string debugString = $"Player {enemyPlayer.Profile.Nickname} : Side: {enemyPlayer.Profile.Side} is not in Botowner's {Player.Profile.Nickname} : Side: {Player.Profile.Side} EnemyInfos dictionary.: ";
@@ -584,6 +590,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             sainEnemy = new SAINEnemy(Bot, enemyPlayerComponent, enemyInfo);
             Enemies.Add(enemyPlayer.ProfileId, sainEnemy);
             enemyPlayer.OnIPlayerDeadOrUnspawn += removeEnemy;
+            enemyPlayerComponent.OnComponentDestroyed += RemoveEnemy;
             return sainEnemy;
         }
 
@@ -639,42 +646,54 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public bool IsPlayerAnEnemy(string profileID)
         {
-            return Enemies.ContainsKey(profileID) && Enemies[profileID] != null;
+            return Enemies.TryGetValue(profileID, out var enemy) && enemy != null;
         }
 
         public bool IsPlayerFriendly(IPlayer iPlayer)
         {
-            if (iPlayer != null)
+            if (iPlayer == null)
             {
-                Player player = GameWorldInfo.GetAlivePlayer(iPlayer);
-                if (player != null)
-                {
-                    // Check that the source isn't from a member of the bot's group.
-                    if (player.AIData.IsAI
-                        && BotOwner.BotsGroup.Contains(player.AIData.BotOwner))
-                    {
-                        return true;
-                    }
-                    if (player.ProfileId == Bot.Person.Player.ProfileId)
-                    {
-                        return true;
-                    }
-                    if (GetEnemy(player.ProfileId) != null)
-                    {
-                        return false;
-                    }
-                    // Checks if the player is not an active enemy and that they are a neutral party
-                    if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer)
-                        && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
-                    {
-                        return true;
-                    }
-                    // Check that the source isn't an ally
-                    if (BotOwner.BotsGroup.Allies.Contains(iPlayer))
-                    {
-                        return true;
-                    }
-                }
+                return false;
+            }
+            if (iPlayer.ProfileId == Bot.ProfileId)
+            {
+                return true;
+            }
+
+            if (Enemies.ContainsKey(iPlayer.ProfileId))
+            {
+                return false;
+            }
+
+            // Check that the source isn't from a member of the bot's group.
+            if (iPlayer.AIData.IsAI
+            && BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
+            {
+                return true;
+            }
+
+            // Checks if the player is not an active enemy and that they are a neutral party
+            if (!BotOwner.BotsGroup.IsPlayerEnemy(iPlayer)
+                && BotOwner.BotsGroup.Neutrals.ContainsKey(iPlayer))
+            {
+                return true;
+            }
+
+            // Check that the source isn't an ally
+            if (BotOwner.BotsGroup.Allies.Contains(iPlayer))
+            {
+                return true;
+            }
+
+            if (iPlayer.IsAI &&
+                iPlayer.AIData?.BotOwner?.Memory.GoalEnemy?.ProfileId == Bot.ProfileId)
+            {
+                return false;
+            }
+
+            if (!BotOwner.BotsGroup.Enemies.ContainsKey(iPlayer))
+            {
+                return true;
             }
             return false;
         }

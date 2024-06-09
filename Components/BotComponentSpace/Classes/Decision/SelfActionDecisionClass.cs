@@ -195,7 +195,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool checkDecisionTooLong()
         {
-            return Time.time - Bot.Decision.ChangeDecisionTime > 30f;
+            return Time.time - Bot.Decision.ChangeDecisionTime > 60f;
         }
 
         public bool UsingMeds => BotOwner.Medecine?.Using == true && CurrentSelfAction != SelfDecision.None;

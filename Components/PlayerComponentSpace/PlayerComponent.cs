@@ -124,6 +124,9 @@ namespace SAIN.Components.PlayerComponentSpace
         {
             Logger.LogDebug($"{Name} Player Component Destroyed");
             StopAllCoroutines();
+            OnComponentDestroyed?.Invoke(ProfileId);
         }
+
+        public Action<string> OnComponentDestroyed { get; set; }
     }
 }

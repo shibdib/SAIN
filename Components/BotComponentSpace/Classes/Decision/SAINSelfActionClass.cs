@@ -171,9 +171,15 @@ namespace SAIN.SAINComponent.Classes.Decision
             try
             {
                 result = BotOwner.WeaponManager.Reload.TryReload();
-                if (BotOwner.WeaponManager.Reload.NoAmmoForReloadCached)
+                if (!result && 
+                    checkRefillMags() && 
+                    BotOwner.WeaponManager.Reload.TryReload())
                 {
-                    BotOwner.WeaponManager.Reload.TryFillMagazines();
+                    result = true;
+                }
+                if (!result)
+                {
+                    BotOwner.WeaponManager.Selector.TryChangeWeapon(true);
                 }
             }
             catch (Exception)
@@ -182,6 +188,40 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             return result;
         }
+
+        private bool checkRefillMags()
+        {
+            var weapon = BotOwner.WeaponManager.CurrentWeapon;
+            var mag = weapon?.GetMagazineSlot();
+            if (mag == null)
+            {
+                return false;
+            }
+
+            MagRefillClass refill = new MagRefillClass
+            {
+                magazineSlot = mag,
+            };
+
+            _preallocatedMagazineList.Clear();
+            Player.GClass2761_0.GetReachableItemsOfTypeNonAlloc<MagazineClass>(_preallocatedMagazineList, new Func<MagazineClass, bool>(refill.canAccept));
+            if (_preallocatedMagazineList.Count == 0)
+            {
+                return false;
+            }
+            for (int i = 0; i < _preallocatedMagazineList.Count; i++)
+            {
+                MagazineClass magazineClass = _preallocatedMagazineList[i];
+                if (magazineClass.Count < magazineClass.MaxCount)
+                {
+                    BotOwner.WeaponManager.Reload.method_2(weapon, magazineClass);
+                }
+            }
+            _preallocatedMagazineList.Clear();
+            return true;
+        }
+
+        private static readonly List<MagazineClass> _preallocatedMagazineList = new List<MagazineClass>();
 
         public void BotCancelReload()
         {
@@ -192,5 +232,15 @@ namespace SAIN.SAINComponent.Classes.Decision
         }
 
         private float _healTime = 0f;
+    }
+
+    public class MagRefillClass
+    {
+        public bool canAccept(MagazineClass mag)
+        {
+            return this.magazineSlot.CanAccept(mag);
+        }
+
+        public Slot magazineSlot;
     }
 }

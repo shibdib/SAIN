@@ -12,6 +12,10 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
     public class SAINBotGrenadeClass : SAINBase, ISAINClass
     {
+        public GrenadeTracker DangerGrenade { get; private set; }
+        public Vector3? GrenadeDangerPoint => DangerGrenade?.DangerPoint;
+        public Dictionary<int, GrenadeTracker> ActiveGrenades { get; private set; } = new Dictionary<int, GrenadeTracker>();
+
         public SAINBotGrenadeClass(BotComponent sain) : base(sain)
         {
         }
@@ -22,18 +26,19 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Update()
         {
-            DangerGrenade = findGrenadeDangerPoint();
+            if (DangerGrenade == null)
+            {
+                DangerGrenade = findGrenadeDangerPoint();
+            }
         }
 
         private GrenadeTracker findGrenadeDangerPoint()
         {
-            ActiveGrenades.RemoveAll(x => x == null || x.Grenade == null);
-            for (int i = 0; i < ActiveGrenades.Count; i++)
+            foreach (var tracker in ActiveGrenades.Values)
             {
-                GrenadeTracker tracker = ActiveGrenades[i];
-                if (tracker != null && 
-                    tracker.Grenade != null && 
-                    tracker.GrenadeSpotted)
+                if (tracker == null) continue;
+                tracker.Update();
+                if (tracker.CanReact)
                 {
                     return tracker;
                 }
@@ -45,9 +50,39 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
         }
 
-        public GrenadeTracker DangerGrenade { get; private set; }
 
-        public Vector3? GrenadeDangerPoint => DangerGrenade?.DangerPoint;
+        public void EnemyGrenadeThrown(Grenade grenade, Vector3 dangerPoint)
+        {
+            if (Bot.BotActive && 
+                !Bot.GameIsEnding)
+            {
+                float reactionTime = GetReactionTime(Bot.Info.Profile.DifficultyModifier);
+                ActiveGrenades.Add(grenade.Id, new GrenadeTracker(BotOwner, grenade, dangerPoint, reactionTime));
+                grenade.DestroyEvent += removeGrenade;
+            }
+        }
+
+        private void removeGrenade(Throwable grenade)
+        {
+            if (grenade != null)
+            {
+                grenade.DestroyEvent -= removeGrenade;
+                ActiveGrenades.Remove(grenade.Id);
+            }
+        }
+
+
+        private static float GetReactionTime(float diffMod)
+        {
+            float reactionTime = 0.25f;
+            reactionTime /= diffMod;
+            reactionTime *= Random.Range(0.75f, 1.25f);
+
+            float min = 0.1f;
+            float max = 0.5f;
+
+            return Mathf.Clamp(reactionTime, min, max);
+        }
 
         public GrenadeThrowType GetThrowType(out GrenadeThrowDirection direction, out Vector3 ThrowAtPoint)
         {
@@ -198,58 +233,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             }
 
             return true;
-        }
-
-        public void EnemyGrenadeThrown(Grenade grenade, Vector3 dangerPoint)
-        {
-            if (Bot.BotActive && !Bot.GameIsEnding)
-            {
-                float reactionTime = GetReactionTime(Bot.Info.Profile.DifficultyModifier);
-                var tracker = BotOwner.gameObject.AddComponent<GrenadeTracker>();
-                tracker.Initialize(grenade, dangerPoint, reactionTime);
-                ActiveGrenades.Add(tracker);
-            }
-        }
-
-        public List<GrenadeTracker> ActiveGrenades { get; private set; } = new List<GrenadeTracker>();
-
-        private int GrenadePositionComparerer(GrenadeTracker A, GrenadeTracker B)
-        {
-            if (A == null && B != null)
-            {
-                return 1;
-            }
-            else if (A != null && B == null)
-            {
-                return -1;
-            }
-            else if (A == null && B == null)
-            {
-                return 0;
-            }
-            else
-            {
-                float AMag = (BotOwner.Position - A.DangerPoint).sqrMagnitude;
-                float BMag = (BotOwner.Position - B.DangerPoint).sqrMagnitude;
-                return AMag.CompareTo(BMag);
-            }
-        }
-
-        private static bool EnemyGrenadeHeard(Vector3 grenadePosition, Vector3 playerPosition, float distance)
-        {
-            return (grenadePosition - playerPosition).magnitude < distance;
-        }
-
-        private static float GetReactionTime(float diffMod)
-        {
-            float reactionTime = 0.33f;
-            reactionTime *= diffMod;
-            reactionTime *= Random.Range(0.75f, 1.25f);
-
-            float min = 0.15f;
-            float max = 0.66f;
-
-            return Mathf.Clamp(reactionTime, min, max);
         }
     }
 }

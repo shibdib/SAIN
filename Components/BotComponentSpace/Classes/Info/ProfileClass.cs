@@ -63,7 +63,7 @@ namespace SAIN.SAINComponent.Classes.Info
             switch (difficulty)
             {
                 case BotDifficulty.easy:
-                    modifier *= 0.75f;
+                    modifier *= 0.5f;
                     break;
 
                 case BotDifficulty.normal:
@@ -71,18 +71,18 @@ namespace SAIN.SAINComponent.Classes.Info
                     break;
 
                 case BotDifficulty.hard:
-                    modifier *= 1.25f;
+                    modifier *= 1.5f;
                     break;
 
                 case BotDifficulty.impossible:
-                    modifier *= 1.5f;
+                    modifier *= 1.75f;
                     break;
 
                 default:
                     break;
             }
 
-            DifficultyModifier = 1f - Mathf.Clamp((Mathf.Round(modifier * 100f) / 100f), 0.01f, 1f);
+            DifficultyModifier = modifier.Round100();
         }
     }
 }

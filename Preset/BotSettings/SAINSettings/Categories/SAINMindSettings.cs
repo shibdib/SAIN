@@ -72,7 +72,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public bool SURGE_KIT_ONLY_SAFE_CONTAINER = false;
+        public bool SURGE_KIT_ONLY_SAFE_CONTAINER = true;
 
         [Hidden]
         [JsonIgnore]
@@ -101,5 +101,13 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Hidden]
         [JsonIgnore]
         public bool AMBUSH_WHEN_UNDER_FIRE = false;
+
+        [Hidden]
+        [JsonIgnore]
+        public float HIT_DELAY_WHEN_PEACE = 0.33f;
+
+        [Hidden]
+        [JsonIgnore]
+        public float HIT_DELAY_WHEN_HAVE_SMT = 0.1f;
     }
 }

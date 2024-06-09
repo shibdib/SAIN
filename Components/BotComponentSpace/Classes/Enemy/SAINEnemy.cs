@@ -317,15 +317,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public bool IsSniper { get; private set; }
 
-        public void DeleteInfo(IPlayer player)
-        {
-            Bot.EnemyController.RemoveEnemy(EnemyProfileId);
-            if (player != null)
-            {
-                player.OnIPlayerDeadOrUnspawn -= DeleteInfo;
-            }
-        }
-
         private void updateActiveState(bool isCurrent)
         {
             if (isCurrent &&

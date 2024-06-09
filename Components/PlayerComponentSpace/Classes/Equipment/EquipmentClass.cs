@@ -143,6 +143,21 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                         }
                     }
                 }
+                if (_currentWeapon == null)
+                {
+                    if (WeaponInfos.TryGetValue(EquipmentSlot.FirstPrimaryWeapon, out WeaponInfo weaponInfo))
+                    {
+                        _currentWeapon = weaponInfo;
+                    }
+                    else if (WeaponInfos.TryGetValue(EquipmentSlot.SecondPrimaryWeapon, out weaponInfo))
+                    {
+                        _currentWeapon = weaponInfo;
+                    }
+                    else if (WeaponInfos.TryGetValue(EquipmentSlot.Holster, out weaponInfo))
+                    {
+                        _currentWeapon = weaponInfo;
+                    }
+                }
                 return _currentWeapon;
             }
         }

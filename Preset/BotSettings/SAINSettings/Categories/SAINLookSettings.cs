@@ -136,35 +136,35 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Hidden]
         public float GOAL_TO_FULL_DISSAPEAR_SHOOT = 0.1f;
 
-        [NameAndDescription("Lose Shoot Ability Time",
-            "How far into grass a bot will be able to see, how far the depth must be to lose visibilty")]
-        [Default(1f)]
-        [MinMax(0.0f, 1f, 100f)]
-        [Advanced]
-        public float MAX_VISION_GRASS_METERS = 1f;
-
-        [Hidden]
-        public float MAX_VISION_GRASS_METERS_OPT = 1f;
-
-        [Hidden]
-        public float MAX_VISION_GRASS_METERS_FLARE = 4f;
-
-        [Hidden]
-        public float MAX_VISION_GRASS_METERS_FLARE_OPT = 0.25f;
-
-        [NameAndDescription("Vision Distance No Foliage",
-            "Bots will not see foliage at this distance or less, so if a target is below this number in distance, they will ignore foliage")]
-        [Default(3f)]
-        [MinMax(1f, 100f)]
-        [Advanced]
-        public float NO_GREEN_DIST = 3f;
-
-        [NameAndDescription("Vision Distance No Grass",
-            "Bots will not see grass at this distance or less, so if a target is below this number in distance, they will ignore grass")]
-        [Default(3f)]
-        [MinMax(1f, 100f)]
-        [Advanced]
-        public float NO_GRASS_DIST = 3f;
+        //[NameAndDescription("Max Grass Vision",
+        //    "How far into grass a bot will be able to see, how far the depth must be to lose visibilty")]
+        //[Default(1f)]
+        //[MinMax(0.0f, 1f, 100f)]
+        //[Advanced]
+        //public float MAX_VISION_GRASS_METERS = 1f;
+        //
+        //[Hidden]
+        //public float MAX_VISION_GRASS_METERS_OPT = 1f;
+        //
+        //[Hidden]
+        //public float MAX_VISION_GRASS_METERS_FLARE = 4f;
+        //
+        //[Hidden]
+        //public float MAX_VISION_GRASS_METERS_FLARE_OPT = 0.25f;
+        //
+        //[NameAndDescription("Vision Distance No Foliage",
+        //    "Bots will not see foliage at this distance or less, so if a target is below this number in distance, they will ignore foliage")]
+        //[Default(3f)]
+        //[MinMax(1f, 100f)]
+        //[Advanced]
+        //public float NO_GREEN_DIST = 3f;
+        //
+        //[NameAndDescription("Vision Distance No Grass",
+        //    "Bots will not see grass at this distance or less, so if a target is below this number in distance, they will ignore grass")]
+        //[Default(3f)]
+        //[MinMax(1f, 100f)]
+        //[Advanced]
+        //public float NO_GRASS_DIST = 3f;
 
         [Hidden]
         [JsonIgnore]

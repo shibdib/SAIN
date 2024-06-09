@@ -78,7 +78,12 @@ namespace SAIN.SAINComponent.Classes
 
         private Vector3? getTarget()
         {
-            Vector3? target = getVisibleEnemyPos() ?? getEnemylastKnownPos();
+            Vector3? target = 
+                getVisibleEnemyPos() ?? 
+                getLastHitPosition() ?? 
+                getUnderFirePosition() ??
+                getEnemylastKnownPos();
+
             return target;
         }
 
@@ -94,11 +99,46 @@ namespace SAIN.SAINComponent.Classes
                 }
                 if (enemy.Seen && enemy.TimeSinceSeen < 1f)
                 {
-                    return pos;
+                    //return pos;
                 }
             }
             return null;
         }
+
+        private Vector3? getLastHitPosition()
+        {
+            if (Bot.BotHitReaction.TimeSinceShot > 5f)
+            {
+                return null;
+            }
+
+            SAINEnemy enemy = Bot.BotHitReaction.EnemyWhoLastShotMe;
+            if (enemy == null || 
+                !enemy.IsValid || 
+                enemy.IsCurrentEnemy)
+            {
+                return null;
+            }
+            return enemy.LastKnownPosition ?? enemy.EnemyStatus.LastShotPosition;
+        }
+
+        private Vector3? getUnderFirePosition()
+        {
+            if (!BotOwner.Memory.IsUnderFire)
+            {
+                return null;
+            }
+
+            SAINEnemy enemy = Bot.Memory.LastUnderFireEnemy;
+            if (enemy == null ||
+                !enemy.IsValid ||
+                enemy.IsCurrentEnemy)
+            {
+                return null;
+            }
+            return enemy.LastKnownPosition ?? Bot.Memory.UnderFireFromPosition;
+        }
+
         private Vector3? getEnemylastKnownPos()
         {
             SAINEnemy enemy = Enemy;

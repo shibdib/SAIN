@@ -541,9 +541,33 @@ namespace SAIN.Components
 
         private void GrenadeThrown(Grenade grenade, Vector3 position, Vector3 force, float mass)
         {
-            if (grenade != null)
+            if (grenade == null)
             {
-                StartCoroutine(grenadeThrown(grenade, position, force, mass));
+                return;
+            }
+
+            Player player = GameWorldInfo.GetAlivePlayer(grenade.ProfileId);
+            if (player == null)
+            {
+                Logger.LogError($"Player Null from ID {grenade.ProfileId}");
+                return;
+            }
+            if (!player.HealthController.IsAlive)
+            {
+                return;
+            }
+
+            Vector3 dangerPoint = Vector.DangerPoint(position, force, mass);
+            Singleton<BotEventHandler>.Instance?.PlaySound(player, grenade.transform.position, 30f, AISoundType.gun);
+
+            foreach (var bot in Bots.Values)
+            {
+                if (IsBotActive(bot) &&
+                    !bot.EnemyController.IsPlayerFriendly(player) &&
+                    (dangerPoint - bot.Position).sqrMagnitude < 100f * 100f)
+                {
+                    bot.Grenade.EnemyGrenadeThrown(grenade, dangerPoint);
+                }
             }
         }
 
@@ -587,6 +611,7 @@ namespace SAIN.Components
             }
             if (player.HealthController.IsAlive)
             {
+                Singleton<BotEventHandler>.Instance?.PlaySound(player, grenade.transform.position, 30f, AISoundType.gun);
                 foreach (var bot in Bots.Values)
                 {
                     if (IsBotActive(bot) &&

@@ -223,7 +223,7 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [Default(0.35f)]
         [Percentage01to99]
-        public float WeaponClassScaling = 0.35f;
+        public float WeaponClassScaling = 0.25f;
 
         [Description(Shootability)]
         [Advanced]
@@ -241,18 +241,18 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [Default(0.4f)]
         [Percentage01to99]
-        public float AmmoCaliberScaling = 0.4f;
+        public float AmmoCaliberScaling = 0.3f;
 
         [Description(Shootability)]
         [Advanced]
         [Default(0.15f)]
         [Percentage01to99]
-        public float WeaponProficiencyScaling = 0.15f;
+        public float WeaponProficiencyScaling = 0.3f;
 
         [Description(Shootability)]
         [Advanced]
         [Default(0.2f)]
         [Percentage01to99]
-        public float DifficultyScaling = 0.2f;
+        public float DifficultyScaling = 0.3f;
     }
 }

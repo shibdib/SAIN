@@ -26,6 +26,16 @@ namespace SAIN.SAINComponent.Classes
         public void Init()
         {
             Player.BeingHitAction += GetHit;
+            Bot.EnemyController.OnEnemyRemoved += clearEnemy;
+        }
+
+        private void clearEnemy(string profileId)
+        {
+            if (EnemyWhoLastShotMe != null && 
+                EnemyWhoLastShotMe.EnemyProfileId == profileId)
+            {
+                EnemyWhoLastShotMe = null;
+            }
         }
 
         public void Update()
@@ -38,15 +48,12 @@ namespace SAIN.SAINComponent.Classes
             {
                 Player.BeingHitAction -= GetHit;
             }
+            Bot.EnemyController.OnEnemyRemoved -= clearEnemy;
         }
 
         public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
-            IPlayer player = damageInfo.Player?.iPlayer;
-            if (player != null)
-            {
-                PlayerWhoLastShotMe = GameWorldInfo.GetAlivePlayer(player);
-            }
+            TimeLastShot = Time.time;
             switch (bodyPart)
             {
                 case EBodyPart.Head:
@@ -67,18 +74,23 @@ namespace SAIN.SAINComponent.Classes
                     GetHitInArms(damageInfo); 
                     break;
             }
-            if (PlayerWhoLastShotMe != null && !PlayerWhoLastShotMe.IsAI)
+
+            var player = damageInfo.Player?.iPlayer;
+            if (player != null)
             {
-                //Logger.LogAndNotifyDebug($"{BotOwner.name} is hit in {HitReaction}");
-            }
-            SAINEnemy enemy = Bot.EnemyController.CheckAddEnemy(player);
-            if (enemy != null)
-            {
-                enemy.EnemyStatus.RegisterShotByEnemy(damageInfo);
+                SAINEnemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
+                if (enemy != null &&
+                    enemy.IsValid)
+                {
+                    EnemyWhoLastShotMe = enemy;
+                    enemy.EnemyStatus.RegisterShotByEnemy(damageInfo);
+                }
             }
         }
 
-        public Player PlayerWhoLastShotMe { get; private set; }
+        public float TimeLastShot { get; private set; }
+        public float TimeSinceShot => Time.time - TimeLastShot;
+        public SAINEnemy EnemyWhoLastShotMe { get; private set; }
 
         private void GetHitInLegs(DamageInfo damageInfo)
         {

@@ -14,10 +14,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (SAINBot.Medical.Surgery.AreaClearForSurgery)
             {
-                tryStartSurgery();
+                SAINBot.Mover.PauseMovement(30);
+                SAINBot.Mover.SprintController.CancelRun();
                 SAINBot.Mover.SetTargetMoveSpeed(0f);
                 SAINBot.Cover.DuckInCover();
-                SAINBot.Mover.PauseMovement(1);
+                tryStartSurgery();
             }
             else
             {
@@ -54,8 +55,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             var surgery = BotOwner.Medecine.SurgicalKit;
             if (_startSurgeryTime < Time.time
-                && !BotOwner.Mover.IsMoving
-                && !SAINBot.Mover.SprintController.Running
                 && !surgery.Using
                 && surgery.ShallStartUse())
             {
@@ -69,7 +68,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private bool checkFullHeal()
         {
             if (SAINBot.Medical.Surgery.SurgeryStarted = true &&
-                _actionStartedTime + 20f < Time.time)
+                _actionStartedTime + 30f < Time.time)
             {
                 SAINBot.Player?.ActiveHealthController?.RestoreFullHealth();
                 SAINBot.Decision.ResetDecisions(true);

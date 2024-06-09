@@ -22,6 +22,16 @@ namespace SAIN.SAINComponent.Classes.Memory
 
         public void Init()
         {
+            Bot.EnemyController.OnEnemyRemoved += clearEnemy;
+        }
+
+        private void clearEnemy(string profileId)
+        {
+            if (LastUnderFireEnemy != null && LastUnderFireEnemy.EnemyProfileId == profileId)
+            {
+                LastUnderFireEnemy = null;
+                resetUnderFire();
+            }
         }
 
         public void Update()
@@ -71,26 +81,30 @@ namespace SAIN.SAINComponent.Classes.Memory
                 catch { }
 
                 LastUnderFireSource = source;
+                var enemy = Bot.EnemyController.GetEnemy(source.ProfileId);
+                if (enemy != null && enemy.IsValid)
+                {
+                    LastUnderFireEnemy = enemy;
+                }
+                UnderFireFromPosition = position;
             }
-            UnderFireFromPosition = position;
         }
 
         private void checkResetUnderFire()
         {
             if (_nextCheckDeadTime < Time.time)
             {
-                _nextCheckDeadTime = Time.time + 0.5f;
+                _nextCheckDeadTime = Time.time + 0.5f; 
+                resetUnderFire();
+            }
+        }
 
-                if (BotOwner.Memory.IsUnderFire
-                    && LastUnderFireSource != null
-                    && !LastUnderFireSource.HealthController.IsAlive)
-                {
-                    if (_underFireTimeField == null)
-                    {
-                        _underFireTimeField = AccessTools.Field(typeof(BotMemoryClass), "float_4");
-                    }
-                    _underFireTimeField.SetValue(BotOwner.Memory, Time.time);
-                }
+        private void resetUnderFire()
+        {
+            if (BotOwner.Memory.IsUnderFire &&
+                (LastUnderFireSource == null || LastUnderFireSource.HealthController.IsAlive == false))
+            {
+                _underFireTimeField.SetValue(BotOwner.Memory, Time.time);
             }
         }
 
@@ -99,9 +113,11 @@ namespace SAIN.SAINComponent.Classes.Memory
         private static FieldInfo _underFireTimeField;
 
         public IPlayer LastUnderFireSource { get; private set; }
+        public SAINEnemy LastUnderFireEnemy { get; private set; }
 
         public void Dispose()
         {
+            Bot.EnemyController.OnEnemyRemoved -= clearEnemy;
         }
 
         public readonly List<Player> VisiblePlayers = new List<Player>();
@@ -115,5 +131,10 @@ namespace SAIN.SAINComponent.Classes.Memory
         public HealthTracker Health { get; private set; }
 
         public LocationTracker Location { get; private set; }
+
+        static SAINMemoryClass()
+        {
+            _underFireTimeField = AccessTools.Field(typeof(BotMemoryClass), "float_4");
+        }
     }
 }

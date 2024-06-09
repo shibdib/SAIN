@@ -346,10 +346,9 @@ namespace SAIN.Components
                             visPlayers.Add(player);
                         }
 
-                        if (player.IsAI && 
-                            !bot.EnemyController.IsPlayerFriendly(player))
+                        if (player.IsAI)
                         {
-                            var sainEnemy = bot.EnemyController.CheckAddEnemy(player);
+                            var sainEnemy = bot.EnemyController.GetEnemy(player.ProfileId);
                             if (sainEnemy != null)
                             {
                                 sainEnemy.Vision.InLineOfSight = lineOfSight;

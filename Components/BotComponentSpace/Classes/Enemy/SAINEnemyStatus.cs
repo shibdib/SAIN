@@ -128,8 +128,31 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
             set
             {
+                if (value)
+                {
+                    updateShotStatus();
+                    updateShotPos();
+                }
                 _shotByEnemy.Value = value;
             }
+        }
+
+        private void updateShotStatus()
+        {
+            if (!ShotByEnemy)
+            {
+                ShotByEnemy = true;
+                TimeFirstShot = Time.time;
+            }
+        }
+
+        private void updateShotPos()
+        {
+            Vector3 random = UnityEngine.Random.onUnitSphere;
+            random.y = 0f;
+            random = random.normalized;
+            random *= UnityEngine.Random.Range(0.5f, Enemy.RealDistance / 5);
+            LastShotPosition = Enemy.EnemyPosition + random;
         }
 
         public bool EnemyUsingSurgery
@@ -229,6 +252,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 ShotByEnemyRecently = true;
             }
         }
+
+        public bool ShotByEnemy { get; private set; }
+        public float TimeFirstShot { get; private set; } 
+        public Vector3? LastShotPosition { get; private set; }
 
         public SAINEnemyStatus(SAINEnemy enemy) : base(enemy)
         {
