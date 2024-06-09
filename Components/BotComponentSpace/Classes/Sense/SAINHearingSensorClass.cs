@@ -1,23 +1,13 @@
-﻿using BepInEx.Logging;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
-using Interpolation;
-using RootMotion.FinalIK;
 using SAIN.Components;
+using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
-using SAIN.Preset.GlobalSettings.Categories;
-using SAIN.Preset.Personalities;
-using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Enemy;
-using SAIN.SAINComponent.Classes.WeaponFunction;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -29,8 +19,54 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            Singleton<BotEventHandler>.Instance.OnSoundPlayed += HearSound;
+            SAINBotController.Instance.AISoundPlayed += soundHeard;
             Singleton<BotEventHandler>.Instance.OnKill += cleanupKilledPlayer;
+        }
+
+        private void soundHeard(SAINSoundType soundType, Vector3 soundPosition, PlayerComponent playerComponent, float power, float volume)
+        {
+            IPlayer iPlayer = playerComponent.IPlayer;
+            if (shallIgnore(iPlayer, soundPosition))
+            {
+                return;
+            }
+
+            if (!Bot.EnemyController.IsPlayerAnEnemy(playerComponent.ProfileId))
+            {
+                return;
+            }
+
+            if (iPlayer.IsAI &&
+                shallLimitAI(iPlayer))
+            {
+                return;
+            }
+
+            const float freq = 1f;
+            if (cleanupTimer < Time.time)
+            {
+                cleanupTimer = Time.time + freq;
+                ManualCleanup();
+            }
+
+            if (iPlayer?.IsYourPlayer == true &&
+                _nextChecktime < Time.time)
+            {
+                Logger.LogDebug($"MainPlayer Footstep Sound Range {power} : Volume: {volume}");
+                _nextChecktime = Time.time + 1f;
+            }
+
+            power *= volume;
+
+            bool wasHeard = DoIHearSound(iPlayer, soundPosition, power, soundType, out float distance);
+            bool bulletFelt = BulletFelt(iPlayer, soundType, soundPosition);
+
+            if (!wasHeard && !bulletFelt)
+            {
+                return;
+            }
+
+            ReactToSound(iPlayer, soundPosition, distance, wasHeard, bulletFelt, soundType);
         }
 
         public void Update()
@@ -71,7 +107,7 @@ namespace SAIN.SAINComponent.Classes
         public void Dispose()
         {
             ManualCleanup(true);
-            Singleton<BotEventHandler>.Instance.OnSoundPlayed -= HearSound;
+            SAINBotController.Instance.AISoundPlayed -= soundHeard;
             Singleton<BotEventHandler>.Instance.OnKill -= cleanupKilledPlayer;
         }
 
@@ -101,43 +137,18 @@ namespace SAIN.SAINComponent.Classes
                 case AILimitSetting.Far:
                 case AILimitSetting.VeryFar:
                     return settings.LimitAIvsAIMaxAudioRange;
+
                 case AILimitSetting.Narnia:
                     return settings.LimitAIvsAIMaxAudioRangeVeryFar;
+
                 default:
                     return float.MaxValue;
             }
         }
 
-        public void HearSound(IPlayer iPlayer, Vector3 position, float power, AISoundType type)
-        {
-            if (Bot?.Player?.HealthController?.IsAlive == true && 
-                iPlayer?.HealthController?.IsAlive == true)
-            {
-                if (shallIgnore(iPlayer, position))
-                {
-                    return;
-                }
-
-                if (iPlayer.IsAI && 
-                    shallLimitAI(iPlayer))
-                {
-                    return;
-                }
-
-                const float freq = 1f;
-                if (cleanupTimer < Time.time)
-                {
-                    cleanupTimer = Time.time + freq;
-                    ManualCleanup();
-                }
-
-                EnemySoundHeard(iPlayer, position, power, type);
-            }
-        }
-
         private bool shallIgnore(IPlayer iPlayer, Vector3 position)
         {
-            return 
+            return
                 !Bot.BotActive ||
                 Bot.GameIsEnding ||
                 Bot.Person.ProfileId == iPlayer.ProfileId ||
@@ -146,41 +157,14 @@ namespace SAIN.SAINComponent.Classes
 
         private readonly Dictionary<string, SAINSoundCollection> SoundsHeardFromPlayer = new Dictionary<string, SAINSoundCollection>();
 
-        public bool EnemySoundHeard(IPlayer iPlayer, Vector3 soundPosition, float power, AISoundType type)
-        {
-            if (Bot.EnemyController.IsPlayerFriendly(iPlayer))
-            {
-                return false;
-            }
-
-            if (type == AISoundType.step && 
-                iPlayer?.IsYourPlayer == true &&
-                _nextChecktime < Time.time)
-            {
-                //Logger.LogDebug($"MainPlayer Footstep Sound Range {power}");
-                _nextChecktime = Time.time + 1f;
-            }
-
-            bool wasHeard = checkIfSoundHeard(iPlayer, soundPosition, power, type, out float distance);
-            bool bulletFelt = BulletFelt(iPlayer, type, soundPosition);
-
-            return 
-                (wasHeard || bulletFelt) && 
-                ReactToSound(iPlayer, soundPosition, distance, wasHeard, bulletFelt, type);
-        }
-
         private static float _nextChecktime;
 
-        private bool checkIfSoundHeard(IPlayer player, Vector3 position, float power, AISoundType soundType, out float distance)
-        {
-            return DoIHearSound(player, position, power, soundType, out distance);
-        }
-
-        private float getSoundRangeModifier(AISoundType soundType, float soundDistance)
+        private float getSoundRangeModifier(SAINSoundType soundType, float soundDistance)
         {
             float modifier = 1f;
             var globalHearing = GlobalSettings.Hearing;
-            if (soundType == AISoundType.step)
+            bool gunShot = isGunshot(soundType);
+            if (!gunShot)
             {
                 modifier *= globalHearing.FootstepAudioMultiplier;
             }
@@ -195,7 +179,7 @@ namespace SAIN.SAINComponent.Classes
                 modifier *= hearSense;
             }
 
-            if (soundType == AISoundType.step && 
+            if (!gunShot &&
                 soundDistance > 15f)
             {
                 if (!Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece)
@@ -206,7 +190,7 @@ namespace SAIN.SAINComponent.Classes
                 {
                     modifier *= 0.8f;
                 }
-                if (Bot.Memory.Health.Dying && 
+                if (Bot.Memory.Health.Dying &&
                     !Bot.Memory.Health.OnPainKillers)
                 {
                     modifier *= 0.8f;
@@ -236,17 +220,21 @@ namespace SAIN.SAINComponent.Classes
             return false;
         }
 
-        private bool BulletFelt(IPlayer person, AISoundType type, Vector3 pos)
+        private bool BulletFelt(IPlayer person, SAINSoundType type, Vector3 pos)
         {
             const float bulletfeeldistance = 500f;
             const float DotThreshold = 0.5f;
 
-            bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
+            if (!isGunshot(type))
+            {
+                return false;
+            }
 
             Vector3 shooterDirectionToBot = BotOwner.Transform.position - pos;
             float shooterDistance = shooterDirectionToBot.magnitude;
 
-            if (isGunSound && shooterDistance <= bulletfeeldistance && GetShotDirection(person, out Vector3 shotDirection))
+            if (shooterDistance <= bulletfeeldistance &&
+                GetShotDirection(person, out Vector3 shotDirection))
             {
                 Vector3 shotDirectionNormal = shotDirection.normalized;
                 Vector3 botDirectionNormal = shooterDirectionToBot.normalized;
@@ -269,15 +257,10 @@ namespace SAIN.SAINComponent.Classes
             return false;
         }
 
-        private IEnumerator hearSound(IPlayer iPlayer, Vector3 soundPosition, float power, AISoundType type)
-        {
-            yield return null;
-        }
-
-        public bool ReactToSound(IPlayer person, Vector3 soundPosition, float power, bool wasHeard, bool bulletFelt, AISoundType type)
+        public bool ReactToSound(IPlayer person, Vector3 soundPosition, float power, bool wasHeard, bool bulletFelt, SAINSoundType type)
         {
             bool reacting = false;
-            bool isGunSound = type == AISoundType.gun || type == AISoundType.silencedGun;
+            bool isGunSound = isGunshot(type);
             float shooterDistance = (BotOwner.Transform.position - soundPosition).magnitude;
 
             Player player = GameWorldInfo.GetAlivePlayer(person);
@@ -288,8 +271,8 @@ namespace SAIN.SAINComponent.Classes
 
             Vector3 vector = getSoundDispersion(person, soundPosition, type);
 
-            if (person != null && 
-                bulletFelt && 
+            if (person != null &&
+                bulletFelt &&
                 isGunSound)
             {
                 float maxSuppressionDist = SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaxSuppressionDistance;
@@ -300,13 +283,13 @@ namespace SAIN.SAINComponent.Classes
                 }
             }
 
-            if (!reacting && 
+            if (!reacting &&
                 !wasHeard)
             {
                 return false;
             }
 
-            if (!reacting && 
+            if (!reacting &&
                 !shallChaseGunshot(shooterDistance, soundPosition))
             {
                 return reacting;
@@ -387,12 +370,12 @@ namespace SAIN.SAINComponent.Classes
             yield return new WaitForSeconds(delay);
         }
 
-        private IEnumerator delayReact(Vector3 soundPos, AISoundType type, IPlayer person, float shooterDistance, Vector3 projectionPoint, float projectionPointDist)
+        private IEnumerator delayReact(Vector3 soundPos, SAINSoundType type, IPlayer person, float shooterDistance, Vector3 projectionPoint, float projectionPointDist)
         {
             yield return baseHearDelay();
 
-            if (Bot != null && 
-                person != null && 
+            if (Bot != null &&
+                person != null &&
                 Bot?.Player?.HealthController?.IsAlive == true &&
                 person?.HealthController?.IsAlive == true)
             {
@@ -400,7 +383,22 @@ namespace SAIN.SAINComponent.Classes
                 bool underFire = projectionPointDist <= maxUnderFireDist;
                 if (underFire)
                 {
-                    BotOwner?.HearingSensor?.OnEnemySounHearded?.Invoke(soundPos, shooterDistance, type);
+                    AISoundType baseSoundType;
+                    switch (type)
+                    {
+                        case SAINSoundType.SuppressedGunShot:
+                            baseSoundType = AISoundType.silencedGun;
+                            break;
+
+                        case SAINSoundType.Gunshot:
+                            baseSoundType = AISoundType.gun;
+                            break;
+
+                        default:
+                            baseSoundType = AISoundType.step;
+                            break;
+                    }
+                    BotOwner?.HearingSensor?.OnEnemySounHearded?.Invoke(soundPos, shooterDistance, baseSoundType);
                     Bot.Memory.SetUnderFire(person, soundPos);
                 }
                 Bot.Suppression.AddSuppression(projectionPointDist);
@@ -414,11 +412,11 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private IEnumerator delayAddSearch(Vector3 vector, float power, AISoundType type, IPlayer person)
+        private IEnumerator delayAddSearch(Vector3 vector, float power, SAINSoundType type, IPlayer person)
         {
             yield return baseHearDelay();
 
-            if (Bot?.Player?.HealthController?.IsAlive == true && 
+            if (Bot?.Player?.HealthController?.IsAlive == true &&
                 person?.HealthController?.IsAlive == true)
             {
                 Bot?.Squad?.SquadInfo?.AddPointToSearch(vector, power, Bot, type, person);
@@ -426,13 +424,13 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private Vector3 getSoundDispersion(IPlayer person, Vector3 soundPosition, AISoundType soundType)
+        private Vector3 getSoundDispersion(IPlayer person, Vector3 soundPosition, SAINSoundType soundType)
         {
             float shooterDistance = (Bot.Position - soundPosition).magnitude;
             float baseDispersion = getBaseDispersion(shooterDistance, soundType);
 
-            float finalDispersion = 
-                modifyDispersion(baseDispersion, person, out int soundCount) * 
+            float finalDispersion =
+                modifyDispersion(baseDispersion, person, out int soundCount) *
                 getDispersionFromDirection(soundPosition);
 
             float minDispersion = shooterDistance < 10 ? 0f : 0.5f;
@@ -444,25 +442,28 @@ namespace SAIN.SAINComponent.Classes
             return soundPosition + randomdirection;
         }
 
-        private float getBaseDispersion(float shooterDistance, AISoundType soundType)
+        private float getBaseDispersion(float shooterDistance, SAINSoundType soundType)
         {
             const float dispSuppGun = 12.5f;
             const float dispGun = 17.5f;
             const float dispStep = 6.25f;
 
             float dispersion;
-            if (soundType == AISoundType.gun)
+            switch (soundType)
             {
-                dispersion = shooterDistance / dispGun;
+                case SAINSoundType.Gunshot:
+                    dispersion = shooterDistance / dispGun;
+                    break;
+
+                case SAINSoundType.SuppressedGunShot:
+                    dispersion = shooterDistance / dispSuppGun;
+                    break;
+
+                default:
+                    dispersion = shooterDistance / dispStep;
+                    break;
             }
-            else if (soundType == AISoundType.silencedGun)
-            {
-                dispersion = shooterDistance / dispSuppGun;
-            }
-            else
-            {
-                dispersion = shooterDistance / dispStep;
-            }
+
             return dispersion;
         }
 
@@ -549,14 +550,14 @@ namespace SAIN.SAINComponent.Classes
             // if the direction the player shot hits a wall, and the point that they hit is further than our input max distance, the shot did not fly by the bot.
             Vector3 weaponRoot = player.WeaponRoot.position;
             Vector3 direction = projectionPoint - weaponRoot;
-            if (shotNearMe && 
-                Physics.Raycast(player.WeaponRoot.position, direction, out var hit, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask) && 
+            if (shotNearMe &&
+                Physics.Raycast(player.WeaponRoot.position, direction, out var hit, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask) &&
                 (hit.point - Bot.Position).magnitude > maxDist)
             {
                 return false;
             }
 
-            if (SAINPlugin.EditorDefaults.DebugHearing && 
+            if (SAINPlugin.EditorDefaults.DebugHearing &&
                 shotNearMe)
             {
                 DebugGizmos.Sphere(projectionPoint, 0.25f, Color.red, true, 60f);
@@ -576,7 +577,7 @@ namespace SAIN.SAINComponent.Classes
             return projectionPoint;
         }
 
-        private bool CheckFootStepDetectChance(float distance)
+        private bool doDetectionChanceCheck(float distance)
         {
             bool hasheadPhones = Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece;
 
@@ -596,15 +597,15 @@ namespace SAIN.SAINComponent.Classes
 
             float minimumChance = 0f;
             bool midRange = distance < farhearing * 0.66f;
-            if (midRange && 
+            if (midRange &&
                 Player.Velocity.magnitude < 0.5f)
             {
                 minimumChance += 5f;
             }
 
             // Random chance to hear at any range within maxdistance if a bot has headphones
-            if (midRange && 
-                Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece && 
+            if (midRange &&
+                Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece &&
                 EFTMath.RandomBool(5))
             {
                 minimumChance += 5f;
@@ -620,13 +621,26 @@ namespace SAIN.SAINComponent.Classes
             return EFTMath.RandomBool(chanceToHear);
         }
 
-        public bool DoIHearSound(IPlayer iPlayer, Vector3 position, float range, AISoundType type, out float soundDistance)
+        private static bool isGunshot(SAINSoundType soundType)
+        {
+            switch (soundType)
+            {
+                case SAINSoundType.Gunshot:
+                case SAINSoundType.SuppressedGunShot:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        public bool DoIHearSound(IPlayer iPlayer, Vector3 position, float range, SAINSoundType type, out float soundDistance)
         {
             bool wasHeard = false;
             soundDistance = (Bot.Position - position).magnitude;
 
-            if (type == AISoundType.step && 
-                !CheckFootStepDetectChance(soundDistance))
+            if (!isGunshot(type) &&
+                !doDetectionChanceCheck(soundDistance))
             {
                 return false;
             }
@@ -650,11 +664,11 @@ namespace SAIN.SAINComponent.Classes
             return wasHeard;
         }
 
-        private float GetOcclusion(IPlayer player, Vector3 position, float power, AISoundType type)
+        private float GetOcclusion(IPlayer player, Vector3 position, float power, SAINSoundType type)
         {
             Vector3 botheadpos = BotOwner.MyHead.position;
 
-            if (type == AISoundType.step)
+            if (!isGunshot(type))
             {
                 position.y += 0.1f;
             }
@@ -680,7 +694,7 @@ namespace SAIN.SAINComponent.Classes
                     float finalmodifier = RaycastCheck(botheadpos, position, environmentmodifier);
 
                     // Reduce occlusion for unsuppressed guns
-                    if (type == AISoundType.gun) finalmodifier = Mathf.Sqrt(finalmodifier);
+                    if (type == SAINSoundType.Gunshot) finalmodifier = Mathf.Sqrt(finalmodifier);
 
                     // Apply Modifier
                     result = power * finalmodifier;

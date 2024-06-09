@@ -84,6 +84,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
             set
             {
+                if (value && !Enemy.Heard)
+                {
+                    Enemy.Heard = true;
+                }
                 _heardRecently.Value = value;
             }
         }

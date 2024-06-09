@@ -105,6 +105,47 @@ namespace SAIN.BotController.Classes
 
         public Action<EnemyPlace, SAINEnemy> OnEnemyHeard { get; set; }
 
+        public void AddPointToSearch(Vector3 position, float soundPower, BotComponent sain, SAINSoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
+        {
+            if (EFTBotGroup == null)
+            {
+                EFTBotGroup = sain.BotOwner.BotsGroup;
+                Logger.LogError("Botsgroup null");
+            }
+            if (GroupPlacesForCheck == null)
+            {
+                Logger.LogError("PlacesForCheck null");
+                return;
+            }
+
+            sain?.EnemyController?.GetEnemy(player.ProfileId)?.SetHeardStatus(true, position, soundType, true);
+
+            AISoundType baseSoundType;
+            switch (soundType)
+            {
+                case SAINSoundType.SuppressedGunShot:
+                    baseSoundType = AISoundType.silencedGun;
+                    break;
+
+                case SAINSoundType.Gunshot:
+                    baseSoundType = AISoundType.gun;
+                    break;
+
+                default:
+                    baseSoundType = AISoundType.step;
+                    break;
+            }
+
+
+            bool isDanger = baseSoundType == AISoundType.step ? false : true;
+            PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
+            PlaceForCheck newPlace = AddNewPlaceForCheck(sain.BotOwner, position, checkType, player);
+            if (newPlace != null && searchType == ESearchPointType.Hearing)
+            {
+                OnSoundHeard?.Invoke(newPlace);
+            }
+        }
+
         public void AddPointToSearch(Vector3 position, float soundPower, BotComponent sain, AISoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
         {
             if (EFTBotGroup == null)

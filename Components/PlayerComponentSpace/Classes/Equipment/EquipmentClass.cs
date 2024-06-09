@@ -49,8 +49,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
             if (_nextPlaySoundTime < Time.time)
             {
-                _nextPlaySoundTime = Time.time + (PlayerComponent.IsAI ? 0.5f : 0.1f);
-                SAINSoundType sainType = weapon.AISoundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot;
+                _nextPlaySoundTime = Time.time + (PlayerComponent.IsAI ? 0.25f : 0.05f);
 
                 float range = weapon.CalculatedAudibleRange;
 
@@ -60,7 +59,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                     range *= weather.RainSoundModifier;
                 }
 
-                SAINPlugin.BotController?.PlayAISound(Player, sainType, Player.WeaponRoot.position, range);
+                SAINPlugin.BotController.BotHearing.PlayAISound(PlayerComponent, weapon.SoundType, Player.WeaponRoot.position, range, 1f, false);
             }
             return true;
         }

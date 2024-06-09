@@ -22,16 +22,6 @@ namespace SAIN.Components.PlayerComponentSpace
             Slots.Clear();
         }
 
-        public void PlayShootSound(float range, AISoundType soundType)
-        {
-            if (Player != null &&
-                Player.WeaponRoot != null)
-            {
-                SAINSoundType sainType = soundType == AISoundType.gun ? SAINSoundType.Gunshot : SAINSoundType.SuppressedGunShot;
-                SAINPlugin.BotController?.PlayAISound(Player, sainType, Player.WeaponRoot.position, range);
-            }
-        }
-
         public void CheckForNewGear()
         {
             if (_nextUpdateTime < Time.time)

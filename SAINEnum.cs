@@ -184,6 +184,7 @@ namespace SAIN
         TurnSound,
         Breathing,
         Pain,
+        Bush,
     }
 
     public enum ELocation

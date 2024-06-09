@@ -243,6 +243,7 @@
     <None Include="Plugin\VersionChecker\setbuild.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\BotControllerSpace\Classes\BotHearingClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\AIDataBase.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\DeviceMode.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\Equipment\AIGearModifierClass.cs" />
@@ -373,7 +374,6 @@
     <Compile Include="Components\BotComponentSpace\Classes\Search\SAINSearchClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINConcealment.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINBotSpaceAwareness.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINSound.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINSoundCollection.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\BotLightController.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ManualShootClass.cs" />
@@ -436,7 +436,6 @@
     <Compile Include="Layers\Combat\Solo\Cover\ShiftCoverAction.cs" />
     <Compile Include="Layers\Combat\Solo\RushEnemyAction.cs" />
     <Compile Include="Layers\Combat\Solo\ThrowGrenadeAction.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Sense\HeardSoundsClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\BotExtractManager.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\BotSpawnController.cs" />
     <Compile Include="Preset\Editor\BotPersonalityEditor.cs" />

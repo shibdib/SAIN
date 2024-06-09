@@ -79,7 +79,7 @@ namespace SAIN.Patches.Talk
                 case EPhraseTrigger.OnBeingHurt:
                 case EPhraseTrigger.OnAgony:
                 case EPhraseTrigger.OnBreath:
-                    SAINPlugin.BotController?.PlayerTalked(@event, mask, __instance);
+                    SAINPlugin.BotController?.BotHearing.PlayerTalked(@event, mask, __instance);
                     return true;
 
                 default:
@@ -91,13 +91,13 @@ namespace SAIN.Patches.Talk
                 if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching ||
                     SAINPlugin.IsBotExluded(__instance.AIData?.BotOwner))
                 {
-                    SAINPlugin.BotController?.PlayerTalked(@event, mask, __instance);
+                    SAINPlugin.BotController?.BotHearing.PlayerTalked(@event, mask, __instance);
                     return true;
                 }
                 return false;
             }
 
-            SAINPlugin.BotController?.PlayerTalked(@event, mask, __instance);
+            SAINPlugin.BotController?.BotHearing.PlayerTalked(@event, mask, __instance);
             return true;
         }
     }
@@ -132,7 +132,7 @@ namespace SAIN.Patches.Talk
                 ___botOwner_0?.HealthController?.IsAlive == false || 
                 SAINPlugin.IsBotExluded(___botOwner_0))
             {
-                SAINPlugin.BotController?.PlayerTalked(type, additionalMask ?? ETagStatus.Combat, ___botOwner_0.GetPlayer);
+                SAINPlugin.BotController?.BotHearing.PlayerTalked(type, additionalMask ?? ETagStatus.Combat, ___botOwner_0.GetPlayer);
                 return true;
             }
             return false;

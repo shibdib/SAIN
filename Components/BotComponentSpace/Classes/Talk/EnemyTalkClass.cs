@@ -3,9 +3,15 @@ using EFT;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.BotSettings.SAINSettings;
+using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.Preset.Personalities;
+using SAIN.SAINComponent.Classes.Enemy;
 using System.Collections;
+using System.Drawing.Printing;
 using UnityEngine;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using UnityEngine.UIElements;
+using SAIN.Components;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
@@ -24,6 +30,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += tryFakeDeathGrenade;
             }
+            SAINBotController.Instance.PlayerTalk += playerTalked;
         }
 
         public void Update()
@@ -66,6 +73,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= tryFakeDeathGrenade;
             }
+            SAINBotController.Instance.PlayerTalk -= playerTalked;
         }
 
         private PersonalityTalkSettings PersonalitySettings => Bot?.Info?.PersonalitySettings.Talk;
@@ -304,7 +312,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void SetEnemyTalk(Player player)
         {
-            if ((player.Position - Bot.Position).sqrMagnitude < 70f.Sqr())
+            if ((player.Position - Bot.Position).sqrMagnitude < 70f * 70f)
             {
                 Bot.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position + UnityEngine.Random.onUnitSphere + Vector3.up, SAINSoundType.Conversation, true);
             }
@@ -323,11 +331,66 @@ namespace SAIN.SAINComponent.Classes.Talk
                     trigger,
                     ETagStatus.Combat,
                     Random.Range(0.4f, 0.6f),
-                    player,
-                    TauntDist,
-                    chance
-                    ));
+                player,
+                TauntDist,
+                chance
+                ));
             }
+        }
+
+        private void playerTalked(EPhraseTrigger phrase, ETagStatus mask, Player player)
+        {
+            if (Bot == null || !Bot.BotActive || player == null)
+            {
+                return;
+            }
+            if (Bot.ProfileId == player.ProfileId)
+            {
+                return;
+            }
+
+            bool isPain = phrase == EPhraseTrigger.OnAgony || phrase == EPhraseTrigger.OnBeingHurt;
+            float painRange = 50f;
+            float breathRange = player.HeavyBreath ? 50f : 25f;
+
+            SAINEnemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
+            if (enemy == null)
+            {
+                if (!isPain && phrase != EPhraseTrigger.OnBreath)
+                {
+                    SetFriendlyTalked(player);
+                }
+                return;
+            }
+
+            if (isPain)
+            {
+                if (enemy.RealDistance <= painRange)
+                {
+                    Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
+                    enemy.SetHeardStatus(true, randomizedPos, SAINSoundType.Pain, true);
+                }
+                return;
+            }
+            if (phrase == EPhraseTrigger.OnBreath)
+            {
+                if (enemy.RealDistance <= breathRange)
+                {
+                    Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
+                    enemy.SetHeardStatus(true, randomizedPos, SAINSoundType.Breathing, true);
+                }
+                return;
+            }
+
+            SetEnemyTalk(player);
+        }
+
+        private Vector3 randomizePos(Vector3 position, float distance, float dispersionFactor = 20f)
+        {
+            float disp = distance / dispersionFactor;
+            Vector3 random = UnityEngine.Random.insideUnitSphere * disp;
+            random.y = 0;
+            return position + random;
         }
 
         private float _nextGestureTime;
@@ -360,11 +423,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void SetFriendlyTalked(Player player)
         {
-            if (player == null
-                || Bot == null
-                || !player.HealthController.IsAlive
-                || Bot.ProfileId == player.ProfileId
-                || (player.Position - Bot.Position).sqrMagnitude > 100f * 100f)
+            if ((player.Position - Bot.Position).sqrMagnitude > 100f * 100f)
             {
                 return;
             }

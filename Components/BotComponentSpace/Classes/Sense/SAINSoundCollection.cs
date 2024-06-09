@@ -7,6 +7,26 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINSoundCollection
     {
+        public class SAINSound
+        {
+            public SAINSound()
+            {
+                TimeCreated = Time.time;
+            }
+
+            public readonly float TimeCreated;
+
+            public string SourcePlayerProfileId;
+            public Vector3 Position;
+            public float SoundPower;
+            public bool WasHeard;
+            public bool BulletFelt;
+            public float DistanceAtCreation;
+            public bool IsTooFar;
+            public bool IsTooOld;
+            public bool IsCheckedByBot;
+        }
+
         public SAINSoundCollection(IPlayer iPlayer)
         {
             IPlayer = iPlayer;

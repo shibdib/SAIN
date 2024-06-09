@@ -38,6 +38,7 @@ namespace SAIN.SAINComponent.Classes.Info
         public ICaliber AmmoCaliber { get; private set; }
         public float CalculatedAudibleRange { get; private set; }
         public AISoundType AISoundType => HasSuppressor ? AISoundType.silencedGun : AISoundType.gun;
+        public SAINSoundType SoundType => HasSuppressor ? SAINSoundType.SuppressedGunShot : SAINSoundType.Gunshot;
         public float BaseAudibleRange
         {
             get

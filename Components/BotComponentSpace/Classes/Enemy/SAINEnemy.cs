@@ -244,7 +244,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public Vector3 EnemyMoveDirection { get; set; }
 
         public bool EnemyHeardFromPeace = false;
-        public bool Heard { get; private set; }
+        public bool Heard { get; set; }
         public float TimeSinceHeard => Time.time - TimeLastHeard;
         public float TimeLastHeard { get; private set; }
         public Vector3? LastHeardPosition => KnownPlaces.LastHeardPlace?.Position;
@@ -313,6 +313,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         }
 
         public Action<SAINEnemy> OnEnemyHeard { get; set; }
+
         public bool CanSeeLastCornerToEnemy => Path.CanSeeLastCornerToEnemy;
 
         public bool IsSniper { get; private set; }
@@ -386,13 +387,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void SetHeardStatus(bool value, Vector3 pos, SAINSoundType soundType, bool shallReport)
         {
-            if (value && _heardTime < Time.time)
+            if (value)
             {
-                _heardTime = Time.time + 0.05f;
-                if (!Heard)
-                {
-                    Heard = true;
-                }
                 EnemyStatus.HeardRecently = true;
                 TimeLastHeard = Time.time;
                 bool wasGunfire = soundType == SAINSoundType.SuppressedGunShot || soundType == SAINSoundType.Gunshot;
@@ -401,6 +397,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 if (!wasGunfire &&
                     shallReport)
                 {
+                    updateEnemyAction(soundType, pos);
                     talkNoise(soundType == SAINSoundType.Conversation);
                     if (!Bot.HasEnemy)
                     {
@@ -410,11 +407,49 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
+        private void updateEnemyAction(SAINSoundType soundType, Vector3 soundPosition)
+        {
+            bool shallUpdateSquad = true;
+            switch (soundType)
+            {
+                case SAINSoundType.GrenadeDraw:
+                case SAINSoundType.GrenadePin:
+                    EnemyStatus.EnemyHasGrenadeOut = true;
+                    break;
+
+                case SAINSoundType.Reload:
+                case SAINSoundType.DryFire:
+                    EnemyStatus.EnemyIsReloading = true;
+                    break;
+
+                case SAINSoundType.Looting:
+                    EnemyStatus.EnemyIsLooting = true;
+                    break;
+
+                case SAINSoundType.Heal:
+                    EnemyStatus.EnemyIsHealing = true;
+                    break;
+
+                case SAINSoundType.Surgery:
+                    EnemyStatus.VulnerableAction = SAINComponent.Classes.Enemy.EEnemyAction.UsingSurgery;
+                    break;
+
+                default:
+                    shallUpdateSquad = false;
+                    break;
+            }
+
+            if (shallUpdateSquad)
+            {
+                Bot.Squad.SquadInfo.UpdateSharedEnemyStatus(EnemyIPlayer, EnemyStatus.VulnerableAction, Bot, soundType, soundPosition);
+            }
+        }
+
         private void talkNoise(bool conversation)
         {
             if (_nextSayNoise < Time.time
-                && Bot.Talk.GroupTalk.FriendIsClose
-                && Bot.Squad.BotInGroup
+            && Bot.Talk.GroupTalk.FriendIsClose
+            && Bot.Squad.BotInGroup
                 && (Bot.Enemy == null || Bot.Enemy.TimeSinceSeen > 20f))
             {
                 _nextSayNoise = Time.time + 12f;
@@ -460,7 +495,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float _nextReportHeardTime;
         private const float _reportSightFreq = 0.25f;
         private const float _reportHeardFreq = 1f;
-        private float _heardTime;
         private float _nextSayNoise;
         private float _realDistance;
     }

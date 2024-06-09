@@ -2,8 +2,6 @@
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
-using SAIN.Preset.GlobalSettings.Categories;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -29,15 +27,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void Init()
         {
-            BotMemoryClass memory = BotOwner?.Memory;
-            if (memory != null)
-            {
-                memory.OnAddEnemy += AddEnemy;
-            }
-            else
-            {
-                Logger.LogAndNotifyError("Botowner Null in EnemyController Init");
-            }
+            BotOwner.Memory.OnAddEnemy += AddEnemy;
         }
 
         public void Update()
@@ -135,26 +125,30 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
 
             ActiveHumanEnemy = false;
+
             foreach (SAINEnemy enemy in Enemies.Values)
             {
-                if (enemy != null)
+                if (enemy == null)
                 {
-                    bool inList = ActiveEnemies.Contains(enemy);
-                    bool activeThreat = enemy.ActiveThreat;
-                    if (activeThreat && !inList)
-                    {
-                        ActiveEnemies.Add(enemy);
-                    }
-                    else if (!activeThreat && inList)
-                    {
-                        ActiveEnemies.Remove(enemy);
-                    }
-                    if (!ActiveHumanEnemy &&
-                        activeThreat &&
-                        !enemy.IsAI)
-                    {
-                        ActiveHumanEnemy = true;
-                    }
+                    continue;
+                }
+                bool inList = ActiveEnemies.Contains(enemy);
+                bool activeThreat = enemy.ActiveThreat;
+
+                if (activeThreat && !inList)
+                {
+                    ActiveEnemies.Add(enemy);
+                }
+                else if (!activeThreat && inList)
+                {
+                    ActiveEnemies.Remove(enemy);
+                }
+
+                if (!ActiveHumanEnemy &&
+                    activeThreat &&
+                    !enemy.IsAI)
+                {
+                    ActiveHumanEnemy = true;
                 }
             }
 

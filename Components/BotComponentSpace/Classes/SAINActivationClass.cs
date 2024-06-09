@@ -43,14 +43,14 @@ namespace SAIN.SAINComponent.Classes
                 !sainActive &&
                 !customLayerActive)
             {
-                string layer = BrainManager.GetActiveLayerName(BotOwner);
-                Logger.LogWarning($"{BotOwner.name} Active Layer: {layer} Patrol data is paused!");
-                BotOwner.PatrollingData?.Unpause();
-                if (!_speedReset)
-                {
-                    _speedReset = true;
-                    resetSpeed();
-                }
+                //string layer = BrainManager.GetActiveLayerName(BotOwner);
+                //Logger.LogWarning($"{BotOwner.name} Active Layer: {layer} Patrol data is paused!");
+                //BotOwner.PatrollingData?.Unpause();
+                //if (!_speedReset)
+                //{
+                //    _speedReset = true;
+                //    resetSpeed();
+                //}
             }
         }
 

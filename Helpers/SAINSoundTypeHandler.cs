@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using SAIN.Components;
-using EFT;
-using BepInEx.Logging;
+﻿using EFT;
 using UnityEngine;
 
 namespace SAIN.Components.Helpers
@@ -50,7 +42,7 @@ namespace SAIN.Components.Helpers
                 }
             }
 
-            SAINPlugin.BotController?.PlayAISound(player, soundType, player.Position + Vector3.up, soundDist);
+            SAINPlugin.BotController?.BotHearing.PlayAISound(player.ProfileId, soundType, player.Position + Vector3.up, soundDist, 1f);
         }
     }
 }

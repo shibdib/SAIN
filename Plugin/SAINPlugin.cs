@@ -8,6 +8,7 @@ using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
 using SAIN.Patches.Generic;
+using SAIN.Patches.Hearing;
 using SAIN.Plugin;
 using SAIN.Preset;
 using System;
@@ -108,6 +109,12 @@ namespace SAIN
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
                 typeof(Patches.Hearing.OnMakingShotPatch),
                 typeof(Patches.Hearing.HearingSensorPatch),
+
+                typeof(Patches.Hearing.TreeSoundPatch),
+                typeof(Patches.Hearing.DoorBreachSoundPatch),
+                typeof(Patches.Hearing.DoorOpenSoundPatch),
+                typeof(Patches.Hearing.FootstepSoundPatch),
+                typeof(Patches.Hearing.JumpSoundPatch),
                 typeof(Patches.Hearing.DryShotPatch),
                 typeof(Patches.Hearing.FallSoundPatch),
                 typeof(Patches.Hearing.TurnSoundPatch),
