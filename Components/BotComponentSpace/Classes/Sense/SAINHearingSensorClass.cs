@@ -188,8 +188,6 @@ namespace SAIN.SAINComponent.Classes
 
         private readonly Dictionary<string, SAINSoundCollection> SoundsHeardFromPlayer = new Dictionary<string, SAINSoundCollection>();
 
-        private static float _nextChecktime;
-
         private float getSoundRangeModifier(SAINSoundType soundType, float soundDistance)
         {
             float modifier = 1f;
@@ -323,20 +321,18 @@ namespace SAIN.SAINComponent.Classes
             if (!reacting &&
                 !shallChaseGunshot(shooterDistance, soundPosition))
             {
-                return reacting;
+                return false;
             }
 
             if (wasHeard)
             {
-                //SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
-                Bot.StartCoroutine(delayAddSearch(vector, power, type, person));
+                Bot.StartCoroutine(delayAddSearch(vector, power, type, person, shooterDistance));
                 reacting = true;
             }
             else
             {
                 Vector3 estimate = GetEstimatedPoint(vector);
-                Bot.StartCoroutine(delayAddSearch(estimate, power, type, person));
-                //SAIN.Squad.SquadInfo.AddPointToSearch(vector, power, SAIN, type, person);
+                Bot.StartCoroutine(delayAddSearch(estimate, power, type, person, shooterDistance));
                 reacting = true;
             }
             return reacting;
@@ -386,16 +382,17 @@ namespace SAIN.SAINComponent.Classes
             return pos;
         }
 
-        private IEnumerator baseHearDelay()
+        const float _speedOfSound = 343;
+        private IEnumerator baseHearDelay(float distance)
         {
-            float delay;
+            float delay = distance / _speedOfSound;
             if (Bot?.EnemyController?.NoEnemyContact == true)
             {
-                delay = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayAtPeace;
+                delay += SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayAtPeace;
             }
             else
             {
-                delay = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayWithEnemy;
+                delay += SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayWithEnemy;
             }
             delay = Mathf.Clamp(delay - 0.1f, 0f, 5f);
             yield return new WaitForSeconds(delay);
@@ -403,7 +400,7 @@ namespace SAIN.SAINComponent.Classes
 
         private IEnumerator delayReact(Vector3 soundPos, SAINSoundType type, IPlayer person, float shooterDistance, Vector3 projectionPoint, float projectionPointDist)
         {
-            yield return baseHearDelay();
+            yield return baseHearDelay(shooterDistance);
 
             if (Bot != null &&
                 person != null &&
@@ -443,9 +440,9 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private IEnumerator delayAddSearch(Vector3 vector, float power, SAINSoundType type, IPlayer person)
+        private IEnumerator delayAddSearch(Vector3 vector, float power, SAINSoundType type, IPlayer person, float shooterDistance)
         {
-            yield return baseHearDelay();
+            yield return baseHearDelay(shooterDistance);
 
             if (Bot?.Player?.HealthController?.IsAlive == true &&
                 person?.HealthController?.IsAlive == true)
@@ -608,7 +605,7 @@ namespace SAIN.SAINComponent.Classes
             return projectionPoint;
         }
 
-        private bool doDetectionChanceCheck(float distance)
+        private bool doDetectionChanceCheck(float distance, IPlayer player)
         {
             bool hasheadPhones = Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece;
 
@@ -628,18 +625,24 @@ namespace SAIN.SAINComponent.Classes
 
             float minimumChance = 0f;
             bool midRange = distance < farhearing * 0.66f;
-            if (midRange &&
-                Player.Velocity.magnitude < 0.5f)
+            if (midRange)
+            {
+                if (hasheadPhones)
+                {
+                    minimumChance += 5f;
+                }
+
+            }
+
+            if (Player.Velocity.magnitude < 0.5f)
             {
                 minimumChance += 5f;
             }
 
-            // Random chance to hear at any range within maxdistance if a bot has headphones
-            if (midRange &&
-                Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece &&
-                EFTMath.RandomBool(5))
+            if (Bot.HasEnemy &&
+                Bot.Enemy.EnemyProfileId == player.ProfileId)
             {
-                minimumChance += 5f;
+                minimumChance += 10f;
             }
 
             float num = farhearing - closehearing;
@@ -649,7 +652,7 @@ namespace SAIN.SAINComponent.Classes
 
             chanceToHear = Mathf.Clamp(chanceToHear, minimumChance, 1f);
 
-            return EFTMath.RandomBool(chanceToHear);
+            return EFTMath.RandomBool(chanceToHear * 100f);
         }
 
         private static bool isGunshot(SAINSoundType soundType)
@@ -671,7 +674,7 @@ namespace SAIN.SAINComponent.Classes
             soundDistance = (Bot.Position - position).magnitude;
 
             if (!isGunshot(type) &&
-                !doDetectionChanceCheck(soundDistance))
+                !doDetectionChanceCheck(soundDistance, iPlayer))
             {
                 return false;
             }
