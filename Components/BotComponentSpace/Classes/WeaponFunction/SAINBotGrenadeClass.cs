@@ -1,10 +1,5 @@
-﻿using BepInEx.Logging;
-using EFT;
-using SAIN.SAINComponent.Classes.Decision;
-using SAIN.SAINComponent.Classes.Talk;
-using SAIN.SAINComponent.Classes.Mover;
+﻿using EFT;
 using SAIN.SAINComponent.SubComponents;
-using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,34 +21,24 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Update()
         {
-            if (DangerGrenade == null)
-            {
-                DangerGrenade = findGrenadeDangerPoint();
-            }
+            updateActiveGrenades();
         }
 
-        private GrenadeTracker findGrenadeDangerPoint()
+        private void updateActiveGrenades()
         {
             foreach (var tracker in ActiveGrenades.Values)
             {
-                if (tracker == null) continue;
-                tracker.Update();
-                if (tracker.CanReact)
-                {
-                    return tracker;
-                }
+                tracker?.Update();
             }
-            return null;
         }
 
         public void Dispose()
         {
         }
 
-
         public void EnemyGrenadeThrown(Grenade grenade, Vector3 dangerPoint)
         {
-            if (Bot.BotActive && 
+            if (Bot.BotActive &&
                 !Bot.GameIsEnding)
             {
                 float reactionTime = GetReactionTime(Bot.Info.Profile.DifficultyModifier);
@@ -70,7 +55,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 ActiveGrenades.Remove(grenade.Id);
             }
         }
-
 
         private static float GetReactionTime(float diffMod)
         {

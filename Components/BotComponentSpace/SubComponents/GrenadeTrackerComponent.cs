@@ -23,8 +23,15 @@ namespace SAIN.SAINComponent.SubComponents
 
         public void Update()
         {
-            if (BotOwner == null || BotOwner.IsDead || Grenade == null)
+            if (BotOwner == null || BotOwner.IsDead || Grenade == null || _sentToBot)
             {
+                return;
+            }
+
+            if (!_sentToBot && CanReact)
+            {
+                _sentToBot = true;
+                BotOwner.BewareGrenade.AddGrenadeDanger(DangerPoint, Grenade);
                 return;
             }
 
@@ -44,6 +51,8 @@ namespace SAIN.SAINComponent.SubComponents
                 }
             }
         }
+
+        private bool _sentToBot;
 
         private void setSpotted()
         {

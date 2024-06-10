@@ -276,7 +276,7 @@ namespace SAIN.Components
             // We dont want bots to think the grenade explosion was a place they heard an enemy, so set this manually.
             foreach (var bot in Bots.Values)
             {
-                if (IsBotActive(bot))
+                if (bot?.BotActive == true)
                 {
                     float distance = (bot.Position - explosionPosition).magnitude;
                     if (distance < range)
@@ -318,7 +318,7 @@ namespace SAIN.Components
 
             foreach (var bot in Bots.Values)
             {
-                if (IsBotActive(bot) &&
+                if (bot?.BotActive == true &&
                     !bot.EnemyController.IsPlayerFriendly(player) &&
                     (dangerPoint - bot.Position).sqrMagnitude < 100f * 100f)
                 {
@@ -329,21 +329,7 @@ namespace SAIN.Components
 
         public static bool IsBotActive(BotComponent bot)
         {
-            return IsBotActive(bot?.BotOwner) && bot.BotActive;
-        }
-
-        public static bool IsBotActive(BotOwner botOwner)
-        {
-            if (botOwner == null)
-            {
-                return false;
-            }
-            if (botOwner.BotState != EBotState.Active ||
-                    botOwner.StandBy.StandByType != BotStandByType.active)
-            {
-                return false;
-            }
-            return true;
+            return bot?.BotActive == true;
         }
 
         public List<string> Groups = new List<string>();
