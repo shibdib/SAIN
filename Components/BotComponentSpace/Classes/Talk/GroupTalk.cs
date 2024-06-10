@@ -40,26 +40,24 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Update()
         {
-            if (!Bot.Talk.CanTalk ||
-                !BotSquad.BotInGroup ||
+            if (!Bot.Talk.CanTalk)
+            {
+                return;
+            }
+            if (!BotSquad.BotInGroup ||
                 !Bot.Info.FileSettings.Mind.SquadTalk ||
                 SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
             {
                 if (Subscribed)
-                {
                     Dispose();
-                }
+
                 return;
             }
 
             if (!Subscribed)
-            {
                 Subscribe();
-            }
-            else
-            {
-                checkGroupTalk();
-            }
+
+            checkGroupTalk();
         }
 
         private void checkGroupTalk()
@@ -190,21 +188,14 @@ namespace SAIN.SAINComponent.Classes.Talk
                     squad.MemberKilled -= OnFriendlyDown;
                     squad.OnSoundHeard -= onNoiseHeard;
                 }
-                var botController = SAINPlugin.BotController;
-                if (botController != null)
-                {
-                    botController.PlayerTalk -= EnemyConversation;
-                }
 
-                if (BotOwner != null)
-                {
-                    BotOwner.DeadBodyWork.OnStartLookToBody -= OnLootBody;
-                    var botsGroup = BotOwner.BotsGroup;
-                    if (botsGroup != null)
-                    {
-                        botsGroup.OnEnemyRemove -= OnEnemyDown;
-                    }
-                }
+                var botController = SAINPlugin.BotController;
+
+                if (botController != null)
+                    botController.PlayerTalk -= EnemyConversation;
+
+                if (Bot.EnemyController != null)
+                    Bot.EnemyController.OnEnemyKilled -= OnEnemyDown;
             }
         }
 
@@ -221,7 +212,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 squad.OnSoundHeard += onNoiseHeard;
                 SAINPlugin.BotController.PlayerTalk += EnemyConversation;
                 BotOwner.DeadBodyWork.OnStartLookToBody += OnLootBody;
-                BotOwner.BotsGroup.OnEnemyRemove += OnEnemyDown;
+                Bot.EnemyController.OnEnemyKilled += OnEnemyDown;
             }
         }
 
@@ -269,23 +260,17 @@ namespace SAIN.SAINComponent.Classes.Talk
             return false;
         }
 
-        private void OnEnemyDown(IPlayer person)
+        private void OnEnemyDown(Player player)
         {
-            AggressorStats aggressorStats = person?.Profile?.Stats?.Eft?.Aggressor;
-            if (aggressorStats == null || aggressorStats.ProfileId != Bot.ProfileId)
-            {
-                return;
-            }
-
             if (!_reportEnemyKilledToxicSquadLeader)
             {
-                var settings = person?.Profile?.Info?.Settings;
+                var settings = player?.Profile?.Info?.Settings;
                 if (settings == null || !BotOwner.BotsGroup.IsPlayerEnemyByRole(settings.Role))
                 {
                     return;
                 }
 
-                if (!FriendIsClose || !PersonIsClose(person))
+                if (!FriendIsClose || !PersonIsClose(player))
                 {
                     return;
                 }
@@ -294,7 +279,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (EFTMath.RandomBool(_reportEnemyKilledChance))
             {
                 float randomTime = UnityEngine.Random.Range(0.2f, 0.6f);
-                Bot.Talk.TalkAfterDelay(EPhraseTrigger.EnemyDown, ETagStatus.Aware, randomTime);
+                Bot.Talk.TalkAfterDelay(EPhraseTrigger.EnemyDown, null, randomTime);
 
                 var leader = Bot.Squad.SquadInfo?.LeaderComponent;
                 if (leader?.Person?.IPlayer != null
@@ -302,7 +287,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     && EFTMath.RandomBool(_reportEnemyKilledSquadLeadChance)
                     && PersonIsClose(leader.Person.IPlayer))
                 {
-                    leader.Talk.TalkAfterDelay(EPhraseTrigger.GoodWork, ETagStatus.Aware, randomTime + 0.75f);
+                    leader.Talk.TalkAfterDelay(EPhraseTrigger.GoodWork, null, randomTime + 0.75f);
                 }
             }
         }

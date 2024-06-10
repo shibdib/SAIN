@@ -18,10 +18,9 @@ namespace SAIN.SAINComponent.Classes.Talk
         public SAINBotTalkClass(BotComponent sain) : base(sain)
         {
             PhraseObjectsAdd(PersonalPhraseDict);
-
             GroupTalk = new GroupTalk(sain);
             EnemyTalk = new EnemyTalk(sain);
-            TimeUntilCanTalk = Time.time + UnityEngine.Random.Range(1f, 2f);
+            _timeCanTalk = Time.time + UnityEngine.Random.Range(1f, 2f);
         }
 
         public void Init()
@@ -51,7 +50,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private float _nextGetHitTime;
 
-        private float TimeUntilCanTalk;
+        private float _timeCanTalk;
 
         public void Update()
         {
@@ -63,47 +62,52 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
 
             if (CanTalk 
-                && TimeUntilCanTalk < Time.time)
+                && _timeCanTalk < Time.time)
             {
                 EnemyTalk.Update();
                 if (allTalkDelay < Time.time)
                 {
-                    BotTalkPackage TalkPack = null;
+                    checkTalk();
+                }
+            }
+        }
 
-                    if (TalkPriorityTimer < Time.time && NormalBotTalk != null)
-                    {
-                        TalkPack = NormalBotTalk;
-                        NormalBotTalk = null;
-                        TalkPriorityActive = false;
-                    }
-                    else if (TalkAfterDelayTimer < Time.time && TalkDelayPack != null)
-                    {
-                        TalkPack = TalkDelayPack;
-                        TalkDelayPack = null;
-                    }
+        private void checkTalk()
+        {
+            BotTalkPackage TalkPack = null;
 
-                    if (TalkPack != null)
-                    {
-                        allTalkDelay = Time.time + Bot.Info.FileSettings.Mind.TalkFrequency;
+            if (TalkPriorityTimer < Time.time && NormalBotTalk != null)
+            {
+                TalkPack = NormalBotTalk;
+                NormalBotTalk = null;
+                TalkPriorityActive = false;
+            }
+            else if (TalkAfterDelayTimer < Time.time && TalkDelayPack != null)
+            {
+                TalkPack = TalkDelayPack;
+                TalkDelayPack = null;
+            }
 
-                        if (TalkPack.phraseInfo.Phrase == EPhraseTrigger.Roger || TalkPack.phraseInfo.Phrase == EPhraseTrigger.Negative)
+            if (TalkPack != null)
+            {
+                allTalkDelay = Time.time + Bot.Info.FileSettings.Mind.TalkFrequency;
+
+                if (TalkPack.phraseInfo.Phrase == EPhraseTrigger.Roger || TalkPack.phraseInfo.Phrase == EPhraseTrigger.Negative)
+                {
+                    if (Bot.Squad.VisibleMembers != null && Bot.Squad.LeaderComponent != null && Bot.Squad.VisibleMembers.Contains(Bot.Squad.LeaderComponent) && Bot.Enemy?.IsVisible == false)
+                    {
+                        if (TalkPack.phraseInfo.Phrase == EPhraseTrigger.Roger)
                         {
-                            if (Bot.Squad.VisibleMembers != null && Bot.Squad.LeaderComponent != null && Bot.Squad.VisibleMembers.Contains(Bot.Squad.LeaderComponent) && Bot.Enemy?.IsVisible == false)
-                            {
-                                if (TalkPack.phraseInfo.Phrase == EPhraseTrigger.Roger)
-                                {
-                                    Player.HandsController.ShowGesture(EGesture.Good);
-                                }
-                                else
-                                {
-                                    Player.HandsController.ShowGesture(EGesture.Bad);
-                                }
-                                return;
-                            }
+                            Player.HandsController.ShowGesture(EGesture.Good);
                         }
-                        SendSayCommand(TalkPack);
+                        else
+                        {
+                            Player.HandsController.ShowGesture(EGesture.Bad);
+                        }
+                        return;
                     }
                 }
+                SendSayCommand(TalkPack);
             }
         }
 
@@ -118,7 +122,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             EnemyTalk.Dispose();
         }
 
-        public bool CanTalk => Bot.Info.FileSettings.Mind.CanTalk;
+        public bool CanTalk => Bot.Info.FileSettings.Mind.CanTalk && _timeCanTalk < Time.time;
 
         public bool CanSay(EPhraseTrigger trigger)
         {
@@ -131,7 +135,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return false;
             }
-            if ((CanTalk && TimeUntilCanTalk < Time.time) 
+            if ((CanTalk && _timeCanTalk < Time.time) 
                 || phrase == EPhraseTrigger.OnDeath 
                 || phrase == EPhraseTrigger.OnAgony 
                 || phrase == EPhraseTrigger.OnBeingHurt)
@@ -168,7 +172,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void TalkAfterDelay(EPhraseTrigger phrase, ETagStatus? mask = null, float delay = 0.5f)
         {
-            if (CanTalk && TimeUntilCanTalk < Time.time)
+            if (CanTalk && _timeCanTalk < Time.time)
             {
                 if (!PersonalPhraseDict.ContainsKey(phrase))
                 {

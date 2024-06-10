@@ -32,7 +32,8 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void enemyKilled(Player player)
         {
-            if (CanTaunt &&
+            if (Bot.Talk.CanTalk &&
+                CanTaunt &&
                 EFTMath.RandomBool(75))
             {
                 EPhraseTrigger trigger;
