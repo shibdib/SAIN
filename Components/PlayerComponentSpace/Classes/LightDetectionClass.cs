@@ -10,7 +10,7 @@ namespace SAIN.Components.PlayerComponentSpace
 {
     public class LightDetectionClass : PlayerComponentBase
     {
-        public List<FlashLightPoint> LightPoints { get; private set; } = new List<FlashLightPoint>();
+        public List<FlashLightPoint> LightPoints { get; } = new List<FlashLightPoint>();
 
         public LightDetectionClass(PlayerComponent component) : base(component)
         {
@@ -25,7 +25,7 @@ namespace SAIN.Components.PlayerComponentSpace
 
             Vector3 lightDirection = getLightPointToCheck(onlyLaser);
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
-            float detectionDistance = 75f;
+            float detectionDistance = 100f;
             Vector3 sourcePosition = Player.WeaponRoot.position;
             Vector3 playerLookDirection = LookDirection;
 
@@ -47,10 +47,12 @@ namespace SAIN.Components.PlayerComponentSpace
             if (visibleLight)
             {
                 DebugGizmos.Sphere(hit.point, 0.1f, Color.red, true, 0.25f);
+                DebugGizmos.Line(hit.point, sourcePosition, Color.red, 0.05f, true, 0.25f);
                 return;
             }
 
             DebugGizmos.Sphere(hit.point, 0.1f, Color.blue, true, 0.25f);
+            DebugGizmos.Line(hit.point, sourcePosition, Color.blue, 0.05f, true, 0.25f);
         }
 
         private Vector3 getLightPointToCheck(bool onlyLaser)
@@ -91,6 +93,13 @@ namespace SAIN.Components.PlayerComponentSpace
                 Vector3 randomBeamDirection = randomRotation * lookDir;
 
                 beamPoints.Add(randomBeamDirection);
+            }
+            if (SAINPlugin.DebugMode)
+            {
+                foreach (var point in beamPoints)
+                {
+                    DebugGizmos.Line(point, Player.WeaponRoot.position, 0.05f, 0.25f);
+                }
             }
         }
 
@@ -163,7 +172,18 @@ namespace SAIN.Components.PlayerComponentSpace
             // raycast to check if the point is visible
             if (!raycastToLightPoint(lightPoint.Point, botPos))
             {
+                if (SAINPlugin.DebugMode)
+                {
+                    DebugGizmos.Line(lightPoint.Point, botPos, Color.white, 0.05f, true, 0.25f);
+                    DebugGizmos.Line(lightPoint.Point, enemy.EnemyPosition + Vector3.up, Color.white, 0.05f, true, 0.25f);
+                }
                 return;
+            }
+
+            if (SAINPlugin.DebugMode)
+            {
+                DebugGizmos.Line(lightPoint.Point, botPos, Color.red, 0.1f, true, 3f);
+                DebugGizmos.Line(lightPoint.Point, enemy.EnemyPosition + Vector3.up, Color.red, 0.1f, true, 3f);
             }
 
             // all checks are passed, estimate the enemy position and try to investigate

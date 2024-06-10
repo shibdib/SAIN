@@ -15,6 +15,10 @@ namespace SAIN.Components.PlayerComponentSpace.Classes
         {
             InBunker = trigger?.IsBunker == true;
             BunkerDepth = InBunker ? trigger.BunkerDepth : 0f;
+            if (InBunker)
+            {
+                Logger.LogDebug($"In Bunker. BunkerDepth: {BunkerDepth}");
+            }
         }
     }
 }

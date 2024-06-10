@@ -2,6 +2,7 @@
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings.Categories;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -14,6 +15,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public bool HasLastEnemy => LastEnemy?.EnemyPerson?.IsActive == true;
         public SAINEnemy ActiveEnemy { get; private set; }
         public SAINEnemy LastEnemy { get; private set; }
+        public System.Action<Player> OnEnemyKilled { get; set; }
 
         public readonly Dictionary<string, SAINEnemy> Enemies = new Dictionary<string, SAINEnemy>();
 
@@ -346,6 +348,21 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
+        private void enemyKilled(Player player, IPlayer lastAggressor, DamageInfo lastDamageInfo, EBodyPart lastBodyPart)
+        {
+            if (player != null)
+            {
+                player.OnPlayerDead -= enemyKilled;
+
+                if (lastAggressor != null && 
+                    lastAggressor.ProfileId == Bot.ProfileId)
+                {
+                    OnEnemyKilled?.Invoke(player);
+                }
+            }
+        }
+
+
         public void RemoveEnemy(string id)
         {
             if (ActiveEnemy != null &&
@@ -585,6 +602,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             Enemies.Add(enemyPlayer.ProfileId, sainEnemy);
             enemyPlayer.OnIPlayerDeadOrUnspawn += removeEnemy;
             enemyPlayerComponent.OnComponentDestroyed += RemoveEnemy;
+            enemyPlayerComponent.Player.OnPlayerDead += enemyKilled;
             return sainEnemy;
         }
 

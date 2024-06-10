@@ -8,7 +8,6 @@ using SAIN.Components;
 using SAIN.Components.Helpers;
 using System.Reflection;
 using UnityEngine;
-using static EFT.Interactive.BetterPropagationGroups;
 
 namespace SAIN.Patches.Hearing
 {
@@ -29,11 +28,12 @@ namespace SAIN.Patches.Hearing
                 {
                     baseRange = ____soundBank.Rolloff * player.SoundRadius;
                 }
-                Logger.LogDebug($"Playing Bush Sound Range: {baseRange}");
+                //Logger.LogDebug($"Playing Bush Sound Range: {baseRange}");
                 SAINPlugin.BotController?.BotHearing.PlayAISound(player.iPlayer.ProfileId, SAINSoundType.Bush, soundPosition, baseRange, 1f);
             }
         }
     }
+
     public class DoorOpenSoundPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

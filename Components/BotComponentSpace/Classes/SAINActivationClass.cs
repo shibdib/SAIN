@@ -5,7 +5,6 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINActivationClass : SAINBase
     {
-
         public bool SAINLayersActive => ActiveLayer != ESAINLayer.None;
 
         public ESAINLayer ActiveLayer { get; private set; }

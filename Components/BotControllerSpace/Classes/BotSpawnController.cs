@@ -108,7 +108,7 @@ namespace SAIN.Components.BotController
             {
                 GameObject gameObject = botOwner.gameObject;
                 PlayerComponent playerComponent = gameObject.GetComponent<PlayerComponent>();
-                playerComponent.InitBot(botOwner);
+                playerComponent.InitBotOwner(botOwner);
 
                 string name = botOwner.name;
                 if (BotDictionary.ContainsKey(name))
@@ -140,7 +140,7 @@ namespace SAIN.Components.BotController
                 if (botComponent.Init(playerComponent))
                 {
                     BotDictionary.Add(name, botComponent);
-
+                    playerComponent.InitBotComponent(botComponent);
                     botOwner.LeaveData.OnLeave += RemoveBot;
                     playerComponent.IPlayer.OnIPlayerDeadOrUnspawn += RemoveBot;
                 }

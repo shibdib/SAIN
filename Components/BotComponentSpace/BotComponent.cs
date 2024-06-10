@@ -231,6 +231,7 @@ namespace SAIN.SAINComponent
         private void OnDisable()
         {
             BotActive = false;
+            OnBotDisabled?.Invoke();
             StopAllCoroutines();
             Decision?.ResetDecisions(false);
             Cover?.ActivateCoverFinder(false);
@@ -293,6 +294,8 @@ namespace SAIN.SAINComponent
                 handleDumbShit();
             }
         }
+
+        public Action OnBotDisabled { get; set; }
 
         private void LateUpdate()
         {

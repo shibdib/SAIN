@@ -1,17 +1,13 @@
 using Comfort.Common;
 using EFT;
+using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.BotSettings.SAINSettings;
-using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.Preset.Personalities;
 using SAIN.SAINComponent.Classes.Enemy;
 using System.Collections;
-using System.Drawing.Printing;
 using UnityEngine;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using UnityEngine.UIElements;
-using SAIN.Components;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
@@ -31,6 +27,30 @@ namespace SAIN.SAINComponent.Classes.Talk
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += tryFakeDeathGrenade;
             }
             SAINBotController.Instance.PlayerTalk += playerTalked;
+            Bot.EnemyController.OnEnemyKilled += enemyKilled;
+        }
+
+        private void enemyKilled(Player player)
+        {
+            if (CanTaunt &&
+                EFTMath.RandomBool(75))
+            {
+                EPhraseTrigger trigger;
+                if (EFTMath.RandomBool(15) ||
+                    (Bot.Memory.Health.HealthStatus == ETagStatus.Healthy && EFTMath.RandomBool(50)))
+                {
+                    trigger = EPhraseTrigger.GoodWork;
+                }
+                else if (EFTMath.RandomBool(25))
+                {
+                    trigger = EPhraseTrigger.BadWork;
+                }
+                else
+                {
+                    trigger = EPhraseTrigger.OnFight;
+                }
+                Bot.Talk.Say(trigger, ETagStatus.Combat, false);
+            }
         }
 
         public void Update()
@@ -74,6 +94,10 @@ namespace SAIN.SAINComponent.Classes.Talk
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= tryFakeDeathGrenade;
             }
             SAINBotController.Instance.PlayerTalk -= playerTalked;
+            if (Bot?.EnemyController != null)
+            {
+                Bot.EnemyController.OnEnemyKilled -= enemyKilled;
+            }
         }
 
         private PersonalityTalkSettings PersonalitySettings => Bot?.Info?.PersonalitySettings.Talk;
@@ -210,25 +234,26 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 if (Bot.Info.PersonalitySettings.Talk.ConstantTaunt)
                 {
-                    tauntEnemy = true;
+                    tauntEnemy = EFTMath.RandomBool(66);
                 }
-                else if (enemy.IsVisible || enemy.TimeSinceSeen < 5f)
+                if (!tauntEnemy &&
+                    (enemy.IsVisible || enemy.TimeSinceSeen < 3f))
                 {
                     tauntEnemy = enemy.EnemyLookingAtMe || Bot.Info.PersonalitySettings.Talk.FrequentTaunt;
                 }
             }
 
-            if (!tauntEnemy && BotOwner.AimingData != null)
-            {
-                var aim = BotOwner.AimingData;
-                if (aim != null && aim.IsReady)
-                {
-                    if (aim.LastDist2Target < TauntDist)
-                    {
-                        tauntEnemy = true;
-                    }
-                }
-            }
+            //if (!tauntEnemy && BotOwner.AimingData != null)
+            //{
+            //    var aim = BotOwner.AimingData;
+            //    if (aim != null && aim.IsReady)
+            //    {
+            //        if (aim.LastDist2Target < TauntDist)
+            //        {
+            //            tauntEnemy = true;
+            //        }
+            //    }
+            //}
 
             if (tauntEnemy)
             {
@@ -242,7 +267,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 }
                 else
                 {
-                    EPhraseTrigger trigger = EFTMath.RandomBool(90) ? EPhraseTrigger.OnFight : EPhraseTrigger.BadWork;
+                    EPhraseTrigger trigger = EFTMath.RandomBool(95) ? EPhraseTrigger.OnFight : EPhraseTrigger.BadWork;
                     Bot.Talk.Say(trigger, ETagStatus.Combat, false);
                 }
             }
@@ -321,7 +346,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 _nextResponseTime < Time.time)
             {
                 float chance = 60;
-                EPhraseTrigger trigger = EFTMath.RandomBool(90) ? EPhraseTrigger.OnFight : EPhraseTrigger.BadWork;
+                EPhraseTrigger trigger = EFTMath.RandomBool(92.5f) ? EPhraseTrigger.OnFight : EPhraseTrigger.BadWork;
 
                 //if (player.IsYourPlayer)
                 //    Logger.LogInfo($"Starting Responding To Voice! Min Dist: {TauntDist} Chance: {chance}");
@@ -351,7 +376,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             bool isPain = phrase == EPhraseTrigger.OnAgony || phrase == EPhraseTrigger.OnBeingHurt;
             float painRange = 50f;
-            float breathRange = player.HeavyBreath ? 50f : 25f;
+            float breathRange = player.HeavyBreath ? 35f : 15f;
 
             SAINEnemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
             if (enemy == null)

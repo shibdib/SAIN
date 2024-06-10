@@ -18,6 +18,7 @@ namespace SAIN.Components.PlayerComponentSpace
 
             if (IsActive)
             {
+                Flashlight.Update();
                 Equipment.Update();
                 navRayCastAllDir();
             }
@@ -45,7 +46,7 @@ namespace SAIN.Components.PlayerComponentSpace
             }
 
             Vector3 direction;
-            int max = 30;
+            int max = 5;
             for (int i = 0; i < max; i++)
             {
                 direction = UnityEngine.Random.onUnitSphere;
@@ -109,9 +110,14 @@ namespace SAIN.Components.PlayerComponentSpace
             Equipment.Init();
         }
 
-        public void InitBot(BotOwner botOwner)
+        public void InitBotOwner(BotOwner botOwner)
         {
-            Person.InitBot(botOwner);
+            Person.InitBotOwner(botOwner);
+        }
+
+        public void InitBotComponent(BotComponent bot)
+        {
+            Person.InitBotComponent(bot);
         }
 
         private void OnDisable()

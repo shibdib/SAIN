@@ -48,6 +48,7 @@ namespace SAIN.Components
                 _nextPointCreateTime = Time.time + 0.05f;
                 bool onlyLaser = !WhiteLight && !IRLight && (Laser || IRLaser);
                 LightDetection.CreateDetectionPoints(WhiteLight || Laser, onlyLaser);
+                Logger.LogDebug("Creating flashlight points");
             }
         }
 

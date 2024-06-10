@@ -83,18 +83,20 @@ namespace SAIN.Components.PlayerComponentSpace
             Transform = new PersonTransformClass(this);
         }
 
-        public void InitBot(BotOwner botOwner)
+        public void InitBotOwner(BotOwner botOwner)
         {
             if (botOwner != null)
             {
                 Name = botOwner.name;
                 BotOwner = botOwner;
                 IsAI = true;
-                BotComponent = botOwner.gameObject?.GetComponent<BotComponent>();
-                IsSAINBot = BotComponent != null;
             }
         }
-
+        public void InitBotComponent(BotComponent bot)
+        {
+            BotComponent = bot;
+            IsSAINBot = bot != null;
+        }
 
         public bool IsAI { get; private set; } = false;
         public bool IsSAINBot { get; private set; } = false;

@@ -303,7 +303,7 @@ namespace SAIN.Patches.Vision
 
                 if (!flashLight.WhiteLight && !flashLight.Laser)
                 {
-                    _UsingLight.Invoke(____player.AIData, new object[] { false });
+                    //_UsingLight.Invoke(____player.AIData, new object[] { false });
                 }
             }
         }
