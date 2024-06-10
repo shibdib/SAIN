@@ -1,7 +1,6 @@
 ﻿using EFT.InventoryLogic;
 using SAIN.Helpers;
 using System;
-using System.Linq;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Info
@@ -27,6 +26,7 @@ namespace SAIN.SAINComponent.Classes.Info
         }
 
         public Weapon Weapon { get; private set; }
+
         public float Durability
         {
             get
@@ -34,11 +34,13 @@ namespace SAIN.SAINComponent.Classes.Info
                 return Weapon.Repairable.Durability / (float)Weapon.Repairable.TemplateDurability;
             }
         }
+
         public IWeaponClass WeaponClass { get; private set; }
         public ICaliber AmmoCaliber { get; private set; }
         public float CalculatedAudibleRange { get; private set; }
         public AISoundType AISoundType => HasSuppressor ? AISoundType.silencedGun : AISoundType.gun;
         public SAINSoundType SoundType => HasSuppressor ? SAINSoundType.SuppressedGunShot : SAINSoundType.Gunshot;
+
         public float BaseAudibleRange
         {
             get
@@ -51,8 +53,10 @@ namespace SAIN.SAINComponent.Classes.Info
                 return 150f;
             }
         }
+
         public float MuzzleLoudness { get; private set; }
         public float MuzzleLoudnessRealism { get; private set; }
+
         public float SuppressorModifier
         {
             get
@@ -71,7 +75,9 @@ namespace SAIN.SAINComponent.Classes.Info
                 return supmod;
             }
         }
+
         public float SpeedFactor => 2f - Weapon.SpeedFactor;
+
         public bool Subsonic
         {
             get
@@ -83,6 +89,7 @@ namespace SAIN.SAINComponent.Classes.Info
                 return Weapon.CurrentAmmoTemplate.InitialSpeed * SpeedFactor < SuperSonicSpeed;
             }
         }
+
         public bool HasRedDot { get; private set; }
         public bool HasOptic { get; private set; }
         public bool HasSuppressor { get; private set; }
@@ -118,8 +125,6 @@ namespace SAIN.SAINComponent.Classes.Info
                 }
             }
 
-            MuzzleLoudness = loudness;
-
             if (ModDetection.RealismLoaded)
             {
                 MuzzleLoudnessRealism = (realismLoudness / 200) + 1f;
@@ -127,9 +132,9 @@ namespace SAIN.SAINComponent.Classes.Info
             }
             else
             {
-                CalculatedAudibleRange = BaseAudibleRange * SuppressorModifier + loudness;
+                MuzzleLoudness = loudness / 4f;
+                CalculatedAudibleRange = BaseAudibleRange * SuppressorModifier + MuzzleLoudness;
             }
-
         }
 
         private static void calcLoudness(Mod mod, ref float loudness, ref float realismLoudness)
@@ -180,17 +185,17 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private void checkItemType(Type type)
         {
-            if (!HasSuppressor && 
+            if (!HasSuppressor &&
                 isSuppressor(type))
             {
                 HasSuppressor = true;
             }
-            else if (!HasOptic && 
+            else if (!HasOptic &&
                 IsOptic(type))
             {
                 HasOptic = true;
             }
-            else if (!HasRedDot && 
+            else if (!HasRedDot &&
                 IsRedDot(type))
             {
                 HasRedDot = true;

@@ -38,11 +38,10 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void EnemyGrenadeThrown(Grenade grenade, Vector3 dangerPoint)
         {
-            if (Bot.BotActive &&
-                !Bot.GameIsEnding)
+            if (Bot.BotActive)
             {
                 float reactionTime = GetReactionTime(Bot.Info.Profile.DifficultyModifier);
-                ActiveGrenades.Add(grenade.Id, new GrenadeTracker(BotOwner, grenade, dangerPoint, reactionTime));
+                ActiveGrenades.Add(grenade.Id, new GrenadeTracker(Bot, grenade, dangerPoint, reactionTime));
                 grenade.DestroyEvent += removeGrenade;
             }
         }

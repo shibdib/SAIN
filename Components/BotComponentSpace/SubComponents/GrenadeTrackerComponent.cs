@@ -5,9 +5,9 @@ namespace SAIN.SAINComponent.SubComponents
 {
     public class GrenadeTracker
     {
-        public GrenadeTracker(BotOwner bot, Grenade grenade, Vector3 dangerPoint, float reactionTime)
+        public GrenadeTracker(BotComponent bot, Grenade grenade, Vector3 dangerPoint, float reactionTime)
         {
-            BotOwner = bot;
+            Bot = bot;
             ReactionTime = reactionTime;
             DangerPoint = dangerPoint;
             Grenade = grenade;
@@ -17,7 +17,8 @@ namespace SAIN.SAINComponent.SubComponents
             }
         }
 
-        private readonly BotOwner BotOwner;
+        private readonly BotComponent Bot;
+        private BotOwner BotOwner => Bot.BotOwner;
 
         public float GrenadeDistance { get; private set; }
 
@@ -32,6 +33,7 @@ namespace SAIN.SAINComponent.SubComponents
             {
                 _sentToBot = true;
                 BotOwner.BewareGrenade.AddGrenadeDanger(DangerPoint, Grenade);
+                Bot.Talk.GroupSay(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat, false, 80);
                 return;
             }
 
