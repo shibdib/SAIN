@@ -21,6 +21,34 @@ namespace SAIN.SAINComponent.Classes
         {
             SAINBotController.Instance.AISoundPlayed += soundHeard;
             Singleton<BotEventHandler>.Instance.OnKill += cleanupKilledPlayer;
+            SAINBotController.Instance.BulletImpact += bulletImpacted;
+        }
+
+        private void bulletImpacted(EftBulletClass bullet)
+        {
+            if (!Bot.BotActive)
+                return;
+
+            var player = bullet.Player?.iPlayer;
+            if (player == null)
+                return;
+
+            if (Bot.HasEnemy)
+                return;
+
+            float distance = (bullet.CurrentPosition - Bot.Position).magnitude;
+            if (distance > 50f)
+                return;
+
+            if (Bot.EnemyController.Enemies.TryGetValue(player.ProfileId, out var enemy))
+            {
+                float dispersion = distance / 5f;
+                Vector3 random = UnityEngine.Random.onUnitSphere;
+                random.y = 0;
+                random = random.normalized * dispersion;
+                Vector3 estimatedPos = enemy.EnemyPosition + random;
+                enemy.SetHeardStatus(true, estimatedPos, SAINSoundType.BulletImpact, true);
+            }
         }
 
         private void soundHeard(SAINSoundType soundType, Vector3 soundPosition, PlayerComponent playerComponent, float power, float volume)
@@ -49,11 +77,11 @@ namespace SAIN.SAINComponent.Classes
                 ManualCleanup();
             }
 
-            if (iPlayer?.IsYourPlayer == true &&
-                _nextChecktime < Time.time)
+            if (_logtime < Time.time && 
+                iPlayer?.IsYourPlayer == true)
             {
-                Logger.LogDebug($"MainPlayer Footstep Sound Range {power} : Volume: {volume}");
-                _nextChecktime = Time.time + 1f;
+                _logtime = Time.time + 0.05f;
+                Logger.LogDebug($"SoundType [{soundType}] FinalRange: {power * volume} Base Range {power} : Volume: {volume}");
             }
 
             power *= volume;
@@ -68,6 +96,8 @@ namespace SAIN.SAINComponent.Classes
 
             ReactToSound(iPlayer, soundPosition, distance, wasHeard, bulletFelt, soundType);
         }
+
+        private static float _logtime;
 
         public void Update()
         {
@@ -109,6 +139,7 @@ namespace SAIN.SAINComponent.Classes
             ManualCleanup(true);
             SAINBotController.Instance.AISoundPlayed -= soundHeard;
             Singleton<BotEventHandler>.Instance.OnKill -= cleanupKilledPlayer;
+            SAINBotController.Instance.BulletImpact -= bulletImpacted;
         }
 
         private bool shallLimitAI(IPlayer iPlayer)

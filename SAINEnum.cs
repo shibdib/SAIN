@@ -185,6 +185,7 @@ namespace SAIN
         Breathing,
         Pain,
         Bush,
+        BulletImpact,
     }
 
     public enum ELocation

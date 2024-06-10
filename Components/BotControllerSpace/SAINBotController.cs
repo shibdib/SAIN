@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
+using static EFT.Interactive.BetterPropagationGroups;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace SAIN.Components
 {
@@ -23,7 +25,7 @@ namespace SAIN.Components
 
         public Action<SAINSoundType, Vector3, PlayerComponent, float, float> AISoundPlayed { get; set; }
         public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; set; }
-        public Action<Vector3> BulletImpact { get; set; }
+        public Action<EftBulletClass> BulletImpact { get; set; }
 
         public Dictionary<string, BotComponent> Bots => BotSpawnController.Bots;
         public GameWorld GameWorld => SAINGameWorld.GameWorld;
@@ -77,6 +79,13 @@ namespace SAIN.Components
         public void PlayerEnviromentChanged(string profileID, IndoorTrigger trigger)
         {
             SAINGameWorld.PlayerTracker.GetPlayerComponent(profileID)?.AIData.PlayerLocation.UpdateEnvironment(trigger);
+        }
+
+        public void BulletImpacted(EftBulletClass bullet)
+        {
+            Logger.LogInfo($"Shot By: {bullet.Player?.iPlayer?.Profile.Nickname} at Time: {Time.time}");
+            DebugGizmos.Sphere(bullet.CurrentPosition);
+            BulletImpact?.Invoke(bullet);
         }
 
         private void Awake()
