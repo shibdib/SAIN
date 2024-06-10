@@ -1,15 +1,8 @@
-using BepInEx.Logging;
 using EFT;
-using SAIN.Components;
+using EFT.Ballistics;
+using SAIN.Helpers;
 using System.Collections.Generic;
 using UnityEngine;
-using SAIN.Helpers;
-using SAIN.SAINComponent;
-using EFT.Utilities;
-using EFT.Ballistics;
-using System;
-using Comfort.Common;
-using static ChartAndGraph.ChartItemEvents;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
@@ -61,7 +54,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 return;
             }
 
-            if (CanTalk 
+            if (CanTalk
                 && _timeCanTalk < Time.time)
             {
                 EnemyTalk.Update();
@@ -107,7 +100,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                         return;
                     }
                 }
-                SendSayCommand(TalkPack);
+                SendSayCommand(TalkPack.phraseInfo.Phrase, TalkPack.Mask);
             }
         }
 
@@ -135,12 +128,12 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return false;
             }
-            if ((CanTalk && _timeCanTalk < Time.time) 
-                || phrase == EPhraseTrigger.OnDeath 
-                || phrase == EPhraseTrigger.OnAgony 
+            if ((CanTalk && _timeCanTalk < Time.time)
+                || phrase == EPhraseTrigger.OnDeath
+                || phrase == EPhraseTrigger.OnAgony
                 || phrase == EPhraseTrigger.OnBeingHurt)
             {
-                if (withGroupDelay && 
+                if (withGroupDelay &&
                     !CanSay(phrase))
                 {
                     return false;
@@ -162,8 +155,8 @@ namespace SAIN.SAINComponent.Classes.Talk
                 float vocalization = squadSettings.VocalizationLevel * 10f - 25f;
                 chance += vocalization;
             }
-            return EFTMath.RandomBool(chance) 
-                && GroupTalk.FriendIsClose 
+            return EFTMath.RandomBool(chance)
+                && GroupTalk.FriendIsClose
                 && Say(phrase, additionalMask, withGroupDelay);
         }
 
@@ -199,7 +192,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void Say(EPhraseTrigger trigger, bool demand = false, float delay = 0f, ETagStatus mask = (ETagStatus)0, int probability = 100, bool aggressive = false)
         {
-            if (Player?.HealthController?.IsAlive == true && 
+            if (Player?.HealthController?.IsAlive == true &&
                 Player.Speaker != null &&
                 _nextCanTalkTime < Time.time)
             {
@@ -225,11 +218,6 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private float _nextCanTalkTime;
 
-        private void SendSayCommand(BotTalkPackage talkPackage)
-        {
-            SendSayCommand(talkPackage.phraseInfo.Phrase, talkPackage.Mask);
-        }
-
         private ETagStatus SetETagMask(ETagStatus? additionaMask = null)
         {
             ETagStatus etagStatus;
@@ -242,8 +230,8 @@ namespace SAIN.SAINComponent.Classes.Talk
                 etagStatus = ETagStatus.Solo;
             }
 
-            if (BotOwner.Memory.IsUnderFire || 
-                Bot.Suppression.IsSuppressed || 
+            if (BotOwner.Memory.IsUnderFire ||
+                Bot.Suppression.IsSuppressed ||
                 Bot.Suppression.IsHeavySuppressed)
             {
                 etagStatus |= ETagStatus.Combat;
@@ -363,7 +351,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             return ChangeTalk ? newTalk : oldTalk;
         }
 
-        static void PhraseObjectsAdd(Dictionary<EPhraseTrigger, PhraseInfo> dictionary)
+        private static void PhraseObjectsAdd(Dictionary<EPhraseTrigger, PhraseInfo> dictionary)
         {
             AddPhrase(EPhraseTrigger.OnGoodWork, 1, 60f, dictionary);
             AddPhrase(EPhraseTrigger.OnBreath, 3, 15f, dictionary);
@@ -437,7 +425,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
         }
 
-        static void AddPhrase(EPhraseTrigger phrase, int priority, float timeDelay, Dictionary<EPhraseTrigger, PhraseInfo> dictionary)
+        private static void AddPhrase(EPhraseTrigger phrase, int priority, float timeDelay, Dictionary<EPhraseTrigger, PhraseInfo> dictionary)
         {
             if (!dictionary.ContainsKey(phrase))
             {
