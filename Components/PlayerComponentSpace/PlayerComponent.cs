@@ -99,7 +99,7 @@ namespace SAIN.Components.PlayerComponentSpace
                 Logger.LogError(ex);
                 return false;
             }
-            Logger.LogDebug($"{Name} Player Component Created");
+            Logger.LogDebug($"{Person.Nickname} Player Component Created");
             StartCoroutine(delayInit());
             return true;
         }
@@ -130,7 +130,7 @@ namespace SAIN.Components.PlayerComponentSpace
             StopAllCoroutines();
             Equipment?.Dispose();
             OnComponentDestroyed?.Invoke(ProfileId);
-            Logger.LogDebug($"{Name} Player Component Destroyed");
+            Logger.LogDebug($"{Person.Nickname} Player Component Destroyed");
         }
 
         public Action<string> OnComponentDestroyed { get; set; }

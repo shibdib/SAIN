@@ -78,7 +78,7 @@ namespace SAIN.Patches.Hearing
             if (____nextJumpNoise < Time.time)
             {
                 ____nextJumpNoise = Time.time + 0.5f;
-                float baseRange = 65f;
+                float baseRange = 55f;
                 SAINPlugin.BotController?.BotHearing.PlayAISound(____player.ProfileId, SAINSoundType.Jump, ____player.Position, baseRange, 1f);
             }
             return false;
@@ -98,7 +98,7 @@ namespace SAIN.Patches.Hearing
             if (____nextStepNoise < Time.time)
             {
                 ____nextStepNoise = Time.time + 0.33f;
-                float baseRange = 65f;
+                float baseRange = 35f;
 
                 if (motion.y < 0.2f && motion.y > -0.2f)
                 {
@@ -370,21 +370,6 @@ namespace SAIN.Patches.Hearing
         }
     }
 
-    public class BulletImpactPatch2 : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(BetterAudio), "LimitedPlay");
-        }
-
-        [PatchPostfix]
-        public static void PatchPostfix(BetterAudio __instance, Vector3 position, SoundBank bank, float distance, Vector3 gagRadius, float chokeTime, float volume, float bankBlendValue, EnvironmentType env, EOcclusionTest occlusionTest, string key)
-        {
-            if (SAINPlugin.BotController != null)
-            {
-            }
-        }
-    }
     public class BulletImpactPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

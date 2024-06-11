@@ -47,10 +47,10 @@ namespace SAIN.Patches.Generic
                 float strength = (float)___iobserverToPlayerBridge_0.Skills.Strength.SummaryLevel;
                 Vector3 b2 = new Vector3(inertia.InertiaLimitsStep * strength, inertia.InertiaLimitsStep * strength, 0f);
 
-                Logger.LogDebug($"Strength {strength}");
-                Logger.LogDebug($"carryWeightModifier {carryWeightModifier}");
-                Logger.LogDebug($"absoluteWeightModifier {absoluteWeightModifier}");
-                Logger.LogDebug($"d {d} : b {b.magnitude} : b2 {b2.magnitude}");
+                //Logger.LogDebug($"Strength {strength}");
+                //Logger.LogDebug($"carryWeightModifier {carryWeightModifier}");
+                //Logger.LogDebug($"absoluteWeightModifier {absoluteWeightModifier}");
+                //Logger.LogDebug($"d {d} : b {b.magnitude} : b2 {b2.magnitude}");
 
                 __instance.BaseInertiaLimits = inertia.InertiaLimits + b2;
                 __instance.WalkOverweightLimits = stamina.WalkOverweightLimits * d + b;
@@ -58,11 +58,11 @@ namespace SAIN.Patches.Generic
                 __instance.SprintOverweightLimits = stamina.SprintOverweightLimits * d + b;
                 __instance.WalkSpeedOverweightLimits = stamina.WalkSpeedOverweightLimits * d + b;
 
-                Logger.LogDebug($"BaseInertiaLimits {__instance.BaseInertiaLimits.magnitude}");
-                Logger.LogDebug($"WalkOverweightLimits {__instance.WalkOverweightLimits.magnitude}");
-                Logger.LogDebug($"BaseOverweightLimits {__instance.BaseOverweightLimits.magnitude}");
-                Logger.LogDebug($"SprintOverweightLimits {__instance.SprintOverweightLimits.magnitude}");
-                Logger.LogDebug($"WalkSpeedOverweightLimits {__instance.WalkSpeedOverweightLimits.magnitude}");
+                //Logger.LogDebug($"BaseInertiaLimits {__instance.BaseInertiaLimits.magnitude}");
+                //Logger.LogDebug($"WalkOverweightLimits {__instance.WalkOverweightLimits.magnitude}");
+                //Logger.LogDebug($"BaseOverweightLimits {__instance.BaseOverweightLimits.magnitude}");
+                //Logger.LogDebug($"SprintOverweightLimits {__instance.SprintOverweightLimits.magnitude}");
+                //Logger.LogDebug($"WalkSpeedOverweightLimits {__instance.WalkSpeedOverweightLimits.magnitude}");
 
                 return false;
             }

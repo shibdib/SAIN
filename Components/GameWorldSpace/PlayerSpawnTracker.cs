@@ -13,7 +13,6 @@ namespace SAIN.Components.PlayerComponentSpace
 
         public readonly Dictionary<string, Player> DeadPlayers = new Dictionary<string, Player>();
 
-
         public PlayerComponent GetPlayerComponent(string profileId) => AlivePlayers.GetPlayerComponent(profileId);
 
         public PlayerComponent FindClosestHumanPlayer(out float closestPlayerSqrMag, Vector3 targetPosition, out Player player)
@@ -85,32 +84,6 @@ namespace SAIN.Components.PlayerComponentSpace
             }
         }
 
-        public Player GetPlayer(IPlayer iPlayer)
-        {
-            if (iPlayer == null)
-            {
-                Logger.LogWarning("IPlayer is Null");
-                return null;
-            }
-
-            Player player = GameWorldInfo.GetAlivePlayer(iPlayer.ProfileId);
-            if (player != null)
-            {
-                return player;
-            }
-
-            if (iPlayer is Player player2 && player2 != null)
-            {
-                Logger.LogWarning("Got player from cast");
-                return player2;
-            }
-            else
-            {
-                Logger.LogError("Failed to get player from cast");
-                return null;
-            }
-        }
-
         public Player GetPlayer(string profileId)
         {
             if (!profileId.IsNullOrEmpty())
@@ -169,7 +142,7 @@ namespace SAIN.Components.PlayerComponentSpace
     {
         public PlayerComponent GetPlayerComponent(string profileId)
         {
-            if (!profileId.IsNullOrEmpty() && 
+            if (!profileId.IsNullOrEmpty() &&
                 this.TryGetValue(profileId, out PlayerComponent component))
             {
                 return component;

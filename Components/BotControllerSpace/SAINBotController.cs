@@ -14,8 +14,6 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
-using static EFT.Interactive.BetterPropagationGroups;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace SAIN.Components
 {
@@ -83,8 +81,8 @@ namespace SAIN.Components
 
         public void BulletImpacted(EftBulletClass bullet)
         {
-            Logger.LogInfo($"Shot By: {bullet.Player?.iPlayer?.Profile.Nickname} at Time: {Time.time}");
-            DebugGizmos.Sphere(bullet.CurrentPosition);
+            //Logger.LogInfo($"Shot By: {bullet.Player?.iPlayer?.Profile.Nickname} at Time: {Time.time}");
+            //DebugGizmos.Sphere(bullet.CurrentPosition);
             BulletImpact?.Invoke(bullet);
         }
 
@@ -325,11 +323,6 @@ namespace SAIN.Components
                     bot.Grenade.EnemyGrenadeThrown(grenade, dangerPoint);
                 }
             }
-        }
-
-        public static bool IsBotActive(BotComponent bot)
-        {
-            return bot?.BotActive == true;
         }
 
         public List<string> Groups = new List<string>();

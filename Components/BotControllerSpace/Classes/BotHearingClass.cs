@@ -5,6 +5,7 @@ using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent;
 using System.Collections;
 using UnityEngine;
+using SAIN.Preset.GlobalSettings.Categories;
 
 namespace SAIN.Components.BotControllerSpace.Classes
 {
@@ -63,7 +64,7 @@ namespace SAIN.Components.BotControllerSpace.Classes
                 return;
             }
 
-            var hearSound = delaySoundHeard2(soundType, playerComponent, position, range, volume);
+            var hearSound = delaySoundHeard(soundType, playerComponent, position, range, volume);
             BotController.StartCoroutine(hearSound);
         }
 
@@ -75,11 +76,19 @@ namespace SAIN.Components.BotControllerSpace.Classes
             }
 
             PlayerComponent playerComponent = SAINGameWorld.PlayerTracker.GetPlayerComponent(profileId);
-            PlayAISound(playerComponent, soundType, position, range, volume, true);
+
+            if (playerComponent != null && playerComponent.IsActive)
+                PlayAISound(playerComponent, soundType, position, range, volume, true);
         }
 
-        private IEnumerator delaySoundHeard2(SAINSoundType soundType, PlayerComponent playerComponent, Vector3 position, float range, float volume, float delay = 0.1f)
+        private IEnumerator delaySoundHeard(SAINSoundType soundType, PlayerComponent playerComponent, Vector3 position, float range, float volume, float delay = 0.1f)
         {
+            BotController.AISoundPlayed?.Invoke(soundType, position, playerComponent, range, volume);
+            if (playerComponent.Player.IsYourPlayer)
+            {
+                Logger.LogDebug($"SoundType [{soundType}] FinalRange: {range * volume} Base Range {range} : Volume: {volume}");
+            }
+
             yield return new WaitForSeconds(delay);
 
             if (playerComponent == null ||
@@ -90,14 +99,12 @@ namespace SAIN.Components.BotControllerSpace.Classes
             }
 
             playBotEvent(playerComponent.Player, position, range * volume, soundType);
-            BotController.AISoundPlayed?.Invoke(soundType, position, playerComponent, range, volume);
         }
 
-        private AISoundType playBotEvent(Player player, Vector3 position, float range, SAINSoundType soundType)
+        private void playBotEvent(Player player, Vector3 position, float range, SAINSoundType soundType)
         {
             AISoundType baseSoundType = getBaseSoundType(soundType);
             BotController.BotEventHandler?.PlaySound(player, position, range, baseSoundType);
-            return baseSoundType;
         }
 
         private AISoundType getBaseSoundType(SAINSoundType soundType)
