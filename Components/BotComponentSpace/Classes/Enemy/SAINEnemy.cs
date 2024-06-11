@@ -58,7 +58,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             EnemyAim = new EnemyAim(this);
         }
 
-        public float NextCheckLookTime { get; set; }
+        public float LastCheckLookTime { get; set; }
 
         public bool EnemyNotLooking => IsVisible && !EnemyStatus.EnemyLookingAtMe && !EnemyStatus.ShotAtMeRecently;
 

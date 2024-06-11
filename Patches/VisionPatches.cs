@@ -92,6 +92,20 @@ namespace SAIN.Patches.Vision
         }
     }
 
+    public class DisableLookUpdatePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(LookSensor), "CheckAllEnemies");
+        }
+
+        [PatchPrefix]
+        public static bool Patch(BotOwner ____botOwner)
+        {
+            return SAINEnableClass.isBotExcluded(____botOwner);
+        }
+    }
+
     public class GlobalLookSettingsPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

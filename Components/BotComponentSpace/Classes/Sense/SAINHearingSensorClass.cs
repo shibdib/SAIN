@@ -77,7 +77,7 @@ namespace SAIN.SAINComponent.Classes
                 ManualCleanup();
             }
 
-            if (_logtime < Time.time && 
+            if (_logtime < Time.time &&
                 iPlayer?.IsYourPlayer == true)
             {
                 _logtime = Time.time + 0.05f;
@@ -382,7 +382,8 @@ namespace SAIN.SAINComponent.Classes
             return pos;
         }
 
-        const float _speedOfSound = 343;
+        private const float _speedOfSound = 343;
+
         private IEnumerator baseHearDelay(float distance)
         {
             float delay = distance / _speedOfSound;
@@ -631,7 +632,6 @@ namespace SAIN.SAINComponent.Classes
                 {
                     minimumChance += 5f;
                 }
-
             }
 
             if (Player.Velocity.magnitude < 0.5f)

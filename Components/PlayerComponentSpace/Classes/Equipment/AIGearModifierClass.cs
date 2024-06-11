@@ -6,13 +6,11 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 {
     public class AIGearModifierClass : AIDataBase
     {
-        public AIGearModifierClass(SAINAIData sAINAIData) : base(sAINAIData)
-        {
+        public AIGearModifierClass(SAINAIData sAINAIData) : base(sAINAIData) {
 
         }
 
-        public float StealthModifier(float distance)
-        {
+        public float StealthModifier(float distance) {
             if (_nextGetSightModTime < Time.time)
             {
                 _nextGetSightModTime = Time.time + 1f;
@@ -22,14 +20,11 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         }
 
 
-        private float getSightMod(float distance)
-        {
+        private float getSightMod(float distance) {
             float gainVisionTime = 1f;
-            if (distance > 50f)
-            {
+            if (distance > 50f)  {
                 Item backpack = GearInfo.GetItem(EquipmentSlot.Backpack);
-                if (backpack != null)
-                {
+                if (backpack != null) {
                     switch (backpack.TemplateId)
                     {
                         case backpack_pilgrim:
@@ -50,8 +45,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                 } 
 
                 Item headwear = GearInfo.GetItem(EquipmentSlot.Headwear);
-                if (headwear != null)
-                {
+                if (headwear != null) {
                     switch (headwear.TemplateId)
                     {
                         case boonie_MILTEC:
@@ -75,8 +69,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                 }
 
                 Item faceCover = GearInfo.GetItem(EquipmentSlot.FaceCover);
-                if (faceCover != null)
-                {
+                if (faceCover != null) {
                     gainVisionTime *= 1.05f;
                 }
             }

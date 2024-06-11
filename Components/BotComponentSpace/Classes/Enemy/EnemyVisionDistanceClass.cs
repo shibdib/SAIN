@@ -107,15 +107,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float calcGearStealthMod()
         {
-            if (GearInfo == null)
-            {
-                GearInfo = SAINGearInfoHandler.GetGearInfo(EnemyPlayer);
-            }
-            if (GearInfo != null)
-            {
-                return GearInfo.GetStealthModifier(Enemy.RealDistance);
-            }
-            return 1f;
+            return Enemy.EnemyPlayerComponent.AIData.AIGearModifier.StealthModifier(Enemy.RealDistance);
         }
 
         private float getFlare()
@@ -144,6 +136,5 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float _nextCalcTime;
         private float _calcFreq = 0.1f;
         private float _visionDist;
-        private GearInfoContainer GearInfo;
     }
 }

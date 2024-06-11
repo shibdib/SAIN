@@ -122,15 +122,15 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private void OnDisable()
         {
-            //Logger.LogDebug($"{Name} Player Component Disabled");
             StopAllCoroutines();
         }
 
         private void OnDestroy()
         {
-            Logger.LogDebug($"{Name} Player Component Destroyed");
             StopAllCoroutines();
+            Equipment?.Dispose();
             OnComponentDestroyed?.Invoke(ProfileId);
+            Logger.LogDebug($"{Name} Player Component Destroyed");
         }
 
         public Action<string> OnComponentDestroyed { get; set; }

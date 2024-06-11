@@ -144,7 +144,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             Vector3? lastKnown = SAINBot.Enemy?.LastKnownPosition;
             if (lastKnown != null)
             {
-                float maxRange = 3f.Sqr();
+                const float maxRange = 6f * 6f;
 
                 Vector3? blindCorner = SAINBot.Enemy.Path.BlindCornerToEnemy;
                 if (blindCorner != null
@@ -154,7 +154,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
 
                 Vector3? lastCorner = SAINBot.Enemy.Path.LastCornerToEnemy;
-                if (lastCorner != null
+                if (lastCorner != null && SAINBot.Enemy.Path.CanSeeLastCornerToEnemy
                     && (lastCorner.Value - lastKnown.Value).sqrMagnitude < maxRange)
                 {
                     return lastCorner;
@@ -172,11 +172,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 SAINBot.Enemy.EnemyStatus.EnemyIsSuppressed = true;
                 if (SAINBot.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
                 {
-                    _suppressTime = Time.time + 0.1f * Random.Range(0.75f, 1.25f);
+                    _suppressTime = Time.time + 0.05f * Random.Range(0.75f, 1.25f);
                 }
                 else
                 {
-                    _suppressTime = Time.time + 0.5f * Random.Range(0.66f, 1.33f);
+                    _suppressTime = Time.time + 0.25f * Random.Range(0.66f, 1.33f);
                 }
             }
         }

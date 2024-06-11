@@ -97,7 +97,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
-            SAINBot.Mover.StopMove();
+            //SAINBot.Mover.StopMove();
             SAINBot.Mover.PauseMovement(3f);
             _startSurgeryTime = Time.time + 1f;
             _actionStartedTime = Time.time;

@@ -286,23 +286,18 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return SteerPriority.Aiming;
             }
-            if (BotOwner.Memory.IsUnderFire)
-            {
-                return SteerPriority.UnderFire;
-            }
             if (EnemyVisible())
             {
                 return SteerPriority.EnemyVisible;
+            }
+            if (BotOwner.Memory.IsUnderFire)
+            {
+                return SteerPriority.UnderFire;
             }
             var shotMeRecent = enemyShotMe();
             if (shotMeRecent != null)
             {
                 return SteerPriority.LastHit;
-            }
-            //LastHeardSound = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, 100f, 4f);
-            if (LastHeardSound != null)
-            {
-                //return SteerPriority.Hear;
             }
             EnemyPlace lastKnownPlace = Bot.Enemy?.KnownPlaces?.LastKnownPlace;
             if (lastKnownPlace != null 
@@ -332,20 +327,24 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private SAINEnemy enemyShotMe()
         {
-            foreach (var enemy in Bot.EnemyController.Enemies.Values)
-            {
-                if (enemy?.IsValid == true && 
-                    (enemy.EnemyStatus.ShotByEnemyRecently || enemy.EnemyStatus.ShotAtMeRecently))
-                {
-                    return enemy;
-                }
-            }
+            if (Bot.BotHitReaction.TimeSinceShot < 3f)
+                return Bot.BotHitReaction.EnemyWhoLastShotMe;
+
             return null;
         }
 
 
         public SteerPriority CurrentSteerPriority { get; private set; } = SteerPriority.None;
         public SteerPriority LastSteerPriority { get; private set; } = SteerPriority.None;
+
+        private Vector3 adjustLookPoint(Vector3 target)
+        {
+            Vector3 head = BotOwner.LookSensor._headPoint;
+            Vector3 direction = target - head;
+            direction.y = 0f;
+            direction = direction.normalized;
+            return target + direction;
+        }
 
         public bool LookToLastKnownEnemyPosition(SAINEnemy enemy)
         {
@@ -360,15 +359,24 @@ namespace SAIN.SAINComponent.Classes.Mover
                 EnemyPlace lastKnownPlace = enemy.KnownPlaces.LastKnownPlace;
                 if (lastKnownPlace?.PersonalClearLineOfSight(BotOwner.LookSensor._headPoint, LayerMaskClass.HighPolyWithTerrainMask) == true)
                 {
-                    LookToPoint(lastKnownPlace.Position + _weaponRootOffset);
+                    Vector3 lookPos = adjustLookPoint(lastKnownPlace.Position);
+                    LookToPoint(lookPos + _weaponRootOffset);
+                    if (SAINPlugin.DebugMode)
+                    {
+                        DebugGizmos.Line(lastKnownPlace.Position + _weaponRootOffset, lookPos + _weaponRootOffset, 0.05f, 1f);
+                    }
                     return true;
                 }
 
                 Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
-                if (blindCornerToEnemy != null &&
-                    (blindCornerToEnemy.Value - Bot.Transform.HeadPosition).sqrMagnitude > 1.5f)
+                if (blindCornerToEnemy != null)
                 {
-                    LookToPoint(blindCornerToEnemy.Value);
+                    Vector3 lookPos = adjustLookPoint(blindCornerToEnemy.Value);
+                    LookToPoint(lookPos);
+                    if (SAINPlugin.DebugMode)
+                    {
+                        DebugGizmos.Line(blindCornerToEnemy.Value, lookPos, 0.05f, 1f);
+                    }
                     return true;
                 }
 
@@ -376,21 +384,37 @@ namespace SAIN.SAINComponent.Classes.Mover
                 if (lastCorner != null &&
                     enemy.CanSeeLastCornerToEnemy)
                 {
-                    LookToPoint(lastCorner.Value + _weaponRootOffset);
+                    Vector3 lookPos = adjustLookPoint(lastCorner.Value);
+                    LookToPoint(lookPos + _weaponRootOffset);
+                    if (SAINPlugin.DebugMode)
+                    {
+                        DebugGizmos.Line(lastCorner.Value + _weaponRootOffset, lookPos + _weaponRootOffset, 0.05f, 1f);
+                    }
                     return true;
                 }
 
                 var enemyPath = enemy.Path.PathToEnemy;
-                if (enemyPath != null && enemyPath.corners.Length > 2)
+                if (enemyPath != null && 
+                    enemyPath.corners.Length > 2)
                 {
                     Vector3 point = enemyPath.corners[1];
+                    Vector3 lookPos = adjustLookPoint(point);
                     LookToPoint(point + _weaponRootOffset);
+                    if (SAINPlugin.DebugMode)
+                    {
+                        DebugGizmos.Line(point + _weaponRootOffset, lookPos + _weaponRootOffset, 0.05f, 1f);
+                    }
                     return true;
                 }
 
                 if (lastKnownPlace != null)
                 {
-                    LookToPoint(lastKnownPlace.Position + _weaponRootOffset);
+                    Vector3 lookPos = adjustLookPoint(lastKnownPlace.Position);
+                    LookToPoint(lookPos + _weaponRootOffset);
+                    if (SAINPlugin.DebugMode)
+                    {
+                        DebugGizmos.Line(lastKnownPlace.Position + _weaponRootOffset, lookPos + _weaponRootOffset, 0.05f, 1f);
+                    }
                     return true;
                 }
             }
@@ -569,6 +593,12 @@ namespace SAIN.SAINComponent.Classes.Mover
             var shotMeRecent = enemyShotMe();
             if (shotMeRecent != null)
             {
+                var lastShotPos = shotMeRecent.EnemyStatus.LastShotPosition;
+                if (lastShotPos != null)
+                {
+                    LookToPoint(lastShotPos.Value + _weaponRootOffset);
+                    return;
+                }
                 Vector3? lastKnown = shotMeRecent.LastKnownPosition;
                 if (lastKnown != null)
                 {

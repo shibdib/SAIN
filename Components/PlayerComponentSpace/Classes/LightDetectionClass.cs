@@ -114,7 +114,12 @@ namespace SAIN.Components.PlayerComponentSpace
                 return;
             }
 
-            var enemies = PlayerComponent.BotComponent?.EnemyController.Enemies.Values;
+            if (PlayerComponent.BotComponent?.BotActive != true)
+            {
+                return;
+            }
+
+            var enemies = PlayerComponent.BotComponent.EnemyController.Enemies.Values;
             if (enemies == null)
             {
                 return;

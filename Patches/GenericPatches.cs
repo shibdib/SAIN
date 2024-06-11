@@ -97,20 +97,6 @@ namespace SAIN.Patches.Generic
         }
     }
 
-    public class DisableLookSensorPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(LookSensor), "CheckAllEnemies");
-        }
-
-        [PatchPrefix]
-        public static bool PatchPrefix(BotOwner ____botOwner)
-        {
-            return SAINEnableClass.isBotExcluded(____botOwner);
-        }
-    }
-
     public class AddPointToSearchPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -158,39 +144,6 @@ namespace SAIN.Patches.Generic
                 && sain.EnemyController.CheckAddEnemy(__instance.Person)?.Heard == true)
             {
                 __result = true;
-            }
-        }
-    }
-
-    public class BulletImpactPatch2 : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(BetterAudio), "LimitedPlay");
-        }
-
-        [PatchPostfix]
-        public static void PatchPostfix(BetterAudio __instance, Vector3 position, SoundBank bank, float distance, Vector3 gagRadius, float chokeTime, float volume, float bankBlendValue, EnvironmentType env, EOcclusionTest occlusionTest, string key)
-        {
-            if (SAINPlugin.BotController != null)
-            {
-            }
-        }
-    }
-    public class BulletImpactPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(EffectsCommutator), "PlayHitEffect");
-        }
-
-        [PatchPostfix]
-        public static void PatchPostfix(EftBulletClass info)
-        {
-            if (SAINPlugin.BotController != null)
-            {
-                //Vector3 position = __instance.transform.position + ___vector3_0;
-                SAINPlugin.BotController.BulletImpacted(info);
             }
         }
     }

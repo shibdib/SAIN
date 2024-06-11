@@ -1,5 +1,6 @@
 ﻿using EFT.InventoryLogic;
 using SAIN.Helpers;
+using SAIN.Plugin;
 using System;
 using UnityEngine;
 
@@ -9,10 +10,23 @@ namespace SAIN.SAINComponent.Classes.Info
     {
         public WeaponInfo(Weapon weapon)
         {
-            Logger.LogDebug($"Created WeaponInfo for {weapon.ShortName}");
             Weapon = weapon;
             WeaponClass = TryGetWeaponClass(weapon);
             AmmoCaliber = TryGetAmmoCaliber(weapon);
+            updateSettings();
+            PresetHandler.OnPresetUpdated += updateSettings;
+        }
+
+        private void updateSettings()
+        {
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Shoot.EngagementDistance.TryGetValue(WeaponClass, out float distance))
+            {
+                EngagementDistance = distance;
+            }
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Hearing.HearingDistances.TryGetValue(AmmoCaliber, out float range))
+            {
+                BaseAudibleRange = range;
+            }
         }
 
         public void Update()
@@ -23,7 +37,15 @@ namespace SAIN.SAINComponent.Classes.Info
             }
             _nextUpdateTime = Time.time + 10f;
             checkAllMods();
+            Log();
         }
+
+        public void Dispose()
+        {
+            PresetHandler.OnPresetUpdated -= updateSettings;
+        }
+
+        public float EngagementDistance { get; private set; } = 150f;
 
         public Weapon Weapon { get; private set; }
 
@@ -41,18 +63,7 @@ namespace SAIN.SAINComponent.Classes.Info
         public AISoundType AISoundType => HasSuppressor ? AISoundType.silencedGun : AISoundType.gun;
         public SAINSoundType SoundType => HasSuppressor ? SAINSoundType.SuppressedGunShot : SAINSoundType.Gunshot;
 
-        public float BaseAudibleRange
-        {
-            get
-            {
-                if (SAINPlugin.LoadedPreset?.GlobalSettings?.Hearing?.HearingDistances.TryGetValue(AmmoCaliber, out var range) == true)
-                {
-                    return range;
-                }
-                Logger.LogError($"Cannot find base audible range for Caliber: [{AmmoCaliber}]");
-                return 150f;
-            }
-        }
+        public float BaseAudibleRange { get; private set; } = 150f;
 
         public float MuzzleLoudness { get; private set; }
         public float MuzzleLoudnessRealism { get; private set; }

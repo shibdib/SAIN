@@ -14,9 +14,8 @@ namespace SAIN.Layers.Combat.Solo
 
         public override Action GetNextAction()
         {
-            SoloDecision Decision = _currentDecision;
-            var SelfDecision = SAINBot.Decision.CurrentSelfDecision;
-            _lastDecision = Decision;
+            _lastSelfDecision = _currentSelfDecision;
+            _lastDecision = _currentDecision;
 
             if (_doSurgeryAction)
             {
@@ -24,51 +23,51 @@ namespace SAIN.Layers.Combat.Solo
                 return new Action(typeof(DoSurgeryAction), $"Do Surgery");
             }
 
-            switch (Decision)
+            switch (_lastDecision)
             {
                 case SoloDecision.MoveToEngage:
-                    return new Action(typeof(MoveToEngageAction), $"{Decision}");
+                    return new Action(typeof(MoveToEngageAction), $"{_lastDecision}");
 
                 case SoloDecision.RushEnemy:
-                    return new Action(typeof(RushEnemyAction), $"{Decision}");
+                    return new Action(typeof(RushEnemyAction), $"{_lastDecision}");
 
                 case SoloDecision.ThrowGrenade:
-                    return new Action(typeof(ThrowGrenadeAction), $"{Decision}");
+                    return new Action(typeof(ThrowGrenadeAction), $"{_lastDecision}");
 
                 case SoloDecision.ShiftCover:
-                    return new Action(typeof(ShiftCoverAction), $"{Decision}");
+                    return new Action(typeof(ShiftCoverAction), $"{_lastDecision}");
 
                 case SoloDecision.RunToCover:
-                    return new Action(typeof(RunToCoverAction), $"{Decision}");
+                    return new Action(typeof(RunToCoverAction), $"{_lastDecision}");
 
                 case SoloDecision.Retreat:
-                    return new Action(typeof(RunToCoverAction), $"{Decision} + {SelfDecision}");
+                    return new Action(typeof(RunToCoverAction), $"{_lastDecision} + {_lastSelfDecision}");
 
                 case SoloDecision.MoveToCover:
-                    return new Action(typeof(WalkToCoverAction), $"{Decision}");
+                    return new Action(typeof(WalkToCoverAction), $"{_lastDecision}");
 
                 case SoloDecision.DogFight:
-                    return new Action(typeof(DogFightAction), $"{Decision}");
+                    return new Action(typeof(DogFightAction), $"{_lastDecision}");
 
                 case SoloDecision.ShootDistantEnemy:
                 case SoloDecision.StandAndShoot:
-                    return new Action(typeof(StandAndShootAction), $"{Decision}");
+                    return new Action(typeof(StandAndShootAction), $"{_lastDecision}");
 
                 case SoloDecision.HoldInCover:
-                    if (SelfDecision != SelfDecision.None)
+                    if (_lastSelfDecision != SelfDecision.None)
                     {
-                        return new Action(typeof(HoldinCoverAction), $"{Decision} + {SelfDecision}");
+                        return new Action(typeof(HoldinCoverAction), $"{_lastDecision} + {_lastSelfDecision}");
                     }
                     else
                     {
-                        return new Action(typeof(HoldinCoverAction), $"{Decision}");
+                        return new Action(typeof(HoldinCoverAction), $"{_lastDecision}");
                     }
 
                 case SoloDecision.Search:
-                    return new Action(typeof(SearchAction), $"{Decision}");
+                    return new Action(typeof(SearchAction), $"{_lastDecision}");
 
                 default:
-                    return new Action(typeof(StandAndShootAction), $"DEFAULT! {Decision}");
+                    return new Action(typeof(StandAndShootAction), $"DEFAULT! {_lastDecision}");
             }
         }
 
@@ -90,10 +89,16 @@ namespace SAIN.Layers.Combat.Solo
         {
             // this is dumb im sorry
             if (!_doSurgeryAction
-                && SAINBot.Decision.CurrentSelfDecision == SelfDecision.Surgery
+                && _currentSelfDecision == SelfDecision.Surgery
                 && SAINBot.Cover.BotIsAtCoverInUse())
             {
                 _doSurgeryAction = true;
+                return true;
+            }
+
+            if (_lastSelfDecision == SelfDecision.Surgery && 
+                _currentSelfDecision != SelfDecision.Surgery )
+            {
                 return true;
             }
 
@@ -103,6 +108,8 @@ namespace SAIN.Layers.Combat.Solo
         private bool _doSurgeryAction;
 
         private SoloDecision _lastDecision = SoloDecision.None;
+        private SelfDecision _lastSelfDecision = SelfDecision.None;
         public SoloDecision _currentDecision => SAINBot.Decision.CurrentSoloDecision;
+        public SelfDecision _currentSelfDecision => SAINBot.Decision.CurrentSelfDecision;
     }
 }

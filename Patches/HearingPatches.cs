@@ -7,6 +7,7 @@ using HarmonyLib;
 using SAIN.Components;
 using SAIN.Components.Helpers;
 using System.Reflection;
+using Systems.Effects;
 using UnityEngine;
 
 namespace SAIN.Patches.Hearing
@@ -366,6 +367,39 @@ namespace SAIN.Patches.Hearing
                 range = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_Healing;
             }
             SAINPlugin.BotController?.BotHearing.PlayAISound(__instance.ProfileId, soundType, __instance.Position, range, 1f);
+        }
+    }
+
+    public class BulletImpactPatch2 : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BetterAudio), "LimitedPlay");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(BetterAudio __instance, Vector3 position, SoundBank bank, float distance, Vector3 gagRadius, float chokeTime, float volume, float bankBlendValue, EnvironmentType env, EOcclusionTest occlusionTest, string key)
+        {
+            if (SAINPlugin.BotController != null)
+            {
+            }
+        }
+    }
+    public class BulletImpactPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(EffectsCommutator), "PlayHitEffect");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(EftBulletClass info)
+        {
+            if (SAINPlugin.BotController != null)
+            {
+                //Vector3 position = __instance.transform.position + ___vector3_0;
+                SAINPlugin.BotController.BulletImpacted(info);
+            }
         }
     }
 }

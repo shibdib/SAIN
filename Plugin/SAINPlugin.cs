@@ -9,6 +9,7 @@ using SAIN.Editor;
 using SAIN.Helpers;
 using SAIN.Patches.Generic;
 using SAIN.Patches.Hearing;
+using SAIN.Patches.Vision;
 using SAIN.Plugin;
 using SAIN.Preset;
 using System;
@@ -82,8 +83,6 @@ namespace SAIN
                 typeof(Patches.Generic.FixPatrolDataPatch),
                 typeof(Patches.Generic.SetPanicPointPatch),
                 typeof(Patches.Generic.AddPointToSearchPatch),
-                typeof(Patches.Generic.BulletImpactPatch),
-                //typeof(Patches.Generic.BulletImpactPatch2),
                 typeof(Patches.Generic.HaveSeenEnemyPatch),
                 typeof(Patches.Generic.StopSetToNavMeshPatch),
                 typeof(Patches.Generic.TurnDamnLightOffPatch),
@@ -104,6 +103,7 @@ namespace SAIN
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
 
                 //typeof(Patches.Generic.SteeringPatch),
+                typeof(Patches.Generic.EncumberedPatch),
                 typeof(Patches.Generic.InBunkerPatch),
                 typeof(Patches.Generic.DoorOpenerPatch),
 
@@ -111,6 +111,8 @@ namespace SAIN
                 typeof(Patches.Hearing.OnMakingShotPatch),
                 typeof(Patches.Hearing.HearingSensorPatch),
 
+                typeof(Patches.Hearing.BulletImpactPatch),
+                //typeof(Patches.Generic.BulletImpactPatch2),
                 typeof(Patches.Hearing.TreeSoundPatch),
                 typeof(Patches.Hearing.DoorBreachSoundPatch),
                 typeof(Patches.Hearing.DoorOpenSoundPatch),
@@ -133,6 +135,7 @@ namespace SAIN
                 typeof(Patches.Talk.BotTalkPatch),
                 typeof(Patches.Talk.BotTalkManualUpdatePatch),
 
+                typeof(Patches.Vision.DisableLookUpdatePatch),
                 typeof(Patches.Vision.SetPartPriorityPatch),
                 typeof(Patches.Vision.GlobalLookSettingsPatch),
                 typeof(Patches.Vision.WeatherTimeVisibleDistancePatch),

@@ -120,7 +120,8 @@ namespace SAIN.SAINComponent.Classes.Memory
             Bot.EnemyController.OnEnemyRemoved -= clearEnemy;
         }
 
-        public readonly List<Player> VisiblePlayers = new List<Player>();
+        public List<Player> VisiblePlayers { get; } = new List<Player>();
+        public List<string> VisiblePlayersIds { get; } = new List<string>();
 
         public Vector3 UnderFireFromPosition { get; set; }
 

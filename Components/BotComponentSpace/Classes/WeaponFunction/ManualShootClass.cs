@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         public void Update()
         {
             if (Reason != EShootReason.None && 
-                (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 1f < Time.time))
+                (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 1f < Time.time || !BotOwner.ShootData.Shooting))
             {
                 Shoot(false, Vector3.zero);
             }
@@ -34,17 +34,15 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                     BotOwner.ShootData.EndShoot();
                     return false;
                 }
-                else if (BotOwner.ShootData.Shoot())
+                if (BotOwner.ShootData.Shooting)
+                {
+                    return true;
+                }
+                if (BotOwner.ShootData.Shoot())
                 {
                     _timeStartManualShoot = Time.time;
                     Reason = reason;
                     return true;
-                }
-                else
-                {
-                    BotOwner.ShootData.EndShoot();
-                    Reason = EShootReason.None;
-                    return false;
                 }
             }
             BotOwner.ShootData.EndShoot();

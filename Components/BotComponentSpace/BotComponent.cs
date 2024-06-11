@@ -79,14 +79,14 @@ namespace SAIN.SAINComponent
 
         public bool IsDead =>
             PlayerComponent == null ||
-            BotOwner == null
-            || BotOwner.IsDead
-            || Player == null
-            || Player.HealthController.IsAlive == false;
+            BotOwner == null || 
+            BotOwner.IsDead || 
+            Player == null || 
+            Player.HealthController.IsAlive == false;
 
         public bool GameIsEnding =>
-            Singleton<IBotGame>.Instance == null
-            || Singleton<IBotGame>.Instance.Status == GameStatus.Stopping;
+            Singleton<IBotGame>.Instance == null || 
+            Singleton<IBotGame>.Instance.Status == GameStatus.Stopping;
 
         public float DistanceToAimTarget
         {
@@ -100,12 +100,13 @@ namespace SAIN.SAINComponent
             }
         }
 
-        public float NextCheckVisiblePlayerTime;
+        public float LastCheckVisibleTime;
 
         public bool Init(PlayerComponent playerComponent)
         {
             PlayerComponent = playerComponent;
             ProfileId = playerComponent.ProfileId;
+            playerComponent.Player.Physical.EncumberDisabled = false;
 
             try
             {

@@ -24,6 +24,15 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
             ReCalcPowerOfEquipment();
         }
 
+        public void Dispose()
+        {
+            foreach (var weapon in WeaponInfos.Values)
+            {
+                weapon.Dispose();
+            }
+            WeaponInfos.Clear();
+        }
+
         public EquipmentClass EquipmentClass { get; private set; }
 
         private void ReCalcPowerOfEquipment()
@@ -94,6 +103,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                 else if (WeaponInfos.TryGetValue(slot, out WeaponInfo info) &&
                     info.Weapon != weapon)
                 {
+                    info.Dispose();
                     WeaponInfos[slot] = new WeaponInfo(weapon);
                 }
             }
@@ -127,13 +137,11 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
             {
                 if (Player.HandsController.Item is Weapon weapon)
                 {
-                    if (_currentWeapon?.Weapon == weapon)
-                    {
+                    if (_currentWeapon?.Weapon == weapon) {
                         return _currentWeapon;
                     }
 
-                    foreach (var weaponInfo in WeaponInfos.Values)
-                    {
+                    foreach (var weaponInfo in WeaponInfos.Values) {
                         if (weapon == weaponInfo.Weapon)
                         {
                             _currentWeapon = weaponInfo;
@@ -142,27 +150,26 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                         }
                     }
                 }
+
                 if (_currentWeapon == null)
-                {
-                    if (WeaponInfos.TryGetValue(EquipmentSlot.FirstPrimaryWeapon, out WeaponInfo weaponInfo))
-                    {
-                        _currentWeapon = weaponInfo;
-                    }
-                    else if (WeaponInfos.TryGetValue(EquipmentSlot.SecondPrimaryWeapon, out weaponInfo))
-                    {
-                        _currentWeapon = weaponInfo;
-                    }
-                    else if (WeaponInfos.TryGetValue(EquipmentSlot.Holster, out weaponInfo))
-                    {
-                        _currentWeapon = weaponInfo;
-                    }
-                }
+                    _currentWeapon = PrimaryWeapon ?? SecondaryWeapon ?? HolsterWeapon;
+
                 return _currentWeapon;
             }
         }
 
+        public WeaponInfo GetWeaponInfo(EquipmentSlot slot) {
+            if (WeaponInfos.TryGetValue(slot, out WeaponInfo weaponInfo))
+                return weaponInfo;
+            return null;
+        }
+
+        public WeaponInfo PrimaryWeapon => GetWeaponInfo(EquipmentSlot.FirstPrimaryWeapon);
+        public WeaponInfo SecondaryWeapon => GetWeaponInfo(EquipmentSlot.SecondPrimaryWeapon);
+        public WeaponInfo HolsterWeapon => GetWeaponInfo(EquipmentSlot.Holster);
+
         private WeaponInfo _currentWeapon;
 
-        public Dictionary<EquipmentSlot, WeaponInfo> WeaponInfos { get; private set; } = new Dictionary<EquipmentSlot, WeaponInfo>();
+        public Dictionary<EquipmentSlot, WeaponInfo> WeaponInfos { get; } = new Dictionary<EquipmentSlot, WeaponInfo>();
     }
 }
