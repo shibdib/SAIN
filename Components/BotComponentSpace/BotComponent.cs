@@ -106,7 +106,7 @@ namespace SAIN.SAINComponent
         {
             PlayerComponent = playerComponent;
             ProfileId = playerComponent.ProfileId;
-            playerComponent.Player.Physical.EncumberDisabled = false;
+            //playerComponent.Player.Physical.EncumberDisabled = false;
 
             try
             {

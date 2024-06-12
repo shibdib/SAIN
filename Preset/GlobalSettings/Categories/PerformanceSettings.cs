@@ -1,4 +1,5 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
@@ -9,6 +10,7 @@ namespace SAIN.Preset.GlobalSettings
         [Default(false)]
         public bool PerformanceMode = false;
 
+        [JsonIgnore]
         [Advanced]
         [MinMax(1f, 20f, 1f)]
         public float MinJobSize = 2;
@@ -17,9 +19,10 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0.01f, 0.1f, 1000f)]
         public float SpherecastRadius = 0.025f;
 
+        [JsonIgnore]
         [Advanced]
         [MinMax(1f, 20f, 1f)]
-        public float MaxBotsToCheckVisionPerFrame = 3;
+        public float MaxBotsToCheckVisionPerFrame = 5;
 
         //[Advanced]
         //[MinMax(1f, 20f, 1f)]

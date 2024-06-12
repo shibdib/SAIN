@@ -111,13 +111,11 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private void updateAllWeapons()
         {
-            if (_nextUpdateTime < Time.time)
+            foreach (var info in WeaponInfos.Values)
             {
-                _nextUpdateTime = Time.time + 1f;
-
-                foreach (var info in WeaponInfos.Values)
+                if (info?.Update() == true)
                 {
-                    info?.Update();
+                    return;
                 }
             }
         }

@@ -5,76 +5,58 @@ namespace SAIN.Components.PlayerComponentSpace
 {
     public class PersonTransformClass
     {
-        //public bool TransformNull => Person == null || Person.PlayerNull || _transform == null || Person.Player == null || Person.Player.gameObject == null;
-
-        public Vector3 Position
-        {
-            get
-            {
-                if (_transform == null)
-                {
-                    return Vector3.zero;
-                }
-                return _position;
-            }
-        }
-
-        private Vector3 _position => _transform.position;
-
-        public Vector3 LookDirection
-        {
-            get
-            {
-                if (_transform == null || Person.Player == null)
-                {
-                    return Vector3.zero;
-                }
-                return _lookDirection;
-            }
-        }
-
-        private Vector3 _lookDirection => Person.Player.LookDirection;
+        public Vector3 Position { get; private set; }
+        public Vector3 LookDirection { get; private set; }
+        public Vector3 HeadPosition { get; private set; }
+        public Vector3 EyePosition { get; private set; }
+        public Vector3 BodyPosition { get; private set; }
 
         public Vector3 DirectionTo(Vector3 point)
         {
-            if (_transform == null)
+            return Position - point;
+        }
+
+        public Vector3 Right()
+            => AngledLookDirection(0f, 90f, 0f);
+
+        public Vector3 Left()
+            => AngledLookDirection(0f, -90f, 0f);
+
+        public Vector3 Back()
+            => AngledLookDirection(0f, 180, 0f);
+
+        public Vector3 AngledLookDirection(float x, float y, float z)
+            => Quaternion.Euler(x, y, z) * LookDirection;
+
+        public void Update()
+        {
+            if (_eyePart != null)
+                EyePosition = _eyePart.Center;
+
+            if (_headPart != null)
+                HeadPosition = _headPart.Position;
+
+            if (_bodyPart != null)
+                BodyPosition = _bodyPart.Position;
+
+            if (getLookDir(out Vector3 lookDir))
+                LookDirection = lookDir;
+
+            if (_transform != null)
+                Position = _transform.position;
+        }
+
+        private bool getLookDir(out Vector3 lookDir)
+        {
+            var player = Person.Player;
+            if (player != null && player.MovementContext != null)
             {
-                return Vector3.zero;
+                lookDir = player.MovementContext.LookDirection;
+                return true;
             }
-            return _position - point;
+            lookDir = Vector3.zero;
+            return false;
         }
-
-        public Vector3 Right(bool normalized = true)
-        {
-            return AngledLookDirection(0f, 90f, 0f, normalized);
-        }
-
-        public Vector3 Left(bool normalized = true)
-        {
-            return AngledLookDirection(0f, -90f, 0f, normalized);
-        }
-
-        public Vector3 Back(bool normalized = true)
-        {
-            return AngledLookDirection(0f, 180, 0f, normalized);
-        }
-
-        public Vector3 AngledLookDirection(float x, float y, float z, bool normalized)
-        {
-            if (_transform == null || Person.Player == null)
-            {
-                return Vector3.zero;
-            }
-            Vector3 lookDir = _lookDirection;
-            if (normalized)
-            {
-                lookDir = Vector3.Normalize(lookDir);
-            }
-            return Quaternion.Euler(x, y, z) * lookDir;
-        }
-
-        public Vector3 HeadPosition => _headPart.Position;
-        public Vector3 BodyPosition => _bodyPart.Position;
 
         public PersonTransformClass(PersonClass person)
         {
@@ -82,11 +64,13 @@ namespace SAIN.Components.PlayerComponentSpace
             _headPart = person.IPlayer.MainParts[BodyPartType.head];
             _bodyPart = person.IPlayer.MainParts[BodyPartType.body];
             _transform = person.IPlayer.Transform;
+            _eyePart = person.IPlayer.PlayerBones.BodyPartCollidersDictionary[EBodyPartColliderType.Eyes];
         }
 
         private readonly PersonClass Person;
         private readonly BifacialTransform _transform;
-        private EnemyPart _headPart;
-        private EnemyPart _bodyPart;
+        private readonly EnemyPart _headPart;
+        private readonly EnemyPart _bodyPart;
+        private readonly BodyPartCollider _eyePart;
     }
 }

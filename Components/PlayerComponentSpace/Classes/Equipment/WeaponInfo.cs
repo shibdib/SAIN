@@ -29,15 +29,16 @@ namespace SAIN.SAINComponent.Classes.Info
             }
         }
 
-        public void Update()
+        public bool Update()
         {
             if (_nextUpdateTime > Time.time)
             {
-                return;
+                return false;
             }
             _nextUpdateTime = Time.time + 10f;
             checkAllMods();
             Log();
+            return true;
         }
 
         public void Dispose()

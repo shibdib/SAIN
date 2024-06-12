@@ -74,7 +74,9 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Update()
         {
-            if (BotInGroup && SquadInfo != null && UpdateMembersTimer < Time.time)
+            if (BotInGroup && 
+                SquadInfo != null && 
+                UpdateMembersTimer < Time.time)
             {
                 UpdateMembersTimer = Time.time + 0.5f;
 
@@ -94,13 +96,22 @@ namespace SAIN.SAINComponent.Classes.Info
         private void UpdateVisibleMembers()
         {
             VisibleMembers.Clear();
+            Vector3 eyePos = Bot.Transform.EyePosition;
             foreach (var member in Members.Values)
             {
                 if (member != null && 
-                    member.ProfileId != Bot.ProfileId && 
-                    Bot.Memory.VisiblePlayers.Contains(member.Player))
+                    member.ProfileId != Bot.ProfileId)
                 {
-                    VisibleMembers.Add(member);
+                    Vector3 direction = member.Transform.BodyPosition - eyePos;
+                    float magnitude = direction.magnitude;
+                    if (magnitude > 100)
+                    {
+                        continue;
+                    }
+                    if (!Physics.Raycast(eyePos, direction, magnitude, LayerMaskClass.HighPolyWithTerrainMask))
+                    {
+                        VisibleMembers.Add(member);
+                    }
                 }
             }
         }

@@ -14,20 +14,14 @@ namespace SAIN.Components.PlayerComponentSpace
     {
         private void Update()
         {
-            updatePosition();
+            Transform.Update();
 
             if (IsActive)
             {
                 Flashlight.Update();
                 Equipment.Update();
-                navRayCastAllDir();
+                //navRayCastAllDir();
             }
-        }
-
-        private void updatePosition()
-        {
-            Position = Person.Transform.Position;
-            LookDirection = Person.Transform.LookDirection;
         }
 
         private void navRayCastAllDir()
@@ -68,8 +62,9 @@ namespace SAIN.Components.PlayerComponentSpace
         public SAINEquipmentClass Equipment { get; private set; }
 
         public bool IsActive => Person.IsActive;
-        public Vector3 Position { get; private set; }
-        public Vector3 LookDirection { get; private set; }
+        public Vector3 Position => Person.Transform.Position;
+        public Vector3 LookDirection => Person.Transform.LookDirection;
+        public Vector3 LookSensorPosition => Transform.EyePosition;
 
         public Vector3 DirectionTo(Vector3 point) => Person.Transform.DirectionTo(point);
 

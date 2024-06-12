@@ -1,5 +1,7 @@
 ﻿using EFT.InventoryLogic;
+using SAIN.Components.PlayerComponentSpace;
 using SAIN.Components.PlayerComponentSpace.Classes.Equipment;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,13 +32,21 @@ namespace SAIN.SAINComponent.Classes.Info
             Equipment = equipment;
         }
 
+        private PlayerComponent _playerComponent => Equipment.PlayerComponent;
+
         public void Update()
         {
             if (_nextUpdateTime < Time.time)
             {
                 _nextUpdateTime = Time.time + 5f;
-                checkAllGear();
+                _playerComponent.StartCoroutine(checkGear());
             }
+        }
+
+        private IEnumerator checkGear()
+        {
+            checkAllGear();
+            yield return null;
         }
 
         private void checkAllGear()

@@ -39,11 +39,11 @@ namespace SAIN.Components
 
         public void Update()
         {
-            if (_jobCoroutine == null)
-            {
-                _jobCoroutine = BotController.StartCoroutine(
-                    raycastJobLoop());
-            }
+            //if (_jobCoroutine == null)
+            //{
+            //    _jobCoroutine = BotController.StartCoroutine(
+            //        raycastJobLoop());
+            //}
             if (_lookCoroutine == null)
             {
                 _lookCoroutine = BotController.StartCoroutine(
@@ -64,12 +64,13 @@ namespace SAIN.Components
             //WaitForSeconds wait = new WaitForSeconds(delay);
             while (true)
             {
-                //getBotList(_localVisionCheckList, maxBotsPerFrame);
-                //foreach (var bot in _localVisionCheckList)
-                //{
-                //    bot.Vision.BotLook.UpdateLook();
-                //}
-                //_localVisionCheckList.Clear();
+                var bots = Bots;
+                if (bots != null && bots.Count > 0)
+                {
+                    getBotList(_localBotList, maxBotsPerFrame);
+                    checkVision(_localBotList);
+                    _localBotList.Clear();
+                }
 
                 yield return null;
             }
@@ -78,7 +79,8 @@ namespace SAIN.Components
         //private static float _nextLogUpdatedTime;
         //private static float _nextLogUpdatedTime2;
 
-        private readonly List<BotComponent> _localVisionCheckList = new List<BotComponent>();
+        private readonly List<BotComponent> _botsVision = new List<BotComponent>();
+        private readonly List<Player> _playersVision = new List<Player>();
 
         private void getBotList(List<BotComponent> bots, int max)
         {
@@ -108,24 +110,25 @@ namespace SAIN.Components
             WaitForSeconds wait = new WaitForSeconds(0.1f);
             while (true)
             {
-                if (Bots != null)
+                var bots = Bots;
+                if (bots != null && bots.Count > 0)
                 {
                     getBotList(_localBotList, maxBotsPerFrame);
-                    doRaycasts(_localBotList);
+                    checkVision(_localBotList);
                     _localBotList.Clear();
                 }
                 yield return null;
             }
         }
 
-        private int maxBotsPerFrame = 3;
+        private int maxBotsPerFrame = 5;
 
         private readonly List<BotComponent> _localBotList = new List<BotComponent>();
 
-        private void doRaycasts(List<BotComponent> botList)
+        private void checkVision(List<BotComponent> botList)
         {
-            checkLineOfSightAI(botList);
-            checkHumanLineOfSight(botList);
+            //checkLineOfSightAI(botList);
+            //checkHumanLineOfSight(botList);
             foreach (var bot in botList)
             {
                 bot.Vision.BotLook.UpdateLook();
@@ -223,8 +226,8 @@ namespace SAIN.Components
                     if (lineOfSight)
                         visiblePlayerIDs.Add(profileID);
 
-                    if (bot.EnemyController.Enemies.TryGetValue(profileID, out var enemy))
-                        enemy.Vision.InLineOfSight = lineOfSight;
+                    //if (bot.EnemyController.Enemies.TryGetValue(profileID, out var enemy))
+                    //    enemy.Vision.InLineOfSight = lineOfSight;
                 }
             }
         }
@@ -308,8 +311,8 @@ namespace SAIN.Components
                         if (lineOfSight)
                             visPlayerIds.Add(profileId);
 
-                        if (bot.EnemyController.Enemies.TryGetValue(profileId, out var enemy))
-                            enemy.Vision.InLineOfSight = lineOfSight;
+                        //if (bot.EnemyController.Enemies.TryGetValue(profileId, out var enemy))
+                        //    enemy.Vision.InLineOfSight = lineOfSight;
                     }
                     total++;
                 }
@@ -327,7 +330,11 @@ namespace SAIN.Components
         private void getPlayers(List<Player> playerList, bool forAI, out int partCount)
         {
             partCount = 0;
-            foreach (var player in Players) {
+            var players = Players;
+            if (players == null)
+                return;
+
+            foreach (var player in players) {
 
                 if (!shallCheckPlayer(player))
                     continue;

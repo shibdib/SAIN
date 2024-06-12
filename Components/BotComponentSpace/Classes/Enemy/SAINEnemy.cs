@@ -12,6 +12,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public void Update()
         {
             bool isCurrent = IsCurrentEnemy;
+            Vision.startCheckingVision();
             if (ShallUpdateEnemy || isCurrent)
             {
                 updateActiveState(isCurrent);
@@ -476,6 +477,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public void Dispose()
         {
             KnownPlaces?.Dispose();
+            Vision?.Dispose();
         }
 
         private float _activeForPeriod = 180f;
