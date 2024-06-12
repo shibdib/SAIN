@@ -25,7 +25,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float CalcVisionDistance()
         {
-            // Increase or decrease vis distance based on pose and if sprinting.
             float sprint = calcMovementMod();
             float gear = calcGearStealthMod();
             float angle = calcAngleMod();
@@ -134,7 +133,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         }
 
         private float _nextCalcTime;
-        private float _calcFreq = 0.1f;
+        private float _calcFreq = 0.05f;
         private float _visionDist;
     }
 }

@@ -247,7 +247,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void CheckVision()
         {
-            EnemyParts.CheckLineOfSight(_transform.EyePosition);
+            if (EnemyParts.CheckLineOfSight(_transform.EyePosition))
+            {
+                return;
+            }
+
+            // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
+            if ((Enemy.IsCurrentEnemy || !Enemy.IsAI) && 
+                EnemyParts.CheckLineOfSight(_transform.EyePosition))
+            {
+                return;
+            }
         }
 
         public bool LineOfSight => EnemyParts.LineOfSight;
@@ -265,16 +275,18 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private bool IsYourPlayer;
 
-        public bool LineOfSight { get; private set; }
+        public bool LineOfSight => _lastSuccessTime + 0.1f > Time.time;
 
-        public void CheckLineOfSight(Vector3 origin)
+        private float _lastSuccessTime;
+
+        public bool CheckLineOfSight(Vector3 origin)
         {
             if (_lastCheckSuccessPart != null)
             {
                 if (_lastCheckSuccessPart.CheckLineOfSight(origin))
                 {
-                    LineOfSight = true;
-                    return;
+                    _lastSuccessTime = Time.time;
+                    return true;
                 }
                 _lastCheckSuccessPart = null;
             }
@@ -283,12 +295,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (checkingPart.CheckLineOfSight(origin))
             {
                 _lastCheckSuccessPart = checkingPart;
-                LineOfSight = true;
-                return;
+                _lastSuccessTime = Time.time;
+                return true;
             }
 
-            LineOfSight = false;
-
+            _lastSuccessTime = 0f;
+            return false;
         }
 
         private SAINEnemyPartData _lastCheckSuccessPart;
@@ -342,7 +354,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     partColliders.Add(bones.BodyPartCollidersDictionary[EBodyPartColliderType.RightThigh]);
                     partColliders.Add(bones.BodyPartCollidersDictionary[EBodyPartColliderType.RightCalf]);
                     break;
-
             }
         }
 
@@ -381,7 +392,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public readonly List<BodyPartCollider> Colliders;
         public readonly BifacialTransform Transform;
 
-        public bool LineOfSight => _lastSuccessTime + 0.15f < Time.time;
+        public bool LineOfSight => _lastSuccessTime + 0.2f > Time.time;
 
         private float _nextCheckTime;
 
@@ -401,35 +412,37 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             if (lineOfSight)
             {
+                _lastSuccessTime = Time.time;
                 _lastSuccessPart = collider;
                 _lastSuccessCastPoint = castPoint;
+            }
+            else
+            {
+                _lastSuccessTime = 0f;
+                _lastSuccessPart = null;
+                _lastSuccessCastPoint = null;
+            }
 
-                if (SAINPlugin.DebugMode && IsYourPlayer && _nextdrawTime < Time.time)
+            if (SAINPlugin.DebugMode &&
+                IsYourPlayer &&
+                _nextdrawTime < Time.time)
+            {
+                _nextdrawTime = Time.time + 0.1f;
+                if (lineOfSight)
                 {
                     DebugGizmos.Sphere(castPoint, 0.025f, Color.red, true, 10f);
                     DebugGizmos.Sphere(origin, 0.025f, Color.red, true, 1f);
                     DebugGizmos.Line(castPoint, origin, Color.red, 0.005f, true, 0.5f);
-                    Logger.LogDebug($"{BodyPart} : {direction.magnitude} : {castPoint} : {collider.Collider != null && collider.Collider is SphereCollider}");
+                    Logger.LogDebug($"{BodyPart} : {direction.magnitude} : {castPoint} : Is Sphere? {_isSphereCollider}");
                 }
-            }
-            else
-            {
-                _lastSuccessPart = null;
-                _lastSuccessCastPoint = null;
-
-                if (SAINPlugin.DebugMode && IsYourPlayer && _nextdrawTime < Time.time)
+                else
                 {
-                    _nextdrawTime = Time.time + 0.1f;
                     DebugGizmos.Sphere(castPoint, 0.025f, Color.white, true, 10f);
                     DebugGizmos.Sphere(origin, 0.025f, Color.white, true, 1f);
                     DebugGizmos.Line(castPoint, origin, Color.white, 0.005f, true, 0.5f);
                 }
             }
 
-            if (lineOfSight)
-            {
-                _lastSuccessTime = Time.time;
-            }
             return lineOfSight;
         }
 
@@ -439,13 +452,18 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private Vector3 getCastPoint(Vector3 origin, BodyPartCollider collider)
         {
-            if (collider.Collider != null && 
-                collider.Collider is SphereCollider)
+            SphereCollider sphere;
+            _isSphereCollider = collider.Collider != null && 
+                (sphere = collider.Collider as SphereCollider) != null;
+
+            if (_isSphereCollider)
             {
                 return collider.GetRandomPointToCastLocal(origin);
             }
             return Position;
         }
+
+        private bool _isSphereCollider;
 
         private BodyPartCollider _lastSuccessPart;
         private Vector3? _lastSuccessCastPoint;

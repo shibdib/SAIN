@@ -19,7 +19,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 if (_nextCheckVisTime < Time.time)
                 {
-                    _nextCheckVisTime = Time.time + 0.1f;
+                    _nextCheckVisTime = Time.time + 0.05f;
                     _gainSightModifier = GetGainSightModifier() * calcRepeatSeenCoef();
                 }
                 return _gainSightModifier;
@@ -86,13 +86,13 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return result;
         }
 
-        private float _minSeenSpeedCoef = 0.1f;
-        private float _minDistRepeatSeen = 3f;
-        private float _maxDistRepeatSeen = 15f;
+        private float _minSeenSpeedCoef = 0.01f;
+        private float _minDistRepeatSeen = 1f;
+        private float _maxDistRepeatSeen = 20f;
 
-        private float _minHeardSpeedCoef = 0.25f;
-        private float _minDistRepeatHeard = 5f;
-        private float _maxDistRepeatHeard = 25f;
+        private float _minHeardSpeedCoef = 0.2f;
+        private float _minDistRepeatHeard = 1f;
+        private float _maxDistRepeatHeard = 20f;
 
         private float _gainSightModifier;
         private float _nextCheckVisTime;
@@ -123,7 +123,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             float flareMod = calcFlareMod();
             float moveMod = calcMoveModifier();
             float elevMod = calcElevationModifier();
-            float posFlareMod = calcPosFlareMod();
             float thirdPartyMod = calcThirdPartyMod();
             float angleMod = calcAngleMod();
 
@@ -131,7 +130,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (!Enemy.IsAI)
                 notLookMod = SAINNotLooking.GetVisionSpeedDecrease(Enemy.EnemyInfo);
 
-            float result = 1f * partMod * gearMod * flareMod * moveMod * elevMod * posFlareMod * thirdPartyMod * angleMod * notLookMod;
+            float result = 1f * partMod * gearMod * flareMod * moveMod * elevMod * thirdPartyMod * angleMod * notLookMod;
 
             //if (EnemyPlayer.IsYourPlayer && result != 1f)
             //{
@@ -147,30 +146,18 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (!Enemy.IsAI)
             {
-                float max = 2f;
+                float max = 1.75f;
                 float partRatio = GetRatioPartsVisible(EnemyInfo, out int visibleCount);
                 if (visibleCount < 1)
                 {
-                    //if (Enemy.EnemyPlayer.IsYourPlayer)
-                    //{
-                    //    Logger.LogInfo($"part mod: result: {max} : part ratio {partRatio} : vis count: {visibleCount}");
-                    //}
                     return max;
                 }
-                float min = 0.9f;
+                float min = 0.75f;
                 if (partRatio >= 1f)
                 {
-                    //if (Enemy.EnemyPlayer.IsYourPlayer)
-                    //{
-                    //    Logger.LogInfo($"part mod: result: {min} : part ratio {partRatio} : vis count: {visibleCount}");
-                    //}
                     return min;
                 }
                 float result = Mathf.Lerp(max, min, partRatio);
-                //if (Enemy.EnemyPlayer.IsYourPlayer)
-                //{
-                //    Logger.LogInfo($"part mod: result: {result} : part ratio {partRatio} : vis count: {visibleCount}");
-                //}
                 return result;
             }
             return 1f;
@@ -203,9 +190,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float calcMoveModifier()
         {
+            LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
+            return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Enemy.Vision.EnemyVelocity);
+
             if (EnemyPlayer.IsSprintEnabled)
             {
-                LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
                 return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Enemy.Vision.EnemyVelocity);
             }
             return 1f;
@@ -230,17 +219,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private float calcPosFlareMod()
-        {
-            if (Enemy.EnemyStatus.PositionalFlareEnabled
-                && Enemy.Heard
-                && Enemy.TimeSinceHeard < 300f)
-            {
-                return 0.8f;
-            }
-            return 1f;
-        }
-
         private float calcThirdPartyMod()
         {
             if (!Enemy.IsCurrentEnemy)
@@ -256,7 +234,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
                         float angle = Vector3.Angle(currentEnemyDir, myDir);
 
-                        float minAngle = 10f;
+                        float minAngle = 20f;
                         float maxAngle = Enemy.Vision.MaxVisionAngle;
                         if (angle > minAngle && 
                             angle < maxAngle)
@@ -277,7 +255,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private static bool _reduceVisionSpeedOnPeriphVis = true;
         private static float _periphVisionStart = 30f;
-        private static float _maxPeriphVisionSpeedReduction = 3f;
+        private static float _maxPeriphVisionSpeedReduction = 2.5f;
 
         private float calcAngleMod()
         {
