@@ -29,6 +29,31 @@ namespace SAIN.Patches.Generic
         }
     }
 
+    public class BulletCrackFixPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(FlyingBulletSoundPlayer), "method_1");
+        }
+
+        [PatchPrefix]
+        public static bool Patch(EftBulletClass shot, Vector3 forward, Vector3 normal)
+        {
+            Vector3 shotOrigin = shot.StartPosition;
+            Vector3 shotEnd = shot.HitPoint;
+            Vector3 cameraPos = CameraClass.Instance.Camera.transform.position;
+
+            float shotEndDistance = (shotEnd - shotOrigin).sqrMagnitude;
+            float cameraDistance = (cameraPos - shotOrigin).sqrMagnitude;
+
+            if (cameraDistance > shotEndDistance + 10f)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
     public class SetEnvironmentPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

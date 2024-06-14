@@ -5,8 +5,8 @@ namespace SAIN.Preset.GlobalSettings
     public class GlobalMoveSettings
     {
         [Advanced]
-        [Default(true)]
-        public bool EditSprintSpeed = true;
+        [Default(false)]
+        public bool EditSprintSpeed = false;
 
         [Advanced]
         [MinMax(0.01f, 1.5f, 100f)]
@@ -44,14 +44,14 @@ namespace SAIN.Preset.GlobalSettings
         public float BotSprintFinalDestReachDist= 0.5f;
 
         [Advanced]
-        [MinMax(0.01f, 1.5f, 100f)]
-        [Default(0.5f)]
-        public float BotSprintBufferDist = 0.5f;
+        [MinMax(0.01f, 2f, 100f)]
+        [Default(1f)]
+        public float BotSprintBufferDist = 1f;
 
         [Advanced]
         [MinMax(0.01f, 1.5f, 100f)]
-        [Default(0.25f)]
-        public float BotSprintMinDist = 0.25f;
+        [Default(0.5f)]
+        public float BotSprintMinDist = 0.5f;
 
         [Advanced]
         [MinMax(1f, 90f, 1f)]
@@ -66,7 +66,7 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [MinMax(1f, 500f, 1f)]
         [Default(250f)]
-        public float BotSprintTurnSpeed = 250f;
+        public float BotSprintTurnSpeed = 300f;
 
         [Advanced]
         [MinMax(1f, 500f, 1f)]

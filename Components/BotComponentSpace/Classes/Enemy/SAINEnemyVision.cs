@@ -253,11 +253,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
 
             // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
-            if ((Enemy.IsCurrentEnemy || !Enemy.IsAI) && 
-                EnemyParts.CheckLineOfSight(_transform.EyePosition))
-            {
-                return;
-            }
+            // if (Enemy.IsCurrentEnemy && !Enemy.IsAI && 
+            //     EnemyParts.CheckLineOfSight(_transform.EyePosition))
+            // {
+            //     return;
+            // }
         }
 
         public bool LineOfSight => EnemyParts.LineOfSight;
@@ -374,7 +374,9 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             get
             {
-                if (Time.frameCount != this._posCachedForFrame)
+                if (Time.frameCount != this._posCachedForFrame && 
+                    Transform != null && 
+                    Transform.Original != null)
                 {
                     this._position = this.Transform.position;
                     this._posCachedForFrame = Time.frameCount;

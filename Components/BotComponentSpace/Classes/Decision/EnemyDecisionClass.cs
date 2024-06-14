@@ -85,10 +85,10 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 Decision = SoloDecision.Freeze;
             }
-            else if (shallMoveToEngage(enemy))
-            {
-                Decision = SoloDecision.MoveToEngage;
-            }
+            //else if (shallMoveToEngage(enemy))
+            //{
+            //    Decision = SoloDecision.MoveToEngage;
+            //}
             else if (shallShiftCover(enemy))
             {
                 Decision = SoloDecision.ShiftCover;
@@ -193,6 +193,27 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool canTryThrow(SAINEnemy enemy)
         {
+            if (this._nextPosibleAttempt > Time.time)
+            {
+                return false;
+            }
+            if (!BotOwner.Settings.FileSettings.Core.CanGrenade)
+            {
+                return false;
+            }
+            if (!BotOwner.Settings.FileSettings.Grenade.CAN_LAY && BotOwner.BotLay.IsLay)
+            {
+                return false;
+            }
+            //if (!BotOwner.BotsGroup.GroupGrenade.CanThrow())
+            //{
+            //    return false;
+            //}
+            //if (BotOwner.AIData.PlaceInfo != null && BotOwner.AIData.PlaceInfo.BlockGrenade)
+            //{
+            //    return false;
+            //}
+
             return !enemy.IsVisible
                 && enemy.TimeSinceSeen > Bot.Info.FileSettings.Grenade.TimeSinceSeenBeforeThrow
                 && enemy.TimeSinceLastKnownUpdated < 120f;
@@ -286,10 +307,53 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             if ((pos - Bot.Position).sqrMagnitude < GrenadeMaxEnemyDistance.Sqr())
             {
-                return BotOwner.WeaponManager.Grenades.CanThrowGrenade(pos);
+                return CanThrowGrenade(BotOwner.WeaponRoot.position, pos);
             }
             return false;
         }
+
+        public bool CanThrowGrenade(Vector3 from, Vector3 trg)
+        {
+            if (_nextPosibleAttempt > Time.time)
+            {
+                return false;
+            }
+            if (!checkFriendlyDistances(trg))
+            {
+                _nextPosibleAttempt = BotOwner.Settings.FileSettings.Grenade.DELTA_NEXT_ATTEMPT + Time.time;
+                return false;
+            }
+            if (_angleValues == null)
+            {
+                _angleValues = EnumValues.GetEnum<AIGreandeAng>();
+            }
+            AIGreandeAng greandeAng = _angleValues.PickRandom();
+            AIGreanageThrowData aigreanageThrowData = GClass494.CanThrowGrenade2(from, trg, this.MaxPower, greandeAng, BotOwner.Settings.FileSettings.Grenade.MIN_THROW_GRENADE_DIST_SQRT, BotOwner.Settings.FileSettings.Grenade.MIN_THROW_DIST_PERCENT_0_1);
+            if (aigreanageThrowData.CanThrow)
+            {
+                _nextPosibleAttempt = BotOwner.Settings.FileSettings.Grenade.DELTA_NEXT_ATTEMPT + Time.time;
+                BotOwner.WeaponManager.Grenades.SetThrowData(aigreanageThrowData);
+                return true;
+            }
+            return false;
+        }
+
+        private static AIGreandeAng[] _angleValues;
+        public float MaxPower => BotOwner.WeaponManager.Grenades.MaxPower;
+
+        private bool checkFriendlyDistances(Vector3 trg)
+        {
+            for (int i = 0; i < BotOwner.BotsGroup.MembersCount; i++)
+            {
+                if ((BotOwner.BotsGroup.Member(i).Transform.position - trg).sqrMagnitude < BotOwner.Settings.FileSettings.Grenade.MIN_DIST_NOT_TO_THROW_SQR)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private float _nextPosibleAttempt;
 
         private float _nextGrenadeCheckTime;
 

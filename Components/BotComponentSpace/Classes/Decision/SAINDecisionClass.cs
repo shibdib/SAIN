@@ -292,30 +292,30 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool CheckContinueRetreat()
         {
-            if (CurrentSoloDecision == SoloDecision.None)
+            bool runningToCover = CurrentSoloDecision == SoloDecision.Retreat || CurrentSoloDecision == SoloDecision.RunToCover;
+            if (!runningToCover)
             {
                 return false;
             }
+
             float timeChangeDec = Bot.Decision.TimeSinceChangeDecision;
-            if (timeChangeDec > 10)
+            if (timeChangeDec > 30 && 
+                !Bot.BotStuck.BotHasChangedPosition)
             {
                 return false;
             }
-            bool Running = CurrentSoloDecision == SoloDecision.Retreat || CurrentSoloDecision == SoloDecision.RunToCover;
-            if (Running && !Bot.BotStuck.BotHasChangedPosition && Bot.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 2f)
+
+            //if (Running && !Bot.BotStuck.BotHasChangedPosition && Bot.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 2f)
+            //{
+            //    return false;
+            //}
+
+            if (Bot.Cover.CoverInUse?.Status == CoverStatus.InCover)
             {
                 return false;
             }
-            CoverPoint pointInUse = Bot.Cover.CoverInUse;
-            if (pointInUse != null && 
-                //pointInUse.IsBad == false && 
-                //pointInUse.Spotted == false && 
-                pointInUse.Status != CoverStatus.InCover && 
-                (BotOwner.Mover.IsMoving || Bot.Mover.SprintController.Running))
-            {
-                return true;
-            }
-            return false;
+
+            return Bot.Mover.SprintController.Running;
         }
     }
 }

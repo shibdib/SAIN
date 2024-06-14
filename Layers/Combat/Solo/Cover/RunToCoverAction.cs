@@ -29,19 +29,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 BotOwner.WeaponManager.Reload.Reload();
             }
 
-            if (SAINBot.Cover.CoverPoints.Count == 0)
-            {
-                SAINBot.Mover.SprintController.CancelRun();
-                SAINBot.Mover.DogFight.DogFightMove(false);
-                
-                if (!SAINBot.Steering.SteerByPriority(false))
-                {
-                    SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy);
-                }
-                Shoot.Update();
-                return;
-            }
-
             if (SAINBot.Cover.CoverInUse != null)
             {
                 // Jump into cover!
@@ -60,8 +47,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
             }
 
-            if (_recalcMoveTimer < Time.time || 
-                (!SAINBot.Mover.SprintController.Running && !BotOwner.Mover.IsMoving))
+            if (_recalcMoveTimer < Time.time && 
+                !SAINBot.Mover.SprintController.Running)
             {
                 _moveSuccess = moveToCover(out bool sprinting, out CoverPoint coverDestination, false);
                 if (!_moveSuccess)
@@ -74,7 +61,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
                 if (_moveSuccess)
                 {
-                    _recalcMoveTimer = Time.time + 4f;
+                    _recalcMoveTimer = Time.time + 2f;
                     _shallJumpToCover = EFTMath.RandomBool(2)
                         && _sprinting
                         && BotOwner.Memory.IsUnderFire
@@ -96,15 +83,27 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 _nextTryReloadTime = Time.time + 2f;
                 SAINBot.SelfActions.TryReload();
             }
-            if (!_moveSuccess)
+
+            if (SAINBot.Cover.CoverPoints.Count == 0 && !_moveSuccess)
             {
                 SAINBot.Cover.CoverInUse = null;
+                SAINBot.Mover.SprintController.CancelRun();
                 SAINBot.Mover.DogFight.DogFightMove(false);
+                
+                if (!SAINBot.Steering.SteerByPriority(false))
+                {
+                    SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy);
+                }
+                Shoot.Update();
+                return;
             }
 
             if (!SAINBot.Mover.SprintController.Running)
             {
-                SAINBot.Steering.SteerByPriority();
+                if (!SAINBot.Steering.SteerByPriority(false))
+                {
+                    SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy);
+                }
                 Shoot.Update();
             }
         }
@@ -165,22 +164,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     return true;
                 }
             }
-
-            if (SAINBot.Decision.CurrentSoloDecision == SoloDecision.AvoidGrenade)
-            {
-                coverPoints = SAINBot.Cover.CoverFinder.OldCoverPoints;
-                for (int i = 0; i < coverPoints.Count; i++)
-                {
-                    CoverPoint coverPoint = coverPoints[i];
-
-                    if (tryRun(coverPoint, out sprinting, tryWalk))
-                    {
-                        coverDestination = coverPoint;
-                        return true;
-                    }
-                }
-            }
-
             coverDestination = null;
             return false;
         }
@@ -299,6 +282,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 SAINBot.Talk.TalkAfterDelay(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat, 0.33f);
             }
 
+            SAINBot.Mover.SprintController.CancelRun();
             _recalcMoveTimer = 0f;
             _shallJumpToCover = false;
             _sprinting = false;
