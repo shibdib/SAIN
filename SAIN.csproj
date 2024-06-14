@@ -248,6 +248,7 @@
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverFinderStatus.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\ECoverFailReason.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\BotHearingClass.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\RayCastJobClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\AIDataBase.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\DeviceMode.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\Equipment\AIGearModifierClass.cs" />

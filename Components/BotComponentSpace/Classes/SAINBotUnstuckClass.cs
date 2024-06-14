@@ -214,18 +214,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private bool isHumanVisible()
         {
-            bool visibleHuman = false;
-            foreach (var player in Bot.Memory.VisiblePlayers)
-            {
-                if (player != null
-                    && !player.IsAI 
-                    && player.HealthController.IsAlive)
-                {
-                    visibleHuman = true;
-                    break;
-                }
-            }
-            return visibleHuman;
+            return Bot.EnemyController.HumansInLineOfSight.Count > 0;
         }
 
         private bool isHumanClose()
@@ -416,7 +405,9 @@ namespace SAIN.SAINComponent.Classes.Debug
 
                 if (HasTriedJumpOrVault
                     && TimeSinceStuck > 6f
-                    && TimeSinceTriedJumpOrVault + 2f < Time.time)
+                    && TimeSinceTriedJumpOrVault + 2f < Time.time &&
+                    !isHumanVisible() &&
+                    !isHumanClose())
                 {
                     TeleportCoroutine = Bot.StartCoroutine(CheckIfTeleport());
                 }
@@ -489,13 +480,6 @@ namespace SAIN.SAINComponent.Classes.Debug
                                 yield break;
                             }
 
-                            // Make sure the player isn't visible to the bot
-                            if (Bot.Memory.VisiblePlayers.Contains(player))
-                            {
-                                shallTeleport = false;
-                                break;
-                            }
-
                             Vector3 playerPosition = player.Position;
 
                             // Makes sure the bot isn't too close to a human for them to hear
@@ -539,26 +523,6 @@ namespace SAIN.SAINComponent.Classes.Debug
         }
 
         private bool IsTeleporting;
-
-        private bool CheckVisibilityToAllPlayers(Vector3 point)
-        {
-            var allPlayers = Singleton<GameWorld>.Instance?.AllAlivePlayersList;
-            if (allPlayers == null)
-            {
-                return false;
-            }
-
-            Vector3 testPoint = point + Vector3.up;
-
-            foreach (var player in allPlayers)
-            {
-                if (ShallCheckPlayer(player))
-                {
-
-                }
-            }
-            return false;
-        }
 
         private bool ShallCheckPlayer(Player player)
         {

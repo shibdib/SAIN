@@ -26,7 +26,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         public float FireratMulti = 1.35f;
 
         [Default(80f)]
-        [MinMax(10f, 150f, 1f)]
+        [MinMax(10f, 500f, 1f)]
         public float MaxPointFireDistance = 80f;
 
         [Default(true)]

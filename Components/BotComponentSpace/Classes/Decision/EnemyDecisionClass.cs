@@ -1,16 +1,9 @@
-﻿using BepInEx.Logging;
-using EFT;
-using SAIN.Components;
+﻿using EFT;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
-using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
@@ -111,7 +104,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 Decision = SoloDecision.DebugNoDecision;
             }
 
-            if (Decision != SoloDecision.MoveToCover && 
+            if (Decision != SoloDecision.MoveToCover &&
                 Decision != SoloDecision.RunToCover)
             {
                 StartRunCoverTimer = 0f;
@@ -133,9 +126,9 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallFreezeAndWait(SAINEnemy enemy)
         {
-            if (enemy.EnemyHeardFromPeace && 
+            if (enemy.EnemyHeardFromPeace &&
                 Bot.Memory.Location.IsIndoors &&
-                (!enemy.Seen || enemy.TimeSinceSeen > 240f) && 
+                (!enemy.Seen || enemy.TimeSinceSeen > 240f) &&
                 enemy.TimeSinceLastKnownUpdated < 90f)
             {
                 checkFreezeTime();
@@ -176,11 +169,11 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return true;
             }
-            if (_nextGrenadeCheckTime < Time.time && 
+            if (_nextGrenadeCheckTime < Time.time &&
                 canTryThrow(enemy))
             {
-                _nextGrenadeCheckTime = Time.time + 0.1f;
-                if (findThrowTarget(enemy) && 
+                _nextGrenadeCheckTime = Time.time + 0.5f;
+                if (findThrowTarget(enemy) &&
                     tryThrowGrenade())
                 {
                     return true;
@@ -201,10 +194,10 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
-            if (!BotOwner.Settings.FileSettings.Grenade.CAN_LAY && BotOwner.BotLay.IsLay)
-            {
-                return false;
-            }
+            //if (!BotOwner.Settings.FileSettings.Grenade.CAN_LAY && BotOwner.BotLay.IsLay)
+            //{
+            //    return false;
+            //}
             //if (!BotOwner.BotsGroup.GroupGrenade.CanThrow())
             //{
             //    return false;
@@ -219,7 +212,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 && enemy.TimeSinceLastKnownUpdated < 120f;
         }
 
-        int throwTarget = 0;
+        private int throwTarget = 0;
 
         private bool findThrowTarget(SAINEnemy enemy)
         {
@@ -228,6 +221,12 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
+
+            if (tryThrowToPos(lastKnown.Value, "LastKnownPosition"))
+            {
+                return true;
+            }
+            /*
 
             if (throwTarget >= 3)
                 throwTarget = 0;
@@ -245,6 +244,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                         return true;
                     }
                     break;
+
                 case 2:
                     Vector3? blindCorner = enemy.Path.BlindCornerToEnemy;
                     if (blindCorner != null &&
@@ -254,6 +254,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                         return true;
                     }
                     break;
+
                 case 3:
                     if (tryThrowToPos(lastKnown.Value, "LastKnownPosition"))
                     {
@@ -263,8 +264,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
                 default:
                     break;
-
             }
+            */
             return false;
         }
 
@@ -292,15 +293,18 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool tryThrowGrenade()
         {
             var grenades = BotOwner.WeaponManager.Grenades;
-            if (grenades.ReadyToThrow && 
-                grenades.AIGreanageThrowData.IsUpToDate())
+            if (!grenades.ReadyToThrow)
             {
-                //SAINBot.Steering.LookToDirection(grenades.AIGreanageThrowData.Direction, false);
-                grenades.DoThrow();
-                Bot.Talk.GroupSay(EPhraseTrigger.OnGrenade, null, true, 75);
-                return true;
+                return false;
             }
-            return false;
+            if (!grenades.AIGreanageThrowData.IsUpToDate())
+            {
+                Logger.LogDebug("not up2date");
+                return false;
+            }
+            grenades.DoThrow();
+            Bot.Talk.GroupSay(EPhraseTrigger.OnGrenade, null, true, 75);
+            return true;
         }
 
         private bool checkCanThrowToPosition(Vector3 pos)
@@ -320,7 +324,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             if (!checkFriendlyDistances(trg))
             {
-                _nextPosibleAttempt = BotOwner.Settings.FileSettings.Grenade.DELTA_NEXT_ATTEMPT + Time.time;
+                _nextPosibleAttempt = 1f + Time.time;
                 return false;
             }
             if (_angleValues == null)
@@ -328,11 +332,12 @@ namespace SAIN.SAINComponent.Classes.Decision
                 _angleValues = EnumValues.GetEnum<AIGreandeAng>();
             }
             AIGreandeAng greandeAng = _angleValues.PickRandom();
-            AIGreanageThrowData aigreanageThrowData = GClass494.CanThrowGrenade2(from, trg, this.MaxPower, greandeAng, BotOwner.Settings.FileSettings.Grenade.MIN_THROW_GRENADE_DIST_SQRT, BotOwner.Settings.FileSettings.Grenade.MIN_THROW_DIST_PERCENT_0_1);
+            AIGreanageThrowData aigreanageThrowData = GClass494.CanThrowGrenade2(from, trg, this.MaxPower, greandeAng, -1f, BotOwner.Settings.FileSettings.Grenade.MIN_THROW_DIST_PERCENT_0_1);
             if (aigreanageThrowData.CanThrow)
             {
-                _nextPosibleAttempt = BotOwner.Settings.FileSettings.Grenade.DELTA_NEXT_ATTEMPT + Time.time;
+                _nextPosibleAttempt = 3f + Time.time;
                 BotOwner.WeaponManager.Grenades.SetThrowData(aigreanageThrowData);
+                Logger.LogDebug("canThrow");
                 return true;
             }
             return false;
@@ -501,8 +506,8 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             var currentSolo = Bot.Decision.CurrentSoloDecision;
-            if (Time.time - Bot.Cover.LastHitTime < 2f 
-                && currentSolo != SoloDecision.RunAway 
+            if (Time.time - Bot.Cover.LastHitTime < 2f
+                && currentSolo != SoloDecision.RunAway
                 && currentSolo != SoloDecision.RunToCover
                 && currentSolo != SoloDecision.Retreat
                 && currentSolo != SoloDecision.MoveToCover)
@@ -541,12 +546,12 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
-            if (enemy.RealDistance > Bot.Info.WeaponInfo.EffectiveWeaponDistance 
+            if (enemy.RealDistance > Bot.Info.WeaponInfo.EffectiveWeaponDistance
                 && decision != SoloDecision.MoveToEngage)
             {
                 return true;
             }
-            if (enemy.RealDistance > Bot.Info.WeaponInfo.EffectiveWeaponDistance * 0.66f 
+            if (enemy.RealDistance > Bot.Info.WeaponInfo.EffectiveWeaponDistance * 0.66f
                 && decision == SoloDecision.MoveToEngage)
             {
                 return true;
@@ -556,16 +561,16 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallShootDistantEnemy(SAINEnemy enemy)
         {
-            if (_endShootDistTargetTime > Time.time 
-                && Bot.Decision.CurrentSoloDecision == SoloDecision.ShootDistantEnemy 
+            if (_endShootDistTargetTime > Time.time
+                && Bot.Decision.CurrentSoloDecision == SoloDecision.ShootDistantEnemy
                 && Bot.Memory.Health.HealthStatus != ETagStatus.Dying)
             {
                 return true;
             }
-            if (_nextShootDistTargetTime < Time.time 
-                && enemy.RealDistance > Bot.Info.FileSettings.Shoot.MaxPointFireDistance 
-                && enemy.IsVisible 
-                && enemy.CanShoot 
+            if (_nextShootDistTargetTime < Time.time
+                && enemy.RealDistance > Bot.Info.FileSettings.Shoot.MaxPointFireDistance
+                && enemy.IsVisible
+                && enemy.CanShoot
                 && (Bot.Memory.Health.HealthStatus == ETagStatus.Healthy || Bot.Memory.Health.HealthStatus == ETagStatus.Injured))
             {
                 float timeAdd = 6f * UnityEngine.Random.Range(0.75f, 1.25f);
@@ -633,7 +638,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         public bool shallHoldInCover()
         {
             var cover = Bot.Cover.CoverInUse;
-            if (cover != null 
+            if (cover != null
                 && !cover.Spotted
                 && cover.Status == CoverStatus.InCover)
             {
@@ -644,8 +649,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallStandAndShoot(SAINEnemy enemy)
         {
-            if (enemy.IsVisible && 
-                enemy.CanShoot && 
+            if (enemy.IsVisible &&
+                enemy.CanShoot &&
                 BotOwner.WeaponManager?.HaveBullets == true)
             {
                 if (enemy.RealDistance > Bot.Info.WeaponInfo.EffectiveWeaponDistance * 1.25f)

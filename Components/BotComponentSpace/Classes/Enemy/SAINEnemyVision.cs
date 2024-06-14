@@ -146,7 +146,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public void UpdateVisible(bool forceOff)
         {
             bool wasVisible = IsVisible;
-            bool lineOfSight = InLineOfSight || Bot.Memory.VisiblePlayers.Contains(EnemyPlayer);
+            bool lineOfSight = InLineOfSight;
 
             if (forceOff)
             {

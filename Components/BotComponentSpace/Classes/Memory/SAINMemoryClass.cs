@@ -41,24 +41,6 @@ namespace SAIN.SAINComponent.Classes.Memory
             checkResetUnderFire();
         }
 
-        private void checkVisiblePlayers()
-        {
-            if (_nextCheckVisPlayersTime < Time.time)
-            {
-                _nextCheckVisPlayersTime = Time.time + 10f;
-                Logger.LogDebug($"Checking Visible {VisiblePlayers.Count} Players for {BotOwner.name}...");
-                foreach (var player in VisiblePlayers)
-                {
-                    if (player != null)
-                    {
-                        Logger.LogDebug($"Visible for {BotOwner.name} = {player.name} : {player.Side} : {player.ProfileId} : Is Friendly? {Bot.EnemyController.IsPlayerFriendly(player)}");
-                    }
-                }
-            }
-        }
-
-        private float _nextCheckVisPlayersTime;
-
         public Action<SAINEnemy> OnEnemyHeardFromPeace { get; set; }
 
         public void EnemyWasHeard(SAINEnemy enemy)
@@ -119,9 +101,6 @@ namespace SAIN.SAINComponent.Classes.Memory
         {
             Bot.EnemyController.OnEnemyRemoved -= clearEnemy;
         }
-
-        public List<Player> VisiblePlayers { get; } = new List<Player>();
-        public List<string> VisiblePlayersIds { get; } = new List<string>();
 
         public Vector3 UnderFireFromPosition { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using SAIN.SAINComponent.Classes;
+﻿using SAIN.Helpers;
+using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Enemy;
 using UnityEngine;
 using UnityEngine.AI;
@@ -27,16 +28,34 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return false;
         }
 
-        public bool CheckCollider(CoverPoint coverPoint, out ECoverFailReason failReason)
+        public bool RecheckCoverPoint(CoverPoint coverPoint, out ECoverFailReason failReason)
         {
-            // the closest edge to that farPoint
-            if (CheckColliderForCover(coverPoint.Collider, out Vector3 place, coverPoint.PathToPoint, out failReason))
-            {
-                coverPoint.PathLength = coverPoint.PathToPoint.CalculatePathLength();
-                coverPoint.Position = place;
+            failReason = ECoverFailReason.None;
+
+            if (!GetPlaceToMove(coverPoint.Collider, TargetPoint, OriginPoint, out Vector3 newPosition)) {
+                failReason = ECoverFailReason.NoPlaceToMove;
+                return false;
             }
 
-            return false;
+            coverPoint.Position = newPosition;
+
+            if (coverPoint.Status == CoverStatus.InCover) {
+                return true;
+            }
+
+            if (!CheckPosition(newPosition, coverPoint.Collider.transform.position)) {
+                failReason = ECoverFailReason.BadPosition;
+                return false;
+            }
+
+            NavMeshPath path = coverPoint.PathToPoint;
+            if (coverPoint.Distance > 2f && !CheckPath(newPosition, path)) {
+                failReason = ECoverFailReason.BadPath;
+                return false;
+            }
+
+            coverPoint.PathLength = path.CalculatePathLength();
+            return true;
         }
 
         private bool CheckColliderForCover(Collider collider, out Vector3 place, NavMeshPath pathToPoint, out ECoverFailReason failReason)
@@ -47,7 +66,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 return false;
             }
 
-            if (!CheckPosition(place))
+            if (!CheckPosition(place, collider.transform.position))
             {
                 failReason = ECoverFailReason.BadPosition;
                 return false;
@@ -129,12 +148,12 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return colliderDist < targetDist * 0.25f;
         }
 
-        private bool CheckPosition(Vector3 position)
+        private bool CheckPosition(Vector3 position, Vector3 colliderPosition)
         {
             return (position - TargetPoint).sqrMagnitude > CoverMinEnemyDistSqr &&
                 !isPositionSpotted(position) &&
                 checkPositionVsOtherBots(position) &&
-                visibilityCheck(position, TargetPoint);
+                visibilityCheck(position, TargetPoint, colliderPosition);
         }
 
         private bool isPositionSpotted(Vector3 position)
@@ -248,69 +267,75 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 return true;
             }
 
-            const float DistanceToBotCoverThresh = 1f;
-
+            string profileID = Bot.ProfileId;
             foreach (var member in Bot.Squad.Members.Values)
             {
-                if (member != null && member.BotOwner != BotOwner)
-                {
-                    CoverPoint currentCover = member.Cover.CoverInUse;
-                    if (currentCover != null)
-                    {
-                        Vector3 coverPos = currentCover.Position;
-                        if ((position - coverPos).sqrMagnitude < DistanceToBotCoverThresh * DistanceToBotCoverThresh)
-                        {
-                            return false;
-                        }
-                    }
-                    else if (member.Cover.FallBackPoint != null)
-                    {
-                        Vector3 coverPos = member.Cover.FallBackPoint.Position;
-                        if ((position - coverPos).sqrMagnitude < DistanceToBotCoverThresh * DistanceToBotCoverThresh)
-                        {
-                            return false;
-                        }
-                    }
-                }
+                if (member == null || member.ProfileId == profileID)
+                    continue;
+
+                if (isDistanceToClose(member.Cover.CoverInUse, position))
+                    return false;
             }
 
             return true;
         }
 
-        private static bool visibilityCheck(Vector3 position, Vector3 target)
+        private bool isDistanceToClose(CoverPoint point, Vector3 position)
+        {
+            const float DistanceToBotCoverThresh = 1f;
+            return point != null && (position - point.Position).sqrMagnitude < DistanceToBotCoverThresh;
+        }
+
+        private static bool visibilityCheck(Vector3 position, Vector3 target, Vector3 colliderPosition)
         {
             const float offset = 0.1f;
 
-            if (checkRayCast(position, target, 3f))
+            float distanceToCollider = (colliderPosition - position).magnitude * 1.25f;
+            Logger.LogDebug($"visCheck: Dist To Collider: {distanceToCollider}");
+
+            if (!checkRaycastToCoverCollider(position, target, out RaycastHit hit, distanceToCollider))
             {
-                Vector3 enemyDirection = target - position;
-                enemyDirection = enemyDirection.normalized * offset;
-
-                Quaternion right = Quaternion.Euler(0f, 90f, 0f);
-                Vector3 rightPoint = right * enemyDirection;
-                rightPoint += position;
-
-                if (checkRayCast(rightPoint, target, 3f))
-                {
-                    Quaternion left = Quaternion.Euler(0f, -90f, 0f);
-                    Vector3 leftPoint = left * enemyDirection;
-                    leftPoint += position;
-
-                    if (checkRayCast(leftPoint, target, 3f))
-                    {
-                        return true;
-                    }
-                }
+                return false;
             }
-            return false;
+
+            Vector3 enemyDirection = target - position;
+            enemyDirection = enemyDirection.normalized * offset;
+            Quaternion right = Quaternion.Euler(0f, 90f, 0f);
+            Vector3 rightPoint = right * enemyDirection;
+
+            if (!checkRaycastToCoverCollider(position + rightPoint, target, out hit, distanceToCollider))
+            {
+                return false;
+            }
+
+            if (!checkRaycastToCoverCollider(position - rightPoint, target, out hit, distanceToCollider))
+            {
+                return false;
+            }
+
+            return true;
         }
 
-        private static bool checkRayCast(Vector3 point, Vector3 target, float distance = 3f)
+        private static bool checkRaycastToCoverCollider(Vector3 point, Vector3 target, out RaycastHit hit, float distance)
         {
             point.y += 0.5f;
             target.y += 1.25f;
             Vector3 direction = target - point;
-            return Physics.Raycast(point, direction, distance, LayerMaskClass.HighPolyWithTerrainMask);
+            bool hitObject = Physics.Raycast(point, direction, out hit, distance, LayerMaskClass.HighPolyWithTerrainMask);
+
+            if (DebugCoverFinder)
+            {
+                if (hitObject)
+                {
+                    DebugGizmos.Line(point, hit.point, Color.white, 0.1f, true, 10f);
+                }
+                else
+                {
+                    Vector3 testPoint = direction.normalized * distance + point;
+                    DebugGizmos.Line(point, testPoint, Color.red, 0.1f, true, 10f);
+                }
+            }
+            return hitObject;
         }
 
         private Vector3 OriginPoint => CoverFinder.OriginPoint;

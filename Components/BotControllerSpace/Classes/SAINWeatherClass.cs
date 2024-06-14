@@ -20,7 +20,7 @@ namespace SAIN.Components.BotController
             {
                 _getModifierTime = Time.time + UpdateWeatherVisibilitySec;
                 VisibilityNum = CalcWeatherVisibility();
-                InverseWeatherModifier = Mathf.Sqrt(2f - VisibilityNum);
+                InverseWeatherModifier = 2f - VisibilityNum;
             }
         }
 

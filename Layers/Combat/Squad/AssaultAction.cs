@@ -41,7 +41,7 @@ namespace SAIN.Layers.Combat.Squad
                     }
                     if (_recalcPathTime < Time.time)
                     {
-                        bool sprint = !PointDestination.IsSafePath;
+                        bool sprint = true;
 
                         if (sprint && BotOwner.BotRun.Run(destination, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance))
                         {

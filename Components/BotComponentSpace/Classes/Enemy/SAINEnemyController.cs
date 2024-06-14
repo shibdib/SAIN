@@ -189,16 +189,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private void updateEnemies()
         {
-            var activeEnemy = ActiveEnemy;
-            if (activeEnemy?.IsValid == true)
-            {
-                //activeEnemy.Update();
-            }
-
             removeInvalidEnemies();
             updateAllEnemies();
-
-            if (ActiveEnemy != null && !ActiveEnemy.EnemyPerson.IsActive)
+            checkHumanLOS();
+            if (ActiveEnemy != null && 
+                !ActiveEnemy.EnemyPerson.IsActive)
             {
                 setActiveEnemy(null);
             }
@@ -208,28 +203,54 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             foreach (var enemy in Enemies.Values)
             {
-                if (enemy?.IsValid == true)
+                enemy.Update();
+            }
+        }
+
+        private void checkHumanLOS()
+        {
+            if (_nextCheckHumanTime > Time.time)
+            {
+                return;
+            }
+            _nextCheckHumanTime = Time.time + _checkHumanFreq;
+
+            HumansInLineOfSight.Clear();
+            foreach (var enemy in Enemies.Values)
+            {
+                if (!enemy.IsAI && 
+                    enemy.InLineOfSight)
                 {
-                    enemy.Update();
+                    HumansInLineOfSight.Add(enemy.EnemyProfileId);
                 }
             }
         }
+
+        private float _nextCheckHumanTime;
+        private const float _checkHumanFreq = 0.25f;
+
+        public List<string> HumansInLineOfSight { get; } = new List<string>();
 
         private void removeInvalidEnemies()
         {
             foreach (var keyPair in Enemies)
             {
-                var enemy = keyPair.Value;
-                if (enemy?.IsValid == true)
-                {
+                if (keyPair.Value?.IsValid == true)
                     continue;
-                }
+
                 _idsToRemove.Add(keyPair.Key);
             }
+
+            if (_idsToRemove.Count == 0)
+            {
+                return;
+            }
+
             foreach (var id in _idsToRemove)
             {
                 RemoveEnemy(id);
             }
+            Logger.LogAndNotifyInfo($"Removed {_idsToRemove.Count} Invalid Enemies");
             _idsToRemove.Clear();
         }
 
@@ -362,7 +383,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-
         public void RemoveEnemy(string id)
         {
             if (ActiveEnemy != null &&
@@ -383,8 +403,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 Bot.Decision.DogFightDecision.DogFightTarget = null;
             }
 
+
             if (Enemies.TryGetValue(id, out SAINEnemy enemy))
             {
+                if (!enemy.IsAI)
+                    HumansInLineOfSight.Remove(id);
+
                 ActiveEnemies.Remove(enemy);
                 enemy.Dispose();
                 Enemies.Remove(id);
@@ -625,31 +649,20 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public bool IsHumanPlayerLookAtMe(out Player lookingPlayer)
         {
-            var gameworld = GameWorldHandler.SAINGameWorld?.GameWorld;
-            if (gameworld != null)
+            foreach (var enemy in Enemies.Values)
             {
-                var players = gameworld.AllAlivePlayersList;
-                if (players != null)
+                if (enemy == null || enemy.IsAI)
                 {
-                    foreach (var player in Bot.Memory.VisiblePlayers)
-                    {
-                        if (player != null
-                            && !player.IsAI
-                            && Bot.EnemyController.IsPlayerAnEnemy(player.ProfileId))
-                        {
-                            Vector3 lookDir = player.LookDirection;
-                            Vector3 playerHeadPos = player.MainParts[BodyPartType.head].Position;
+                    continue;
+                }
 
-                            Vector3 botChestPos = Bot.Person.Transform.BodyPosition;
-                            Vector3 botDir = botChestPos - playerHeadPos;
+                Vector3 lookDir = enemy.Player.LookDirection;
+                Vector3 botDir = Bot.Person.Transform.BodyPosition - enemy.Player.MainParts[BodyPartType.head].Position;
 
-                            if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
-                            {
-                                lookingPlayer = player;
-                                return true;
-                            }
-                        }
-                    }
+                if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
+                {
+                    lookingPlayer = enemy.Player;
+                    return true;
                 }
             }
             lookingPlayer = null;

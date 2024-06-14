@@ -1,5 +1,4 @@
 ﻿using EFT;
-using SAIN.Components.PlayerComponentSpace;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Enemy
@@ -25,9 +24,9 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float CalcVisionDistance()
         {
-            float sprint = calcMovementMod();
-            float gear = calcGearStealthMod();
-            float angle = calcAngleMod();
+            float moveMod = calcMovementMod();
+            float gearMod = calcGearStealthMod();
+            float angleMod = calcAngleMod();
             float flareMod = getFlare();
 
             SAINEnemyStatus status = Enemy.EnemyStatus;
@@ -44,7 +43,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             float aiReduction = shallLimit ? 0.75f : 1f;
 
-            float finalModifier = (sprint * angle * flareMod * positionalFlareMod * underFire * aiReduction) / gear;
+            float finalModifier = (moveMod * angleMod * flareMod * positionalFlareMod * underFire * aiReduction) / gearMod;
 
             float defaultVisDist = BotOwner.LookSensor.VisibleDist;
             float result = (defaultVisDist * finalModifier) - defaultVisDist;
@@ -62,7 +61,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float calcMovementMod()
         {
             float velocity = Enemy.Vision.EnemyVelocity;
-            float result = Mathf.Lerp(1f, _sprintMod, velocity);
+            float result = Mathf.Lerp(0.9f, _sprintMod, velocity);
 
             // if (EnemyPlayer.IsYourPlayer &&
             //     _nextLogTime < Time.time)
@@ -85,23 +84,19 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return 0f;
             }
 
-            float minAngle = 45f;
-            if (angleToEnemy > minAngle)
+            float minAngle = 5f;
+            if (angleToEnemy <= minAngle)
             {
-                float num = maxAngle - minAngle;
-                float num2 = angleToEnemy - minAngle;
-                float ratio = 1f - num2 / num;
-                float min = 0.25f;
-                float max = 1f;
-                float result = Mathf.InverseLerp(min, max, ratio);
-                // if (EnemyPlayer.IsYourPlayer &&
-                //     _nextLogTime < Time.time)
-                // {
-                //     Logger.LogWarning($"[{result}] : angleToEnemy: {angleToEnemy}");
-                // }
-                return Mathf.InverseLerp(min, max, ratio);
+                return 2f;
             }
-            return 1f;
+
+            float num = maxAngle - minAngle;
+            float num2 = angleToEnemy - minAngle;
+            float ratio = 1f - num2 / num;
+            float min = 0.25f;
+            float max = 2f;
+            float result = Mathf.InverseLerp(min, max, ratio);
+            return result;
         }
 
         private float calcGearStealthMod()

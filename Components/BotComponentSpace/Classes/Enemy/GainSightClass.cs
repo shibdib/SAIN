@@ -102,25 +102,22 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return Enemy.EnemyPlayerComponent.AIData.AIGearModifier.StealthModifier(Enemy.RealDistance);
         }
 
-        private float calcFlareMod()
+        private float calcWeatherMod()
         {
-            var aiData = EnemyPlayer.AIData;
-            bool flare = aiData?.GetFlare == true;
-            bool usingSuppressor = Enemy.EnemyPlayerComponent?.Equipment.CurrentWeapon?.HasSuppressor == true;
-
             // Only apply vision speed debuff from weather if their enemy has not shot an unsuppressed weapon
-            if (!flare || usingSuppressor)
+            if (EnemyPlayer.AIData?.GetFlare == true && 
+                Enemy.EnemyPlayerComponent?.Equipment.CurrentWeapon?.HasSuppressor == false)
             {
-                return SAINPlugin.BotController.WeatherVision.InverseWeatherModifier;
+                return 1f;
             }
-            return 1f;
+            return SAINPlugin.BotController.WeatherVision.InverseWeatherModifier;
         }
 
         private float GetGainSightModifier()
         {
             float partMod = calcPartsMod();
             float gearMod = calcGearMod();
-            float flareMod = calcFlareMod();
+            float weatherMod = calcWeatherMod();
             float moveMod = calcMoveModifier();
             float elevMod = calcElevationModifier();
             float thirdPartyMod = calcThirdPartyMod();
@@ -130,7 +127,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             if (!Enemy.IsAI)
                 notLookMod = SAINNotLooking.GetVisionSpeedDecrease(Enemy.EnemyInfo);
 
-            float result = 1f * partMod * gearMod * flareMod * moveMod * elevMod * thirdPartyMod * angleMod * notLookMod;
+            float result = 1f * partMod * gearMod * weatherMod * moveMod * elevMod * thirdPartyMod * angleMod * notLookMod;
 
             //if (EnemyPlayer.IsYourPlayer && result != 1f)
             //{
@@ -192,12 +189,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
             return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Enemy.Vision.EnemyVelocity);
-
-            if (EnemyPlayer.IsSprintEnabled)
-            {
-                return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Enemy.Vision.EnemyVelocity);
-            }
-            return 1f;
         }
 
         private float calcElevationModifier()

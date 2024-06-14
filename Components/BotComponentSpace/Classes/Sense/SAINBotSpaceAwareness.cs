@@ -269,30 +269,6 @@ namespace SAIN.SAINComponent.Classes
             return true;
         }
 
-        public static IEnumerator CheckPathSafety(CoverPoint coverPoint, Vector3 enemyHeadPos, float ratio = 0.5f)
-        {
-            coverPoint.CalcPathLength();
-            Vector3[] corners = coverPoint.PathToPoint.corners;
-            int max = corners.Length - 1;
-
-            bool safePath = true;
-            for (int i = 0; i < max; i++)
-            {
-                Vector3 pointA = corners[i];
-                Vector3 pointB = corners[i + 1];
-
-                float ratioResult = RaycastAlongDirection(pointA, pointB, enemyHeadPos);
-                if (ratioResult < ratio)
-                {
-                    safePath = false;
-                    break;
-                }
-                yield return null;
-            }
-
-            coverPoint.IsSafePath = safePath;
-        }
-
         public static float GetSegmentLength(int segmentCount, Vector3 direction, float minLength, float maxLength, out float dirMagnitude, out int countResult, int maxIterations = 10)
         {
             dirMagnitude = direction.magnitude;

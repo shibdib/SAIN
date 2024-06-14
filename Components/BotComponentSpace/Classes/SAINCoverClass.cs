@@ -17,10 +17,9 @@ namespace SAIN.SAINComponent.Classes
 
     public class SAINCoverClass : SAINBase, ISAINClass
     {
-        public SAINCoverClass(BotComponent sain) : base(sain)
+        public SAINCoverClass(BotComponent bot) : base(bot)
         {
-            CoverFinder = sain.GetOrAddComponent<CoverFinderComponent>();
-            Player.HealthController.ApplyDamageEvent += OnBeingHit;
+            CoverFinder = bot.GetOrAddComponent<CoverFinderComponent>();
         }
 
         public CoverPoint FindPointInDirection(Vector3 direction, float dotThreshold = 0.33f, float minDistance = 8f)
@@ -29,7 +28,9 @@ namespace SAIN.SAINComponent.Classes
             for (int i = 0; i < CoverPoints.Count; i++)
             {
                 CoverPoint point = CoverPoints[i];
-                if (point != null && !point.Spotted)
+                if (point != null && 
+                    !point.Spotted && 
+                    !point.IsBad)
                 {
                     Vector3 coverPosition = point.Position;
                     Vector3 directionToPoint = botPosition - coverPosition;
@@ -46,6 +47,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
+            Player.BeingHitAction += OnBeingHit;
             CoverFinder.Init(Bot);
         }
 
@@ -92,13 +94,13 @@ namespace SAIN.SAINComponent.Classes
         {
             try
             {
-                Player.HealthController.ApplyDamageEvent -= OnBeingHit;
+                Player.BeingHitAction -= OnBeingHit;
                 CoverFinder?.Dispose();
             }
             catch { }
         }
 
-        private void OnBeingHit(EBodyPart part, float unused, DamageInfo damage)
+        private void OnBeingHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
             LastHitTime = Time.time;
 
@@ -106,8 +108,12 @@ namespace SAIN.SAINComponent.Classes
             if (coverInUse != null)
             {
                 SAINEnemy enemy = Bot.Enemy;
-                bool HitInCoverKnown = enemy != null && damage.Player != null && enemy.EnemyPlayer.ProfileId == damage.Player.iPlayer.ProfileId;
-                bool HitInCoverCantSee = enemy != null && enemy.IsVisible == false;
+                bool HitInCoverKnown = enemy != null && 
+                    damageInfo.Player?.iPlayer != null && 
+                    enemy.EnemyPlayer.ProfileId == damageInfo.Player.iPlayer.ProfileId;
+
+                bool HitInCoverCantSee = enemy != null && 
+                    enemy.IsVisible == false;
 
                 if (HitInCoverCantSee)
                 {
@@ -162,23 +168,13 @@ namespace SAIN.SAINComponent.Classes
         {
             get
             {
-                // Call path length to trigger recalc if timer allows.
-                foreach (var point in CoverPoints)
-                {
-                    float dist = point.PathLength;
-                }
-
                 SortPointsByPathDist();
-
                 for (int i = 0; i < CoverPoints.Count; i++)
                 {
                     CoverPoint point = CoverPoints[i];
-                    if (point != null)
+                    if (point != null && point.Spotted == false)
                     {
-                        if (point != null && point.Spotted == false)
-                        {
-                            return point;
-                        }
+                        return point;
                     }
                 }
                 return null;
@@ -199,7 +195,8 @@ namespace SAIN.SAINComponent.Classes
                 var prone = move.Prone;
                 bool shallProne = prone.ShallProneHide();
 
-                if (shallProne && (Bot.Decision.CurrentSelfDecision != SelfDecision.None || Bot.Suppression.IsHeavySuppressed))
+                if (shallProne && 
+                    (Bot.Decision.CurrentSelfDecision != SelfDecision.None || Bot.Suppression.IsHeavySuppressed))
                 {
                     prone.SetProne(true);
                     return true;
@@ -208,7 +205,8 @@ namespace SAIN.SAINComponent.Classes
                 {
                     return true;
                 }
-                if (shallProne && point.Collider.bounds.size.y < 1f)
+                if (shallProne && 
+                    point.Collider.bounds.size.y < 0.85f)
                 {
                     prone.SetProne(true);
                     return true;

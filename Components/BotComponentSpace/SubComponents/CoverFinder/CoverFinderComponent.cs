@@ -55,15 +55,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public BotComponent Bot { get; private set; }
         public Player Player => Bot.Player;
         public BotOwner BotOwner => Bot.BotOwner;
-
         public List<CoverPoint> CoverPoints { get; } = new List<CoverPoint>();
         private CoverAnalyzer CoverAnalyzer { get; set; }
         private ColliderFinder ColliderFinder { get; set; }
         public bool ProcessingLimited { get; private set; }
-
         public CoverPoint FallBackPoint { get; private set; }
-
-        public readonly List<CoverPoint> OldCoverPoints = new List<CoverPoint>(_maxOldPoints);
         public List<SpottedCoverPoint> SpottedCoverPoints { get; private set; } = new List<SpottedCoverPoint>();
 
         private int _targetCoverCount
@@ -172,25 +168,12 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
         }
 
-        private void addOldPoint(CoverPoint point)
-        {
-            if (point != null)
-            {
-                OldCoverPoints.Add(point);
-            }
-            if (OldCoverPoints.Count > _maxOldPoints)
-            {
-                OldCoverPoints.RemoveAt(0);
-            }
-        }
-
         private IEnumerator recheckCoverPoints(List<CoverPoint> coverPoints, bool limit = true)
         {
             // if (!limit || (limit && HavePositionsChanged()))
-            bool avoidingGrenade = Bot.Decision.CurrentSoloDecision == SoloDecision.AvoidGrenade;
-            if (havePositionsChanged() || avoidingGrenade)
+            if (havePositionsChanged())
             {
-                bool shallLimit = limit && !avoidingGrenade && shallLimitProcessing();
+                bool shallLimit = limit && shallLimitProcessing();
                 WaitForSeconds wait = new WaitForSeconds(0.05f);
 
                 CoverFinderStatus lastStatus = CurrentStatus;
@@ -200,11 +183,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 bool updated = false;
                 if (coverInUse != null)
                 {
-                    if (!PointStillGood(coverInUse, avoidingGrenade, out updated, out ECoverFailReason failReason))
+                    if (!PointStillGood(coverInUse, out updated, out ECoverFailReason failReason))
                     {
                         //Logger.LogWarning(failReason);
                         coverInUse.IsBad = true;
-                        addOldPoint(coverInUse);
                     }
                     if (updated)
                     {
@@ -215,11 +197,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 for (int i = coverPoints.Count - 1; i >= 0; i--)
                 {
                     var coverPoint = coverPoints[i];
-                    if (!PointStillGood(coverPoint, avoidingGrenade, out updated, out ECoverFailReason failReason))
+                    if (!PointStillGood(coverPoint, out updated, out ECoverFailReason failReason))
                     {
                         //Logger.LogWarning(failReason);
                         coverPoint.IsBad = true;
-                        addOldPoint(coverPoint);
                     }
                     if (updated)
                     {
@@ -493,7 +474,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private CoverPoint FindFallbackPoint(List<CoverPoint> points)
         {
             CoverPoint result = null;
-            CoverPoint safestResult = null;
 
             for (int i = 0; i < points.Count; i++)
             {
@@ -502,17 +482,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 if (result == null
                     || point.Collider.bounds.size.y > result.Collider.bounds.size.y)
                 {
-                    if (point.IsSafePath)
-                    {
-                        safestResult = point;
-                    }
                     result = point;
                 }
             }
-            return safestResult ?? result;
+            return result;
         }
 
-        public bool PointStillGood(CoverPoint coverPoint, bool avoidingGrenade, out bool updated, out ECoverFailReason failReason)
+        public bool PointStillGood(CoverPoint coverPoint, out bool updated, out ECoverFailReason failReason)
         {
             updated = false;
             failReason = ECoverFailReason.None;
@@ -521,7 +497,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 failReason = ECoverFailReason.NullOrBad;
                 return false;
             }
-            if (!coverPoint.ShallUpdate && !avoidingGrenade)
+            if (!coverPoint.ShallUpdate)
             {
                 return true;
             }
@@ -531,7 +507,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 return false;
             }
             updated = true;
-            return CoverAnalyzer.CheckCollider(coverPoint, out failReason);
+            return CoverAnalyzer.RecheckCoverPoint(coverPoint, out failReason);
         }
 
         private void ClearSpotted()
