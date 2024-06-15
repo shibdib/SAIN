@@ -5,8 +5,8 @@ namespace SAIN.Preset.GlobalSettings
     public class GlobalMoveSettings
     {
         [Advanced]
-        [Default(false)]
-        public bool EditSprintSpeed = false;
+        [Default(true)]
+        public bool EditSprintSpeed = true;
 
         [Advanced]
         [MinMax(0.01f, 1.5f, 100f)]
@@ -35,28 +35,28 @@ namespace SAIN.Preset.GlobalSettings
 
         [Advanced]
         [MinMax(0.01f, 1f, 100f)]
-        [Default(0.1f)]
-        public float BotSprintBaseReachDist = 0.15f;
+        [Default(0.15f)]
+        public float BotSprintCornerReachDist = 0.15f;
 
         [Advanced]
         [MinMax(0.1f, 1.5f, 100f)]
-        [Default(0.5f)]
-        public float BotSprintFinalDestReachDist= 0.5f;
+        [Default(0.25f)]
+        public float BotSprintFinalDestReachDist= 0.25f;
 
         [Advanced]
         [MinMax(0.01f, 2f, 100f)]
         [Default(1f)]
-        public float BotSprintBufferDist = 1f;
+        public float BotSprintDistanceToStopSprintDestination = 1f;
 
         [Advanced]
         [MinMax(0.01f, 1.5f, 100f)]
         [Default(0.5f)]
         public float BotSprintMinDist = 0.5f;
 
-        [Advanced]
-        [MinMax(1f, 90f, 1f)]
-        [Default(30f)]
-        public float BotSprintNextCornerAngleMax = 30f;
+        //[Advanced]
+        //[MinMax(1f, 90f, 1f)]
+        //[Default(30f)]
+        //public float BotSprintNextCornerAngleMax = 30f;
 
         [Advanced]
         [MinMax(1f, 90f, 1f)]
@@ -65,7 +65,7 @@ namespace SAIN.Preset.GlobalSettings
 
         [Advanced]
         [MinMax(1f, 500f, 1f)]
-        [Default(250f)]
+        [Default(300f)]
         public float BotSprintTurnSpeed = 300f;
 
         [Advanced]

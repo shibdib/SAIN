@@ -18,13 +18,13 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 updateActiveState(isCurrent);
                 Vision.Update(isCurrent);
                 KnownPlaces.Update(isCurrent);
-                Path.Update(isCurrent);
+                Path.Update();
             }
             else
             {
                 Vision.UpdateCanShoot(true);
                 Vision.UpdateVisible(true);
-                Path.Clear();
+                Path.StopLoop();
             }
         }
 
@@ -250,7 +250,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public float TimeLastHeard { get; private set; }
         public Vector3? LastHeardPosition => KnownPlaces.LastHeardPlace?.Position;
 
-        public EnemyPathDistance CheckPathDistance() => Path.CheckPathDistance();
+        public EPathDistance CheckPathDistance() => Path.EPathDistance;
 
         public IPlayer EnemyIPlayer => EnemyPlayerComponent.IPlayer;
 
@@ -478,6 +478,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             KnownPlaces?.Dispose();
             Vision?.Dispose();
+            Path?.Dispose();
         }
 
         private float _activeForPeriod = 180f;

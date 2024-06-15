@@ -366,36 +366,67 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             get
             {
-                EnemyPlace result = null;
-                float timeUpdated = float.MaxValue;
-                if (LastSeenPlace != null)
+                EnemyPlace result = findMostRecent();
+                if (result != null)
                 {
-                    result = LastSeenPlace;
-                    timeUpdated = LastSeenPlace.TimeSincePositionUpdated;
-                }
-                if (_enemy.IsVisible)
-                {
+                    updateNewPlace(result);
+                    LastKnownPosition = result.Position;
+                    EnemyForgotten = false;
                     return result;
                 }
-                foreach (var place in AllEnemyPlaces)
+
+                if (!EnemyForgotten)
                 {
-                    if (place != null && 
-                        place.TimeSincePositionUpdated < timeUpdated)
-                    {
-                        timeUpdated = place.TimeSincePositionUpdated;
-                        result = place;
-                    }
+                    EnemyForgotten = true;
+                    _enemy.Bot.EnemyController.OnEnemyForgotten?.Invoke(_enemy, Time.time);
                 }
-                if (result != null 
-                    && (_lastLastKnownPlace == null 
-                        || _lastLastKnownPlace != result))
-                {
-                    _lastLastKnownPlace = result;
-                    OnNewLastKnown?.Invoke(result);
-                }
-                return result;
+                return null;
             }
         }
+
+        private EnemyPlace findMostRecent()
+        {
+            EnemyPlace result = null;
+            float timeUpdated = float.MaxValue;
+            if (LastSeenPlace != null)
+            {
+                result = LastSeenPlace;
+                timeUpdated = LastSeenPlace.TimeSincePositionUpdated;
+            }
+            if (_enemy.IsVisible)
+            {
+                return result;
+            }
+            foreach (var place in AllEnemyPlaces)
+            {
+                if (place != null &&
+                    place.TimeSincePositionUpdated < timeUpdated)
+                {
+                    timeUpdated = place.TimeSincePositionUpdated;
+                    result = place;
+                }
+            }
+
+            if (result != null && 
+                result.TimeSincePositionUpdated > _enemy.Bot.Info.ForgetEnemyTime)
+            {
+                result = null;
+            }
+
+            return result;
+        }
+
+        private void updateNewPlace(EnemyPlace result)
+        {
+            if (_lastLastKnownPlace == null || _lastLastKnownPlace != result)
+            {
+                _lastLastKnownPlace = result;
+                OnNewLastKnown?.Invoke(result);
+            }
+        }
+
+        public bool EnemyForgotten { get; private set; }
+        public Vector3? LastKnownPosition { get; private set; }
 
         public Action<EnemyPlace> OnNewLastKnown { get; set; }
 

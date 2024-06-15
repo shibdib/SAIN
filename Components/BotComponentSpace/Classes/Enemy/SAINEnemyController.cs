@@ -3,6 +3,7 @@ using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -281,14 +282,14 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 }
                 else if (debugLastHeardPosition != null || debugLastSeenPosition != null)
                 {
-                    Object.Destroy(debugLastHeardPosition);
-                    Object.Destroy(debugLastSeenPosition);
+                    GameObject.Destroy(debugLastHeardPosition);
+                    GameObject.Destroy(debugLastSeenPosition);
                 }
             }
             else if (debugLastHeardPosition != null || debugLastSeenPosition != null)
             {
-                Object.Destroy(debugLastHeardPosition);
-                Object.Destroy(debugLastSeenPosition);
+                GameObject.Destroy(debugLastHeardPosition);
+                GameObject.Destroy(debugLastSeenPosition);
             }
         }
 
@@ -646,6 +647,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
             debugString += $" StackTrace: [{stackTrace.ToString()}]";
             return debugString;
         }
+
+        public Action<SAINEnemy, float> OnEnemyForgotten { get; set; }
 
         public bool IsHumanPlayerLookAtMe(out Player lookingPlayer)
         {

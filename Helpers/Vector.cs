@@ -2,7 +2,9 @@
 using EFT;
 using EFT.UI.Ragfair;
 using HarmonyLib;
+using SAIN.SAINComponent;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -16,6 +18,22 @@ namespace SAIN.Helpers
 {
     public static class Vector
     {
+        public static float FindFlatSignedAngle(Vector3 a, Vector3 b, Vector3 origin)
+        {
+            a.y = 0;
+            b.y = 0;
+            origin.y = 0;
+            return Vector3.SignedAngle(a - origin, b - origin, Vector3.up);
+        }
+
+        public static float FindFlatAngle(Vector3 a, Vector3 b, Vector3 origin)
+        {
+            a.y = 0;
+            b.y = 0;
+            origin.y = 0;
+            return Vector3.Angle(a - origin, b - origin);
+        }
+
         public static Vector3? FindFirstBlindCorner(BotOwner botOwner, NavMeshPath path)
         {
             if (botOwner == null || path == null)
@@ -53,6 +71,11 @@ namespace SAIN.Helpers
                 }
             }
             return null;
+        }
+
+        public static IEnumerator FindBlindCorner(BotComponent bot, NavMeshPath path)
+        {
+            yield return null;
         }
 
         public static bool CheckIfBlindCorner(Vector3 lookSensor, Vector3 corner, Vector3 offset)

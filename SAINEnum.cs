@@ -206,7 +206,7 @@ namespace SAIN
         Town = 13,
     }
 
-    public enum EnemyPathDistance
+    public enum EPathDistance
     {
         VeryClose,
         Close,

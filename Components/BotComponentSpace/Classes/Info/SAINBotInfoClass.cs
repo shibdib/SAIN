@@ -180,7 +180,7 @@ namespace SAIN.SAINComponent.Classes.Info
             ForgetEnemyTime = forgetTime;
         }
 
-        public float ForgetEnemyTime;
+        public float ForgetEnemyTime { get; private set; }
 
         private void UpdateExtractTime()
         {

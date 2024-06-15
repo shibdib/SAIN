@@ -291,7 +291,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             const float offset = 0.1f;
 
             float distanceToCollider = (colliderPosition - position).magnitude * 1.25f;
-            Logger.LogDebug($"visCheck: Dist To Collider: {distanceToCollider}");
+            //Logger.LogDebug($"visCheck: Dist To Collider: {distanceToCollider}");
 
             if (!checkRaycastToCoverCollider(position, target, out RaycastHit hit, distanceToCollider))
             {

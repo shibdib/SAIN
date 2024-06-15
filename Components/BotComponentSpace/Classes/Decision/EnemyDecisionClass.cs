@@ -518,7 +518,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             ShotInCover = false;
 
             var pathStatus = enemy.CheckPathDistance();
-            return (pathStatus == EnemyPathDistance.VeryClose && Bot.Enemy.IsVisible) || Bot.Cover.CoverInUse?.Spotted == true;
+            return (pathStatus == EPathDistance.VeryClose && Bot.Enemy.IsVisible) || Bot.Cover.CoverInUse?.Spotted == true;
         }
 
         public bool ShotInCover;

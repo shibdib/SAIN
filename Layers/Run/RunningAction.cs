@@ -29,8 +29,7 @@ namespace SAIN.Layers.Combat.Run
                 nextRandomRunTime = 0f;
             }
 
-            if ((nextRandomRunTime < Time.time 
-                || !SAINBot.Mover.SprintController.Running)
+            if (!SAINBot.Mover.SprintController.Running
                 && findRandomPlace(out var path) 
                 && SAINBot.Mover.SprintController.RunToPoint(_runDestination, SAINComponent.Classes.Mover.ESprintUrgency.High))
             {
@@ -50,7 +49,7 @@ namespace SAIN.Layers.Combat.Run
 
         private bool findRandomPlace(out NavMeshPath path)
         {
-            for (int i = 0; i < 50;  i++)
+            for (int i = 0; i < 10;  i++)
             {
                 Vector3 random = UnityEngine.Random.onUnitSphere * 100f;
                 if (NavMesh.SamplePosition(random + SAINBot.Position, out var hit, 10f, -1))

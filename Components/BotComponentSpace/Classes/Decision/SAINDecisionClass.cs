@@ -56,7 +56,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
         }
 
-        public EnemyPathDistance EnemyDistance
+        public EPathDistance EnemyDistance
         {
             get
             {
@@ -65,7 +65,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 {
                     return enemy.CheckPathDistance();
                 }
-                return EnemyPathDistance.NoEnemy;
+                return EPathDistance.NoEnemy;
             }
         }
 

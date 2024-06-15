@@ -128,7 +128,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void doorOpenDone()
         {
-            _traversingEnd = 0f;
+            //_traversingEnd = 0f;
         }
 
         private bool shallKickOpen(Door door, EInteractionType Etype)
@@ -162,7 +162,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (Etype == EInteractionType.Breach || ModDetection.ProjectFikaLoaded)
             {
-                _traversingEnd = Time.time + 0.75f;
+                _traversingEnd = Time.time + 1.5f;
                 doDefaultInteract(door, Etype);
                 door.interactWithoutAnimation = noAnimation;
                 //door.Snap = snap;

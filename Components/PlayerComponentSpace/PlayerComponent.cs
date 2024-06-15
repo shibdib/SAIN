@@ -1,10 +1,12 @@
 ﻿using EFT;
+using EFT.Interactive;
 using SAIN.Components.PlayerComponentSpace.Classes;
 using SAIN.Components.PlayerComponentSpace.Classes.Equipment;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
 using System;
 using System.Collections;
+using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -21,6 +23,23 @@ namespace SAIN.Components.PlayerComponentSpace
                 Flashlight.Update();
                 Equipment.Update();
                 //navRayCastAllDir();
+                test();
+            }
+        }
+
+        private void test()
+        {
+            if (!Player.IsYourPlayer)
+            {
+                return;
+            }
+
+            float angle = 360 / 90;
+            Vector3 direction = Vector3.forward * 5f;
+            for (int i = 1; i < 90; i++)
+            {
+                direction = Vector.Rotate(direction, 0, angle, 0);
+                DebugGizmos.Line(Position + Vector3.up, Position + Vector3.up + direction, Color.blue, 0.025f, true, 0.1f);
             }
         }
 

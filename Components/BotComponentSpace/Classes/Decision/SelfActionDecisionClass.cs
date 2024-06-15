@@ -27,7 +27,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         }
 
         public SelfDecision CurrentSelfAction => Bot.Decision.CurrentSelfDecision;
-        private EnemyPathDistance EnemyDistance => Bot.Decision.EnemyDistance;
+        private EPathDistance EnemyDistance => Bot.Decision.EnemyDistance;
 
         public bool GetDecision(out SelfDecision Decision)
         {
@@ -238,7 +238,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     {
                         takeStims = true;
                     }
-                    else if (pathStatus == EnemyPathDistance.Far || pathStatus == EnemyPathDistance.VeryFar)
+                    else if (pathStatus == EPathDistance.Far || pathStatus == EPathDistance.VeryFar)
                     {
                         takeStims = true;
                     }
@@ -264,19 +264,19 @@ namespace SAIN.SAINComponent.Classes.Decision
                     var status = Bot;
                     if (status.Memory.Health.Injured)
                     {
-                        if (!enemy.InLineOfSight && !SeenRecent && pathStatus != EnemyPathDistance.VeryClose && pathStatus != EnemyPathDistance.Close)
+                        if (!enemy.InLineOfSight && !SeenRecent && pathStatus != EPathDistance.VeryClose && pathStatus != EPathDistance.Close)
                         {
                             useFirstAid = true;
                         }
                     }
                     else if (status.Memory.Health.BadlyInjured)
                     {
-                        if (!enemy.InLineOfSight && pathStatus != EnemyPathDistance.VeryClose && enemy.TimeSinceSeen < StartFirstAid_HeavyInjury_SeenRecentTime)
+                        if (!enemy.InLineOfSight && pathStatus != EPathDistance.VeryClose && enemy.TimeSinceSeen < StartFirstAid_HeavyInjury_SeenRecentTime)
                         {
                             useFirstAid = true;
                         }
 
-                        if (pathStatus == EnemyPathDistance.VeryFar)
+                        if (pathStatus == EPathDistance.VeryFar)
                         {
                             useFirstAid = true;
                         }
@@ -287,7 +287,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                         {
                             useFirstAid = true;
                         }
-                        if (pathStatus == EnemyPathDistance.VeryFar || pathStatus == EnemyPathDistance.Far)
+                        if (pathStatus == EPathDistance.VeryFar || pathStatus == EPathDistance.Far)
                         {
                             useFirstAid = true;
                         }
@@ -320,11 +320,11 @@ namespace SAIN.SAINComponent.Classes.Decision
                 {
                     return true;
                 }
-                if (pathStatus == EnemyPathDistance.VeryClose)
+                if (pathStatus == EPathDistance.VeryClose)
                 {
                     return true;
                 }
-                if (BotOwner.WeaponManager.Reload.BulletCount > 1 && pathStatus == EnemyPathDistance.Close)
+                if (BotOwner.WeaponManager.Reload.BulletCount > 1 && pathStatus == EPathDistance.Close)
                 {
                     return true;
                 }
@@ -363,7 +363,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     {
                         needToReload = true;
                     }
-                    else if (EnemyDistance != EnemyPathDistance.VeryClose && !enemy.IsVisible)
+                    else if (EnemyDistance != EPathDistance.VeryClose && !enemy.IsVisible)
                     {
                         needToReload = true;
                     }
