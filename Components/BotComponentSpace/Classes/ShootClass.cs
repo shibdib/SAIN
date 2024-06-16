@@ -45,11 +45,6 @@ namespace SAIN.SAINComponent.Classes
 
                 BotComponent.BotLight.HandleLightForEnemy();
 
-                //if (!tryPauseForShoot(true))
-                //{
-                //    return;
-                //}
-
                 if (BotOwner.WeaponManager.HaveBullets)
                 {
                     aimAtEnemy();
@@ -239,15 +234,13 @@ namespace SAIN.SAINComponent.Classes
         private void aimAtEnemy()
         {
             Vector3? pointToShoot = GetPointToShoot();
-            if (pointToShoot != null)
+            if (pointToShoot != null && 
+                BotOwner.AimingData.IsReady && 
+                !BotComponent.NoBushESP.NoBushESPActive && 
+                FriendlyFire.ClearShot)
             {
-                if (BotOwner.AimingData.IsReady
-                    && !BotComponent.NoBushESP.NoBushESPActive
-                    && FriendlyFire.ClearShot)
-                {
-                    ReadyToShoot();
-                    Shoot.Update();
-                }
+                ReadyToShoot();
+                Shoot.Update();
             }
         }
 

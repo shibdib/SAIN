@@ -23,23 +23,6 @@ namespace SAIN.Components.PlayerComponentSpace
                 Flashlight.Update();
                 Equipment.Update();
                 //navRayCastAllDir();
-                test();
-            }
-        }
-
-        private void test()
-        {
-            if (!Player.IsYourPlayer)
-            {
-                return;
-            }
-
-            float angle = 360 / 90;
-            Vector3 direction = Vector3.forward * 5f;
-            for (int i = 1; i < 90; i++)
-            {
-                direction = Vector.Rotate(direction, 0, angle, 0);
-                DebugGizmos.Line(Position + Vector3.up, Position + Vector3.up + direction, Color.blue, 0.025f, true, 0.1f);
             }
         }
 
@@ -139,12 +122,13 @@ namespace SAIN.Components.PlayerComponentSpace
             StopAllCoroutines();
         }
 
-        private void OnDestroy()
+        public void Dispose()
         {
+            OnComponentDestroyed?.Invoke(ProfileId);
             StopAllCoroutines();
             Equipment?.Dispose();
-            OnComponentDestroyed?.Invoke(ProfileId);
             Logger.LogDebug($"{Person.Nickname} Player Component Destroyed");
+            Destroy(this);
         }
 
         public Action<string> OnComponentDestroyed { get; set; }

@@ -2,7 +2,6 @@
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
-using SAIN.Preset.GlobalSettings.Categories;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,14 +18,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public System.Action<Player> OnEnemyKilled { get; set; }
 
         public readonly Dictionary<string, SAINEnemy> Enemies = new Dictionary<string, SAINEnemy>();
+        public bool NoEnemyContact => _atPeace && Time.time - _timePeaceStart > 3f;
+        public bool ActiveHumanEnemy { get; private set; }
+
+        public readonly List<SAINEnemy> ActiveEnemies = new List<SAINEnemy>();
+        public List<string> HumansInLineOfSight { get; } = new List<string>();
+        public System.Action<string> OnEnemyRemoved { get; set; }
+        public Action<SAINEnemy, float> OnEnemyForgotten { get; set; }
 
         public SAINEnemyController(BotComponent sain) : base(sain)
         {
-            if (_players == null)
-                _players = GameWorldComponent.Instance.PlayerTracker.AlivePlayers;
         }
-
-        private static Dictionary<string, PlayerComponent> _players;
 
         public void Init()
         {
@@ -35,12 +37,19 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void Update()
         {
-            CheckAddEnemy();
-            updateEnemies();
-            //checkDiscrepency();
+            removeInvalidEnemies();
+            updateAllEnemies();
+            checkHumanLOS();
+            AssignActiveEnemy();
             checkActiveEnemies();
-            updateDebug();
             checkIsAtPeace();
+            updateDebug();
+
+            if (ActiveEnemy != null &&
+                !ActiveEnemy.EnemyPerson.IsActive)
+            {
+                setActiveEnemy(null);
+            }
         }
 
         private void checkIsAtPeace()
@@ -57,10 +66,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 _timePeaceStart = Time.time;
             }
         }
-
-        private bool _atPeace;
-        private float _timePeaceStart;
-        public bool NoEnemyContact => _atPeace && Time.time - _timePeaceStart > 3f;
 
         private void checkDiscrepency()
         {
@@ -109,10 +114,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private float _nextLogTime;
-
-        private float _nextCheckActiveTime;
-
         private void checkActiveEnemies()
         {
             if (_nextCheckActiveTime > Time.time)
@@ -131,10 +132,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             foreach (SAINEnemy enemy in Enemies.Values)
             {
-                if (enemy == null)
-                {
-                    continue;
-                }
                 bool inList = ActiveEnemies.Contains(enemy);
                 bool activeThreat = enemy.ActiveThreat;
 
@@ -166,38 +163,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public bool ActiveHumanEnemy { get; private set; }
-
-        private float _nextLogActiveTime;
-
-        public readonly List<SAINEnemy> ActiveEnemies = new List<SAINEnemy>();
-
         private SAINEnemy checkIfAnyEnemyVisible()
         {
-            if (ActiveEnemy?.IsVisible == true)
-            {
-                return null;
-            }
             foreach (var enemy in Enemies.Values)
             {
-                if (enemy?.IsValid == true && enemy.IsVisible)
+                if (enemy.IsVisible)
                 {
                     return enemy;
                 }
             }
             return null;
-        }
-
-        private void updateEnemies()
-        {
-            removeInvalidEnemies();
-            updateAllEnemies();
-            checkHumanLOS();
-            if (ActiveEnemy != null && 
-                !ActiveEnemy.EnemyPerson.IsActive)
-            {
-                setActiveEnemy(null);
-            }
         }
 
         private void updateAllEnemies()
@@ -219,18 +194,13 @@ namespace SAIN.SAINComponent.Classes.Enemy
             HumansInLineOfSight.Clear();
             foreach (var enemy in Enemies.Values)
             {
-                if (!enemy.IsAI && 
+                if (!enemy.IsAI &&
                     enemy.InLineOfSight)
                 {
                     HumansInLineOfSight.Add(enemy.EnemyProfileId);
                 }
             }
         }
-
-        private float _nextCheckHumanTime;
-        private const float _checkHumanFreq = 0.25f;
-
-        public List<string> HumansInLineOfSight { get; } = new List<string>();
 
         private void removeInvalidEnemies()
         {
@@ -249,13 +219,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             foreach (var id in _idsToRemove)
             {
-                RemoveEnemy(id);
+                removeEnemy(id);
             }
             Logger.LogAndNotifyInfo($"Removed {_idsToRemove.Count} Invalid Enemies");
             _idsToRemove.Clear();
         }
-
-        private readonly List<string> _idsToRemove = new List<string>();
 
         private void updateDebug()
         {
@@ -292,9 +260,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 GameObject.Destroy(debugLastSeenPosition);
             }
         }
-
-        private GameObject debugLastSeenPosition;
-        private GameObject debugLastHeardPosition;
 
         public void Dispose()
         {
@@ -361,22 +326,13 @@ namespace SAIN.SAINComponent.Classes.Enemy
             setActiveEnemy(null);
         }
 
-        private void removeEnemy(IPlayer player)
-        {
-            if (player != null)
-            {
-                player.OnIPlayerDeadOrUnspawn -= removeEnemy;
-                RemoveEnemy(player.ProfileId);
-            }
-        }
-
         private void enemyKilled(Player player, IPlayer lastAggressor, DamageInfo lastDamageInfo, EBodyPart lastBodyPart)
         {
             if (player != null)
             {
                 player.OnPlayerDead -= enemyKilled;
 
-                if (lastAggressor != null && 
+                if (lastAggressor != null &&
                     lastAggressor.ProfileId == Bot.ProfileId)
                 {
                     OnEnemyKilled?.Invoke(player);
@@ -384,7 +340,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public void RemoveEnemy(string id)
+        private void removeEnemy(string id)
         {
             if (ActiveEnemy != null &&
                 ActiveEnemy.EnemyProfileId == id)
@@ -404,9 +360,10 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 Bot.Decision.DogFightDecision.DogFightTarget = null;
             }
 
-
             if (Enemies.TryGetValue(id, out SAINEnemy enemy))
             {
+                OnEnemyRemoved?.Invoke(id);
+
                 if (!enemy.IsAI)
                     HumansInLineOfSight.Remove(id);
 
@@ -414,14 +371,15 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 enemy.Dispose();
                 Enemies.Remove(id);
                 removeEnemyInfo(enemy);
-                OnEnemyRemoved?.Invoke(id);
+                if (enemy.EnemyPlayerComponent != null)
+                {
+                    enemy.EnemyPlayerComponent.OnComponentDestroyed -= removeEnemy;
+                }
                 //Logger.LogDebug($"Removed [{id}] from [{BotOwner?.name}'s] Enemy List");
             }
         }
 
-        public System.Action<string> OnEnemyRemoved { get; set; }
-
-        private void CheckAddEnemy()
+        private void AssignActiveEnemy()
         {
             SAINEnemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
             if (dogFightTarget?.IsValid == true)
@@ -430,13 +388,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 setGoalEnemy(dogFightTarget.EnemyInfo);
                 return;
             }
-            checkGoalEnemy();
-            checkVisibleEnemies();
-            checkShotAtMe();
-        }
-
-        private void checkVisibleEnemies()
-        {
             if (ActiveEnemy?.IsVisible == false)
             {
                 SAINEnemy visibileEnemy = checkIfAnyEnemyVisible();
@@ -444,8 +395,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 {
                     setActiveEnemy(visibileEnemy);
                     setGoalEnemy(visibileEnemy.EnemyInfo);
+                    return;
                 }
             }
+            checkGoalEnemy();
+            checkShotAtMe();
         }
 
         private void checkShotAtMe()
@@ -483,27 +437,34 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private void checkGoalEnemy()
         {
             EnemyInfo goalEnemy = BotOwner.Memory.GoalEnemy;
-            SAINEnemy sainEnemy = ActiveEnemy;
             if (goalEnemy == null)
             {
-                if (sainEnemy != null &&
-                    !sainEnemy.EnemyStatus.ShotAtMeRecently &&
-                    !sainEnemy.IsVisible)
+                SAINEnemy enemy = ActiveEnemy;
+                if (enemy != null)
                 {
-                    setActiveEnemy(null);
+                    if (!enemy.IsValid)
+                    {
+                        setActiveEnemy(null);
+                        return;
+                    }
+                    if (!enemy.EnemyStatus.ShotAtMeRecently &&
+                        !enemy.IsVisible)
+                    {
+                        setActiveEnemy(null);
+                        return;
+                    }
                 }
 
                 return;
             }
 
-            if (goalEnemy?.Person != null && goalEnemy.Person.HealthController.IsAlive == false)
+            if (goalEnemy?.Person != null &&
+                goalEnemy.Person.HealthController.IsAlive == false)
             {
                 setGoalEnemy(null);
+                return;
             }
-            else
-            {
-                setEnemyFromEnemyInfo(goalEnemy);
-            }
+            setEnemyFromEnemyInfo(goalEnemy);
         }
 
         private void setEnemyFromEnemyInfo(EnemyInfo enemyInfo)
@@ -610,7 +571,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return null;
             }
 
-            if (Enemies.TryGetValue(enemyPlayer.ProfileId, out SAINEnemy sainEnemy))
+            if (Enemies.TryGetValue(enemyPlayer.ProfileId, out SAINEnemy sainEnemy) &&
+                sainEnemy.IsValid)
             {
                 return sainEnemy;
             }
@@ -623,12 +585,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return null;
             }
 
-            sainEnemy = new SAINEnemy(Bot, enemyPlayerComponent, enemyInfo);
-            Enemies.Add(enemyPlayer.ProfileId, sainEnemy);
-            enemyPlayer.OnIPlayerDeadOrUnspawn += removeEnemy;
-            enemyPlayerComponent.OnComponentDestroyed += RemoveEnemy;
+            return createEnemy(enemyPlayerComponent, enemyInfo);
+        }
+
+        private SAINEnemy createEnemy(PlayerComponent enemyPlayerComponent, EnemyInfo enemyInfo)
+        {
+            SAINEnemy enemy = new SAINEnemy(Bot, enemyPlayerComponent, enemyInfo);
+            enemyPlayerComponent.OnComponentDestroyed += removeEnemy;
             enemyPlayerComponent.Player.OnPlayerDead += enemyKilled;
-            return sainEnemy;
+            Enemies.Add(enemy.EnemyProfileId, enemy);
+            return enemy;
         }
 
         private string getBotInfo(Player player)
@@ -647,8 +613,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             debugString += $" StackTrace: [{stackTrace.ToString()}]";
             return debugString;
         }
-
-        public Action<SAINEnemy, float> OnEnemyForgotten { get; set; }
 
         public bool IsHumanPlayerLookAtMe(out Player lookingPlayer)
         {
@@ -725,5 +689,16 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
             return false;
         }
+
+        private float _nextLogTime;
+        private float _nextCheckActiveTime;
+        private bool _atPeace;
+        private float _timePeaceStart;
+        private float _nextLogActiveTime;
+        private float _nextCheckHumanTime;
+        private const float _checkHumanFreq = 0.25f;
+        private readonly List<string> _idsToRemove = new List<string>();
+        private GameObject debugLastSeenPosition;
+        private GameObject debugLastHeardPosition;
     }
 }

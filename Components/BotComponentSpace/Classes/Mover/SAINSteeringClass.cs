@@ -54,15 +54,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             switch (CurrentSteerPriority)
             {
                 case SteerPriority.RunningPath:
+                case SteerPriority.Aiming:
                     return true;
 
                 case SteerPriority.ManualShooting:
                     LookToPoint(Bot.ManualShoot.ShootPosition);
-                    return true;
-
-                case SteerPriority.Aiming:
-                case SteerPriority.Shooting:
-                    lookToAimTarget();
                     return true;
 
                 case SteerPriority.EnemyVisible:
@@ -112,7 +108,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             Vector3? place = findLastKnown(enemy);
             if (place != null)
             {
-                LookToPoint(place.Value + _weaponRootOffset);
+                LookToPoint(place.Value);
                 return true;
             }
             return false;
@@ -372,73 +368,55 @@ namespace SAIN.SAINComponent.Classes.Mover
             return target + direction;
         }
 
+        private Vector3? enemyLastKnown(SAINEnemy enemy, out bool visible)
+        {
+            visible = false;
+            EnemyPlace lastKnownPlace = enemy?.KnownPlaces.LastKnownPlace;
+            if (lastKnownPlace == null)
+            {
+                return null;
+            }
+            visible = lastKnownPlace.PersonalClearLineOfSight(Bot.Transform.EyePosition, LayerMaskClass.HighPolyWithTerrainMask);
+            return adjustLookPoint(lastKnownPlace.Position) + _weaponRootOffset;
+        }
+
         private Vector3? findLastKnown(SAINEnemy enemy)
         {
-            if (enemy != null)
+            if (enemy == null)
             {
-                if (enemy.IsVisible)
-                {
-                    return enemy.EnemyPosition;
-                }
-
-                EnemyPlace lastKnownPlace = enemy.KnownPlaces.LastKnownPlace;
-                if (lastKnownPlace?.PersonalClearLineOfSight(Bot.Transform.EyePosition, LayerMaskClass.HighPolyWithTerrainMask) == true)
-                {
-                    Vector3 lookPos = adjustLookPoint(lastKnownPlace.Position);
-                    if (SAINPlugin.DebugMode)
-                    {
-                        //DebugGizmos.Line(lastKnownPlace.Position + _weaponRootOffset, lookPos + _weaponRootOffset, 0.05f, 1f);
-                    }
-                    return lookPos;
-                }
-
-                Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
-                if (blindCornerToEnemy != null)
-                {
-                    Vector3 lookPos = adjustLookPoint(blindCornerToEnemy.Value);
-                    if (SAINPlugin.DebugMode)
-                    {
-                        //DebugGizmos.Line(blindCornerToEnemy.Value, lookPos, 0.05f, 1f);
-                    }
-                    return lookPos;
-                }
-
-                Vector3? lastCorner = enemy.Path.LastCornerToEnemy;
-                if (lastCorner != null &&
-                    enemy.CanSeeLastCornerToEnemy)
-                {
-                    Vector3 lookPos = adjustLookPoint(lastCorner.Value);
-                    if (SAINPlugin.DebugMode)
-                    {
-                        //DebugGizmos.Line(lastCorner.Value + _weaponRootOffset, lookPos + _weaponRootOffset, 0.05f, 1f);
-                    }
-                    return lookPos;
-                }
-
-                var enemyPath = enemy.Path.PathToEnemy;
-                if (enemyPath != null &&
-                    enemyPath.corners.Length > 2)
-                {
-                    Vector3 firstCorner = enemyPath.corners[1];
-                    Vector3 lookPos = adjustLookPoint(firstCorner);
-                    if (SAINPlugin.DebugMode)
-                    {
-                        //DebugGizmos.Line(firstCorner + _weaponRootOffset, lookPos + _weaponRootOffset, 0.05f, 1f);
-                    }
-                    return lookPos;
-                }
-
-                if (lastKnownPlace != null)
-                {
-                    Vector3 lookPos = adjustLookPoint(lastKnownPlace.Position);
-                    if (SAINPlugin.DebugMode)
-                    {
-                        //DebugGizmos.Line(lastKnownPlace.Position + _weaponRootOffset, lookPos + _weaponRootOffset, 0.05f, 1f);
-                    }
-                    return lookPos;
-                }
+                return null;
             }
-
+            if (enemy.IsVisible)
+            {
+                return enemy.EnemyPosition;
+            }
+            Vector3? lastKnown = enemyLastKnown(enemy, out bool visible);
+            if (lastKnown != null &&
+                visible)
+            {
+                return lastKnown;
+            }
+            Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
+            if (blindCornerToEnemy != null)
+            {
+                return adjustLookPoint(blindCornerToEnemy.Value);
+            }
+            Vector3? lastCorner = enemy.Path.LastCornerToEnemy;
+            if (lastCorner != null &&
+                enemy.CanSeeLastCornerToEnemy)
+            {
+                return adjustLookPoint(lastCorner.Value) + _weaponRootOffset;
+            }
+            var enemyPath = enemy.Path.PathToEnemy;
+            if (enemyPath != null &&
+                enemyPath.corners.Length > 2)
+            {
+                return adjustLookPoint(enemyPath.corners[1]) + _weaponRootOffset;
+            }
+            if (lastKnown != null)
+            {
+                return lastKnown.Value + _weaponRootOffset;
+            }
             return null;
         }
 
@@ -539,7 +517,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 Vector3? lastKnown = findLastKnown(shotMeRecent);
                 if (lastKnown != null)
                 {
-                    LookToPoint(lastKnown.Value + _weaponRootOffset);
+                    LookToPoint(lastKnown.Value);
                     return;
                 }
                 var lastShotPos = shotMeRecent.EnemyStatus.LastShotPosition;

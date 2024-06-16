@@ -32,7 +32,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool checkDecisions()
         {
-            if (!BotOwner.WeaponManager.HaveBullets)
+            if (!BotOwner.WeaponManager.HaveBullets || 
+                BotOwner.WeaponManager.Reload.Reloading)
             {
                 return false;
             }
@@ -43,8 +44,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             if (currentDecision == SoloDecision.Retreat || currentDecision == SoloDecision.RunToCover)
             {
-                bool lowOnAmmo = Bot.Decision.SelfActionDecisions.LowOnAmmo(0.3f);
-                if (lowOnAmmo)
+                if (Bot.Decision.SelfActionDecisions.LowOnAmmo(0.3f))
                 {
                     return false;
                 }
@@ -65,7 +65,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return true;
             }
-            return !enemy.IsVisible && enemy.TimeSinceSeen > 2f;
+            return !enemy.IsVisible && enemy.TimeSinceSeen > 6f;
         }
 
         private bool findDogFightTarget()

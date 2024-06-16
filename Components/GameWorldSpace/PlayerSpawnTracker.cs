@@ -102,14 +102,19 @@ namespace SAIN.Components.PlayerComponentSpace
             }
             player.OnPlayerDeadOrUnspawn -= clearPlayer;
             AlivePlayers.TryRemove(player.ProfileId, out _);
-            SAINGameWorld.StartCoroutine(addDeadPlayer(player));
+
+            if (!player.HealthController.IsAlive)
+            {
+                SAINGameWorld.StartCoroutine(addDeadPlayer(player));
+            }
         }
 
         private IEnumerator addDeadPlayer(Player player)
         {
             yield return null;
 
-            if (player != null)
+            if (player != null && 
+                !player.HealthController.IsAlive)
             {
                 if (DeadPlayers.Count > _maxDeadTracked)
                 {
@@ -162,7 +167,7 @@ namespace SAIN.Components.PlayerComponentSpace
                 if (playerComponent != null)
                 {
                     destroyedComponent = true;
-                    Object.Destroy(playerComponent);
+                    playerComponent.Dispose();
                 }
                 this.Remove(id);
                 return true;
