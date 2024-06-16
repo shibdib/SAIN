@@ -18,26 +18,25 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
-            if (Player != null)
-            {
-                Player.OnDamageReceived += GetHit;
-            }
+            Player.BeingHitAction += GetHit;
             GroupTalk.Init();
             EnemyTalk.Init();
         }
 
-        private void GetHit(float damage, EBodyPart bodyPart, EDamageType type, float damageReducedByArmor, MaterialType special = MaterialType.None)
+        private void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
             if (Player == null || BotOwner == null || Bot == null)
             {
                 return;
             }
-            if (EFTMath.RandomBool(33) && _nextGetHitTime < Time.time)
+            if (EFTMath.RandomBool(33) && 
+                _nextGetHitTime < Time.time && 
+                GroupTalk.FriendIsClose)
             {
                 _nextGetHitTime = Time.time + 1f;
                 EPhraseTrigger trigger = EPhraseTrigger.OnBeingHurt | EPhraseTrigger.OnAgony;
                 ETagStatus mask = ETagStatus.Combat | ETagStatus.Aware;
-                SendSayCommand(trigger, mask);
+                GroupSay(trigger, mask, false, 100);
             }
         }
 
@@ -108,7 +107,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             if (Player != null)
             {
-                Player.OnDamageReceived -= GetHit;
+                Player.BeingHitAction -= GetHit;
             }
             PersonalPhraseDict.Clear();
             GroupTalk.Dispose();

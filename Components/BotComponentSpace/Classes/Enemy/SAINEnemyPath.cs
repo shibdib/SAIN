@@ -200,20 +200,20 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
                 if (_calcPathTime + timeAdd < Time.time)
                 {
-                    Stopwatch watch = Stopwatch.StartNew();
+                    //Stopwatch watch = Stopwatch.StartNew();
                     _calcPathTime = Time.time;
 
                     if (!isCurrentEnemy && shallClear())
                     {
                         Clear();
-                        watch.Stop();
+                        //watch.Stop();
                         yield return null;
                         continue;
                     }
 
                     yield return calcPathToEnemy(isCurrentEnemy);
-                    watch.Stop();
-                    Logger.LogAndNotifyDebug($"Time To CalcPath [{watch.ElapsedMilliseconds}].ms");
+                    //watch.Stop();
+                    //Logger.LogAndNotifyDebug($"Time To CalcPath [{watch.ElapsedMilliseconds}].ms");
                 }
 
                 yield return null;
@@ -396,8 +396,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
             int removed = 0;
             int count = corners.Count;
 
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"Clearing Short Corners of [{count}] for [{Bot.name}] with min [{min}]...");
+            //StringBuilder stringBuilder = new StringBuilder();
+            //stringBuilder.AppendLine($"Clearing Short Corners of [{count}] for [{Bot.name}] with min [{min}]...");
 
             for (int i = count - 2; i >= count; i--)
             {
@@ -405,7 +405,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 Vector3 cornerB = corners[i + 1];
 
                 float magnitude = (cornerA - cornerB).magnitude;
-                Logger.LogDebug($"{i} to {i + 1} mag: [{magnitude}] min [{min}]");
+                //Logger.LogDebug($"{i} to {i + 1} mag: [{magnitude}] min [{min}]");
 
                 if (magnitude > min)
                     continue;
@@ -413,14 +413,14 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 corners[i + 1] = Vector3.Lerp(cornerA, cornerB, 0.5f);
                 corners.RemoveAt(i);
 
-                stringBuilder.AppendLine($"Corner [{i + 1}] replaced. Removed [{i}] because Magnitude [{magnitude}] with min [{min}]");
+                //stringBuilder.AppendLine($"Corner [{i + 1}] replaced. Removed [{i}] because Magnitude [{magnitude}] with min [{min}]");
                 removed++;
             }
 
             if (removed > 0)
             {
-                stringBuilder.AppendLine($"Finished Clearing Short Corners. Removed [{removed}] corners from [{count}]");
-                Logger.LogDebug(stringBuilder.ToString());
+                //stringBuilder.AppendLine($"Finished Clearing Short Corners. Removed [{removed}] corners from [{count}]");
+                //Logger.LogDebug(stringBuilder.ToString());
             }
 
             yield return null;
@@ -441,29 +441,29 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 {
                     result = corners[i - 1];
                     notVisCorner = corners[i];
-                    DebugGizmos.Line(target, lookPoint, Color.red, 0.05f, true, 5f, true);
+                    //DebugGizmos.Line(target, lookPoint, Color.red, 0.05f, true, 5f, true);
                     break;
                 }
-                DebugGizmos.Line(target, lookPoint, Color.white, 0.05f, true, 5f, true);
+                //DebugGizmos.Line(target, lookPoint, Color.white, 0.05f, true, 5f, true);
                 yield return null;
             }
             _blindCornerGround = result ?? corners[1];
             _cornerNotVisible = notVisCorner ?? corners[corners.Count - 1];
         }
 
-        private IEnumerator findRealCorner(Vector3 blindCorner, Vector3 notVisibleCorner, Vector3 lookPoint, float height, int iterations = 45)
+        private IEnumerator findRealCorner(Vector3 blindCorner, Vector3 notVisibleCorner, Vector3 lookPoint, float height, int iterations = 15)
         {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"Finding Real Blind Corner for [{Bot.name}]...");
+            //StringBuilder stringBuilder = new StringBuilder();
+            //stringBuilder.AppendLine($"Finding Real Blind Corner for [{Bot.name}]...");
 
             blindCorner.y += height;
 
             BlindCorner = blindCorner;
             float sign = Vector.FindFlatSignedAngle(blindCorner, notVisibleCorner, lookPoint);
-            float angle = sign <= 0 ? -20f : 20f;
+            float angle = sign <= 0 ? -10f : 10f;
             float rotationStep = angle / iterations;
 
-            stringBuilder.AppendLine($"Angle to check [{angle}] Step Angle [{rotationStep}]");
+            //stringBuilder.AppendLine($"Angle to check [{angle}] Step Angle [{rotationStep}]");
 
             Vector3 directionToBlind = blindCorner - lookPoint;
 
@@ -476,15 +476,15 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 }
                 else
                 {
-                    stringBuilder.AppendLine($"Angle where LOS broken [{rotationStep * i}] after [{i}] iterations");
+                    //stringBuilder.AppendLine($"Angle where LOS broken [{rotationStep * i}] after [{i}] iterations");
                     break;
                 }
 
                 yield return null;
             }
 
-            stringBuilder.AppendLine("Finished Checking for real Blind Corner");
-            Logger.LogAndNotifyDebug(stringBuilder.ToString());
+            //stringBuilder.AppendLine("Finished Checking for real Blind Corner");
+            //Logger.LogAndNotifyDebug(stringBuilder.ToString());
         }
 
         public Vector3? BlindCorner { get; set; }

@@ -355,6 +355,11 @@ namespace SAIN.Preset.Personalities
         [MinMax(0.1f, 100f, 100f)]
         public float TauntFrequency = 15f;
 
+        [Default(60f)]
+        [Advanced]
+        [MinMax(0f, 100f, 1f)]
+        public float TauntChance = 60f;
+
         [Default(20f)]
         [Advanced]
         [MinMax(0.1f, 150f, 100f)]

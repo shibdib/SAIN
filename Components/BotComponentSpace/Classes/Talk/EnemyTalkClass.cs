@@ -34,7 +34,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             if (Bot.Talk.CanTalk &&
                 CanTaunt &&
-                EFTMath.RandomBool(75))
+                EFTMath.RandomBool(70))
             {
                 EPhraseTrigger trigger;
                 if (EFTMath.RandomBool(15) ||
@@ -72,11 +72,15 @@ namespace SAIN.SAINComponent.Classes.Talk
                         return;
                     }
                     if (CanTaunt
-                        && _tauntTimer < time
-                        && TauntEnemy())
+                        && _tauntTimer < time)
                     {
                         _nextCheckTime = time + 1f;
                         _tauntTimer = time + TauntFreq * Random.Range(0.5f, 1.5f);
+
+                        if (EFTMath.RandomBool(PersonalitySettings.TauntChance))
+                        {
+                            TauntEnemy();
+                        }
                         return;
                     }
                 }
@@ -137,8 +141,8 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool CanFakeDeath = false;
         private bool CanBegForLife = false;
         private bool _canRespondToEnemy = true;
-        private float TauntDist = 50f;
-        private float TauntFreq = 5f;
+        private float TauntDist = 40f;
+        private float TauntFreq = 30f;
 
         private bool ShallFakeDeath()
         {
@@ -260,8 +264,8 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 if (enemy != null
                     && !enemy.IsVisible
-                    && (enemy.Seen || enemy.Heard)
-                    && enemy.TimeSinceSeen > 8f
+                    && enemy.Seen 
+                    && enemy.TimeSinceSeen > 20f
                     && EFTMath.RandomBool(20))
                 {
                     Bot.Talk.Say(EPhraseTrigger.OnLostVisual, ETagStatus.Combat, true);

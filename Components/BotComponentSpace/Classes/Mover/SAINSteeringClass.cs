@@ -27,6 +27,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private readonly float Steer_HeardSound_Age = 3f;
 
         private readonly float baseTurnSpeed = 240f;
+
         private readonly float baseTurnSpeedNoEnemy = 150f;
 
         public AimStatus AimStatus
