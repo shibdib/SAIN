@@ -199,6 +199,11 @@ namespace SAIN.Patches.Shoot.Aim
                 Logger.LogDebug(stringBuilder.ToString());
             }
 
+            if (botComponent != null)
+            {
+                botComponent.LastAimTime = timeToAimResult;
+            }
+
             return timeToAimResult;
         }
 

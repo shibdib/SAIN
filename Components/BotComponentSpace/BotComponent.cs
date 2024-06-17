@@ -25,6 +25,8 @@ namespace SAIN.SAINComponent
         public string ProfileId { get; private set; }
         public PersonClass Person { get; private set; }
 
+        public float LastAimTime { get; set; }
+
         public Vector3 Position => PlayerComponent.Position;
         public Vector3 LookDirection => PlayerComponent.LookDirection;
         public BotOwner BotOwner => PlayerComponent.BotOwner;

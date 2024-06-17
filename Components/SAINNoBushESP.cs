@@ -187,17 +187,8 @@ namespace SAIN.Components
                     enemy.SetCanShoot(false);
                     enemy.SetVisible(false);
 
-                    IsVisibleProp.SetValue(enemy, false);
-
                     BotOwner.AimingData?.LoseTarget();
-                    //BotOwner.ShootData?.EndShoot();
 
-                    // Use reflection to set the blockShoot of the property
-                    var shoot = BotOwner.ShootData;
-                    if (shoot != null)
-                    {
-                        //CanShootByState.Invoke(shoot, new object[] { false });
-                    }
                     var vision = SAIN?.Enemy?.Vision;
                     if (vision != null)
                     {

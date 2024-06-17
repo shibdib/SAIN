@@ -5,7 +5,6 @@ using System;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.Layers
 {
@@ -59,41 +58,38 @@ namespace SAIN.Layers
             try
             {
                 var info = sain.Info;
-                stringBuilder.AppendLine($"Name: [{sain.Person.Name}] Nickname: [{sain.Player.Profile.Nickname}] Personality: [{info.Personality}] Type: [{info.Profile.WildSpawnType}]");
-                stringBuilder.AppendLine($"Suppression Status: Num: [{sain.Suppression?.SuppressionNumber}] IsSuppressed: [{sain.Suppression?.IsSuppressed}] IsHeavySuppressed: [{sain.Suppression?.IsHeavySuppressed}]");
-                stringBuilder.AppendLine($"Steering: [{sain.Steering.CurrentSteerPriority}]");
-                stringBuilder.AppendLine($"AI Limited: [{sain.CurrentAILimit}]");
-                stringBuilder.AppendLine($"Cover Points Count: [{sain.Cover.CoverPoints.Count}]");
-                stringBuilder.AppendLine($"Cover Finder State: [{sain.Cover.CurrentCoverFinderState}]");
-                stringBuilder.AppendLine($"Cover Finder Status: [{sain.Cover.CoverFinder.CurrentStatus}] Limited? [{sain.Cover.CoverFinder.ProcessingLimited}] ");
+                stringBuilder.AppendLine($"Name: [{sain.Person.Name}] Nickname: [{sain.Player.Profile.Nickname}] Personality: [{info.Personality}] Type: [{info.Profile.WildSpawnType}] PowerLevel: [{info.Profile.PowerLevel}]");
+                stringBuilder.AppendLabeledValue("Start Search + Hold Ground Time", $"{info.TimeBeforeSearch} + {info.HoldGroundDelay}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLine($"Suppression Num: [{sain.Suppression?.SuppressionNumber}] IsSuppressed: [{sain.Suppression?.IsSuppressed}] IsHeavySuppressed: [{sain.Suppression?.IsHeavySuppressed}]");
+                stringBuilder.AppendLine($"Steering: [{sain.Steering.CurrentSteerPriority}] : AI Limited: [{sain.CurrentAILimit}] : Cover Points Count: [{sain.Cover.CoverPoints.Count}]");
+                stringBuilder.AppendLine($"Indoors? {sain.Memory.Location.IsIndoors} EnvironmentID: {sain.Player?.AIData.EnvironmentId} In Bunker? {sain.PlayerComponent.AIData.PlayerLocation.InBunker}");
                 var members = sain.Squad.SquadInfo?.Members;
                 if (members != null && members.Count > 1)
                 {
                     stringBuilder.AppendLine($"Squad Personality: [{sain.Squad.SquadInfo.SquadPersonality}]");
                 }
 
-                stringBuilder.AppendLine($"Indoors? {sain.Memory.Location.IsIndoors} EnvironmentID: {sain.Player?.AIData.EnvironmentId}");
+                stringBuilder.AppendLine();
 
                 stringBuilder.AppendLabeledValue("Main Decision", $"Current: {sain.Decision.CurrentSoloDecision} Last: {sain.Decision.OldSoloDecision}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Squad Decision", $"Current: {sain.Decision.CurrentSquadDecision} Last: {sain.Decision.OldSquadDecision}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Self Decision", $"Current: {sain.Decision.CurrentSelfDecision} Last: {sain.Decision.OldSelfDecision}", Color.white, Color.yellow, true);
 
-                if (sain.Decision.CurrentSoloDecision == SoloDecision.Search)
-                {
-                    stringBuilder.AppendLabeledValue("Searching", $"Current State: {sain.Search.CurrentState} Next: {sain.Search.NextState} Last: {sain.Search.LastState}", Color.white, Color.yellow, true);
-                }
-
                 stringBuilder.AppendLine();
-                stringBuilder.AppendLine("SAIN Info");
-                stringBuilder.AppendLabeledValue("Personality and Type", $"{info.Personality} {info.Profile.WildSpawnType}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Power of Equipment", $"{info.Profile.PowerLevel}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Start Search + Hold Ground Time", $"{info.TimeBeforeSearch} + {info.HoldGroundDelay}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Difficulty + Modifier", $"{info.Profile.BotDifficulty} + {info.Profile.DifficultyModifier}", Color.white, Color.yellow, true);
+
+                stringBuilder.AppendLine($"Aim Status {sain.Steering.AimStatus} Aim Time: {sain.LastAimTime} Ready? {sain.BotOwner.AimingData?.IsReady}");
+                stringBuilder.AppendLine($"Friendly Fire Status {sain.FriendlyFireClass.FriendlyFireStatus} No Bush ESP Status: {sain.NoBushESP.NoBushESPActive} Ready? {sain.BotOwner.AimingData?.IsReady}");
 
                 if (sain.HasEnemy)
                 {
                     stringBuilder.AppendLine();
                     CreateEnemyInfo(stringBuilder, sain.Enemy);
+                }
+                stringBuilder.AppendLine();
+
+                if (sain.Decision.CurrentSoloDecision == SoloDecision.Search)
+                {
+                    stringBuilder.AppendLabeledValue("Searching", $"Current State: {sain.Search.CurrentState} Next: {sain.Search.NextState} Last: {sain.Search.LastState}", Color.white, Color.yellow, true);
                 }
 
             }
@@ -105,11 +101,10 @@ namespace SAIN.Layers
 
         private static void CreateEnemyInfo(StringBuilder stringBuilder, SAINEnemy enemy)
         {
-            stringBuilder.AppendLine();
             stringBuilder.AppendLine("Enemy Info");
 
             stringBuilder.AppendLabeledValue("Enemy Name", $"{enemy.EnemyPlayer?.Profile.Nickname}", Color.white, Color.red, true);
-            stringBuilder.AppendLabeledValue("Enemy Power Level", $"{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}", Color.white, Color.red, true);
+            stringBuilder.AppendLabeledValue("Enemy Power Level ", $"{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}", Color.white, Color.red, true);
 
             stringBuilder.AppendLabeledValue("Last GainSight Result", $"{enemy.Vision.LastGainSightResult}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("SeenCoef", $"{enemy.EnemyInfo.SeenCoef}", Color.white, Color.yellow, true);

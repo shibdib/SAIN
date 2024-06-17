@@ -63,9 +63,9 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Name("Distance To Not Scatter Aim")]
         [Description("If an enemy is closer than this distance, ignore scatter.")]
-        [MinMax(0.0f, 30f, 100f)]
+        [MinMax(0.1f, 30f, 100f)]
         [Advanced]
-        public float DIST_TO_SHOOT_NO_OFFSET = 0f;
+        public float DIST_TO_SHOOT_NO_OFFSET = 3f;
 
         [Name("Scatter Multiplier - Moving")]
         [Default(2f)]
@@ -96,15 +96,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [MinMax(0f, 0.5f, 100f)]
         [Advanced]
         public float SHPERE_FRIENDY_FIRE_SIZE = 0.15f;
-
-        [Hidden]
-        public int RECALC_MUST_TIME = 1;
-
-        [Hidden]
-        public int RECALC_MUST_TIME_MIN = 1;
-
-        [Hidden]
-        public int RECALC_MUST_TIME_MAX = 2;
 
         [Hidden]
         public float DAMAGE_TO_DISCARD_AIM_0_100 = 100;
