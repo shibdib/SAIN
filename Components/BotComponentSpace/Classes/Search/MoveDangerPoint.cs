@@ -12,29 +12,13 @@ namespace SAIN.SAINComponent.Classes.Search
         public MoveDangerPoint(Vector3 start, Vector3 end, Vector3 dangerPoint, Vector3 corner)
         {
             PeekStart = new PeekPosition(start, dangerPoint);
-            Vector3 mid = MidPoint(start, end);
-            PeekMid = new PeekPosition(mid, dangerPoint);
             PeekEnd = new PeekPosition(end, dangerPoint);
-
-            Vector3 midDir = PeekMid.DangerDir;
-            FirstLookPoint = start + midDir;
-            SecondLookPoint = end + midDir;
-
             DangerPoint = dangerPoint;
             Corner = corner;
         }
 
         public PeekPosition PeekStart { get; private set; }
-        public Vector3 StartPeekPosition => PeekStart.Point;
-        public Vector3 FirstLookPoint { get; private set; }
-
-        public PeekPosition PeekMid { get; private set; }
-        public Vector3 PeekMidPoint => PeekMid.Point;
-
         public PeekPosition PeekEnd { get; private set; }
-        public Vector3 EndPeekPosition => PeekEnd.Point;
-        public Vector3 SecondLookPoint { get; private set; }
-
         public Vector3 DangerPoint { get; private set; }
         public Vector3 Corner { get; private set; }
 
@@ -72,7 +56,6 @@ namespace SAIN.SAINComponent.Classes.Search
                 DebugVectorList = new List<Vector3>
                 {
                     PeekStart.Point,
-                    PeekMid.Point,
                     PeekEnd.Point,
                     DangerPoint,
                 };

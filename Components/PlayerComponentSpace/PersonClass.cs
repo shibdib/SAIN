@@ -73,8 +73,9 @@ namespace SAIN.Components.PlayerComponentSpace
         public IPlayer IPlayer { get; private set; }
         public Player Player { get; private set; }
 
-        public PersonClass(IPlayer iPlayer, Player player)
+        public PersonClass(IPlayer iPlayer, Player player, PlayerComponent playerComponent)
         {
+            PlayerComponent = playerComponent;
             Player = player;
             IPlayer = iPlayer;
             Name = player?.name;
@@ -102,6 +103,7 @@ namespace SAIN.Components.PlayerComponentSpace
         public bool IsSAINBot { get; private set; } = false;
         public BotOwner BotOwner { get; private set; }
         public BotComponent BotComponent { get; private set; }
+        public PlayerComponent PlayerComponent { get; private set; }
         public PersonTransformClass Transform { get; private set; }
         public string ProfileId { get; private set; }
         public string Nickname { get; private set; }

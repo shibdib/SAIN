@@ -84,7 +84,7 @@ namespace SAIN.Components.PlayerComponentSpace
             try
             {
                 ProfileId = iPlayer.ProfileId;
-                Person = new PersonClass(iPlayer, player);
+                Person = new PersonClass(iPlayer, player, this);
 
                 Flashlight = new FlashLightClass(this);
                 Equipment = new SAINEquipmentClass(this);

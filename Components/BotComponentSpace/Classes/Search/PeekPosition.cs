@@ -19,5 +19,6 @@ namespace SAIN.SAINComponent.Classes.Search
         public readonly Vector3 DangerDirNormal;
         public readonly float DangerDistance;
         public readonly Vector3 Point;
+        public bool Used { get; set; }
     }
 }

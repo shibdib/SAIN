@@ -3,6 +3,7 @@ using EFT;
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.Classes.Enemy;
 using System.Collections;
 using System.Collections.Generic;
@@ -40,8 +41,12 @@ namespace SAIN.SAINComponent.Classes
             if (distance > 50f)
                 return;
 
-            if (Bot.EnemyController.Enemies.TryGetValue(player.ProfileId, out var enemy))
+            if (Bot.EnemyController.Enemies.TryGetValue(player.ProfileId, out var enemy) && enemy.IsValid)
             {
+                if (Bot.PlayerComponent.AIData.PlayerLocation.InBunker != enemy.EnemyPlayerComponent.AIData.PlayerLocation.InBunker)
+                {
+                    return;
+                }
                 float dispersion = distance / 5f;
                 Vector3 random = UnityEngine.Random.onUnitSphere;
                 random.y = 0;
@@ -60,6 +65,11 @@ namespace SAIN.SAINComponent.Classes
             }
 
             if (!Bot.EnemyController.IsPlayerAnEnemy(playerComponent.ProfileId))
+            {
+                return;
+            }
+
+            if (Bot.PlayerComponent.AIData.PlayerLocation.InBunker != playerComponent.AIData.PlayerLocation.InBunker)
             {
                 return;
             }

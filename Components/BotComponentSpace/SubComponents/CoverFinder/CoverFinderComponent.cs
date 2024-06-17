@@ -9,7 +9,7 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
-    public class CoverFinderComponent : MonoBehaviour, ISAINSubComponent
+    public class CoverFinderComponent : MonoBehaviour
     {
         public CoverFinderStatus CurrentStatus { get; private set; }
 

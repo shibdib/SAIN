@@ -7,22 +7,6 @@ using System.Collections.Generic;
 
 namespace SAIN
 {
-    public interface ISAINSubComponent
-    {
-        void Init(BotComponent sain);
-        BotOwner BotOwner { get; }
-        Player Player { get; }
-    }
-
-    public interface IBotComponent
-    {
-        bool Init(PlayerComponent playerComponent);
-        PlayerComponent PlayerComponent { get; }
-        PersonClass Person { get; }
-        BotOwner BotOwner { get; }
-        Player Player { get; }
-    }
-
     public interface ISAINClass
     {
         void Init();

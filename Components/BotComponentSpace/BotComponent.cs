@@ -19,17 +19,17 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent
 {
-    public class BotComponent : MonoBehaviour, IBotComponent
+    public class BotComponent : MonoBehaviour
     {
-        public PlayerComponent PlayerComponent { get; private set; }
         public bool BotActive { get; private set; }
         public string ProfileId { get; private set; }
+        public PersonClass Person { get; private set; }
 
         public Vector3 Position => PlayerComponent.Position;
         public Vector3 LookDirection => PlayerComponent.LookDirection;
         public BotOwner BotOwner => PlayerComponent.BotOwner;
+        public PlayerComponent PlayerComponent => Person.PlayerComponent;
         public Player Player => PlayerComponent.Player;
-        public PersonClass Person => PlayerComponent.Person;
         public PersonTransformClass Transform => PlayerComponent.Transform;
 
         public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
@@ -102,16 +102,16 @@ namespace SAIN.SAINComponent
 
         public float LastCheckVisibleTime;
 
-        public bool Init(PlayerComponent playerComponent)
+        public bool Init(PersonClass person)
         {
-            PlayerComponent = playerComponent;
-            ProfileId = playerComponent.ProfileId;
+            Person = person;
+            ProfileId = person.ProfileId;
             //playerComponent.Player.Physical.EncumberDisabled = false;
 
             try
             {
                 NoBushESP = this.gameObject.AddComponent<SAINNoBushESP>();
-                NoBushESP.Init(playerComponent.BotOwner, this);
+                NoBushESP.Init(person.BotOwner, this);
             }
             catch (Exception ex)
             {
@@ -145,7 +145,7 @@ namespace SAIN.SAINComponent
                 AimDownSightsController = new AimDownSightsController(this);
                 BotHitReaction = new SAINBotHitReaction(this);
                 SpaceAwareness = new SAINBotSpaceAwareness(this);
-                DoorOpener = new SAINDoorOpener(this, playerComponent.BotOwner);
+                DoorOpener = new SAINDoorOpener(this, person.BotOwner);
                 Medical = new SAINMedical(this);
                 BotLight = new BotLightController(this);
                 BackpackDropper = new BotBackpackDropClass(this);
@@ -260,6 +260,12 @@ namespace SAIN.SAINComponent
 
         private void Update()
         {
+            if (IsDead || BotOwner.BotState == EBotState.Disposed)
+            {
+                Dispose();
+                return;
+            }
+
             if (BotActive)
             {
                 EnemyController.Update();
@@ -352,6 +358,7 @@ namespace SAIN.SAINComponent
         public void Dispose()
         {
             OnDisable();
+            OnSAINDisposed?.Invoke(ProfileId, BotOwner);
 
             try
             {
@@ -400,9 +407,6 @@ namespace SAIN.SAINComponent
             {
                 BotOwner.OnBotStateChange -= resetBot;
             }
-
-            OnSAINDisposed?.Invoke(ProfileId, BotOwner);
-
             Destroy(this);
         }
 

@@ -4,11 +4,10 @@
     {
         None,
         DirectMove,
-        DirectMovePeek,
         MoveToStartPeek,
         MoveToEndPeek,
         MoveToDangerPoint,
-        MoveToCorner,
         Wait,
+        Advance,
     }
 }

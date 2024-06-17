@@ -14,9 +14,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         protected SAINEnemy Enemy { get; private set; }
         protected BotComponent Bot => Enemy.Bot;
+        protected PlayerComponent PlayerComp => Enemy.Bot.PlayerComponent;
         protected BotOwner BotOwner => Enemy.BotOwner;
         protected EnemyInfo EnemyInfo => Enemy.EnemyInfo;
 
+        protected PlayerComponent EnemyPlayerComp => EnemyPerson.PlayerComponent;
         protected PersonClass EnemyPerson { get; private set; }
         protected Player EnemyPlayer => EnemyPerson.Player;
         protected IPlayer EnemyIPlayer => EnemyPerson.IPlayer;

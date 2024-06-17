@@ -1,16 +1,12 @@
 ﻿using EFT;
-using Interpolation;
 using SAIN.Helpers;
 using SAIN.Plugin;
-using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Enemy;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.BotController.Classes
 {
@@ -118,8 +114,6 @@ namespace SAIN.BotController.Classes
                 return;
             }
 
-            sain?.EnemyController?.GetEnemy(player.ProfileId)?.SetHeardStatus(true, position, soundType, true);
-
             AISoundType baseSoundType;
             switch (soundType)
             {
@@ -136,14 +130,19 @@ namespace SAIN.BotController.Classes
                     break;
             }
 
-
             bool isDanger = baseSoundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
             PlaceForCheck newPlace = AddNewPlaceForCheck(sain.BotOwner, position, checkType, player);
-            if (newPlace != null && searchType == ESearchPointType.Hearing)
+            if (newPlace != null)
             {
-                OnSoundHeard?.Invoke(newPlace);
+                sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, newPlace.Position, soundType, true);
+                if (searchType == ESearchPointType.Hearing)
+                {
+                    OnSoundHeard?.Invoke(newPlace);
+                }
+                return;
             }
+            sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, position, soundType, true);
         }
 
         public void AddPointToSearch(Vector3 position, float soundPower, BotComponent sain, AISoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
@@ -175,15 +174,19 @@ namespace SAIN.BotController.Classes
                     break;
             }
 
-            sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, position, sainSoundType, true);
-
             bool isDanger = soundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
             PlaceForCheck newPlace = AddNewPlaceForCheck(sain.BotOwner, position, checkType, player);
-            if (newPlace != null && searchType == ESearchPointType.Hearing)
+            if (newPlace != null)
             {
-                OnSoundHeard?.Invoke(newPlace);
+                sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, newPlace.Position, sainSoundType, true);
+                if (searchType == ESearchPointType.Hearing)
+                {
+                    OnSoundHeard?.Invoke(newPlace);
+                }
+                return;
             }
+            sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, position, sainSoundType, true);
         }
 
         public readonly Dictionary<string, PlaceForCheck> PlayerPlaceChecks = new Dictionary<string, PlaceForCheck>();
@@ -499,14 +502,14 @@ namespace SAIN.BotController.Classes
         {
             if (a != null && b != null)
             {
-                if (a.PlayerComponent.Equipment.GearInfo.HasEarPiece && 
+                if (a.PlayerComponent.Equipment.GearInfo.HasEarPiece &&
                     b.PlayerComponent.Equipment.GearInfo.HasEarPiece)
                 {
                     return true;
                 }
-                if ((a.Position - b.Position).sqrMagnitude <= maxReportActionRangeSqr) 
-                { 
-                    return true; 
+                if ((a.Position - b.Position).sqrMagnitude <= maxReportActionRangeSqr)
+                {
+                    return true;
                 }
             }
             return false;
