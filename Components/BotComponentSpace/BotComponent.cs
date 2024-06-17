@@ -106,7 +106,16 @@ namespace SAIN.SAINComponent
         {
             Person = person;
             ProfileId = person.ProfileId;
-            //playerComponent.Player.Physical.EncumberDisabled = false;
+
+            try
+            {
+                //playerComponent.Player.Physical.EncumberDisabled = false;
+                person.Player.ActiveHealthController.SetDamageCoeff(1f);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error Updating Player Values for bot: {ex}");
+            }
 
             try
             {

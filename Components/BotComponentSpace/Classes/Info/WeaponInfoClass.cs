@@ -1,10 +1,11 @@
 using EFT;
 using EFT.InventoryLogic;
-using Mono.WebBrowser;
+using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.WeaponFunction;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static EFT.InventoryLogic.Weapon;
@@ -19,7 +20,35 @@ namespace SAIN.SAINComponent.Classes.Info
             Firerate = new Firerate(sain);
             Firemode = new Firemode(sain);
             PresetHandler.OnPresetUpdated += forceRecheckWeapon;
+            SAINBotController.Instance.OnBotWeaponChange += weaponChanged;
         }
+
+        private void weaponChanged(string name, IFirearmHandsController firearmController)
+        {
+            if (name != BotOwner?.name)
+            {
+                return;
+            }
+            WeaponAIPreset preset = BotOwner?.WeaponManager?.WeaponAIPreset;
+            if (preset == null)
+            {
+                return;
+            }
+            var type = preset.WeaponAIPresetType;
+            if (!_presets.ContainsKey(type))
+            {
+                _presets.Add(type, new WeaponAIPresetHistory(preset));
+            }
+
+            float accuracyModifier = Bot.Info.FileSettings.Aiming.AccuracySpreadMulti * SAINPlugin.LoadedPreset.GlobalSettings.Aiming.AccuracySpreadMultiGlobal;
+
+            WeaponAIPresetHistory history = _presets[type];
+            preset.BaseShift = history.BaseShift * accuracyModifier;
+            preset.XZ_COEF = history.XZ_COEF * accuracyModifier;
+            forceRecheckWeapon();
+        }
+
+        private readonly Dictionary<EWeaponAIPresetType, WeaponAIPresetHistory> _presets = new Dictionary<EWeaponAIPresetType, WeaponAIPresetHistory>();
 
         private void forceRecheckWeapon()
         {
@@ -44,21 +73,20 @@ namespace SAIN.SAINComponent.Classes.Info
         private Weapon LastCheckedWeapon;
 
         private float _nextRecalcTime;
-        private const float _recalcFreq = 10f;
+        private const float _recalcFreq = 60f;
         private float _nextCheckWeapTime;
-        private const float _checkWeapFreq = 0.25f;
+        private const float _checkWeapFreq = 1f;
         private bool forceNewCheck = false;
 
         public void checkCalcWeaponInfo()
         {
-            if (_nextCheckWeapTime < Time.time)
+            if (_nextCheckWeapTime < Time.time || forceNewCheck)
             {
                 Weapon currentWeapon = CurrentWeapon;
                 if (currentWeapon != null)
                 {
                     _nextCheckWeapTime = Time.time + _checkWeapFreq;
-                    bool doCalculation = forceNewCheck || _nextRecalcTime < Time.time || LastCheckedWeapon == null || LastCheckedWeapon != currentWeapon;
-                    if (doCalculation)
+                    if (forceNewCheck || _nextRecalcTime < Time.time || LastCheckedWeapon == null || LastCheckedWeapon != currentWeapon)
                     {
                         if (forceNewCheck)
                             forceNewCheck = false;
@@ -165,6 +193,7 @@ namespace SAIN.SAINComponent.Classes.Info
             Firerate.Dispose();
             Firemode.Dispose();
             PresetHandler.OnPresetUpdated -= forceRecheckWeapon;
+            SAINBotController.Instance.OnBotWeaponChange -= weaponChanged;
         }
 
         public float SwapToSemiDist { get; private set; } = 50f;

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.Enemy;
+using EFT.HealthSystem;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -21,6 +22,21 @@ namespace SAIN.SAINComponent.Classes
 
         public SAINBotHitReaction(BotComponent sain) : base(sain)
         {
+            HealthController = sain.Player.HealthController;
+            addPart(EBodyPart.Head);
+            addPart(EBodyPart.Chest);
+            addPart(EBodyPart.LeftArm);
+            addPart(EBodyPart.RightArm);
+            addPart(EBodyPart.LeftLeg);
+            addPart(EBodyPart.RightLeg);
+            addPart(EBodyPart.Stomach);
+        }
+
+        public IHealthController HealthController { get; private set; }
+
+        private void addPart(EBodyPart part)
+        {
+            BodyParts.Add(part, new BodyPartStatus(part, HealthController));
         }
 
         public void Init()
@@ -40,7 +56,24 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
+            if (_updateHealthTime < Time.time || injuryRegistered)
+            {
+                _updateHealthTime = Time.time + 1f;
+                if (injuryRegistered)
+                {
+                    injuryRegistered = false;
+                }
+                LeftArmInjury = BodyParts[EBodyPart.LeftArm].InjurySeverity;
+                RightArmInjury = BodyParts[EBodyPart.RightArm].InjurySeverity;
+            }
         }
+
+        private float _updateHealthTime;
+
+        public EInjurySeverity LeftArmInjury { get; private set; }
+        public EInjurySeverity RightArmInjury { get; private set; }
+
+        public bool ArmsInjured => LeftArmInjury != EInjurySeverity.None || RightArmInjury != EInjurySeverity.None;
 
         public void Dispose()
         {
@@ -51,8 +84,11 @@ namespace SAIN.SAINComponent.Classes
             Bot.EnemyController.OnEnemyRemoved -= clearEnemy;
         }
 
+        private bool injuryRegistered;
+
         public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
+            injuryRegistered = true;
             TimeLastShot = Time.time;
             switch (bodyPart)
             {
@@ -145,6 +181,46 @@ namespace SAIN.SAINComponent.Classes
         {
             return false;
         }
+
+        public Dictionary<EBodyPart, BodyPartStatus> BodyParts = new Dictionary<EBodyPart, BodyPartStatus>();
+    }
+
+    public class BodyPartStatus
+    {
+        public BodyPartStatus(EBodyPart part, IHealthController healthController)
+        {
+            _bodyPart = part;
+            _healthController = healthController;
+        }
+
+        private readonly IHealthController _healthController;
+        private readonly EBodyPart _bodyPart;
+
+        public EInjurySeverity InjurySeverity
+        {
+            get
+            {
+                float health = PartHealthNormalized;
+                if (health > 0.75f)
+                {
+                    return EInjurySeverity.None;
+                }
+                if (health > 0.4f)
+                {
+                    return EInjurySeverity.Injury;
+                }
+                if (health > 0.01f)
+                {
+                    return EInjurySeverity.HeavyInjury;
+                }
+                return EInjurySeverity.Destroyed;
+            }
+        }
+
+        public float PartHealth => _healthController.GetBodyPartHealth(_bodyPart, false).Current;
+        public float PartHealthNormalized => _healthController.GetBodyPartHealth(_bodyPart, false).Normalized;
+        public bool PartDestoyed => _healthController.IsBodyPartDestroyed(_bodyPart);
+
     }
 
     public enum EHitReaction

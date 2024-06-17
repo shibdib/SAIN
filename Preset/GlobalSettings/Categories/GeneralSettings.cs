@@ -1,32 +1,13 @@
-﻿using EFT;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SAIN.Attributes;
-using SAIN.Helpers;
-using SAIN.Preset.GlobalSettings.Categories;
-using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
     public class GeneralSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public float SprintReachDistance = 1f;
-
-        [JsonIgnore]
-        [Hidden]
-        public float BaseReachDistance = 0.5f;
-
-        [Name("Global Difficulty Modifier")]
-        [Description("Higher number = harder bots. Affects bot accuracy, recoil, fire-rate, full auto burst lenght, scatter, reaction-time")]
-        [Default(1f)]
-        [MinMax(0.1f, 5f, 100f)]
-        public float GlobalDifficultyModifier = 1f;
-
-        [Name("Random Speed Hacker AI")]
-        [Description("Emulate the real Live-Like experience! 1% of bots will be a speed-hacker.")]
-        [Default(false)]
-        public bool RandomSpeedHacker = false;
+        [Name("Bots Use Grenades")]
+        [Default(true)]
+        public bool BotsUseGrenades = true;
 
         [Name("Bots Open Doors Fast")]
         [Description("WIP. Can cause bots to get stuck on doors sometimes.")]
@@ -50,9 +31,10 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         public float LimitAIvsAIMaxAudioRangeVeryFar = 80f;
 
-        [Name("Bot Grenades")]
-        [Default(true)]
-        public bool BotsUseGrenades = true;
+        [Name("Random Speed Hacker AI")]
+        [Description("Emulate the real Live-Like experience! 1% of bots will be a speed-hacker.")]
+        [Default(false)]
+        public bool RandomSpeedHacker = false;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
@@ -77,5 +59,13 @@ namespace SAIN.Preset.GlobalSettings
         [Hidden]
         [JsonIgnore]
         public int SAINCombatSoloLayerPriority = 20;
+
+        [JsonIgnore]
+        [Hidden]
+        public float SprintReachDistance = 1f;
+
+        [JsonIgnore]
+        [Hidden]
+        public float BaseReachDistance = 0.5f;
     }
 }

@@ -5,7 +5,7 @@ using SAIN.SAINComponent;
 using System.Reflection;
 using UnityEngine;
 
-namespace SAIN.Patches.Shoot
+namespace SAIN.Patches.Shoot.Recoil
 {
     public class RecoilPatch : ModulePatch
     {

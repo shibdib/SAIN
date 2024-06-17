@@ -74,6 +74,14 @@ namespace SAIN.Components
         public BotSquads BotSquads { get; private set; }
         public BotHearingClass BotHearing { get; private set; }
 
+        public Action<string, IFirearmHandsController> OnBotWeaponChange { get; set; }
+
+        public void BotChangedWeapon(BotOwner botOwner, IFirearmHandsController firearmController)
+        {
+            if (botOwner != null)
+                OnBotWeaponChange?.Invoke(botOwner.name, firearmController);
+        }
+
         public void PlayerEnviromentChanged(string profileID, IndoorTrigger trigger)
         {
             SAINGameWorld.PlayerTracker.GetPlayerComponent(profileID)?.AIData.PlayerLocation.UpdateEnvironment(trigger);

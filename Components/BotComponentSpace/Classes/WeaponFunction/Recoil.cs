@@ -18,6 +18,28 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
         }
 
+        private bool _armsInjured => Bot.BotHitReaction.ArmsInjured;
+
+        private float calcModFromInjury(EInjurySeverity severity)
+        {
+            switch (severity)
+            {
+                default:
+                    return 1f;
+
+                case EInjurySeverity.Injury:
+                    return 1.15f;
+
+                case EInjurySeverity.HeavyInjury:
+                    return 1.35f;
+
+                case EInjurySeverity.Destroyed:
+                    return 1.65f;
+            }
+        }
+
+        public float ArmInjuryModifier => calcModFromInjury(Bot.BotHitReaction.LeftArmInjury) * calcModFromInjury(Bot.BotHitReaction.RightArmInjury);
+
         public void Update()
         {
             if (_shot)
@@ -85,6 +107,10 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             if (shootController != null && shootController.IsAiming == true)
             {
                 newRecoil *= 0.8f;
+            }
+            if (_armsInjured)
+            {
+                newRecoil *= Mathf.Sqrt(ArmInjuryModifier);
             }
 
             Vector3 vector = newRecoil + currentRecoil;

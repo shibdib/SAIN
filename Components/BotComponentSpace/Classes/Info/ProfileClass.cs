@@ -4,50 +4,47 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Info
 {
-    public class ProfileClass : SAINBase, ISAINClass
+    public class ProfileClass : SAINBase
     {
         public ProfileClass(BotComponent sain) : base(sain)
         {
+            Name = sain.BotOwner.name;
+
+            var profile = sain.BotOwner.Profile;
+            Faction = profile.Side;
+            NickName = profile.Nickname;
+            WildSpawnType = profile.Info.Settings.Role;
+            BotDifficulty = profile.Info.Settings.BotDifficulty;
+            PlayerLevel = profile.Info.Level;
+
             IsBoss = EnumValues.WildSpawn.IsBoss(WildSpawnType);
             IsFollower = EnumValues.WildSpawn.IsFollower(WildSpawnType);
             IsScav = EnumValues.WildSpawn.IsScav(WildSpawnType);
             IsPMC = EnumValues.WildSpawn.IsPMC(WildSpawnType);
-            if (IsPMC && SAINPlugin.DebugMode)
+            IsPlayerScav = IsScav && SAINEnableClass.isPlayerScav(NickName);
+
+            if (IsPMC)
             {
-                Logger.LogInfo($"Found PMC: [{WildSpawnType}]");
+                Logger.LogDebug($"Found PMC: [{WildSpawnType}]");
             }
             SetDiffModifier(BotDifficulty);
         }
 
-        public void Init()
-        {
-        }
-
-        public void Update()
-        {
-        }
-
-        public void Dispose()
-        {
-        }
-
         public float DifficultyModifier { get; private set; }
-
-        public bool IsBoss { get; private set; }
-        public bool IsFollower { get; private set; }
-        public bool IsScav { get; private set; }
-        public bool IsPMC { get; private set; }
-        public bool IsPlayerScav { get; private set; }
-
-        public BotDifficulty BotDifficulty => BotOwner.Profile.Info.Settings.BotDifficulty;
-
-        public WildSpawnType WildSpawnType => BotOwner.Profile.Info.Settings.Role;
-
+        public float DifficultyModifierSqrt { get; private set; }
         public float PowerLevel => BotOwner.AIData.PowerOfEquipment;
 
-        public EPlayerSide Faction => BotOwner.Profile.Side;
-
-        public int PlayerLevel => BotOwner.Profile.Info.Level;
+        public readonly string Name;
+        public readonly string NickName;
+        public readonly bool IsBoss;
+        public readonly bool IsFollower;
+        public readonly bool IsScav;
+        public readonly bool IsPMC;
+        public readonly bool IsPlayerScav;
+        public readonly BotDifficulty BotDifficulty;
+        public readonly WildSpawnType WildSpawnType;
+        public readonly EPlayerSide Faction;
+        public readonly int PlayerLevel;
 
         private void SetDiffModifier(BotDifficulty difficulty)
         {
@@ -58,7 +55,6 @@ namespace SAIN.SAINComponent.Classes.Info
             {
                 modifier = sainSettings[WildSpawnType].DifficultyModifier;
             }
-            modifier *= SAINPlugin.LoadedPreset.GlobalSettings.General.GlobalDifficultyModifier;
 
             switch (difficulty)
             {
@@ -83,6 +79,7 @@ namespace SAIN.SAINComponent.Classes.Info
             }
 
             DifficultyModifier = modifier.Round100();
+            DifficultyModifierSqrt = Mathf.Sqrt(modifier).Round100();
         }
     }
 }

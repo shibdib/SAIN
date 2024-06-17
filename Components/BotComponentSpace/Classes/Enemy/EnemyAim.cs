@@ -18,24 +18,23 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             get
             {
-                float pose = PoseFactor;
-                float visibility = VisibilityFactor;
-                float opticMod = OpticModifier;
-                float result = visibility * pose * opticMod;
-
-                //if (EnemyPlayer.IsYourPlayer && _nextLogTime < Time.time)
-                //{
-                //    _nextLogTime = Time.time + 1f;
-                //    Logger.LogDebug($"Aim Modifier for [{BotOwner.name}] Result: [{result}] : PoseFactor: [{pose}] : Pose Level: [{PoseLevel}] : VisFactor: [{visibility}] : Optic Mod: {opticMod} Enemy Distance: {Enemy.RealDistance}");
-                //}
-
-                return result;
+                if (_getModTime < Time.time)
+                {
+                    _getModTime = Time.time + 0.1f;
+                    _modifier = _poseFactor * _visibilityFactor * _opticFactor * _injuryFactor;
+                }
+                return _modifier;
             }
         }
 
+        private float _modifier;
+        private float _getModTime;
+
+        private float _injuryFactor => Bot.Info.WeaponInfo.Recoil.ArmInjuryModifier;
+
         private static AimSettings _aimSettings => SAINPlugin.LoadedPreset.GlobalSettings.Aiming;
 
-        private float OpticModifier
+        private float _opticFactor
         {
             get
             {
@@ -99,7 +98,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float PoseLevel => EnemyPlayer.PoseLevel;
 
-        private float PoseFactor
+        private float _poseFactor
         {
             get
             {
@@ -116,7 +115,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private float VisibilityFactor
+        private float _visibilityFactor
         {
             get
             {

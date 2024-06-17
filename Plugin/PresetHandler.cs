@@ -265,7 +265,6 @@ namespace SAIN.Plugin
             global.Shoot.GlobalScatterMultiplier = 1.5f;
             global.Aiming.AccuracySpreadMultiGlobal = 2f;
             global.Aiming.FasterCQBReactionsGlobal = false;
-            global.General.GlobalDifficultyModifier = 0.65f;
             global.Look.GlobalVisionDistanceMultiplier = 0.66f;
             global.Look.GlobalVisionSpeedModifier = 1.75f;
 
@@ -290,7 +289,6 @@ namespace SAIN.Plugin
             global.Shoot.GlobalScatterMultiplier = 1.2f;
             global.Aiming.AccuracySpreadMultiGlobal = 1.5f;
             global.Aiming.FasterCQBReactionsGlobal = false;
-            global.General.GlobalDifficultyModifier = 0.75f;
             global.Look.GlobalVisionDistanceMultiplier = 0.85f;
             global.Look.GlobalVisionSpeedModifier = 1.25f;
 
@@ -388,7 +386,6 @@ namespace SAIN.Plugin
             global.Shoot.GlobalScatterMultiplier = 0.85f;
             global.Aiming.AccuracySpreadMultiGlobal = 0.8f;
             global.Aiming.AimCenterMassGlobal = false;
-            global.General.GlobalDifficultyModifier = 1.35f;
             global.Look.GlobalVisionDistanceMultiplier = 1.33f;
             global.Look.GlobalVisionSpeedModifier = 0.8f;
 
@@ -413,7 +410,6 @@ namespace SAIN.Plugin
             global.Shoot.GlobalRecoilMultiplier = 0.25f;
             global.Shoot.GlobalScatterMultiplier = 0.01f;
             global.Aiming.AccuracySpreadMultiGlobal = 0.33f;
-            global.General.GlobalDifficultyModifier = 2f;
             global.Look.GlobalVisionDistanceMultiplier = 2f;
             global.Look.GlobalVisionSpeedModifier = 0.65f;
             global.Aiming.AimCenterMassGlobal = false;

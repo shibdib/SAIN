@@ -25,20 +25,17 @@ namespace SAIN.SAINComponent.Classes.Info
         public void Init()
         {
             WeaponInfo.Init();
-            Profile.Init();
         }
 
         public void Update()
         {
             WeaponInfo.Update();
-            Profile.Update();
         }
 
         public void Dispose()
         {
             PresetHandler.OnPresetUpdated -= GetFileSettings;
             WeaponInfo.Dispose();
-            Profile.Dispose();
         }
 
         public ProfileClass Profile { get; private set; }
@@ -142,7 +139,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
             float min = settings.General.HoldGroundMinRandom;
             float max = settings.General.HoldGroundMaxRandom;
-            HoldGroundDelay = 0.6f + baseTime.Randomize(min, max).Round100();
+            HoldGroundDelay = baseTime.Randomize(min, max).Round100();
         }
 
         private float AggressionMultiplier => (FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.General.AggressionMultiplier).Round100();
@@ -277,11 +274,15 @@ namespace SAIN.SAINComponent.Classes.Info
             {
                 case WildSpawnType.bossKilla:
                 case WildSpawnType.bossTagilla:
+                case WildSpawnType.bossKolontay:
                     return EPersonality.Wreckless;
 
                 case WildSpawnType.bossKnight:
-                case WildSpawnType.followerBirdEye:
                 case WildSpawnType.followerBigPipe:
+                    return EPersonality.GigaChad;
+
+                case WildSpawnType.followerBirdEye:
+                case WildSpawnType.bossGluhar:
                     return EPersonality.SnappingTurtle;
 
                 case WildSpawnType.bossKojaniy:
@@ -289,11 +290,8 @@ namespace SAIN.SAINComponent.Classes.Info
 
                 case WildSpawnType.bossBully:
                 case WildSpawnType.bossSanitar:
-                    return EPersonality.Coward;
-
                 case WildSpawnType.bossBoar:
-                case WildSpawnType.bossKolontay:
-                    return EPersonality.SnappingTurtle;
+                    return EPersonality.Coward;
 
                 default:
                     return EPersonality.Normal;
