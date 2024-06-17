@@ -90,7 +90,7 @@ namespace SAIN.Plugin
             return true;
         }
 
-        private static bool DebugExternal => SAINPlugin.EditorDefaults.DebugExternal;
+        private static bool DebugExternal => SAINPlugin.DebugSettings.DebugExternal;
 
         public static bool ResetDecisionsForBot(BotOwner bot)
         {

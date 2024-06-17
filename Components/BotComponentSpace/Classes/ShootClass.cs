@@ -302,19 +302,19 @@ namespace SAIN.SAINComponent.Classes
 
         private Vector3? findCenterMassPoint(SAINEnemy enemy)
         {
-            if (!enemy.IsAI)
+            if (enemy.IsAI)
             {
-                if (BotComponent.Info.Profile.IsPMC &&
-                    !SAINPlugin.LoadedPreset.GlobalSettings.Aiming.HeadShotProtectionPMC)
-                {
-                    return null;
-                }
-                if (SAINPlugin.LoadedPreset.GlobalSettings.Aiming.HeadShotProtection)
-                {
-                    return enemy.CenterMass;
-                }
+                return null;
             }
-            return null;
+            if (!SAINPlugin.LoadedPreset.GlobalSettings.Aiming.AimCenterMassGlobal)
+            {
+                return null;
+            }
+            if (!BotComponent.Info.FileSettings.Aiming.AimCenterMass)
+            {
+                return null;
+            }
+            return enemy.CenterMass;
         }
 
         private Vector3? getEnemyPartToShoot(EnemyInfo enemy)

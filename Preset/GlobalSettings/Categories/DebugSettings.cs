@@ -1,63 +1,69 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
     public class DebugSettings
     {
-        [Name("Debug Mode")]
+        [Name("Global Debug Mode")]
         [Default(false)]
-        [Advanced]
         public bool GlobalDebugMode;
+
+        [Name("Test Bot Sprint Pathfinder")]
+        [Default(false)]
+        public bool ForceBotsToRunAround;
+
+        [Name("Debug External")]
+        [Default(false)]
+        public bool DebugExternal;
 
         [Name("Draw Debug Gizmos")]
         [Default(false)]
-        [Debug]
-        [Advanced]
         public bool DrawDebugGizmos;
 
-        [Name("Draw Current Target Position")]
+        [Name("Draw Debug Labels")]
         [Default(false)]
-        [Debug]
-        [Advanced]
-        public bool DrawTargetPosition = false;
+        public bool DrawDebugLabels;
 
-        [Name("Draw Last Seen and Last Heard Positions")]
+        [Name("Log Aim Calculations")]
         [Default(false)]
-        [Debug]
-        [Advanced]
-        public bool DrawLastSeen = false;
+        public bool DebugAimCalculations = false;
+
+        [Name("Draw Aim Gizmos")]
+        [Default(false)]
+        public bool DebugDrawAimGizmos = false;
 
         [Name("Draw Debug Suppression Points")]
         [Default(false)]
-        [Debug]
-        [Advanced]
+        [Hidden]
         public bool DebugDrawProjectionPoints = false;
 
-        [Name("Path Safety Tester")]
+        [Name("Draw Search Peek Start and End Gizmos")]
         [Default(false)]
-        [Debug]
-        [Advanced]
-        public bool DebugEnablePathTester = false;
+        public bool DebugSearchGizmos = false;
+
+        [Name("Log Hearing Calc Results")]
+        [Default(false)]
+        public bool DebugHearing = false;
+
+        [Default(false)]
+        [Hidden]
+        public bool DebugMovementPlan = false;
 
         [Name("Draw Debug Path Safety Tester")]
         [Default(false)]
-        [Debug]
-        [Advanced]
+        [Hidden]
         public bool DebugDrawSafePaths = false;
 
+        [Name("Path Safety Tester")]
         [Default(false)]
-        [Debug]
-        [Advanced]
-        public bool DebugSearchGizmos = false;
+        [Hidden]
+        public bool DebugEnablePathTester = false;
 
+        [Name("Collect and Export Bot Layer and Brain Info")]
         [Default(false)]
-        [Debug]
-        [Advanced]
-        public bool DebugMovementPlan = false;
-
-        [Default(false)]
-        [Debug]
-        [Advanced]
-        public bool DebugHearing = false;
+        [Hidden]
+        [JsonIgnore]
+        public bool CollectBotLayerBrainInfo = false;
     }
 }

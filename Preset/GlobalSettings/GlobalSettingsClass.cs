@@ -25,9 +25,9 @@ namespace SAIN.Preset.GlobalSettings
 
         public GeneralSettings General = new GeneralSettings();
 
-        [Name("Disable SAIN For Bot Types")]
-        [Description("If a option here is set to ON, they will use vanilla logic.")]
-        public DisableSAINSettings SAINDisabled = new DisableSAINSettings();
+        [Name("Vanilla Bot Behavior Settings")]
+        [Description("If a option here is set to ON, they will use vanilla logic, ALL Features will be disabled for these types, including personality, recoil, difficulty, and behavior.")]
+        public VanillaBotSettings VanillaBots = new VanillaBotSettings();
 
         public PerformanceSettings Performance = new PerformanceSettings();
 
@@ -46,7 +46,8 @@ namespace SAIN.Preset.GlobalSettings
 
         public LookSettings Look = new LookSettings();
 
-        [Name("Looting Bots")]
+        [Name("Looting Bots Integration")]
+        [Description("Modify settings that relate to Looting Bots. Requires Looting Bots to be installed.")]
         public LootingBotsSettings LootingBots = new LootingBotsSettings();
 
         public MindSettings Mind = new MindSettings();
@@ -62,6 +63,8 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("Squad Talk")]
         public SquadTalkSettings SquadTalk = new SquadTalkSettings();
+
+        public DebugSettings Debug = new DebugSettings();
 
         [Name("Power Level Calculation")]
         [Advanced]

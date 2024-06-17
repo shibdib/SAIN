@@ -12,6 +12,7 @@ using SAIN.Patches.Hearing;
 using SAIN.Patches.Vision;
 using SAIN.Plugin;
 using SAIN.Preset;
+using SAIN.Preset.GlobalSettings;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -29,8 +30,9 @@ namespace SAIN
     [BepInIncompatibility("com.dvize.NoGrenadeESP")]
     public class SAINPlugin : BaseUnityPlugin
     {
-        public static bool DebugMode => EditorDefaults.GlobalDebugMode;
-        public static bool DrawDebugGizmos => EditorDefaults.DrawDebugGizmos;
+        public static DebugSettings DebugSettings => LoadedPreset.GlobalSettings.Debug;
+        public static bool DebugMode => DebugSettings.GlobalDebugMode;
+        public static bool DrawDebugGizmos => DebugSettings.DrawDebugGizmos;
         public static PresetEditorDefaults EditorDefaults => PresetHandler.EditorDefaults;
 
         public static SoloDecision ForceSoloDecision = SoloDecision.None;
@@ -141,15 +143,18 @@ namespace SAIN
                 typeof(Patches.Vision.WeatherTimeVisibleDistancePatch),
                 typeof(Patches.Vision.NoAIESPPatch),
                 typeof(Patches.Vision.BotLightTurnOnPatch),
-                typeof(Patches.Vision.VisionSpeedPostPatch),
-                typeof(Patches.Vision.VisionDistancePosePatch),
+                typeof(Patches.Vision.VisionSpeedPatch),
+                typeof(Patches.Vision.VisionDistancePatch),
                 typeof(Patches.Vision.CheckFlashlightPatch),
 
-                typeof(Patches.Shoot.AimTimePatch),
-                typeof(Patches.Shoot.AimOffsetPatch),
+                typeof(Patches.Shoot.AimDataPatches.AimOffsetPatch),
+                typeof(Patches.Shoot.AimDataPatches.AimTimePatch),
+                typeof(Patches.Shoot.AimDataPatches.ScatterPatch),
+
                 typeof(Patches.Shoot.RecoilPatch),
                 typeof(Patches.Shoot.LoseRecoilPatch),
                 typeof(Patches.Shoot.EndRecoilPatch),
+
                 typeof(Patches.Shoot.FullAutoPatch),
                 typeof(Patches.Shoot.SemiAutoPatch),
                 typeof(Patches.Shoot.SemiAutoPatch2),

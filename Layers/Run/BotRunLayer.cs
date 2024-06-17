@@ -24,7 +24,7 @@ namespace SAIN.Layers.Combat.Run
 
         public override bool IsActive()
         {
-            bool active = SAINPlugin.EditorDefaults.ForceBotsToRunAround;
+            bool active = SAINPlugin.DebugSettings.ForceBotsToRunAround;
             if (active)
             {
                 SAINBot.ActiveLayer = ESAINLayer.Run;

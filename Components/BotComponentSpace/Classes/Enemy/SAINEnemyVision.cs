@@ -247,14 +247,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public void CheckVision()
         {
-            if (EnemyParts.CheckLineOfSight(_transform.EyePosition))
+            if (EnemyParts.CheckBodyLineOfSight(_transform.EyePosition))
             {
                 return;
             }
-
+            if (EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition))
+            {
+                return;
+            }
             // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
             if (Enemy.IsCurrentEnemy && !Enemy.IsAI && 
-                EnemyParts.CheckLineOfSight(_transform.EyePosition))
+                EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition))
             {
                 return;
             }
@@ -271,16 +274,56 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             IsYourPlayer = isYourPlayer;
             createPartDatas(bones);
+            _indexMax = Parts.Count;
         }
 
         private bool IsYourPlayer;
 
-        public bool LineOfSight => _lastSuccessTime + 0.1f > Time.time;
+        public bool LineOfSight
+        {
+            get
+            {
+                if (_lastSuccessTime + 0.2f > Time.time)
+                {
+                    return true;
+                }
+                foreach (var part in Parts.Values)
+                {
+                    if (part.LineOfSight)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
 
         private float _lastSuccessTime;
 
-        public bool CheckLineOfSight(Vector3 origin)
+        public bool CheckBodyLineOfSight(Vector3 origin)
         {
+            if (LineOfSight)
+            {
+                return true;
+            }
+
+            SAINEnemyPartData checkingPart = Parts[EBodyPart.Chest];
+            if (checkingPart.CheckLineOfSight(origin))
+            {
+                _lastSuccessTime = Time.time;
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool CheckRandomPartLineOfSight(Vector3 origin)
+        {
+            if (LineOfSight)
+            {
+                return true;
+            }
+
             if (_lastCheckSuccessPart != null)
             {
                 if (_lastCheckSuccessPart.CheckLineOfSight(origin))
@@ -291,7 +334,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 _lastCheckSuccessPart = null;
             }
 
-            SAINEnemyPartData checkingPart = Parts.Values.PickRandom();
+            SAINEnemyPartData checkingPart = getNextPart();
             if (checkingPart.CheckLineOfSight(origin))
             {
                 _lastCheckSuccessPart = checkingPart;
@@ -302,6 +345,28 @@ namespace SAIN.SAINComponent.Classes.Enemy
             _lastSuccessTime = 0f;
             return false;
         }
+
+        private SAINEnemyPartData getNextPart()
+        {
+            SAINEnemyPartData result = null;
+            EBodyPart epart = (EBodyPart)_index;
+            if (!Parts.TryGetValue(epart, out result))
+            {
+                _index = 0;
+                result = Parts[EBodyPart.Chest];
+            }
+
+            _index++;
+            if (_index > _indexMax)
+            {
+                _index = 0;
+            }
+
+            return result;
+        }
+
+        private int _index;
+        private readonly int _indexMax;
 
         private SAINEnemyPartData _lastCheckSuccessPart;
 
@@ -320,7 +385,19 @@ namespace SAIN.SAINComponent.Classes.Enemy
             switch (bodyPart)
             {
                 default:
-                    transform = bones.BifacialTransforms[PlayerBoneType.Body];
+                    transform = bones.BifacialTransforms[PlayerBoneType.Spine];
+                    if (transform == null)
+                    {
+                        Logger.LogError($"Transform Null {PlayerBoneType.Spine}");
+                        transform = bones.BifacialTransforms[PlayerBoneType.Body];
+                        if (transform == null)
+                        {
+                            Logger.LogError($"Transform Null {PlayerBoneType.Body}");
+                        }
+                    }
+
+                    partColliders.Add(bones.BodyPartCollidersDictionary[EBodyPartColliderType.SpineDown]);
+                    partColliders.Add(bones.BodyPartCollidersDictionary[EBodyPartColliderType.SpineTop]);
                     partColliders.Add(bones.BodyPartCollidersDictionary[EBodyPartColliderType.RibcageUp]);
                     partColliders.Add(bones.BodyPartCollidersDictionary[EBodyPartColliderType.RibcageLow]);
                     break;
@@ -367,6 +444,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             BodyPart = bodyPart;
             Transform = transform;
             Colliders = colliders;
+            _indexMax = colliders.Count - 1;
             IsYourPlayer = isYourPlayer;
         }
 
@@ -398,15 +476,39 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float _nextCheckTime;
 
+        private BodyPartCollider getCollider()
+        {
+            if (_lastSuccessPart != null)
+            {
+                return _lastSuccessPart;
+            }
+
+            BodyPartCollider collider = Colliders[_index];
+            _index++;
+            if (_index > _indexMax)
+            {
+                _index = 0;
+            }
+            return collider;
+        }
+
+        private int _index;
+        private readonly int _indexMax;
+
         public bool CheckLineOfSight(Vector3 origin)
         {
+            if (LineOfSight)
+            {
+                return true;
+            }
+
             if (_nextCheckTime > Time.time)
             {
-                return LineOfSight;
+                return false;
             }
             _nextCheckTime = Time.time + 0.1f;
 
-            BodyPartCollider collider = _lastSuccessPart ?? Colliders.PickRandom();
+            BodyPartCollider collider = getCollider();
             Vector3 castPoint = _lastSuccessCastPoint ?? getCastPoint(origin, collider);
 
             Vector3 direction = castPoint - origin;

@@ -144,7 +144,7 @@ namespace SAIN.Editor
                 PresetHandler.OnEditorSettingsChanged?.Invoke();
             }
 
-            if (!PresetHandler.EditorDefaults.GlobalDebugMode)
+            if (!SAINPlugin.DebugMode)
             {
                 return;
             }

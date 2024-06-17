@@ -117,7 +117,7 @@ namespace SAIN.SAINComponent.Classes
                 if (SoundsToRemove.Count > 0)
                 {
                     string debugText = $"Cleaning up {SoundsToRemove.Count} sounds... ";
-                    bool debugOn = SAINPlugin.EditorDefaults.DebugHearing;
+                    bool debugOn = SAINPlugin.DebugSettings.DebugHearing;
 
                     for (int i = 0; i < SoundsToRemove.Count; i++)
                     {

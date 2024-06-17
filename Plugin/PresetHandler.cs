@@ -387,7 +387,7 @@ namespace SAIN.Plugin
             global.Shoot.GlobalRecoilMultiplier = 0.66f;
             global.Shoot.GlobalScatterMultiplier = 0.85f;
             global.Aiming.AccuracySpreadMultiGlobal = 0.8f;
-            global.Aiming.HeadShotProtection = false;
+            global.Aiming.AimCenterMassGlobal = false;
             global.General.GlobalDifficultyModifier = 1.35f;
             global.Look.GlobalVisionDistanceMultiplier = 1.33f;
             global.Look.GlobalVisionSpeedModifier = 0.8f;
@@ -416,7 +416,7 @@ namespace SAIN.Plugin
             global.General.GlobalDifficultyModifier = 2f;
             global.Look.GlobalVisionDistanceMultiplier = 2f;
             global.Look.GlobalVisionSpeedModifier = 0.65f;
-            global.Aiming.HeadShotProtection = false;
+            global.Aiming.AimCenterMassGlobal = false;
             global.Look.NotLookingToggle = false;
 
             foreach (var bot in preset.BotSettings.SAINSettings)

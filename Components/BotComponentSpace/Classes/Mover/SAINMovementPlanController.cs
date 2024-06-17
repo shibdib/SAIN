@@ -105,7 +105,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void DrawDebug()
         {
-            if (SAINPlugin.DebugMode && SAINPlugin.EditorDefaults.DebugMovementPlan)
+            if (SAINPlugin.DebugMode && SAINPlugin.DebugSettings.DebugMovementPlan)
             {
                 for (int i = 0; i < Path.Count - 1; i++)
                 {

@@ -57,7 +57,7 @@ namespace SAIN.Helpers
 
         public static void OnGUI()
         {
-            if (!SAINPlugin.EditorDefaults.DrawDebugLabels)
+            if (!SAINPlugin.DebugSettings.DrawDebugLabels)
             {
                 GUIObjects.Clear();
             }

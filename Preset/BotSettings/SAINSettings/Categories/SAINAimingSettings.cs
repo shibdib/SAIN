@@ -7,11 +7,22 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINAimingSettings
     {
+        [Name("Always Aim Center Mass")]
+        [Description("Force this bot type to aim for center of mass.")]
+        [Default(true)]
+        public bool AimCenterMass = true;
+
         [Name("Distance Aim Time Multiplier")]
         [Description("Multiplies the time a bot takes to aim based on distance. So higher values will cause bots to take longer to aim depending on distance.")]
         [Default(1f)]
         [MinMax(0.1f, 5f, 100f)]
         public float DistanceAimTimeMultiplier = 1f;
+
+        [Name("Angle Aim Time Multiplier")]
+        [Description("Multiplies the time a bot takes to aim based on the angle they have to turn to line up a shot. So higher values will cause bots to take longer to aim depending on the angle to turn.")]
+        [Default(1f)]
+        [MinMax(0.1f, 5f, 100f)]
+        public float AngleAimTimeMultiplier = 1f;
 
         [Name("Faster CQB Reactions")]
         [Description("Sets whether this bot reacts and aims faster before being able to shoot at close ranges")]
@@ -42,18 +53,27 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [MinMax(0.1f, 10f, 10f)]
         public float AccuracySpreadMulti = 1f;
 
-        [NameAndDescription("Aiming Upgrade By Time")]
-        [Default(0.8f)]
-        [MinMax(0.1f, 0.95f, 100f)]
+        [Name("Max Aiming Upgrade By Time")]
+        [Description("Lower = Better. How much to cap this bots aim improvement based on time. 0.25 means they will be able to multiply their aim offset by 0.25x when aiming. Making their shots more accurate")]
+        [Default(0.25f)]
+        [MinMax(0.01f, 0.99f, 100f)]
         [Advanced]
         [CopyValue]
-        public float MAX_AIMING_UPGRADE_BY_TIME = 0.5f;
+        public float MAX_AIMING_UPGRADE_BY_TIME = 0.25f;
 
+        [Name("Distance To Not Scatter Aim")]
+        [Description("If an enemy is closer than this distance, ignore scatter.")]
+        [MinMax(0.0f, 30f, 100f)]
+        [Advanced]
+        public float DIST_TO_SHOOT_NO_OFFSET = 0f;
+
+        [Name("Scatter Multiplier - Moving")]
         [Default(2f)]
         [MinMax(0.1f, 6f, 100f)]
         [Advanced]
         public float COEF_IF_MOVE = 1.5f;
 
+        [Name("Aim Time Multiplier - Moving")]
         [Hidden]
         [JsonIgnore]
         public float TIME_COEF_IF_MOVE = 1.5f;
@@ -95,7 +115,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Default(0.5f)]
         [MinMax(0.1f, 0.99f, 100f)]
         [Advanced]
-        public float BASE_HIT_AFFECTION_DELAY_SEC = 0.77f;
+        public float BASE_HIT_AFFECTION_DELAY_SEC = 0.65f;
 
         [NameAndDescription(
             "Minimum Hit Reaction Angle",
@@ -119,7 +139,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float FIRST_CONTACT_ADD_SEC = 0.3f;
+        public float FIRST_CONTACT_ADD_SEC = 0.2f;
 
         [Hidden]
         [JsonIgnore]

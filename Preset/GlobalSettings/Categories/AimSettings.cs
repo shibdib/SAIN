@@ -4,37 +4,38 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class AimSettings
     {
-        [Name("Headshot Protection")]
-        [Description("Force Bots to aim for center of mass.")]
+        [Name("Always Aim Center Mass Global")]
+        [Description("Force Bots to aim for center of mass. If this is disabled, all bots will have Always Aim Center Mass turned OFF, so their individual settings will be ignored.")]
         [Default(true)]
-        public bool HeadShotProtection = true;
+        public bool AimCenterMassGlobal = true;
 
-        [Name("Headshot Protection for PMCs")]
-        [Description("Force PMCs to aim for center of mass.")]
-        [Default(true)]
-        public bool HeadShotProtectionPMC = true;
+        [Name("Aim Down Sight Aim Time Multiplier")]
+        [Description("If a bot is aiming down sights, their time to aim will be multiplied by this number")]
+        [MinMax(0.01f, 1f, 100f)]
+        [Default(0.8f)]
+        public float AimDownSightsAimTimeMultiplier = 0.8f;
 
         [Description("Lower is more scatter")]
         [Advanced]
-        [MinMax(0.5f, 1f, 1000f)]
+        [MinMax(0.5f, 1f, 100f)]
         [Default(0.8f)]
         public float PoseLevelScatterMulti = 0.8f;
 
         [Description("Lower is more scatter")]
         [Advanced]
-        [MinMax(0.5f, 1f, 1000f)]
+        [MinMax(0.5f, 1f, 100f)]
         [Default(0.7f)]
         public float ProneScatterMulti = 0.7f;
 
         [Description("Lower is more scatter")]
         [Advanced]
-        [MinMax(0.5f, 1f, 1000f)]
+        [MinMax(0.5f, 1f, 100f)]
         [Default(0.75f)]
         public float PartVisScatterMulti = 0.75f;
 
         [Description("Lower is more scatter")]
         [Advanced]
-        [MinMax(1f, 1.5f, 1000f)]
+        [MinMax(1f, 1.5f, 100f)]
         [Default(1.2f)]
         public float OpticFarMulti = 1.2f;
 
@@ -45,7 +46,7 @@ namespace SAIN.Preset.GlobalSettings
 
         [Description("Lower is more scatter")]
         [Advanced]
-        [MinMax(0.5f, 1f, 1000f)]
+        [MinMax(0.5f, 1f, 100f)]
         [Default(0.8f)]
         public float OpticCloseMulti = 0.8f;
 
@@ -56,7 +57,7 @@ namespace SAIN.Preset.GlobalSettings
 
         [Description("Lower is more scatter")]
         [Advanced]
-        [MinMax(0.5f, 1f, 1000f)]
+        [MinMax(0.5f, 1f, 100f)]
         [Default(0.85f)]
         public float RedDotFarMulti = 0.85f;
 
@@ -67,7 +68,7 @@ namespace SAIN.Preset.GlobalSettings
 
         [Description("Lower is more scatter")]
         [Advanced]
-        [MinMax(1f, 1.5f, 1000f)]
+        [MinMax(1f, 1.5f, 100f)]
         [Default(1.15f)]
         public float RedDotCloseMulti = 1.15f;
 
@@ -78,7 +79,7 @@ namespace SAIN.Preset.GlobalSettings
 
         [Description("Lower is more scatter")]
         [Advanced]
-        [MinMax(0.5f, 1f, 1000f)]
+        [MinMax(0.5f, 1f, 100f)]
         [Default(0.75f)]
         public float IronSightFarMulti = 0.7f;
 
@@ -93,10 +94,12 @@ namespace SAIN.Preset.GlobalSettings
         public float IronSightScaleDistanceEnd = 100f;
 
         [Name("Center Mass Point")]
-        [Description("The place where bots will target if headshot protection is on. A value of 0 will be directly on your head, a value of 1 will be directly at the floor below you at your feet.")]
+        [Description("The maximum height that bots will target if Always Aim Center Mass is on. " +
+            "A value of 0 will be directly on the center your head, a value of 1 will be directly at the floor below you at your feet. " +
+            "If their aim target is above this, the height will be adjusted to be where this point is.")]
         [Advanced]
         [Default(0.3125f)]
-        [MinMax(0f, 1f, 1000f)]
+        [MinMax(0f, 1f, 10000f)]
         public float CenterMassVal = 0.3125f;
 
         [Name("Global Accuracy Spread Multiplier")]

@@ -347,7 +347,7 @@ namespace SAIN.SAINComponent.Classes
                     hits++;
                 }
 
-                if (SAINPlugin.EditorDefaults.DebugDrawSafePaths)
+                if (SAINPlugin.DebugSettings.DebugDrawSafePaths)
                 {
                     DebugGizmos.Line(rayOrigin, testPoint, debugColor, 0.025f, true, debugExpireTime, true);
                     DebugGizmos.Sphere(testPoint, 0.05f, Color.green, true, debugExpireTime);

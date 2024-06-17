@@ -257,6 +257,7 @@
     <Compile Include="Components\PlayerComponentSpace\Classes\PlayerAISoundPlayer.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\PlayerLocationClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\ShootPlayerClass.cs" />
+    <Compile Include="Patches\Shoot\AimDataPatches.cs" />
     <Compile Include="Preset\Editor\Attributes\AttributesGUI.cs" />
     <Compile Include="Preset\Editor\Attributes\AttributesInfoClass.cs" />
     <Compile Include="Preset\Editor\Attributes\GUIEntryConfig.cs" />
@@ -328,7 +329,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\DebugSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\NoBushESPSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\LootingBotsSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\DisableSAINSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\VanillaBotSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\PerformanceSettings.cs" />
     <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />

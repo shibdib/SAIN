@@ -84,17 +84,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return 0f;
             }
 
-            float minAngle = 5f;
+            float minAngle = 15f;
             if (angleToEnemy <= minAngle)
             {
-                return 2f;
+                return 1.5f;
             }
 
             float num = maxAngle - minAngle;
             float num2 = angleToEnemy - minAngle;
             float ratio = 1f - num2 / num;
             float min = 0.25f;
-            float max = 2f;
+            float max = 1.5f;
             float result = Mathf.InverseLerp(min, max, ratio);
             return result;
         }

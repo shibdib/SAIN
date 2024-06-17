@@ -250,7 +250,7 @@ namespace SAIN.Patches.Vision
         }
     }
 
-    public class VisionSpeedPostPatch : ModulePatch
+    public class VisionSpeedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -260,7 +260,7 @@ namespace SAIN.Patches.Vision
         [PatchPostfix]
         public static void PatchPostfix(ref float __result, EnemyInfo __instance)
         {
-            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPostPatch)))
+            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPatch)))
             {
                 SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
                 if (enemy != null &&
@@ -274,7 +274,7 @@ namespace SAIN.Patches.Vision
         }
     }
 
-    public class VisionDistancePosePatch : ModulePatch
+    public class VisionDistancePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -284,7 +284,7 @@ namespace SAIN.Patches.Vision
         [PatchPrefix]
         public static void PatchPrefix(ref float addVisibility, EnemyInfo __instance)
         {
-            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPostPatch)))
+            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPatch)))
             {
                 SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
                 if (enemy != null && 
@@ -310,14 +310,15 @@ namespace SAIN.Patches.Vision
         [PatchPostfix]
         public static void PatchPostfix(ref Player ____player)
         {
-            if (____player.gameObject.TryGetComponent<PlayerComponent>(out var component))
+            PlayerComponent playerComponent = GameWorldComponent.Instance?.PlayerTracker.GetPlayerComponent(____player?.ProfileId);
+            if (playerComponent != null)
             {
-                var flashLight = component.Flashlight;
+                var flashLight = playerComponent.Flashlight;
                 flashLight.CheckDevice();
 
                 if (!flashLight.WhiteLight && !flashLight.Laser)
                 {
-                    //_UsingLight.Invoke(____player.AIData, new object[] { false });
+                    _UsingLight.Invoke(____player.AIData, new object[] { false });
                 }
             }
         }

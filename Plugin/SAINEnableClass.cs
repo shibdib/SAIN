@@ -193,6 +193,6 @@ namespace SAIN
             return GetSAIN(player?.AIData?.BotOwner, out sain, patchName);
         }
 
-        private static DisableSAINSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.SAINDisabled;
+        private static VanillaBotSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.VanillaBots;
     }
 }

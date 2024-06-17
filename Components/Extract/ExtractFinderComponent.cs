@@ -59,7 +59,7 @@ namespace SAIN.Components.Extract
 
         public void OnGUI()
         {
-            if (!SAINPlugin.DebugMode || !SAINPlugin.EditorDefaults.DrawDebugLabels)
+            if (!SAINPlugin.DebugMode || !SAINPlugin.DebugSettings.DrawDebugLabels)
             {
                 return;
             }

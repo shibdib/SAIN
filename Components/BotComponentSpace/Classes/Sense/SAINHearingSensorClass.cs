@@ -120,7 +120,7 @@ namespace SAIN.SAINComponent.Classes
             if (target != null && SoundsHeardFromPlayer.ContainsKey(target.ProfileId))
             {
                 var list = SoundsHeardFromPlayer[target.ProfileId].SoundList;
-                if (SAINPlugin.EditorDefaults.DebugHearing)
+                if (SAINPlugin.DebugSettings.DebugHearing)
                 {
                     Logger.LogDebug($"Cleaned up {list.Count} sounds from killed player: {target.Profile?.Nickname}");
                 }
@@ -280,18 +280,7 @@ namespace SAIN.SAINComponent.Classes
 
                 float dot = Vector3.Dot(shotDirectionNormal, botDirectionNormal);
 
-                if (dot >= DotThreshold)
-                {
-                    if (SAINPlugin.EditorDefaults.DebugHearing)
-                    {
-                        Logger.LogInfo($"Got Shot Direction from [{person.Profile?.Nickname}] to [{BotOwner?.name}] : Dot Product Result: [{dot}]");
-
-                        //Vector3 start = person.MainParts[BodyPartType.head].Position;
-                        //DebugGizmos.Ray(start, shotDirectionNormal, Color.red, 3f, 0.05f, true, 3f);
-                        //DebugGizmos.Ray(start, botDirectionNormal, Color.yellow, 3f, 0.05f, true, 3f);
-                    }
-                    return true;
-                }
+                return dot >= DotThreshold;
             }
             return false;
         }
@@ -474,7 +463,7 @@ namespace SAIN.SAINComponent.Classes
 
             float minDispersion = shooterDistance < 10 ? 0f : 0.5f;
             Vector3 randomdirection = getRandomizedDirection(finalDispersion, minDispersion);
-            if (SAINPlugin.EditorDefaults.DebugHearing)
+            if (SAINPlugin.DebugSettings.DebugHearing)
             {
                 Logger.LogDebug($"Dispersion: [{randomdirection.magnitude}] :: Distance: [{shooterDistance}] : Sounds Heard: [{soundCount}] : PreCount Dispersion Num: [{baseDispersion}] : PreRandomized Dispersion Result: [{finalDispersion}] : SoundType: [{soundType}]");
             }
@@ -596,7 +585,7 @@ namespace SAIN.SAINComponent.Classes
                 return false;
             }
 
-            if (SAINPlugin.EditorDefaults.DebugHearing &&
+            if (SAINPlugin.DebugSettings.DebugHearing &&
                 shotNearMe)
             {
                 DebugGizmos.Sphere(projectionPoint, 0.25f, Color.red, true, 60f);
