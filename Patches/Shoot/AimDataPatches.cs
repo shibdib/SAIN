@@ -29,7 +29,7 @@ namespace SAIN.Patches.Shoot.Aim
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref Vector3 ___vector3_5, ref Vector3 ___vector3_4, ref float ___float_13)
         {
-            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            if (!SAINEnableClass.GetSAIN(___botOwner_0, out var bot, nameof(AimOffsetPatch)))
             {
                 return true;
             }
@@ -37,16 +37,9 @@ namespace SAIN.Patches.Shoot.Aim
             float aimUpgradeByTime = ___float_13;
             Vector3 badShootOffset = ___vector3_5;
             Vector3 aimOffset = ___vector3_4;
-            Vector3 recoilOffset = ___botOwner_0.RecoilData.RecoilOffset;
+            Vector3 recoilOffset = bot.Info.WeaponInfo.Recoil.CurrentRecoilOffset;
             Vector3 realTargetPoint = ___botOwner_0.AimingData.RealTargetPoint;
-
             IPlayer person = ___botOwner_0?.Memory?.GoalEnemy?.Person;
-            if (SAINEnableClass.GetSAIN(___botOwner_0, out var bot, nameof(AimOffsetPatch)))
-            {
-                float distance = (realTargetPoint - ___botOwner_0.WeaponRoot.position).magnitude;
-                float scaled = distance / 20f;
-                recoilOffset = bot.Info.WeaponInfo.Recoil.CurrentRecoilOffset * scaled;
-            }
 
             // Applies aiming offset, recoil offset, and scatter offsets
             // Default Setup :: Vector3 finalTarget = __instance.RealTargetPoint + badShootOffset + (AimUpgradeByTime * (AimOffset + ___botOwner_0.RecoilData.RecoilOffset));
@@ -60,12 +53,22 @@ namespace SAIN.Patches.Shoot.Aim
             }
 
             Vector3 result = realTargetPoint + finalOffset;
+
             if (SAINPlugin.LoadedPreset.GlobalSettings.Debug.DebugDrawAimGizmos &&
                 person?.IsYourPlayer == true)
             {
                 Vector3 weaponRoot = ___botOwner_0.WeaponRoot.position;
-                DebugGizmos.Line(weaponRoot, result, Color.red, 0.025f, true, 0.25f, true);
-                DebugGizmos.Line(weaponRoot, realTargetPoint, Color.white, 0.025f, true, 0.25f, true);
+                DebugGizmos.Line(weaponRoot, result, Color.red, 0.02f, true, 0.25f, true);
+                DebugGizmos.Sphere(result, 0.025f, Color.red, true, 10f);
+
+                DebugGizmos.Line(weaponRoot, realTargetPoint, Color.white, 0.02f, true, 0.25f, true);
+                DebugGizmos.Sphere(realTargetPoint, 0.025f, Color.white, true, 10f);
+            }
+            if (SAINPlugin.DebugSettings.DebugDrawRecoilGizmos &&
+                person?.IsYourPlayer == true)
+            {
+                DebugGizmos.Sphere(recoilOffset + realTargetPoint, 0.035f, Color.red, true, 10f);
+                DebugGizmos.Line(recoilOffset + realTargetPoint, realTargetPoint, Color.red, 0.02f, true, 10f, true);
             }
 
             _endTargetPointProp.SetValue(___botOwner_0.AimingData, result);
@@ -321,7 +324,7 @@ namespace SAIN.Patches.Shoot.Aim
         public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref Vector3 ___vector3_2, ref Vector3 ___vector3_0, Vector3 dir)
         {
             ___vector3_2 = dir;
-            ___botOwner_0.Steering.LookToDirection(dir, 250);
+            ___botOwner_0.Steering.LookToDirection(dir, 150);
             ___botOwner_0.Steering.SetYByDir(___vector3_0);
             return false;
         }

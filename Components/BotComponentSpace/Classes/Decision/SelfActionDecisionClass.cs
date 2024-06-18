@@ -338,11 +338,13 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             if (BotOwner.WeaponManager?.Reload?.Reloading == true)
             {
-                if (Bot.Enemy?.IsVisible == true && BotOwner.WeaponManager.Reload.BulletCount > 1)
+                if (Bot.Enemy?.IsVisible == true && BotOwner.WeaponManager.Reload.BulletCount > 3)
                 {
                     TryStopReload();
                     return false;
                 }
+                BotOwner.WeaponManager.Reload.CheckReloadLongTime();
+                _nextCheckReloadTime = Time.time + 0.5f;
                 return true;
             }
 
@@ -352,7 +354,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 _needToReload = checkNeedToReload();
                 if (_needToReload)
                 {
-                    _nextCheckReloadTime = Time.time + 0.5f;
+                    _nextCheckReloadTime = Time.time + 1f;
                 }
             }
             return _needToReload;
@@ -384,6 +386,11 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             var currentMagazine = BotOwner.WeaponManager.CurrentWeapon.GetCurrentMagazine();
             if (currentMagazine != null && currentMagazine.MaxCount == BotOwner.WeaponManager.CurrentWeapon.GetCurrentMagazineCount())
+            {
+                return false;
+            }
+
+            if (!BotOwner.WeaponManager.Reload.CanReload(true))
             {
                 return false;
             }

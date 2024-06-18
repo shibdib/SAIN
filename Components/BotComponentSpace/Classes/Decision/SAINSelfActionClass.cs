@@ -170,6 +170,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             bool result = false;
             try
             {
+
                 result = BotOwner.WeaponManager.Reload.TryReload();
                 if (!result && 
                     checkRefillMags() && 

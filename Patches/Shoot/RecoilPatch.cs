@@ -34,7 +34,7 @@ namespace SAIN.Patches.Shoot.Recoil
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ____owner)
         {
-            return SAINPlugin.IsBotExluded(____owner);
+            return true;
         }
     }
 
@@ -51,24 +51,6 @@ namespace SAIN.Patches.Shoot.Recoil
         [PatchPrefix]
         public static bool PatchPrefix(ref Vector3 ____recoilOffset, BotOwner ____owner)
         {
-            if (SAINPlugin.IsBotExluded(____owner))
-            {
-                return true;
-            }
-            if (SAINPlugin.BotController == null)
-            {
-                Logger.LogError($"Bot Controller Null in [{nameof(LoseRecoilPatch)}]");
-                return true;
-            }
-            if (SAINPlugin.BotController.GetSAIN(____owner, out BotComponent sain))
-            {
-                var recoil = sain?.Info?.WeaponInfo?.Recoil;
-                if (recoil != null)
-                {
-                    ____recoilOffset = recoil.CurrentRecoilOffset;
-                    return false;
-                }
-            }
             return true;
         }
     }
@@ -86,19 +68,6 @@ namespace SAIN.Patches.Shoot.Recoil
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ____owner)
         {
-            if (SAINPlugin.IsBotExluded(____owner))
-            {
-                return true;
-            }
-            if (SAINPlugin.BotController == null)
-            {
-                Logger.LogError($"Bot Controller Null in [{nameof(EndRecoilPatch)}]");
-                return true;
-            }
-            if (SAINPlugin.BotController.GetSAIN(____owner, out BotComponent sain))
-            {
-                return false;
-            }
             return true;
         }
     }

@@ -77,25 +77,25 @@ namespace SAIN
         {
             var patches = new List<Type>() {
                 typeof(Patches.Generic.SetEnvironmentPatch),
-                typeof(Patches.Generic.FixItemTakerPatch),
-                typeof(Patches.Generic.FixItemTakerPatch2),
-                typeof(Patches.Generic.FixPatrolDataPatch),
                 typeof(Patches.Generic.SetPanicPointPatch),
                 typeof(Patches.Generic.AddPointToSearchPatch),
-                typeof(Patches.Generic.HaveSeenEnemyPatch),
-                typeof(Patches.Generic.StopSetToNavMeshPatch),
                 typeof(Patches.Generic.TurnDamnLightOffPatch),
-                typeof(Patches.Generic.RotateClampPatch),
-                typeof(Patches.Generic.GetBotController),
-                typeof(Patches.Generic.GetBotSpawner),
                 typeof(Patches.Generic.GrenadeThrownActionPatch),
                 typeof(Patches.Generic.GrenadeExplosionActionPatch),
-                typeof(Patches.Generic.BotGroupAddEnemyPatch),
-                typeof(Patches.Generic.NoTeleportPatch),
                 typeof(Patches.Generic.ShallKnowEnemyPatch),
                 typeof(Patches.Generic.ShallKnowEnemyLatePatch),
-                typeof(Patches.Generic.BotMemoryAddEnemyPatch),
-                //typeof(Patches.Generic.HealCancelPatch),
+                typeof(Patches.Generic.HaveSeenEnemyPatch),
+
+                //typeof(Patches.Generic.Fixes.HealCancelPatch),
+                typeof(Patches.Generic.Fixes.StopSetToNavMeshPatch),
+                typeof(Patches.Generic.Fixes.FightShallReloadFixPatch),
+                typeof(Patches.Generic.Fixes.BotMemoryAddEnemyPatch),
+                typeof(Patches.Generic.Fixes.BotGroupAddEnemyPatch),
+                typeof(Patches.Generic.Fixes.NoTeleportPatch),
+                typeof(Patches.Generic.Fixes.FixItemTakerPatch),
+                typeof(Patches.Generic.Fixes.FixItemTakerPatch2),
+                typeof(Patches.Generic.Fixes.FixPatrolDataPatch),
+                typeof(Patches.Generic.Fixes.RotateClampPatch),
 
                 typeof(Patches.Movement.EncumberedPatch),
                 typeof(Patches.Movement.DoorOpenerPatch),
@@ -157,6 +157,8 @@ namespace SAIN
 
                 typeof(Patches.Components.AddComponentPatch),
                 typeof(Patches.Components.AddGameWorldPatch),
+                typeof(Patches.Components.GetBotController),
+                typeof(Patches.Components.GetBotSpawner),
             };
 
             // Reflection go brrrrrrrrrrrrrr

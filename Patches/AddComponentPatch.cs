@@ -12,7 +12,7 @@ using SAIN.Components;
 
 namespace SAIN.Patches.Components
 {
-    public class AddComponentPatch : ModulePatch
+    internal class AddComponentPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -40,7 +40,7 @@ namespace SAIN.Patches.Components
         }
     }
 
-    public class AddGameWorldPatch : ModulePatch
+    internal class AddGameWorldPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -57,6 +57,42 @@ namespace SAIN.Patches.Components
             catch (Exception ex)
             {
                 Logger.LogError($" SAIN Init Gameworld Error: {ex}");
+            }
+        }
+    }
+
+    internal class GetBotController : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotsController), "method_0");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(BotsController __instance)
+        {
+            var controller = SAINPlugin.BotController;
+            if (controller != null && controller.DefaultController == null)
+            {
+                controller.DefaultController = __instance;
+            }
+        }
+    }
+
+    internal class GetBotSpawner : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotSpawner), "AddPlayer");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(BotSpawner __instance)
+        {
+            var controller = SAINPlugin.BotController;
+            if (controller != null && controller.BotSpawner == null)
+            {
+                controller.BotSpawner = __instance;
             }
         }
     }

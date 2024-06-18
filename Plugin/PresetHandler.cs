@@ -261,7 +261,7 @@ namespace SAIN.Plugin
             var preset = new SAINPresetClass(SAINDifficulty.easy);
 
             var global = preset.GlobalSettings;
-            global.Shoot.GlobalRecoilMultiplier = 2.0f;
+            global.Shoot.RecoilMultiplier = 2.0f;
             global.Shoot.GlobalScatterMultiplier = 1.5f;
             global.Aiming.AccuracySpreadMultiGlobal = 2f;
             global.Aiming.FasterCQBReactionsGlobal = false;
@@ -285,7 +285,7 @@ namespace SAIN.Plugin
             var preset = new SAINPresetClass(SAINDifficulty.lesshard);
 
             var global = preset.GlobalSettings;
-            global.Shoot.GlobalRecoilMultiplier = 1.6f;
+            global.Shoot.RecoilMultiplier = 1.6f;
             global.Shoot.GlobalScatterMultiplier = 1.2f;
             global.Aiming.AccuracySpreadMultiGlobal = 1.5f;
             global.Aiming.FasterCQBReactionsGlobal = false;
@@ -382,7 +382,7 @@ namespace SAIN.Plugin
             var preset = new SAINPresetClass(SAINDifficulty.veryhard);
 
             var global = preset.GlobalSettings;
-            global.Shoot.GlobalRecoilMultiplier = 0.66f;
+            global.Shoot.RecoilMultiplier = 0.66f;
             global.Shoot.GlobalScatterMultiplier = 0.85f;
             global.Aiming.AccuracySpreadMultiGlobal = 0.8f;
             global.Aiming.AimCenterMassGlobal = false;
@@ -407,7 +407,7 @@ namespace SAIN.Plugin
             var preset = new SAINPresetClass(SAINDifficulty.deathwish);
 
             var global = preset.GlobalSettings;
-            global.Shoot.GlobalRecoilMultiplier = 0.25f;
+            global.Shoot.RecoilMultiplier = 0.25f;
             global.Shoot.GlobalScatterMultiplier = 0.01f;
             global.Aiming.AccuracySpreadMultiGlobal = 0.33f;
             global.Look.GlobalVisionDistanceMultiplier = 2f;

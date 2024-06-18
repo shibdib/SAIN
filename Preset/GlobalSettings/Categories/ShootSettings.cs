@@ -6,38 +6,38 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class ShootSettings
     {
-        [Name("Global EFT Scatter Multiplier")]
+        [Name("Global Scatter Multiplier")]
         [Description("Higher = more scattering. Modifies EFT's default scatter feature. 1.5 = 1.5x more scatter")]
         [Default(1f)]
         [MinMax(0.01f, 10f, 100f)]
         public float GlobalScatterMultiplier = 1f;
 
-        [Name("Global SAIN Recoil Scatter Multiplier")]
-        [Description("Higher = more recoil. Modifies SAIN's new recoil scatter feature. 1.5 = 1.5x more scatter from recoil")]
+        [Name("Global Recoil Multiplier")]
+        [Description("Higher = more recoil. Modifies SAIN's recoil scatter feature. 1.5 = 1.5x more recoilfrom a single gunshot")]
         [Default(1f)]
-        [MinMax(0.1f, 5f, 100f)]
-        public float GlobalRecoilMultiplier = 1f;
-
-        [Name("Max Recoil Per Shot")]
-        [Description("Maximum Impulse force from a single shot for a bot.")]
-        [Default(2f)]
-        [MinMax(0.1f, 10f, 100f)]
-        [Advanced]
-        public float MaxRecoil = 2f;
+        [MinMax(0.01f, 3f, 100f)]
+        public float RecoilMultiplier = 1f;
 
         [Name("Add or Subtract Recoil")]
         [Description("Linearly add or subtract from the final recoil result")]
-        [Default(-1f)]
-        [MinMax(-10f, 10f, 100f)]
+        [Default(5f)]
+        [MinMax(-20f, 20f, 100f)]
         [Advanced]
-        public float AddRecoil = -1f;
+        public float AddRecoil = 5f;
 
-        [Name("Recoil Decay p/frame")]
-        [Description("How much to decay the recoil impulse per frame. 0.75 means 25% of the recoil will be removed per frame.")]
-        [Default(0.5f)]
-        [Percentage01to99]
+        [Name("Recoil Decay Coefficient")]
+        [Description("Controls the speed that bots will recover from a weapon's recoil. Higher = faster decay")]
+        [Default(1)]
+        [MinMax(0.01f, 5f, 100f)]
         [Advanced]
-        public float RecoilDecay = 0.5f;
+        public float RecoilDecayCoef = 1;
+
+        [Name("Recoil Barrel Rise Coefficient")]
+        [Description("Controls the speed that a bot's weapon will rise after a shot occurs.  Higher = faster application")]
+        [Default(8)]
+        [MinMax(0.01f, 20f, 100f)]
+        [Advanced]
+        public float RecoilRiseCoef = 8;
 
         [Name("Ammo Shootability" )]
         [Description(

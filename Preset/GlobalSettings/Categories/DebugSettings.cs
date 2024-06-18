@@ -25,6 +25,14 @@ namespace SAIN.Preset.GlobalSettings
         [Default(false)]
         public bool DrawDebugLabels;
 
+        [Name("Log Recoil Calculations")]
+        [Default(false)]
+        public bool DebugRecoilCalculations = false;
+
+        [Name("Draw Recoil Gizmos")]
+        [Default(false)]
+        public bool DebugDrawRecoilGizmos = false;
+
         [Name("Log Aim Calculations")]
         [Default(false)]
         public bool DebugAimCalculations = false;
@@ -48,16 +56,19 @@ namespace SAIN.Preset.GlobalSettings
 
         [Default(false)]
         [Hidden]
+        [JsonIgnore]
         public bool DebugMovementPlan = false;
 
         [Name("Draw Debug Path Safety Tester")]
         [Default(false)]
         [Hidden]
+        [JsonIgnore]
         public bool DebugDrawSafePaths = false;
 
         [Name("Path Safety Tester")]
         [Default(false)]
         [Hidden]
+        [JsonIgnore]
         public bool DebugEnablePathTester = false;
 
         [Name("Collect and Export Bot Layer and Brain Info")]
