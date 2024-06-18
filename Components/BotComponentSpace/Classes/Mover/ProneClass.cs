@@ -1,6 +1,7 @@
 ﻿using EFT;
 using HarmonyLib;
 using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Reflection;
 using UnityEngine;
@@ -39,31 +40,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             _isProneProperty.SetValue(BotLay, value);
         }
 
-        public bool ShallProne(CoverPoint point, bool withShoot)
-        {
-            var status = point.Status;
-            if (status == CoverStatus.FarFromCover || status == CoverStatus.None)
-            {
-                if (Player.MovementContext.CanProne)
-                {
-                    var enemy = Bot.Enemy;
-                    if (enemy != null)
-                    {
-                        float distance = (enemy.EnemyPosition - Bot.Transform.Position).magnitude;
-                        if (distance > 20f)
-                        {
-                            if (withShoot)
-                            {
-                                return CanShootFromProne(enemy.EnemyPosition);
-                            }
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
         public bool ShallProne(bool withShoot, float mindist = 25f)
         {
             if (Player.MovementContext.CanProne)
@@ -87,27 +63,65 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool ShallProneHide(float mindist = 10f)
         {
-            if (Player.MovementContext.CanProne)
+            if (_nextChangeProneTime > Time.time)
             {
-                Vector3? targetPos = Bot.CurrentTargetPosition;
-                if (targetPos != null)
-                {
-                    float distance = (targetPos.Value - Bot.Transform.Position).magnitude;
-                    if (distance > mindist)
-                    {
-                        if (Bot.Decision.CurrentSelfDecision == SelfDecision.None && !Bot.Suppression.IsHeavySuppressed)
-                        {
-                            return !CanShootFromProne(targetPos.Value);
-                        }
-                        else
-                        {
-                            return true;
-                        }
-                    }
-                }
+                return Player.IsInPronePose;
             }
-            return false;
+
+            if (!Player.MovementContext.CanProne)
+            {
+                return false;
+            }
+
+            SAINEnemy enemy = Bot.Enemy;
+            if (enemy == null)
+            {
+                return false;
+            }
+
+            Vector3? lastKnownPos = enemy.LastKnownPosition;
+            if (lastKnownPos == null)
+            {
+                return false;
+            }
+            if (Bot.CurrentTargetDistance < mindist)
+            {
+                return false;
+            }
+
+            bool isUnderDuress = Bot.Decision.CurrentSelfDecision != SelfDecision.None || Bot.Suppression.IsHeavySuppressed;
+            bool shallProne = isUnderDuress || !checkShootProne(lastKnownPos.Value, enemy);
+            if (shallProne)
+            {
+                _nextChangeProneTime = Time.time + 3f;
+            }
+            return shallProne;
         }
+
+        private float _nextChangeProneTime;
+
+        private bool checkShootProne(Vector3? lastKnownPos, SAINEnemy enemy)
+        {
+            if (_nextCheckShootTime > Time.time)
+            {
+                return _canshoot;
+            }
+            _nextCheckShootTime = Time.time + 0.5f;
+
+            var blindCorner = enemy.Path.BlindCornerToEnemy;
+            if (blindCorner != null)
+            {
+                _canshoot = CanShootFromProne(blindCorner.Value);
+            }
+            else
+            {
+                _canshoot = CanShootFromProne(lastKnownPos.Value);
+            }
+            return _canshoot;
+        }
+
+        private bool _canshoot;
+        private float _nextCheckShootTime;
 
         public bool ShallGetUp(float mindist = 30f)
         {

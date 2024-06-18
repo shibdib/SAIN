@@ -14,7 +14,6 @@ namespace SAIN.SAINComponent.Classes.Decision
         private static readonly float StartFirstAid_Injury_SeenRecentTime = 12f;
         private static readonly float StartFirstAid_HeavyInjury_SeenRecentTime = 8f;
         private static readonly float StartFirstAid_FatalInjury_SeenRecentTime = 5f;
-        private static readonly float StartReload_LowAmmo_SeenRecentTime = 5f;
 
         public void Init()
         {
@@ -528,18 +527,32 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             get
             {
-                try
+                if (_nextGetRatioTime < Time.time)
                 {
-                    int currentAmmo = BotOwner.WeaponManager.Reload.BulletCount;
-                    int maxAmmo = BotOwner.WeaponManager.Reload.MaxBulletCount;
-                    return (float)currentAmmo / maxAmmo;
+                    _nextGetRatioTime = Time.time + 0.1f;
+                    _ammoRatio = getAmmoRatio();
                 }
-                catch
-                {
-                    // I HATE THIS STUPID BUG
-                }
-                return 1f;
+                return _ammoRatio;
             }
         }
+
+        private float getAmmoRatio()
+        {
+            float ratio = _ammoRatio; 
+            try
+            {
+                int currentAmmo = BotOwner.WeaponManager.Reload.BulletCount;
+                int maxAmmo = BotOwner.WeaponManager.Reload.MaxBulletCount;
+                ratio = (float)currentAmmo / maxAmmo;
+            }
+            catch
+            {
+                // I HATE THIS STUPID BUG
+            }
+            return ratio;
+        }
+
+        private float _ammoRatio;
+        private float _nextGetRatioTime;
     }
 }

@@ -14,6 +14,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
     public class ColliderFinder
     {
+        static ColliderFinder()
+        {
+            _orientation = Quaternion.identity;
+        }
+
         public ColliderFinder(CoverFinderComponent component)
         {
             CoverFinderComponent = component;
@@ -22,7 +27,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private CoverFinderComponent CoverFinderComponent;
         private Vector3 OriginPoint => CoverFinderComponent.OriginPoint;
 
-        public IEnumerator GetNewColliders(Collider[] array, int iterationMax = 10, float startBoxWidth = 2f, int hitThreshold = 50)
+        public IEnumerator GetNewColliders(Collider[] array, int iterationMax = 10, float startBoxWidth = 2f, int hitThreshold = 100)
         {
             const float StartBoxHeight = 0.25f;
             const float HeightIncreasePerIncrement = 0.5f;
@@ -30,7 +35,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             const float LengthIncreasePerIncrement = 2f;
 
             clearColliders(array);
-            destroyDebug();
+            //destroyDebug();
 
             float boxLength = startBoxWidth;
             float boxHeight = StartBoxHeight;
@@ -40,7 +45,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             int hits = 0;
             int totalIterations = 0;
             bool foundEnough = false;
-            for (int l = 0; l < _layersToCheck.Count; l++)
+            int layerCount = _layersToCheck.Count;
+            for (int l = 0; l < layerCount; l++)
             {
                 var layer = _layersToCheck[l];
 
@@ -64,7 +70,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     if (_nextLogTime < Time.time)
                     {
                         _nextLogTime = Time.time + 1f;
-                        //Logger.LogInfo($"Found enough colliders in Layer: [{layer.MaskToString()}] after [{totalIterations}] total iterations");
+                        Logger.LogInfo($"Found enough colliders in Layer: [{layer.MaskToString()}] after [{totalIterations}] total iterations");
                     }
                     break;
                 }
@@ -76,9 +82,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private static float _nextLogTime;
 
         private static List<LayerMask> _layersToCheck = new List<LayerMask>() 
-        { 
-            LayerMaskClass.HighPolyCollider,
-            LayerMaskClass.TerrainLayer,
+        {
+            //LayerMaskClass.HighPolyCollider,
+            //LayerMaskClass.TerrainLayer,
             LayerMaskClass.HighPolyWithTerrainMask, 
             LayerMaskClass.LowPolyColliderLayerMask,
         };
@@ -90,7 +96,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return FilterColliders(array, rawHits);
         }
 
-        private Quaternion _orientation => Quaternion.identity;
+        private static Quaternion _orientation;
 
         private void destroyDebug()
         {
@@ -125,22 +131,21 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private int FilterColliders(Collider[] array, int hits)
         {
             float minHeight = CoverFinderComponent.CoverMinHeight;
-            const float minX = 0.2f;
-            const float minZ = 0.2f;
             float minY = CoverFinderComponent.CoverMinHeight;
+            const float minX = 0.25f;
+            const float minZ = 0.25f;
 
             int hitReduction = 0;
             for (int i = 0; i < hits; i++)
             {
                 Vector3 size = array[i].bounds.size;
-                if (size.y < minY
-                        || (size.x < minX && size.z < minZ))
+                if (size.y < minY || (size.x < minX && size.z < minZ))
                 {
                     array[i] = null;
                     hitReduction++;
                 }
             }
-            UpdateDebugColliders(array);
+            //UpdateDebugColliders(array);
             return hits - hitReduction;
         }
 

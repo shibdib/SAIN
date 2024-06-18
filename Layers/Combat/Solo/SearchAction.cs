@@ -34,17 +34,17 @@ namespace SAIN.Layers.Combat.Solo
         {
             // Scavs will speak out and be more vocal
             if (!HaveTalked &&
-                SAINBot.Info.Profile.IsScav &&
+                Bot.Info.Profile.IsScav &&
                 (BotOwner.Position - TargetPosition).sqrMagnitude < 50f * 50f)
             {
                 HaveTalked = true;
                 if (EFTMath.RandomBool(60))
                 {
-                    SAINBot.Talk.Say(EPhraseTrigger.OnMutter, ETagStatus.Aware, true);
+                    Bot.Talk.Say(EPhraseTrigger.OnMutter, ETagStatus.Aware, true);
                 }
             }
 
-            bool isBeingStealthy = SAINBot.Enemy?.EnemyHeardFromPeace == true;
+            bool isBeingStealthy = Bot.Enemy?.EnemyHeardFromPeace == true;
             if (isBeingStealthy)
             {
                 SprintEnabled = false;
@@ -67,19 +67,19 @@ namespace SAIN.Layers.Combat.Solo
 
         private void CheckWeapon()
         {
-            if (SAINBot.Enemy != null && SAINBot.Enemy.TimeSinceLastKnownUpdated > 10f)
+            if (Bot.Enemy != null && Bot.Enemy.TimeSinceLastKnownUpdated > 10f)
             {
-                if (ReloadTimer < Time.time && SAINBot.Decision.SelfActionDecisions.LowOnAmmo(0.7f))
+                if (ReloadTimer < Time.time && Bot.Decision.SelfActionDecisions.LowOnAmmo(0.7f))
                 {
                     ReloadTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
-                    SAINBot.SelfActions.TryReload();
+                    Bot.SelfActions.TryReload();
                 }
                 else if (CheckMagTimer < Time.time && NextCheckTimer < Time.time)
                 {
                     NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
                     if (EFTMath.RandomBool())
                     {
-                        SAINBot.Player.HandsController.FirearmsAnimator.CheckAmmo();
+                        Bot.Player.HandsController.FirearmsAnimator.CheckAmmo();
                         CheckMagTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
                     }
                 }
@@ -88,7 +88,7 @@ namespace SAIN.Layers.Combat.Solo
                     NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
                     if (EFTMath.RandomBool())
                     {
-                        SAINBot.Player.HandsController.FirearmsAnimator.CheckChamber();
+                        Bot.Player.HandsController.FirearmsAnimator.CheckChamber();
                         CheckChamberTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
                     }
                 }
@@ -97,7 +97,7 @@ namespace SAIN.Layers.Combat.Solo
 
         private bool HaveTalked = false;
 
-        private SAINSearchClass Search => SAINBot.Search;
+        private SAINSearchClass Search => Bot.Search;
 
         private void CheckShouldSprint()
         {
@@ -107,24 +107,24 @@ namespace SAIN.Layers.Combat.Solo
                 return;
             }
 
-            if (SAINBot.Enemy?.IsVisible == true || SAINBot.Enemy?.InLineOfSight == true)
+            if (Bot.Enemy?.IsVisible == true || Bot.Enemy?.InLineOfSight == true)
             {
                 SprintEnabled = false;
                 return;
             }
 
-            if (SAINBot.Decision.CurrentSquadDecision == SquadDecision.Help)
+            if (Bot.Decision.CurrentSquadDecision == SquadDecision.Help)
             {
                 SprintEnabled = true;
                 return;
             }
 
-            var persSettings = SAINBot.Info.PersonalitySettings;
+            var persSettings = Bot.Info.PersonalitySettings;
             float chance = persSettings.Search.SprintWhileSearchChance;
             if (RandomSprintTimer < Time.time && chance > 0)
             {
-                float myPower = SAINBot.Info.PowerLevel;
-                if (SAINBot.Enemy?.EnemyPlayer != null && SAINBot.Enemy.EnemyPlayer.AIData.PowerOfEquipment < myPower * 0.5f)
+                float myPower = Bot.Info.PowerLevel;
+                if (Bot.Enemy?.EnemyPlayer != null && Bot.Enemy.EnemyPlayer.AIData.PowerOfEquipment < myPower * 0.5f)
                 {
                     chance = 100f;
                 }
@@ -149,7 +149,7 @@ namespace SAIN.Layers.Combat.Solo
         private void Steer()
         {
             if (!SteerByPriority(false)
-                && !SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy))
+                && !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy))
             {
                 LookToMovingDirection();
             }
@@ -169,7 +169,7 @@ namespace SAIN.Layers.Combat.Solo
             {
                 LookPoint = Vector3.zero;
                 CheckSeeTimer = Time.time + 0.5f;
-                var headPosition = SAINBot.Transform.HeadPosition;
+                var headPosition = Bot.Transform.HeadPosition;
 
                 var canSeePoint = !Vector.Raycast(headPosition,
                     Search.SearchMovePoint.DangerPoint,
@@ -204,9 +204,9 @@ namespace SAIN.Layers.Combat.Solo
         private Vector3 LookPoint;
         private float CheckSeeTimer;
 
-        private bool SteerByPriority(bool value) => SAINBot.Steering.SteerByPriority(value);
+        private bool SteerByPriority(bool value) => Bot.Steering.SteerByPriority(value);
 
-        private void LookToMovingDirection() => SAINBot.Steering.LookToMovingDirection();
+        private void LookToMovingDirection() => Bot.Steering.LookToMovingDirection();
 
         public NavMeshPath Path = new NavMeshPath();
     }

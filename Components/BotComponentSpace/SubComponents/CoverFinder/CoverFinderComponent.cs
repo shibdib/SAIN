@@ -284,20 +284,25 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             while (true)
             {
                 ClearSpotted();
-
                 _tempRecheckList.AddRange(CoverPoints);
-                yield return recheckCoverPoints(_tempRecheckList, false);
-                //yield return checkPathSafety(_tempRecheckList);
-
-                CoverPoints.RemoveAll(x => x.IsBad);
-                _tempRecheckList.Clear();
-
-                yield return null;
-
-                OrderPointsByPathDist(CoverPoints, Bot);
-
+                yield return StartCoroutine(recheckCoverPoints(_tempRecheckList, false));
+                yield return StartCoroutine(finishRechecking(_tempRecheckList));
                 yield return wait;
             }
+        }
+
+        private IEnumerator finishRechecking(List<CoverPoint> list)
+        {
+            foreach (var point in list)
+            {
+                if (point == null || point.IsBad)
+                {
+                    CoverPoints.Remove(point);
+                }
+            }
+            list.Clear();
+            OrderPointsByPathDist(CoverPoints);
+            yield return null;
         }
 
         private bool needToFindCover(int coverCount, out int max)
@@ -322,59 +327,17 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 {
                     CurrentStatus = CoverFinderStatus.SearchingColliders;
                     _lastPositionChecked = OriginPoint;
+                    bool debug = DebugCoverFinder;
 
-                    Stopwatch fullStopWatch = Stopwatch.StartNew();
-                    Stopwatch findFirstPointStopWatch = coverCount == 0 && SAINPlugin.DebugMode ? Stopwatch.StartNew() : null;
+                    Stopwatch fullStopWatch = debug ? Stopwatch.StartNew() : null;
+                    Stopwatch findFirstPointStopWatch = coverCount == 0 && debug ? Stopwatch.StartNew() : null;
 
                     Collider[] colliders = _colliderArray;
-                    yield return ColliderFinder.GetNewColliders(colliders);
+                    yield return StartCoroutine(ColliderFinder.GetNewColliders(colliders));
                     ColliderFinder.SortArrayBotDist(colliders);
+                    yield return StartCoroutine(findCoverPoints(colliders, ColliderFinder.HitCount, max, findFirstPointStopWatch));
 
-                    int hits = ColliderFinder.HitCount;
-
-                    yield return findCoverPoints(colliders, ColliderFinder.HitCount, max, findFirstPointStopWatch);
-
-                    coverCount = CoverPoints.Count;
-
-                    if (coverCount > 0)
-                    {
-                        //yield return checkPathSafety(CoverPoints);
-                    }
-
-                    if (coverCount > 1)
-                    {
-                        OrderPointsByPathDist(CoverPoints, Bot);
-                    }
-
-                    if (coverCount > 0)
-                    {
-                        FallBackPoint = FindFallbackPoint(CoverPoints);
-                        if (_debugLogTimer < Time.time && DebugCoverFinder)
-                        {
-                            _debugLogTimer = Time.time + 1f;
-                            Logger.LogInfo($"[{BotOwner.name}] - Found [{coverCount}] CoverPoints. Colliders checked: [{_totalChecked}] Collider Array Size = [{ColliderFinder.HitCount}]");
-                        }
-                    }
-                    else
-                    {
-                        FallBackPoint = null;
-                        if (_debugLogTimer < Time.time && DebugCoverFinder)
-                        {
-                            _debugLogTimer = Time.time + 1f;
-                            Logger.LogWarning($"[{BotOwner.name}] - No Cover Found! Valid Colliders checked: [{_totalChecked}] Collider Array Size = [{ColliderFinder.HitCount}]");
-                        }
-                    }
-                    if (findFirstPointStopWatch?.IsRunning == true)
-                    {
-                        findFirstPointStopWatch.Stop();
-                    }
-
-                    fullStopWatch.Stop();
-                    if (_debugTimer2 < Time.time && SAINPlugin.DebugMode)
-                    {
-                        _debugTimer2 = Time.time + 5;
-                        Logger.LogAndNotifyDebug($"Time to Complete Coverfinder Loop: [{fullStopWatch.ElapsedMilliseconds}ms]");
-                    }
+                    logAndFinish(debug, findFirstPointStopWatch, fullStopWatch);
                 }
 
                 CurrentStatus = CoverFinderStatus.None;
@@ -382,59 +345,63 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
         }
 
+        private void logAndFinish(bool debug, Stopwatch a, Stopwatch b)
+        {
+            int coverCount = CoverPoints.Count;
+            if (coverCount > 1)
+            {
+                OrderPointsByPathDist(CoverPoints);
+            }
+            if (coverCount > 0)
+            {
+                FallBackPoint = FindFallbackPoint(CoverPoints);
+                if (_debugLogTimer < Time.time && debug)
+                {
+                    _debugLogTimer = Time.time + 1f;
+                    Logger.LogInfo($"[{BotOwner.name}] - Found [{coverCount}] CoverPoints. Colliders checked: [{_totalChecked}] Collider Array Size = [{ColliderFinder.HitCount}]");
+                }
+            }
+            else
+            {
+                FallBackPoint = null;
+                if (_debugLogTimer < Time.time && debug)
+                {
+                    _debugLogTimer = Time.time + 1f;
+                    Logger.LogWarning($"[{BotOwner.name}] - No Cover Found! Valid Colliders checked: [{_totalChecked}] Collider Array Size = [{ColliderFinder.HitCount}]");
+                }
+            }
+
+            if (a?.IsRunning == true)
+            {
+                a.Stop();
+            }
+            b?.Stop();
+            if (_debugTimer2 < Time.time && debug)
+            {
+                _debugTimer2 = Time.time + 5;
+                Logger.LogAndNotifyDebug($"Time to Complete Coverfinder Loop: [{b.ElapsedMilliseconds}ms]");
+            }
+        }
+
         private IEnumerator findCoverPoints(Collider[] colliders, int hits, int max, Stopwatch debugStopWatch)
         {
             _totalChecked = 0;
             int waitCount = 0;
+            int coverCount = CoverPoints.Count;
+
             for (int i = 0; i < hits; i++)
             {
+                if (coverCount >= max)
+                {
+                    break;
+                }
+
                 Collider collider = colliders[i];
                 if (collider == null)
                 {
                     continue;
                 }
 
-                _totalChecked++;
-
-                waitCount++;
-
-                bool failed = false;
-                ECoverFailReason failReason = ECoverFailReason.None;
-                CoverPoint newPoint = null;
-
-                if (!failed &&
-                    filterColliderByName(collider))
-                {
-                    failed = true;
-                    failReason = ECoverFailReason.ExcludedName;
-                }
-
-                if (!failed &&
-                    colliderAlreadyUsed(collider))
-                {
-                    failed = true;
-                    failReason = ECoverFailReason.ColliderUsed;
-                }
-
-                // The main Calculations
-                if (!failed &&
-                    !CoverAnalyzer.CheckCollider(collider, out newPoint, out failReason))
-                {
-                    failed = true;
-                }
-
-                if (!failed &&
-                    newPoint != null)
-                {
-                    CoverPoints.Add(newPoint);
-                }
-
-                int coverCount = CoverPoints.Count;
-
-                if (coverCount >= max)
-                {
-                    break;
-                }
                 // Main Optimization, scales with the amount of points a bot currently has, and slows down the rate as it grows.
                 if (coverCount > 2)
                 {
@@ -443,15 +410,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 else if (coverCount > 0)
                 {
                     // How long did it take to find at least 1 point?
-                    if (debugStopWatch?.IsRunning == true)
-                    {
-                        debugStopWatch.Stop();
-                        if (_debugTimer < Time.time)
-                        {
-                            _debugTimer = Time.time + 5;
-                            Logger.LogAndNotifyDebug($"Time to Find First CoverPoint: [{debugStopWatch.ElapsedMilliseconds}ms]");
-                        }
-                    }
+                    endStopWatch(debugStopWatch);
+
                     if (waitCount >= 3 || shallLimitProcessing())
                     {
                         waitCount = 0;
@@ -463,10 +423,42 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     waitCount = 0;
                     yield return null;
                 }
+
+                _totalChecked++;
+
+                if (filterColliderByName(collider))
+                {
+                    continue;
+                }
+                if (colliderAlreadyUsed(collider))
+                {
+                    continue;
+                }
+                // The main Calculations
+                if (CoverAnalyzer.CheckCollider(collider, out CoverPoint newPoint, out _))
+                {
+                    CoverPoints.Add(newPoint);
+                    coverCount++;
+                }
+
+                waitCount++;
             }
         }
 
-        public static void OrderPointsByPathDist(List<CoverPoint> points, BotComponent sain)
+        private void endStopWatch(Stopwatch debugStopWatch)
+        {
+            if (debugStopWatch?.IsRunning == true)
+            {
+                debugStopWatch.Stop();
+                if (_debugTimer < Time.time)
+                {
+                    _debugTimer = Time.time + 5;
+                    Logger.LogAndNotifyDebug($"Time to Find First CoverPoint: [{debugStopWatch.ElapsedMilliseconds}ms]");
+                }
+            }
+        }
+
+        public static void OrderPointsByPathDist(List<CoverPoint> points)
         {
             points.Sort((x, y) => x.RoundedPathLength.CompareTo(y.RoundedPathLength));
         }
@@ -577,7 +569,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private float _sampleOriginTime;
         private Vector3 _origin;
         private float _sampleTargetTime;
-        private readonly Collider[] _colliderArray = new Collider[250];
+        private readonly Collider[] _colliderArray = new Collider[300];
         private string ProfileId;
         private int _targetCount;
         private float _nextUpdateTargetTime;

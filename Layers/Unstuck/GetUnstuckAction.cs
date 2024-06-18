@@ -21,19 +21,19 @@ namespace SAIN.Layers.Combat.Run
 
         public override void Update()
         {
-            SAINBot.Mover.SetTargetPose(1f);
-            SAINBot.Mover.SetTargetMoveSpeed(1f);
-            SAINBot.Steering.LookToMovingDirection();
+            Bot.Mover.SetTargetPose(1f);
+            Bot.Mover.SetTargetMoveSpeed(1f);
+            Bot.Steering.LookToMovingDirection();
 
             Vector3? unstuckDestination = null;
-            var coverPoints = SAINBot.Cover.CoverPoints;
+            var coverPoints = Bot.Cover.CoverPoints;
             if (coverPoints.Count > 0)
             {
                 for (int i = 0; i < coverPoints.Count; i++)
                 {
                     var cover = coverPoints[i];
                     NavMeshPath path = new NavMeshPath();
-                    if (NavMesh.CalculatePath(cover.Position, SAINBot.Position, -1, path))
+                    if (NavMesh.CalculatePath(cover.Position, Bot.Position, -1, path))
                     {
                         unstuckDestination = new Vector3?(path.corners[path.corners.Length - 1]);
                         break;
@@ -43,13 +43,13 @@ namespace SAIN.Layers.Combat.Run
 
             if (unstuckDestination != null)
             {
-                BotOwner.Mover.GoToByWay(new Vector3[] { SAINBot.Position, unstuckDestination.Value }, -1f);
+                BotOwner.Mover.GoToByWay(new Vector3[] { Bot.Position, unstuckDestination.Value }, -1f);
             }
         }
 
         public override void Start()
         {
-            SAINBot.Mover.StopMove();
+            Bot.Mover.StopMove();
         }
 
         public override void Stop()

@@ -212,8 +212,6 @@ namespace SAIN.SAINComponent.Classes.Decision
                 && enemy.TimeSinceLastKnownUpdated < 120f;
         }
 
-        private int throwTarget = 0;
-
         private bool findThrowTarget(SAINEnemy enemy)
         {
             Vector3? lastKnown = enemy.LastKnownPosition;
@@ -593,7 +591,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             bool runNow = Bot.Enemy != null
                 && !Bot.Enemy.IsVisible
-                && (!Bot.Enemy.Seen || Bot.Enemy.TimeSinceSeen > 3f || BotOwner.Memory.IsUnderFire)
+                && (!Bot.Enemy.Seen || Bot.Enemy.TimeSinceSeen > 3f)
                 && Bot.Cover.CoverPoints.Count > 0;
 
             if (StartRunCoverTimer < Time.time || runNow)
@@ -615,7 +613,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool shallMoveToCover()
         {
             CoverPoint coverInUse = Bot.Cover.CoverInUse;
-            if (coverInUse == null || coverInUse.Status != CoverStatus.InCover || coverInUse.Spotted)
+            if (coverInUse == null || coverInUse.Status != CoverStatus.InCover)
             {
                 var CurrentDecision = Bot.Decision.CurrentSoloDecision;
                 if (CurrentDecision != SoloDecision.MoveToCover && CurrentDecision != SoloDecision.RunToCover)

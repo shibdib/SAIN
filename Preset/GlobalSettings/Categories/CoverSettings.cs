@@ -5,9 +5,10 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class CoverSettings
     {
-        [Default(true)]
+        [Default(60f)]
+        [MinMax(20f, 100f, 10f)]
         [Advanced]
-        public bool ShiftCoverMustBeSafe = true;
+        public float MaxCoverPathLength = 60f;
 
         [Default(6f)]
         [MinMax(1f, 30f, 1f)]

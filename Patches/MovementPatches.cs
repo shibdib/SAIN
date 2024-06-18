@@ -6,8 +6,41 @@ using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
 
-namespace SAIN.Patches.Generic
+namespace SAIN.Patches.Movement
 {
+    public class CrawlPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(GClass423), "method_0");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(GClass423 __instance, BotOwner ___botOwner_0, Vector3 pos, bool slowAtTheEnd, bool getUpWithCheck)
+        {
+            if (___botOwner_0.BotLay.IsLay && 
+                getUpWithCheck)
+            {
+                Vector3 vector = pos - ___botOwner_0.Position;
+                if (vector.y < 0.5f)
+                {
+                    vector.y = 0f;
+                }
+                if (vector.sqrMagnitude > 0.2f)
+                {
+                    ___botOwner_0.BotLay.GetUp(getUpWithCheck);
+                }
+                if (___botOwner_0.BotLay.IsLay)
+                {
+                    return false;
+                }
+            }
+            ___botOwner_0.WeaponManager.Stationary.StartMove();
+            __instance.SlowAtTheEnd = slowAtTheEnd;
+            return true;
+        }
+
+    }
     public class EncumberedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

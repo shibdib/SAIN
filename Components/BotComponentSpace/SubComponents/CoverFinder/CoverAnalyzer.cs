@@ -17,15 +17,32 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public bool CheckCollider(Collider collider, out CoverPoint newPoint, out ECoverFailReason failReason)
         {
-            NavMeshPath path = new NavMeshPath();
-            if (CheckColliderForCover(collider, out Vector3 place, path, out failReason))
+            if (!GetPlaceToMove(collider, TargetPoint, OriginPoint, out Vector3 place))
             {
-                newPoint = new CoverPoint(Bot, place, collider, path);
-                newPoint.PathLength = path.CalculatePathLength();
-                return true;
+                failReason = ECoverFailReason.NoPlaceToMove;
+                newPoint = null;
+                return false;
             }
-            newPoint = null;
-            return false;
+
+            if (!CheckPosition(place, collider.transform.position))
+            {
+                failReason = ECoverFailReason.BadPosition;
+                newPoint = null;
+                return false;
+            }
+
+            NavMeshPath path = new NavMeshPath();
+            if (!CheckPath(place, path, out float pathLength))
+            {
+                failReason = ECoverFailReason.BadPath;
+                newPoint = null;
+                return false;
+            }
+
+            failReason = ECoverFailReason.None;
+            newPoint = new CoverPoint(Bot, place, collider, path, pathLength);
+
+            return true;
         }
 
         public bool RecheckCoverPoint(CoverPoint coverPoint, out ECoverFailReason failReason)
@@ -49,36 +66,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
 
             NavMeshPath path = coverPoint.PathToPoint;
-            if (coverPoint.Distance > 2f && !CheckPath(newPosition, path)) {
-                failReason = ECoverFailReason.BadPath;
-                return false;
-            }
-
-            coverPoint.PathLength = path.CalculatePathLength();
-            return true;
-        }
-
-        private bool CheckColliderForCover(Collider collider, out Vector3 place, NavMeshPath pathToPoint, out ECoverFailReason failReason)
-        {
-            if (!GetPlaceToMove(collider, TargetPoint, OriginPoint, out place))
-            {
-                failReason = ECoverFailReason.NoPlaceToMove;
-                return false;
-            }
-
-            if (!CheckPosition(place, collider.transform.position))
-            {
-                failReason = ECoverFailReason.BadPosition;
-                return false;
-            }
-
-            if (!CheckPath(place, pathToPoint))
+            path.ClearCorners();
+            if (!CheckPath(newPosition, path, out float pathLength))
             {
                 failReason = ECoverFailReason.BadPath;
                 return false;
             }
-
-            failReason = ECoverFailReason.None;
+            coverPoint.PathLength = pathLength;
             return true;
         }
 
@@ -170,26 +164,31 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return false;
         }
 
-        private bool CheckPath(Vector3 position, NavMeshPath pathToPoint)
+        private bool CheckPath(Vector3 position, NavMeshPath pathToPoint, out float pathLength)
         {
-            if (pathToPoint == null)
-            {
-                pathToPoint = new NavMeshPath();
-            }
-            else
-            {
-                pathToPoint.ClearCorners();
-            }
+            NavMesh.CalculatePath(OriginPoint, position, -1, pathToPoint);
 
-            Vector3 origin = Vector3.zero;
+            //if (!NavMesh.CalculatePath(OriginPoint, position, -1, pathToPoint))
+            //{
+            //    pathLength = 0;
+            //    return false;
+            //}
 
-            if (!NavMesh.CalculatePath(OriginPoint, position, -1, pathToPoint))
+            //if (pathToPoint.status == NavMeshPathStatus.PathPartial &&
+            //    (position - pathToPoint.corners[pathToPoint.corners.Length - 1]).sqrMagnitude > 1f)
+            //{
+            //    pathLength = 0;
+            //    return false;
+            //}
+
+            if (pathToPoint.status != NavMeshPathStatus.PathComplete)
             {
+                pathLength = 0;
                 return false;
             }
 
-            if (pathToPoint.status == NavMeshPathStatus.PathPartial &&
-                (position - pathToPoint.corners[pathToPoint.corners.Length - 1]).sqrMagnitude > 1f)
+            pathLength = pathToPoint.CalculatePathLength();
+            if (pathLength > SAINPlugin.LoadedPreset.GlobalSettings.Cover.MaxCoverPathLength)
             {
                 return false;
             }

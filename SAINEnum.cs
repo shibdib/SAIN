@@ -163,7 +163,9 @@ namespace SAIN
     public enum SAINSoundType
     {
         None,
+        Generic,
         FootStep,
+        Sprint,
         Prone,
         Looting,
         Reload,
@@ -186,6 +188,7 @@ namespace SAIN
         Pain,
         Bush,
         BulletImpact,
+        Land,
     }
 
     public enum ELocation

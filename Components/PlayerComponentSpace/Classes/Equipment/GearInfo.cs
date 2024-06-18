@@ -38,7 +38,7 @@ namespace SAIN.SAINComponent.Classes.Info
         {
             if (_nextUpdateTime < Time.time)
             {
-                _nextUpdateTime = Time.time + 5f;
+                _nextUpdateTime = Time.time + 10f;
                 _playerComponent.StartCoroutine(checkGear());
             }
         }

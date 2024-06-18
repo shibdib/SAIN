@@ -183,7 +183,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void SortPointsByPathDist()
         {
-            CoverFinderComponent.OrderPointsByPathDist(CoverPoints, Bot);
+            CoverFinderComponent.OrderPointsByPathDist(CoverPoints);
         }
 
         public bool DuckInCover()

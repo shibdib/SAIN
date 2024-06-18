@@ -1,11 +1,7 @@
 ﻿using EFT;
-using SAIN.Components.BotController;
 using SAIN.Components.PlayerComponentSpace;
-using SAIN.SAINComponent.Classes.Enemy;
-using SAIN.SAINComponent;
 using System.Collections;
 using UnityEngine;
-using SAIN.Preset.GlobalSettings.Categories;
 
 namespace SAIN.Components.BotControllerSpace.Classes
 {
@@ -64,8 +60,8 @@ namespace SAIN.Components.BotControllerSpace.Classes
                 return;
             }
 
-            var hearSound = delaySoundHeard(soundType, playerComponent, position, range, volume);
-            BotController.StartCoroutine(hearSound);
+            BotController.StartCoroutine(
+                delaySoundHeard(soundType, playerComponent, position, range, volume));
         }
 
         public void PlayAISound(string profileId, SAINSoundType soundType, Vector3 position, float range, float volume)

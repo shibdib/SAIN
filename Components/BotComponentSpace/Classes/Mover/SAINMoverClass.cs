@@ -166,7 +166,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public NavMeshObstacle BotBodyObstacle { get; private set; }
 
-        public bool GoToPoint(Vector3 point, out bool calculating, float reachDist = -1f, bool crawl = false, bool slowAtEnd = true, bool mustHaveCompletePath = false)
+        public bool GoToPoint(Vector3 point, out bool calculating, float reachDist = -1f, bool crawl = false, bool slowAtEnd = true, bool mustHaveCompletePath = true)
         {
             calculating = false;
             if (reachDist < 0f)

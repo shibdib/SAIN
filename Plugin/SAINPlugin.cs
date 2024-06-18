@@ -76,9 +76,6 @@ namespace SAIN
         private void Patches()
         {
             var patches = new List<Type>() {
-                //typeof(Patches.Generic.ShallRunAwayGrenadePatch),
-                //typeof(Patches.Generic.DisableLookSensorPatch),
-
                 typeof(Patches.Generic.SetEnvironmentPatch),
                 typeof(Patches.Generic.FixItemTakerPatch),
                 typeof(Patches.Generic.FixItemTakerPatch2),
@@ -89,9 +86,6 @@ namespace SAIN
                 typeof(Patches.Generic.StopSetToNavMeshPatch),
                 typeof(Patches.Generic.TurnDamnLightOffPatch),
                 typeof(Patches.Generic.RotateClampPatch),
-
-                //typeof(Patches.Generic.HealCancelPatch),
-
                 typeof(Patches.Generic.GetBotController),
                 typeof(Patches.Generic.GetBotSpawner),
                 typeof(Patches.Generic.GrenadeThrownActionPatch),
@@ -101,8 +95,11 @@ namespace SAIN
                 typeof(Patches.Generic.ShallKnowEnemyPatch),
                 typeof(Patches.Generic.ShallKnowEnemyLatePatch),
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
-                typeof(Patches.Generic.EncumberedPatch),
-                typeof(Patches.Generic.DoorOpenerPatch),
+                //typeof(Patches.Generic.HealCancelPatch),
+
+                typeof(Patches.Movement.EncumberedPatch),
+                typeof(Patches.Movement.DoorOpenerPatch),
+                typeof(Patches.Movement.CrawlPatch),
 
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
                 typeof(Patches.Hearing.OnMakingShotPatch),
@@ -113,10 +110,10 @@ namespace SAIN
                 typeof(Patches.Hearing.DoorBreachSoundPatch),
                 typeof(Patches.Hearing.DoorOpenSoundPatch),
                 typeof(Patches.Hearing.FootstepSoundPatch),
+                typeof(Patches.Hearing.SprintSoundPatch),
+                typeof(Patches.Hearing.GenericMovementSoundPatch),
                 typeof(Patches.Hearing.JumpSoundPatch),
                 typeof(Patches.Hearing.DryShotPatch),
-                typeof(Patches.Hearing.FallSoundPatch),
-                typeof(Patches.Hearing.TurnSoundPatch),
                 typeof(Patches.Hearing.ProneSoundPatch),
                 typeof(Patches.Hearing.SoundClipNameCheckerPatch),
                 typeof(Patches.Hearing.AimSoundPatch),

@@ -23,7 +23,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINBot.Steering.SteerByPriority();
+            Bot.Steering.SteerByPriority();
             Shoot.Update();
         }
     }

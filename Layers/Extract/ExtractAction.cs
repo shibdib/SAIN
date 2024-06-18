@@ -20,27 +20,27 @@ namespace SAIN.Layers
         {
         }
 
-        private Vector3? Exfil => SAINBot.Memory.Extract.ExfilPosition;
+        private Vector3? Exfil => Bot.Memory.Extract.ExfilPosition;
 
         public override void Start()
         {
-            SAINBot.Memory.Extract.ExtractStatus = EExtractStatus.Extracting;
+            Bot.Memory.Extract.ExtractStatus = EExtractStatus.Extracting;
         }
 
         public override void Stop()
         {
-            SAINBot.Memory.Extract.ExtractStatus = EExtractStatus.None;
+            Bot.Memory.Extract.ExtractStatus = EExtractStatus.None;
             BotOwner.Mover.MovementResume();
         }
 
         public override void Update()
         {
-            if (SAINBot?.Player == null) return;
+            if (Bot?.Player == null) return;
 
-            float stamina = SAINBot.Player.Physical.Stamina.NormalValue;
+            float stamina = Bot.Player.Physical.Stamina.NormalValue;
             bool fightingEnemy = isFightingEnemy();
             // Environment id of 0 means a bot is outside.
-            if (SAINBot.Player.AIData.EnvironmentId != 0)
+            if (Bot.Player.AIData.EnvironmentId != 0)
             {
                 shallSprint = false;
             }
@@ -79,12 +79,12 @@ namespace SAIN.Layers
             {
                 setStatus(EExtractStatus.ExtractingNow);
                 StartExtract(point);
-                SAINBot.Mover.SetTargetPose(0f);
-                SAINBot.Mover.SetTargetMoveSpeed(0f);
+                Bot.Mover.SetTargetPose(0f);
+                Bot.Mover.SetTargetMoveSpeed(0f);
                 if (_sayExitLocatedTime < Time.time)
                 {
                     _sayExitLocatedTime = Time.time + 10;
-                    SAINBot.Talk.GroupSay(EPhraseTrigger.ExitLocated, null, true, 70);
+                    Bot.Talk.GroupSay(EPhraseTrigger.ExitLocated, null, true, 70);
                 }
             }
             else
@@ -98,29 +98,29 @@ namespace SAIN.Layers
                     setStatus(EExtractStatus.MovingTo);
                 }
                 MoveToExtract(distance, point);
-                SAINBot.Mover.SetTargetPose(1f);
-                SAINBot.Mover.SetTargetMoveSpeed(1f);
+                Bot.Mover.SetTargetPose(1f);
+                Bot.Mover.SetTargetMoveSpeed(1f);
             }
 
             if (BotOwner.BotState == EBotState.Active)
             {
-                SAINBot.Steering.SteerByPriority();
+                Bot.Steering.SteerByPriority();
                 Shoot.Update();
             }
         }
 
         private void setStatus(EExtractStatus status)
         {
-            SAINBot.Memory.Extract.ExtractStatus = status;
+            Bot.Memory.Extract.ExtractStatus = status;
         }
 
         private float _sayExitLocatedTime;
 
         private bool isFightingEnemy()
         {
-            return SAINBot.Enemy != null
-                && SAINBot.Enemy.Seen
-                && (SAINBot.Enemy.Path.PathDistance < 50f || SAINBot.Enemy.InLineOfSight);
+            return Bot.Enemy != null
+                && Bot.Enemy.Seen
+                && (Bot.Enemy.Path.PathDistance < 50f || Bot.Enemy.InLineOfSight);
         }
 
         private bool shallSprint;
@@ -132,7 +132,7 @@ namespace SAIN.Layers
                 return;
             }
 
-            SAINBot.Mover.Sprint(shallSprint);
+            Bot.Mover.Sprint(shallSprint);
 
             if (distance > MinDistanceToStartExtract * 2)
             {
@@ -153,7 +153,7 @@ namespace SAIN.Layers
                 ExtractTimer = -1f;
                 ReCalcPathTimer = Time.time + 4f;
 
-                SAINBot.Memory.Extract.ExtractStatus = EExtractStatus.MovingTo;
+                Bot.Memory.Extract.ExtractStatus = EExtractStatus.MovingTo;
                 NavMeshPathStatus pathStatus = BotOwner.Mover.GoToPoint(point, true, 0.5f, false, false);
                 var pathController = HelpersGClass.GetPathControllerClass(BotOwner.Mover);
                 if (pathController?.CurPath != null)
@@ -165,10 +165,10 @@ namespace SAIN.Layers
                     if ((pathStatus == NavMeshPathStatus.PathInvalid) || reachedEndOfIncompletePath)
                     {
                         // Need to reset the search timer to prevent the bot from immediately selecting (possibly) the same extract
-                        BotController.BotExtractManager.ResetExfilSearchTime(SAINBot);
+                        BotController.BotExtractManager.ResetExfilSearchTime(Bot);
 
-                        SAINBot.Memory.Extract.ExfilPoint = null;
-                        SAINBot.Memory.Extract.ExfilPosition = null;
+                        Bot.Memory.Extract.ExfilPoint = null;
+                        Bot.Memory.Extract.ExfilPosition = null;
                     }
                 }
             }
@@ -176,13 +176,13 @@ namespace SAIN.Layers
 
         private void StartExtract(Vector3 point)
         {
-            SAINBot.Memory.Extract.ExtractStatus = EExtractStatus.ExtractingNow;
+            Bot.Memory.Extract.ExtractStatus = EExtractStatus.ExtractingNow;
             if (ExtractTimer == -1f)
             {
-                ExtractTimer = BotController.BotExtractManager.GetExfilTime(SAINBot.Memory.Extract.ExfilPoint);
+                ExtractTimer = BotController.BotExtractManager.GetExfilTime(Bot.Memory.Extract.ExfilPoint);
 
                 // Needed to get car extracts working
-                activateExfil(SAINBot.Memory.Extract.ExfilPoint);
+                activateExfil(Bot.Memory.Extract.ExfilPoint);
 
                 float timeRemaining = ExtractTimer - Time.time;
                 Logger.LogInfo($"{BotOwner.name} Starting Extract Timer of {timeRemaining}");
@@ -191,11 +191,11 @@ namespace SAIN.Layers
 
             if (ExtractTimer < Time.time)
             {
-                Logger.LogInfo($"{BotOwner.name} Extracted at {point} for extract {SAINBot.Memory.Extract.ExfilPoint.Settings.Name} at {System.DateTime.UtcNow}");
-                SAINPlugin.BotController?.BotExtractManager?.LogExtractionOfBot(BotOwner, point, SAINBot.Memory.Extract.ExtractReason.ToString(), SAINBot.Memory.Extract.ExfilPoint);
+                Logger.LogInfo($"{BotOwner.name} Extracted at {point} for extract {Bot.Memory.Extract.ExfilPoint.Settings.Name} at {System.DateTime.UtcNow}");
+                SAINPlugin.BotController?.BotExtractManager?.LogExtractionOfBot(BotOwner, point, Bot.Memory.Extract.ExtractReason.ToString(), Bot.Memory.Extract.ExfilPoint);
 
                 var botgame = Singleton<IBotGame>.Instance;
-                Player player = SAINBot.Player;
+                Player player = Bot.Player;
                 Singleton<Effects>.Instance.EffectsCommutator.StopBleedingForPlayer(player);
                 BotOwner.Deactivate();
                 BotOwner.Dispose();
@@ -209,7 +209,7 @@ namespace SAIN.Layers
         private void activateExfil(ExfiltrationPoint exfil)
         {
             // Needed to start the car extract
-            exfil.OnItemTransferred(SAINBot.Player);
+            exfil.OnItemTransferred(Bot.Player);
 
             // Copied from the end of ExfiltrationPoint.Proceed()
             if (exfil.Status == EExfiltrationStatus.UncompleteRequirements)
@@ -225,7 +225,7 @@ namespace SAIN.Layers
 
                         if (SAINPlugin.DebugMode)
                         {
-                            Logger.LogInfo($"bot {SAINBot.name} has started the VEX exfil");
+                            Logger.LogInfo($"bot {Bot.name} has started the VEX exfil");
                         }
 
                         break;

@@ -81,8 +81,6 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
             updateAllWeapons();
         }
 
-        private float _nextUpdateTime;
-
         private void getAllWeapons()
         {
             foreach (EquipmentSlot slot in _weaponSlots)

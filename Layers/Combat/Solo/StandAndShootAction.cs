@@ -13,10 +13,10 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINBot.Steering.SteerByPriority();
+            Bot.Steering.SteerByPriority();
             if (!shallMoveShoot)
             {
-                SAINBot.Mover.Pose.SetPoseToCover();
+                Bot.Mover.Pose.SetPoseToCover();
             }
             Shoot.Update();
         }
@@ -28,18 +28,18 @@ namespace SAIN.Layers.Combat.Solo
             shallMoveShoot = moveShoot();
             if (!shallMoveShoot)
             {
-                SAINBot.Mover.StopMove();
+                Bot.Mover.StopMove();
                 BotOwner.Mover.SprintPause(0.5f);
-                shallResume = SAINBot.Decision.CurrentSoloDecision == SoloDecision.ShootDistantEnemy;
+                shallResume = Bot.Decision.CurrentSoloDecision == SoloDecision.ShootDistantEnemy;
             }
 
-            SAINBot.Mover.Lean.HoldLean(0.75f);
+            Bot.Mover.Lean.HoldLean(0.75f);
         }
 
         private bool moveShoot()
         {
-            if (SAINBot.Enemy != null &&
-                SAINBot.Enemy.RealDistance < 50)
+            if (Bot.Enemy != null &&
+                Bot.Enemy.RealDistance < 50)
             {
                 float angle = UnityEngine.Random.Range(70, 110);
                 if (EFTMath.RandomBool())
@@ -47,19 +47,19 @@ namespace SAIN.Layers.Combat.Solo
                     angle *= -1;
                 }
 
-                Vector3 directionToEnemy = SAINBot.Enemy.EnemyDirection.normalized;
+                Vector3 directionToEnemy = Bot.Enemy.EnemyDirection.normalized;
                 Vector3 rotated = Vector.Rotate(directionToEnemy, 0, angle, 0);
                 rotated.y = 0;
                 rotated *= 6f;
-                if (NavMesh.SamplePosition(SAINBot.Position + rotated, out var hit, 5f, -1) &&
-                    NavMesh.SamplePosition(SAINBot.Position, out var hit2, 0.5f, -1))
+                if (NavMesh.SamplePosition(Bot.Position + rotated, out var hit, 5f, -1) &&
+                    NavMesh.SamplePosition(Bot.Position, out var hit2, 0.5f, -1))
                 {
                     Vector3 movePos = hit.position;
                     if (NavMesh.Raycast(hit2.position, hit.position, out var rayHit, -1))
                     {
                         movePos = rayHit.position;
                     }
-                    return SAINBot.Mover.GoToPoint(movePos, out _, -1, false, false);
+                    return Bot.Mover.GoToPoint(movePos, out _, -1, false, false);
                 }
             }
             return false;

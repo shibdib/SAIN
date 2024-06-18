@@ -71,7 +71,7 @@ namespace SAIN.Preset.GlobalSettings
 
         [Default(1f)]
         [MinMax(0.1f, 10f, 100f)]
-        public float _reportReloadingFreq = 1f;
+        public float _reportReloadingFreq = 4f;
 
         [Default(40f)]
         [Percentage]

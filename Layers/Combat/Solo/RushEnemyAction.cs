@@ -20,63 +20,63 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINBot.Mover.SetTargetPose(1f);
-            SAINBot.Mover.SetTargetMoveSpeed(1f);
+            Bot.Mover.SetTargetPose(1f);
+            Bot.Mover.SetTargetMoveSpeed(1f);
             Shoot.Update();
 
-            if (SAINBot.Enemy == null)
+            if (Bot.Enemy == null)
             {
-                SAINBot.Steering.SteerByPriority(true);
+                Bot.Steering.SteerByPriority(true);
                 return;
             }
 
-            if (SAINBot.Enemy.InLineOfSight)
+            if (Bot.Enemy.InLineOfSight)
             {
                 if (_shallTryJump)
                 {
                     if (_shallBunnyHop)
                     {
-                        SAINBot.Mover.TryJump();
+                        Bot.Mover.TryJump();
                     }
                     else if (TryJumpTimer < Time.time &&
-                            SAINBot.Player.IsSprintEnabled)
+                            Bot.Player.IsSprintEnabled)
                     {
                         TryJumpTimer = Time.time + 3f;
                         if (!_shallBunnyHop
-                            && EFTMath.RandomBool(SAINBot.Info.PersonalitySettings.Rush.BunnyHopChance))
+                            && EFTMath.RandomBool(Bot.Info.PersonalitySettings.Rush.BunnyHopChance))
                         {
                             _shallBunnyHop = true;
                         }
-                        SAINBot.Mover.TryJump();
+                        Bot.Mover.TryJump();
                     }
                 }
 
-                SAINBot.Mover.Sprint(false);
-                SAINBot.Mover.SprintController.CancelRun();
-                SAINBot.Mover.DogFight.DogFightMove(true);
+                Bot.Mover.Sprint(false);
+                Bot.Mover.SprintController.CancelRun();
+                Bot.Mover.DogFight.DogFightMove(true);
 
-                if (SAINBot.Enemy.IsVisible && SAINBot.Enemy.CanShoot)
+                if (Bot.Enemy.IsVisible && Bot.Enemy.CanShoot)
                 {
-                    SAINBot.Steering.SteerByPriority();
+                    Bot.Steering.SteerByPriority();
                 }
                 else
                 {
-                    SAINBot.Steering.LookToEnemy(SAINBot.Enemy);
+                    Bot.Steering.LookToEnemy(Bot.Enemy);
                 }
                 return;
             }
 
-            Vector3[] EnemyPath = SAINBot.Enemy.PathToEnemy.corners;
-            Vector3 EnemyPos = SAINBot.Enemy.EnemyPosition;
+            Vector3[] EnemyPath = Bot.Enemy.PathToEnemy.corners;
+            Vector3 EnemyPos = Bot.Enemy.EnemyPosition;
             if (NewDestTimer < Time.time)
             {
                 Vector3 Destination = EnemyPos;
-                if (SAINBot.Enemy.Path.PathDistance > 1f
-                    && SAINBot.Mover.SprintController.RunToPoint(Destination, SAINComponent.Classes.Mover.ESprintUrgency.High))
+                if (Bot.Enemy.Path.PathDistance > 1f
+                    && Bot.Mover.SprintController.RunToPoint(Destination, SAINComponent.Classes.Mover.ESprintUrgency.High))
                 {
                     NewDestTimer = Time.time + 2f;
                 }
-                else if (SAINBot.Mover.GoToPoint(Destination, out _))
+                else if (Bot.Mover.GoToPoint(Destination, out _))
                 {
                     NewDestTimer = Time.time + 1f;
                 }
@@ -86,17 +86,17 @@ namespace SAIN.Layers.Combat.Solo
                 }
             }
 
-            if (_shallTryJump && TryJumpTimer < Time.time && SAINBot.Player.IsSprintEnabled)
+            if (_shallTryJump && TryJumpTimer < Time.time && Bot.Player.IsSprintEnabled)
             {
                 //&& Bot.Enemy.Path.PathDistance > 3f
-                var corner = SAINBot.Enemy?.LastCornerToEnemy;
+                var corner = Bot.Enemy?.LastCornerToEnemy;
                 if (corner != null)
                 {
                     float distance = (corner.Value - BotOwner.Position).magnitude;
                     if (distance < 0.75f)
                     {
                         TryJumpTimer = Time.time + 3f;
-                        SAINBot.Mover.TryJump();
+                        Bot.Mover.TryJump();
                     }
                 }
             }
@@ -107,9 +107,9 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
-            _shallTryJump = SAINBot.Info.PersonalitySettings.Rush.CanJumpCorners
+            _shallTryJump = Bot.Info.PersonalitySettings.Rush.CanJumpCorners
                 //&& Bot.Decision.CurrentSquadDecision != SquadDecision.PushSuppressedEnemy
-                && EFTMath.RandomBool(SAINBot.Info.PersonalitySettings.Rush.JumpCornerChance);
+                && EFTMath.RandomBool(Bot.Info.PersonalitySettings.Rush.JumpCornerChance);
 
             _shallBunnyHop = false;
         }
@@ -118,8 +118,8 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Stop()
         {
-            SAINBot.Mover.DogFight.ResetDogFightStatus();
-            SAINBot.Mover.SprintController.CancelRun();
+            Bot.Mover.DogFight.ResetDogFightStatus();
+            Bot.Mover.SprintController.CancelRun();
         }
     }
 }

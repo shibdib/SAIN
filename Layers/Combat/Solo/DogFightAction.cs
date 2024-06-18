@@ -23,10 +23,10 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINBot.Mover.SetTargetPose(1f);
-            SAINBot.Mover.SetTargetMoveSpeed(1f);
-            SAINBot.Steering.SteerByPriority();
-            SAINBot.Mover.DogFight.DogFightMove(true);
+            Bot.Mover.SetTargetPose(1f);
+            Bot.Mover.SetTargetMoveSpeed(1f);
+            Bot.Steering.SteerByPriority();
+            Bot.Mover.DogFight.DogFightMove(true);
             Shoot.Update();
         }
 
@@ -34,13 +34,13 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
-            SAINBot.Mover.Sprint(false);
+            Bot.Mover.Sprint(false);
             BotOwner.Mover.SprintPause(0.5f);
         }
 
         public override void Stop()
         {
-            SAINBot.Mover.DogFight.ResetDogFightStatus();
+            Bot.Mover.DogFight.ResetDogFightStatus();
             BotOwner.MovementResume();
         }
     }

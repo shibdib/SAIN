@@ -10,17 +10,17 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINBot.Mover.SetTargetPose(0f);
-            if (!SAINBot.Steering.SteerByPriority(false))
+            Bot.Mover.SetTargetPose(0f);
+            if (!Bot.Steering.SteerByPriority(false))
             {
-                SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy);
+                Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
             }
             Shoot.Update();
         }
 
         public override void Start()
         {
-            SAINBot.Mover.StopMove();
+            Bot.Mover.StopMove();
         }
 
         public override void Stop()

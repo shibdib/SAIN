@@ -299,7 +299,12 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             float timeChangeDec = Bot.Decision.TimeSinceChangeDecision;
-            if (timeChangeDec > 30 && 
+            if (timeChangeDec < 1)
+            {
+                return true;
+            }
+
+            if (timeChangeDec > 5 && 
                 !Bot.BotStuck.BotHasChangedPosition)
             {
                 return false;
@@ -310,12 +315,23 @@ namespace SAIN.SAINComponent.Classes.Decision
             //    return false;
             //}
 
-            if (Bot.Cover.CoverInUse?.Status == CoverStatus.InCover)
+            CoverPoint coverInUse = Bot.Cover.CoverInUse;
+            if (coverInUse == null)
             {
                 return false;
             }
 
-            return Bot.Mover.SprintController.Running;
+            switch (coverInUse.Status)
+            {
+                case CoverStatus.InCover:
+                    return false;
+
+                case CoverStatus.CloseToCover:
+                    return Bot.Mover.SprintController.Running || BotOwner.Mover.IsMoving;
+
+                default:
+                    return !coverInUse.IsBad;
+            }
         }
     }
 }

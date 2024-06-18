@@ -8,7 +8,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes
         {
         }
 
-        private float _soundFrequency => (IsAI ? 0.5f : 0.05f);
+        private float _soundFrequency => (IsAI ? 0.5f : 0.1f);
         private float _lastSoundPower;
         private float _nextPlaySoundTime;
 

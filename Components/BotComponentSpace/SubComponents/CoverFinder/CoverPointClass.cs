@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
     public class CoverPoint
     {
-        public CoverPoint(BotComponent sain, Vector3 point, Collider collider, NavMeshPath pathToPoint)
+        public CoverPoint(BotComponent sain, Vector3 point, Collider collider, NavMeshPath pathToPoint, float pathLength)
         {
             Bot = sain;
             TimeCreated = Time.time;
@@ -24,6 +24,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             CoverValue = (size.x + size.y + size.z).Round10();
             Position = point;
             PathToPoint = pathToPoint;
+            PathLength = pathLength;
         }
 
         private readonly BotComponent Bot;
@@ -74,21 +75,24 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             get
             {
                 float distance = Distance;
+                float pathLength = PathLength;
+                CoverStatus status;
 
-                if (_lastStatus == CoverStatus.InCover && 
-                    distance <= InCoverStayDist)
-                {
+                if (_lastStatus == CoverStatus.InCover &&
+                    distance <= InCoverStayDist){
                     return CoverStatus.InCover;
                 }
 
-                CoverStatus status;
                 if (distance <= InCoverDist) {
                     status = CoverStatus.InCover;
                 }
-                else if (distance <= CloseCoverDist) {
+                else if (pathLength <= InCoverDist) {
+                    status = CoverStatus.InCover;
+                }
+                else if (pathLength <= CloseCoverDist) {
                     status = CoverStatus.CloseToCover;
                 }
-                else if (distance <= MidCoverDist) {
+                else if (pathLength <= MidCoverDist) {
                     status = CoverStatus.MidRangeToCover;
                 }
                 else {

@@ -24,7 +24,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINEnemy enemy = SAINBot.Enemy;
+            SAINEnemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 return;
@@ -33,7 +33,7 @@ namespace SAIN.Layers.Combat.Solo
 
         private FlankRoute FindFlankRoute()
         {
-            SAINEnemy enemy = SAINBot.Enemy;
+            SAINEnemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 return null;
@@ -41,8 +41,8 @@ namespace SAIN.Layers.Combat.Solo
 
             FlankRoute flankRoute = null;
 
-            Vector3 enemyPosition = SAINBot.Enemy.EnemyPosition;
-            Vector3 botPosition = SAINBot.Position;
+            Vector3 enemyPosition = Bot.Enemy.EnemyPosition;
+            Vector3 botPosition = Bot.Position;
 
             Vector3? middleNode = FindMiddlePoint(enemy.Path.PathToEnemy, enemy.Path.PathDistance, out int index);
 

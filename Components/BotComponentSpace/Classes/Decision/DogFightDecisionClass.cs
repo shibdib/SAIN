@@ -44,7 +44,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             if (currentDecision == SoloDecision.Retreat || currentDecision == SoloDecision.RunToCover)
             {
-                if (Bot.Decision.SelfActionDecisions.LowOnAmmo(0.3f))
+                if (Bot.Decision.SelfActionDecisions.LowOnAmmo(0.2f))
                 {
                     return false;
                 }
@@ -154,10 +154,10 @@ namespace SAIN.SAINComponent.Classes.Decision
             return enemy?.IsValid == true && 
                 enemy.IsVisible && 
                 enemy.ShallUpdateEnemy && 
-                enemy.Path.PathDistance < _dogFightStartDist;
+                enemy.Path.PathDistance <= _dogFightStartDist;
         }
 
-        private float _dogFightStartDist = 4f;
-        private float _dogFightEndDist = 10f;
+        private float _dogFightStartDist = 8f;
+        private float _dogFightEndDist = 15f;
     }
 }
