@@ -1,18 +1,8 @@
 ﻿using EFT;
-using EFT.InventoryLogic;
-using SAIN.Components;
-using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Decision;
-using SAIN.SAINComponent.Classes.Talk;
-using SAIN.SAINComponent.Classes.WeaponFunction;
-using SAIN.SAINComponent.Classes.Mover;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents;
-using System;
-using UnityEngine;
-using Random = UnityEngine.Random;
-using static EFT.InventoryLogic.Weapon;
 using SAIN.SAINComponent.Classes.Info;
+using UnityEngine;
+using static EFT.InventoryLogic.Weapon;
+using Random = UnityEngine.Random;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
@@ -49,7 +39,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             float final = Mathf.Clamp(rate, minTime, maxTime);
 
             // Sets a different time between shots if a weapon is full auto or burst and the enemy isn't close
-            if (weaponInfo.IsFireModeSet(EFireMode.fullauto) || weaponInfo.IsFireModeSet(EFireMode.burst))
+            if (weaponInfo.IsFireModeSet(EFireMode.fullauto))
+            {
+                final = Mathf.Clamp(final * 0.25f, 0.001f, 1f);
+            }
+            if (weaponInfo.IsFireModeSet(EFireMode.burst))
             {
                 final = Mathf.Clamp(final, 0.1f, 3f);
             }

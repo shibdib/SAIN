@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
@@ -15,6 +16,7 @@ using SAIN.SAINComponent.Classes.Search;
 using SAIN.SAINComponent.Classes.Talk;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SAIN.SAINComponent
@@ -104,6 +106,36 @@ namespace SAIN.SAINComponent
 
         public float LastCheckVisibleTime;
 
+        private float getBotTotalWeight()
+        {
+            _slots.Clear();
+            foreach (var slot in _botEquipmentSlots)
+            {
+                _slots.Add(Player.Equipment.GetSlot(slot));
+            }
+            float result = Player.Equipment.method_11(_slots);
+            _slots.Clear();
+            Logger.LogWarning(result);
+            return result;
+        }
+
+        private readonly List<Slot> _slots = new List<Slot>();
+
+        public static readonly EquipmentSlot[] _botEquipmentSlots = new EquipmentSlot[]
+        {
+            EquipmentSlot.Backpack,
+            EquipmentSlot.TacticalVest,
+            EquipmentSlot.ArmorVest,
+            EquipmentSlot.Eyewear,
+            EquipmentSlot.FaceCover,
+            EquipmentSlot.Headwear,
+            EquipmentSlot.Earpiece,
+            EquipmentSlot.FirstPrimaryWeapon,
+            EquipmentSlot.SecondPrimaryWeapon,
+            EquipmentSlot.Holster,
+            EquipmentSlot.Pockets,
+        };
+
         public bool Init(PersonClass person)
         {
             Person = person;
@@ -111,12 +143,21 @@ namespace SAIN.SAINComponent
 
             try
             {
-                //playerComponent.Player.Physical.EncumberDisabled = false;
                 person.Player.ActiveHealthController.SetDamageCoeff(1f);
             }
             catch (Exception ex)
             {
                 Logger.LogError($"Error Updating Player Values for bot: {ex}");
+            }
+
+            try
+            {
+                person.Player.GClass2761_0.Inventory.TotalWeight = new GClass754<float>(new Func<float>(this.getBotTotalWeight));
+                person.Player.Physical.EncumberDisabled = false;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error Updating Weight: {ex}");
             }
 
             try
