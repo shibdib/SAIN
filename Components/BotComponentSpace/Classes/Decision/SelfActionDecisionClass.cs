@@ -119,29 +119,30 @@ namespace SAIN.SAINComponent.Classes.Decision
             if (CurrentSelfAction == SelfDecision.Reload)
             {
                 bool reloading = BotOwner.WeaponManager.Reload?.Reloading == true;
-                if (!reloading &&
-                    !StartBotReload())
+                if (!StartBotReload())
                 {
+                    if (reloading)
+                    {
+                        Bot.SelfActions.BotCancelReload();
+                    }
                     Decision = SelfDecision.None;
                     return false;
                 }
 
                 if (reloading)
                 {
-                    if (timeSinceChange < 5f)
-                    {
-                        Decision = SelfDecision.Reload;
-                        return true;
-                    }
-                    else
+                    if (timeSinceChange > 5f)
                     {
                         Bot.SelfActions.BotCancelReload();
                         Decision = SelfDecision.None;
                         return false;
                     }
+                    Decision = SelfDecision.Reload;
+                    return true;
                 }
-                Decision = SelfDecision.Reload;
-                return true;
+
+                Decision = SelfDecision.None;
+                return false;
             }
 
             if (BotOwner?.Medecine == null &&
@@ -345,17 +346,15 @@ namespace SAIN.SAINComponent.Classes.Decision
                 }
                 BotOwner.WeaponManager.Reload.CheckReloadLongTime();
                 _nextCheckReloadTime = Time.time + 0.5f;
+                _needToReload = false;
                 return true;
             }
 
             // Only allow reloading every 1 seconds to avoid spamming reload when the weapon data is bad
             if (_nextCheckReloadTime < Time.time)
             {
+                _nextCheckReloadTime = Time.time + 0.5f;
                 _needToReload = checkNeedToReload();
-                if (_needToReload)
-                {
-                    _nextCheckReloadTime = Time.time + 1f;
-                }
             }
             return _needToReload;
         }
