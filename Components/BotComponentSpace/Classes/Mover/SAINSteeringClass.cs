@@ -227,23 +227,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             _firstTurnBigSpeed = moveSettings.FIRST_TURN_BIG_SPEED;
         }
 
-        public void SetAimTarget(Vector3? target)
-        {
-            var aimData = BotOwner.AimingData;
-            if (aimData != null)
-            {
-                if (target == null)
-                {
-                    aimData.LoseTarget();
-                }
-                else
-                {
-                    aimData.SetTarget(target.Value);
-                    aimData.NodeUpdate();
-                }
-            }
-        }
-
         public void Dispose()
         {
         }
@@ -426,7 +409,16 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return false;
             }
-            return AimStatus != AimStatus.NoTarget;
+            if (AimStatus == AimStatus.NoTarget)
+            {
+                return false;
+            }
+            return canSeeAndShoot(Bot.Enemy) || canSeeAndShoot(Bot.LastEnemy);
+        }
+
+        private bool canSeeAndShoot(SAINEnemy enemy)
+        {
+            return enemy != null && enemy.IsVisible && enemy.CanShoot;
         }
 
         private bool enemyVisible()

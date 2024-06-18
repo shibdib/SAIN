@@ -138,8 +138,8 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [JsonIgnore]
         public float FIRST_CONTACT_ADD_CHANCE_100 = 100f;
 
-        [Hidden]
-        [JsonIgnore]
-        public float RECALC_SQR_DIST = 2f * 2f;
+        //[Hidden]
+        //[JsonIgnore]
+        //public float RECALC_SQR_DIST = 2f * 2f;
     }
 }

@@ -27,32 +27,27 @@ namespace SAIN.SAINComponent.Classes
             {
                 return;
             }
-
-            if (!BotComponent.Player.IsSprintEnabled)
+            if (BotComponent.Player.IsSprintEnabled)
             {
-                if (BotOwner.WeaponManager.Selector.EquipmentSlot == EquipmentSlot.Holster
-                    && !BotOwner.WeaponManager.HaveBullets
-                    && !BotOwner.WeaponManager.Selector.TryChangeToMain())
-                {
-                    selectWeapon();
-                }
-
-                if (changeAimTimer < Time.time)
-                {
-                    changeAimTimer = Time.time + 0.5f;
-                    BotComponent.AimDownSightsController.UpdateADSstatus();
-                }
-
-                BotComponent.BotLight.HandleLightForEnemy();
-
-                if (BotOwner.WeaponManager.HaveBullets)
-                {
-                    aimAtEnemy();
-                    return;
-                }
+                return;
             }
 
-            BotOwner.AimingData?.LoseTarget();
+            if (BotOwner.WeaponManager.Selector.EquipmentSlot == EquipmentSlot.Holster
+                && !BotOwner.WeaponManager.HaveBullets
+                && !BotOwner.WeaponManager.Selector.TryChangeToMain())
+            {
+                selectWeapon();
+            }
+
+            if (changeAimTimer < Time.time)
+            {
+                changeAimTimer = Time.time + 0.5f;
+                BotComponent.AimDownSightsController.UpdateADSstatus();
+            }
+
+            BotComponent.BotLight.HandleLightForEnemy();
+
+            aimAtEnemy();
         }
 
         public void AllowUnpauseMove(bool value)
@@ -234,13 +229,18 @@ namespace SAIN.SAINComponent.Classes
         private void aimAtEnemy()
         {
             Vector3? pointToShoot = GetPointToShoot();
-            if (pointToShoot != null && 
-                BotOwner.AimingData.IsReady && 
-                !BotComponent.NoBushESP.NoBushESPActive && 
-                FriendlyFire.ClearShot)
+            if (pointToShoot != null)
             {
-                ReadyToShoot();
-                Shoot.Update();
+                BotOwner.AimingData.SetTarget(pointToShoot.Value);
+                BotOwner.AimingData.NodeUpdate();
+
+                if (BotOwner.AimingData.IsReady &&
+                    !BotComponent.NoBushESP.NoBushESPActive &&
+                    FriendlyFire.ClearShot)
+                {
+                    ReadyToShoot();
+                    Shoot.Update();
+                }
             }
         }
 
@@ -338,7 +338,6 @@ namespace SAIN.SAINComponent.Classes
         protected virtual Vector3? GetPointToShoot()
         {
             Vector3? target = GetTarget();
-            BotComponent.Steering.SetAimTarget(target);
             if (target != null)
             {
                 Target = target.Value;
@@ -360,6 +359,10 @@ namespace SAIN.SAINComponent.Classes
 
         public override void Update()
         {
+            if (!this.botOwner_0.WeaponManager.HaveBullets)
+            {
+                return;
+            }
             if (this.botOwner_0.ShootData.Shoot())
             {
                 this.botOwner_0.Memory.GoalEnemy?.SetLastShootTime();
