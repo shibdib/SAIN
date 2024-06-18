@@ -8,19 +8,6 @@ using UnityEngine;
 
 namespace SAIN.Patches.Generic
 {
-    public class InBunkerPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(EnvironmentManager), "SetTriggerForPlayer");
-        }
-
-        [PatchPrefix]
-        public static void PatchPrefix(IPlayer player, IndoorTrigger trigger)
-        {
-        }
-    }
-
     public class EncumberedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

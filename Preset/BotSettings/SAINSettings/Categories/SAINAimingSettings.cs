@@ -126,14 +126,20 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float ANY_PART_SHOOT_TIME = 0f;
+        public float ANY_PART_SHOOT_TIME = 2f;
 
-        [Hidden]
-        [JsonIgnore]
+        [Name("Enemy First Contact Reaction Delay")]
+        [Default(0.2f)]
+        [MinMax(0f, 1f, 100f)]
+        [Advanced]
         public float FIRST_CONTACT_ADD_SEC = 0.2f;
 
         [Hidden]
         [JsonIgnore]
         public float FIRST_CONTACT_ADD_CHANCE_100 = 100f;
+
+        [Hidden]
+        [JsonIgnore]
+        public float RECALC_SQR_DIST = 2f * 2f;
     }
 }

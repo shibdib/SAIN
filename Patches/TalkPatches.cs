@@ -28,9 +28,9 @@ namespace SAIN.Patches.Talk
         [PatchPrefix]
         public static void PatchPrefix(Player __instance, float damage)
         {
-            if (__instance?.HealthController?.IsAlive == true &&
-                (!__instance.MovementContext.PhysicalConditionIs(EPhysicalCondition.OnPainkillers) || damage > 4f) &&
-                __instance.IsAI)
+            if (__instance?.HealthController?.IsAlive == true && 
+                __instance.IsAI &&
+                (!__instance.MovementContext.PhysicalConditionIs(EPhysicalCondition.OnPainkillers) || damage > 4f))
             {
                 __instance.Speaker?.Play(EPhraseTrigger.OnBeingHurt, __instance.HealthStatus, true, null);
             }

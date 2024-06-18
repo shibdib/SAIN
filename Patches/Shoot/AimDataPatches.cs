@@ -194,7 +194,8 @@ namespace SAIN.Patches.Shoot.Aim
             timeToAimResult = calcFasterCQB(distance, timeToAimResult, sainAimSettings, stringBuilder);
             timeToAimResult = calcAttachmentMod(botComponent, timeToAimResult, stringBuilder);
 
-            if (stringBuilder != null)
+            if (stringBuilder != null && 
+                botOwner.Memory.GoalEnemy?.Person?.IsYourPlayer == true)
             {
                 Logger.LogDebug(stringBuilder.ToString());
             }
@@ -306,6 +307,49 @@ namespace SAIN.Patches.Shoot.Aim
                 aimTimeResult /= modifier;
             }
             return aimTimeResult;
+        }
+    }
+
+    public class AimRotateSpeedPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(HelpersGClass.AimDataType, "method_11");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref Vector3 ___vector3_2, ref Vector3 ___vector3_0, Vector3 dir)
+        {
+            ___vector3_2 = dir;
+            ___botOwner_0.Steering.LookToDirection(dir, 250);
+            ___botOwner_0.Steering.SetYByDir(___vector3_0);
+            return false;
+        }
+    }
+
+    internal class ForceNoHeadAimPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(EnemyInfo), "method_7");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref bool withLegs, ref bool canBehead, EnemyInfo __instance)
+        {
+            if (!__instance.Person.IsAI)
+            {
+                canBehead =
+                    SAINPlugin.LoadedPreset.GlobalSettings.Aiming.PMCSAimForHead &&
+                    EnumValues.WildSpawn.IsPMC(__instance.Owner.Profile.Info.Settings.Role);
+
+                withLegs = true;
+            }
+            else
+            {
+                canBehead = true;
+                withLegs = true;
+            }
         }
     }
 }

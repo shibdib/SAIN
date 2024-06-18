@@ -1,4 +1,5 @@
 ﻿using EFT;
+using HarmonyLib;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Enemy;
 using System;
@@ -10,6 +11,15 @@ namespace SAIN.Layers
 {
     public static class DebugOverlay
     {
+        static DebugOverlay()
+        {
+            TimeToAim = AccessTools.Field(Helpers.HelpersGClass.AimDataType, "float_7");
+            timeAiming = AccessTools.Field(Helpers.HelpersGClass.AimDataType, "float_5");
+        }
+
+        private static FieldInfo TimeToAim;
+        private static FieldInfo timeAiming;
+
         private static void DisplayPropertyAndFieldValues(object obj, StringBuilder stringBuilder)
         {
             if (obj == null)
@@ -77,8 +87,14 @@ namespace SAIN.Layers
 
                 stringBuilder.AppendLine();
 
-                stringBuilder.AppendLine($"Aim Status {sain.Steering.AimStatus} Aim Time: {sain.LastAimTime} Ready? {sain.BotOwner.AimingData?.IsReady}");
-                stringBuilder.AppendLine($"Friendly Fire Status {sain.FriendlyFireClass.FriendlyFireStatus} No Bush ESP Status: {sain.NoBushESP.NoBushESPActive} Ready? {sain.BotOwner.AimingData?.IsReady}");
+                if (sain.BotOwner.AimingData != null)
+                {
+                    stringBuilder.AppendLine($"Aim Status {sain.Steering.AimStatus} Last Aim Time: {sain.LastAimTime}");
+                    stringBuilder.AppendLine($"Aim Time {timeAiming.GetValue(sain.BotOwner.AimingData)} TimeToAim: {TimeToAim.GetValue(sain.BotOwner.AimingData)}");
+                    stringBuilder.AppendLine($"Aim Offset Magnitude {(sain.BotOwner.AimingData.RealTargetPoint - sain.BotOwner.AimingData.EndTargetPoint).magnitude}");
+                    stringBuilder.AppendLine($"Friendly Fire Status {sain.FriendlyFireClass.FriendlyFireStatus} No Bush ESP Status: {sain.NoBushESP.NoBushESPActive}");
+
+                }
 
                 if (sain.HasEnemy)
                 {

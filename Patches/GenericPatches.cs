@@ -256,69 +256,6 @@ namespace SAIN.Patches.Generic
         }
     }
 
-    public class AimRotateSpeedPatch : ModulePatch
-    {
-        private static Type _aimingDataType;
-        private static MethodInfo _aimingDataMethod11;
-
-        protected override MethodBase GetTargetMethod()
-        {
-            //return AccessTools.Method(typeof(GClass544), "method_7");
-            _aimingDataType = PatchConstants.EftTypes.Single(x => x.GetProperty("LastSpreadCount") != null && x.GetProperty("LastAimTime") != null);
-            _aimingDataMethod11 = AccessTools.Method(_aimingDataType, "method_11");
-            return _aimingDataMethod11;
-        }
-
-        [PatchPrefix]
-        public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref Vector3 ___vector3_2, ref Vector3 ___vector3_0, Vector3 dir)
-        {
-            ___vector3_2 = dir;
-            ___botOwner_0.Steering.LookToDirection(dir, 250);
-            ___botOwner_0.Steering.SetYByDir(___vector3_0);
-            return false;
-        }
-    }
-
-    internal class OnMakingShotRecoilPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod() => typeof(Player).GetMethod("OnMakingShot");
-
-        [PatchPrefix]
-        public static void PatchPrefix(ref Player __instance)
-        {
-            if (SAINEnableClass.GetSAIN(__instance, out var sain, nameof(OnMakingShotRecoilPatch)))
-            {
-                sain.Info.WeaponInfo.Recoil.WeaponShot();
-            }
-        }
-    }
-
-    internal class ForceNoHeadAimPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(EnemyInfo), "method_7");
-        }
-
-        [PatchPrefix]
-        public static void PatchPrefix(ref bool withLegs, ref bool canBehead, EnemyInfo __instance)
-        {
-            if (!__instance.Person.IsAI)
-            {
-                canBehead = 
-                    SAINPlugin.LoadedPreset.GlobalSettings.Aiming.PMCSAimForHead &&
-                    EnumValues.WildSpawn.IsPMC(__instance.Owner.Profile.Info.Settings.Role);
-
-                withLegs = true;
-            }
-            else
-            {
-                canBehead = true;
-                withLegs = true;
-            }
-        }
-    }
-
     internal class NoTeleportPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

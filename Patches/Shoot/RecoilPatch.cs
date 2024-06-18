@@ -7,7 +7,21 @@ using UnityEngine;
 
 namespace SAIN.Patches.Shoot.Recoil
 {
-    public class RecoilPatch : ModulePatch
+    internal class OnMakingShotRecoilPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod() => typeof(Player).GetMethod("OnMakingShot");
+
+        [PatchPrefix]
+        public static void PatchPrefix(ref Player __instance)
+        {
+            if (SAINEnableClass.GetSAIN(__instance, out var sain, nameof(OnMakingShotRecoilPatch)))
+            {
+                sain.Info.WeaponInfo.Recoil.WeaponShot();
+            }
+        }
+    }
+
+    internal class RecoilPatch : ModulePatch
     {
         private static PropertyInfo _RecoilDataPI;
 
@@ -24,7 +38,7 @@ namespace SAIN.Patches.Shoot.Recoil
         }
     }
 
-    public class LoseRecoilPatch : ModulePatch
+    internal class LoseRecoilPatch : ModulePatch
     {
         private static PropertyInfo _RecoilDataPI;
 
@@ -59,7 +73,7 @@ namespace SAIN.Patches.Shoot.Recoil
         }
     }
 
-    public class EndRecoilPatch : ModulePatch
+    internal class EndRecoilPatch : ModulePatch
     {
         private static PropertyInfo _RecoilDataPI;
 

@@ -94,19 +94,12 @@ namespace SAIN
                 typeof(Patches.Generic.GetBotSpawner),
                 typeof(Patches.Generic.GrenadeThrownActionPatch),
                 typeof(Patches.Generic.GrenadeExplosionActionPatch),
-                typeof(Patches.Generic.AimRotateSpeedPatch),
-                typeof(Patches.Generic.OnMakingShotRecoilPatch),
                 typeof(Patches.Generic.BotGroupAddEnemyPatch),
-                typeof(Patches.Generic.ForceNoHeadAimPatch),
                 typeof(Patches.Generic.NoTeleportPatch),
                 typeof(Patches.Generic.ShallKnowEnemyPatch),
                 typeof(Patches.Generic.ShallKnowEnemyLatePatch),
-                //typeof(Patches.Generic.SkipLookForCoverPatch),
                 typeof(Patches.Generic.BotMemoryAddEnemyPatch),
-
-                //typeof(Patches.Generic.SteeringPatch),
                 typeof(Patches.Generic.EncumberedPatch),
-                typeof(Patches.Generic.InBunkerPatch),
                 typeof(Patches.Generic.DoorOpenerPatch),
 
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
@@ -114,7 +107,6 @@ namespace SAIN
                 typeof(Patches.Hearing.HearingSensorPatch),
 
                 typeof(Patches.Hearing.BulletImpactPatch),
-                //typeof(Patches.Generic.BulletImpactPatch2),
                 typeof(Patches.Hearing.TreeSoundPatch),
                 typeof(Patches.Hearing.DoorBreachSoundPatch),
                 typeof(Patches.Hearing.DoorOpenSoundPatch),
@@ -151,10 +143,14 @@ namespace SAIN
                 typeof(Patches.Shoot.Aim.AimTimePatch),
                 typeof(Patches.Shoot.Aim.ScatterPatch),
                 typeof(Patches.Shoot.Aim.WeaponPresetPatch),
+                typeof(Patches.Shoot.Aim.ForceNoHeadAimPatch),
+                typeof(Patches.Shoot.Aim.AimRotateSpeedPatch),
 
+                typeof(Patches.Shoot.Recoil.OnMakingShotRecoilPatch),
                 typeof(Patches.Shoot.Recoil.RecoilPatch),
                 typeof(Patches.Shoot.Recoil.LoseRecoilPatch),
                 typeof(Patches.Shoot.Recoil.EndRecoilPatch),
+
                 typeof(Patches.Shoot.RateOfFire.FullAutoPatch),
                 typeof(Patches.Shoot.RateOfFire.SemiAutoPatch),
                 typeof(Patches.Shoot.RateOfFire.SemiAutoPatch2),

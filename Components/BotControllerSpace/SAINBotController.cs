@@ -78,8 +78,8 @@ namespace SAIN.Components
 
         public void BotChangedWeapon(BotOwner botOwner, IFirearmHandsController firearmController)
         {
-            if (botOwner != null)
-                OnBotWeaponChange?.Invoke(botOwner.name, firearmController);
+           // if (botOwner != null)
+           //     OnBotWeaponChange?.Invoke(botOwner.name, firearmController);
         }
 
         public void PlayerEnviromentChanged(string profileID, IndoorTrigger trigger)

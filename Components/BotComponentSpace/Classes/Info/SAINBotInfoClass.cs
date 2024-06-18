@@ -1,13 +1,10 @@
 ﻿using EFT;
 using SAIN.Helpers;
 using SAIN.Plugin;
-using SAIN.Preset;
 using SAIN.Preset.BotSettings.SAINSettings;
 using SAIN.Preset.Personalities;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using static SAIN.Preset.Personalities.PersonalitySettingsClass;
 using Random = UnityEngine.Random;
 
 namespace SAIN.SAINComponent.Classes.Info
@@ -49,12 +46,9 @@ namespace SAIN.SAINComponent.Classes.Info
         public void GetFileSettings()
         {
             FileSettings = SAINPlugin.LoadedPreset.BotSettings.GetSAINSettings(WildSpawnType, BotDifficulty);
-
             CalcPersonality();
-
             UpdateExtractTime();
-
-            SetConfigValues(FileSettings);
+            //SetConfigValues(FileSettings);
         }
 
         public void CalcPersonality()
@@ -113,12 +107,6 @@ namespace SAIN.SAINComponent.Classes.Info
                             //Logger.NotifyInfo(message);
 
                             eftVarField.SetValue(eftCategory, sainValue);
-                        }
-                        else
-                        {
-                            string message = $"[{sainVarField.Name}] : Does Not Exist in EFT Bot Settings";
-                            //Logger.LogInfo(message);
-                            //Logger.NotifyInfo(message);
                         }
                     }
                 }
