@@ -47,8 +47,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
             }
 
-            if (_recalcMoveTimer < Time.time && 
-                !SAINBot.Mover.SprintController.Running)
+            if (shallRecalcDestination())
             {
                 _moveSuccess = moveToCover(out bool sprinting, out CoverPoint coverDestination, false);
                 if (!_moveSuccess)
@@ -86,6 +85,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (SAINBot.Cover.CoverPoints.Count == 0 && !_moveSuccess)
             {
+                SAINBot.Mover.EnableSprintPlayer(false);
                 SAINBot.Cover.CoverInUse = null;
                 SAINBot.Mover.SprintController.CancelRun();
                 SAINBot.Mover.DogFight.DogFightMove(false);
@@ -100,12 +100,19 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (!SAINBot.Mover.SprintController.Running)
             {
+                SAINBot.Mover.EnableSprintPlayer(false);
                 if (!SAINBot.Steering.SteerByPriority(false))
                 {
                     SAINBot.Steering.LookToLastKnownEnemyPosition(SAINBot.Enemy);
                 }
                 Shoot.Update();
             }
+        }
+
+        private bool shallRecalcDestination()
+        {
+            return _recalcMoveTimer < Time.time &&
+                (!SAINBot.Mover.SprintController.Running || SAINBot.Cover.CoverInUse?.IsBad == true);
         }
 
         private void jumpToCover()
@@ -229,10 +236,10 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             Vector3 destination = coverPoint.Position;
 
-            if (tooCloseToGrenade(destination))
-            {
-                return false;
-            }
+            //if (tooCloseToGrenade(destination))
+            //{
+            //    return false;
+            //}
 
             // Testing new pathfinder for running
             if (!tryWalk &&

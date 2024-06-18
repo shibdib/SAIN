@@ -89,7 +89,9 @@ namespace SAIN
                 typeof(Patches.Generic.StopSetToNavMeshPatch),
                 typeof(Patches.Generic.TurnDamnLightOffPatch),
                 typeof(Patches.Generic.RotateClampPatch),
-                typeof(Patches.Generic.HealCancelPatch),
+
+                //typeof(Patches.Generic.HealCancelPatch),
+
                 typeof(Patches.Generic.GetBotController),
                 typeof(Patches.Generic.GetBotSpawner),
                 typeof(Patches.Generic.GrenadeThrownActionPatch),

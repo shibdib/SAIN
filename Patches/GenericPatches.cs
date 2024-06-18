@@ -241,15 +241,18 @@ namespace SAIN.Patches.Generic
                     ___float_0 += 5f;
                 }
                 ___bool_1 = true;
-                SAINPlugin.BotController?.StartCoroutine(TakePrevWeapon(___botOwner_0));
+                SAINPlugin.BotController?.StartCoroutine(cancelHeal(___botOwner_0));
             }
             return false;
         }
 
-        private static IEnumerator TakePrevWeapon(BotOwner bot)
+        private static IEnumerator cancelHeal(BotOwner bot)
         {
             yield return new WaitForSeconds(0.25f);
-            if (bot != null && bot.GetPlayer != null && bot.GetPlayer.HealthController.IsAlive)
+            if (bot != null && 
+                bot.GetPlayer != null && 
+                bot.GetPlayer.HealthController.IsAlive && 
+                bot.Medecine?.Using == true)
             {
                 bot.WeaponManager?.Selector?.TakePrevWeapon();
             }

@@ -1,4 +1,6 @@
 ﻿using EFT;
+using EFT.InventoryLogic;
+using SAIN.SAINComponent.Classes.Enemy;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Decision
@@ -9,9 +11,9 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
         }
 
-        private static readonly float StartFirstAid_Injury_SeenRecentTime = 8f;
-        private static readonly float StartFirstAid_HeavyInjury_SeenRecentTime = 6f;
-        private static readonly float StartFirstAid_FatalInjury_SeenRecentTime = 4f;
+        private static readonly float StartFirstAid_Injury_SeenRecentTime = 12f;
+        private static readonly float StartFirstAid_HeavyInjury_SeenRecentTime = 8f;
+        private static readonly float StartFirstAid_FatalInjury_SeenRecentTime = 5f;
         private static readonly float StartReload_LowAmmo_SeenRecentTime = 5f;
 
         public void Init()
@@ -109,7 +111,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         }
 
         private float BusyHandsTimer;
-        private float NextReloadTime;
+        private float _nextCheckReloadTime;
 
         private bool CheckContinueSelfAction(out SelfDecision Decision)
         {
@@ -215,7 +217,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool CanUseSurgery => BotOwner.Medecine?.SurgicalKit?.ShallStartUse() == true && BotOwner.Medecine?.FirstAid?.IsBleeding == false;
 
-        public bool CanReload => BotOwner.WeaponManager?.IsReady == true && BotOwner.WeaponManager?.HaveBullets == false;
+        public bool CanReload => BotOwner.WeaponManager?.IsReady == true && BotOwner.WeaponManager?.Reload.CanReload(false) == true;
 
         private bool StartUseStims()
         {
@@ -335,48 +337,187 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool StartBotReload()
         {
-            if (BotOwner.WeaponManager?.Reload.Reloading == true)
+            if (BotOwner.WeaponManager?.Reload?.Reloading == true)
             {
+                if (Bot.Enemy?.IsVisible == true && BotOwner.WeaponManager.Reload.BulletCount > 1)
+                {
+                    TryStopReload();
+                    return false;
+                }
                 return true;
             }
+
             // Only allow reloading every 1 seconds to avoid spamming reload when the weapon data is bad
-            if (NextReloadTime > Time.time)
+            if (_nextCheckReloadTime < Time.time)
+            {
+                _needToReload = checkNeedToReload();
+                if (_needToReload)
+                {
+                    _nextCheckReloadTime = Time.time + 0.5f;
+                }
+            }
+            return _needToReload;
+        }
+
+        public void TryStopReload()
+        {
+            if (this._nextPossibleTryStopReload < Time.time)
+            {
+                this._nextPossibleTryStopReload = Time.time + 1f;
+                BotOwner.ShootData.Shoot();
+            }
+        }
+
+        private float _nextPossibleTryStopReload;
+
+        private bool checkNeedToReload()
+        {
+            if (BotOwner.WeaponManager?.IsReady == false)
             {
                 return false;
             }
 
-            bool needToReload = false;
-            if (CanReload)
+            if (BotOwner.WeaponManager.Malfunctions.HaveMalfunction() && 
+                BotOwner.WeaponManager.Malfunctions.MalfunctionType() != Weapon.EMalfunctionState.Misfire)
             {
-                if (BotOwner.WeaponManager.Reload.BulletCount == 0)
-                {
-                    needToReload = true;
-                }
-                else if (LowOnAmmo())
-                {
-                    var enemy = Bot.Enemy;
-                    if (enemy == null)
-                    {
-                        needToReload = true;
-                    }
-                    else if (enemy.TimeSinceSeen > StartReload_LowAmmo_SeenRecentTime)
-                    {
-                        needToReload = true;
-                    }
-                    else if (EnemyDistance != EPathDistance.VeryClose && !enemy.IsVisible)
-                    {
-                        needToReload = true;
-                    }
-                }
+                return false;
             }
 
-            if (needToReload)
+            var currentMagazine = BotOwner.WeaponManager.CurrentWeapon.GetCurrentMagazine();
+            if (currentMagazine != null && currentMagazine.MaxCount == BotOwner.WeaponManager.CurrentWeapon.GetCurrentMagazineCount())
             {
-                NextReloadTime = Time.time + 1;
+                return false;
             }
 
-            return needToReload;
+            float ammoRatio = AmmoRatio;
+            if (ammoRatio >= 0.85f)
+            {
+                return false;
+            }
+            if (ammoRatio <= 0)
+            {
+                return true;
+            }
+
+            var enemy = Bot.Enemy;
+            if (enemy == null)
+            {
+                return ammoRatio < 0.8f;
+            }
+
+            EPathDistance distance = enemy.CheckPathDistance();
+
+            if (ammoRatio > 0.66f)
+            {
+                if (enemy.TimeSinceSeen > 15f)
+                {
+                    return true;
+                }
+                switch (distance)
+                {
+                    case EPathDistance.VeryClose:
+                        break;
+
+                    case EPathDistance.Close:
+                        if (enemyNotSeenFor(enemy, 12f))
+                        {
+                            return true;
+                        }
+                        break;
+
+                    case EPathDistance.Mid:
+                        if (enemyNotSeenFor(enemy, 6f))
+                        {
+                            return true;
+                        }
+                        break;
+
+                    case EPathDistance.Far:
+                    case EPathDistance.VeryFar:
+                        if (enemyNotSeenFor(enemy, 3f))
+                        {
+                            return true;
+                        }
+                        break;
+                }
+                return false;
+            }
+
+            if (ammoRatio > 0.4f)
+            {
+                if (enemy.TimeSinceSeen > 10f)
+                {
+                    return true;
+                }
+                switch (distance)
+                {
+                    case EPathDistance.VeryClose:
+                        break;
+
+                    case EPathDistance.Close:
+                        if (enemyNotSeenFor(enemy, 8f))
+                        {
+                            return true;
+                        }
+                        break;
+
+                    case EPathDistance.Mid:
+                        if (enemyNotSeenFor(enemy, 4f))
+                        {
+                            return true;
+                        }
+                        break;
+
+                    case EPathDistance.Far:
+                    case EPathDistance.VeryFar:
+                        if (enemyNotSeenFor(enemy, 2f))
+                        {
+                            return true;
+                        }
+                        break;
+                }
+                return false;
+            }
+
+            if (ammoRatio > 0.2f)
+            {
+                if (enemy.TimeSinceSeen > 4f)
+                {
+                    return true;
+                }
+                switch (distance)
+                {
+                    case EPathDistance.VeryClose:
+                    case EPathDistance.Close:
+                        if (enemyNotSeenFor(enemy, 2f))
+                        {
+                            return true;
+                        }
+                        break;
+
+                    case EPathDistance.Mid:
+                    case EPathDistance.Far:
+                    case EPathDistance.VeryFar:
+                        if (enemyNotSeenFor(enemy, 1f))
+                        {
+                            return true;
+                        }
+                        break;
+                }
+                return false;
+            }
+
+            return enemy.TimeSinceSeen > 2f;
         }
+
+        private bool enemyNotSeenFor(SAINEnemy enemy, float time)
+        {
+            return enemy != null &&
+                !enemy.IsVisible &&
+                enemy.TimeSinceSeen > time;
+        }
+
+        private bool _needToReload;
 
         public bool LowOnAmmo(float ratio = 0.3f)
         {
