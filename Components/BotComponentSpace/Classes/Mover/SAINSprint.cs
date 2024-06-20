@@ -7,7 +7,9 @@ using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
@@ -35,18 +37,11 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public SAINSprint(BotComponent sain) : base(sain)
         {
-            _agent = sain.gameObject.GetComponent<NavMeshAgent>();
-            baseRadius = _agent.radius;
         }
-
-        float baseRadius;
 
         public void Init()
         {
         }
-
-        private NavMeshAgent _agent;
-
 
         public void Update()
         {
@@ -61,31 +56,80 @@ namespace SAIN.SAINComponent.Classes.Mover
                 Bot.StopCoroutine(_runToPointCoroutine);
                 _runToPointCoroutine = null;
                 Bot.Mover.Sprint(false);
-                _agent.radius = baseRadius;
+                _path.Clear();
             }
+        }
+
+        public bool RunToPointByWay(NavMeshPath way, ESprintUrgency urgency, bool checkSameWay = true, System.Action callback = null)
+        {
+            if (!getLastCorner(way, out Vector3 point))
+            {
+                return false;
+            }
+
+            if (checkSameWay && IsPointSameWay(point))
+            {
+                return true;
+            }
+            startRun(way, point, urgency, callback);
+            return true;
+        }
+
+        private bool getLastCorner(NavMeshPath way, out Vector3 result)
+        {
+            Vector3[] corners = way?.corners;
+            if (corners == null)
+            {
+                result = Vector3.zero;
+                return false;
+            }
+            if (way.status != NavMeshPathStatus.PathComplete)
+            {
+                result = Vector3.zero;
+                return false;
+            }
+
+            Vector3? last = corners.LastElement();
+            if (last == null)
+            {
+                result = Vector3.zero;
+                return false;
+            }
+
+            result = last.Value;
+            return true;
         }
 
         public bool RunToPoint(Vector3 point, ESprintUrgency urgency, bool checkSameWay = true, System.Action callback = null)
         {
-            if (checkSameWay && 
-                Running && 
-                (LastRunDestination - point).sqrMagnitude < 0.5f)
+            if (checkSameWay && IsPointSameWay(point))
             {
                 return true;
             }
-            //_agent.radius = baseRadius + 0.1f;
-            if (Bot.Mover.CanGoToPoint(point, out NavMeshPath path))
+
+            if (!Bot.Mover.CanGoToPoint(point, out NavMeshPath path))
             {
-                isShortCorner = false;
-                LastRunDestination = point; 
-                CancelRun();
-                CurrentPath = path;
-                _lastUrgency = urgency;
-                _runToPointCoroutine = Bot.StartCoroutine(RunToPoint(path, urgency, callback));
-                return Running;
+                return false;
             }
-            //_agent.radius = baseRadius;
-            return false;
+
+            startRun(path, point, urgency, callback);
+            return true;
+        }
+
+        private bool IsPointSameWay(Vector3 point, float minDistSqr = 0.5f)
+        {
+            return Running && (LastRunDestination - point).sqrMagnitude < minDistSqr;
+        }
+
+        private void startRun(NavMeshPath path, Vector3 point, ESprintUrgency urgency, System.Action callback)
+        {
+            if (_runToPointCoroutine != null)
+                Bot.StopCoroutine(_runToPointCoroutine);
+
+            LastRunDestination = point;
+            CurrentPath = path;
+            _lastUrgency = urgency;
+            _runToPointCoroutine = Bot.StartCoroutine(runToPointCoroutine(path.corners, urgency, callback));
         }
 
         private float _timeStartRun;
@@ -105,35 +149,36 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public RunStatus CurrentRunStatus { get; private set; }
 
-        public Vector3 currentCorner()
+        public Vector3 CurrentCornerDestination()
         {
-            if (_currentPath == null)
+            if (_path.Count <= _currentIndex)
             {
                 return Vector3.zero;
             }
-            return _currentPath.corners[_currentIndex];
+            return _path[_currentIndex];
         }
 
         private int _currentIndex = 0;
-        private NavMeshPath _currentPath;
 
-        private IEnumerator RunToPoint(NavMeshPath path, ESprintUrgency urgency, System.Action callback = null)
+        private IEnumerator runToPointCoroutine(Vector3[] corners, ESprintUrgency urgency, System.Action callback = null)
         {
+            _path.Clear();
+            _path.AddRange(corners);
+
+            isShortCorner = false;
             _timeStartCorner = Time.time;
-            _currentPath = path;
             positionMoving = true;
             _timeNotMoving = -1f;
             _timeStartRun = Time.time;
 
             BotOwner.Mover.Stop();
-            //BotOwner.Mover.IsMoving = true;
             _currentIndex = 1;
 
             // First step, look towards the path we want to run
             //yield return firstTurn(path.corners[1]);
 
             // Start running!
-            yield return runPath(path, urgency);
+            yield return runPath(urgency);
 
             callback?.Invoke();
 
@@ -141,45 +186,53 @@ namespace SAIN.SAINComponent.Classes.Mover
             CancelRun();
         }
 
-        private void moveToNextCorner(NavMeshPath path)
+        private readonly List<Vector3> _path = new List<Vector3>();
+
+        private void moveToNextCorner()
         {
-            int total = totalCorners();
-            if (total > _currentIndex)
+            if (totalCorners() > _currentIndex)
             {
-                Vector3 current = _currentPath.corners[_currentIndex];
-                Vector3 next = _currentPath.corners[_currentIndex + 1];
-                isShortCorner = (current - next).magnitude < 0.25f;
+                checkCornerLength();
                 _currentIndex++;
-                _timeStartCorner = Time.time;
             }
+        }
+
+        private void checkCornerLength()
+        {
+            Vector3 current = _path[_currentIndex];
+            Vector3 next = _path[_currentIndex + 1];
+            isShortCorner = (current - next).magnitude < 0.25f;
+            _timeStartCorner = Time.time;
         }
 
         private float _timeStartCorner;
 
-        private Vector3? getNextCorner()
-        {
-            if (totalCorners() > _currentIndex)
-            {
-                return _currentPath.corners[_currentIndex + 1];
-            }
-            return null;
-        }
-
         private int totalCorners()
         {
-            return _currentPath != null ? _currentPath.corners.Length - 1 : 0;
+            return _path.Count - 1;
         }
 
         private bool onLastCorner()
         {
-            return _currentPath != null ? totalCorners() <= _currentIndex : false;
+            return totalCorners() <= _currentIndex;
+        }
+
+        private Vector3 lastCorner()
+        {
+            int count = _path.Count;
+            if (count == 0)
+            {
+                return Vector3.zero;
+            }
+            return _path[count - 1];
         }
 
         private static GlobalMoveSettings _moveSettings => SAINPlugin.LoadedPreset.GlobalSettings.Move;
 
-        private IEnumerator runPath(NavMeshPath path, ESprintUrgency urgency)
+        private IEnumerator runPath(ESprintUrgency urgency)
         {
-            for (int i = _currentIndex; i <= totalCorners(); i++)
+            int total = totalCorners();
+            for (int i = 1; i <= total; i++)
             {
                 // Track distance to target corner in the path.
                 float distToCurrent = float.MaxValue;
@@ -188,7 +241,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     distToCurrent = distanceToCurrentCornerSqr();
                     DistanceToCurrentCorner = distToCurrent;
 
-                    Vector3 current = currentCorner();
+                    Vector3 current = CurrentCornerDestination();
                     if (SAINPlugin.DebugMode)
                     {
                         DebugGizmos.Sphere(current, 0.1f);
@@ -199,7 +252,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     trackMovement();
 
                     // Start or stop sprinting with a buffer
-                    handleSprinting(distToCurrent, path, urgency);
+                    handleSprinting(distToCurrent, urgency);
 
                     if (BotOwner.DoorOpener.Interacting)
                     {
@@ -222,7 +275,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                         Bot.Mover.TryVault();
                     }
 
-                    Vector3 destination = currentCorner();
+                    Vector3 destination = CurrentCornerDestination();
                     float speed = IsSprintEnabled ? _moveSettings.BotSprintTurnSpeed : _moveSettings.BotSprintFirstTurnSpeed;
                     float dotProduct = steer(destination, speed);
                     move((destination - Bot.Position).normalized);
@@ -235,21 +288,12 @@ namespace SAIN.SAINComponent.Classes.Mover
 
                     yield return null;
                 }
-                moveToNextCorner(path);
+                moveToNextCorner();
             }
         }
 
         private bool isShortCorner;
-
         public float DistanceToCurrentCorner { get; private set; }
-
-        private bool checkMissedCorner(Vector3 currentCorner, float dotProduct)
-        {
-            _lastDotProduct = dotProduct;
-            return false;
-        }
-
-        private float _lastDotProduct;
 
         private float findStartSprintStamina(ESprintUrgency urgency)
         {
@@ -257,10 +301,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 case ESprintUrgency.None:
                 case ESprintUrgency.Low:
-                    return 0.5f;
+                    return 0.75f;
 
                 case ESprintUrgency.Middle:
-                    return 0.33f;
+                    return 0.5f;
 
                 case ESprintUrgency.High:
                     return 0.2f;
@@ -276,10 +320,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 case ESprintUrgency.None:
                 case ESprintUrgency.Low:
-                    return 0.25f;
+                    return 0.4f;
 
                 case ESprintUrgency.Middle:
-                    return 0.15f;
+                    return 0.2f;
 
                 case ESprintUrgency.High:
                     return 0.01f;
@@ -289,7 +333,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
-        private void handleSprinting(float distToCurrent, NavMeshPath path, ESprintUrgency urgency)
+        private void handleSprinting(float distToCurrent, ESprintUrgency urgency)
         {
             // I cant sprint :(
             if (!Player.MovementContext.CanSprint)
@@ -328,7 +372,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
 
             // We are arriving to our destination, stop sprinting when you get close.
-            if ((_currentPath.corners[_currentPath.corners.Length - 1] - BotPosition).magnitude < _moveSettings.BotSprintDistanceToStopSprintDestination)
+            if ((lastCorner() - BotPosition).magnitude <= _moveSettings.BotSprintDistanceToStopSprintDestination)
             {
                 Bot.Mover.EnableSprintPlayer(false);
                 CurrentRunStatus = RunStatus.ArrivingAtDestination;
@@ -369,14 +413,14 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool shallPauseSprintAngle()
         {
-            Vector3? currentCorner = this.currentCorner();
+            Vector3? currentCorner = this.CurrentCornerDestination();
             return currentCorner != null && 
                 checkShallPauseSprintFromTurn(currentCorner.Value, _moveSettings.BotSprintCurrentCornerAngleMax);
         }
 
         private bool shallPauseMoveAngle()
         {
-            Vector3? currentCorner = this.currentCorner();
+            Vector3? currentCorner = this.CurrentCornerDestination();
             return currentCorner != null &&
                 checkShallPauseSprintFromTurn(currentCorner.Value, 60f);
         }
@@ -457,7 +501,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private float distanceToCurrentCornerSqr()
         {
-            Vector3 dir = currentCorner() - BotPosition;
+            Vector3 dir = CurrentCornerDestination() - BotPosition;
             //dir.y = 0f;
             return dir.sqrMagnitude;
         }

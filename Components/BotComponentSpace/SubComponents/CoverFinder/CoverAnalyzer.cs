@@ -205,8 +205,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         {
             SAINEnemy enemy = Bot.Enemy;
             if (enemy != null
-                && enemy.Path.PathToEnemy != null
-                && !SAINBotSpaceAwareness.ArePathsDifferent(path, enemy.Path.PathToEnemy, 0.5f, 0.1f))
+                && enemy.EnemyPath.PathToEnemy != null
+                && !SAINBotSpaceAwareness.ArePathsDifferent(path, enemy.EnemyPath.PathToEnemy, 0.5f, 0.1f))
             {
                 return false;
             }

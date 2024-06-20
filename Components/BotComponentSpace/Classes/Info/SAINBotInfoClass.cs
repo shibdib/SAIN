@@ -157,15 +157,18 @@ namespace SAIN.SAINComponent.Classes.Info
             TimeBeforeSearch = searchTime;
             float random = 30f.Randomize(0.75f, 1.25f).Round100();
             float forgetTime = searchTime + random;
-            if (forgetTime < 120f)
+            if (forgetTime < 240f)
             {
-                forgetTime = 120f.Randomize(0.9f, 1.1f).Round100();
+                forgetTime = 240f.Randomize(0.9f, 1.1f).Round100();
             }
+
             BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = forgetTime;
             ForgetEnemyTime = forgetTime;
+            ForgetEnemyTimeAI = forgetTime * 0.66f;
         }
 
         public float ForgetEnemyTime { get; private set; }
+        public float ForgetEnemyTimeAI { get; private set; }
 
         private void UpdateExtractTime()
         {

@@ -60,7 +60,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float calcMovementMod()
         {
-            float velocity = Enemy.Vision.EnemyVelocity;
+            float velocity = Enemy.EnemyVision.EnemyVelocity;
             float result = Mathf.Lerp(0.9f, _sprintMod, velocity);
 
             // if (EnemyPlayer.IsYourPlayer &&
@@ -77,8 +77,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float calcAngleMod()
         {
             // Reduce Bot Periph Vision
-            float angleToEnemy = Enemy.Vision.AngleToEnemy;
-            float maxAngle = Enemy.Vision.MaxVisionAngle;
+            float angleToEnemy = Enemy.EnemyVision.AngleToEnemy;
+            float maxAngle = Enemy.EnemyVision.MaxVisionAngle;
             if (angleToEnemy > maxAngle)
             {
                 return 0f;

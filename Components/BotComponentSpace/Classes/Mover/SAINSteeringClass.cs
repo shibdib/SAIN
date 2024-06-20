@@ -379,18 +379,18 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return lastKnown;
             }
-            Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
+            Vector3? blindCornerToEnemy = enemy.EnemyPath.BlindCornerToEnemy;
             if (blindCornerToEnemy != null)
             {
                 return adjustLookPoint(blindCornerToEnemy.Value);
             }
-            Vector3? lastCorner = enemy.Path.LastCornerToEnemy;
+            Vector3? lastCorner = enemy.EnemyPath.LastCornerToEnemy;
             if (lastCorner != null &&
                 enemy.CanSeeLastCornerToEnemy)
             {
                 return adjustLookPoint(lastCorner.Value) + _weaponRootOffset;
             }
-            var enemyPath = enemy.Path.PathToEnemy;
+            var enemyPath = enemy.EnemyPath.PathToEnemy;
             if (enemyPath != null &&
                 enemyPath.corners.Length > 2)
             {

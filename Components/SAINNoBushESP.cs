@@ -1,19 +1,12 @@
-﻿using BepInEx.Logging;
-using EFT;
+﻿using EFT;
 using HarmonyLib;
-using SAIN.Components;
+using SAIN.Preset.GlobalSettings;
+using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes.Enemy;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using System;
-using SAIN.Preset.GlobalSettings;
-using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Decision;
-using SAIN.SAINComponent.Classes.Talk;
-using SAIN.SAINComponent.Classes.WeaponFunction;
-using SAIN.SAINComponent.Classes.Mover;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents;
 
 namespace SAIN.Components
 {
@@ -31,8 +24,6 @@ namespace SAIN.Components
     {
         static SAINNoBushESP()
         {
-            Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(SAINNoBushESP));
-
             Type botType = typeof(BotOwner);
 
             Type memoryType = AccessTools.Field(
@@ -68,14 +59,12 @@ namespace SAIN.Components
             SAIN = sain;
         }
 
-        private static NoBushESPSettings Settings => SAINPlugin.LoadedPreset?.GlobalSettings?.NoBushESP;
-        private static bool UserToggle => Settings?.NoBushESPToggle == true;
-        private static bool EnhancedChecks => Settings?.NoBushESPEnhanced == true;
-        private static float EnhancedRatio => Settings == null ? 0.75f : Settings.NoBushESPEnhancedRatio;
-        private static float Frequency => Settings == null ? 0.2f : Settings.NoBushESPFrequency;
-        private static bool DebugMode => Settings?.NoBushESPDebugMode == true;
-
-        private static readonly ManualLogSource Logger;
+        private static NoBushESPSettings Settings => SAINPlugin.LoadedPreset.GlobalSettings.NoBushESP;
+        private static bool UserToggle => Settings.NoBushESPToggle;
+        private static bool EnhancedChecks => Settings.NoBushESPEnhanced;
+        private static float EnhancedRatio => Settings.NoBushESPEnhancedRatio;
+        private static float Frequency => Settings.NoBushESPFrequency;
+        private static bool DebugMode => Settings.NoBushESPDebugMode;
 
         private void Update()
         {
@@ -100,19 +89,20 @@ namespace SAIN.Components
 
         public bool NoBushESPCheck()
         {
-            var enemy = BotOwner?.Memory?.GoalEnemy;
+            SAINEnemy sainEnemy = SAIN?.Enemy;
+            var enemy = sainEnemy?.EnemyInfo ?? BotOwner?.Memory?.GoalEnemy;
             if (enemy != null && (enemy.IsVisible || enemy.CanShoot))
             {
-                Player player = enemy?.Person as Player;
-                if (player?.IsAI == false)
+                IPlayer person = enemy.Person;
+                if (person != null && !person.IsAI)
                 {
                     if (EnhancedChecks)
                     {
-                        return NoBushESPCheckEnhanced(player);
+                        return NoBushESPCheckEnhanced(person);
                     }
                     else
                     {
-                        return NoBushESPCheck(player);
+                        return NoBushESPCheck(person);
                     }
                 }
             }
@@ -189,12 +179,12 @@ namespace SAIN.Components
 
                     BotOwner.AimingData?.LoseTarget();
 
-                    var vision = SAIN?.Enemy?.Vision;
+                    var vision = SAIN?.EnemyController.GetEnemy(enemy.ProfileId)?.EnemyVision;
                     if (vision != null)
                     {
                         bool forceOff = true;
-                        vision.UpdateCanShoot(forceOff);
-                        vision.UpdateVisible(forceOff);
+                        vision.UpdateCanShootState(forceOff);
+                        vision.UpdateVisibleState(forceOff);
                     }
                 }
             }

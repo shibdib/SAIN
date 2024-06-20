@@ -245,6 +245,8 @@
   <ItemGroup>
     <Compile Include="Components\BotComponentSpace\Classes\BotSurgery.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EInjurySeverity.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyHearing.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyKnownChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\WeaponAIPresetHistory.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ReloadClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SAINEnemySearchClass.cs" />

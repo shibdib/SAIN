@@ -178,7 +178,7 @@ namespace SAIN.Plugin
             }
 
             // Compare the corners in both paths, and check if the nodes used in each are the same.
-            if (SAINBotSpaceAwareness.ArePathsDifferent(path, enemy.Path.PathToEnemy, ratioSameOverAll, sqrDistCheck))
+            if (SAINBotSpaceAwareness.ArePathsDifferent(path, enemy.EnemyPath.PathToEnemy, ratioSameOverAll, sqrDistCheck))
             {
                 return false;
             }

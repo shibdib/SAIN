@@ -373,12 +373,12 @@ namespace SAIN.SAINComponent.Classes.Decision
                     bool inRange = false;
                     EEnemyAction vulnerableAction = enemy.EnemyStatus.VulnerableAction;
                     float modifier = vulnerableAction == EEnemyAction.UsingSurgery ? 2f : 1f;
-                    if (enemy.Path.PathDistance < RushEnemyMaxPathDistanceSprint
+                    if (enemy.EnemyPath.PathDistance < RushEnemyMaxPathDistanceSprint
                         && BotOwner?.CanSprintPlayer == true)
                     {
                         inRange = true;
                     }
-                    else if (enemy.Path.PathDistance < RushEnemyMaxPathDistance)
+                    else if (enemy.EnemyPath.PathDistance < RushEnemyMaxPathDistance)
                     {
                         inRange = true;
                     }

@@ -1,8 +1,5 @@
 ﻿using EFT;
-using EFT.InventoryLogic;
-using SAIN.Components.PlayerComponentSpace;
 using SAIN.Preset.GlobalSettings;
-using SAIN.SAINComponent.Classes.Info;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Enemy
@@ -90,9 +87,9 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float _minDistRepeatSeen = 1f;
         private float _maxDistRepeatSeen = 20f;
 
-        private float _minHeardSpeedCoef = 0.2f;
+        private float _minHeardSpeedCoef = 0.25f;
         private float _minDistRepeatHeard = 1f;
-        private float _maxDistRepeatHeard = 20f;
+        private float _maxDistRepeatHeard = 10f;
 
         private float _gainSightModifier;
         private float _nextCheckVisTime;
@@ -141,23 +138,29 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float calcPartsMod()
         {
-            if (!Enemy.IsAI)
+            if (Enemy.IsAI)
             {
-                float max = 1.75f;
-                float partRatio = GetRatioPartsVisible(EnemyInfo, out int visibleCount);
-                if (visibleCount < 1)
-                {
-                    return max;
-                }
-                float min = 0.75f;
-                if (partRatio >= 1f)
-                {
-                    return min;
-                }
-                float result = Mathf.Lerp(max, min, partRatio);
-                return result;
+                return 1f;
             }
-            return 1f;
+
+            float max = 1.75f;
+
+            if (!Enemy.InLineOfSight)
+            {
+                return max;
+            }
+            float partRatio = GetRatioPartsVisible(EnemyInfo, out int visibleCount);
+            if (visibleCount < 1)
+            {
+                return max;
+            }
+            float min = 0.9f;
+            if (partRatio >= 1f)
+            {
+                return min;
+            }
+            float result = Mathf.Lerp(max, min, partRatio);
+            return result;
         }
 
         private static float GetRatioPartsVisible(EnemyInfo enemyInfo, out int visibleCount)
@@ -188,7 +191,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private float calcMoveModifier()
         {
             LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
-            return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Enemy.Vision.EnemyVelocity);
+            return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Enemy.EnemyVision.EnemyVelocity);
         }
 
         private float calcElevationModifier()
@@ -226,7 +229,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                         float angle = Vector3.Angle(currentEnemyDir, myDir);
 
                         float minAngle = 20f;
-                        float maxAngle = Enemy.Vision.MaxVisionAngle;
+                        float maxAngle = Enemy.EnemyVision.MaxVisionAngle;
                         if (angle > minAngle && 
                             angle < maxAngle)
                         {
@@ -255,14 +258,14 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return 1f;
             }
 
-            float angle = Enemy.Vision.AngleToEnemy;
+            float angle = Enemy.EnemyVision.AngleToEnemy;
 
             float minAngle = _periphVisionStart;
             if (angle < minAngle)
             {
                 return 1f;
             }
-            float maxAngle = Enemy.Vision.MaxVisionAngle;
+            float maxAngle = Enemy.EnemyVision.MaxVisionAngle;
             float maxRatio = _maxPeriphVisionSpeedReduction;
             if (angle > maxAngle)
             {

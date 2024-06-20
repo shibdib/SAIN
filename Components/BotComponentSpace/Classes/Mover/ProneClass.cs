@@ -108,7 +108,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             _nextCheckShootTime = Time.time + 0.5f;
 
-            var blindCorner = enemy.Path.BlindCornerToEnemy;
+            var blindCorner = enemy.EnemyPath.BlindCornerToEnemy;
             if (blindCorner != null)
             {
                 _canshoot = CanShootFromProne(blindCorner.Value);

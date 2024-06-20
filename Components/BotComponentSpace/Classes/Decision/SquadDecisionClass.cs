@@ -123,12 +123,12 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 bool inRange = false;
                 float modifier = enemy.EnemyStatus.VulnerableAction == EEnemyAction.UsingSurgery ? 1.25f : 1f;
-                if (enemy.Path.PathDistance < PushSuppressedEnemyMaxPathDistanceSprint * modifier
+                if (enemy.EnemyPath.PathDistance < PushSuppressedEnemyMaxPathDistanceSprint * modifier
                     && BotOwner?.CanSprintPlayer == true)
                 {
                     inRange = true;
                 }
-                else if (enemy.Path.PathDistance < PushSuppressedEnemyMaxPathDistance * modifier)
+                else if (enemy.EnemyPath.PathDistance < PushSuppressedEnemyMaxPathDistance * modifier)
                 {
                     inRange = true;
                 }
@@ -246,7 +246,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallHelp(BotComponent member)
         {
-            float distance = member.Enemy.Path.PathDistance;
+            float distance = member.Enemy.EnemyPath.PathDistance;
             bool visible = member.Enemy.IsVisible;
 
             if (Bot.Decision.CurrentSquadDecision == SquadDecision.Help 

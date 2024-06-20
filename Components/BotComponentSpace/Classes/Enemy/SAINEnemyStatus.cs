@@ -3,38 +3,67 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
-    public class SAINEnemyStatus : EnemyBase
+    public class SAINEnemyStatus : EnemyBase, ISAINEnemyClass
     {
+        public void Update()
+        {
+
+        }
+
+        public void Init()
+        {
+            Enemy.OnEnemyForgotten += onEnemyForgotten;
+            Enemy.OnEnemyKnown += onEnemyKnown;
+        }
+
+        public void Dispose()
+        {
+            Enemy.OnEnemyForgotten -= onEnemyForgotten;
+            Enemy.OnEnemyKnown -= onEnemyKnown;
+        }
+
+        public void onEnemyForgotten(SAINEnemy enemy)
+        {
+            VulnerableAction = EEnemyAction.None;
+        }
+
+        public void onEnemyKnown(SAINEnemy enemy)
+        {
+
+        }
+
         public EEnemyAction VulnerableAction
         {
             get
             {
+                if (EnemyUsingSurgery)
+                {
+                    return EEnemyAction.UsingSurgery;
+                }
                 if (EnemyIsReloading)
                 {
                     return EEnemyAction.Reloading;
                 }
-                else if (EnemyHasGrenadeOut)
+                if (EnemyHasGrenadeOut)
                 {
                     return EEnemyAction.HasGrenade;
                 }
-                else if (EnemyIsHealing)
+                if (EnemyIsHealing)
                 {
                     return EEnemyAction.Healing;
                 }
-                else if (EnemyUsingSurgery)
+                if (EnemyIsLooting)
                 {
-                    return EEnemyAction.UsingSurgery;
+                    return EEnemyAction.Looting;
                 }
-                else
-                {
-                    return EEnemyAction.None;
-                }
+                return EEnemyAction.None;
             }
             set
             {
                 switch (value)
                 {
                     case EEnemyAction.None:
+                        resetActions();
                         break;
 
                     case EEnemyAction.Reloading:
@@ -63,11 +92,24 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
+        private void resetActions()
+        {
+            HeardRecently = false;
+            _enemyLookAtMe = false;
+            ShotByEnemyRecently = false;
+            EnemyUsingSurgery = false;
+            EnemyIsLooting = false;
+            EnemyHasGrenadeOut = false;
+            EnemyIsHealing = false;
+            EnemyIsReloading = false;
+        }
+
         public bool PositionalFlareEnabled
         {
             get
             {
-                if (Enemy.LastKnownPosition != null
+                if (Enemy.EnemyKnown &&
+                    Enemy.LastKnownPosition != null
                     && (Enemy.LastKnownPosition.Value - EnemyPlayer.Position).sqrMagnitude < _maxDistFromPosFlareEnabled * _maxDistFromPosFlareEnabled)
                 {
                     return true;

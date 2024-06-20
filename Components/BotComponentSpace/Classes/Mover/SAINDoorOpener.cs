@@ -75,7 +75,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     Vector3 targetDest;
                     if (Bot.Mover.SprintController.Running)
                     {
-                        targetDest = Bot.Mover.SprintController.currentCorner();
+                        targetDest = Bot.Mover.SprintController.CurrentCornerDestination();
                     }
                     else
                     {

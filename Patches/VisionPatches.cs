@@ -266,8 +266,8 @@ namespace SAIN.Patches.Vision
                 if (enemy != null &&
                     enemy.EnemyPerson.IsActive)
                 {
-                    __result *= enemy.Vision.GainSightCoef;
-                    enemy.Vision.LastGainSightResult = __result;
+                    __result *= enemy.EnemyVision.GainSightCoef;
+                    enemy.EnemyVision.LastGainSightResult = __result;
                 }
             }
             //__result = Mathf.Clamp(__result, 0.1f, 8888f);
@@ -290,7 +290,7 @@ namespace SAIN.Patches.Vision
                 if (enemy != null && 
                     enemy.EnemyPerson.IsActive)
                 {
-                    addVisibility += enemy.Vision.VisionDistance;
+                    addVisibility += enemy.EnemyVision.VisionDistance;
                 }
             }
         }

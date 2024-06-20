@@ -7,28 +7,47 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
-    public class SAINEnemyVision : EnemyBase
+    public class SAINEnemyVision : EnemyBase, ISAINEnemyClass
     {
         public SAINEnemyVision(SAINEnemy enemy) : base(enemy)
         {
             GainSight = new GainSightClass(enemy);
             VisionDist = new EnemyVisionDistanceClass(enemy);
             EnemyVisionChecker = new EnemyVisionChecker(enemy);
-            enemy.Bot.OnBotDisabled += stopVisionCheck;
+        }
+
+        public void Init()
+        {
+            Bot.OnBotDisabled += stopVisionCheck;
+            Enemy.OnEnemyForgotten += onEnemyForgotten;
+            Enemy.OnEnemyKnown += onEnemyKnown;
+        }
+
+        public void onEnemyForgotten(SAINEnemy enemy)
+        {
+        }
+
+        public void onEnemyKnown(SAINEnemy enemy)
+        {
+
+        }
+
+        public void Update()
+        {
+            getAngles();
+            startCheckingVision();
+            UpdateVisibleState(false);
+            UpdateCanShootState(false);
         }
 
         public void Dispose()
         {
-            Enemy.Bot.OnBotDisabled -= stopVisionCheck;
+            Bot.OnBotDisabled -= stopVisionCheck;
+            Enemy.OnEnemyForgotten -= onEnemyForgotten;
+            Enemy.OnEnemyKnown -= onEnemyKnown;
         }
 
-        public void Update(bool isCurrentEnemy)
-        {
-            UpdateVisible(false);
-            UpdateCanShoot(false);
-        }
-
-        public void startCheckingVision()
+        private void startCheckingVision()
         {
             if (_visionCoroutine == null)
             {
@@ -108,42 +127,26 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return Vector3.Angle(direction, lookDir);
         }
 
-        public float MaxVisionAngle => Enemy.Bot.Info.FileSettings.Core.VisibleAngle / 2f;
-
-        public float AngleToEnemy
-        {
-            get
-            {
-                getAngles();
-                return _angleToEnemy;
-            }
-        }
-
-        public float AngleToEnemyHorizontal
-        {
-            get
-            {
-                getAngles();
-                return _angleToEnemyHoriz;
-            }
-        }
+        public float MaxVisionAngle { get; private set; }
+        public float AngleToEnemy { get; private set; }
+        public float AngleToEnemyHorizontal { get; private set; }
 
         private void getAngles()
         {
             if (_calcAngleTime < Time.time)
             {
+                MaxVisionAngle = Enemy.Bot.Info.FileSettings.Core.VisibleAngle / 2f;
                 _calcAngleTime = Time.time + _calcAngleFreq;
-                _angleToEnemy = getAngleToEnemy(false);
-                _angleToEnemyHoriz = getAngleToEnemy(true);
+                AngleToEnemy = getAngleToEnemy(false);
+                AngleToEnemyHorizontal = getAngleToEnemy(true);
             }
         }
 
-        private float _angleToEnemyHoriz;
-        private float _angleToEnemy;
         private float _calcAngleTime;
-        private float _calcAngleFreq = 0.1f;
+        private float _calcAngleFreq = 1f / ANGLE_CALC_PERSECOND;
+        private const float ANGLE_CALC_PERSECOND = 30f;
 
-        public void UpdateVisible(bool forceOff)
+        public void UpdateVisibleState(bool forceOff)
         {
             bool wasVisible = IsVisible;
             bool lineOfSight = InLineOfSight;
@@ -155,8 +158,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             else
             {
                 IsVisible =
-                    EnemyInfo?.IsVisible == true &&
-                    lineOfSight &&
+                    EnemyInfo.IsVisible &&
                     isEnemyInVisibleSector();
             }
 
@@ -206,7 +208,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private float _nextReportLostVisualTime;
 
-        public void UpdateCanShoot(bool forceOff)
+        public void UpdateCanShootState(bool forceOff)
         {
             if (forceOff)
             {

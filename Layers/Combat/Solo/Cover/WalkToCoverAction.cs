@@ -146,15 +146,15 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 const float maxRange = 6f * 6f;
 
-                Vector3? blindCorner = Bot.Enemy.Path.BlindCornerToEnemy;
+                Vector3? blindCorner = Bot.Enemy.EnemyPath.BlindCornerToEnemy;
                 if (blindCorner != null
                     && (blindCorner.Value - lastKnown.Value).sqrMagnitude < maxRange)
                 {
                     return blindCorner;
                 }
 
-                Vector3? lastCorner = Bot.Enemy.Path.LastCornerToEnemy;
-                if (lastCorner != null && Bot.Enemy.Path.CanSeeLastCornerToEnemy
+                Vector3? lastCorner = Bot.Enemy.EnemyPath.LastCornerToEnemy;
+                if (lastCorner != null && Bot.Enemy.EnemyPath.CanSeeLastCornerToEnemy
                     && (lastCorner.Value - lastKnown.Value).sqrMagnitude < maxRange)
                 {
                     return lastCorner;

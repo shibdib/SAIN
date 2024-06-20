@@ -115,7 +115,7 @@ namespace SAIN.SAINComponent
             }
             float result = Player.Equipment.method_11(_slots);
             _slots.Clear();
-            Logger.LogWarning(result);
+           // Logger.LogWarning(result);
             return result;
         }
 

@@ -120,7 +120,7 @@ namespace SAIN.Layers
         {
             return Bot.Enemy != null
                 && Bot.Enemy.Seen
-                && (Bot.Enemy.Path.PathDistance < 50f || Bot.Enemy.InLineOfSight);
+                && (Bot.Enemy.EnemyPath.PathDistance < 50f || Bot.Enemy.InLineOfSight);
         }
 
         private bool shallSprint;

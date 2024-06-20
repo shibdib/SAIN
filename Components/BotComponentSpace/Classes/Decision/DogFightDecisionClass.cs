@@ -55,12 +55,12 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool shallClearDogfightTarget(SAINEnemy enemy)
         {
             if (enemy == null || 
-                !enemy.ShallUpdateEnemy || 
+                !enemy.EnemyKnown || 
                 enemy.Player?.HealthController.IsAlive == false)
             {
                 return true;
             }
-            float pathDist = enemy.Path.PathDistance;
+            float pathDist = enemy.EnemyPath.PathDistance;
             if (pathDist > _dogFightEndDist)
             {
                 return true;
@@ -153,8 +153,8 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             return enemy?.IsValid == true && 
                 enemy.IsVisible && 
-                enemy.ShallUpdateEnemy && 
-                enemy.Path.PathDistance <= _dogFightStartDist;
+                enemy.EnemyKnown && 
+                enemy.EnemyPath.PathDistance <= _dogFightStartDist;
         }
 
         private float _dogFightStartDist = 8f;

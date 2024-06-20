@@ -122,7 +122,7 @@ namespace SAIN.Layers
             stringBuilder.AppendLabeledValue("Enemy Name", $"{enemy.EnemyPlayer?.Profile.Nickname}", Color.white, Color.red, true);
             stringBuilder.AppendLabeledValue("Enemy Power Level ", $"{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}", Color.white, Color.red, true);
 
-            stringBuilder.AppendLabeledValue("Last GainSight Result", $"{enemy.Vision.LastGainSightResult}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Last GainSight Result", $"{enemy.EnemyVision.LastGainSightResult}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("SeenCoef", $"{enemy.EnemyInfo.SeenCoef}", Color.white, Color.yellow, true);
             //stringBuilder.AppendLabeledValue("PercentSpotted", $"{enemy.EnemyInfo.BodyData().Value?.PercentSpotted(out _)}", Color.white, Color.yellow, true);
 

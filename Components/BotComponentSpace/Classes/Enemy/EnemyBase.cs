@@ -12,6 +12,11 @@ namespace SAIN.SAINComponent.Classes.Enemy
             EnemyPerson = enemy.EnemyPerson;
         }
 
+        public virtual void OnEnemyForgotten(SAINEnemy enemy)
+        {
+
+        }
+
         protected SAINEnemy Enemy { get; private set; }
         protected BotComponent Bot => Enemy.Bot;
         protected PlayerComponent PlayerComp => Enemy.Bot.PlayerComponent;

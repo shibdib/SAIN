@@ -9,7 +9,7 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.Enemy
 {
-    public class SAINEnemyPath : EnemyBase
+    public class SAINEnemyPath : EnemyBase, ISAINEnemyClass
     {
         public EPathDistance EPathDistance
         {
@@ -119,11 +119,17 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public SAINEnemyPath(SAINEnemy enemy) : base(enemy)
         {
             PathToEnemy = new NavMeshPath();
-            enemy.Bot.OnBotDisabled += StopLoop;
             _blindCornerFinder = new BlindCornerFinder(enemy);
         }
 
-        public void StopLoop()
+        public void Init()
+        {
+            Bot.OnBotDisabled += stopLoop;
+            Enemy.OnEnemyForgotten += onEnemyForgotten;
+            Enemy.OnEnemyKnown += onEnemyKnown;
+        }
+
+        private void stopLoop()
         {
             if (_calcPathCoroutine != null)
             {
@@ -133,7 +139,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public void Update()
+        public void onEnemyForgotten(SAINEnemy enemy)
+        {
+            stopLoop();
+        }
+
+        public void onEnemyKnown(SAINEnemy enemy)
         {
             if (_calcPathCoroutine == null)
             {
@@ -141,54 +152,21 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public void Dispose()
+        public void Update()
         {
-            StopLoop();
-            Enemy.Bot.OnBotDisabled -= StopLoop;
+            if (_calcPathCoroutine == null && Enemy.EnemyKnown)
+            {
+                Logger.LogWarning($"Enemy Known but coroutine was not started!");
+                _calcPathCoroutine = Enemy.Bot.StartCoroutine(calcPathLoop());
+            }
         }
 
-        public void UpdateOld(bool isCurrentEnemy)
+        public void Dispose()
         {
-            float timeAdd = 1f;
-            if (!isCurrentEnemy && Enemy.IsAI)
-            {
-                timeAdd = 4f;
-            }
-            if (!isCurrentEnemy && !Enemy.IsAI)
-            {
-                timeAdd = 1f;
-            }
-            if (isCurrentEnemy && !Enemy.IsAI)
-            {
-                timeAdd = 0.33f;
-            }
-
-            if (_calcPathTime + timeAdd < Time.time)
-            {
-                _calcPathTime = Time.time;
-                if (!isCurrentEnemy)
-                {
-                    bool clearPath = false;
-                    if (Enemy.Seen == false && Enemy.Heard == false)
-                    {
-                        clearPath = true;
-                    }
-                    else if (Enemy.TimeSinceLastKnownUpdated > BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC)
-                    {
-                        clearPath = true;
-                    }
-                    else if (Enemy.IsAI && Enemy.RealDistance > 300 || !Enemy.IsAI && Enemy.RealDistance > 500)
-                    {
-                        clearPath = true;
-                    }
-                    if (clearPath)
-                    {
-                        Clear();
-                        return;
-                    }
-                }
-                calcPathToEnemy(isCurrentEnemy);
-            }
+            stopLoop();
+            Enemy.OnEnemyForgotten -= onEnemyForgotten;
+            Enemy.OnEnemyKnown -= onEnemyKnown;
+            Enemy.Bot.OnBotDisabled -= stopLoop;
         }
 
         private IEnumerator calcPathLoop()
@@ -196,24 +174,15 @@ namespace SAIN.SAINComponent.Classes.Enemy
             while (true)
             {
                 bool isCurrentEnemy = Enemy.IsCurrentEnemy;
-                float timeAdd = findDelay(isCurrentEnemy);
+                float timeAdd = calcDelayOnDistance();
 
                 if (_calcPathTime + timeAdd < Time.time)
                 {
-                    //Stopwatch watch = Stopwatch.StartNew();
                     _calcPathTime = Time.time;
-
-                    if (!isCurrentEnemy && shallClear())
+                    if (isCurrentEnemy || isEnemyInRange())
                     {
-                        Clear();
-                        //watch.Stop();
-                        yield return null;
-                        continue;
+                        yield return Bot.StartCoroutine(calcPathToEnemy(isCurrentEnemy));
                     }
-
-                    yield return calcPathToEnemy(isCurrentEnemy);
-                    //watch.Stop();
-                    //Logger.LogAndNotifyDebug($"Time To CalcPath [{watch.ElapsedMilliseconds}].ms");
                 }
 
                 yield return null;
@@ -240,23 +209,73 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return Enemy.IsAI ? 0.5f : 0.25f;
         }
 
-        private bool shallClear()
+        private float calcDelayOnDistance()
         {
-            bool clearPath = false;
-            if (Enemy.Seen == false && Enemy.Heard == false)
+            bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.Performance.PerformanceMode;
+            bool currentEnemy = Enemy.IsCurrentEnemy;
+            bool isAI = Enemy.IsAI;
+            float distance = Enemy.RealDistance;
+
+            float maxDelay = isAI ? MAX_FREQ_CALCPATH_AI : MAX_FREQ_CALCPATH;
+            if (currentEnemy)
+                maxDelay *= CURRENTENEMY_COEF;
+            if (performanceMode)
+                maxDelay *= PERFORMANCE_MODE_COEF;
+
+            if (distance > MAX_FREQ_CALCPATH_DISTANCE)
             {
-                clearPath = true;
+                return maxDelay;
             }
-            else if (Enemy.TimeSinceLastKnownUpdated > BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC)
+
+            float minDelay = isAI ? MIN_FREQ_CALCPATH_AI : MIN_FREQ_CALCPATH;
+            if (currentEnemy)
+                minDelay *= CURRENTENEMY_COEF;
+            if (performanceMode)
+                minDelay *= PERFORMANCE_MODE_COEF;
+
+            if (distance < MIN_FREQ_CALCPATH_DISTANCE)
             {
-                clearPath = true;
+                return minDelay;
             }
-            else if (Enemy.IsAI && Enemy.RealDistance > 300 || !Enemy.IsAI && Enemy.RealDistance > 500)
+
+            float difference = distance - MIN_FREQ_CALCPATH_DISTANCE;
+            float distanceRatio = difference / DISTANCE_DIFFERENCE;
+            float delayDifference = maxDelay - minDelay;
+
+            float result = distanceRatio * delayDifference + minDelay;
+            float clampedResult = Mathf.Clamp(result, minDelay, maxDelay);
+
+            if (_nextLogTime < Time.time)
             {
-                clearPath = true;
+                _nextLogTime = Time.time + 10f;
+                //Logger.LogDebug($"{BotOwner.name} calcPathFreqResults for [{Enemy.EnemyPerson.Nickname}] Result: [{result}] preClamped: [[{result}] [{distanceRatio} * {delayDifference} + {minDelay}]] : Distance: [{distance}] : IsAI? [{isAI}] : Current Enemy? [{currentEnemy}] : MinDelay [{minDelay}] : MaxDelay [{maxDelay}]");
             }
-            return clearPath;
+
+            return clampedResult;
         }
+
+        private float _nextLogTime;
+
+        private const float MAX_FREQ_CALCPATH = 2f;
+        private const float MAX_FREQ_CALCPATH_AI = 4f;
+        private const float MAX_FREQ_CALCPATH_DISTANCE = 250f;
+
+        private const float MIN_FREQ_CALCPATH = 0.5f;
+        private const float MIN_FREQ_CALCPATH_AI = 1f;
+        private const float MIN_FREQ_CALCPATH_DISTANCE = 50f;
+
+        private const float DISTANCE_DIFFERENCE = MAX_FREQ_CALCPATH_DISTANCE - MIN_FREQ_CALCPATH_DISTANCE;
+        private const float PERFORMANCE_MODE_COEF = 1.5f;
+        private const float CURRENTENEMY_COEF = 0.5f;
+
+        private bool isEnemyInRange()
+        {
+            return Enemy.IsAI && Enemy.RealDistance <= MAX_CALCPATH_RANGE_AI || 
+                !Enemy.IsAI && Enemy.RealDistance <= MAX_CALCPATH_RANGE;
+        }
+
+        private const float MAX_CALCPATH_RANGE = 500f;
+        private const float MAX_CALCPATH_RANGE_AI = 300f;
 
         private IEnumerator calcPathToEnemy(bool isCurrentEnemy)
         {
@@ -265,28 +284,26 @@ namespace SAIN.SAINComponent.Classes.Enemy
             Vector3 botPosition = Bot.Position;
 
             // Did we already check the current enemy position and has the bot not moved? dont recalc path then
-            if (!checkShallCalc(botPosition, enemyPosition))
+            if (checkPositionsChanged(botPosition, enemyPosition))
             {
-                yield break;
-            }
+                // calculate a path to the enemys position
+                yield return Bot.StartCoroutine(calculatePath(botPosition, enemyPosition, PathToEnemy, isCurrentEnemy));
 
-            // calculate a path to the enemys position
-            yield return calculatePath(botPosition, enemyPosition, PathToEnemy, isCurrentEnemy);
+                switch (PathToEnemyStatus)
+                {
+                    case NavMeshPathStatus.PathInvalid:
+                        LastCornerToEnemy = null;
+                        break;
 
-            switch (PathToEnemyStatus)
-            {
-                case NavMeshPathStatus.PathInvalid:
-                    LastCornerToEnemy = null;
-                    break;
-
-                case NavMeshPathStatus.PathPartial:
-                case NavMeshPathStatus.PathComplete:
-                    yield return analyzePath(PathToEnemy, enemyPosition, isCurrentEnemy);
-                    break;
+                    case NavMeshPathStatus.PathPartial:
+                    case NavMeshPathStatus.PathComplete:
+                        yield return Bot.StartCoroutine(analyzePath(PathToEnemy, enemyPosition, isCurrentEnemy));
+                        break;
+                }
             }
         }
 
-        private bool checkShallCalc(Vector3 botPosition, Vector3 enemyPosition)
+        private bool checkPositionsChanged(Vector3 botPosition, Vector3 enemyPosition)
         {
             // Did we already check the current enemy position and has the bot not moved? dont recalc path then
             if (_enemyLastPosChecked != null
@@ -308,6 +325,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             NavMesh.CalculatePath(botPosition, enemyPosition, -1, path);
             PathToEnemyStatus = path.status;
             PathDistance = CalculatePathLength(path.corners);
+            Enemy.OnPathUpdated?.Invoke(Enemy);
             yield return null;
         }
 

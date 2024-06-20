@@ -7,6 +7,8 @@ using SAIN.SAINComponent;
 using SAIN.Components;
 using UnityEngine;
 using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.Enemy;
+using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -22,15 +24,15 @@ namespace SAIN.Layers.Combat.Solo
         {
             Bot.Mover.SetTargetPose(1f);
             Bot.Mover.SetTargetMoveSpeed(1f);
-            Shoot.Update();
 
-            if (Bot.Enemy == null)
+            SAINEnemy enemy = Bot.Enemy;
+            if (enemy == null)
             {
                 Bot.Steering.SteerByPriority(true);
                 return;
             }
 
-            if (Bot.Enemy.InLineOfSight)
+            if (enemy.InLineOfSight)
             {
                 if (_shallTryJump)
                 {
@@ -51,39 +53,26 @@ namespace SAIN.Layers.Combat.Solo
                     }
                 }
 
+                Shoot.Update();
                 Bot.Mover.Sprint(false);
                 Bot.Mover.SprintController.CancelRun();
                 Bot.Mover.DogFight.DogFightMove(true);
 
-                if (Bot.Enemy.IsVisible && Bot.Enemy.CanShoot)
+                if (enemy.IsVisible && enemy.CanShoot)
                 {
                     Bot.Steering.SteerByPriority();
                 }
                 else
                 {
-                    Bot.Steering.LookToEnemy(Bot.Enemy);
+                    Bot.Steering.LookToEnemy(enemy);
                 }
                 return;
             }
 
-            Vector3[] EnemyPath = Bot.Enemy.PathToEnemy.corners;
-            Vector3 EnemyPos = Bot.Enemy.EnemyPosition;
-            if (NewDestTimer < Time.time)
+            if (_updateMoveTime < Time.time)
             {
-                Vector3 Destination = EnemyPos;
-                if (Bot.Enemy.Path.PathDistance > 1f
-                    && Bot.Mover.SprintController.RunToPoint(Destination, SAINComponent.Classes.Mover.ESprintUrgency.High))
-                {
-                    NewDestTimer = Time.time + 2f;
-                }
-                else if (Bot.Mover.GoToPoint(Destination, out _))
-                {
-                    NewDestTimer = Time.time + 1f;
-                }
-                else
-                {
-                    NewDestTimer = Time.time + 0.25f;
-                }
+                updateMove(enemy, out float nextTime);
+                _updateMoveTime = Time.time + nextTime;
             }
 
             if (_shallTryJump && TryJumpTimer < Time.time && Bot.Player.IsSprintEnabled)
@@ -102,8 +91,39 @@ namespace SAIN.Layers.Combat.Solo
             }
         }
 
+        private void updateMove(SAINEnemy enemy, out float nextUpdateTime)
+        {
+            float pathDistance = enemy.EnemyPath.PathDistance;
+            var sprintController = Bot.Mover.SprintController;
+            if (pathDistance <= 1f && (sprintController.Running || BotOwner.Mover.IsMoving))
+            {
+                nextUpdateTime = 1f;
+                return;
+            }
+
+            if (pathDistance > BotOwner.Settings.FileSettings.Move.RUN_TO_COVER_MIN && sprintController.RunToPointByWay(enemy.EnemyPath.PathToEnemy, SAINComponent.Classes.Mover.ESprintUrgency.High))
+            {
+                nextUpdateTime = 1f;
+                return;
+            }
+
+            if (sprintController.Running)
+            {
+                nextUpdateTime = 1f;
+                return;
+            }
+
+            if (Bot.Mover.GoToPoint(enemy.EnemyPosition, out _, -1, false, false, true))
+            {
+                nextUpdateTime = 1f;
+                return;
+            }
+
+            nextUpdateTime = 0.25f;
+        }
+
         private bool _shallBunnyHop = false;
-        private float NewDestTimer = 0f;
+        private float _updateMoveTime = 0f;
 
         public override void Start()
         {

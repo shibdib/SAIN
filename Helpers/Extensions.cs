@@ -18,6 +18,35 @@ namespace SAIN.Helpers
             return Vector3.zero;
         }
 
+        public static Vector3? LastElement(this Vector3[] array)
+        {
+            if (array == null)
+            {
+                return null;
+            }
+            int length = array.Length;
+            if (length == 0)
+            {
+                return null;
+            }
+            return array[length - 1];
+        }
+
+        public static Vector3? LastElement(this Vector3[] array, out int length)
+        {
+            if (array == null)
+            {
+                length = 0;
+                return null;
+            }
+            length = array.Length;
+            if (length == 0)
+            {
+                return null;
+            }
+            return array[length - 1];
+        }
+
         public static Vector3 RotateHoriz(this Vector3 value, float angle)
         {
             Quaternion rotation = Quaternion.Euler(0, angle, 0);

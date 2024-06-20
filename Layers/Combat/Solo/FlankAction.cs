@@ -44,7 +44,7 @@ namespace SAIN.Layers.Combat.Solo
             Vector3 enemyPosition = Bot.Enemy.EnemyPosition;
             Vector3 botPosition = Bot.Position;
 
-            Vector3? middleNode = FindMiddlePoint(enemy.Path.PathToEnemy, enemy.Path.PathDistance, out int index);
+            Vector3? middleNode = FindMiddlePoint(enemy.EnemyPath.PathToEnemy, enemy.EnemyPath.PathDistance, out int index);
 
             if (middleNode != null)
             {
@@ -83,7 +83,7 @@ namespace SAIN.Layers.Combat.Solo
             if (SamplePointAndCheckPath(flank, middleNode, out NavMeshPath path))
             {
                 flank = path.corners[path.corners.Length - 1];
-                NavMeshPath pathToEnemy = enemy.Path.PathToEnemy;
+                NavMeshPath pathToEnemy = enemy.EnemyPath.PathToEnemy;
                 NavMeshPath flankPath = new NavMeshPath();
                 if (NavMesh.CalculatePath(botPosition, flank, -1, flankPath)
                     && ArePathsDifferent(pathToEnemy, flankPath))

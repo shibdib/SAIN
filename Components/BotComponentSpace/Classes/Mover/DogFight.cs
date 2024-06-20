@@ -124,7 +124,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (enemy != null &&
                 enemy.Seen &&
                 enemy.TimeSinceSeen >= _enemyTimeSinceSeenThreshold &&
-                enemy.PathToEnemy.status != NavMeshPathStatus.PathInvalid)
+                enemy.EnemyPath.PathToEnemy.status != NavMeshPathStatus.PathInvalid)
             {
                 return Bot.Enemy.LastKnownPosition;
             }

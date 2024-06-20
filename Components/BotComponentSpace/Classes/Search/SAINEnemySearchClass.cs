@@ -60,7 +60,7 @@ namespace SAIN.SAINComponent.Classes.Search
             if (!Searching)
             {
                 _cornersToEnemy.Clear();
-                _cornersToEnemy.AddRange(Enemy.Path.PathToEnemy.corners);
+                _cornersToEnemy.AddRange(Enemy.EnemyPath.PathToEnemy.corners);
                 _searchDestination = Enemy.LastKnownPosition.Value;
                 _searchCoroutine = Bot.StartCoroutine(search());
             }

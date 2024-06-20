@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public readonly List<SAINEnemy> ActiveEnemies = new List<SAINEnemy>();
         public List<string> HumansInLineOfSight { get; } = new List<string>();
-        public System.Action<string> OnEnemyRemoved { get; set; }
+        public Action<string> OnEnemyRemoved { get; set; }
         public Action<SAINEnemy, float> OnEnemyForgotten { get; set; }
 
         public SAINEnemyController(BotComponent sain) : base(sain)
@@ -591,6 +591,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         private SAINEnemy createEnemy(PlayerComponent enemyPlayerComponent, EnemyInfo enemyInfo)
         {
             SAINEnemy enemy = new SAINEnemy(Bot, enemyPlayerComponent, enemyInfo);
+            enemy.Init();
             enemyPlayerComponent.OnComponentDestroyed += removeEnemy;
             enemyPlayerComponent.Player.OnPlayerDead += enemyKilled;
             Enemies.Add(enemy.EnemyProfileId, enemy);

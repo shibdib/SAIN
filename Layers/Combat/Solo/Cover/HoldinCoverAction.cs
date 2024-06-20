@@ -20,9 +20,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
         }
 
-        private bool Stopped;
-
-
         public override void Update()
         {
             Bot.Steering.SteerByPriority();

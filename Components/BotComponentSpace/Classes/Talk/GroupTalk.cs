@@ -127,9 +127,9 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool ShallReportLostVisual()
         {
             var enemy = Bot.Enemy;
-            if (enemy != null && enemy.Vision.ShallReportLostVisual)
+            if (enemy != null && enemy.EnemyVision.ShallReportLostVisual)
             {
-                enemy.Vision.ShallReportLostVisual = false;
+                enemy.EnemyVision.ShallReportLostVisual = false;
                 if (EFTMath.RandomBool(_reportLostVisualChance))
                 {
                     ETagStatus mask = PersonIsClose(enemy.EnemyPlayer) ? ETagStatus.Combat : ETagStatus.Aware;
@@ -247,9 +247,9 @@ namespace SAIN.SAINComponent.Classes.Talk
                         return Bot.Talk.GroupSay(EPhraseTrigger.OnFirstContact, mask, true, 100);
                     }
                 }
-                if (enemy.Vision.ShallReportRepeatContact)
+                if (enemy.EnemyVision.ShallReportRepeatContact)
                 {
-                    enemy.Vision.ShallReportRepeatContact = false;
+                    enemy.EnemyVision.ShallReportRepeatContact = false;
                     if (EFTMath.RandomBool(40))
                     {
                         ETagStatus mask = PersonIsClose(enemy.EnemyPlayer) ? ETagStatus.Combat : ETagStatus.Aware;
