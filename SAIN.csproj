@@ -246,6 +246,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\BotSurgery.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EInjurySeverity.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\WeaponAIPresetHistory.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ReloadClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SAINEnemySearchClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINBotLookClass.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverFinderStatus.cs" />

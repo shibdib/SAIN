@@ -638,7 +638,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public bool IsPlayerAnEnemy(string profileID)
         {
-            return Enemies.TryGetValue(profileID, out var enemy) && enemy != null;
+            return Enemies.TryGetValue(profileID, out var enemy) && enemy?.IsValid == true;
         }
 
         public bool IsPlayerFriendly(IPlayer iPlayer)

@@ -49,9 +49,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             if (_recoilFinished)
             {
                 stopLoop();
-                _recoilFinished = false;
-                _shotRegistered = false;
-                _barrelRising = false;
                 return;
             }
         }
@@ -70,32 +67,30 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 Bot.StopCoroutine(_recoilCoroutine);
                 _recoilCoroutine = null;
+                _recoilFinished = false;
+                _shotRegistered = false;
+                _barrelRising = false;
             }
         }
 
         private IEnumerator RecoilLoop()
         {
             StringBuilder stringBuilder = SAINPlugin.DebugSettings.DebugRecoilCalculations ? new StringBuilder() : null;
-            while (true)
+
+            while (!_recoilFinished)
             {
-                applyShot(stringBuilder);
+                checkApplyShot(stringBuilder);
                 calcBarrelRise(stringBuilder);
                 calcDecay(stringBuilder);
-
-                if (_recoilFinished)
-                {
-                    CurrentRecoilOffset = Vector3.zero;
-                    break;
-                }
-
                 yield return null;
             }
 
+            CurrentRecoilOffset = Vector3.zero;
             if (stringBuilder != null)
                 Logger.LogDebug(stringBuilder.ToString());
         }
 
-        private void applyShot(StringBuilder stringBuilder)
+        private void checkApplyShot(StringBuilder stringBuilder)
         {
             if (_shotRegistered)
             {
@@ -178,47 +173,17 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             checkStartLoop();
         }
 
-        /*
-        public Vector3 CalculateRecoil()
-        {
-            float weaponhorizrecoil = CalcHorizRecoil(Bot.Info.WeaponInfo.RecoilForceUp);
-            float weaponvertrecoil = CalcVertRecoil(Bot.Info.WeaponInfo.RecoilForceBack);
-
-            float addRecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.AddRecoil;
-            float horizRecoil = (1f * (weaponhorizrecoil + addRecoil));
-            float vertRecoil = (1f * (weaponvertrecoil + addRecoil));
-
-            float maxrecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.MaxRecoil;
-
-            float randomHorizRecoil = Random.Range(-horizRecoil, horizRecoil);
-            float randomvertRecoil = Random.Range(-vertRecoil, vertRecoil);
-            Vector3 newRecoil = new Vector3(randomHorizRecoil, randomvertRecoil, randomHorizRecoil);
-            newRecoil = MathHelpers.VectorClamp(newRecoil, -maxrecoil, maxrecoil) * RecoilMultiplier;
-
-            if (Player.IsInPronePose)
-            {
-                newRecoil *= 0.8f;
-            }
-            var shootController = BotOwner.WeaponManager.ShootController;
-            if (shootController != null && shootController.IsAiming == true)
-            {
-                newRecoil *= 0.8f;
-            }
-            if (_armsInjured)
-            {
-                newRecoil *= Mathf.Sqrt(ArmInjuryModifier);
-            }
-
-            Vector3 totalRecoil = newRecoil + currentRecoil;
-            return totalRecoil;
-        }
-        */
-
         private void calculateRecoil(StringBuilder stringBuilder)
         {
+            Weapon weapon = Bot.Info?.WeaponInfo?.CurrentWeapon;
+            if (weapon == null)
+            {
+                return;
+            }
+
             float addRecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.AddRecoil;
             float recoilMod = calcRecoilMod();
-            float recoilTotal = Bot.Info.WeaponInfo.CurrentWeapon.RecoilTotal;
+            float recoilTotal = weapon.RecoilTotal;
 
             float vertRecoil = (CalcVertRecoil(recoilTotal) + addRecoil) * recoilMod;
             float randomvertRecoil = Random.Range(vertRecoil / 2f, vertRecoil) * randomSign();
@@ -248,16 +213,16 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
             if (Player.IsInPronePose)
             {
-                recoilMod *= 0.6f;
+                recoilMod *= 0.7f;
             }
             else if (Player.Pose == EPlayerPose.Duck)
             {
-                recoilMod *= 0.8f;
+                recoilMod *= 0.9f;
             }
 
             if (BotOwner.WeaponManager?.ShootController?.IsAiming == true)
             {
-                recoilMod *= 0.85f;
+                recoilMod *= 0.9f;
             }
             if (Player.Velocity.magnitude < 0.5f)
             {

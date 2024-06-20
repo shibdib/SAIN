@@ -1,5 +1,6 @@
 ﻿using Aki.Reflection.Patching;
 using EFT;
+using EFT.InventoryLogic;
 using HarmonyLib;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,6 +22,22 @@ namespace SAIN.Patches.Generic.Fixes
             if (SAINPlugin.IsBotExluded(___botOwner_0))
             {
                 return true;
+            }
+            if (___botOwner_0.Medecine?.Using == true)
+            {
+                __result = false;
+                return false;
+            }
+            if (!___botOwner_0.WeaponManager.IsWeaponReady)
+            {
+                __result = false;
+                return false;
+            }
+            if (___botOwner_0.WeaponManager.Malfunctions.HaveMalfunction() && 
+                ___botOwner_0.WeaponManager.Malfunctions.MalfunctionType() != Weapon.EMalfunctionState.Misfire)
+            {
+                __result = false;
+                return false;
             }
             __result = true;
             return false;

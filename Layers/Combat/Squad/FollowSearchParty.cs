@@ -5,6 +5,7 @@ using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Squad
 {
@@ -22,43 +23,83 @@ namespace SAIN.Layers.Combat.Squad
                 Bot.Steering.SteerByPriority();
             }
 
-            var leader = Bot.Squad.SquadInfo?.LeaderComponent;
-            if (leader != null)
+            if (_nextUpdatePosTime < Time.time)
             {
-                _leaderPosition = leader.Position;
-                if (_nextUpdatePosTime < Time.time)
-                {
-                    _nextUpdatePosTime = Time.time + 1f;
-
-                    float sqrMag = (_leaderPosition - Bot.Position).sqrMagnitude;
-                    if (sqrMag < 5f * 5f)
-                    {
-                        Bot.Mover.StopMove();
-                        return;
-                    }
-                    if (sqrMag > 30f * 30f)
-                    {
-                        Bot.Mover.SprintController.RunToPoint(_leaderPosition, SAINComponent.Classes.Mover.ESprintUrgency.Middle);
-                    }
-                    else if (sqrMag > 10f * 10f)
-                    {
-                        Bot.Mover.GoToPoint(_leaderPosition, out _, 5f);
-                    }
-
-                    if (sqrMag < 20f * 20f && Bot.Mover.SprintController.Running)
-                    {
-                        Bot.Mover.SprintController.CancelRun();
-                        Bot.Mover.GoToPoint(_leaderPosition, out _, 5f);
-                    }
-                }
+                moveToLead(out float nextTime);
+                _nextUpdatePosTime = Time.time + nextTime;
             }
         }
 
+        private void moveToLead(out float nextUpdateTime)
+        {
+            var leader = Bot.Squad.SquadInfo?.LeaderComponent;
+            if (leader == null)
+            {
+                nextUpdateTime = 1f;
+                return;
+            }
+            if ((_LastLeadPos - leader.Position).sqrMagnitude < 1f)
+            {
+                nextUpdateTime = 1f;
+                return;
+            }
+            Vector3? movePosition = getPosNearLead(leader.Position);
+            if (movePosition == null)
+            {
+                nextUpdateTime = 0.25f;
+                return;
+            }
+
+            _LastLeadPos = leader.Position;
+            float moveDistance = (movePosition.Value - Bot.Position).sqrMagnitude;
+            if (moveDistance < 1f)
+            {
+                nextUpdateTime = 1f;
+                return;
+            }
+
+            if (moveDistance > 20f * 20f &&
+                Bot.Mover.SprintController.RunToPoint(movePosition.Value, SAINComponent.Classes.Mover.ESprintUrgency.Middle))
+            {
+                nextUpdateTime = 2f;
+                return;
+            }
+            if (Bot.Mover.SprintController.Running)
+            {
+                nextUpdateTime = 2f;
+                return;
+            }
+            nextUpdateTime = 1f;
+            Bot.Mover.GoToPoint(movePosition.Value, out _);
+        }
+
+        private Vector3? getPosNearLead(Vector3 leadPos)
+        {
+            Vector3? result = null;
+            if (NavMesh.SamplePosition(leadPos, out var leadHit, 3f, -1))
+            {
+                Vector3 leadDir = Bot.Position - leadHit.position;
+                leadDir.y = 0;
+                leadDir = leadDir.normalized * 2f;
+                if (NavMesh.Raycast(leadHit.position, (leadDir + leadHit.position), out var rayHit, -1))
+                {
+                    result = rayHit.position;
+                }
+                else
+                {
+                    result = leadDir + leadHit.position;
+                }
+            }
+            return result;
+        }
+
         private float _nextUpdatePosTime;
-        private Vector3 _leaderPosition;
+        private Vector3 _LastLeadPos;
 
         public override void Start()
         {
+            _nextUpdatePosTime = 0f;
+            _LastLeadPos = Vector3.zero;
         }
 
         public override void Stop()

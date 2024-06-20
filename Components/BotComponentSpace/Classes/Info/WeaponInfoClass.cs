@@ -1,6 +1,7 @@
 using EFT;
 using EFT.InventoryLogic;
 using SAIN.Components;
+using SAIN.Components.BotComponentSpace.Classes;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.GlobalSettings;
@@ -14,11 +15,15 @@ namespace SAIN.SAINComponent.Classes.Info
 {
     public class WeaponInfoClass : SAINBase, ISAINClass
     {
-        public WeaponInfoClass(BotComponent sain) : base(sain)
+        public ReloadClass Reload { get; private set; }
+
+        public WeaponInfoClass(BotComponent bot) : base(bot)
         {
-            Recoil = new Recoil(sain);
-            Firerate = new Firerate(sain);
-            Firemode = new Firemode(sain);
+            Recoil = new Recoil(bot);
+            Firerate = new Firerate(bot);
+            Firemode = new Firemode(bot);
+            Reload = new ReloadClass(bot);
+
             PresetHandler.OnPresetUpdated += forceRecheckWeapon;
             SAINBotController.Instance.OnBotWeaponChange += weaponChanged;
         }
@@ -60,6 +65,7 @@ namespace SAIN.SAINComponent.Classes.Info
             Recoil.Init();
             Firerate.Init();
             Firemode.Init();
+            Reload.Init();
         }
 
         public void Update()
@@ -68,6 +74,7 @@ namespace SAIN.SAINComponent.Classes.Info
             Recoil.Update();
             Firerate.Update();
             Firemode.Update();
+            Reload.Update();
         }
 
         private Weapon LastCheckedWeapon;
@@ -192,6 +199,7 @@ namespace SAIN.SAINComponent.Classes.Info
             Recoil.Dispose();
             Firerate.Dispose();
             Firemode.Dispose();
+            Reload.Dispose();
             PresetHandler.OnPresetUpdated -= forceRecheckWeapon;
             SAINBotController.Instance.OnBotWeaponChange -= weaponChanged;
         }

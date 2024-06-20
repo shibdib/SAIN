@@ -103,20 +103,7 @@ namespace SAIN.Patches.Hearing
 
         private static float calcVolume(Player player)
         {
-            float num = player.MovementContext.ClampedSpeed;
-            float covertMovementVolumeBySpeed = player.MovementContext.CovertMovementVolumeBySpeed;
-            num = Mathf.Max(player.Physical.MinStepSound, num);
-            num *= covertMovementVolumeBySpeed;
-            float num2 = covertMovementVolumeBySpeed;
-            float num3 = player.method_45();
-            num2 = num2 * num3;
-            float num5 = (player.Pose == EPlayerPose.Duck) ? Mathf.Clamp(num, 0f, 0.3f) : Mathf.Clamp(num * 0.75f * Mathf.Sqrt(player.MovementContext.PoseLevel), 0.1f, 0.5f);
-            if (player.IsYourPlayer)
-            {
-                Logger.LogDebug(num2);
-                Logger.LogDebug(num5);
-            }
-            return num2;
+            return player.MovementContext.CovertMovementVolumeBySpeed * player.method_45();
         }
 
         private static float calcVolumeOld(Player player)
@@ -161,7 +148,7 @@ namespace SAIN.Patches.Hearing
                 float num2 = Mathf.Clamp(0.5f * ____player.PoseLevel + 0.5f, 0f, 1f);
                 num *= num2;
                 float volume = (1f + num) / 2f;
-                float baseRange = 35f;
+                float baseRange = 45f;
                 SAINPlugin.BotController?.BotHearing.PlayAISound(____player.ProfileId, SAINSoundType.Sprint, ____player.Position, baseRange, volume);
             }
             return false;
@@ -185,9 +172,9 @@ namespace SAIN.Patches.Hearing
                     soundType = SAINSoundType.Sprint;
                     break;
 
-                case EAudioMovementState.Run:
-                    soundType = SAINSoundType.FootStep;
-                    break;
+                //case EAudioMovementState.Run:
+                //    soundType = SAINSoundType.FootStep;
+                //    break;
 
                 case EAudioMovementState.Stop:
                     soundType = SAINSoundType.TurnSound;
@@ -249,6 +236,11 @@ namespace SAIN.Patches.Hearing
         [PatchPrefix]
         public static bool PatchPrefix(AIData __instance)
         {
+            if (__instance.IsAI && 
+                SAINPlugin.IsBotExluded(__instance.BotOwner))
+            {
+                return true;
+            }
             AIFlareEnabled.SetValue(__instance, true);
             return false;
         }

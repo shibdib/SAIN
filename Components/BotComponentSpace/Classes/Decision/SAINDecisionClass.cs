@@ -49,7 +49,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         }
 
         private float _nextGetDecisionTime;
-        private const float getDecisionFreq = 0.05f;
+        private const float getDecisionFreq = 0f;
         private const float getDecisionFreqAtPeace = 0.25f;
 
         public void Dispose()
@@ -100,14 +100,13 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return;
             }
 
-            if (CheckContinueRetreat())
-            {
-                return;
-            }
-
             if (SelfActionDecisions.GetDecision(out SelfDecision selfDecision))
             {
                 SetDecisions(SoloDecision.Retreat, SquadDecision.None, selfDecision);
+                return;
+            }
+            if (CheckContinueRetreat())
+            {
                 return;
             }
 
