@@ -37,6 +37,11 @@ namespace SAIN.Components.BotComponentSpace.Classes
                     BotMagazineWeapons.Add(slot, new BotMagazineWeapon(weapon, Bot));
                 }
             }
+
+            foreach (var weapon in BotMagazineWeapons.Values)
+            {
+                weapon.Init(BotOwner);
+            }
         }
 
         public void Init()
@@ -52,6 +57,10 @@ namespace SAIN.Components.BotComponentSpace.Classes
         public void Update()
         {
             checkWeapChanged();
+            foreach (var weapon in BotMagazineWeapons.Values )
+            {
+                weapon?.Update();
+            }
         }
 
         private void checkWeapChanged()
@@ -102,15 +111,20 @@ namespace SAIN.Components.BotComponentSpace.Classes
             EquipmentSlot activeSlot = ActiveEquipmentSlot;
             if (!BotMagazineWeapons.TryGetValue(activeSlot, out BotMagazineWeapon magazineWeapon))
             {
-                BotMagazineWeapons.Add(activeSlot, new BotMagazineWeapon(weapon, Bot));
-                return BotMagazineWeapons[activeSlot];
+                magazineWeapon = new BotMagazineWeapon(weapon, Bot);
+                magazineWeapon.Init(BotOwner);
+                BotMagazineWeapons.Add(activeSlot, magazineWeapon);
+                return magazineWeapon;
             }
 
             if (magazineWeapon.Weapon != weapon)
             {
-                BotMagazineWeapons[activeSlot] = new BotMagazineWeapon(weapon, Bot);
+                magazineWeapon.Dispose(BotOwner);
+                magazineWeapon = new BotMagazineWeapon(weapon, Bot);
+                magazineWeapon.Init(BotOwner);
+                BotMagazineWeapons[activeSlot] = magazineWeapon;
             }
-            return BotMagazineWeapons[activeSlot];
+            return magazineWeapon;
         }
 
         public void Dispose()
@@ -119,6 +133,14 @@ namespace SAIN.Components.BotComponentSpace.Classes
             {
                 _weaponManager.Selector.OnActiveEquipmentSlotChanged -= weaponChanged;
             }
+            if (BotOwner != null)
+            {
+                foreach (var weapon in BotMagazineWeapons.Values)
+                {
+                    weapon.Dispose(BotOwner);
+                }
+            }
+            BotMagazineWeapons.Clear();
         }
 
         private static EquipmentSlot[] _weapSlots = 
@@ -171,12 +193,22 @@ namespace SAIN.Components.BotComponentSpace.Classes
 
         private void checkItemTaken(Item item, IPlayer player)
         {
-            _needToRecheck = true;
+            if (item == null) return;
+            if (item is MagazineClass mag && 
+                _refill.magazineSlot?.CanAccept(mag) == true)
+            {
+                _needToRecheck = true;
+            }
         }
 
         private void checkItemDropped(Item item)
         {
-            _needToRecheck = true;
+            if (item == null) return;
+            if (item is MagazineClass mag && 
+                Magazines.Contains(mag))
+            {
+                _needToRecheck = true;
+            }
         }
 
         private bool findMags()
@@ -184,10 +216,15 @@ namespace SAIN.Components.BotComponentSpace.Classes
             Weapon weapon = Weapon;
             if (weapon == null)
             {
-                Logger.LogDebug("Weapon Null");
+                //Logger.LogDebug("Weapon Null");
                 return false;
             }
             return getNonActiveMagazines() > 0;
+        }
+
+        public void botReloaded()
+        {
+            _needToRecheck = true;
         }
 
         private bool _magsFound;
@@ -210,7 +247,7 @@ namespace SAIN.Components.BotComponentSpace.Classes
         {
             if (getActiveMagazine() == null)
             {
-                Logger.LogDebug("Active Magazine is Null!");
+                //Logger.LogDebug("Active Magazine is Null!");
                 return 0;
             }
             Magazines.Clear();
@@ -227,18 +264,18 @@ namespace SAIN.Components.BotComponentSpace.Classes
         {
             if (!IsMagazineFed)
             {
-                Logger.LogDebug($"weapon doesn't use mags!");
+                //Logger.LogDebug($"weapon doesn't use mags!");
                 return false;
             }
             if (!_magsFound)
             {
-                Logger.LogDebug($"no magazines found!");
+                //Logger.LogDebug($"no magazines found!");
                 return false;
             }
             Weapon weapon = Weapon;
             if (weapon == null)
             {
-                Logger.LogDebug("Weapon Null");
+                //Logger.LogDebug("Weapon Null");
                 return false;
             }
             return refillMagsInList(Magazines, weapon, count);
@@ -268,7 +305,7 @@ namespace SAIN.Components.BotComponentSpace.Classes
                     
                     if (mag.Count < mag.MaxCount)
                     {
-                        Logger.LogDebug($"Mag Count still below max after refill. Current: {mag.Count} : Max {mag.MaxCount} : count before attempt: {startCount}");
+                        //Logger.LogDebug($"Mag Count still below max after refill. Current: {mag.Count} : Max {mag.MaxCount} : count before attempt: {startCount}");
                     }
 
                     refilled++;
@@ -293,7 +330,7 @@ namespace SAIN.Components.BotComponentSpace.Classes
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            stringBuilder.AppendLine($"Checking Mags...");
+            //stringBuilder.AppendLine($"Checking Mags...");
 
             int count = 0;
             foreach (MagazineClass mag in Magazines)
@@ -302,7 +339,7 @@ namespace SAIN.Components.BotComponentSpace.Classes
 
                 count++;
                 float ratio = getAmmoRatio(mag);
-                stringBuilder.AppendLine($"Mag [{count}] : Count [{mag.Count}] : Capacity [{mag.MaxCount}] : Ratio [{ratio}]");
+                //stringBuilder.AppendLine($"Mag [{count}] : Count [{mag.Count}] : Capacity [{mag.MaxCount}] : Ratio [{ratio}]");
 
                 if (ratio <= 0)
                 {
@@ -317,8 +354,8 @@ namespace SAIN.Components.BotComponentSpace.Classes
                 fullMags++;
             }
 
-            stringBuilder.AppendLine($"Full [{fullMags}] : Partial [{partialMags}] : Empty [{emptyMags}]");
-            Logger.LogDebug(stringBuilder.ToString());
+            //stringBuilder.AppendLine($"Full [{fullMags}] : Partial [{partialMags}] : Empty [{emptyMags}]");
+            //Logger.LogDebug(stringBuilder.ToString());
 
             FullMagazineCount = fullMags;
             PartialMagazineCount = partialMags;

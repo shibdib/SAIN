@@ -144,7 +144,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             Vector3? lastKnown = Bot.Enemy?.LastKnownPosition;
             if (lastKnown != null)
             {
-                const float maxRange = 6f * 6f;
+                const float maxRange = 10f * 10f;
 
                 Vector3? blindCorner = Bot.Enemy.EnemyPath.BlindCornerToEnemy;
                 if (blindCorner != null

@@ -29,11 +29,14 @@ namespace SAIN.Components
                         continue;
 
                     bot.LastCheckVisibleTime = Time.time;
-                    bot.Vision.BotLook.UpdateLook();
-                    count++;
-                    if (count >= maxBotsPerFrame)
+                    int numUpdated = bot.Vision.BotLook.UpdateLook();
+                    if (numUpdated > 0)
                     {
-                        break;
+                        count++;
+                        if (count >= maxBotsPerFrame)
+                        {
+                            break;
+                        }
                     }
                 }
                 _localBotList.Clear();

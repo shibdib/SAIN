@@ -173,15 +173,21 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             while (true)
             {
-                bool isCurrentEnemy = Enemy.IsCurrentEnemy;
                 float timeAdd = calcDelayOnDistance();
 
                 if (_calcPathTime + timeAdd < Time.time)
                 {
                     _calcPathTime = Time.time;
+                    bool isCurrentEnemy = Enemy.IsCurrentEnemy;
                     if (isCurrentEnemy || isEnemyInRange())
                     {
+                        //Stopwatch sw = Stopwatch.StartNew();
                         yield return Bot.StartCoroutine(calcPathToEnemy(isCurrentEnemy));
+                        //sw.Stop();
+                        //if (!Enemy.IsAI)
+                        //{
+                        //    Logger.LogDebug($"{sw.ElapsedMilliseconds} ms to calcPath");
+                        //}
                     }
                 }
 
@@ -198,15 +204,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             LastCornerToEnemy = null;
             _blindCornerFinder.BlindCorner = null;
             PathDistance = float.MaxValue;
-        }
-
-        private float findDelay(bool isCurrentEnemy)
-        {
-            if (!isCurrentEnemy)
-            {
-                return Enemy.IsAI ? 1f : 0.5f;
-            }
-            return Enemy.IsAI ? 0.5f : 0.25f;
         }
 
         private float calcDelayOnDistance()
@@ -300,6 +297,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
                         yield return Bot.StartCoroutine(analyzePath(PathToEnemy, enemyPosition, isCurrentEnemy));
                         break;
                 }
+
+                Enemy.OnPathUpdated?.Invoke(Enemy);
             }
         }
 
@@ -325,7 +324,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
             NavMesh.CalculatePath(botPosition, enemyPosition, -1, path);
             PathToEnemyStatus = path.status;
             PathDistance = CalculatePathLength(path.corners);
-            Enemy.OnPathUpdated?.Invoke(Enemy);
             yield return null;
         }
 
@@ -334,7 +332,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             findLastCorner(enemyPosition, path.status, path.corners);
             if (isCurrentEnemy)
             {
-                yield return _blindCornerFinder.FindBlindCorner(path);
+                yield return Bot.StartCoroutine(_blindCornerFinder.FindBlindCorner(path));
             }
             else
             {
@@ -391,21 +389,15 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public IEnumerator FindBlindCorner(NavMeshPath path)
         {
-            LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
-            Vector3 lookPoint = Bot.Transform.EyePosition;
-            Vector3 lookOffset = lookPoint - Bot.Position;
-
+            _corners.Clear();
             _corners.AddRange(path.corners);
-
-            //yield return clearShortCorners(_corners, 0.1f);
-            //yield return clearShortCorners(_corners, 0.2f);
-            //yield return clearShortCorners(_corners, 0.5f);
-            //yield return clearShortCorners(_corners, 1f);
-            //yield return clearShortCorners(_corners, 2f);
-            //yield return clearShortCorners(_corners, 5f);
-
-            yield return findBlindCorner(_corners, lookPoint, lookOffset.y);
-            yield return findRealCorner(_blindCornerGround, _cornerNotVisible, lookPoint, lookOffset.y);
+            if (_corners.Count > 2)
+            {
+                Vector3 lookPoint = Bot.Transform.EyePosition;
+                Vector3 lookOffset = lookPoint - Bot.Position;
+                yield return Bot.StartCoroutine(findBlindCorner(_corners, lookPoint, lookOffset.y));
+                yield return Bot.StartCoroutine(findRealCorner(_blindCornerGround, _cornerNotVisible, lookPoint, lookOffset.y));
+            }
             _corners.Clear();
         }
 
@@ -449,24 +441,36 @@ namespace SAIN.SAINComponent.Classes.Enemy
             Vector3? result = null;
             Vector3? notVisCorner = null;
             int count = corners.Count;
-            for (int i = 1; i < count; i++)
+            if (count > 2)
             {
-                Vector3 target = corners[i];
-                target.y += height;
-                Vector3 direction = target - lookPoint;
-                
-                if (Physics.Raycast(lookPoint, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
+                for (int i = 1; i < count; i++)
                 {
-                    result = corners[i - 1];
-                    notVisCorner = corners[i];
-                    //DebugGizmos.Line(target, lookPoint, Color.red, 0.05f, true, 5f, true);
-                    break;
+                    Vector3 target = corners[i];
+                    target.y += height;
+                    Vector3 direction = target - lookPoint;
+
+                    if (Physics.Raycast(lookPoint, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
+                    {
+                        result = corners[i - 1];
+                        notVisCorner = corners[i];
+                        //DebugGizmos.Line(target, lookPoint, Color.red, 0.05f, true, 5f, true);
+                        break;
+                    }
+                    //DebugGizmos.Line(target, lookPoint, Color.white, 0.05f, true, 5f, true);
+                    //yield return null;
                 }
-                //DebugGizmos.Line(target, lookPoint, Color.white, 0.05f, true, 5f, true);
-                yield return null;
+                if (result == null && count > 1)
+                {
+                    result = corners[1];
+                }
+                if (notVisCorner == null && count > 2)
+                {
+                    notVisCorner = corners[count - 1];
+                }
             }
-            _blindCornerGround = result ?? corners[1];
-            _cornerNotVisible = notVisCorner ?? corners[corners.Count - 1];
+            _blindCornerGround = result ?? Vector3.zero;
+            _cornerNotVisible = notVisCorner ?? Vector3.zero;
+            yield return null;
         }
 
         private IEnumerator findRealCorner(Vector3 blindCorner, Vector3 notVisibleCorner, Vector3 lookPoint, float height, int iterations = 15)
@@ -474,9 +478,18 @@ namespace SAIN.SAINComponent.Classes.Enemy
             //StringBuilder stringBuilder = new StringBuilder();
             //stringBuilder.AppendLine($"Finding Real Blind Corner for [{Bot.name}]...");
 
+            if (blindCorner == Vector3.zero)
+            {
+                BlindCorner = null;
+                yield break;
+            }
             blindCorner.y += height;
-
             BlindCorner = blindCorner;
+            if (notVisibleCorner == Vector3.zero)
+            {
+                yield break;
+            }
+
             float sign = Vector.FindFlatSignedAngle(blindCorner, notVisibleCorner, lookPoint);
             float angle = sign <= 0 ? -10f : 10f;
             float rotationStep = angle / iterations;
@@ -484,6 +497,8 @@ namespace SAIN.SAINComponent.Classes.Enemy
             //stringBuilder.AppendLine($"Angle to check [{angle}] Step Angle [{rotationStep}]");
 
             Vector3 directionToBlind = blindCorner - lookPoint;
+
+            int raycasts = 0;
 
             for (int i = 0; i < iterations; i++)
             {
@@ -497,8 +512,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     //stringBuilder.AppendLine($"Angle where LOS broken [{rotationStep * i}] after [{i}] iterations");
                     break;
                 }
+                raycasts++;
 
-                yield return null;
+                if (raycasts >= 3)
+                {
+                    yield return null;
+                }
             }
 
             //stringBuilder.AppendLine("Finished Checking for real Blind Corner");

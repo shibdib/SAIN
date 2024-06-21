@@ -69,9 +69,16 @@ namespace SAIN.Layers
             {
                 var info = sain.Info;
                 stringBuilder.AppendLine($"Name: [{sain.Person.Name}] Nickname: [{sain.Player.Profile.Nickname}] Personality: [{info.Personality}] Type: [{info.Profile.WildSpawnType}] PowerLevel: [{info.Profile.PowerLevel}]");
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine($"Steering: [{sain.Steering.CurrentSteerPriority}]");
+                if (sain.Steering.CurrentSteerPriority == SAINComponent.Classes.Mover.SteerPriority.EnemyLastKnown || sain.Steering.CurrentSteerPriority == SAINComponent.Classes.Mover.SteerPriority.EnemyLastKnownLong)
+                {
+                    stringBuilder.AppendLine($"EnemySteer: [{sain.Steering.EnemySteerDir}]");
+                }
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine($"AI Limited: [{sain.CurrentAILimit}] : Cover Points Count: [{sain.Cover.CoverPoints.Count}]");
                 stringBuilder.AppendLabeledValue("Start Search + Hold Ground Time", $"{info.TimeBeforeSearch} + {info.HoldGroundDelay}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLine($"Suppression Num: [{sain.Suppression?.SuppressionNumber}] IsSuppressed: [{sain.Suppression?.IsSuppressed}] IsHeavySuppressed: [{sain.Suppression?.IsHeavySuppressed}]");
-                stringBuilder.AppendLine($"Steering: [{sain.Steering.CurrentSteerPriority}] : AI Limited: [{sain.CurrentAILimit}] : Cover Points Count: [{sain.Cover.CoverPoints.Count}]");
                 stringBuilder.AppendLine($"Indoors? {sain.Memory.Location.IsIndoors} EnvironmentID: {sain.Player?.AIData.EnvironmentId} In Bunker? {sain.PlayerComponent.AIData.PlayerLocation.InBunker}");
                 var members = sain.Squad.SquadInfo?.Members;
                 if (members != null && members.Count > 1)
@@ -93,7 +100,6 @@ namespace SAIN.Layers
                     stringBuilder.AppendLine($"Aim Time {timeAiming.GetValue(sain.BotOwner.AimingData)} TimeToAim: {TimeToAim.GetValue(sain.BotOwner.AimingData)}");
                     stringBuilder.AppendLine($"Aim Offset Magnitude {(sain.BotOwner.AimingData.RealTargetPoint - sain.BotOwner.AimingData.EndTargetPoint).magnitude}");
                     stringBuilder.AppendLine($"Friendly Fire Status {sain.FriendlyFireClass.FriendlyFireStatus} No Bush ESP Status: {sain.NoBushESP.NoBushESPActive}");
-
                 }
 
                 if (sain.HasEnemy)

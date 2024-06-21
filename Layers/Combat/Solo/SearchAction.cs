@@ -67,7 +67,7 @@ namespace SAIN.Layers.Combat.Solo
 
         private void CheckWeapon()
         {
-            if (Bot.Enemy != null && Bot.Enemy.TimeSinceLastKnownUpdated > 10f)
+            if (Bot.Enemy != null && Bot.Enemy.TimeSinceLastKnownUpdated > 20f)
             {
                 if (ReloadTimer < Time.time && Bot.Decision.SelfActionDecisions.LowOnAmmo(0.7f))
                 {

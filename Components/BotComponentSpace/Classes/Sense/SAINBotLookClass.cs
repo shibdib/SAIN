@@ -56,7 +56,9 @@ namespace SAIN.SAINComponent.Classes
         private int UpdateLookForEnemies(LookAllData lookAll)
         {
             int updated = 0;
-            foreach (SAINEnemy enemy in _enemies.Values) {
+            _cachedList.Clear();
+            _cachedList.AddRange(_enemies.Values);
+            foreach (SAINEnemy enemy in _cachedList) {
 
                 if (!shallCheckEnemy(enemy))
                     continue;
@@ -65,8 +67,11 @@ namespace SAIN.SAINComponent.Classes
                     updated++;
                 }
             }
+            _cachedList.Clear();
             return updated;
         }
+
+        private readonly List<SAINEnemy> _cachedList = new List<SAINEnemy>();
 
         private bool shallCheckEnemy(SAINEnemy enemy)
         {

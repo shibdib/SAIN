@@ -9,10 +9,22 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
+    public enum EEnemySteerDir
+    {
+        None = 0,
+        BlindCorner = 1,
+        LastCorner = 2,
+        LastKnown = 3,
+        Path = 4,
+        VisibleLastKnown = 5,
+    }
+
     public class SAINSteeringClass : SAINBase, ISAINClass
     {
         public SteerPriority CurrentSteerPriority { get; private set; } = SteerPriority.None;
         public SteerPriority LastSteerPriority { get; private set; } = SteerPriority.None;
+
+        public EEnemySteerDir EnemySteerDir { get; private set; }
 
         // How long a bot will look at where they last saw an enemy instead of something they hear
         private readonly float Steer_TimeSinceLocationKnown_Threshold = 3f;
@@ -365,6 +377,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private Vector3? findLastKnown(SAINEnemy enemy)
         {
+            EnemySteerDir = EEnemySteerDir.None;
             if (enemy == null)
             {
                 return null;
@@ -377,27 +390,32 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (lastKnown != null &&
                 visible)
             {
+                EnemySteerDir = EEnemySteerDir.VisibleLastKnown;
                 return lastKnown;
             }
             Vector3? blindCornerToEnemy = enemy.EnemyPath.BlindCornerToEnemy;
             if (blindCornerToEnemy != null)
             {
+                EnemySteerDir = EEnemySteerDir.BlindCorner;
                 return adjustLookPoint(blindCornerToEnemy.Value);
             }
             Vector3? lastCorner = enemy.EnemyPath.LastCornerToEnemy;
             if (lastCorner != null &&
                 enemy.CanSeeLastCornerToEnemy)
             {
+                EnemySteerDir = EEnemySteerDir.LastCorner;
                 return adjustLookPoint(lastCorner.Value) + _weaponRootOffset;
             }
             var enemyPath = enemy.EnemyPath.PathToEnemy;
             if (enemyPath != null &&
                 enemyPath.corners.Length > 2)
             {
+                EnemySteerDir = EEnemySteerDir.Path;
                 return adjustLookPoint(enemyPath.corners[1]) + _weaponRootOffset;
             }
             if (lastKnown != null)
             {
+                EnemySteerDir = EEnemySteerDir.LastKnown;
                 return lastKnown.Value + _weaponRootOffset;
             }
             return null;

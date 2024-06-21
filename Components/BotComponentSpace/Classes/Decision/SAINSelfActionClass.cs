@@ -1,4 +1,5 @@
 ﻿using BepInEx.Logging;
+using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
@@ -167,21 +168,48 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool TryReload()
         {
+            if (BotOwner.WeaponManager.Reload.Reloading)
+            {
+                return true;
+            }
+
+            bool result = false;
+            var magWeapon = Bot.Info.WeaponInfo.Reload.ActiveMagazineWeapon;
+            if (magWeapon != null)
+            {
+                if (magWeapon.FullMagazineCount == 0)
+                {
+                    magWeapon.TryRefillMags(1);
+                }
+            }
+
+            result = tryCatchReload();
+
+            if (!result &&
+                magWeapon != null &&
+                magWeapon.FullMagazineCount == 0 && 
+                magWeapon.TryRefillAllMags() &&
+                tryCatchReload())
+            {
+                result = true;
+            }
+            if (!result)
+            {
+                BotOwner.WeaponManager.Selector.TryChangeWeapon(true);
+            }
+            if (result)
+            {
+                magWeapon?.botReloaded();
+            }
+            return result;
+        }
+
+        private bool tryCatchReload()
+        {
             bool result = false;
             try
             {
-
                 result = BotOwner.WeaponManager.Reload.TryReload();
-                if (!result && 
-                    checkRefillMags() && 
-                    BotOwner.WeaponManager.Reload.TryReload())
-                {
-                    result = true;
-                }
-                if (!result)
-                {
-                    BotOwner.WeaponManager.Selector.TryChangeWeapon(true);
-                }
             }
             catch (Exception)
             {
@@ -189,40 +217,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             return result;
         }
-
-        private bool checkRefillMags()
-        {
-            var weapon = BotOwner.WeaponManager.CurrentWeapon;
-            var mag = weapon?.GetMagazineSlot();
-            if (mag == null)
-            {
-                return false;
-            }
-
-            MagRefillClass refill = new MagRefillClass
-            {
-                magazineSlot = mag,
-            };
-
-            _preallocatedMagazineList.Clear();
-            Player.GClass2761_0.GetReachableItemsOfTypeNonAlloc<MagazineClass>(_preallocatedMagazineList, new Func<MagazineClass, bool>(refill.canAccept));
-            if (_preallocatedMagazineList.Count == 0)
-            {
-                return false;
-            }
-            for (int i = 0; i < _preallocatedMagazineList.Count; i++)
-            {
-                MagazineClass magazineClass = _preallocatedMagazineList[i];
-                if (magazineClass.Count < magazineClass.MaxCount)
-                {
-                    BotOwner.WeaponManager.Reload.method_2(weapon, magazineClass);
-                }
-            }
-            _preallocatedMagazineList.Clear();
-            return true;
-        }
-
-        private static readonly List<MagazineClass> _preallocatedMagazineList = new List<MagazineClass>();
 
         public void BotCancelReload()
         {
@@ -233,15 +227,5 @@ namespace SAIN.SAINComponent.Classes.Decision
         }
 
         private float _healTime = 0f;
-    }
-
-    public class MagRefillClass
-    {
-        public bool canAccept(MagazineClass mag)
-        {
-            return this.magazineSlot.CanAccept(mag);
-        }
-
-        public Slot magazineSlot;
     }
 }
