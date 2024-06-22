@@ -296,8 +296,6 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
             if ((sourcePlayer.Position - Bot.Position).sqrMagnitude > responseDist * responseDist)
             {
-                //if (sourcePlayer.IsYourPlayer)
-                //    Logger.LogInfo("No Response. Too far");
                 yield break;
             }
 
@@ -313,40 +311,32 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (!sourcePlayer.HealthController.IsAlive
                 || !Player.HealthController.IsAlive)
             {
-                //if (sourcePlayer.IsYourPlayer)
-                //    Logger.LogInfo("No Response. Player dead");
                 yield break;
             }
 
-            if (friendly && !BotOwner.Memory.IsPeace)
+            if (friendly)
             {
-                if (Bot.Talk.Say(trigger, null, false))
+                if (!BotOwner.Memory.IsPeace)
                 {
-                    //if (sourcePlayer.IsYourPlayer)
-                    //    Logger.LogInfo("Response Done");
+                    Bot.Talk.Say(trigger, null, false);
+                    yield break;
                 }
+                if (_nextGestureTime < Time.time)
+                {
+                    _nextGestureTime = Time.time + 3f;
+                    Player.HandsController.ShowGesture(EGesture.Hello);
+                }
+                Bot.Talk.Say(trigger, mask, false);
                 yield break;
             }
 
-            if (friendly && _nextGestureTime < Time.time)
-            {
-                _nextGestureTime = Time.time + 3f;
-                Player.HandsController.ShowGesture(EGesture.Hello);
-            }
             if (Bot.Talk.Say(trigger, mask, false))
             {
-                //if (sourcePlayer.IsYourPlayer)
-                //    Logger.LogInfo("Response Done");
             }
         }
 
         public void SetEnemyTalk(Player player)
         {
-            if ((player.Position - Bot.Position).sqrMagnitude < 70f * 70f)
-            {
-                Bot.EnemyController.GetEnemy(player.ProfileId)?.SetHeardStatus(true, player.Position + UnityEngine.Random.onUnitSphere + Vector3.up, SAINSoundType.Conversation, true);
-            }
-
             if (_canRespondToEnemy &&
                 _nextResponseTime < Time.time)
             {
@@ -357,10 +347,11 @@ namespace SAIN.SAINComponent.Classes.Talk
                 //    Logger.LogInfo($"Starting Responding To Voice! Min Dist: {TauntDist} Chance: {chance}");
 
                 _nextResponseTime = Time.time + 2f;
+
                 Bot.StartCoroutine(RespondToVoice(
                     trigger,
                     ETagStatus.Combat,
-                    Random.Range(0.4f, 0.6f),
+                    Random.Range(0.4f, 0.75f),
                 player,
                 TauntDist,
                 chance
@@ -386,7 +377,9 @@ namespace SAIN.SAINComponent.Classes.Talk
             Enemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
             if (enemy == null)
             {
-                if (!isPain && phrase != EPhraseTrigger.OnBreath)
+                if (!isPain && 
+                    phrase != EPhraseTrigger.OnBreath && 
+                    phrase != EPhraseTrigger.OnFight)
                 {
                     SetFriendlyTalked(player);
                 }
@@ -453,7 +446,8 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void SetFriendlyTalked(Player player)
         {
-            if ((player.Position - Bot.Position).sqrMagnitude > 100f * 100f)
+            float maxDist = player.IsAI ? _friendlyResponseDistanceAI : _friendlyResponseDistance;
+            if ((player.Position - Bot.Position).sqrMagnitude > maxDist * maxDist)
             {
                 return;
             }
@@ -465,7 +459,6 @@ namespace SAIN.SAINComponent.Classes.Talk
 
                 if (player.IsAI == false || shallBeChatty())
                 {
-                    float maxDist = player.IsAI ? _friendlyResponseDistanceAI : _friendlyResponseDistance;
                     float chance = player.IsAI ? _friendlyResponseChanceAI : _friendlyResponseChance;
 
                     Bot.StartCoroutine(RespondToVoice(

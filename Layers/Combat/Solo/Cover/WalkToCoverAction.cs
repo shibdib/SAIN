@@ -1,8 +1,7 @@
 ﻿using EFT;
-using SAIN.Helpers;
-using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
+using System.Collections;
 using System.Text;
 using UnityEngine;
 
@@ -15,33 +14,47 @@ namespace SAIN.Layers.Combat.Solo.Cover
         }
 
         private float _nextUpdateCoverTime;
+        private Coroutine _coroutine;
+        private IEnumerator walkToCover()
+        {
+            while (true)
+            {
+                if (Bot == null || !Bot.BotActive)
+                {
+                    break;
+                }
+
+                Bot.Mover.SetTargetMoveSpeed(1f);
+                Bot.Mover.SetTargetPose(1f);
+
+                if (Bot.Cover.CoverPoints.Count == 0)
+                {
+                    Bot.Mover.DogFight.DogFightMove(false);
+                    EngageEnemy();
+                    yield return null;
+                    continue;
+                }
+
+                if (_nextUpdateCoverTime < Time.time)
+                {
+                    _nextUpdateCoverTime = Time.time + 0.1f;
+
+                    findCover();
+                    reCheckCover();
+                }
+
+                if (Bot.Cover.CoverInUse == null)
+                {
+                    Bot.Mover.DogFight.DogFightMove(false);
+                }
+
+                EngageEnemy();
+                yield return null;
+            }
+        }
 
         public override void Update()
         {
-            Bot.Mover.SetTargetMoveSpeed(1f);
-            Bot.Mover.SetTargetPose(1f);
-
-            if (Bot.Cover.CoverPoints.Count == 0)
-            {
-                Bot.Mover.DogFight.DogFightMove(false);
-                EngageEnemy();
-                return;
-            }
-
-            if (_nextUpdateCoverTime < Time.time)
-            {
-                _nextUpdateCoverTime = Time.time + 0.1f;
-
-                findCover();
-                reCheckCover();
-            }
-
-            if (Bot.Cover.CoverInUse == null)
-            {
-                Bot.Mover.DogFight.DogFightMove(false);
-            }
-
-            EngageEnemy();
         }
 
         private void findCover()
@@ -186,10 +199,14 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
+            _coroutine = Bot.StartCoroutine(walkToCover());
         }
 
         public override void Stop()
         {
+            Bot.StopCoroutine(_coroutine);
+            _coroutine = null;
+
             Bot.Mover.DogFight.ResetDogFightStatus();
             Bot.Cover.CheckResetCoverInUse();
             if (suppressing)

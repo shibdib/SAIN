@@ -12,6 +12,7 @@ using SAIN.Helpers;
 using UnityEngine;
 using UnityEngine.AI;
 using static RootMotion.FinalIK.AimPoser;
+using System.Collections;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -23,25 +24,44 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            Bot.Mover.SetTargetPose(1f);
-            Bot.Mover.SetTargetMoveSpeed(1f);
-            Bot.Steering.SteerByPriority();
-            Bot.Mover.DogFight.DogFightMove(true);
-            Shoot.Update();
         }
 
-        private readonly NavMeshPath navMeshPath_0 = new NavMeshPath();
+        private IEnumerator dogFight()
+        {
+            while (true)
+            {
+                if (Bot == null || !Bot.BotActive)
+                {
+                    break;
+                }
+
+                Bot.Mover.SetTargetPose(1f);
+                Bot.Mover.SetTargetMoveSpeed(1f);
+                Bot.Steering.SteerByPriority();
+                Bot.Mover.DogFight.DogFightMove(true);
+                Shoot.Update();
+
+                yield return null;
+            }
+        }
 
         public override void Start()
         {
             Bot.Mover.Sprint(false);
             BotOwner.Mover.SprintPause(0.5f);
+
+            _coroutine = Bot.StartCoroutine(dogFight());
         }
 
         public override void Stop()
         {
+            Bot.StopCoroutine(_coroutine);
+            _coroutine = null;
+
             Bot.Mover.DogFight.ResetDogFightStatus();
             BotOwner.MovementResume();
         }
+
+        private Coroutine _coroutine;
     }
 }

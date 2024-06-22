@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public MoveDangerPoint SearchMovePoint { get; private set; }
 
-        public bool ShallStartSearch(out Vector3 destination, bool mustHaveTarget = false)
+        public bool ShallStartSearch(out Vector3 destination, bool mustHaveTarget = true)
         {
             if (Bot.Decision.CurrentSoloDecision != SoloDecision.Search
                 && _nextRecalcSearchTime < Time.time)
@@ -227,35 +227,20 @@ namespace SAIN.SAINComponent.Classes.Search
                 SearchedTargetPosition = true;
             }
 
-            if (SearchedTargetPosition)
+            if (_nextCheckPosTime < Time.time || SearchedTargetPosition)
             {
-                Vector3? newTarget = SearchMovePos(out bool hasTarget, true);
-
-                if (newTarget != null
-                    && CalculatePath(newTarget.Value) != NavMeshPathStatus.PathInvalid)
-                {
-                    SearchedTargetPosition = false;
-                    FinalDestination = newTarget.Value;
-                }
-            }
-
-
-            if (_nextCheckPosTime < Time.time)
-            {
-                _nextCheckPosTime = Time.time + 2f;
+                _nextCheckPosTime = Time.time + 4f;
 
                 Vector3? newTarget = SearchMovePos(out bool hasTarget);
 
                 if (newTarget != null
                     && hasTarget
-                    && (newTarget.Value - FinalDestination).sqrMagnitude > 2f * 2f
+                    && (newTarget.Value - FinalDestination).sqrMagnitude > 2f
                     && CalculatePath(newTarget.Value) != NavMeshPathStatus.PathInvalid)
                 {
                     SearchedTargetPosition = false;
-                    FinalDestination = newTarget.Value;
                 }
             }
-
         }
 
         public void Search(bool shallSprint, float reachDist = -1f)
@@ -279,6 +264,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public Vector3? SearchMovePos(out bool hasTarget, bool randomSearch = false)
         {
+            hasTarget = false;
             var enemy = Bot.Enemy;
             if (enemy != null && (enemy.Seen || enemy.Heard))
             {
@@ -287,41 +273,23 @@ namespace SAIN.SAINComponent.Classes.Search
                     hasTarget = true;
                     return enemy.EnemyPosition;
                 }
-                else
-                {
-                    var knownPlaces = enemy.KnownPlaces.AllEnemyPlaces;
-                    for (int i = 0; i < knownPlaces.Count; i++)
-                    {
-                        EnemyPlace enemyPlace = knownPlaces[i];
-                        if (enemyPlace != null
-                            && !enemyPlace.HasArrivedPersonal)
-                        {
-                            hasTarget = true;
-                            return enemyPlace.Position;
-                        }
-                    }
-                    hasTarget = false;
-                    if (randomSearch)
-                    {
-                        return RandomSearch();
-                    }
-                    return null;
-                }
-            }
-            else
-            {
-                var Target = BotOwner?.Memory.GoalTarget;
-                if (Target?.Position != null)
-                {
-                    hasTarget = true;
-                    return Target.Position.Value;
-                }
-            }
 
-            hasTarget = false;
-            if (randomSearch)
-            {
-                return RandomSearch();
+                var knownPlaces = enemy.KnownPlaces.AllEnemyPlaces;
+                for (int i = 0; i < knownPlaces.Count; i++)
+                {
+                    EnemyPlace enemyPlace = knownPlaces[i];
+                    if (enemyPlace != null && 
+                        !enemyPlace.HasArrivedPersonal && 
+                        !enemyPlace.HasArrivedSquad)
+                    {
+                        hasTarget = true;
+                        return enemyPlace.Position;
+                    }
+                }
+                if (randomSearch)
+                {
+                    return RandomSearch();
+                }
             }
             return null;
         }
@@ -380,6 +348,7 @@ namespace SAIN.SAINComponent.Classes.Search
             }
             if (WaitPointTimer < Time.time)
             {
+                BotOwner.Mover.MovementResume();
                 WaitPointTimer = -1;
                 return false;
             }
@@ -478,10 +447,12 @@ namespace SAIN.SAINComponent.Classes.Search
                 handleLight();
             }
 
-            if (BotOwner.WeaponManager?.Reload?.Reloading == true)
+            if (BotOwner.WeaponManager?.Reload?.Reloading == true && CurrentState != ESearchMove.Wait)
             {
+                NextState = CurrentState;
                 CurrentState = ESearchMove.Wait;
             }
+
             if (LastState != CurrentState)
             {
                 LastState = CurrentState;
@@ -491,7 +462,7 @@ namespace SAIN.SAINComponent.Classes.Search
             {
                 case ESearchMove.None:
                     if (_finishedPeek &&
-                        HasPathToSearchTarget(out Vector3 finalDestination, false))
+                        HasPathToSearchTarget(out Vector3 finalDestination, true))
                     {
                         _finishedPeek = false;
                         FinalDestination = finalDestination;
@@ -512,7 +483,6 @@ namespace SAIN.SAINComponent.Classes.Search
                         && moveToPoint(FinalDestination, shallSprint))
                     {
                         CurrentState = ESearchMove.DirectMove;
-                        moveToPoint(FinalDestination, shallSprint);
                         return;
                     }
 
@@ -589,7 +559,6 @@ namespace SAIN.SAINComponent.Classes.Search
                 case ESearchMove.Wait:
                     if (!WaitAtPoint())
                     {
-                        BotOwner.Mover.MovementResume();
                         CurrentState = NextState;
                         return;
                     }

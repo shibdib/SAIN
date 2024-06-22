@@ -1,9 +1,6 @@
-﻿using BepInEx.Logging;
-using EFT;
+﻿using EFT;
 using SAIN.BotController.Classes;
 using SAIN.Components;
-using SAIN.Helpers;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,22 +10,20 @@ namespace SAIN.SAINComponent.Classes.Info
     {
         public SAINSquadClass(BotComponent sain) : base(sain)
         {
+            SquadInfo = SAINPlugin.BotController.BotSquads.GetSquad(Bot);
         }
 
         public void Init()
         {
-            SquadInfo = SAINPlugin.BotController.BotSquads.GetSquad(Bot);
         }
 
         public Squad SquadInfo { get; private set; }
 
-        public float DistanceToSquadLeader = 0f;
-
-        public string SquadID => SquadInfo.Id;
+        public float DistanceToSquadLeader { get; private set; }
 
         public readonly List<BotComponent> VisibleMembers = new List<BotComponent>();
 
-        private float UpdateMembersTimer = 0f;
+        private float _updateMemberTime = 0f;
 
         public bool IAmLeader => SquadInfo.LeaderId == Bot.ProfileId;
 
@@ -47,7 +42,7 @@ namespace SAIN.SAINComponent.Classes.Info
                 if (_nextCheckhumantime < Time.time)
                 {
                     _nextCheckhumantime = Time.time + 3f;
-                    _humanFriendclose = humanFriendClose(50f.Sqr());
+                    _humanFriendclose = humanFriendClose(50f * 50f);
                 }
                 return _humanFriendclose;
             }
@@ -59,12 +54,12 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private bool humanFriendClose(float distToCheck)
         {
-            foreach (var player in GameWorldInfo.AlivePlayers)
+            foreach (var playerComponent in GameWorldComponent.Instance.PlayerTracker.AlivePlayers.Values)
             {
-                if (player != null &&
-                    !player.IsAI &&
-                    Bot?.EnemyController?.IsPlayerFriendly(player) == true
-                    && (player.Position - Bot.Position).sqrMagnitude < distToCheck)
+                if (playerComponent != null &&
+                    !playerComponent.IsAI &&
+                    Bot?.EnemyController?.IsPlayerAnEnemy(playerComponent.ProfileId) == false && 
+                    (playerComponent.Position - Bot.Position).sqrMagnitude < distToCheck)
                 {
                     return true;
                 }
@@ -74,15 +69,15 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Update()
         {
-            if (BotInGroup && 
+            if (BotOwner.BotsGroup.MembersCount > 1 && 
                 SquadInfo != null && 
-                UpdateMembersTimer < Time.time)
+                _updateMemberTime < Time.time)
             {
-                UpdateMembersTimer = Time.time + 0.5f;
+                _updateMemberTime = Time.time + 0.5f;
 
-                UpdateVisibleMembers();
+                checkVisibleMembers();
 
-                if (LeaderComponent != null)
+                if (!IAmLeader && LeaderComponent != null)
                 {
                     DistanceToSquadLeader = (Bot.Position - LeaderComponent.Position).magnitude;
                 }
@@ -93,7 +88,7 @@ namespace SAIN.SAINComponent.Classes.Info
         {
         }
 
-        private void UpdateVisibleMembers()
+        private void checkVisibleMembers()
         {
             VisibleMembers.Clear();
             Vector3 eyePos = Bot.Transform.EyePosition;

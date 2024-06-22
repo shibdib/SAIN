@@ -18,7 +18,6 @@ namespace SAIN.Components.BotControllerSpace.Classes
                 return;
             }
             if (player == null ||
-                Bots == null ||
                 player.HealthController.IsAlive == false)
             {
                 return;

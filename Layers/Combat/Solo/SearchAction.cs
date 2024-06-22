@@ -58,7 +58,11 @@ namespace SAIN.Layers.Combat.Solo
                     talk();
                 }
 
-                Search.Search(SprintEnabled);
+                if (_nextUpdateSearchTime < Time.time)
+                {
+                    _nextUpdateSearchTime = Time.time + 0.2f;
+                    Search.Search(SprintEnabled);
+                }
                 Steer();
 
                 if (!SprintEnabled)
@@ -71,6 +75,8 @@ namespace SAIN.Layers.Combat.Solo
                 yield return null;
             }
         }
+
+        private float _nextUpdateSearchTime;
 
         private void talk()
         {
