@@ -100,7 +100,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             if (enemy != null)
             {
                 float maxTurnOnrange = 50f;
-                float? lastKnownDist = enemy.LastKnownDistanceSqr;
                 SoloDecision decision = Bot.Decision.CurrentSoloDecision;
 
                 if (enemy.EnemyNotLooking)
