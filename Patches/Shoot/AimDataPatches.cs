@@ -150,7 +150,7 @@ namespace SAIN.Patches.Shoot.Aim
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0, float dist, float ang, ref bool ___bool_1, ref float ___float_10, ref float __result)
         {
-            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            if (!SAINEnableClass.GetSAIN(___botOwner_0, out var bot, nameof(AimOffsetPatch)))
             {
                 return true;
             }
@@ -159,37 +159,26 @@ namespace SAIN.Patches.Shoot.Aim
             bool moving = ___bool_1;
             bool panicing = (bool)_PanicingProp.GetValue(___botOwner_0.AimingData);
 
-            __result = calculateAim(___botOwner_0, dist, ang, moving, panicing, aimDelay);
+            __result = calculateAim(bot, dist, ang, moving, panicing, aimDelay);
 
             return false;
         }
 
-        private static float calculateAim(BotOwner botOwner, float distance, float angle, bool moving, bool panicing, float aimDelay)
+        private static float calculateAim(BotComponent botComponent, float distance, float angle, bool moving, bool panicing, float aimDelay)
         {
+            BotOwner botOwner = botComponent.BotOwner;
             StringBuilder stringBuilder = SAINPlugin.LoadedPreset.GlobalSettings.Debug.DebugAimCalculations ? new StringBuilder() : null;
             stringBuilder?.AppendLine($"Aim Time Calculation for [{botOwner?.name} : {botOwner?.Profile?.Info?.Settings?.Role} : {botOwner?.Profile?.Info?.Settings?.BotDifficulty}]");
 
-            SAINPlugin.BotController.GetSAIN(botOwner, out var botComponent);
-
-            SAINAimingSettings sainAimSettings = botComponent?.Info.FileSettings.Aiming;
-            BotSettingsComponents fileSettings = botOwner?.Settings?.FileSettings;
-
-            if (fileSettings == null)
-            {
-                return 1f;
-            }
+            SAINAimingSettings sainAimSettings = botComponent.Info.FileSettings.Aiming;
+            BotSettingsComponents fileSettings = botOwner.Settings.FileSettings;
 
             float baseAimTime = fileSettings.Aiming.BOTTOM_COEF;
-            stringBuilder.AppendLine($"baseAimTime [{baseAimTime}]");
+            stringBuilder?.AppendLine($"baseAimTime [{baseAimTime}]");
 
             baseAimTime = calcCoverMod(baseAimTime, botOwner, botComponent, fileSettings, stringBuilder);
 
             BotCurvSettings curve = botOwner.Settings.Curv;
-            if (curve == null)
-            {
-                return 1f;
-            }
-
             float modifier = sainAimSettings != null ? sainAimSettings.AngleAimTimeMultiplier : 1f;
             float angleTime = calcCurveOutput(curve.AimAngCoef, angle, modifier, stringBuilder, "Angle");
 
