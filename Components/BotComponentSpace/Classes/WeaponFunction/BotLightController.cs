@@ -1,10 +1,5 @@
 ﻿using EFT;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
@@ -81,7 +76,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 _timeWithinDistanceSearch = Time.time;
                 ToggleLight(true);
             }
-            else if (_timeWithinDistanceSearch + 1f < Time.time)
+            else if (_timeWithinDistanceSearch + 0.66f < Time.time)
             {
                 ToggleLight(false);
             }
@@ -95,27 +90,31 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 return;
             }
+            if (BotOwner.ShootData.Shooting)
+            {
+                return;
+            }
 
             Enemy enemy = Bot.Enemy;
             if (enemy != null)
             {
-                float maxTurnOnrange = 50f;
-                SoloDecision decision = Bot.Decision.CurrentSoloDecision;
-
-                if (enemy.EnemyNotLooking)
+                if (!enemy.Seen)
                 {
-                    if (BotOwner.ShootData.Shooting)
-                    {
-                        ToggleLight(true);
-                    }
-                    else
-                    {
-                        ToggleLight(false);
-                    }
+                    ToggleLight(false);
                     return;
                 }
 
-                if (enemy.IsVisible)
+                float maxTurnOnrange = 50f;
+                SoloDecision decision = Bot.Decision.CurrentSoloDecision;
+
+                if (enemy.EnemyNotLooking && enemy.RealDistance <= maxTurnOnrange * 0.9f)
+                {
+                    ToggleLight(true);
+                    return;
+                }
+
+                if (enemy.IsVisible && 
+                    Time.time - enemy.EnemyVision.VisibleStartTime > 0.75f)
                 {
                     if (enemy.RealDistance <= maxTurnOnrange * 0.9f)
                     {
@@ -128,17 +127,12 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                     return;
                 }
 
-                bool searching = decision == SoloDecision.Search;
-                if (decision == SoloDecision.Search)
-                {
-                    return;
-                }
-
                 if (enemy.Seen &&
                     BotOwner.BotLight?.IsEnable == true &&
                     enemy.TimeSinceSeen > randomizedTurnOffTime)
                 {
                     ToggleLight(false);
+                    return;
                 }
             }
         }
