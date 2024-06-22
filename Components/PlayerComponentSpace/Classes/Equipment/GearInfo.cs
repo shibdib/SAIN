@@ -1,5 +1,4 @@
 ﻿using EFT.InventoryLogic;
-using SAIN.Components.PlayerComponentSpace;
 using SAIN.Components.PlayerComponentSpace.Classes.Equipment;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,81 +31,86 @@ namespace SAIN.SAINComponent.Classes.Info
             Equipment = equipment;
         }
 
-        private PlayerComponent _playerComponent => Equipment.PlayerComponent;
-
         public void Update()
         {
-            if (_nextUpdateTime < Time.time)
-            {
-                _nextUpdateTime = Time.time + 10f;
-                _playerComponent.StartCoroutine(checkGear());
-            }
         }
 
-        private IEnumerator checkGear()
+        private const float GEAR_UPDATE_FREQ = 10f;
+
+        public IEnumerator GearUpdateLoop()
         {
-            checkAllGear();
-            yield return null;
-        }
-
-        private void checkAllGear()
-        {
-            HasEarPiece = GetItem(EquipmentSlot.Earpiece) != null;
-
-            // Reset previous results if any
-            HasFaceShield = false;
-
-            // Get the headwear item on this player
-            Item helmetItem = GetItem(EquipmentSlot.Headwear);
-
-            if (helmetItem != null)
+            WaitForSeconds wait = new WaitForSeconds(GEAR_UPDATE_FREQ);
+            while (true)
             {
-                // Get a list of faceshield components attached to the headwear item, see if any have AC.
-                helmetItem.GetItemComponentsInChildrenNonAlloc(_faceShieldComponents);
-                foreach (var faceComponent in _faceShieldComponents)
+                HasEarPiece = GetItem(EquipmentSlot.Earpiece) != null;
+
+                yield return null;
+
+                // Reset previous results if any
+                HasFaceShield = false;
+
+                // Get the headwear item on this player
+                Item helmetItem = GetItem(EquipmentSlot.Headwear);
+
+                if (helmetItem != null)
                 {
-                    if (faceComponent.Item.IsArmorMod())
+                    // Get a list of faceshield components attached to the headwear item, see if any have AC.
+                    helmetItem.GetItemComponentsInChildrenNonAlloc(_faceShieldComponents);
+
+                    yield return null;
+
+                    foreach (var faceComponent in _faceShieldComponents)
                     {
-                        HasFaceShield = true;
+                        if (faceComponent.Item.IsArmorMod())
+                        {
+                            HasFaceShield = true;
+                            break;
+                        }
+                    }
+                    _faceShieldComponents.Clear();
+                }
+
+                yield return null;
+
+                // Reset previous results if any
+                HasHeavyHelmet = false;
+
+                // Get a list of armor components attached to the headwear item, check to see which has the highest AC, and check if any make the user deaf.
+                HelmetArmorClass = findMaxAC(helmetItem);
+                foreach (ArmorComponent armor in _armorList)
+                {
+                    if (armor.Deaf == EDeafStrength.High)
+                    {
+                        HasHeavyHelmet = true;
                         break;
                     }
                 }
-                _faceShieldComponents.Clear();
-            }
+                _armorList.Clear();
 
-            // Reset previous results if any
-            HasHeavyHelmet = false;
+                yield return null;
 
-            // Get a list of armor components attached to the headwear item, check to see which has the highest AC, and check if any make the user deaf.
-            HelmetArmorClass = findMaxAC(helmetItem);
+                int vestAC = findMaxAC(EquipmentSlot.ArmorVest);
+                _armorList.Clear();
 
-            foreach (ArmorComponent armor in _armorList)
-            {
-                if (armor.Deaf == EDeafStrength.High)
+                yield return null;
+
+                int bodyAC = findMaxAC(EquipmentSlot.TacticalVest);
+                _armorList.Clear();
+
+                BodyArmorClass = Mathf.Max(vestAC, bodyAC);
+
+                if (SAINPlugin.DebugMode)
                 {
-                    HasHeavyHelmet = true;
-                    break;
+                    Logger.LogInfo(
+                        $" Found GearInfo: " +
+                        $" Body Armor Class: [{BodyArmorClass}]" +
+                        $" Helmet Armor Class [{HelmetArmorClass}]" +
+                        $" Has Heavy Helmet? [{HasHeavyHelmet}]" +
+                        $" Has EarPiece? [{HasEarPiece}]" +
+                        $" Has Face Shield? [{HasFaceShield}]");
                 }
-            }
-            _armorList.Clear();
 
-            int vestAC = findMaxAC(EquipmentSlot.ArmorVest);
-            _armorList.Clear();
-
-            int bodyAC = findMaxAC(EquipmentSlot.TacticalVest);
-            _armorList.Clear();
-
-            BodyArmorClass = Mathf.Max(vestAC, bodyAC);
-
-            if (SAINPlugin.DebugMode)
-            {
-                Logger.LogInfo(
-                    $" Found GearInfo: " +
-                    $" Body Armor Class: [{BodyArmorClass}]" +
-                    $" Helmet Armor Class [{HelmetArmorClass}]" +
-                    $" Has Heavy Helmet? [{HasHeavyHelmet}]" +
-                    $" Has EarPiece? [{HasEarPiece}]" +
-                    $" Has Face Shield? [{HasFaceShield}]");
+                yield return wait;
             }
         }
 

@@ -7,9 +7,12 @@ namespace SAIN.Components.PlayerComponentSpace
     {
         public Vector3 Position { get; private set; }
         public Vector3 LookDirection { get; private set; }
+        public Vector3 HeadLookDirection { get; private set; }
         public Vector3 HeadPosition { get; private set; }
         public Vector3 EyePosition { get; private set; }
         public Vector3 BodyPosition { get; private set; }
+        public Vector3 WeaponFirePort {  get; private set; }
+        public Vector3 WeaponPointDirection { get; private set; }
 
         public Vector3 DirectionTo(Vector3 point)
         {
@@ -28,49 +31,46 @@ namespace SAIN.Components.PlayerComponentSpace
         public Vector3 AngledLookDirection(float x, float y, float z)
             => Quaternion.Euler(x, y, z) * LookDirection;
 
-        public void Update()
+        public void UpdatePositions()
         {
-            if (_eyePart != null)
-                EyePosition = _eyePart.Center;
+            Position = _transform.position;
+            EyePosition = _eyePart.Center;
+            HeadPosition = _myHead.position;
 
-            if (_headPart != null)
-                HeadPosition = _headPart.Position;
-
-            if (_bodyPart != null)
-                BodyPosition = _bodyPart.Position;
-
-            if (getLookDir(out Vector3 lookDir))
-                LookDirection = lookDir;
-
-            if (_transform != null)
-                Position = _transform.position;
-        }
-
-        private bool getLookDir(out Vector3 lookDir)
-        {
             var player = Person.Player;
-            if (player != null && player.MovementContext != null)
+            LookDirection = player.MovementContext.LookDirection;
+
+            //HeadLookDirection = Quaternion.Euler(_myHead.localRotation.y, _myHead.localRotation.x, 0) * _myHead.forward;
+            Vector3 headLookDir = Quaternion.Euler(0, _myHead.rotation.x + 90, 0) * _myHead.forward;
+            headLookDir.y = LookDirection.y;
+            HeadLookDirection = headLookDir;
+
+            BodyPosition = _bodyPart.position;
+
+            if (player.Fireport != null && player.Fireport.Original != null)
             {
-                lookDir = player.MovementContext.LookDirection;
-                return true;
+                WeaponFirePort = player.Fireport.position;
+                WeaponPointDirection = player.Fireport.Original.TransformDirection(player.LocalShotDirection);
             }
-            lookDir = Vector3.zero;
-            return false;
         }
+
+        private const float TRANSFORM_UPDATE_FPS = 30f;
+        public const float TRANSFORM_UPDATE_FREQ = 1f / TRANSFORM_UPDATE_FPS;
 
         public PersonTransformClass(PersonClass person)
         {
             Person = person;
-            _headPart = person.IPlayer.MainParts[BodyPartType.head];
-            _bodyPart = person.IPlayer.MainParts[BodyPartType.body];
-            _transform = person.IPlayer.Transform;
-            _eyePart = person.IPlayer.PlayerBones.BodyPartCollidersDictionary[EBodyPartColliderType.Eyes];
+            _transform = person.Player.Transform;
+            var _bones = person.Player.PlayerBones;
+            _myHead = _bones.Head;
+            _bodyPart = _bones.Ribcage;
+            _eyePart = _bones.BodyPartCollidersDictionary[EBodyPartColliderType.Eyes];
         }
 
         private readonly PersonClass Person;
         private readonly BifacialTransform _transform;
-        private readonly EnemyPart _headPart;
-        private readonly EnemyPart _bodyPart;
+        private readonly BifacialTransform _myHead;
+        private readonly BifacialTransform _bodyPart;
         private readonly BodyPartCollider _eyePart;
     }
 }

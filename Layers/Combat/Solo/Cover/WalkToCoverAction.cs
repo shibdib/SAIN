@@ -127,7 +127,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (suppressing && _suppressTime < Time.time)
             {
                 suppressing = false;
-                Bot.ManualShoot.Shoot(false, Vector3.zero);
+                Bot.ManualShoot.TryShoot(false, Vector3.zero);
             }
 
             if (!Bot.Steering.SteerByPriority(false))
@@ -166,17 +166,20 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private void SuppressPosition(Vector3 position)
         {
             suppressing = true;
-            if (_suppressTime < Time.time
-                && Bot.ManualShoot.Shoot(true, position, true, EShootReason.WalkToCoverSuppress))
+            if (_suppressTime < Time.time)
             {
-                Bot.Enemy.EnemyStatus.EnemyIsSuppressed = true;
-                if (Bot.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
+                bool shot = Bot.ManualShoot.TryShoot(true, position, true, EShootReason.WalkToCoverSuppress);
+                if (shot)
                 {
-                    _suppressTime = Time.time + 0.05f * Random.Range(0.75f, 1.25f);
-                }
-                else
-                {
-                    _suppressTime = Time.time + 0.25f * Random.Range(0.66f, 1.33f);
+                    Bot.Enemy.EnemyStatus.EnemyIsSuppressed = true;
+                    if (Bot.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
+                    {
+                        _suppressTime = Time.time + 0.05f * Random.Range(0.75f, 1.25f);
+                    }
+                    else
+                    {
+                        _suppressTime = Time.time + 0.25f * Random.Range(0.66f, 1.33f);
+                    }
                 }
             }
         }
@@ -192,7 +195,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (suppressing)
             {
                 suppressing = false;
-                Bot.ManualShoot.Shoot(false, Vector3.zero);
+                Bot.ManualShoot.TryShoot(false, Vector3.zero);
             }
         }
 

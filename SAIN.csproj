@@ -263,6 +263,7 @@
     <Compile Include="Components\PlayerComponentSpace\Classes\PlayerAISoundPlayer.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\PlayerLocationClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\ShootPlayerClass.cs" />
+    <Compile Include="Helpers\PerformanceHelpers.cs" />
     <Compile Include="Patches\FixPatches.cs" />
     <Compile Include="Patches\Shoot\AimDataPatches.cs" />
     <Compile Include="Preset\Editor\Attributes\AttributesGUI.cs" />

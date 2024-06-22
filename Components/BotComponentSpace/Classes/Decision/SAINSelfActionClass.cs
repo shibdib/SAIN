@@ -166,11 +166,19 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
+        private float _reloadCallFreqLimit;
+
         public bool TryReload()
         {
+            if (_reloadCallFreqLimit > Time.time)
+            {
+                return false;
+            }
+            _reloadCallFreqLimit = Time.time + 0.1f;
+
             if (BotOwner.WeaponManager.Reload.Reloading)
             {
-                return true;
+                return false;
             }
 
             bool result = false;

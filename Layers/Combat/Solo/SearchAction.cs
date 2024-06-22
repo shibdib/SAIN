@@ -69,7 +69,7 @@ namespace SAIN.Layers.Combat.Solo
         {
             if (Bot.Enemy != null && Bot.Enemy.TimeSinceLastKnownUpdated > 20f)
             {
-                if (ReloadTimer < Time.time && Bot.Decision.SelfActionDecisions.LowOnAmmo(0.7f))
+                if (ReloadTimer < Time.time && Bot.Decision.SelfActionDecisions.LowOnAmmo(0.55f))
                 {
                     ReloadTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
                     Bot.SelfActions.TryReload();

@@ -21,6 +21,10 @@ namespace SAIN.Preset.GlobalSettings
         [Default(false)]
         public bool DrawDebugGizmos;
 
+        [Name("Draw Transform Gizmos")]
+        [Default(false)]
+        public bool DrawTransformGizmos;
+
         [Name("Draw Debug Labels")]
         [Default(false)]
         public bool DrawDebugLabels;

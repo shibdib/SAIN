@@ -28,7 +28,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         {
             foreach (var weapon in WeaponInfos.Values)
             {
-                weapon.Dispose();
+                weapon?.Dispose();
             }
             WeaponInfos.Clear();
         }
@@ -58,7 +58,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
             if (_nextPlaySoundTime < Time.time)
             {
-                _nextPlaySoundTime = Time.time + (PlayerComponent.IsAI ? 0.25f : 0.05f);
+                _nextPlaySoundTime = Time.time + (PlayerComponent.IsAI ? 0.5f : 0.1f);
 
                 float range = weapon.CalculatedAudibleRange;
 
@@ -68,7 +68,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                     range *= weather.RainSoundModifier;
                 }
 
-                SAINPlugin.BotController.BotHearing.PlayAISound(PlayerComponent, weapon.SoundType, Player.WeaponRoot.position, range, 1f, false);
+                SAINPlugin.BotController.BotHearing.PlayAISound(PlayerComponent, weapon.SoundType, PlayerComponent.Transform.WeaponFirePort, range, 1f, false);
             }
             return true;
         }
@@ -77,6 +77,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         public void Update()
         {
+            CurrentWeapon = getCurrentWeapon();
             GearInfo.Update();
             updateAllWeapons();
         }
@@ -109,14 +110,19 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private void updateAllWeapons()
         {
-            foreach (var info in WeaponInfos.Values)
+            if (_nextUpdateWeapTime < Time.time)
             {
-                if (info?.Update() == true)
+                _nextUpdateWeapTime = Time.time + 1f;
+
+                foreach (var info in WeaponInfos.Values)
                 {
-                    return;
+                    if (info?.Update() == true)
+                        return;
                 }
             }
         }
+
+        private float _nextUpdateWeapTime;
 
         private static readonly EquipmentSlot[] _weaponSlots = new EquipmentSlot[]
         {
@@ -127,31 +133,54 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         public GearInfo GearInfo { get; private set; }
 
-        public WeaponInfo CurrentWeapon
+        public WeaponInfo CurrentWeapon { get; private set; }
+
+        private WeaponInfo getCurrentWeapon()
         {
-            get
+            Item item = Player.HandsController.Item;
+            if (item != null)
             {
-                if (Player.HandsController.Item is Weapon weapon)
-                {
-                    if (_currentWeapon?.Weapon == weapon) {
-                        return _currentWeapon;
-                    }
-
-                    foreach (var weaponInfo in WeaponInfos.Values) {
-                        if (weapon == weaponInfo.Weapon)
-                        {
-                            _currentWeapon = weaponInfo;
-                            ReCalcPowerOfEquipment();
-                            break;
-                        }
-                    }
-                }
-
-                if (_currentWeapon == null)
-                    _currentWeapon = PrimaryWeapon ?? SecondaryWeapon ?? HolsterWeapon;
-
+                _currentWeapon = getInfoFromItem(item);
                 return _currentWeapon;
             }
+
+            if (_currentWeapon == null)
+                _currentWeapon = PrimaryWeapon ?? SecondaryWeapon ?? HolsterWeapon;
+
+            return _currentWeapon;
+        }
+
+        private WeaponInfo getInfoFromItem(Item item)
+        {
+            if (item is Weapon weapon)
+            {
+                if (_currentWeapon?.Weapon == weapon)
+                {
+                    return _currentWeapon;
+                }
+                var weaponInfo = getInfoFromWeapon(weapon);
+                if (weaponInfo == null)
+                {
+                    getAllWeapons();
+                    weaponInfo = getInfoFromWeapon(weapon);
+                }
+                return weaponInfo;
+            }
+            return null;
+        }
+
+        private WeaponInfo getInfoFromWeapon(Weapon weapon)
+        {
+            foreach (var weaponInfo in WeaponInfos.Values)
+            {
+                if (weapon == weaponInfo.Weapon)
+                {
+                    _currentWeapon = weaponInfo;
+                    ReCalcPowerOfEquipment();
+                    return weaponInfo;
+                }
+            }
+            return null;
         }
 
         public WeaponInfo GetWeaponInfo(EquipmentSlot slot) {

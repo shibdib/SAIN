@@ -14,12 +14,12 @@ namespace SAIN.Components.PlayerComponentSpace
         {
             get
             {
-                if (!IsPlayerActive)
+                if (!PlayerActive)
                 {
                     return false;
                 }
                 if (IsAI &&
-                    !IsBotActive)
+                    !BotActive)
                 {
                     return false;
                 }
@@ -27,15 +27,15 @@ namespace SAIN.Components.PlayerComponentSpace
             }
         }
 
-        public bool IsPlayerActive
+        public bool PlayerActive
         {
             get
             {
-                return PlayerExists && IsAlive;
+                return PlayerExists && GameObjectActive && IsAlive;
             }
         }
 
-        public bool IsBotActive
+        public bool BotActive
         {
             get
             {
@@ -46,10 +46,6 @@ namespace SAIN.Components.PlayerComponentSpace
                         return false;
                     }
                     if (!IsAlive)
-                    {
-                        return false;
-                    }
-                    if (!BotOwner.gameObject.activeInHierarchy)
                     {
                         return false;
                     }
@@ -69,13 +65,19 @@ namespace SAIN.Components.PlayerComponentSpace
         public Vector3 Position => Transform.Position;
         public bool PlayerExists => Player != null && Player.gameObject != null && Player.Transform?.Original != null;
         public bool BotExists => BotOwner != null && BotOwner.gameObject != null && BotOwner.Transform?.Original != null;
+
+        public bool GameObjectActive => GameObject?.activeInHierarchy == true;
+
         public bool IsAlive => IPlayer?.HealthController?.IsAlive == true;
         public IPlayer IPlayer { get; private set; }
         public Player Player { get; private set; }
 
+        public GameObject GameObject { get; private set; }
+
         public PersonClass(IPlayer iPlayer, Player player, PlayerComponent playerComponent)
         {
             PlayerComponent = playerComponent;
+            GameObject = playerComponent.gameObject;
             Player = player;
             IPlayer = iPlayer;
             Name = player?.name;

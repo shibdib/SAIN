@@ -1,11 +1,8 @@
-using BepInEx.Logging;
-using Comfort.Common;
 using EFT;
 using EFT.Visual;
 using HarmonyLib;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.SAINComponent;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -45,7 +42,7 @@ namespace SAIN.Components
                 UsingLight &&
                 ActiveModes.Count > 0)
             {
-                _nextPointCreateTime = Time.time + 0.05f;
+                _nextPointCreateTime = Time.time + 0.15f;
                 bool onlyLaser = !WhiteLight && !IRLight && (Laser || IRLaser);
                 LightDetection.CreateDetectionPoints(WhiteLight || Laser, onlyLaser);
                 //Logger.LogDebug("Creating flashlight points");

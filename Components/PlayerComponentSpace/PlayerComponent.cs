@@ -16,13 +16,80 @@ namespace SAIN.Components.PlayerComponentSpace
     {
         private void Update()
         {
-            Transform.Update();
-
-            if (IsActive)
+            if (!Person.PlayerActive)
             {
+                endLoops();
+                return;
+            }
+
+
+            bool active = !Person.IsAI || Person.BotActive;
+            startLoops(active);
+
+            if (active)
+            {
+                drawTransformGizmos();
                 Flashlight.Update();
                 Equipment.Update();
-                //navRayCastAllDir();
+            }
+        }
+
+        private void drawTransformGizmos()
+        {
+            if (SAINPlugin.DebugMode &&
+                SAINPlugin.DrawDebugGizmos &&
+                SAINPlugin.DebugSettings.DrawTransformGizmos)
+            {
+                DebugGizmos.Sphere(Transform.EyePosition, 0.05f, Color.white, true, 0.1f);
+                DebugGizmos.Ray(Transform.EyePosition, Transform.HeadLookDirection, Color.white, Transform.HeadLookDirection.magnitude, 0.025f, true, 0.1f);
+
+                DebugGizmos.Sphere(Transform.HeadPosition, 0.075f, Color.yellow, true, 0.1f);
+                DebugGizmos.Ray(Transform.HeadPosition, Transform.LookDirection, Color.yellow, Transform.LookDirection.magnitude, 0.025f, true, 0.1f);
+
+                DebugGizmos.Sphere(Transform.WeaponFirePort, 0.075f, Color.green, true, 0.1f);
+                DebugGizmos.Ray(Transform.WeaponFirePort, Transform.WeaponPointDirection, Color.green, Transform.WeaponPointDirection.magnitude, 0.05f, true, 0.1f);
+
+                DebugGizmos.Sphere(Transform.BodyPosition, 0.1f, Color.blue, true, 0.1f);
+                DebugGizmos.Ray(Transform.BodyPosition, Transform.LookDirection, Color.blue, Transform.LookDirection.magnitude, 0.05f, true, 0.1f);
+            }
+        }
+
+        private void startLoops(bool aiActive)
+        {
+            if (_transformCoroutine == null)
+            {
+                _transformCoroutine = StartCoroutine(updateTransformsLoop());
+            }
+            if (aiActive && _gearCoroutine == null)
+            {
+                _gearCoroutine = StartCoroutine(Equipment.GearInfo.GearUpdateLoop());
+            }
+        }
+
+        private void endLoops()
+        {
+            if (_transformCoroutine != null)
+            {
+                StopCoroutine(_transformCoroutine);
+                _transformCoroutine = null;
+            }
+            if (_gearCoroutine != null)
+            {
+                StopCoroutine(_gearCoroutine);
+                _gearCoroutine = null;
+            }
+        }
+
+        private Coroutine _transformCoroutine;
+        private Coroutine _gearCoroutine;
+
+        private IEnumerator updateTransformsLoop()
+        {
+            WaitForSeconds wait = new WaitForSeconds(PersonTransformClass.TRANSFORM_UPDATE_FREQ);
+            while (true)
+            {
+                Transform.UpdatePositions();
+                yield return wait;
             }
         }
 
@@ -119,15 +186,16 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private void OnDisable()
         {
+            endLoops();
             StopAllCoroutines();
         }
 
         public void Dispose()
         {
             OnComponentDestroyed?.Invoke(ProfileId);
+            endLoops();
             StopAllCoroutines();
             Equipment?.Dispose();
-            Logger.LogDebug($"{Person.Nickname} Player Component Destroyed");
             Destroy(this);
         }
 

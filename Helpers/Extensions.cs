@@ -7,6 +7,49 @@ namespace SAIN.Helpers
 {
     public static class Extensions
     {
+        public static SAINSoundType Convert(this AISoundType aiSoundType)
+        {
+            switch (aiSoundType)
+            {
+                case AISoundType.silencedGun:
+                    return SAINSoundType.SuppressedGunShot;
+
+                case AISoundType.gun:
+                    return SAINSoundType.Gunshot;
+
+                default:
+                    return SAINSoundType.Generic;
+            }
+        }
+
+        public static AISoundType Convert(this SAINSoundType sainSoundType)
+        {
+            switch (sainSoundType)
+            {
+                case SAINSoundType.SuppressedGunShot:
+                    return AISoundType.silencedGun;
+
+                case SAINSoundType.Gunshot:
+                    return AISoundType.gun;
+
+                default:
+                    return AISoundType.step;
+            }
+        }
+
+        public static bool IsGunShot(this SAINSoundType sainSoundType)
+        {
+            switch (sainSoundType)
+            {
+                case SAINSoundType.SuppressedGunShot:
+                case SAINSoundType.Gunshot:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
         public static Vector3 Normalize(this Vector3 value, out float magnitude)
         {
             magnitude = value.magnitude;

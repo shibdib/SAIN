@@ -15,39 +15,77 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         public void Update()
         {
             if (Reason != EShootReason.None && 
-                (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 1f < Time.time || !BotOwner.ShootData.Shooting))
+                (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 2f < Time.time || !BotOwner.ShootData.Shooting))
             {
-                Shoot(false, Vector3.zero);
+                TryShoot(false, Vector3.zero);
             }
         }
 
-        public bool Shoot(bool value, Vector3 targetPos, bool checkFF = true, EShootReason reason = EShootReason.None)
+        public bool TryShoot(bool value, Vector3 targetPos, bool checkFF = true, EShootReason reason = EShootReason.None)
         {
             ShootPosition = targetPos;
             Reason = value ? reason : EShootReason.None;
 
             if (value)
             {
-                if (checkFF && !Bot.FriendlyFireClass.ClearShot)
+                if (!CanShoot(checkFF))
                 {
                     Reason = EShootReason.None;
-                    BotOwner.ShootData.EndShoot();
                     return false;
                 }
-                if (BotOwner.ShootData.Shooting)
+
+                Bot.Steering.LookToPoint(targetPos);
+                if (Shooting)
                 {
-                    return true;
+                    return false;
+                }
+                if (Bot.Steering.AngleToPointFromLookDir(targetPos) > 5)
+                {
+                    return false;
                 }
                 if (BotOwner.ShootData.Shoot())
                 {
                     _timeStartManualShoot = Time.time;
-                    Reason = reason;
                     return true;
                 }
+                return false;
             }
             BotOwner.ShootData.EndShoot();
             Reason = EShootReason.None;
             return false;
+        }
+
+        public bool Shooting => BotOwner.ShootData.Shooting;
+
+        public bool CanShoot(bool checkFF = true)
+        {
+            if (checkFF && !Bot.FriendlyFireClass.ClearShot)
+            {
+                BotOwner.ShootData.EndShoot();
+                return false;
+            }
+            BotWeaponManager weaponManager = BotOwner.WeaponManager;
+            if (weaponManager.IsMelee)
+            {
+                return false;
+            }
+            if (!weaponManager.IsWeaponReady)
+            {
+                return false;
+            }
+            if (weaponManager.Reload.Reloading)
+            {
+                return false;
+            }
+            if (!BotOwner.ShootData.CanShootByState)
+            {
+                return false;
+            }
+            if (!weaponManager.HaveBullets)
+            {
+                return false;
+            }
+            return true;
         }
 
         private float _timeStartManualShoot;

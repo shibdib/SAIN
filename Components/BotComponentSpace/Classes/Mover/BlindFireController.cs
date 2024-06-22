@@ -35,9 +35,19 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return false;
             }
 
+            if (enemy.IsVisible && enemy.CanShoot)
+            {
+                return false;
+            }
+
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
                 && enemy.IsAI
                 && Bot.CurrentAILimit != AILimitSetting.Close)
+            {
+                return false;
+            }
+
+            if (!Bot.ManualShoot.CanShoot())
             {
                 return false;
             }
@@ -47,62 +57,69 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
+            if (_nextBlindFireCheck > Time.time)
+            {
+                if (_blindFire != 0)
+                {
+                    tryShoot();
+                }
+                return;
+            }
+            _nextBlindFireCheck = Time.time + 0.2f;
+
             if (!checkAllowBlindFire())
             {
                 ResetBlindFire();
                 return;
             }
 
-            if (CurrentBlindFireSetting == 0)
-            {
-                WeaponPosOffset = BotOwner.WeaponRoot.position - Bot.Transform.Position;
-            }
-
-            SAINEnemy enemy = Bot.Enemy;
-            Vector3 targetPos;
-            if (enemy.IsVisible)
-            {
-                targetPos = enemy.EnemyChestPosition;
-            }
-            else if (enemy.KnownPlaces.LastKnownPlace != null)
-            {
-                targetPos = enemy.KnownPlaces.LastKnownPlace.Position + Vector3.up;
-            }
-            else
+            Vector3? targetPos = Bot.Steering.EnemyLastKnown(Bot.Enemy, out _);
+            if (targetPos == null)
             {
                 ResetBlindFire();
-                BlindFireTimer = Time.time + 0.5f;
+                _changeBlindFireTime = Time.time + 0.5f;
                 return;
             }
 
-            int blindfire = CheckOverHeadBlindFire(targetPos);
+            int lastBlindFire = _blindFire;
+            _blindFire = checkBlindFire(targetPos.Value);
 
-            if (blindfire == 0)
-            {
-                blindfire = CheckSideBlindFire(targetPos);
-            }
-
-            if (blindfire == 0)
+            if (_blindFire == 0)
             {
                 ResetBlindFire();
-                BlindFireTimer = Time.time + 0.5f;
-                Bot.ManualShoot.Shoot(false, Vector3.zero);
+                _changeBlindFireTime = Time.time + 0.5f;
+                return;
             }
-            else
-            {
-                if (BlindFireTimer < Time.time)
-                {
-                    BlindFireTimer = Time.time + 1f;
-                    SetBlindFire(blindfire);
-                }
 
+            bool noLastBlindFire = lastBlindFire == 0;
+            if (noLastBlindFire || _changeBlindFireTime < Time.time)
+            {
+                _changeBlindFireTime = Time.time + 1f;
+                SetBlindFire(_blindFire);
+            }
+            if (noLastBlindFire || _nextUpdateAimTargetTime < Time.time || BlindFireTargetPos == Vector3.zero)
+            {
+                _nextUpdateAimTargetTime = Time.time + 1.5f;
                 Vector3 start = Bot.Position;
-                Vector3 blindFireDirection = Vector.Rotate(targetPos - start, Vector.RandomRange(3), Vector.RandomRange(3), Vector.RandomRange(3));
+                Vector3 blindFireDirection = Vector.Rotate(targetPos.Value - start, Vector.RandomRange(3), Vector.RandomRange(3), Vector.RandomRange(3));
                 BlindFireTargetPos = blindFireDirection + start;
-                //SAIN.Steering.LookToPoint(BlindFireTargetPos);
-                Bot.ManualShoot.Shoot(true, BlindFireTargetPos, false, EShootReason.Blindfire);
+            }
+            tryShoot();
+        }
+
+        private void tryShoot()
+        {
+            if (Bot.ManualShoot.TryShoot(true, BlindFireTargetPos, false, EShootReason.Blindfire))
+            {
+                _manualShooting = true;
             }
         }
+
+        private float _nextUpdateAimTargetTime;
+        private float _nextBlindFireCheck;
+        private int _blindFire;
+
+        private bool _manualShooting;
 
         public void Dispose()
         {
@@ -110,64 +127,64 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void ResetBlindFire()
         {
-            if (CurrentBlindFireSetting != 0)
+            if (ActiveBlindFireSetting != 0)
             {
+                _blindFire = 0;
                 Player.MovementContext.SetBlindFire(0);
             }
+            if (_blindFire != 0)
+            {
+                _blindFire = 0;
+            }
+            if (_manualShooting)
+            {
+                _manualShooting = false;
+                Bot.ManualShoot.TryShoot(false, Vector3.zero);
+            }
+            if (BlindFireTargetPos != Vector3.zero)
+            {
+                BlindFireTargetPos = Vector3.zero;
+            }
         }
-
-        private Vector3 WeaponPosOffset;
 
         private Vector3 BlindFireTargetPos;
 
-        public bool BlindFireActive => CurrentBlindFireSetting != 0;
+        public bool BlindFireActive => ActiveBlindFireSetting != 0;
 
-        public int CurrentBlindFireSetting => Player.MovementContext.BlindFire;
+        public int ActiveBlindFireSetting => Player.MovementContext.BlindFire;
 
-        private float BlindFireTimer = 0f;
+        private float _changeBlindFireTime = 0f;
 
-        private int CheckOverHeadBlindFire(Vector3 targetPos)
+        private int checkBlindFire(Vector3 targetPos)
         {
-            int blindfire = 0;
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
+            Vector3 firePort = Bot.Transform.WeaponFirePort;
+            Vector3 direction = targetPos - firePort;
 
-            Vector3 rayShoot = WeaponPosOffset + Bot.Transform.Position;
-            Vector3 direction = targetPos - rayShoot;
-            if (Physics.Raycast(rayShoot, direction, direction.magnitude, mask))
+            if (Physics.Raycast(firePort, direction, 5f, mask))
             {
-                rayShoot = Bot.Transform.HeadPosition + Vector3.up * 0.15f;
-                if (!Vector.Raycast(rayShoot, targetPos, mask))
+                // Overhead blindfire
+                firePort = Bot.Transform.HeadPosition + Vector3.up * 0.15f;
+                if (!Vector.Raycast(firePort, targetPos, mask))
                 {
-                    blindfire = 1;
+                    return 1;
                 }
-            }
-            return blindfire;
-        }
 
-        private int CheckSideBlindFire(Vector3 targetPos)
-        {
-            int blindfire = 0;
-            LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
-
-            Vector3 rayShoot = WeaponPosOffset + Bot.Transform.Position;
-            Vector3 direction = targetPos - rayShoot;
-            if (Physics.Raycast(rayShoot, direction, direction.magnitude, mask))
-            {
                 Quaternion rotation = Quaternion.Euler(0f, 90f, 0f);
                 Vector3 SideShoot = rotation * direction.normalized * 0.2f;
-                rayShoot += SideShoot;
-                direction = targetPos - rayShoot;
-                if (!Physics.Raycast(rayShoot, direction, direction.magnitude, mask))
+                firePort += SideShoot;
+                direction = targetPos - firePort;
+                if (!Physics.Raycast(firePort, direction, direction.magnitude, mask))
                 {
-                    blindfire = -1;
+                    return -1;
                 }
             }
-            return blindfire;
+            return 0;
         }
 
         public void SetBlindFire(int value)
         {
-            if (CurrentBlindFireSetting != value)
+            if (ActiveBlindFireSetting != value)
             {
                 Player.MovementContext.SetBlindFire(value);
             }

@@ -8,14 +8,18 @@ namespace SAIN.Components.PlayerComponentSpace.Classes
         {
         }
 
-        private float _soundFrequency => (IsAI ? 0.5f : 0.1f);
+        private float _soundFrequency => (IsAI ? SOUND_FREQUENCY_AI : SOUND_FREQUENCY_HUMAN);
         private float _lastSoundPower;
         private float _nextPlaySoundTime;
+
+        private const float SOUND_FREQUENCY_HUMAN = 0.2f;
+        private const float SOUND_FREQUENCY_AI = 0.75f;
+        private const float SOUND_POWER_THRESH = 1.25f;
 
         public bool ShallPlayAISound(float power)
         {
             if (_nextPlaySoundTime < Time.time || 
-                _lastSoundPower > power * 1.1f)
+                _lastSoundPower > power * SOUND_POWER_THRESH)
             {
                 _nextPlaySoundTime = Time.time + _soundFrequency;
                 _lastSoundPower = power;

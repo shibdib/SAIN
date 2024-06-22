@@ -23,20 +23,26 @@ namespace SAIN.Components.PlayerComponentSpace
                 return;
             }
 
+            if (Player.Fireport == null || Player.Fireport.Original == null)
+            {
+                return;
+            }
+
             Vector3 lightDirection = getLightPointToCheck(onlyLaser);
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
             float detectionDistance = 100f;
-            Vector3 sourcePosition = Player.WeaponRoot.position;
-            Vector3 playerLookDirection = LookDirection;
+            Vector3 firePort = Transform.WeaponFirePort;
+            Vector3 weaponPointDir = Transform.WeaponPointDirection;
 
             // Our flashlight did not hit an object, return
-            if (!Physics.Raycast(sourcePosition, lightDirection, out RaycastHit hit, detectionDistance, mask))
+            if (!Physics.Raycast(firePort, lightDirection, out RaycastHit hit, detectionDistance, mask))
             {
                 return;
             }
 
             // our flashlight hit an object, create a light point
-            LightPoints.Add(new FlashLightPoint(hit.point));
+            Vector3 point = hit.point + (hit.normal * 0.1f);
+            LightPoints.Add(new FlashLightPoint(point));
 
             // Debug is off, return
             if (!SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.DebugFlash)
@@ -46,13 +52,13 @@ namespace SAIN.Components.PlayerComponentSpace
 
             if (visibleLight)
             {
-                DebugGizmos.Sphere(hit.point, 0.1f, Color.red, true, 0.25f);
-                DebugGizmos.Line(hit.point, sourcePosition, Color.red, 0.05f, true, 0.25f);
+                DebugGizmos.Sphere(point, 0.1f, Color.red, true, 0.25f);
+                DebugGizmos.Line(point, firePort, Color.red, 0.05f, true, 0.25f);
                 return;
             }
 
-            DebugGizmos.Sphere(hit.point, 0.1f, Color.blue, true, 0.25f);
-            DebugGizmos.Line(hit.point, sourcePosition, Color.blue, 0.05f, true, 0.25f);
+            DebugGizmos.Sphere(point, 0.1f, Color.blue, true, 0.25f);
+            DebugGizmos.Line(point, firePort, Color.blue, 0.05f, true, 0.25f);
         }
 
         private Vector3 getLightPointToCheck(bool onlyLaser)
@@ -67,7 +73,7 @@ namespace SAIN.Components.PlayerComponentSpace
                 }
                 else
                 {
-                    _LightBeamPoints.Add(LookDirection);
+                    _LightBeamPoints.Add(Transform.WeaponPointDirection);
                 }
             }
             return _LightBeamPoints.GetRandomItem();
@@ -79,18 +85,20 @@ namespace SAIN.Components.PlayerComponentSpace
             float coneAngle = 10f;
 
             beamPoints.Clear();
-            Vector3 lookDir = LookDirection;
+            Vector3 weaponPointDir = Transform.WeaponPointDirection;
             for (int i = 0; i < 10; i++)
             {
                 // Generate random angles within the cone range for yaw and pitch
-                float randomYawAngle = Random.Range(-coneAngle * 0.5f, coneAngle * 0.5f);
-                float randomPitchAngle = Random.Range(-coneAngle * 0.5f, coneAngle * 0.5f);
+                float angle = coneAngle * 0.5f;
+                float x = Random.Range(-angle, angle);
+                float y = Random.Range(-angle, angle);
+                float z = Random.Range(-angle, angle);
 
                 // AddColor a Quaternion rotation based on the random yaw and pitch angles
-                Quaternion randomRotation = Quaternion.Euler(randomPitchAngle, randomYawAngle, 0);
+                Quaternion randomRotation = Quaternion.Euler(x, y, z);
 
                 // Rotate the player's look direction by the Quaternion rotation
-                Vector3 randomBeamDirection = randomRotation * lookDir;
+                Vector3 randomBeamDirection = randomRotation * weaponPointDir;
 
                 beamPoints.Add(randomBeamDirection);
             }
@@ -98,7 +106,7 @@ namespace SAIN.Components.PlayerComponentSpace
             {
                 foreach (var point in beamPoints)
                 {
-                    DebugGizmos.Line(point, Player.WeaponRoot.position, 0.05f, 0.25f);
+                    DebugGizmos.Line(point, Transform.WeaponFirePort, 0.05f, 0.25f);
                 }
             }
         }
@@ -153,7 +161,7 @@ namespace SAIN.Components.PlayerComponentSpace
             {
                 return;
             }
-            enemy.NextCheckFlashLightTime = Time.time + 0.1f;
+            enemy.NextCheckFlashLightTime = Time.time + 0.2f;
 
             var flashLight = enemy.EnemyPlayerComponent.Flashlight;
             if (!checkIsBeamVisible(flashLight, usingNVGs))
@@ -244,10 +252,8 @@ namespace SAIN.Components.PlayerComponentSpace
         private bool raycastToLightPoint(Vector3 lightPointPos, Vector3 botPos)
         {
             Vector3 direction = (lightPointPos - botPos);
-            float rayLength = direction.magnitude - 0.1f;
-            LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
-
-            return !Physics.Raycast(botPos, direction, rayLength, mask);
+            LayerMask mask = LayerMaskClass.HighPolyWithTerrainMaskAI;
+            return !Physics.Raycast(botPos, direction, direction.magnitude, mask);
         }
 
         private void tryToInvestigate(Vector3 estimatedPosition)
