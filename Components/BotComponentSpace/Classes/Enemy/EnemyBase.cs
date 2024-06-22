@@ -2,22 +2,22 @@
 using SAIN.Components.PlayerComponentSpace;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public abstract class EnemyBase
     {
-        public EnemyBase(SAINEnemy enemy)
+        public EnemyBase(Enemy enemy)
         {
             Enemy = enemy;
             EnemyPerson = enemy.EnemyPerson;
         }
 
-        public virtual void OnEnemyForgotten(SAINEnemy enemy)
+        public virtual void OnEnemyForgotten(Enemy enemy)
         {
 
         }
 
-        protected SAINEnemy Enemy { get; private set; }
+        protected Enemy Enemy { get; private set; }
         protected BotComponent Bot => Enemy.Bot;
         protected PlayerComponent PlayerComp => Enemy.Bot.PlayerComponent;
         protected BotOwner BotOwner => Enemy.BotOwner;

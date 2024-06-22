@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyKnownPlaces : EnemyBase, ISAINEnemyClass
     {
@@ -63,7 +63,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public EnemyKnownPlaces(SAINEnemy enemy) : base(enemy)
+        public EnemyKnownPlaces(Enemy enemy) : base(enemy)
         {
         }
 
@@ -93,12 +93,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
             _guiObjects?.Clear();
         }
 
-        public void onEnemyForgotten(SAINEnemy enemy)
+        public void onEnemyForgotten(Enemy enemy)
         {
             clearAllPlaces();
         }
 
-        public void onEnemyKnown(SAINEnemy enemy)
+        public void onEnemyKnown(Enemy enemy)
         {
 
         }

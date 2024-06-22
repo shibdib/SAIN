@@ -2,7 +2,7 @@
 using HarmonyLib;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -89,7 +89,7 @@ namespace SAIN.Components
 
         public bool NoBushESPCheck()
         {
-            SAINEnemy sainEnemy = SAIN?.Enemy;
+            Enemy sainEnemy = SAIN?.Enemy;
             var enemy = sainEnemy?.EnemyInfo ?? BotOwner?.Memory?.GoalEnemy;
             if (enemy != null && (enemy.IsVisible || enemy.CanShoot))
             {

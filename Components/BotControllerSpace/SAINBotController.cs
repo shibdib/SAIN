@@ -8,7 +8,7 @@ using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Layers;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -287,7 +287,7 @@ namespace SAIN.Components
                     float distance = (bot.Position - explosionPosition).magnitude;
                     if (distance < range)
                     {
-                        SAINEnemy enemy = bot.EnemyController.GetEnemy(playerProfileID);
+                        Enemy enemy = bot.EnemyController.GetEnemy(playerProfileID);
                         if (enemy != null)
                         {
                             float dispersion = distance / 10f;

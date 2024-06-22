@@ -1,6 +1,6 @@
 ﻿using SAIN.Helpers;
 using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -203,7 +203,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool checkPathToEnemy(NavMeshPath path)
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy != null
                 && enemy.EnemyPath.PathToEnemy != null
                 && !SAINBotSpaceAwareness.ArePathsDifferent(path, enemy.EnemyPath.PathToEnemy, 0.5f, 0.1f))

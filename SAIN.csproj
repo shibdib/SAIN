@@ -522,7 +522,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Talk\EnemyTalkObject.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Talk\GroupTalk.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\BotSquadClass.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\SAINEnemy.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Enemy\Enemy.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\SAINBotInfoClass.cs" />
     <Compile Include="SAINEnum.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\GrenadeTrackerComponent.cs" />

@@ -2,7 +2,7 @@
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,7 +29,7 @@ namespace SAIN.BotController.Classes
 
         private float maxReportActionRangeSqr;
 
-        public void ReportEnemyPosition(SAINEnemy reportedEnemy, EnemyPlace place, bool seen)
+        public void ReportEnemyPosition(Enemy reportedEnemy, EnemyPlace place, bool seen)
         {
             if (Members == null || Members.Count <= 1)
             {
@@ -76,7 +76,7 @@ namespace SAIN.BotController.Classes
         {
             foreach (var member in Members)
             {
-                SAINEnemy enemy = member.Value?.Enemy;
+                Enemy enemy = member.Value?.Enemy;
                 if (enemy?.EnemyPlayer != null
                     && enemy.EnemyPlayer.ProfileId == profileId
                     && enemy.EnemyStatus.EnemyIsSuppressed)
@@ -99,7 +99,7 @@ namespace SAIN.BotController.Classes
 
         public Action<PlaceForCheck> OnSoundHeard { get; set; }
 
-        public Action<EnemyPlace, SAINEnemy> OnEnemyHeard { get; set; }
+        public Action<EnemyPlace, Enemy> OnEnemyHeard { get; set; }
 
         public void AddPointToSearch(Vector3 position, float soundPower, BotComponent sain, SAINSoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
         {
@@ -532,7 +532,7 @@ namespace SAIN.BotController.Classes
                     member.ProfileId != sain.ProfileId &&
                     isInCommunicationRange(sain, member))
                 {
-                    SAINEnemy memberEnemy = member.EnemyController.CheckAddEnemy(player);
+                    Enemy memberEnemy = member.EnemyController.CheckAddEnemy(player);
                     if (memberEnemy != null)
                     {
                         memberEnemy.SetHeardStatus(true, position, soundType, false);

@@ -2,7 +2,7 @@ using Comfort.Common;
 using EFT;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -148,7 +148,7 @@ namespace SAIN.Components.PlayerComponentSpace
             }
         }
 
-        private void checkEnemyLight(SAINEnemy enemy, Vector3 botPos, bool usingNVGs)
+        private void checkEnemyLight(Enemy enemy, Vector3 botPos, bool usingNVGs)
         {
             // something is wrong with this enemy, or the enemy is another bot
             if (!validateEnemyIsHuman(enemy))
@@ -205,7 +205,7 @@ namespace SAIN.Components.PlayerComponentSpace
             _searchTime = Time.time + 1f;
         }
 
-        private bool validateEnemyIsHuman(SAINEnemy enemy)
+        private bool validateEnemyIsHuman(Enemy enemy)
         {
             if (enemy == null)
             {

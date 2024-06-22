@@ -1,5 +1,5 @@
 ﻿using EFT;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,7 +21,7 @@ namespace SAIN.SAINComponent.Classes
             _enemies = Bot.EnemyController.Enemies;
         }
 
-        private Dictionary<string, SAINEnemy> _enemies;
+        private Dictionary<string, Enemy> _enemies;
         public readonly LookAllData LookData;
 
         public int UpdateLook()
@@ -58,7 +58,7 @@ namespace SAIN.SAINComponent.Classes
             int updated = 0;
             _cachedList.Clear();
             _cachedList.AddRange(_enemies.Values);
-            foreach (SAINEnemy enemy in _cachedList) {
+            foreach (Enemy enemy in _cachedList) {
 
                 if (!shallCheckEnemy(enemy))
                     continue;
@@ -71,9 +71,9 @@ namespace SAIN.SAINComponent.Classes
             return updated;
         }
 
-        private readonly List<SAINEnemy> _cachedList = new List<SAINEnemy>();
+        private readonly List<Enemy> _cachedList = new List<Enemy>();
 
-        private bool shallCheckEnemy(SAINEnemy enemy)
+        private bool shallCheckEnemy(Enemy enemy)
         {
             if (enemy?.IsValid != true)
                 return false;
@@ -87,7 +87,7 @@ namespace SAIN.SAINComponent.Classes
             return true;
         }
 
-        private bool checkEnemy(SAINEnemy enemy, LookAllData lookAll)
+        private bool checkEnemy(Enemy enemy, LookAllData lookAll)
         {
             float delay = getDelay(enemy);
             if (enemy.LastCheckLookTime + delay > Time.time)
@@ -100,7 +100,7 @@ namespace SAIN.SAINComponent.Classes
             return true;
         }
 
-        private float getDelay(SAINEnemy enemy)
+        private float getDelay(Enemy enemy)
         {
             float delay;
             if (enemy.EnemyPerson.IsActive) {

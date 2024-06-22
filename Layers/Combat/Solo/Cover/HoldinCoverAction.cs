@@ -10,7 +10,7 @@ using UnityEngine.AI;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SAIN.Layers.Combat.Solo;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -117,7 +117,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 return false;
             }
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null || !enemy.Seen)
             {
                 return false;

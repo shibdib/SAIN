@@ -1,7 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Collections;
 using System.Collections.Generic;
@@ -105,9 +105,9 @@ namespace SAIN.SAINComponent.Classes
             LastHitTime = Time.time;
 
             CoverPoint coverInUse = CoverInUse;
-            if (coverInUse != null)
+            if (coverInUse != null && coverInUse.Status == CoverStatus.InCover)
             {
-                SAINEnemy enemy = Bot.Enemy;
+                Enemy enemy = Bot.Enemy;
                 bool HitInCoverKnown = enemy != null && 
                     damageInfo.Player?.iPlayer != null && 
                     enemy.EnemyPlayer.ProfileId == damageInfo.Player.iPlayer.ProfileId;

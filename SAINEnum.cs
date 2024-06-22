@@ -38,7 +38,6 @@ namespace SAIN
     {
         None,
         FriendlyBlock,
-        FriendlyClose,
         Clear,
     }
 
@@ -211,12 +210,12 @@ namespace SAIN
 
     public enum EPathDistance
     {
+        NoEnemy,
         VeryClose,
         Close,
         Mid,
         Far,
         VeryFar,
-        NoEnemy,
     }
 
     public enum StyleState

@@ -1,12 +1,6 @@
 ﻿using EFT;
 using SAIN.Components;
-using SAIN.Preset.GlobalSettings;
-using SAIN.SAINComponent;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
@@ -14,23 +8,7 @@ namespace SAIN.SAINComponent.Classes
     public class SAINFriendlyFireClass : SAINBase, ISAINClass
     {
         public bool ClearShot => FriendlyFireStatus != FriendlyFireStatus.FriendlyBlock;
-
-        public FriendlyFireStatus FriendlyFireStatus
-        {
-            get
-            {
-                if (!Bot.SAINLayersActive)
-                {
-                    _ffStatus = FriendlyFireStatus.None;
-                }
-                else if (_nextCheckFFTime < Time.time)
-                {
-                    _nextCheckFFTime = Time.time + 0.1f;
-                    _ffStatus = CheckFriendlyFire();
-                }
-                return _ffStatus;
-            }
-        }
+        public FriendlyFireStatus FriendlyFireStatus { get; private set; }
 
         public SAINFriendlyFireClass(BotComponent sain) : base(sain)
         {
@@ -38,7 +16,8 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            AimSettings = BotOwner.Settings.FileSettings.Aiming;
+            Bot.OnBotDisabled += endLoop;
+            Bot.Decision.OnSAINStatusChanged += toggleLoop;
         }
 
         public void Update()
@@ -49,80 +28,102 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
+        private void endLoop()
+        {
+            toggleLoop(false);
+        }
+
+        private void toggleLoop(bool value)
+        {
+            if (!value && _friendlyFireCoroutine != null)
+            {
+                Bot.StopCoroutine(_friendlyFireCoroutine);
+                _friendlyFireCoroutine = null;
+            }
+            if (value && _friendlyFireCoroutine == null)
+            {
+                _friendlyFireCoroutine = Bot.StartCoroutine(friendlyFireLoop());
+            }
+
+        }
+
+        private IEnumerator friendlyFireLoop()
+        {
+            WaitForSeconds wait = new WaitForSeconds(FRIENDLYFIRE_FREQUENCY);
+            while (true)
+            {
+                FriendlyFireStatus = CheckFriendlyFire();
+                yield return wait;
+            }
+        }
+
         public void Dispose()
         {
+            Bot.OnBotDisabled -= endLoop;
         }
 
         public FriendlyFireStatus CheckFriendlyFire()
         {
-            if (!Bot.Squad.BotInGroup)
+            if (Bot.Squad.Members.Count <= 1)
             {
                 return FriendlyFireStatus.None;
             }
 
-            setSphereCastSize();
             var aimData = BotOwner.AimingData;
-            FriendlyFireStatus friendlyFire = checkFFToTarget(aimData?.RealTargetPoint);
+            if (aimData == null)
+            {
+                return FriendlyFireStatus.None;
+            }
 
+            FriendlyFireStatus friendlyFire = checkFriendlyFire(aimData.RealTargetPoint);
             if (friendlyFire != FriendlyFireStatus.FriendlyBlock)
             {
-                friendlyFire = checkFFToTarget(aimData?.EndTargetPoint);
+                friendlyFire = checkFriendlyFire(aimData.EndTargetPoint);
             }
 
             return friendlyFire;
         }
 
-        private FriendlyFireStatus checkFFToTarget(Vector3? target)
+        private FriendlyFireStatus checkFriendlyFire(Vector3 target)
         {
-            FriendlyFireStatus friendlyFire;
-            if (target != null &&
-                BotOwner.ShootData?.CheckFriendlyFire(BotOwner.WeaponRoot.position, target.Value) == true)
+            Collider hitCollider = sphereCast(target);
+            if (hitCollider == null)
             {
-                friendlyFire = FriendlyFireStatus.FriendlyBlock;
+                return FriendlyFireStatus.None;
             }
-            else
+
+            if (!isColliderEnemy(hitCollider))
             {
-                friendlyFire = FriendlyFireStatus.Clear;
+                return FriendlyFireStatus.FriendlyBlock;
             }
-            return friendlyFire;
+            return FriendlyFireStatus.Clear;
         }
 
-        private void setSphereCastSize()
+        private Collider sphereCast(Vector3 target)
         {
-            if (AimSettings == null)
-            {
-                Logger.LogError($"Aim Settings are null, cannot edit friendly fire settings!");
-                return;
-            }
-            if (defaultSphereSize == 0f)
-            {
-                defaultSphereSize = currentSphereSize;
-                shootingSphereSize = defaultSphereSize * 1.5f;
-            }
-            bool shooting = BotOwner.ShootData.Shooting;
-            if (shooting && currentSphereSize != shootingSphereSize)
-            {
-                AimSettings.SHPERE_FRIENDY_FIRE_SIZE = shootingSphereSize;
-            }
-            else if (!shooting && currentSphereSize != defaultSphereSize)
-            {
-                AimSettings.SHPERE_FRIENDY_FIRE_SIZE = defaultSphereSize;
-            }
+            Vector3 firePort = Bot.Transform.WeaponFirePort;
+            float distance = (target - firePort).magnitude;
+            float sphereCastRadius = BotOwner.ShootData.Shooting ? 0.2f : 0.1f;
+            Physics.SphereCast(firePort, sphereCastRadius, Bot.Transform.WeaponPointDirection, out var hit, distance, LayerMaskClass.PlayerMask);
+            return hit.collider;
         }
 
-        private BotGlobalAimingSettings AimSettings;
+        private bool isColliderEnemy(Collider collider)
+        {
+            if (collider == null)
+                return false;
+
+            Player player = GameWorldComponent.Instance.GameWorld.GetPlayerByCollider(collider);
+            return player != null && Bot.EnemyController.IsPlayerAnEnemy(player.ProfileId);
+        }
 
         public void StopShooting()
         {
             BotOwner.ShootData?.EndShoot();
-            BotOwner.AimingData?.LoseTarget();
         }
 
-        private FriendlyFireStatus _ffStatus;
-        private float defaultSphereSize = 0f;
-        private float shootingSphereSize = 0f;
-        private float currentSphereSize => AimSettings.SHPERE_FRIENDY_FIRE_SIZE;
-
-        private float _nextCheckFFTime = 0f;
+        private const float FRIENDLYFIRE_FREQUENCY = 1f / FRIENDLYFIRE_FPS;
+        private const float FRIENDLYFIRE_FPS = 20f;
+        private Coroutine _friendlyFireCoroutine;
     }
 }

@@ -5,11 +5,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyVision : EnemyBase, ISAINEnemyClass
     {
-        public SAINEnemyVision(SAINEnemy enemy) : base(enemy)
+        public SAINEnemyVision(Enemy enemy) : base(enemy)
         {
             GainSight = new GainSightClass(enemy);
             VisionDist = new EnemyVisionDistanceClass(enemy);
@@ -23,19 +23,19 @@ namespace SAIN.SAINComponent.Classes.Enemy
             Enemy.OnEnemyKnown += onEnemyKnown;
         }
 
-        public void onEnemyForgotten(SAINEnemy enemy)
+        public void onEnemyForgotten(Enemy enemy)
         {
         }
 
-        public void onEnemyKnown(SAINEnemy enemy)
+        public void onEnemyKnown(Enemy enemy)
         {
 
         }
 
         public void Update()
         {
-            getAngles();
             startCheckingVision();
+            getAngles();
             UpdateVisibleState(false);
             UpdateCanShootState(false);
         }
@@ -75,28 +75,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public float EnemyVelocity
-        {
-            get
-            {
-                const float min = 0.5f * 0.5f;
-                const float max = 5f * 5f;
-
-                float rawVelocity = EnemyPlayer.Velocity.sqrMagnitude;
-                if (rawVelocity <= min)
-                {
-                    return 0f;
-                }
-                if (rawVelocity >= max)
-                {
-                    return 1f;
-                }
-
-                float num = max - min;
-                float num2 = rawVelocity - min;
-                return num2 / num;
-            }
-        }
+        public float EnemyVelocity => EnemyTransform.PlayerVelocity;
 
         public bool FirstContactOccured { get; private set; }
 
@@ -239,7 +218,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
     public class EnemyVisionChecker : EnemyBase
     {
-        public EnemyVisionChecker(SAINEnemy enemy) : base(enemy)
+        public EnemyVisionChecker(Enemy enemy) : base(enemy)
         {
             EnemyParts = new SAINEnemyParts(enemy.EnemyPlayer.PlayerBones, enemy.Player.IsYourPlayer);
             _transform = enemy.Bot.Transform;

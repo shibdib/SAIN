@@ -4,7 +4,7 @@ using SAIN.Components;
 using UnityEngine;
 using static SAIN.Helpers.HelpersGClass;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using static UnityEngine.EventSystems.EventTrigger;
 
@@ -18,7 +18,7 @@ namespace SAIN.SAINComponent.Classes.Sense
         {
         }
 
-        public void CheckIfDazzleApplied(SAINEnemy enemy)
+        public void CheckIfDazzleApplied(Enemy enemy)
         {
             if (enemy?.IsValid == true && 
                 enemy.IsVisible)
@@ -47,7 +47,7 @@ namespace SAIN.SAINComponent.Classes.Sense
             }
         }
 
-        private bool enemyWithFlashlight(SAINEnemy enemy)
+        private bool enemyWithFlashlight(Enemy enemy)
         {
             float dist = enemy.RealDistance;
             if (dist < 80f && 
@@ -70,7 +70,7 @@ namespace SAIN.SAINComponent.Classes.Sense
         /// <summary>
         /// Applies dazzle to the enemy if they are within the Max dazzle range and the raycast between the BotOwner and the enemy is not blocked.
         /// </summary>
-        private bool enemyWithLaser(SAINEnemy enemy)
+        private bool enemyWithLaser(Enemy enemy)
         {
             float dist = enemy.RealDistance;
             if (dist < 100f &&
@@ -123,7 +123,7 @@ namespace SAIN.SAINComponent.Classes.Sense
             return enemylookatme;
         }
 
-        private float getDazzleModifier(SAINEnemy enemy)
+        private float getDazzleModifier(Enemy enemy)
         {
             float enemyDist = enemy.RealDistance;
             float max = MaxDazzleRange;

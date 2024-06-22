@@ -7,7 +7,7 @@ using SAIN.SAINComponent;
 using SAIN.Components;
 using UnityEngine;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Solo
@@ -25,7 +25,7 @@ namespace SAIN.Layers.Combat.Solo
             Bot.Mover.SetTargetPose(1f);
             Bot.Mover.SetTargetMoveSpeed(1f);
 
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 Bot.Steering.SteerByPriority(true);
@@ -91,7 +91,7 @@ namespace SAIN.Layers.Combat.Solo
             }
         }
 
-        private void updateMove(SAINEnemy enemy, out float nextUpdateTime)
+        private void updateMove(Enemy enemy, out float nextUpdateTime)
         {
             float pathDistance = enemy.EnemyPath.PathDistance;
             var sprintController = Bot.Mover.SprintController;

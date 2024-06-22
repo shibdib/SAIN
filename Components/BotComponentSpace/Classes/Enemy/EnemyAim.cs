@@ -6,11 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyAim : EnemyBase
     {
-        public EnemyAim(SAINEnemy enemy) : base(enemy)
+        public EnemyAim(Enemy enemy) : base(enemy)
         {
         }
 

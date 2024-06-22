@@ -1,7 +1,7 @@
 ﻿using EFT;
 using HarmonyLib;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Reflection;
 using UnityEngine;
@@ -73,7 +73,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return false;
             }
 
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 return false;
@@ -100,7 +100,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private float _nextChangeProneTime;
 
-        private bool checkShootProne(Vector3? lastKnownPos, SAINEnemy enemy)
+        private bool checkShootProne(Vector3? lastKnownPos, Enemy enemy)
         {
             if (_nextCheckShootTime > Time.time)
             {

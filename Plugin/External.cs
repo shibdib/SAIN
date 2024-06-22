@@ -4,7 +4,7 @@ using HarmonyLib;
 using SAIN.Components;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -134,9 +134,6 @@ namespace SAIN.Plugin
                 enemyLastSeenTimeSenseProperty.SetValue(bot.BotsGroup.Enemies[player], 1);
             }
 
-            // Until the bot next identifies an enemy, do not search anywhere
-            component.Decision.GoalTargetDecisions.IgnorePlaceTarget = true;
-
             // Force the bot to "forget" what it was doing
             bot.Memory.GoalTarget.Clear();
             bot.Memory.GoalEnemy = null;
@@ -154,7 +151,7 @@ namespace SAIN.Plugin
                 return float.MaxValue;
             }
 
-            SAINEnemy enemy = component.Enemy;
+            Enemy enemy = component.Enemy;
             if (enemy == null)
             {
                 return float.MaxValue;
@@ -171,7 +168,7 @@ namespace SAIN.Plugin
                 return false;
             }
 
-            SAINEnemy enemy = component.Enemy;
+            Enemy enemy = component.Enemy;
             if (enemy == null)
             {
                 return false;
@@ -241,7 +238,7 @@ namespace SAIN.Plugin
             const float TimeSinceUnderFireThreshold = 10f;
 
             reason = ECombatReason.None;
-            SAINEnemy enemy = component?.EnemyController?.ActiveEnemy;
+            Enemy enemy = component?.EnemyController?.ActiveEnemy;
             if (enemy == null)
             {
                 return false;

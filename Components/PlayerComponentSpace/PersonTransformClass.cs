@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
 
 namespace SAIN.Components.PlayerComponentSpace
@@ -52,6 +53,8 @@ namespace SAIN.Components.PlayerComponentSpace
                 WeaponFirePort = player.Fireport.position;
                 WeaponPointDirection = player.Fireport.Original.TransformDirection(player.LocalShotDirection);
             }
+
+            PlayerVelocity = getPlayerVelocity();
         }
 
         private const float TRANSFORM_UPDATE_FPS = 30f;
@@ -65,6 +68,34 @@ namespace SAIN.Components.PlayerComponentSpace
             _myHead = _bones.Head;
             _bodyPart = _bones.Ribcage;
             _eyePart = _bones.BodyPartCollidersDictionary[EBodyPartColliderType.Eyes];
+        }
+
+        public float PlayerVelocity { get; private set; }
+
+        private float getPlayerVelocity()
+        {
+            const float min = 0.5f * 0.5f;
+            const float max = 5f * 5f;
+
+            var player = Person.Player;
+            if (player == null)
+            {
+                return 0f;
+            }
+
+            float rawVelocity = player.Velocity.sqrMagnitude;
+            if (rawVelocity <= min)
+            {
+                return 0f;
+            }
+            if (rawVelocity >= max)
+            {
+                return 1f;
+            }
+
+            float num = max - min;
+            float num2 = rawVelocity - min;
+            return num2 / num;
         }
 
         private readonly PersonClass Person;

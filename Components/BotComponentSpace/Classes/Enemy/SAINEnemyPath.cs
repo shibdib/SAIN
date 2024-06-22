@@ -4,7 +4,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyPath : EnemyBase, ISAINEnemyClass
     {
@@ -12,37 +12,31 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             get
             {
-                const float VeryCloseDist = 10f;
-                const float CloseDist = 40f;
-                const float FarDist = 100f;
-                const float VeryFarDist = 200f;
-
                 float distance = PathDistance;
-                EPathDistance pathDistance;
-                if (distance <= VeryCloseDist)
+                if (distance <= ENEMY_DISTANCE_VERYCLOSE)
                 {
-                    pathDistance = SAIN.EPathDistance.VeryClose;
+                    return EPathDistance.VeryClose;
                 }
-                else if (distance <= CloseDist)
+                if (distance <= ENEMY_DISTANCE_CLOSE)
                 {
-                    pathDistance = SAIN.EPathDistance.Close;
+                    return EPathDistance.Close;
                 }
-                else if (distance <= FarDist)
+                if (distance <= ENEMY_DISTANCE_MID)
                 {
-                    pathDistance = SAIN.EPathDistance.Mid;
+                    return EPathDistance.Mid;
                 }
-                else if (distance <= VeryFarDist)
+                if (distance <= ENEMY_DISTANCE_FAR)
                 {
-                    pathDistance = SAIN.EPathDistance.Far;
+                    return EPathDistance.Far;
                 }
-                else
-                {
-                    pathDistance = SAIN.EPathDistance.VeryFar;
-                }
-
-                return pathDistance;
+                return EPathDistance.VeryFar;
             }
         }
+
+        const float ENEMY_DISTANCE_VERYCLOSE = 10f;
+        const float ENEMY_DISTANCE_CLOSE = 20f;
+        const float ENEMY_DISTANCE_MID = 80f;
+        const float ENEMY_DISTANCE_FAR = 150f;
 
         public float PathDistance { get; private set; } = float.MaxValue;
         public Vector3? LastCornerToEnemy { get; private set; }
@@ -113,7 +107,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public NavMeshPath PathToEnemy { get; private set; }
         public NavMeshPathStatus PathToEnemyStatus { get; private set; }
 
-        public SAINEnemyPath(SAINEnemy enemy) : base(enemy)
+        public SAINEnemyPath(Enemy enemy) : base(enemy)
         {
             PathToEnemy = new NavMeshPath();
             _blindCornerFinder = new BlindCornerFinder(enemy);
@@ -136,12 +130,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public void onEnemyForgotten(SAINEnemy enemy)
+        public void onEnemyForgotten(Enemy enemy)
         {
             stopLoop();
         }
 
-        public void onEnemyKnown(SAINEnemy enemy)
+        public void onEnemyKnown(Enemy enemy)
         {
             if (_calcPathCoroutine == null)
             {

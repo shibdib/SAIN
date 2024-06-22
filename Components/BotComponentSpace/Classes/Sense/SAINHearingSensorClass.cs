@@ -5,7 +5,7 @@ using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -369,7 +369,7 @@ namespace SAIN.SAINComponent.Classes
                     Bot.Memory.SetUnderFire(person, soundPos);
                 }
                 Bot.Suppression.AddSuppression(projectionPointDist);
-                SAINEnemy enemy = Bot.EnemyController.CheckAddEnemy(person);
+                Enemy enemy = Bot.EnemyController.CheckAddEnemy(person);
                 if (enemy != null)
                 {
                     enemy.SetEnemyAsSniper(distance > 100f);

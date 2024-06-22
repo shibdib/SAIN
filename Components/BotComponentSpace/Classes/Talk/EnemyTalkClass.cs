@@ -5,7 +5,7 @@ using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.BotSettings.SAINSettings;
 using SAIN.Preset.Personalities;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections;
 using UnityEngine;
 
@@ -383,7 +383,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             float painRange = 50f;
             float breathRange = player.HeavyBreath ? 35f : 15f;
 
-            SAINEnemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
+            Enemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
             if (enemy == null)
             {
                 if (!isPain && phrase != EPhraseTrigger.OnBreath)

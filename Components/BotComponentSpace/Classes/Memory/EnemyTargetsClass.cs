@@ -1,11 +1,11 @@
-﻿using SAIN.SAINComponent.Classes.Enemy;
+﻿using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections.Generic;
 
 namespace SAIN.SAINComponent.Classes.Memory
 {
     public class EnemyTargetsClass
     {
-        public void SetEnemy(EEnemyTargetType type, SAINEnemy enemy)
+        public void SetEnemy(EEnemyTargetType type, Enemy enemy)
         {
             if (EnemyTargets.TryGetValue(type, out EnemyTarget enemyTarget))
             {
@@ -19,7 +19,7 @@ namespace SAIN.SAINComponent.Classes.Memory
             }
         }
 
-        public SAINEnemy GetCurrent(EEnemyTargetType type)
+        public Enemy GetCurrent(EEnemyTargetType type)
         {
             if (EnemyTargets.TryGetValue(type, out EnemyTarget enemyTarget))
             {
@@ -28,7 +28,7 @@ namespace SAIN.SAINComponent.Classes.Memory
             return null;
         }
 
-        public SAINEnemy GetLast(EEnemyTargetType type)
+        public Enemy GetLast(EEnemyTargetType type)
         {
             if (EnemyTargets.TryGetValue(type, out EnemyTarget enemyTarget))
             {
@@ -40,7 +40,7 @@ namespace SAIN.SAINComponent.Classes.Memory
         public bool HasEnemy => PrimaryEnemy?.EnemyPerson?.IsActive == true;
         public bool HasLastEnemy => LastPrimaryEnemy?.EnemyPerson?.IsActive == true;
 
-        public SAINEnemy PrimaryEnemy
+        public Enemy PrimaryEnemy
         {
             get
             {
@@ -52,7 +52,7 @@ namespace SAIN.SAINComponent.Classes.Memory
             }
         }
 
-        public SAINEnemy LastPrimaryEnemy { get; private set; }
+        public Enemy LastPrimaryEnemy { get; private set; }
 
         public readonly Dictionary<EEnemyTargetType, EnemyTarget> EnemyTargets = new Dictionary<EEnemyTargetType, EnemyTarget>();
 

@@ -1,4 +1,4 @@
-﻿using SAIN.SAINComponent.Classes.Enemy;
+﻿using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes.Memory
 {
@@ -11,9 +11,9 @@ namespace SAIN.SAINComponent.Classes.Memory
 
         public readonly EEnemyTargetType Type;
 
-        public SAINEnemy Current { get; private set; }
+        public Enemy Current { get; private set; }
 
-        public SAINEnemy Last { get; private set; }
+        public Enemy Last { get; private set; }
 
         public void ClearEnemy(string profileID)
         {
@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes.Memory
             }
         }
 
-        public void SetEnemy(SAINEnemy replacementEnemy)
+        public void SetEnemy(Enemy replacementEnemy)
         {
             // if both our current and replacement are null. Do nothing.
             if (Current == null && replacementEnemy == null)
@@ -69,7 +69,7 @@ namespace SAIN.SAINComponent.Classes.Memory
             }
         }
 
-        private bool areEnemiesSame(SAINEnemy a, SAINEnemy b)
+        private bool areEnemiesSame(Enemy a, Enemy b)
         {
             return
                 a != null &&

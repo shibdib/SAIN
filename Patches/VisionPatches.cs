@@ -14,7 +14,7 @@ using SAIN.Helpers;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 using EFT.InventoryLogic;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.Preset.GlobalSettings;
@@ -71,7 +71,7 @@ namespace SAIN.Patches.Vision
             if (!isAI && 
                 SAINEnableClass.GetSAIN(__instance.Owner, out BotComponent botComponent, nameof(SetPartPriorityPatch)))
             {
-                SAINEnemy enemy = botComponent.EnemyController.CheckAddEnemy(__instance.Person);
+                Enemy enemy = botComponent.EnemyController.CheckAddEnemy(__instance.Person);
                 if (enemy != null)
                 {
                     if (enemy.IsCurrentEnemy)
@@ -262,7 +262,7 @@ namespace SAIN.Patches.Vision
         {
             if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPatch)))
             {
-                SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
+                Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
                 if (enemy != null &&
                     enemy.EnemyPerson.IsActive)
                 {
@@ -286,7 +286,7 @@ namespace SAIN.Patches.Vision
         {
             if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPatch)))
             {
-                SAINEnemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
+                Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
                 if (enemy != null && 
                     enemy.EnemyPerson.IsActive)
                 {

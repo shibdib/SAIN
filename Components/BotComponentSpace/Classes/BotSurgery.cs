@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -118,7 +118,7 @@ namespace SAIN.SAINComponent.Classes
             return allClear;
         }
 
-        private bool checkThisEnemy(SAINEnemy enemy, float minPathDist, float minTimeSinceLastKnown)
+        private bool checkThisEnemy(Enemy enemy, float minPathDist, float minTimeSinceLastKnown)
         {
             if (enemy?.EnemyPlayer?.HealthController.IsAlive == true
                 && (enemy.Seen || enemy.Heard)

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.UIElements;
 using UnityEngine;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -40,7 +40,7 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private SAINEnemy Enemy => Bot.EnemyController.ActiveEnemy;
+        private Enemy Enemy => Bot.EnemyController.ActiveEnemy;
         private Vector3 Position => Bot.Position;
 
         private void UpdateGoalTarget()
@@ -89,7 +89,7 @@ namespace SAIN.SAINComponent.Classes
 
         private Vector3? getVisibleEnemyPos()
         {
-            SAINEnemy enemy = Enemy;
+            Enemy enemy = Enemy;
             if (enemy != null)
             {
                 Vector3 pos = enemy.EnemyPosition;
@@ -112,7 +112,7 @@ namespace SAIN.SAINComponent.Classes
                 return null;
             }
 
-            SAINEnemy enemy = Bot.BotHitReaction.EnemyWhoLastShotMe;
+            Enemy enemy = Bot.BotHitReaction.EnemyWhoLastShotMe;
             if (enemy == null || 
                 !enemy.IsValid || 
                 enemy.IsCurrentEnemy)
@@ -129,7 +129,7 @@ namespace SAIN.SAINComponent.Classes
                 return null;
             }
 
-            SAINEnemy enemy = Bot.Memory.LastUnderFireEnemy;
+            Enemy enemy = Bot.Memory.LastUnderFireEnemy;
             if (enemy == null ||
                 !enemy.IsValid ||
                 enemy.IsCurrentEnemy)
@@ -141,7 +141,7 @@ namespace SAIN.SAINComponent.Classes
 
         private Vector3? getEnemylastKnownPos()
         {
-            SAINEnemy enemy = Enemy;
+            Enemy enemy = Enemy;
             if (enemy != null)
             {
                 var lastKnownPlace = enemy.KnownPlaces.LastKnownPlace;

@@ -53,7 +53,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         }
 
         public BotComponent Bot { get; private set; }
-        public Player Player => Bot.Player;
         public BotOwner BotOwner => Bot.BotOwner;
         public List<CoverPoint> CoverPoints { get; } = new List<CoverPoint>();
         private CoverAnalyzer CoverAnalyzer { get; set; }
@@ -537,6 +536,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private void OnDestroy()
         {
+            StopLooking();
             StopAllCoroutines();
         }
 
@@ -550,19 +550,13 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public void Dispose()
         {
-            try
+            StopLooking();
+            StopAllCoroutines();
+            if (Bot != null)
             {
-                StopLooking();
-                StopAllCoroutines();
-                if (Bot != null)
-                {
-                    Bot.OnSAINDisposed -= botDisposed;
-                    Bot.OnBotDisabled -= StopLooking;
-                }
+                Bot.OnSAINDisposed -= botDisposed;
+                Bot.OnBotDisabled -= StopLooking;
             }
-            catch { }
-
-            Logger.LogWarning($"Coverfinder for Bot [{BotName}] Destroyed");
             Destroy(this);
         }
 

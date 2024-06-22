@@ -1,4 +1,4 @@
-﻿namespace SAIN.SAINComponent.Classes.Enemy
+﻿namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public enum EEnemyAction
     {

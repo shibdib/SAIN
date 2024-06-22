@@ -1,7 +1,7 @@
 ﻿using EFT;
 using HarmonyLib;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Reflection;
 using System.Text;
@@ -88,9 +88,9 @@ namespace SAIN.Layers
 
                 stringBuilder.AppendLine();
 
-                stringBuilder.AppendLabeledValue("Main Decision", $"Current: {sain.Decision.CurrentSoloDecision} Last: {sain.Decision.OldSoloDecision}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Squad Decision", $"Current: {sain.Decision.CurrentSquadDecision} Last: {sain.Decision.OldSquadDecision}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Self Decision", $"Current: {sain.Decision.CurrentSelfDecision} Last: {sain.Decision.OldSelfDecision}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Main Decision", $"Current: {sain.Decision.CurrentSoloDecision} Last: {sain.Decision.PreviousSoloDecision}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Squad Decision", $"Current: {sain.Decision.CurrentSquadDecision} Last: {sain.Decision.PreviousSquadDecision}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Self Decision", $"Current: {sain.Decision.CurrentSelfDecision} Last: {sain.Decision.PreviousSelfDecision}", Color.white, Color.yellow, true);
 
                 stringBuilder.AppendLine();
 
@@ -121,7 +121,7 @@ namespace SAIN.Layers
             }
         }
 
-        private static void CreateEnemyInfo(StringBuilder stringBuilder, SAINEnemy enemy)
+        private static void CreateEnemyInfo(StringBuilder stringBuilder, Enemy enemy)
         {
             stringBuilder.AppendLine("Enemy Info");
 

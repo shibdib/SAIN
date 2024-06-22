@@ -16,7 +16,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private float _jumpTimer;
         private bool _shallJumpToCover;
         private bool _sprinting;
-        private float _nextTryReloadTime;
 
         public override void Update()
         {
@@ -74,14 +73,14 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
             }
 
-            if (_moveSuccess && 
-                _sprinting && 
-                _nextTryReloadTime < Time.time && 
-                Bot.Decision.SelfActionDecisions.LowOnAmmo(0.5f))
-            {
-                _nextTryReloadTime = Time.time + 2f;
-                Bot.SelfActions.TryReload();
-            }
+            //if (_moveSuccess && 
+            //    _sprinting && 
+            //    _nextTryReloadTime < Time.time && 
+            //    Bot.Decision.SelfActionDecisions.LowOnAmmo(0.5f))
+            //{
+            //    _nextTryReloadTime = Time.time + 2f;
+            //    Bot.SelfActions.TryReload();
+            //}
 
             if (Bot.Cover.CoverPoints.Count == 0 && !_moveSuccess)
             {

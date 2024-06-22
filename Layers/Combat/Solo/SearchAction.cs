@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.Search;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -14,23 +15,64 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
+            _coroutine = Bot.StartCoroutine(search());
         }
 
         private Vector3 TargetPosition => Search.FinalDestination;
 
         public override void Stop()
         {
+            Bot.StopCoroutine(_coroutine);
+            _coroutine = null;
+
             BotOwner.Mover.MovementResume();
             Search.Reset();
             HaveTalked = false;
         }
 
-        private float CheckMagTimer;
-        private float CheckChamberTimer;
-        private float NextCheckTimer;
-        private float ReloadTimer;
+        private float _nextCheckTime;
 
         public override void Update()
+        {
+        }
+
+        private Coroutine _coroutine;
+
+        private IEnumerator search()
+        {
+            while (true)
+            {
+                if (Bot == null || !Bot.BotActive)
+                {
+                    break;
+                }
+
+                bool isBeingStealthy = Bot.Enemy?.EnemyHeardFromPeace == true;
+                if (isBeingStealthy)
+                {
+                    SprintEnabled = false;
+                }
+                else
+                {
+                    CheckShouldSprint(); 
+                    talk();
+                }
+
+                Search.Search(SprintEnabled);
+                Steer();
+
+                if (!SprintEnabled)
+                {
+                    Shoot.Update();
+                    if (!isBeingStealthy)
+                        checkWeapon();
+                }
+
+                yield return null;
+            }
+        }
+
+        private void talk()
         {
             // Scavs will speak out and be more vocal
             if (!HaveTalked &&
@@ -38,59 +80,25 @@ namespace SAIN.Layers.Combat.Solo
                 (BotOwner.Position - TargetPosition).sqrMagnitude < 50f * 50f)
             {
                 HaveTalked = true;
-                if (EFTMath.RandomBool(60))
+                if (EFTMath.RandomBool(40))
                 {
                     Bot.Talk.Say(EPhraseTrigger.OnMutter, ETagStatus.Aware, true);
                 }
             }
-
-            bool isBeingStealthy = Bot.Enemy?.EnemyHeardFromPeace == true;
-            if (isBeingStealthy)
-            {
-                SprintEnabled = false;
-            }
-            else
-            {
-                CheckShouldSprint();
-            }
-
-            Search.Search(SprintEnabled);
-            Steer();
-
-            if (!SprintEnabled)
-            {
-                Shoot.Update();
-                if (!isBeingStealthy)
-                    CheckWeapon();
-            }
         }
 
-        private void CheckWeapon()
+        private void checkWeapon()
         {
-            if (Bot.Enemy != null && Bot.Enemy.TimeSinceLastKnownUpdated > 20f)
+            if (_nextCheckTime < Time.time)
             {
-                if (ReloadTimer < Time.time && Bot.Decision.SelfActionDecisions.LowOnAmmo(0.55f))
+                _nextCheckTime = Time.time + 180f * Random.Range(0.5f, 1.5f);
+
+                if (Bot.Enemy != null && Bot.Enemy.TimeSinceLastKnownUpdated > 20f)
                 {
-                    ReloadTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
-                    Bot.SelfActions.TryReload();
-                }
-                else if (CheckMagTimer < Time.time && NextCheckTimer < Time.time)
-                {
-                    NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
                     if (EFTMath.RandomBool())
-                    {
                         Bot.Player.HandsController.FirearmsAnimator.CheckAmmo();
-                        CheckMagTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
-                    }
-                }
-                else if (CheckChamberTimer < Time.time && NextCheckTimer < Time.time)
-                {
-                    NextCheckTimer = Time.time + 3f * Random.Range(0.5f, 1.5f);
-                    if (EFTMath.RandomBool())
-                    {
+                    else
                         Bot.Player.HandsController.FirearmsAnimator.CheckChamber();
-                        CheckChamberTimer = Time.time + 240f * Random.Range(0.5f, 1.5f);
-                    }
                 }
             }
         }

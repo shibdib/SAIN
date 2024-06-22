@@ -1,5 +1,5 @@
 ﻿using EFT;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo
@@ -14,7 +14,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 Bot.Steering.SteerByPriority();
@@ -31,10 +31,10 @@ namespace SAIN.Layers.Combat.Solo
                 return;
             }
 
-            if (Bot.Decision.SelfActionDecisions.LowOnAmmo(0.66f))
-            {
-                Bot.SelfActions.TryReload();
-            }
+            //if (Bot.Decision.SelfActionDecisions.LowOnAmmo(0.66f))
+            //{
+            //    Bot.SelfActions.TryReload();
+            //}
 
             Vector3? LastSeenPosition = enemy.LastSeenPosition;
             Vector3 movePos;
@@ -86,7 +86,7 @@ namespace SAIN.Layers.Combat.Solo
             }
         }
 
-        private bool CheckShoot(SAINEnemy enemy)
+        private bool CheckShoot(Enemy enemy)
         {
             float distance = enemy.RealDistance;
             bool enemyLookAtMe = enemy.EnemyLookingAtMe;

@@ -1,4 +1,4 @@
-﻿using SAIN.SAINComponent.Classes.Enemy;
+﻿using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.Enemy
 {
     public class EnemyKnownChecker : EnemyBase, ISAINEnemyClass
     {
-        public EnemyKnownChecker(SAINEnemy enemy) : base(enemy)
+        public EnemyKnownChecker(SAINComponent.Classes.EnemyClasses.Enemy enemy) : base(enemy)
         {
 
         }
@@ -28,12 +28,12 @@ namespace SAIN.Components.BotComponentSpace.Classes.Enemy
         {
 
         }
-        public void onEnemyForgotten(SAINEnemy enemy)
+        public void onEnemyForgotten(SAINComponent.Classes.EnemyClasses.Enemy enemy)
         {
 
         }
 
-        public void onEnemyKnown(SAINEnemy enemy)
+        public void onEnemyKnown(SAINComponent.Classes.EnemyClasses.Enemy enemy)
         {
 
         }

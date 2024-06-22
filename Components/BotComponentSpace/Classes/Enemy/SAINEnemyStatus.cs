@@ -1,7 +1,7 @@
 ﻿using EFT;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyStatus : EnemyBase, ISAINEnemyClass
     {
@@ -22,12 +22,12 @@ namespace SAIN.SAINComponent.Classes.Enemy
             Enemy.OnEnemyKnown -= onEnemyKnown;
         }
 
-        public void onEnemyForgotten(SAINEnemy enemy)
+        public void onEnemyForgotten(Enemy enemy)
         {
             VulnerableAction = EEnemyAction.None;
         }
 
-        public void onEnemyKnown(SAINEnemy enemy)
+        public void onEnemyKnown(Enemy enemy)
         {
 
         }
@@ -303,7 +303,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public float TimeFirstShot { get; private set; } 
         public Vector3? LastShotPosition { get; private set; }
 
-        public SAINEnemyStatus(SAINEnemy enemy) : base(enemy)
+        public SAINEnemyStatus(Enemy enemy) : base(enemy)
         {
         }
 

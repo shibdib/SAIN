@@ -3,7 +3,7 @@ using EFT;
 using SAIN.Attributes;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections.Generic;
 
 namespace SAIN
@@ -17,7 +17,7 @@ namespace SAIN
 
     public interface ISAINEnemyClass : ISAINClass
     {
-        void onEnemyForgotten(SAINEnemy enemy);
-        void onEnemyKnown(SAINEnemy enemy);
+        void onEnemyForgotten(Enemy enemy);
+        void onEnemyKnown(Enemy enemy);
     }
 }

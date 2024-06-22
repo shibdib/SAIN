@@ -1,6 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -46,7 +46,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public bool WantToSearch()
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 return false;
@@ -63,7 +63,7 @@ namespace SAIN.SAINComponent.Classes.Search
             return shallSearch(enemy, Bot.Info.TimeBeforeSearch);
         }
 
-        private bool shallSearch(SAINEnemy enemy, float timeBeforeSearch)
+        private bool shallSearch(Enemy enemy, float timeBeforeSearch)
         {
             if (shallBeStealthyDuringSearch(enemy) &&
                 Bot.Decision.EnemyDecisions.UnFreezeTime > Time.time &&
@@ -85,7 +85,7 @@ namespace SAIN.SAINComponent.Classes.Search
             }
         }
 
-        private bool shallBeStealthyDuringSearch(SAINEnemy enemy)
+        private bool shallBeStealthyDuringSearch(Enemy enemy)
         {
             if (!SAINPlugin.LoadedPreset.GlobalSettings.Mind.SneakyBots)
             {
@@ -101,7 +101,7 @@ namespace SAIN.SAINComponent.Classes.Search
                 (FinalDestination - Bot.Position).sqrMagnitude < SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaximumDistanceToBeSneaky.Sqr();
         }
 
-        private bool shallSearchCauseLooting(SAINEnemy enemy)
+        private bool shallSearchCauseLooting(Enemy enemy)
         {
             if (enemy.EnemyStatus.EnemyIsLooting)
             {
@@ -125,7 +125,7 @@ namespace SAIN.SAINComponent.Classes.Search
         private float _checkLootFreq = 1f;
         private float _searchLootChance = 40f;
 
-        private bool shallBeginSearch(SAINEnemy enemy, float timeBeforeSearch)
+        private bool shallBeginSearch(Enemy enemy, float timeBeforeSearch)
         {
             var searchSettings = Bot.Info.PersonalitySettings.Search;
             if (searchSettings.WillSearchForEnemy
@@ -151,7 +151,7 @@ namespace SAIN.SAINComponent.Classes.Search
             return false;
         }
 
-        private bool shallContinueSearch(SAINEnemy enemy, float timeBeforeSearch)
+        private bool shallContinueSearch(Enemy enemy, float timeBeforeSearch)
         {
             var searchSettings = Bot.Info.PersonalitySettings.Search;
             if (searchSettings.WillSearchForEnemy
@@ -271,7 +271,7 @@ namespace SAIN.SAINComponent.Classes.Search
             SearchMovePoint?.DrawDebug();
         }
 
-        public SAINEnemy SearchTarget { get; set; }
+        public Enemy SearchTarget { get; set; }
 
         private float _nextCheckPosTime;
 

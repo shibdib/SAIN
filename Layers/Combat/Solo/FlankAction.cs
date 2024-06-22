@@ -12,7 +12,7 @@ using SAIN.Helpers;
 using UnityEngine;
 using UnityEngine.AI;
 using System.IO;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -24,7 +24,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 return;
@@ -33,7 +33,7 @@ namespace SAIN.Layers.Combat.Solo
 
         private FlankRoute FindFlankRoute()
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 return null;
@@ -77,7 +77,7 @@ namespace SAIN.Layers.Combat.Solo
             return null;
         }
 
-        private FlankRoute FindFlank(Vector3 middleNode, Vector3 directionFromMiddle, Vector3 botPosition, SAINEnemy enemy, SideTurn sideTurn)
+        private FlankRoute FindFlank(Vector3 middleNode, Vector3 directionFromMiddle, Vector3 botPosition, Enemy enemy, SideTurn sideTurn)
         {
             Vector3 flank = Vector.Rotate90(directionFromMiddle, sideTurn);
             if (SamplePointAndCheckPath(flank, middleNode, out NavMeshPath path))

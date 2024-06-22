@@ -174,7 +174,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
-            _reloadCallFreqLimit = Time.time + 0.1f;
+            _reloadCallFreqLimit = Time.time + 0.25f;
 
             if (BotOwner.WeaponManager.Reload.Reloading)
             {
@@ -195,7 +195,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             if (!result &&
                 magWeapon != null &&
-                magWeapon.FullMagazineCount == 0 && 
+                magWeapon.FullMagazineCount == 0 &&
+                magWeapon.EmptyMagazineCount > 0 &&
                 magWeapon.TryRefillAllMags() &&
                 tryCatchReload())
             {
@@ -219,7 +220,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 result = BotOwner.WeaponManager.Reload.TryReload();
             }
-            catch (Exception)
+            catch
             {
                 // Ignore
             }

@@ -1,7 +1,7 @@
 ﻿using EFT;
 using HarmonyLib;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using System.Reflection;
 using UnityEngine;
@@ -137,7 +137,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
-        public bool LookToLastKnownEnemyPosition(SAINEnemy enemy, Vector3? lastKnown = null)
+        public bool LookToLastKnownEnemyPosition(Enemy enemy, Vector3? lastKnown = null)
         {
             Vector3? place = lastKnown ?? findLastKnown(enemy);
             if (place != null)
@@ -185,7 +185,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             LookToPoint(pos, rotateSpeed);
         }
 
-        public void LookToEnemy(SAINEnemy enemy)
+        public void LookToEnemy(Enemy enemy)
         {
             if (enemy != null)
             {
@@ -392,7 +392,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private SteerPriority reactiveSteering()
         {
-            SAINEnemy enemyWhoShotMe = enemyShotMe();
+            Enemy enemyWhoShotMe = enemyShotMe();
             if (enemyWhoShotMe != null && !enemyWhoShotMe.IsCurrentEnemy)
                 return SteerPriority.LastHit;
 
@@ -428,7 +428,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             placeForCheck = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, Steer_HeardSound_Dist, Steer_HeardSound_Age);
             if (placeForCheck != null)
             {
-                SAINEnemy enemy = Bot.Enemy;
+                Enemy enemy = Bot.Enemy;
                 if (enemy == null)
                 {
                     return true;
@@ -442,7 +442,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             return false;
         }
 
-        private SAINEnemy enemyShotMe()
+        private Enemy enemyShotMe()
         {
             float timeSinceShot = Bot.BotHitReaction.TimeSinceShot;
             if (timeSinceShot < 3f && timeSinceShot > 0.33f)
@@ -460,7 +460,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             return target + direction;
         }
 
-        public Vector3? EnemyLastKnown(SAINEnemy enemy, out bool visible)
+        public Vector3? EnemyLastKnown(Enemy enemy, out bool visible)
         {
             visible = false;
             EnemyPlace lastKnownPlace = enemy?.KnownPlaces.LastKnownPlace;
@@ -472,7 +472,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             return lastKnownPlace.Position;
         }
 
-        private Vector3? findLastKnown(SAINEnemy enemy)
+        private Vector3? findLastKnown(Enemy enemy)
         {
             EnemySteerDir = EEnemySteerDir.None;
             if (enemy == null)
@@ -498,7 +498,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             Vector3? lastCorner = enemy.EnemyPath.LastCornerToEnemy;
             if (lastCorner != null &&
-                enemy.CanSeeLastCornerToEnemy)
+                enemy.EnemyPath.CanSeeLastCornerToEnemy)
             {
                 EnemySteerDir = EEnemySteerDir.LastCorner;
                 return adjustLookPoint(lastCorner.Value) + _weaponRootOffset;
@@ -531,14 +531,14 @@ namespace SAIN.SAINComponent.Classes.Mover
             return canSeeAndShoot(Bot.Enemy) || canSeeAndShoot(Bot.LastEnemy);
         }
 
-        private bool canSeeAndShoot(SAINEnemy enemy)
+        private bool canSeeAndShoot(Enemy enemy)
         {
             return enemy != null && enemy.IsVisible && enemy.CanShoot;
         }
 
         private bool enemyVisible()
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
 
             if (enemy != null)
             {

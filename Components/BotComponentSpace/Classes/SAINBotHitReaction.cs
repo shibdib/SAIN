@@ -11,7 +11,7 @@ using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using EFT.HealthSystem;
 
 namespace SAIN.SAINComponent.Classes
@@ -114,7 +114,7 @@ namespace SAIN.SAINComponent.Classes
             var player = damageInfo.Player?.iPlayer;
             if (player != null)
             {
-                SAINEnemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
+                Enemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
                 if (enemy != null &&
                     enemy.IsValid)
                 {
@@ -126,7 +126,7 @@ namespace SAIN.SAINComponent.Classes
 
         public float TimeLastShot { get; private set; }
         public float TimeSinceShot => Time.time - TimeLastShot;
-        public SAINEnemy EnemyWhoLastShotMe { get; private set; }
+        public Enemy EnemyWhoLastShotMe { get; private set; }
 
         private void GetHitInLegs(DamageInfo damageInfo)
         {

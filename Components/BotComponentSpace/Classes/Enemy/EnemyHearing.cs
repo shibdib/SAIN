@@ -1,4 +1,4 @@
-﻿using SAIN.SAINComponent.Classes.Enemy;
+﻿using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 
@@ -6,7 +6,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.Enemy
 {
     public class EnemyHearing : EnemyBase, ISAINEnemyClass
     {
-        public EnemyHearing(SAINEnemy enemy) : base(enemy)
+        public EnemyHearing(SAINComponent.Classes.EnemyClasses.Enemy enemy) : base(enemy)
         {
 
         }
@@ -26,12 +26,12 @@ namespace SAIN.Components.BotComponentSpace.Classes.Enemy
 
         }
 
-        public void onEnemyForgotten(SAINEnemy enemy)
+        public void onEnemyForgotten(SAINComponent.Classes.EnemyClasses.Enemy enemy)
         {
 
         }
 
-        public void onEnemyKnown(SAINEnemy enemy)
+        public void onEnemyKnown(SAINComponent.Classes.EnemyClasses.Enemy enemy)
         {
 
         }

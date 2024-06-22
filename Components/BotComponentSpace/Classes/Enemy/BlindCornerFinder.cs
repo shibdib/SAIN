@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class BlindCornerFinder : EnemyBase
     {
-        public BlindCornerFinder(SAINEnemy enemy) : base(enemy)
+        public BlindCornerFinder(Enemy enemy) : base(enemy)
         {
         }
 

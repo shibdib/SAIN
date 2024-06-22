@@ -6,7 +6,7 @@ using SAIN;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Reflection;
 using UnityEngine;
 
@@ -144,7 +144,7 @@ namespace SAIN.Patches.Generic
 
         public static bool EnemySenseRecently(BotComponent sain, EnemyInfo enemyInfo)
         {
-            SAINEnemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
+            Enemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
             if (myEnemy?.IsValid == true)
             {
                 var lastKnown = myEnemy?.KnownPlaces?.LastKnownPlace;

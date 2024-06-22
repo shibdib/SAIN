@@ -10,13 +10,13 @@ using SAIN.SAINComponent.Classes.Talk;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.Classes.Mover;
 using SAIN.SAINComponent.SubComponents;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.Helpers
 {
     internal class GameWorldInfo
     {
-        public static bool IsEnemyMainPlayer(SAINEnemy enemy)
+        public static bool IsEnemyMainPlayer(Enemy enemy)
         {
             Player player = enemy?.EnemyPlayer;
             Player mainPlayer = GameWorld?.MainPlayer;

@@ -6,7 +6,7 @@ using SAIN.Helpers;
 using SAIN.Preset.BotSettings.SAINSettings.Categories;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Reflection;
 using System.Text;
@@ -110,7 +110,7 @@ namespace SAIN.Patches.Shoot.Aim
                 return;
             }
             additionCoef *= bot.Info.FileSettings.Scattering.ScatterMultiplier;
-            SAINEnemy enemy = bot.EnemyController.CheckAddEnemy(___botOwner_0?.Memory?.GoalEnemy?.Person);
+            Enemy enemy = bot.EnemyController.CheckAddEnemy(___botOwner_0?.Memory?.GoalEnemy?.Person);
             if (enemy == null)
             {
                 return;
@@ -167,11 +167,17 @@ namespace SAIN.Patches.Shoot.Aim
         private static float calculateAim(BotOwner botOwner, float distance, float angle, bool moving, bool panicing, float aimDelay)
         {
             StringBuilder stringBuilder = SAINPlugin.LoadedPreset.GlobalSettings.Debug.DebugAimCalculations ? new StringBuilder() : null;
-            stringBuilder?.AppendLine($"Aim Time Calculation for [{botOwner.name} : {botOwner.Profile.Info.Settings.Role} : {botOwner.Profile.Info.Settings.BotDifficulty}]");
+            stringBuilder?.AppendLine($"Aim Time Calculation for [{botOwner?.name} : {botOwner?.Profile?.Info?.Settings?.Role} : {botOwner?.Profile?.Info?.Settings?.BotDifficulty}]");
 
             SAINPlugin.BotController.GetSAIN(botOwner, out var botComponent);
+
             SAINAimingSettings sainAimSettings = botComponent?.Info.FileSettings.Aiming;
-            BotSettingsComponents fileSettings = botOwner.Settings.FileSettings;
+            BotSettingsComponents fileSettings = botOwner?.Settings?.FileSettings;
+
+            if (fileSettings == null)
+            {
+                return 1f;
+            }
 
             float baseAimTime = fileSettings.Aiming.BOTTOM_COEF;
             stringBuilder.AppendLine($"baseAimTime [{baseAimTime}]");
@@ -179,6 +185,11 @@ namespace SAIN.Patches.Shoot.Aim
             baseAimTime = calcCoverMod(baseAimTime, botOwner, botComponent, fileSettings, stringBuilder);
 
             BotCurvSettings curve = botOwner.Settings.Curv;
+            if (curve == null)
+            {
+                return 1f;
+            }
+
             float modifier = sainAimSettings != null ? sainAimSettings.AngleAimTimeMultiplier : 1f;
             float angleTime = calcCurveOutput(curve.AimAngCoef, angle, modifier, stringBuilder, "Angle");
 
@@ -198,7 +209,7 @@ namespace SAIN.Patches.Shoot.Aim
             timeToAimResult = calcAttachmentMod(botComponent, timeToAimResult, stringBuilder);
 
             if (stringBuilder != null && 
-                botOwner.Memory.GoalEnemy?.Person?.IsYourPlayer == true)
+                botOwner?.Memory?.GoalEnemy?.Person?.IsYourPlayer == true)
             {
                 Logger.LogDebug(stringBuilder.ToString());
             }
@@ -302,7 +313,7 @@ namespace SAIN.Patches.Shoot.Aim
 
         private static float calcAttachmentMod(BotComponent bot, float aimTimeResult, StringBuilder stringBuilder)
         {
-            SAINEnemy enemy = bot?.Enemy;
+            Enemy enemy = bot?.Enemy;
             if (enemy != null)
             {
                 float modifier = enemy.EnemyAim.AimAndScatterMultiplier;

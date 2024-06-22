@@ -4,7 +4,7 @@ using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Layers.Combat.Solo;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
 using System.Collections;
@@ -60,7 +60,7 @@ namespace SAIN.SAINComponent.Classes
 
         public FlankRoute FindFlankRoute()
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 return null;
@@ -113,7 +113,7 @@ namespace SAIN.SAINComponent.Classes
             yield return null;
         }
 
-        private FlankRoute FindFlank(Vector3 middleNode, Vector3 directionFromMiddle, Vector3 botPosition, SAINEnemy enemy, SideTurn sideTurn)
+        private FlankRoute FindFlank(Vector3 middleNode, Vector3 directionFromMiddle, Vector3 botPosition, Enemy enemy, SideTurn sideTurn)
         {
             Vector3 flankDirection1 = Vector.Rotate90(directionFromMiddle, sideTurn);
             if (SamplePointAndCheckPath(flankDirection1, middleNode, out NavMeshPath path) 

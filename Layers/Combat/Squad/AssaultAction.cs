@@ -2,7 +2,7 @@
 using EFT;
 using SAIN.Layers.Combat.Solo;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using UnityEngine;
 
@@ -18,7 +18,7 @@ namespace SAIN.Layers.Combat.Squad
         {
             Shoot.Update();
 
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (!Bot.Steering.SteerByPriority(false) && enemy != null)
             {
                 Bot.Steering.LookToEnemy(enemy);

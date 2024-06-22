@@ -8,7 +8,7 @@ using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.Debug;
 using SAIN.SAINComponent.Classes.Decision;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Info;
 using SAIN.SAINComponent.Classes.Memory;
 using SAIN.SAINComponent.Classes.Mover;
@@ -40,8 +40,8 @@ namespace SAIN.SAINComponent
 
         public bool HasEnemy => EnemyController.HasEnemy;
         public bool HasLastEnemy => EnemyController.HasLastEnemy;
-        public SAINEnemy Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;
-        public SAINEnemy LastEnemy => HasLastEnemy ? EnemyController.LastEnemy : null;
+        public Enemy Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;
+        public Enemy LastEnemy => HasLastEnemy ? EnemyController.LastEnemy : null;
 
         public Vector3? CurrentTargetPosition => CurrentTarget.CurrentTargetPosition;
         public Vector3? CurrentTargetDirection => CurrentTarget.CurrentTargetDirection;
@@ -286,8 +286,6 @@ namespace SAIN.SAINComponent
             BotActive = false;
             OnBotDisabled?.Invoke();
             StopAllCoroutines();
-            Decision?.ResetDecisions(false);
-            Cover?.ActivateCoverFinder(false);
         }
 
         public bool IsSpeedHacker { get; private set; }
@@ -312,11 +310,7 @@ namespace SAIN.SAINComponent
 
         private void Update()
         {
-            if (IsDead || BotOwner.BotState == EBotState.Disposed)
-            {
-                Dispose();
-                return;
-            }
+            checkActive();
 
             if (BotActive)
             {
@@ -354,28 +348,36 @@ namespace SAIN.SAINComponent
             }
         }
 
-        public Action OnBotDisabled { get; set; }
+        public event Action OnBotDisabled;
 
         private void LateUpdate()
         {
+            checkActive();
+        }
+
+        private void checkActive()
+        {
             if (IsDead || BotOwner.BotState == EBotState.Disposed)
             {
+                BotActive = false;
                 Dispose();
                 return;
             }
 
-            BotActive =
-                !GameIsEnding &&
-                BotOwner.isActiveAndEnabled &&
-                Player.gameObject.activeInHierarchy &&
-                BotOwner.BotState == EBotState.Active &&
-                BotOwner.StandBy.StandByType == BotStandByType.active;
+            BotActive = _isActive;
 
             if (!BotActive)
             {
                 OnDisable();
             }
         }
+
+        private bool _isActive =>
+                !GameIsEnding &&
+                BotOwner.isActiveAndEnabled &&
+                Player.gameObject.activeInHierarchy &&
+                BotOwner.BotState == EBotState.Active &&
+                BotOwner.StandBy.StandByType == BotStandByType.active;
 
         private void handleDumbShit()
         {

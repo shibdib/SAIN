@@ -6,21 +6,20 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class SAINEnemy : SAINBase, ISAINClass
+    public class Enemy : SAINBase, ISAINClass
     {
-        public Action<SAINEnemy> OnEnemyKnown { get; set; }
-        public Action<SAINEnemy> OnEnemyForgotten { get; set; }
-        public Action<SAINEnemy> OnEnemyHeard { get; set; }
-        public Action<SAINEnemy> OnGainVision { get; set; }
-        public Action<SAINEnemy> OnLostVision { get; set; }
-        public Action<SAINEnemy> OnPathUpdated { get; set; }
-        public Action<SAINEnemy> OnVulnerableStateChanged { get; set; }
-        public Action<SAINEnemy> OnHealthStatusChanged { get; set; }
-
-        public Action<SAINEnemy> OnEnemyBecomeActiveThreat { get; set; }
-        public Action<SAINEnemy> OnEnemyNotActiveThreat { get; set; }
+        public Action<Enemy> OnEnemyKnown { get; set; }
+        public Action<Enemy> OnEnemyForgotten { get; set; }
+        public Action<Enemy> OnEnemyHeard { get; set; }
+        public Action<Enemy> OnGainVision { get; set; }
+        public Action<Enemy> OnLostVision { get; set; }
+        public Action<Enemy> OnPathUpdated { get; set; }
+        public Action<Enemy> OnVulnerableStateChanged { get; set; }
+        public Action<Enemy> OnHealthStatusChanged { get; set; }
+        public Action<Enemy> OnEnemyBecomeActiveThreat { get; set; }
+        public Action<Enemy> OnEnemyNotActiveThreat { get; set; }
 
         public void Update()
         {
@@ -83,7 +82,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 return false;
             }
-            SAINEnemy searchTarget = Bot.Search.SearchTarget;
+            Enemy searchTarget = Bot.Search.SearchTarget;
             if (searchTarget != null && searchTarget == this)
             {
                 return !KnownPlaces.SearchedAllKnownLocations;
@@ -130,7 +129,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public PersonClass EnemyPerson => EnemyPlayerComponent.Person;
         public PersonTransformClass EnemyTransform => EnemyPlayerComponent.Transform;
 
-        public SAINEnemy(BotComponent bot, PlayerComponent playerComponent, EnemyInfo enemyInfo) : base(bot)
+        public Enemy(BotComponent bot, PlayerComponent playerComponent, EnemyInfo enemyInfo) : base(bot)
         {
             TimeEnemyCreated = Time.time;
             EnemyPlayerComponent = playerComponent;
@@ -287,7 +286,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             get
             {
-                if (CanSeeLastCornerToEnemy && LastCornerToEnemy != null)
+                if (EnemyPath.CanSeeLastCornerToEnemy && LastCornerToEnemy != null)
                 {
                     return LastCornerToEnemy.Value;
                 }
@@ -324,48 +323,33 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         public bool FirstContactReported = false;
         public bool ShallReportRepeatContact => EnemyVision.ShallReportRepeatContact;
-        public Vector3 EnemyMoveDirection { get; set; }
 
         public bool EnemyHeardFromPeace = false;
         public bool Heard { get; set; }
         public float TimeSinceHeard => Time.time - TimeLastHeard;
         public float TimeLastHeard { get; private set; }
-        public Vector3? LastHeardPosition => KnownPlaces.LastHeardPlace?.Position;
 
-        public EPathDistance CheckPathDistance() => EnemyPath.EPathDistance;
-
+        public EPathDistance EPathDistance => EnemyPath.EPathDistance;
         public IPlayer EnemyIPlayer => EnemyPlayerComponent.IPlayer;
-
         public Player EnemyPlayer => EnemyPlayerComponent.Player;
 
         public float TimeEnemyCreated { get; private set; }
-
         public float TimeSinceEnemyCreated => Time.time - TimeEnemyCreated;
-
-        public Vector3? LastKnownPosition => KnownPlaces.LastKnownPlace?.Position;
-
-        public float? LastKnownDistance => KnownPlaces.LastKnownPlace?.Distance(Bot.Position);
-
-        public float? LastKnownDistanceSqr => KnownPlaces.LastKnownPlace?.DistanceSqr(Bot.Position);
+        public Vector3? LastKnownPosition => KnownPlaces.LastKnownPosition;
+        public Vector3? LastHeardPosition => KnownPlaces.LastHeardPlace?.Position;
+        public Vector3? LastSeenPosition => KnownPlaces.LastSeenPlace?.Position;
+        public float EnemyDistanceFromLastKnown => KnownPlaces.EnemyDistanceFromLastKnown;
+        public float TimeSinceLastKnownUpdated => KnownPlaces.TimeSinceLastKnownUpdated;
+        public Vector3 EnemyMoveDirection { get; set; }
 
         public EnemyKnownPlaces KnownPlaces { get; private set; }
 
-        public float TimeLastKnownUpdated => KnownPlaces.TimeSinceLastKnownUpdated;
-
-        public float TimeSinceLastKnownUpdated => Time.time - TimeLastKnownUpdated;
-
         public Vector3 EnemyPosition => EnemyTransform.Position;
-
         public Vector3 EnemyDirection => EnemyTransform.DirectionTo(Bot.Transform.Position);
-
         public Vector3 EnemyHeadPosition => EnemyTransform.HeadPosition;
 
-        public Vector3 EnemyChestPosition => EnemyTransform.BodyPosition;
-
         public bool InLineOfSight => EnemyVision.InLineOfSight;
-
         public bool IsVisible => EnemyVision.IsVisible;
-
         public bool CanShoot => EnemyVision.CanShoot;
 
         public bool Seen => EnemyVision.Seen;
@@ -373,10 +357,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
         public Vector3? LastCornerToEnemy => EnemyPath.LastCornerToEnemy;
 
         public bool EnemyLookingAtMe => EnemyStatus.EnemyLookingAtMe;
-
-        public Vector3? LastSeenPosition => KnownPlaces.LastSeenPlace?.Position;
-
-        public float VisibleStartTime => EnemyVision.VisibleStartTime;
 
         public float TimeSinceSeen => EnemyVision.TimeSinceSeen;
 
@@ -397,14 +377,13 @@ namespace SAIN.SAINComponent.Classes.Enemy
             {
                 timeAdd = IsAI ? 1f : 0.33f;
             }
+
             if (_lastUpdateDistanceTime + timeAdd < Time.time)
             {
                 _lastUpdateDistanceTime = Time.time;
                 RealDistance = (EnemyPlayerComponent.Position - Bot.Position).magnitude;
             }
         }
-
-        public bool CanSeeLastCornerToEnemy => EnemyPath.CanSeeLastCornerToEnemy;
 
         public bool IsSniper { get; private set; }
 
@@ -525,7 +504,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                     break;
 
                 case SAINSoundType.Surgery:
-                    EnemyStatus.VulnerableAction = SAINComponent.Classes.Enemy.EEnemyAction.UsingSurgery;
+                    EnemyStatus.VulnerableAction = SAINComponent.Classes.EnemyClasses.EEnemyAction.UsingSurgery;
                     break;
 
                 default:
@@ -562,7 +541,6 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 Bot.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.33f, 0.66f));
             }
         }
-
 
         public void Dispose()
         {

@@ -1,6 +1,6 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Info;
 using UnityEngine;
 
@@ -244,7 +244,7 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private Vector3? blindShootTarget(SAINEnemy enemy)
+        private Vector3? blindShootTarget(Enemy enemy)
         {
             Vector3? result = null;
             if (!enemy.IsVisible
@@ -275,7 +275,7 @@ namespace SAIN.SAINComponent.Classes
             return target;
         }
 
-        private Vector3? getAimTarget(SAINEnemy enemy)
+        private Vector3? getAimTarget(Enemy enemy)
         {
             if (enemy != null && enemy.IsVisible && enemy.CanShoot)
             {
@@ -300,7 +300,7 @@ namespace SAIN.SAINComponent.Classes
             return null;
         }
 
-        private Vector3? findCenterMassPoint(SAINEnemy enemy)
+        private Vector3? findCenterMassPoint(Enemy enemy)
         {
             if (enemy.IsAI)
             {

@@ -1,11 +1,11 @@
 ﻿using EFT;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyVisionDistanceClass : EnemyBase
     {
-        public EnemyVisionDistanceClass(SAINEnemy enemy) : base(enemy)
+        public EnemyVisionDistanceClass(Enemy enemy) : base(enemy)
         {
         }
 

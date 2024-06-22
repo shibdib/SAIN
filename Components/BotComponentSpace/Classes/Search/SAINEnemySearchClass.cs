@@ -1,4 +1,4 @@
-﻿using SAIN.SAINComponent.Classes.Enemy;
+﻿using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -77,7 +77,7 @@ namespace SAIN.SAINComponent.Classes.Search
             }
         }
 
-        private void checkStopSearch(SAINEnemy enemy, float time)
+        private void checkStopSearch(Enemy enemy, float time)
         {
             if (Searching && 
                 enemy.EnemyProfileId == Enemy.EnemyProfileId)
@@ -98,7 +98,7 @@ namespace SAIN.SAINComponent.Classes.Search
             Bot.EnemyController.OnEnemyForgotten -= checkStopSearch;
         }
 
-        public SAINEnemySearchClass(SAINEnemy enemy) : base(enemy)
+        public SAINEnemySearchClass(Enemy enemy) : base(enemy)
         {
         }
 

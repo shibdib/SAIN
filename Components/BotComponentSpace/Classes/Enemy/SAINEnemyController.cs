@@ -7,24 +7,24 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyController : SAINBase, ISAINClass
     {
         public bool HasEnemy => ActiveEnemy?.EnemyPerson?.IsActive == true;
         public bool HasLastEnemy => LastEnemy?.EnemyPerson?.IsActive == true;
-        public SAINEnemy ActiveEnemy { get; private set; }
-        public SAINEnemy LastEnemy { get; private set; }
+        public Enemy ActiveEnemy { get; private set; }
+        public Enemy LastEnemy { get; private set; }
         public System.Action<Player> OnEnemyKilled { get; set; }
 
-        public readonly Dictionary<string, SAINEnemy> Enemies = new Dictionary<string, SAINEnemy>();
+        public readonly Dictionary<string, Enemy> Enemies = new Dictionary<string, Enemy>();
         public bool NoEnemyContact => _atPeace && Time.time - _timePeaceStart > 3f;
         public bool ActiveHumanEnemy { get; private set; }
 
-        public readonly List<SAINEnemy> ActiveEnemies = new List<SAINEnemy>();
+        public readonly List<Enemy> ActiveEnemies = new List<Enemy>();
         public List<string> HumansInLineOfSight { get; } = new List<string>();
         public Action<string> OnEnemyRemoved { get; set; }
-        public Action<SAINEnemy, float> OnEnemyForgotten { get; set; }
+        public Action<Enemy, float> OnEnemyForgotten { get; set; }
 
         public SAINEnemyController(BotComponent sain) : base(sain)
         {
@@ -96,7 +96,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                         Logger.LogError("goalEnemy.ProfileId == SAINBot.Player.ProfileId");
                         return;
                     }
-                    SAINEnemy sainEnemy = GetEnemy(goalEnemy.ProfileId);
+                    Enemy sainEnemy = GetEnemy(goalEnemy.ProfileId);
                     if (sainEnemy != null)
                     {
                         setActiveEnemy(sainEnemy);
@@ -130,7 +130,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
             ActiveHumanEnemy = false;
 
-            foreach (SAINEnemy enemy in Enemies.Values)
+            foreach (Enemy enemy in Enemies.Values)
             {
                 bool inList = ActiveEnemies.Contains(enemy);
                 bool activeThreat = enemy.ActiveThreat;
@@ -163,7 +163,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private SAINEnemy checkIfAnyEnemyVisible()
+        private Enemy checkIfAnyEnemyVisible()
         {
             foreach (var enemy in Enemies.Values)
             {
@@ -276,9 +276,9 @@ namespace SAIN.SAINComponent.Classes.Enemy
             Enemies?.Clear();
         }
 
-        public SAINEnemy GetEnemy(string id)
+        public Enemy GetEnemy(string id)
         {
-            if (Enemies.TryGetValue(id, out SAINEnemy enemy))
+            if (Enemies.TryGetValue(id, out Enemy enemy))
             {
                 if (enemy.EnemyPlayer == null)
                 {
@@ -291,7 +291,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return null;
         }
 
-        private void removeEnemyInfo(SAINEnemy enemy)
+        private void removeEnemyInfo(Enemy enemy)
         {
             if (enemy == null)
             {
@@ -353,14 +353,14 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 LastEnemy = null;
             }
 
-            SAINEnemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
+            Enemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
             if (dogFightTarget != null &&
                 dogFightTarget.EnemyProfileId == id)
             {
                 Bot.Decision.DogFightDecision.DogFightTarget = null;
             }
 
-            if (Enemies.TryGetValue(id, out SAINEnemy enemy))
+            if (Enemies.TryGetValue(id, out Enemy enemy))
             {
                 OnEnemyRemoved?.Invoke(id);
 
@@ -381,7 +381,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private void AssignActiveEnemy()
         {
-            SAINEnemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
+            Enemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
             if (dogFightTarget?.IsValid == true)
             {
                 setActiveEnemy(dogFightTarget);
@@ -390,7 +390,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
             if (ActiveEnemy?.IsVisible == false)
             {
-                SAINEnemy visibileEnemy = checkIfAnyEnemyVisible();
+                Enemy visibileEnemy = checkIfAnyEnemyVisible();
                 if (visibileEnemy != null)
                 {
                     setActiveEnemy(visibileEnemy);
@@ -439,7 +439,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             EnemyInfo goalEnemy = BotOwner.Memory.GoalEnemy;
             if (goalEnemy == null)
             {
-                SAINEnemy enemy = ActiveEnemy;
+                Enemy enemy = ActiveEnemy;
                 if (enemy != null)
                 {
                     if (!enemy.IsValid)
@@ -469,7 +469,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
 
         private void setEnemyFromEnemyInfo(EnemyInfo enemyInfo)
         {
-            SAINEnemy sainEnemy = CheckAddEnemy(enemyInfo?.Person);
+            Enemy sainEnemy = CheckAddEnemy(enemyInfo?.Person);
             if (sainEnemy != null)
             {
                 setActiveEnemy(sainEnemy);
@@ -480,7 +480,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private void setActiveEnemy(SAINEnemy enemy)
+        private void setActiveEnemy(Enemy enemy)
         {
             if (enemy == null || (enemy.IsValid && enemy.EnemyPerson.IsActive))
             {
@@ -495,7 +495,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        private void setLastEnemy(SAINEnemy activeEnemy)
+        private void setLastEnemy(Enemy activeEnemy)
         {
             bool nullActiveEnemy = activeEnemy?.EnemyPerson?.IsActive == true;
             bool nullLastEnemy = LastEnemy?.EnemyPerson?.IsActive == true;
@@ -516,7 +516,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             }
         }
 
-        public bool AreEnemiesSame(SAINEnemy a, SAINEnemy b)
+        public bool AreEnemiesSame(Enemy a, Enemy b)
         {
             return AreEnemiesSame(a?.EnemyIPlayer, b?.EnemyIPlayer);
         }
@@ -528,7 +528,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 && a.ProfileId == b.ProfileId;
         }
 
-        public SAINEnemy CheckAddEnemy(IPlayer IPlayer)
+        public Enemy CheckAddEnemy(IPlayer IPlayer)
         {
             return tryAddEnemy(IPlayer);
         }
@@ -538,7 +538,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
             tryAddEnemy(player);
         }
 
-        private SAINEnemy tryAddEnemy(IPlayer enemyPlayer)
+        private Enemy tryAddEnemy(IPlayer enemyPlayer)
         {
             if (enemyPlayer == null)
             {
@@ -571,7 +571,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
                 return null;
             }
 
-            if (Enemies.TryGetValue(enemyPlayer.ProfileId, out SAINEnemy sainEnemy) &&
+            if (Enemies.TryGetValue(enemyPlayer.ProfileId, out Enemy sainEnemy) &&
                 sainEnemy.IsValid)
             {
                 return sainEnemy;
@@ -588,9 +588,9 @@ namespace SAIN.SAINComponent.Classes.Enemy
             return createEnemy(enemyPlayerComponent, enemyInfo);
         }
 
-        private SAINEnemy createEnemy(PlayerComponent enemyPlayerComponent, EnemyInfo enemyInfo)
+        private Enemy createEnemy(PlayerComponent enemyPlayerComponent, EnemyInfo enemyInfo)
         {
-            SAINEnemy enemy = new SAINEnemy(Bot, enemyPlayerComponent, enemyInfo);
+            Enemy enemy = new Enemy(Bot, enemyPlayerComponent, enemyInfo);
             enemy.Init();
             enemyPlayerComponent.OnComponentDestroyed += removeEnemy;
             enemyPlayerComponent.Player.OnPlayerDead += enemyKilled;

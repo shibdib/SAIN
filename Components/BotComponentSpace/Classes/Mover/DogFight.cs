@@ -1,6 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -80,7 +80,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool stopMoveToShoot()
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 return false;
@@ -108,7 +108,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private Vector3? findBackupTarget()
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy != null &&
                 enemy.Seen &&
                 enemy.TimeSinceSeen < _enemyTimeSinceSeenThreshold)
@@ -120,7 +120,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private Vector3? findMoveToEnemyTarget()
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy != null &&
                 enemy.Seen &&
                 enemy.TimeSinceSeen >= _enemyTimeSinceSeenThreshold &&

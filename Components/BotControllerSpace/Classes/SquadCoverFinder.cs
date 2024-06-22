@@ -21,29 +21,15 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public void AddMember(BotComponent member)
         {
-            member.Decision.OnSAINActivated += OnMemberSAINStart;
-            member.Decision.OnSAINDeactivated += OnMemberSAINEnd;
         }
 
         public void RemoveMember(BotComponent member)
         {
-            member.Decision.OnSAINActivated -= OnMemberSAINStart;
-            member.Decision.OnSAINDeactivated -= OnMemberSAINEnd;
         }
 
         public void Update()
         {
             SAINBotController.StartCoroutine(FindCoverForMembers());
-        }
-
-        private void OnMemberSAINStart(SoloDecision solo, SquadDecision squad, SelfDecision self, float time)
-        {
-
-        }
-
-        private void OnMemberSAINEnd(float time)
-        {
-
         }
 
         private IEnumerator FindCoverForMembers()

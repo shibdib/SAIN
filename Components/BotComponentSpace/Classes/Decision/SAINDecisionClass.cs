@@ -1,10 +1,6 @@
 ﻿using EFT;
-using SAIN.BotController.Classes;
-using SAIN.SAINComponent.Classes.Enemy;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,87 +8,90 @@ namespace SAIN.SAINComponent.Classes.Decision
 {
     public class SAINDecisionClass : SAINBase, ISAINClass
     {
+        public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnDecisionMade;
+
+        public event Action<bool> OnSAINStatusChanged;
+
+        public bool HasDecision { get; private set; }
+
+        public SoloDecision CurrentSoloDecision { get; private set; }
+        public SoloDecision PreviousSoloDecision { get; private set; }
+
+        public SquadDecision CurrentSquadDecision { get; private set; }
+        public SquadDecision PreviousSquadDecision { get; private set; }
+
+        public SelfDecision CurrentSelfDecision { get; private set; }
+        public SelfDecision PreviousSelfDecision { get; private set; }
+
+        public float ChangeDecisionTime { get; private set; }
+        public float TimeSinceChangeDecision => Time.time - ChangeDecisionTime;
+
+        public int TotalDecisionsMade { get; private set; }
+        public int DecisionsMadeThisFight { get; private set; }
+
+        public bool RunningToCover
+        {
+            get
+            {
+                switch (CurrentSoloDecision)
+                {
+                    case SoloDecision.Retreat:
+                    case SoloDecision.RunAway:
+                    case SoloDecision.RunToCover:
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+        }
+
+        public DogFightDecisionClass DogFightDecision { get; private set; }
+        public SelfActionDecisionClass SelfActionDecisions { get; private set; }
+        public EnemyDecisionClass EnemyDecisions { get; private set; }
+        public SquadDecisionClass SquadDecisions { get; private set; }
+
         public SAINDecisionClass(BotComponent bot) : base(bot)
         {
             SelfActionDecisions = new SelfActionDecisionClass(bot);
             EnemyDecisions = new EnemyDecisionClass(bot);
-            GoalTargetDecisions = new TargetDecisionClass(bot);
             SquadDecisions = new SquadDecisionClass(bot);
             DogFightDecision = new DogFightDecisionClass(bot);
         }
 
-        public DogFightDecisionClass DogFightDecision { get; private set; }
-
-        public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnDecisionMade;
-
-        public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnSAINActivated;
-
-        public event Action<float> OnSAINDeactivated;
-
-        public bool HasDecision => CurrentSoloDecision != SoloDecision.None
-                || CurrentSelfDecision != SelfDecision.None
-                || CurrentSquadDecision != SquadDecision.None;
-
         public void Init()
         {
+            Bot.OnBotDisabled += resetDecisions;
         }
 
         public void Update()
         {
-            float delay = HasDecision ? getDecisionFreq : getDecisionFreqAtPeace;
-
-            if (_nextGetDecisionTime + delay < Time.time)
+            if (_nextGetDecisionTime < Time.time)
             {
-                _nextGetDecisionTime = Time.time;
                 getDecision();
+                float delay = HasDecision ? DECISION_FREQUENCY : DECISION_FREQUENCY_PEACE;
+                _nextGetDecisionTime = Time.time + delay;
             }
         }
 
         private float _nextGetDecisionTime;
-        private const float getDecisionFreq = 0f;
-        private const float getDecisionFreqAtPeace = 0.25f;
+        const float DECISION_FREQUENCY = 1f / DECISION_FREQUENCY_FPS;
+        const float DECISION_FREQUENCY_PEACE = 1f / DECISION_FREQUENCY_PEACE_FPS;
+        const float DECISION_FREQUENCY_FPS = 8;
+        const float DECISION_FREQUENCY_PEACE_FPS = 4;
 
         public void Dispose()
         {
+            Bot.OnBotDisabled -= resetDecisions;
         }
-
-        public EPathDistance EnemyDistance
-        {
-            get
-            {
-                var enemy = Bot.Enemy;
-                if (enemy != null)
-                {
-                    return enemy.CheckPathDistance();
-                }
-                return EPathDistance.NoEnemy;
-            }
-        }
-
-        public SoloDecision CurrentSoloDecision { get; private set; }
-        public SoloDecision OldSoloDecision { get; private set; }
-
-        public SquadDecision CurrentSquadDecision { get; private set; }
-        public SquadDecision OldSquadDecision { get; private set; }
-
-        public SelfDecision CurrentSelfDecision { get; private set; }
-        public SelfDecision OldSelfDecision { get; private set; }
-
-        public SelfActionDecisionClass SelfActionDecisions { get; private set; }
-        public EnemyDecisionClass EnemyDecisions { get; private set; }
-        public TargetDecisionClass GoalTargetDecisions { get; private set; }
-        public SquadDecisionClass SquadDecisions { get; private set; }
-        public List<SoloDecision> RetreatDecisions { get; private set; } = new List<SoloDecision> { SoloDecision.Retreat };
-        public float ChangeDecisionTime { get; private set; }
-        public float TimeSinceChangeDecision => Time.time - ChangeDecisionTime;
 
         private void getDecision()
         {
-            if (shallAvoidGrenade())
-            {
-                SetDecisions(SoloDecision.AvoidGrenade, SquadDecision.None, SelfDecision.None);
-                return;
-            }
+            //if (shallAvoidGrenade())
+            //{
+            //    SetDecisions(SoloDecision.AvoidGrenade, SquadDecision.None, SelfDecision.None);
+            //    return;
+            //}
 
             if (DogFightDecision.ShallDogFight())
             {
@@ -105,6 +104,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 SetDecisions(SoloDecision.Retreat, SquadDecision.None, selfDecision);
                 return;
             }
+
             if (CheckContinueRetreat())
             {
                 return;
@@ -127,90 +127,105 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private void SetDecisions(SoloDecision solo, SquadDecision squad, SelfDecision self)
         {
-            if (SAINPlugin.ForceSoloDecision != SoloDecision.None)
+            if (SAINPlugin.DebugMode)
             {
-                solo = SAINPlugin.ForceSoloDecision;
-            }
-            if (SAINPlugin.ForceSquadDecision != SquadDecision.None)
-            {
-                squad = SAINPlugin.ForceSquadDecision;
-            }
-            if (SAINPlugin.ForceSelfDecision != SelfDecision.None)
-            {
-                self = SAINPlugin.ForceSelfDecision;
+                if (SAINPlugin.ForceSoloDecision != SoloDecision.None)
+                {
+                    solo = SAINPlugin.ForceSoloDecision;
+                }
+                if (SAINPlugin.ForceSquadDecision != SquadDecision.None)
+                {
+                    squad = SAINPlugin.ForceSquadDecision;
+                }
+                if (SAINPlugin.ForceSelfDecision != SelfDecision.None)
+                {
+                    self = SAINPlugin.ForceSelfDecision;
+                }
             }
 
-            bool newDecision = checkForNewDecision(solo, squad, self);
-
-            CurrentSoloDecision = solo;
-            CurrentSquadDecision = squad;
-            CurrentSelfDecision = self;
-
-            if (newDecision)
+            if (updateLastDecisions(solo, squad, self))
             {
+                HasDecision =
+                    CurrentSoloDecision != SoloDecision.None ||
+                    CurrentSelfDecision != SelfDecision.None ||
+                    CurrentSquadDecision != SquadDecision.None;
+
+                _hasLastDecision =
+                    PreviousSoloDecision != SoloDecision.None ||
+                    PreviousSelfDecision != SelfDecision.None ||
+                    PreviousSquadDecision != SquadDecision.None;
+
+                TotalDecisionsMade++;
+                DecisionsMadeThisFight++;
                 ChangeDecisionTime = Time.time;
                 OnDecisionMade?.Invoke(solo, squad, self, Time.time);
-                checkSAINStart(); 
-                checkSAINEnd();
+                checkSAINStartAndEnd(); 
             }
         }
 
-        private void checkSAINStart()
+        private void checkSAINStartAndEnd()
         {
+            bool hasDecision = HasDecision;
+            bool hasLastDecision = _hasLastDecision;
+
             // If previously all decisions were none, sain has now started.
-            if (OldSoloDecision == SoloDecision.None
-                && OldSelfDecision == SelfDecision.None
-                && OldSquadDecision == SquadDecision.None)
+            if (!hasLastDecision && 
+                hasDecision)
             {
-                OnSAINActivated?.Invoke(CurrentSoloDecision, CurrentSquadDecision, CurrentSelfDecision, Time.time);
+                OnSAINStatusChanged?.Invoke(true);
+                Logger.LogDebug($"{BotOwner.name} Has Decision. SAIN Awake.");
+            }
+            if (hasLastDecision && 
+                !hasDecision)
+            {
+                OnSAINStatusChanged?.Invoke(false);
+                Logger.LogDebug($"{BotOwner.name} Has no Decision. SAIN Sleep.");
+                DecisionsMadeThisFight = 0;
             }
         }
 
-        private void checkSAINEnd()
-        {
-            // Are all decisions None? Then SAIN is no longer active.
-            if (CurrentSoloDecision == SoloDecision.None
-                && CurrentSelfDecision == SelfDecision.None
-                && CurrentSquadDecision == SquadDecision.None)
-            {
-                OnSAINDeactivated?.Invoke(Time.time);
-            }
-        }
-
-        private bool checkForNewDecision(SoloDecision solo, SquadDecision squad, SelfDecision self)
+        private bool updateLastDecisions(SoloDecision newSoloDecision, SquadDecision newSquadDecision, SelfDecision newSelfDecision)
         {
             bool newDecision = false;
-            float time = Time.time;
-            if (CurrentSoloDecision != solo)
+
+            if (newSoloDecision != CurrentSoloDecision)
             {
-                ChangeSoloDecisionTime = time;
-                OldSoloDecision = CurrentSoloDecision;
+                PreviousSoloDecision = CurrentSoloDecision;
+                CurrentSoloDecision = newSoloDecision;
                 newDecision = true;
             }
-            if (CurrentSquadDecision != squad)
+
+            if (newSquadDecision != CurrentSquadDecision)
             {
-                ChangeSquadDecisionTime = time;
-                OldSquadDecision = CurrentSquadDecision;
+                PreviousSquadDecision = CurrentSquadDecision;
+                CurrentSquadDecision = newSquadDecision;
                 newDecision = true;
             }
-            if (CurrentSelfDecision != self)
+
+            if (newSelfDecision != CurrentSelfDecision)
             {
-                ChangeSelfDecisionTime = time;
-                OldSelfDecision = CurrentSelfDecision;
+                PreviousSelfDecision = CurrentSelfDecision;
+                CurrentSelfDecision = newSelfDecision;
                 newDecision = true;
             }
+
             return newDecision;
         }
 
         public void ResetDecisions(bool active)
         {
+            resetDecisions();
+            if (active && HasDecision)
+            {
+                BotOwner.CalcGoal();
+            }
+        }
+
+        private void resetDecisions()
+        {
             if (HasDecision)
             {
                 SetDecisions(SoloDecision.None, SquadDecision.None, SelfDecision.None);
-                if (active)
-                {
-                    BotOwner.CalcGoal();
-                }
             }
         }
 
@@ -263,10 +278,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             return _grenadePathDist;
         }
 
-        private float _nextCalcPathTime;
-        private float _calcPathFreq = 0.5f;
-        private float _grenadePathDist;
-
         private float calcPathAndReturnDist(Vector3 point)
         {
             Vector3 botPosition = Bot.Position;
@@ -284,10 +295,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             return (botPosition - point).magnitude;
         }
-
-        public float ChangeSoloDecisionTime { get; private set; }
-        public float ChangeSelfDecisionTime { get; private set; }
-        public float ChangeSquadDecisionTime { get; private set; }
 
         private bool CheckContinueRetreat()
         {
@@ -332,5 +339,16 @@ namespace SAIN.SAINComponent.Classes.Decision
                     return !coverInUse.IsBad;
             }
         }
+
+        private float _nextCalcPathTime;
+        private float _calcPathFreq = 0.5f;
+        private float _grenadePathDist;
+
+        private bool _hasLastDecision;
+
+        public static readonly SoloDecision[] RETREAT_DECISIONS =
+        { 
+            SoloDecision.Retreat 
+        };
     }
 }

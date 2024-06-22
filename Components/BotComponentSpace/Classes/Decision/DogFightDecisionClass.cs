@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
@@ -52,7 +52,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return true;
         }
 
-        private bool shallClearDogfightTarget(SAINEnemy enemy)
+        private bool shallClearDogfightTarget(Enemy enemy)
         {
             if (enemy == null || 
                 !enemy.EnemyKnown || 
@@ -87,7 +87,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 _changeDFTargetTime = Time.time + 0.5f;
 
                 clearDFTargets();
-                SAINEnemy newTarget = selectDFTarget();
+                Enemy newTarget = selectDFTarget();
                 if (newTarget != null)
                 {
                     DogFightTarget = newTarget;
@@ -131,7 +131,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
         }
 
-        private SAINEnemy selectDFTarget()
+        private Enemy selectDFTarget()
         {
             int count = _dogFightTargets.Count;
             if (count > 0)
@@ -145,11 +145,11 @@ namespace SAIN.SAINComponent.Classes.Decision
             return null;
         }
 
-        private readonly List<SAINEnemy> _dogFightTargets = new List<SAINEnemy>();
+        private readonly List<Enemy> _dogFightTargets = new List<Enemy>();
 
-        public SAINEnemy DogFightTarget { get; set; }
+        public Enemy DogFightTarget { get; set; }
 
-        private bool shallDogFightEnemy(SAINEnemy enemy)
+        private bool shallDogFightEnemy(Enemy enemy)
         {
             return enemy?.IsValid == true && 
                 enemy.IsVisible && 

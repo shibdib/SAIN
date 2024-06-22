@@ -1,7 +1,7 @@
 ﻿using EFT;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using UnityEngine;
 
@@ -27,16 +27,12 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool GetDecision(out SoloDecision Decision)
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null)
             {
                 Decision = SoloDecision.None;
                 return false;
             }
-
-            Bot.Decision.GoalTargetDecisions.IgnorePlaceTarget = false;
-
-            var CurrentDecision = Bot.Decision.CurrentSoloDecision;
 
             if (shallDogFight(enemy))
             {
@@ -48,7 +44,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             else if (shallStandAndShoot(enemy))
             {
-                if (CurrentDecision != SoloDecision.StandAndShoot)
+                if (Bot.Decision.CurrentSoloDecision != SoloDecision.StandAndShoot)
                 {
                     Bot.Info.CalcHoldGroundDelay();
                 }
@@ -124,7 +120,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
         }
 
-        private bool shallFreezeAndWait(SAINEnemy enemy)
+        private bool shallFreezeAndWait(Enemy enemy)
         {
             if (enemy.EnemyHeardFromPeace &&
                 Bot.Memory.Location.IsIndoors &&
@@ -148,7 +144,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         public float FreezeFor { get; private set; }
         public float UnFreezeTime { get; private set; }
 
-        private bool shallThrowGrenade(SAINEnemy enemy)
+        private bool shallThrowGrenade(Enemy enemy)
         {
             if (!GlobalSettings.General.BotsUseGrenades)
             {
@@ -184,7 +180,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private float _nextSayNeedGrenadeTime;
 
-        private bool canTryThrow(SAINEnemy enemy)
+        private bool canTryThrow(Enemy enemy)
         {
             if (this._nextPosibleAttempt > Time.time)
             {
@@ -212,7 +208,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 && enemy.TimeSinceLastKnownUpdated < 120f;
         }
 
-        private bool findThrowTarget(SAINEnemy enemy)
+        private bool findThrowTarget(Enemy enemy)
         {
             Vector3? lastKnown = enemy.LastKnownPosition;
             if (lastKnown == null)
@@ -364,7 +360,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private static readonly float RushEnemyMaxPathDistanceSprint = 20f;
         private static readonly float RushEnemyLowAmmoRatio = 0.4f;
 
-        private bool shallRushEnemy(SAINEnemy enemy)
+        private bool shallRushEnemy(Enemy enemy)
         {
             if (Bot.Info.PersonalitySettings?.Rush.CanRushEnemyReloadHeal == true && enemy != null)
             {
@@ -414,7 +410,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private float ShiftCoverNewCoverTime => CoverSettings.ShiftCoverNewCoverTime;
         private float ShiftCoverResetTime => CoverSettings.ShiftCoverResetTime;
 
-        private bool shallShiftCover(SAINEnemy enemy)
+        private bool shallShiftCover(Enemy enemy)
         {
             if (Bot.Info.PersonalitySettings.Cover.CanShiftCoverPosition == false)
             {
@@ -491,7 +487,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private float ShiftResetTimer;
         public bool ShiftCoverComplete { get; set; }
 
-        private bool shallDogFight(SAINEnemy enemy)
+        private bool shallDogFight(Enemy enemy)
         {
             if (Bot.Decision.CurrentSelfDecision != SelfDecision.None || BotOwner.WeaponManager.Reload.Reloading)
             {
@@ -515,13 +511,13 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             ShotInCover = false;
 
-            var pathStatus = enemy.CheckPathDistance();
+            var pathStatus = enemy.EPathDistance;
             return (pathStatus == EPathDistance.VeryClose && Bot.Enemy.IsVisible) || Bot.Cover.CoverInUse?.Spotted == true;
         }
 
         public bool ShotInCover;
 
-        private bool shallMoveToEngage(SAINEnemy enemy)
+        private bool shallMoveToEngage(Enemy enemy)
         {
             if (Bot.Suppression.IsSuppressed)
             {
@@ -557,7 +553,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private bool shallShootDistantEnemy(SAINEnemy enemy)
+        private bool shallShootDistantEnemy(Enemy enemy)
         {
             if (_endShootDistTargetTime > Time.time
                 && Bot.Decision.CurrentSoloDecision == SoloDecision.ShootDistantEnemy
@@ -645,7 +641,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private bool shallStandAndShoot(SAINEnemy enemy)
+        private bool shallStandAndShoot(Enemy enemy)
         {
             if (enemy.IsVisible &&
                 enemy.CanShoot &&
@@ -672,7 +668,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     //}
                 }
 
-                float visibleFor = Time.time - enemy.VisibleStartTime;
+                float visibleFor = Time.time - enemy.EnemyVision.VisibleStartTime;
 
                 if (visibleFor < holdGround)
                 {

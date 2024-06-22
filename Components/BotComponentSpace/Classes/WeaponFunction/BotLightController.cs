@@ -1,5 +1,5 @@
 ﻿using EFT;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -96,7 +96,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 return;
             }
 
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy != null)
             {
                 float maxTurnOnrange = 50f;

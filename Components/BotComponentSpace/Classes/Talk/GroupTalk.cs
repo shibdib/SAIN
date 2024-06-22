@@ -1,9 +1,11 @@
 using EFT;
 using SAIN.Helpers;
 using SAIN.Plugin;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.Decision;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Talk
@@ -233,7 +235,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private bool CheckEnemyContact()
         {
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (FriendIsClose
                 && enemy != null)
             {
@@ -524,7 +526,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 && EFTMath.RandomBool(_talkRetreatChance)
                 && Bot.HasEnemy
                 && (Bot.Enemy.IsVisible == true || Bot.Enemy.InLineOfSight)
-                && Bot.Decision.RetreatDecisions.Contains(Bot.Decision.CurrentSoloDecision))
+                && SAINDecisionClass.RETREAT_DECISIONS.Contains(Bot.Decision.CurrentSoloDecision))
             {
                 _nextCheckTalkRetreatTime = Time.time + _talkRetreatFreq;
                 return Bot.Talk.Say(_talkRetreatTrigger, _talkRetreatMask, _talkRetreatGroupDelay);

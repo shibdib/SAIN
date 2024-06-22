@@ -3,7 +3,7 @@ using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
 using UnityEngine;
@@ -58,7 +58,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool EnemyDecision(out SquadDecision Decision)
         {
             Decision = SquadDecision.None;
-            SAINEnemy myEnemy = Bot.Enemy;
+            Enemy myEnemy = Bot.Enemy;
 
             if (shallPushSuppressedEnemy(myEnemy))
             {
@@ -115,7 +115,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         private static readonly float PushSuppressedEnemyMaxPathDistanceSprint = 100f;
         private static readonly float PushSuppressedEnemyLowAmmoRatio = 0.5f;
 
-        private bool shallPushSuppressedEnemy(SAINEnemy enemy)
+        private bool shallPushSuppressedEnemy(Enemy enemy)
         {
             if (enemy != null
                 && !Bot.Decision.SelfActionDecisions.LowOnAmmo(PushSuppressedEnemyLowAmmoRatio) 

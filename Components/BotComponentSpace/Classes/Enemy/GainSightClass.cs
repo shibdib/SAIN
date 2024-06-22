@@ -2,11 +2,11 @@
 using SAIN.Preset.GlobalSettings;
 using UnityEngine;
 
-namespace SAIN.SAINComponent.Classes.Enemy
+namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class GainSightClass : EnemyBase
     {
-        public GainSightClass(SAINEnemy enemy) : base(enemy)
+        public GainSightClass(Enemy enemy) : base(enemy)
         {
         }
 
@@ -217,7 +217,7 @@ namespace SAIN.SAINComponent.Classes.Enemy
         {
             if (!Enemy.IsCurrentEnemy)
             {
-                SAINEnemy activeEnemy = Enemy.Bot.Enemy;
+                Enemy activeEnemy = Enemy.Bot.Enemy;
                 if (activeEnemy != null)
                 {
                     Vector3? activeEnemyLastKnown = activeEnemy.LastKnownPosition;

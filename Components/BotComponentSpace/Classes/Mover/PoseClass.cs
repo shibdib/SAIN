@@ -2,7 +2,7 @@
 using UnityEngine;
 using SAIN.Helpers;
 using System;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
@@ -86,7 +86,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             targetPose = 1f;
             if ((Bot.AILimit.CurrentAILimit == AILimitSetting.Close || Bot.Enemy?.IsAI == false))
             {
-                SAINEnemy enemy = Bot.Enemy;
+                Enemy enemy = Bot.Enemy;
                 if (enemy?.LastKnownPosition != null)
                 {
                     Vector3 position = enemy.LastKnownPosition.Value + Vector3.up;

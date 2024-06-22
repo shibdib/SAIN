@@ -2,7 +2,7 @@
 using HarmonyLib;
 using JetBrains.Annotations;
 using SAIN.SAINComponent.Classes.Decision;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -41,9 +41,9 @@ namespace SAIN.SAINComponent.Classes.Memory
             checkResetUnderFire();
         }
 
-        public Action<SAINEnemy> OnEnemyHeardFromPeace { get; set; }
+        public Action<Enemy> OnEnemyHeardFromPeace { get; set; }
 
-        public void EnemyWasHeard(SAINEnemy enemy)
+        public void EnemyWasHeard(Enemy enemy)
         {
             if (Bot.HasEnemy || !BotOwner.Memory.IsPeace)
             {
@@ -95,7 +95,7 @@ namespace SAIN.SAINComponent.Classes.Memory
         private static FieldInfo _underFireTimeField;
 
         public IPlayer LastUnderFireSource { get; private set; }
-        public SAINEnemy LastUnderFireEnemy { get; private set; }
+        public Enemy LastUnderFireEnemy { get; private set; }
 
         public void Dispose()
         {

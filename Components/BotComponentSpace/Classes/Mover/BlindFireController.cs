@@ -1,6 +1,6 @@
 using EFT;
 using SAIN.Helpers;
-using SAIN.SAINComponent.Classes.Enemy;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using UnityEngine;
 
@@ -27,7 +27,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return false;
             }
 
-            SAINEnemy enemy = Bot.Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy == null ||
                 !enemy.Seen ||
                 enemy.TimeSinceSeen > 30f)

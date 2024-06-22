@@ -145,6 +145,5 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private readonly List<FaceShieldComponent> _faceShieldComponents = new List<FaceShieldComponent>();
         private readonly List<ArmorComponent> _armorList = new List<ArmorComponent>();
-        private float _nextUpdateTime;
     }
 }
