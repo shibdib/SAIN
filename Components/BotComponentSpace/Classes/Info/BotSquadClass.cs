@@ -10,11 +10,11 @@ namespace SAIN.SAINComponent.Classes.Info
     {
         public SAINSquadClass(BotComponent sain) : base(sain)
         {
-            SquadInfo = SAINPlugin.BotController.BotSquads.GetSquad(Bot);
         }
 
         public void Init()
         {
+            SquadInfo = SAINPlugin.BotController.BotSquads.GetSquad(Bot);
         }
 
         public Squad SquadInfo { get; private set; }
