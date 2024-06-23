@@ -178,7 +178,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             if (BotOwner.WeaponManager.Reload.Reloading)
             {
-                return false;
+                return true;
             }
 
             bool result = false;
@@ -218,7 +218,8 @@ namespace SAIN.SAINComponent.Classes.Decision
             bool result = false;
             try
             {
-                result = BotOwner.WeaponManager.Reload.TryReload();
+                BotOwner.WeaponManager.Reload.Reload();
+                result = BotOwner.WeaponManager.Reload.Reloading;
             }
             catch
             {

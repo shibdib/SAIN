@@ -104,10 +104,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float HIT_DELAY_WHEN_PEACE = 0.33f;
+        public float HIT_DELAY_WHEN_PEACE = 0.5f;
 
         [Hidden]
         [JsonIgnore]
-        public float HIT_DELAY_WHEN_HAVE_SMT = 0.1f;
+        public float HIT_DELAY_WHEN_HAVE_SMT = 0.25f;
     }
 }

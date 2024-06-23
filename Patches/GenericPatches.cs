@@ -111,9 +111,6 @@ namespace SAIN.Patches.Generic
             return AccessTools.Method(typeof(EnemyInfo), "ShallKnowEnemy");
         }
 
-        private const float TimeToForgetEnemyNotSeen = 30f;
-        private const float TimeToForgetEnemySeen = 60f;
-
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
@@ -145,13 +142,7 @@ namespace SAIN.Patches.Generic
         public static bool EnemySenseRecently(BotComponent sain, EnemyInfo enemyInfo)
         {
             Enemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
-            if (myEnemy?.IsValid == true)
-            {
-                var lastKnown = myEnemy?.KnownPlaces?.LastKnownPlace;
-                return lastKnown != null
-                    && lastKnown.TimeSincePositionUpdated <= sain.BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC;
-            }
-            return false;
+            return myEnemy?.IsValid == true && myEnemy.EnemyKnown;
         }
     }
 

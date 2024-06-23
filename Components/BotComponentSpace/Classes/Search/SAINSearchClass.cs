@@ -251,7 +251,7 @@ namespace SAIN.SAINComponent.Classes.Search
             }
 
             updateSearchDestination();
-            CheckIfStuck();
+            //CheckIfStuck();
             SwitchSearchModes(shallSprint);
             SearchMovePoint?.DrawDebug();
         }

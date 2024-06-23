@@ -23,6 +23,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             get
             {
+                return false;
+
                 if (TimeSincePositionUpdated > ExpireTime)
                 {
                     return true;
