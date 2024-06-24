@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             float angleMod = calcAngleMod();
             float flareMod = getFlare();
 
-            SAINEnemyStatus status = Enemy.EnemyStatus;
+            SAINEnemyStatus status = Enemy.Status;
             bool posFlare = status.PositionalFlareEnabled;
             bool shotAtMe = status.ShotAtMeRecently;
 
@@ -60,7 +60,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float calcMovementMod()
         {
-            float velocity = Enemy.EnemyVision.EnemyVelocity;
+            float velocity = Enemy.Vision.EnemyVelocity;
             float result = Mathf.Lerp(0.9f, _sprintMod, velocity);
 
             // if (EnemyPlayer.IsYourPlayer &&
@@ -77,8 +77,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private float calcAngleMod()
         {
             // Reduce Bot Periph Vision
-            float angleToEnemy = Enemy.EnemyVision.AngleToEnemy;
-            float maxAngle = Enemy.EnemyVision.MaxVisionAngle;
+            float angleToEnemy = Enemy.Vision.AngleToEnemy;
+            float maxAngle = Enemy.Vision.MaxVisionAngle;
             if (angleToEnemy > maxAngle)
             {
                 return 0f;

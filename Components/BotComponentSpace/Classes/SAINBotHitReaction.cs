@@ -119,7 +119,7 @@ namespace SAIN.SAINComponent.Classes
                     enemy.IsValid)
                 {
                     EnemyWhoLastShotMe = enemy;
-                    enemy.EnemyStatus.RegisterShotByEnemy(damageInfo);
+                    enemy.Status.RegisterShotByEnemy(damageInfo);
                 }
             }
         }

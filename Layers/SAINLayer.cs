@@ -10,9 +10,9 @@ namespace SAIN.Layers
 {
     public abstract class SAINLayer : CustomLayer
     {
-        public static string BuildLayerName<T>()
+        public static string BuildLayerName(string name)
         {
-            return $"{nameof(SAINBot)} {typeof(T).Name}";
+            return $"SAIN : {name}";
         }
 
         public SAINLayer(BotOwner botOwner, int priority, string layerName) : base(botOwner, priority)
@@ -24,28 +24,34 @@ namespace SAIN.Layers
 
         public override string GetName() => LayerName;
 
-        public SAINBotController BotController => SAINPlugin.BotController;
+        public SAINBotController BotController => SAINBotController.Instance;
 
-        private BotComponent _SAIN = null;
-        public BotComponent SAINBot
+        public BotComponent Bot
         {
             get
             {
-                if (_SAIN == null && BotOwner?.BotState == EBotState.Active)
+                if (_bot == null && 
+                    BotController.GetSAIN(BotOwner, out var bot))
                 {
-                    _SAIN = BotOwner.GetComponent<BotComponent>();
+                    _bot = bot;
                 }
-
-                return _SAIN;
+                if (_bot == null)
+                {
+                    Logger.LogWarning($"Had to getcomponent to find bot component?");
+                    _bot = BotOwner.GetComponent<BotComponent>();
+                }
+                return _bot;
             }
         }
+
+        private BotComponent _bot;
         
 
         public override void BuildDebugText(StringBuilder stringBuilder)
         {
-            if (SAINBot != null)
+            if (Bot != null)
             {
-                DebugOverlay.AddBaseInfo(SAINBot, BotOwner, stringBuilder);
+                DebugOverlay.AddBaseInfo(Bot, BotOwner, stringBuilder);
             }
         }
     }

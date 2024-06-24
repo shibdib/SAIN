@@ -32,7 +32,7 @@ namespace SAIN.Components
                 if (FreqencyTimer < Time.time)
                 {
                     Vector3 position = Position;
-                    var botController = SAINPlugin.BotController;
+                    var botController = SAINBotController.Instance;
                     if (botController != null)
                     {
                         TimeOfDay = botController.TimeVision.TimeOfDay;

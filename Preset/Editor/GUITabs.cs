@@ -11,6 +11,7 @@ using SAIN.Preset.GlobalSettings;
 using static GClass1711;
 using SAIN.Attributes;
 using SAIN.Preset;
+using SAIN.Components;
 
 namespace SAIN.Editor
 {
@@ -185,9 +186,9 @@ namespace SAIN.Editor
                 {
                     if (Button(triggers[i].ToString()))
                     {
-                        if (SAINPlugin.BotController?.Bots != null)
+                        if (SAINBotController.Instance?.Bots != null)
                         {
-                            foreach (var bot in SAINPlugin.BotController.Bots.Values)
+                            foreach (var bot in SAINBotController.Instance.Bots.Values)
                             {
                                 if (bot != null)
                                 {

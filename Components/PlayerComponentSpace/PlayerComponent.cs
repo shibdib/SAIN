@@ -1,12 +1,11 @@
 ﻿using EFT;
-using EFT.Interactive;
 using SAIN.Components.PlayerComponentSpace.Classes;
 using SAIN.Components.PlayerComponentSpace.Classes.Equipment;
+using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
 using System;
 using System.Collections;
-using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -16,22 +15,24 @@ namespace SAIN.Components.PlayerComponentSpace
     {
         private void Update()
         {
-            if (!Person.PlayerActive)
+            Person.Update();
+
+            if (!Person.ActiveClass.PlayerActive)
             {
-                endLoops();
                 return;
             }
 
-
-            bool active = !Person.IsAI || Person.BotActive;
-            startLoops(active);
-
-            if (active)
+            if (!IsAI || Person.ActiveClass.BotActive)
             {
                 drawTransformGizmos();
                 Flashlight.Update();
                 Equipment.Update();
             }
+        }
+
+        private void LateUpdate()
+        {
+            Person.LateUpdate();
         }
 
         private void drawTransformGizmos()
@@ -54,44 +55,25 @@ namespace SAIN.Components.PlayerComponentSpace
             }
         }
 
-        private void startLoops(bool aiActive)
+        private void startCoroutines()
         {
-            if (_transformCoroutine == null)
-            {
-                _transformCoroutine = StartCoroutine(updateTransformsLoop());
-            }
-            if (aiActive && _gearCoroutine == null)
+            if (_gearCoroutine == null)
             {
                 _gearCoroutine = StartCoroutine(Equipment.GearInfo.GearUpdateLoop());
             }
         }
 
-        private void endLoops()
+        private void stopCoroutines()
         {
-            if (_transformCoroutine != null)
-            {
-                StopCoroutine(_transformCoroutine);
-                _transformCoroutine = null;
-            }
             if (_gearCoroutine != null)
             {
                 StopCoroutine(_gearCoroutine);
                 _gearCoroutine = null;
             }
+            StopAllCoroutines();
         }
 
-        private Coroutine _transformCoroutine;
         private Coroutine _gearCoroutine;
-
-        private IEnumerator updateTransformsLoop()
-        {
-            WaitForSeconds wait = new WaitForSeconds(PersonTransformClass.TRANSFORM_UPDATE_FREQ);
-            while (true)
-            {
-                Transform.UpdatePositions();
-                yield return wait;
-            }
-        }
 
         public Vector3? WeaponShotHitPoint
         {
@@ -156,7 +138,7 @@ namespace SAIN.Components.PlayerComponentSpace
         public SAINAIData AIData { get; private set; }
         public SAINEquipmentClass Equipment { get; private set; }
 
-        public bool IsActive => Person.IsActive;
+        public bool IsActive => Person.Active;
         public Vector3 Position => Person.Transform.Position;
         public Vector3 LookDirection => Person.Transform.LookDirection;
         public Vector3 LookSensorPosition => Transform.EyePosition;
@@ -174,15 +156,17 @@ namespace SAIN.Components.PlayerComponentSpace
 
         public bool Init(IPlayer iPlayer, Player player)
         {
+            ProfileId = iPlayer.ProfileId;
+
             try
             {
-                ProfileId = iPlayer.ProfileId;
                 Person = new PersonClass(iPlayer, player, this);
-
                 Flashlight = new FlashLightClass(this);
                 Equipment = new SAINEquipmentClass(this);
-
                 AIData = new SAINAIData(Equipment.GearInfo, this);
+
+                Person.ActiveClass.OnPlayerActiveChanged += handleCoroutines;
+                handleCoroutines(true);
             }
             catch (Exception ex)
             {
@@ -194,6 +178,14 @@ namespace SAIN.Components.PlayerComponentSpace
             return true;
         }
 
+        private void handleCoroutines(bool active)
+        {
+            if (active)
+                startCoroutines();
+            else
+                stopCoroutines();
+        }
+
         private IEnumerator delayInit()
         {
             yield return null;
@@ -202,6 +194,8 @@ namespace SAIN.Components.PlayerComponentSpace
 
         public void InitBotOwner(BotOwner botOwner)
         {
+            Person.ActiveClass.OnPlayerActiveChanged -= handleCoroutines;
+            Person.ActiveClass.OnBotActiveChanged += handleCoroutines;
             Person.InitBotOwner(botOwner);
         }
 
@@ -212,19 +206,19 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private void OnDisable()
         {
-            endLoops();
-            StopAllCoroutines();
+            stopCoroutines();
         }
 
         public void Dispose()
         {
             OnComponentDestroyed?.Invoke(ProfileId);
-            endLoops();
-            StopAllCoroutines();
+            stopCoroutines();
+            Person.ActiveClass.OnBotActiveChanged -= handleCoroutines;
+            Person.ActiveClass.OnPlayerActiveChanged -= handleCoroutines;
             Equipment?.Dispose();
             Destroy(this);
         }
 
-        public Action<string> OnComponentDestroyed { get; set; }
+        public event Action<string> OnComponentDestroyed;
     }
 }

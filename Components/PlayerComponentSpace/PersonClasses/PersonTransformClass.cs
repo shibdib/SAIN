@@ -1,8 +1,7 @@
 ﻿using EFT;
-using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
 
-namespace SAIN.Components.PlayerComponentSpace
+namespace SAIN.Components.PlayerComponentSpace.PersonClasses
 {
     public class PersonTransformClass
     {
@@ -12,7 +11,7 @@ namespace SAIN.Components.PlayerComponentSpace
         public Vector3 HeadPosition { get; private set; }
         public Vector3 EyePosition { get; private set; }
         public Vector3 BodyPosition { get; private set; }
-        public Vector3 WeaponFirePort {  get; private set; }
+        public Vector3 WeaponFirePort { get; private set; }
         public Vector3 WeaponPointDirection { get; private set; }
 
         public Vector3 DirectionTo(Vector3 point)
@@ -38,6 +37,14 @@ namespace SAIN.Components.PlayerComponentSpace
             EyePosition = _eyePart.Center;
             HeadPosition = _myHead.position;
 
+            if (_nextUpdateTime > Time.time)
+            {
+                return;
+            }
+
+            _nextUpdateTime = Time.time + TRANSFORM_UPDATE_FREQ;
+
+
             var player = Person.Player;
             LookDirection = player.MovementContext.LookDirection;
 
@@ -59,6 +66,7 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private const float TRANSFORM_UPDATE_FPS = 30f;
         public const float TRANSFORM_UPDATE_FREQ = 1f / TRANSFORM_UPDATE_FPS;
+        private float _nextUpdateTime;
 
         public PersonTransformClass(PersonClass person)
         {

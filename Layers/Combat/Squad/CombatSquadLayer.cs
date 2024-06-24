@@ -6,7 +6,7 @@ namespace SAIN.Layers.Combat.Squad
 {
     internal class CombatSquadLayer : SAINLayer
     {
-        public static readonly string Name = BuildLayerName<CombatSquadLayer>();
+        public static readonly string Name = BuildLayerName("Squad Layer");
 
         public CombatSquadLayer(BotOwner bot, int priority) : base(bot, priority, Name)
         {
@@ -28,7 +28,7 @@ namespace SAIN.Layers.Combat.Squad
                     return new Action(typeof(SearchAction), $"{Decision}");
 
                 case SquadDecision.GroupSearch:
-                    if (SAINBot.Squad.IAmLeader)
+                    if (Bot.Squad.IAmLeader)
                     {
                         return new Action(typeof(SearchAction), $"{Decision} : Lead Search Party");
                     }
@@ -48,16 +48,16 @@ namespace SAIN.Layers.Combat.Squad
         public override bool IsActive()
         {
             bool active =
-                SAINBot?.BotActive == true &&
+                Bot?.BotActive == true &&
                 SquadDecision != SquadDecision.None &&
-                SAINBot.Decision.CurrentSelfDecision == SelfDecision.None;
+                Bot.Decision.CurrentSelfDecision == SelfDecision.None;
 
             if (active)
             {
-                SAINBot.ActiveLayer = ESAINLayer.Squad;
-                if (SAINBot.Cover.CoverInUse != null)
+                Bot.ActiveLayer = ESAINLayer.Squad;
+                if (Bot.Cover.CoverInUse != null)
                 {
-                    SAINBot.Cover.CoverInUse = null;
+                    Bot.Cover.CoverInUse = null;
                 }
             }
 
@@ -66,11 +66,11 @@ namespace SAIN.Layers.Combat.Squad
 
         public override bool IsCurrentActionEnding()
         {
-            return SAINBot?.BotActive == true && 
+            return Bot?.BotActive == true && 
                 SquadDecision != LastActionDecision;
         }
 
         private SquadDecision LastActionDecision = SquadDecision.None;
-        public SquadDecision SquadDecision => SAINBot.Decision.CurrentSquadDecision;
+        public SquadDecision SquadDecision => Bot.Decision.CurrentSquadDecision;
     }
 }

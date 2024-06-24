@@ -15,7 +15,7 @@ namespace SAIN.Layers.Combat.Run
         {
         }
 
-        public static readonly string Name = BuildLayerName<BotUnstuckLayer>();
+        public static readonly string Name = BuildLayerName("Unstuck");
 
         public override Action GetNextAction()
         {
@@ -24,12 +24,12 @@ namespace SAIN.Layers.Combat.Run
 
         public override bool IsActive()
         {
-            return SAINBot?.BotStuck?.BotIsStuck == true;
+            return Bot?.BotStuck?.BotIsStuck == true;
         }
 
         public override bool IsCurrentActionEnding()
         {
-            if (SAINBot == null) return true;
+            if (Bot == null) return true;
 
             return false;
         }

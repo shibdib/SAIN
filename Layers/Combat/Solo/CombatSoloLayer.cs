@@ -6,11 +6,11 @@ namespace SAIN.Layers.Combat.Solo
 {
     internal class CombatSoloLayer : SAINLayer
     {
+        public static readonly string Name = BuildLayerName("Combat Layer");
+
         public CombatSoloLayer(BotOwner bot, int priority) : base(bot, priority, Name)
         {
         }
-
-        public static readonly string Name = BuildLayerName<CombatSoloLayer>();
 
         public override Action GetNextAction()
         {
@@ -20,7 +20,7 @@ namespace SAIN.Layers.Combat.Solo
             if (_doSurgeryAction)
             {
                 _doSurgeryAction = false;
-                return new Action(typeof(DoSurgeryAction), $"Do Surgery");
+                return new Action(typeof(DoSurgeryAction), $"Surgery");
             }
 
             switch (_lastDecision)
@@ -73,14 +73,18 @@ namespace SAIN.Layers.Combat.Solo
 
         public override bool IsActive()
         {
-            bool active = SAINBot != null && _currentDecision != SoloDecision.None;
+            if (Bot == null)
+            {
+                return false;
+            }
+            bool active = _currentDecision != SoloDecision.None;
             if (active)
             {
-                SAINBot.ActiveLayer = ESAINLayer.Combat;
+                Bot.ActiveLayer = ESAINLayer.Combat;
             }
             else
             {
-                SAINBot.ActiveLayer = ESAINLayer.None;
+                Bot.ActiveLayer = ESAINLayer.None;
             }
             return active;
         }
@@ -90,7 +94,7 @@ namespace SAIN.Layers.Combat.Solo
             // this is dumb im sorry
             if (!_doSurgeryAction
                 && _currentSelfDecision == SelfDecision.Surgery
-                && SAINBot.Cover.BotIsAtCoverInUse())
+                && Bot.Cover.BotIsAtCoverInUse())
             {
                 _doSurgeryAction = true;
                 return true;
@@ -109,7 +113,7 @@ namespace SAIN.Layers.Combat.Solo
 
         private SoloDecision _lastDecision = SoloDecision.None;
         private SelfDecision _lastSelfDecision = SelfDecision.None;
-        public SoloDecision _currentDecision => SAINBot.Decision.CurrentSoloDecision;
-        public SelfDecision _currentSelfDecision => SAINBot.Decision.CurrentSelfDecision;
+        public SoloDecision _currentDecision => Bot.Decision.CurrentSoloDecision;
+        public SelfDecision _currentSelfDecision => Bot.Decision.CurrentSelfDecision;
     }
 }

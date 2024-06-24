@@ -48,11 +48,9 @@ namespace SAIN
                 throw new Exception("Invalid EFT Version");
             }
 
-            //new DefaultBrainsClass();
-
             PresetHandler.Init();
             BindConfigs();
-            Patches();
+            InitPatches();
             BigBrainHandler.Init();
             Vector.Init();
         }
@@ -73,9 +71,7 @@ namespace SAIN
         public static ConfigEntry<bool> OpenEditorButton { get; private set; }
         public static ConfigEntry<KeyboardShortcut> OpenEditorConfigEntry { get; private set; }
 
-        private void Patches()
-        {
-            var patches = new List<Type>() {
+        private List<Type> patches => new List<Type>() {
                 typeof(Patches.Generic.SetEnvironmentPatch),
                 typeof(Patches.Generic.SetPanicPointPatch),
                 typeof(Patches.Generic.AddPointToSearchPatch),
@@ -161,6 +157,8 @@ namespace SAIN
                 typeof(Patches.Components.GetBotSpawner),
             };
 
+        private void InitPatches()
+        {
             // Reflection go brrrrrrrrrrrrrr
             MethodInfo enableMethod = AccessTools.Method(typeof(ModulePatch), "Enable");
             foreach (var patch in patches)
@@ -183,8 +181,7 @@ namespace SAIN
         }
 
         public static SAINPresetClass LoadedPreset => PresetHandler.LoadedPreset;
-
-        public static SAINBotController BotController => GameWorldHandler.SAINBotController;
+        public static SAINBotController BotController => SAINBotController.Instance;
 
         private void Update()
         {

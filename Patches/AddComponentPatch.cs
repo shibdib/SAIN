@@ -71,7 +71,7 @@ namespace SAIN.Patches.Components
         [PatchPrefix]
         public static void PatchPrefix(BotsController __instance)
         {
-            var controller = SAINPlugin.BotController;
+            var controller = SAINBotController.Instance;
             if (controller != null && controller.DefaultController == null)
             {
                 controller.DefaultController = __instance;
@@ -89,7 +89,7 @@ namespace SAIN.Patches.Components
         [PatchPostfix]
         public static void PatchPostfix(BotSpawner __instance)
         {
-            var controller = SAINPlugin.BotController;
+            var controller = SAINBotController.Instance;
             if (controller != null && controller.BotSpawner == null)
             {
                 controller.BotSpawner = __instance;

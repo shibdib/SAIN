@@ -79,8 +79,8 @@ namespace SAIN.Patches.Vision
                         __instance.SetCloseParts();
                         return false;
                     }
-                    if ((enemy.EnemyStatus.ShotAtMeRecently ||
-                        enemy.EnemyStatus.PositionalFlareEnabled))
+                    if ((enemy.Status.ShotAtMeRecently ||
+                        enemy.Status.PositionalFlareEnabled))
                     {
                         __instance.SetCloseParts();
                         return false;
@@ -148,15 +148,15 @@ namespace SAIN.Patches.Vision
                 // Checks to make sure a date and time is present
                 if (____botOwner.GameDateTime != null)
                 {
-                    DateTime dateTime = SAINPlugin.BotController.TimeVision.GameDateTime;
-                    timeMod = SAINPlugin.BotController.TimeVision.TimeOfDayVisibility;
+                    DateTime dateTime = SAINBotController.Instance.TimeVision.GameDateTime;
+                    timeMod = SAINBotController.Instance.TimeVision.TimeOfDayVisibility;
                     // Modify the Rounding of the "HourServer" property to the hour from the DateTime object
                     _HourServerProperty.SetValue(____botOwner.LookSensor, (int)((short)dateTime.Hour));
                 }
-                if (SAINPlugin.BotController != null)
+                if (SAINBotController.Instance != null)
                 {
-                    weatherMod = SAINPlugin.BotController.WeatherVision.VisibilityNum;
-                    weatherMod = Mathf.Clamp(weatherMod, 0.5f, 1f);
+                    weatherMod = SAINBotController.Instance.WeatherVision.VisibilityNum;
+                    weatherMod = Mathf.Clamp(weatherMod, 0.33f, 1f);
                 }
 
                 float currentVisionDistance = ____botOwner.Settings.Current.CurrentVisibleDistance;
@@ -264,10 +264,10 @@ namespace SAIN.Patches.Vision
             {
                 Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
                 if (enemy != null &&
-                    enemy.EnemyPerson.IsActive)
+                    enemy.EnemyPerson.Active)
                 {
-                    __result *= enemy.EnemyVision.GainSightCoef;
-                    enemy.EnemyVision.LastGainSightResult = __result;
+                    __result *= enemy.Vision.GainSightCoef;
+                    enemy.Vision.LastGainSightResult = __result;
                 }
             }
             //__result = Mathf.Clamp(__result, 0.1f, 8888f);
@@ -288,9 +288,9 @@ namespace SAIN.Patches.Vision
             {
                 Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
                 if (enemy != null && 
-                    enemy.EnemyPerson.IsActive)
+                    enemy.EnemyPerson.Active)
                 {
-                    addVisibility += enemy.EnemyVision.VisionDistance;
+                    addVisibility += enemy.Vision.VisionDistance;
                 }
             }
         }

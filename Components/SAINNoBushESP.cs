@@ -179,7 +179,7 @@ namespace SAIN.Components
 
                     BotOwner.AimingData?.LoseTarget();
 
-                    var vision = SAIN?.EnemyController.GetEnemy(enemy.ProfileId)?.EnemyVision;
+                    var vision = SAIN?.EnemyController.GetEnemy(enemy.ProfileId)?.Vision;
                     if (vision != null)
                     {
                         bool forceOff = true;

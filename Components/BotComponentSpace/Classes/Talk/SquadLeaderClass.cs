@@ -24,7 +24,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Update()
         {
-            if (!Bot.BotActive || Bot.GameIsEnding)
+            if (!Bot.BotActive || Bot.GameEnding)
             {
                 return;
             }

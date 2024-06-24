@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.IO;
 using SAIN.SAINComponent.Classes.EnemyClasses;
+using System.Collections;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -22,13 +23,25 @@ namespace SAIN.Layers.Combat.Solo
         {
         }
 
+        public void Toggle(bool value)
+        {
+            ToggleAction(value);
+        }
+
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
+                Enemy enemy = Bot.Enemy;
+                if (enemy != null)
+                {
+                }
+                yield return null;
+            }
+        }
+
         public override void Update()
         {
-            Enemy enemy = Bot.Enemy;
-            if (enemy == null)
-            {
-                return;
-            }
         }
 
         private FlankRoute FindFlankRoute()
@@ -44,7 +57,7 @@ namespace SAIN.Layers.Combat.Solo
             Vector3 enemyPosition = Bot.Enemy.EnemyPosition;
             Vector3 botPosition = Bot.Position;
 
-            Vector3? middleNode = FindMiddlePoint(enemy.EnemyPath.PathToEnemy, enemy.EnemyPath.PathDistance, out int index);
+            Vector3? middleNode = FindMiddlePoint(enemy.Path.PathToEnemy, enemy.Path.PathDistance, out int index);
 
             if (middleNode != null)
             {
@@ -83,7 +96,7 @@ namespace SAIN.Layers.Combat.Solo
             if (SamplePointAndCheckPath(flank, middleNode, out NavMeshPath path))
             {
                 flank = path.corners[path.corners.Length - 1];
-                NavMeshPath pathToEnemy = enemy.EnemyPath.PathToEnemy;
+                NavMeshPath pathToEnemy = enemy.Path.PathToEnemy;
                 NavMeshPath flankPath = new NavMeshPath();
                 if (NavMesh.CalculatePath(botPosition, flank, -1, flankPath)
                     && ArePathsDifferent(pathToEnemy, flankPath))
@@ -167,10 +180,12 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
+            Toggle(true);
         }
 
         public override void Stop()
         {
+            Toggle(false);
         }
     }
 }

@@ -13,21 +13,21 @@ using System.Collections;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    internal class RushEnemyAction : SAINAction
+    internal class RushEnemyAction : SAINAction, ISAINAction
     {
         public RushEnemyAction(BotOwner bot) : base(bot, nameof(RushEnemyAction))
         {
         }
 
-        private IEnumerator rushEnemy()
+        public void Toggle(bool value)
         {
-            while (true)
-            {
-                if (Bot == null || !Bot.BotActive)
-                {
-                    break;
-                }
+            ToggleAction(value);
+        }
 
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
                 Bot.Mover.SetTargetPose(1f);
                 Bot.Mover.SetTargetMoveSpeed(1f);
 
@@ -73,6 +73,7 @@ namespace SAIN.Layers.Combat.Solo
                     {
                         Bot.Steering.LookToEnemy(enemy);
                     }
+
                     yield return null;
                     continue;
                 }
@@ -110,7 +111,7 @@ namespace SAIN.Layers.Combat.Solo
 
         private void updateMove(Enemy enemy, out float nextUpdateTime)
         {
-            float pathDistance = enemy.EnemyPath.PathDistance;
+            float pathDistance = enemy.Path.PathDistance;
             var sprintController = Bot.Mover.SprintController;
             if (pathDistance <= 1f && (sprintController.Running || BotOwner.Mover.IsMoving))
             {
@@ -118,7 +119,7 @@ namespace SAIN.Layers.Combat.Solo
                 return;
             }
 
-            if (pathDistance > BotOwner.Settings.FileSettings.Move.RUN_TO_COVER_MIN && sprintController.RunToPointByWay(enemy.EnemyPath.PathToEnemy, SAINComponent.Classes.Mover.ESprintUrgency.High))
+            if (pathDistance > BotOwner.Settings.FileSettings.Move.RUN_TO_COVER_MIN && sprintController.RunToPointByWay(enemy.Path.PathToEnemy, SAINComponent.Classes.Mover.ESprintUrgency.High))
             {
                 nextUpdateTime = 1f;
                 return;
@@ -144,26 +145,24 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
+            Toggle(true);
+
             _shallTryJump = Bot.Info.PersonalitySettings.Rush.CanJumpCorners
                 //&& Bot.Decision.CurrentSquadDecision != SquadDecision.PushSuppressedEnemy
                 && EFTMath.RandomBool(Bot.Info.PersonalitySettings.Rush.JumpCornerChance);
 
             _shallBunnyHop = false;
 
-            _coroutine = Bot.StartCoroutine(rushEnemy());
         }
 
         private bool _shallTryJump = false;
 
         public override void Stop()
         {
-            Bot.StopCoroutine(_coroutine);
-            _coroutine = null;
+            Toggle(false);
 
             Bot.Mover.DogFight.ResetDogFightStatus();
             Bot.Mover.SprintController.CancelRun();
         }
-
-        private Coroutine _coroutine;
     }
 }

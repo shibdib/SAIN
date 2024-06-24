@@ -115,7 +115,7 @@ namespace SAIN.Patches.Shoot.Aim
             {
                 return;
             }
-            additionCoef /= enemy.EnemyAim.AimAndScatterMultiplier;
+            additionCoef /= enemy.Aim.AimAndScatterMultiplier;
         }
     }
 
@@ -305,7 +305,7 @@ namespace SAIN.Patches.Shoot.Aim
             Enemy enemy = bot?.Enemy;
             if (enemy != null)
             {
-                float modifier = enemy.EnemyAim.AimAndScatterMultiplier;
+                float modifier = enemy.Aim.AimAndScatterMultiplier;
                 stringBuilder?.AppendLine($"Bot Attachment Mod: Result [{aimTimeResult / modifier}] : Original [{aimTimeResult}] : Modifier [{modifier}]");
                 aimTimeResult /= modifier;
             }

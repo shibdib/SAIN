@@ -1,5 +1,7 @@
 ﻿using EFT;
+using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings.Categories;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,17 +55,17 @@ namespace SAIN.Components.PlayerComponentSpace
                 return;
             }
 
-            string id = iPlayer.ProfileId;
-            Player player = GetPlayer(id);
+            string profileId = iPlayer.ProfileId;
+            Player player = GetPlayer(profileId);
             if (player == null)
             {
-                Logger.LogError($"Could not add PlayerComponent for Null Player. IPlayer: {iPlayer.Profile?.Nickname} : {id}");
+                Logger.LogError($"Could not add PlayerComponent for Null Player. IPlayer: {iPlayer.Profile?.Nickname} : {profileId}");
                 return;
             }
 
-            if (AlivePlayers.TryRemove(id, out bool compDestroyed))
+            if (AlivePlayers.TryRemove(profileId, out bool compDestroyed))
             {
-                string playerInfo = $"{player.name} : {player.Profile?.Nickname} : {id}";
+                string playerInfo = $"{player.name} : {player.Profile?.Nickname} : {profileId}";
                 Logger.LogWarning($"PlayerComponent already exists for Player: {playerInfo}");
                 if (compDestroyed)
                 {
@@ -74,13 +76,26 @@ namespace SAIN.Components.PlayerComponentSpace
             PlayerComponent component = player.gameObject.AddComponent<PlayerComponent>();
             if (component?.Init(iPlayer, player) == true)
             {
-                player.OnPlayerDeadOrUnspawn += clearPlayer;
-                AlivePlayers.Add(id, component);
+                component.Person.ActiveClass.OnPersonDeadOrDespawned += removePerson;
+                AlivePlayers.Add(profileId, component);
             }
             else
             {
                 Logger.LogError($"Init PlayerComponent Failed for {player.name} : {player.ProfileId}");
                 Object.Destroy(component);
+            }
+        }
+
+        private void removePerson(PersonClass person)
+        {
+            person.ActiveClass.OnPersonDeadOrDespawned -= removePerson;
+
+            AlivePlayers.TryRemove(person.ProfileId, out _);
+
+            if (!person.ActiveClass.IsAlive && 
+                person.Player != null)
+            {
+                //SAINGameWorld.StartCoroutine(addDeadPlayer(person.Player));
             }
         }
 
@@ -91,22 +106,6 @@ namespace SAIN.Components.PlayerComponentSpace
                 return GameWorldInfo.GetAlivePlayer(profileId);
             }
             return null;
-        }
-
-        private void clearPlayer(Player player)
-        {
-            if (player == null)
-            {
-                AlivePlayers.ClearNullPlayers();
-                return;
-            }
-            player.OnPlayerDeadOrUnspawn -= clearPlayer;
-            AlivePlayers.TryRemove(player.ProfileId, out _);
-
-            if (!player.HealthController.IsAlive)
-            {
-                SAINGameWorld.StartCoroutine(addDeadPlayer(player));
-            }
         }
 
         private IEnumerator addDeadPlayer(Player player)
@@ -124,22 +123,27 @@ namespace SAIN.Components.PlayerComponentSpace
             }
         }
 
-        public PlayerSpawnTracker(GameWorldComponent component)
+        public PlayerSpawnTracker(GameWorldComponent sainGameWorld)
         {
-            SAINGameWorld = component;
-            component.GameWorld.OnPersonAdd += addPlayer;
+            _sainGameWorld = sainGameWorld;
+            sainGameWorld.GameWorld.OnPersonAdd += addPlayer;
         }
 
         public void Dispose()
         {
-            var gameWorld = SAINGameWorld?.GameWorld;
+            var gameWorld = _sainGameWorld?.GameWorld;
             if (gameWorld != null)
             {
                 gameWorld.OnPersonAdd -= addPlayer;
             }
+            foreach (var player in AlivePlayers)
+            {
+                player.Value?.Dispose();
+            }
+            AlivePlayers.Clear();
         }
 
-        private readonly GameWorldComponent SAINGameWorld;
+        private readonly GameWorldComponent _sainGameWorld;
         private const int _maxDeadTracked = 30;
     }
 

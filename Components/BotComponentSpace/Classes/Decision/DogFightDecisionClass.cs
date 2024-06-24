@@ -60,7 +60,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return true;
             }
-            float pathDist = enemy.EnemyPath.PathDistance;
+            float pathDist = enemy.Path.PathDistance;
             if (pathDist > _dogFightEndDist)
             {
                 return true;
@@ -154,7 +154,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return enemy?.IsValid == true && 
                 enemy.IsVisible && 
                 enemy.EnemyKnown && 
-                enemy.EnemyPath.PathDistance <= _dogFightStartDist;
+                enemy.Path.PathDistance <= _dogFightStartDist;
         }
 
         private float _dogFightStartDist = 8f;

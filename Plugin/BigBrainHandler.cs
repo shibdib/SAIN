@@ -18,47 +18,10 @@ namespace SAIN
 {
     public class BigBrainHandler
     {
-        public static bool IsBotUsingSAINLayer(BotOwner bot)
-        {
-            return isBotUsingLayer(bot, SAINLayers);
-        }
-
-        public static bool IsBotUsingSAINCombatLayer(BotOwner bot)
-        {
-            return isBotUsingLayer(bot, SAINCombatLayers);
-        }
-
-        private static bool isBotUsingLayer(BotOwner bot, List<string> layers)
-        {
-            return bot?.Brain?.Agent != null
-                && BrainManager.IsCustomLayerActive(bot)
-                && layers.Contains(bot.Brain.ActiveLayerName());
-        }
-
         public static void Init()
         {
-            if (!BigBrainInitialized)
-            {
-                BrainAssignment.Init();
-                BigBrainInitialized = true;
-            }
+            BrainAssignment.Init();
         }
-
-        public static readonly List<string> SAINLayers = new List<string>
-        {
-            CombatSquadLayer.Name,
-            ExtractLayer.Name,
-            CombatSoloLayer.Name,
-            BotUnstuckLayer.Name,
-            SAINAvoidThreatLayer.Name,
-        };
-
-        public static readonly List<string> SAINCombatLayers = new List<string>
-        {
-            CombatSquadLayer.Name,
-            CombatSoloLayer.Name,
-            SAINAvoidThreatLayer.Name,
-        };
 
         public static bool BigBrainInitialized;
 

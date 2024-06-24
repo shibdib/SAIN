@@ -1,50 +1,54 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
-using EFT;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents;
-using SAIN.SAINComponent;
+﻿using EFT;
+using System.Collections;
 using System.Text;
 using UnityEngine;
-using SAIN.SAINComponent.SubComponents.CoverFinder;
-using SAIN.Layers.Combat.Solo;
 using UnityEngine.AI;
-using SAIN.Helpers;
 
 namespace SAIN.Layers.Combat.Run
 {
-    internal class RunningAction : SAINAction
+    internal class RunningAction : SAINAction, ISAINAction
     {
         public RunningAction(BotOwner bot) : base(bot, nameof(RunningAction))
         {
         }
 
+        public void Toggle(bool value)
+        {
+            ToggleAction(value);
+        }
+
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
+                Bot.Mover.SetTargetPose(1f);
+                Bot.Mover.SetTargetMoveSpeed(1f);
+
+                if (nextRandomRunTime > Time.time && (_runDestination - Bot.Position).sqrMagnitude < 1f)
+                {
+                    nextRandomRunTime = 0f;
+                }
+
+                if (!Bot.Mover.SprintController.Running
+                    && findRandomPlace(out var path)
+                    && Bot.Mover.SprintController.RunToPoint(_runDestination, SAINComponent.Classes.Mover.ESprintUrgency.High))
+                {
+                    nextRandomRunTime = Time.time + 20f;
+                }
+                yield return null;
+            }
+        }
+
         public override void Update()
         {
-            Bot.Mover.SetTargetPose(1f);
-            Bot.Mover.SetTargetMoveSpeed(1f);
-
-            if (nextRandomRunTime > Time.time && (_runDestination - Bot.Position).sqrMagnitude < 1f)
-            {
-                nextRandomRunTime = 0f;
-            }
-
-            if (!Bot.Mover.SprintController.Running
-                && findRandomPlace(out var path) 
-                && Bot.Mover.SprintController.RunToPoint(_runDestination, SAINComponent.Classes.Mover.ESprintUrgency.High))
-            {
-                nextRandomRunTime = Time.time + 20f;
-            }
-
         }
 
         private Vector3 _runDestination;
         private float nextRandomRunTime;
 
-
         public override void Start()
         {
-            
+            Toggle(true);
         }
 
         private bool findRandomPlace(out NavMeshPath path)
@@ -68,6 +72,7 @@ namespace SAIN.Layers.Combat.Run
 
         public override void Stop()
         {
+            Toggle(false);
             Bot.Mover.SprintController.CancelRun();
         }
 

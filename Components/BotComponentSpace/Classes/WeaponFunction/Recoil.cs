@@ -1,12 +1,9 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
-using SAIN.Components;
 using SAIN.Helpers;
-using SAIN.SAINComponent;
 using System.Collections;
 using System.Text;
 using UnityEngine;
-using static EFT.InventoryLogic.Weapon;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
@@ -23,7 +20,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Init()
         {
-            Bot.OnBotDisabled += stopLoop;
+            Bot.BotActivation.OnBotStateChanged += stopLoop;
         }
 
         private float calcModFromInjury(EInjurySeverity severity)
@@ -48,25 +45,24 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             if (_recoilFinished)
             {
-                stopLoop();
+                stopLoop(false);
                 return;
             }
         }
 
         private void checkStartLoop()
         {
-            if (_recoilCoroutine == null)
+            if (_recoilFinished)
             {
-                _recoilCoroutine = Bot.StartCoroutine(RecoilLoop());
+                Bot.CoroutineManager.Add(RecoilLoop());
             }
         }
 
-        private void stopLoop()
+        private void stopLoop(bool value)
         {
-            if (_recoilCoroutine != null)
+            if (!value)
             {
-                Bot.StopCoroutine(_recoilCoroutine);
-                _recoilCoroutine = null;
+                Bot.CoroutineManager.Remove(RecoilLoop());
                 _recoilFinished = false;
                 _shotRegistered = false;
                 _barrelRising = false;
@@ -164,7 +160,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-            Bot.OnBotDisabled -= stopLoop;
+            Bot.BotActivation.OnBotStateChanged -= stopLoop;
         }
 
         public void WeaponShot()
@@ -264,7 +260,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private bool _barrelRising;
         private Vector3 _recoilOffsetTarget;
         private bool _recoilFinished;
-        private Coroutine _recoilCoroutine;
         private bool _armsInjured => Bot.BotHitReaction.ArmsInjured;
         private float RecoilMultiplier => Mathf.Round(Bot.Info.FileSettings.Shoot.RecoilMultiplier * GlobalSettings.Shoot.RecoilMultiplier * 100f) / 100f;
 

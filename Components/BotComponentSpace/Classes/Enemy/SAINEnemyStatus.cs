@@ -1,14 +1,42 @@
 ﻿using EFT;
+using System;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyStatus : EnemyBase, ISAINEnemyClass
     {
+        public event Action<Enemy, EEnemyAction> OnVulnerableStateChanged;
+        public event Action<Enemy, ETagStatus> OnHealthStatusChanged;
+
         public void Update()
         {
-
+            if (Enemy.EnemyKnown)
+            {
+                updateVulnerableState();
+                updateHealthStatus();
+            }
         }
+
+        private void updateHealthStatus()
+        {
+            if (_nextCheckHealthTime > Time.time)
+            {
+                return;
+            }
+            _nextCheckHealthTime = Time.time + 0.5f;
+
+            ETagStatus lastStatus = EnemyHealthStatus;
+            EnemyHealthStatus = EnemyPlayer.HealthStatus;
+            if (lastStatus != EnemyHealthStatus)
+            {
+                OnHealthStatusChanged?.Invoke(Enemy, EnemyHealthStatus);
+            }
+        }
+
+        public ETagStatus EnemyHealthStatus { get; private set; }
+
+        private float _nextCheckHealthTime;
 
         public void Init()
         {
@@ -24,7 +52,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void onEnemyForgotten(Enemy enemy)
         {
-            VulnerableAction = EEnemyAction.None;
+            EnemyHealthStatus = ETagStatus.Healthy;
+            SetVulnerableAction(EEnemyAction.None);
         }
 
         public void onEnemyKnown(Enemy enemy)
@@ -32,35 +61,47 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         }
 
-        public EEnemyAction VulnerableAction
+        private EEnemyAction checkVulnerableAction()
         {
-            get
+            if (EnemyUsingSurgery)
             {
-                if (EnemyUsingSurgery)
-                {
-                    return EEnemyAction.UsingSurgery;
-                }
-                if (EnemyIsReloading)
-                {
-                    return EEnemyAction.Reloading;
-                }
-                if (EnemyHasGrenadeOut)
-                {
-                    return EEnemyAction.HasGrenade;
-                }
-                if (EnemyIsHealing)
-                {
-                    return EEnemyAction.Healing;
-                }
-                if (EnemyIsLooting)
-                {
-                    return EEnemyAction.Looting;
-                }
-                return EEnemyAction.None;
+                return EEnemyAction.UsingSurgery;
             }
-            set
+            if (EnemyIsReloading)
             {
-                switch (value)
+                return EEnemyAction.Reloading;
+            }
+            if (EnemyHasGrenadeOut)
+            {
+                return EEnemyAction.HasGrenade;
+            }
+            if (EnemyIsHealing)
+            {
+                return EEnemyAction.Healing;
+            }
+            if (EnemyIsLooting)
+            {
+                return EEnemyAction.Looting;
+            }
+            return EEnemyAction.None;
+        }
+
+        private void updateVulnerableState()
+        {
+            EEnemyAction lastAction = VulnerableAction;
+            VulnerableAction = checkVulnerableAction();
+            if (lastAction != VulnerableAction)
+            {
+                OnVulnerableStateChanged?.Invoke(Enemy, VulnerableAction);
+            }
+        }
+
+        public void SetVulnerableAction(EEnemyAction action)
+        {
+            if (action != VulnerableAction)
+            {
+                VulnerableAction = action;
+                switch (action)
                 {
                     case EEnemyAction.None:
                         resetActions();
@@ -89,8 +130,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     default:
                         break;
                 }
+                OnVulnerableStateChanged?.Invoke(Enemy, action);
             }
         }
+
+        public EEnemyAction VulnerableAction { get; private set; }
 
         private void resetActions()
         {
@@ -104,19 +148,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             EnemyIsReloading = false;
         }
 
-        public bool PositionalFlareEnabled
-        {
-            get
-            {
-                if (Enemy.EnemyKnown &&
-                    Enemy.LastKnownPosition != null
-                    && (Enemy.LastKnownPosition.Value - EnemyPlayer.Position).sqrMagnitude < _maxDistFromPosFlareEnabled * _maxDistFromPosFlareEnabled)
-                {
-                    return true;
-                }
-                return false;
-            }
-        }
+        public bool PositionalFlareEnabled => 
+            Enemy.EnemyKnown && 
+            Enemy.KnownPlaces.EnemyDistanceFromLastKnown < _maxDistFromPosFlareEnabled;
 
         public bool HeardRecently
         {

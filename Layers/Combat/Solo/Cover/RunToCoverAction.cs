@@ -8,24 +8,22 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
-    internal class RunToCoverAction : SAINAction
+    internal class RunToCoverAction : SAINAction, ISAINAction
     {
-        public RunToCoverAction(BotOwner bot) : base(bot, nameof(RunToCoverAction))
+        public RunToCoverAction(BotOwner bot) : base(bot, "Run To Cover")
         {
         }
 
-        public override void Update()
+        public void Toggle(bool value)
         {
+            ToggleAction(value);
         }
 
-        private IEnumerator runToCover()
+        public override IEnumerator ActionCoroutine()
         {
-            while (true)
+            while (Active)
             {
-                if (Bot == null || !Bot.BotActive)
-                {
-                    break;
-                }
+                yield return null;
 
                 Bot.Mover.SetTargetMoveSpeed(1f);
                 Bot.Mover.SetTargetPose(1f);
@@ -80,7 +78,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
                     }
                     Shoot.Update();
-                    yield return null;
                     continue;
                 }
 
@@ -93,9 +90,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     }
                     Shoot.Update();
                 }
-
-                yield return null;
             }
+        }
+
+        public override void Update()
+        {
         }
 
         private bool shallRecalcDestination()
@@ -260,6 +259,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
+            Toggle(true);
+
             if (Bot.Decision.CurrentSoloDecision == SoloDecision.AvoidGrenade
                 && Bot.Talk.GroupTalk.FriendIsClose)
             {
@@ -271,13 +272,11 @@ namespace SAIN.Layers.Combat.Solo.Cover
             _shallJumpToCover = false;
             _sprinting = false;
             _moveSuccess = false;
-            _coroutine = Bot.StartCoroutine(runToCover());
         }
 
         public override void Stop()
         {
-            Bot.StopCoroutine(_coroutine);
-            _coroutine = null;
+            Toggle(false);
 
             Bot.Mover.DogFight.ResetDogFightStatus();
             Bot.Mover.SprintController.CancelRun();
@@ -320,7 +319,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private bool _moveSuccess;
         private float _recalcMoveTimer;
-        private Coroutine _coroutine;
         private float _jumpTimer;
         private bool _shallJumpToCover;
         private bool _sprinting;

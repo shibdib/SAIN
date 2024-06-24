@@ -62,11 +62,11 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 if (Bot.Decision.CurrentSoloDecision != SoloDecision.Search)
                 {
-                    enemy.EnemyStatus.NumberOfSearchesStarted++;
+                    enemy.Status.NumberOfSearchesStarted++;
                 }
-                if (!enemy.EnemyStatus.SearchStarted)
+                if (!enemy.Status.SearchStarted)
                 {
-                    enemy.EnemyStatus.SearchStarted = true;
+                    enemy.Status.SearchStarted = true;
                 }
                 Decision = SoloDecision.Search;
             }
@@ -367,14 +367,14 @@ namespace SAIN.SAINComponent.Classes.Decision
                 if (!Bot.Decision.SelfActionDecisions.LowOnAmmo(RushEnemyLowAmmoRatio))
                 {
                     bool inRange = false;
-                    EEnemyAction vulnerableAction = enemy.EnemyStatus.VulnerableAction;
+                    EEnemyAction vulnerableAction = enemy.Status.VulnerableAction;
                     float modifier = vulnerableAction == EEnemyAction.UsingSurgery ? 2f : 1f;
-                    if (enemy.EnemyPath.PathDistance < RushEnemyMaxPathDistanceSprint
+                    if (enemy.Path.PathDistance < RushEnemyMaxPathDistanceSprint
                         && BotOwner?.CanSprintPlayer == true)
                     {
                         inRange = true;
                     }
-                    else if (enemy.EnemyPath.PathDistance < RushEnemyMaxPathDistance)
+                    else if (enemy.Path.PathDistance < RushEnemyMaxPathDistance)
                     {
                         inRange = true;
                     }
@@ -668,7 +668,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     //}
                 }
 
-                float visibleFor = Time.time - enemy.EnemyVision.VisibleStartTime;
+                float visibleFor = Time.time - enemy.Vision.VisibleStartTime;
 
                 if (visibleFor < holdGround)
                 {

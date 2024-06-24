@@ -2,6 +2,7 @@
 using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
+using SAIN.Components;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -144,7 +145,7 @@ namespace SAIN.Patches.Generic.Fixes
                     ___float_0 += 5f;
                 }
                 ___bool_1 = true;
-                SAINPlugin.BotController?.StartCoroutine(cancelHeal(___botOwner_0));
+                SAINBotController.Instance?.StartCoroutine(cancelHeal(___botOwner_0));
             }
             return false;
         }

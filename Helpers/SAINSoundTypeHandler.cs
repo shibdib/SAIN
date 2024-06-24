@@ -42,7 +42,7 @@ namespace SAIN.Components.Helpers
                 }
             }
 
-            SAINPlugin.BotController?.BotHearing.PlayAISound(player.ProfileId, soundType, player.Position + Vector3.up, soundDist, 1f);
+            SAINBotController.Instance?.BotHearing.PlayAISound(player.ProfileId, soundType, player.Position + Vector3.up, soundDist, 1f);
         }
     }
 }

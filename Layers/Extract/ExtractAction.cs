@@ -1,22 +1,102 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Interactive;
+using SAIN.Components;
 using SAIN.Components.BotController;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.Memory;
+using System.Collections;
 using Systems.Effects;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace SAIN.Layers
 {
-    internal class ExtractAction : SAINAction
+    internal class ExtractAction : SAINAction, ISAINAction
     {
+        public void Toggle(bool value)
+        {
+            ToggleAction(value);
+        }
+
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
+                float stamina = Bot.Player.Physical.Stamina.NormalValue;
+                bool fightingEnemy = isFightingEnemy();
+                // Environment id of 0 means a bot is outside.
+                if (Bot.Player.AIData.EnvironmentId != 0)
+                {
+                    shallSprint = false;
+                }
+                else if (fightingEnemy)
+                {
+                    shallSprint = false;
+                }
+                else if (stamina > 0.75f)
+                {
+                    shallSprint = true;
+                }
+                else if (stamina < 0.2f)
+                {
+                    shallSprint = false;
+                }
+
+                if (!BotOwner.GetPlayer.MovementContext.CanSprint)
+                {
+                    shallSprint = false;
+                }
+
+                if (!Exfil.HasValue)
+                {
+                    yield return null;
+                    continue;
+                }
+
+                Vector3 point = Exfil.Value;
+                float distance = (point - BotOwner.Position).sqrMagnitude;
+
+                if (distance < 8f)
+                {
+                    shallSprint = false;
+                }
+
+                if (ExtractStarted) {
+                    setStatus(EExtractStatus.ExtractingNow);
+                    StartExtract(point);
+                    Bot.Mover.SetTargetPose(0f);
+                    Bot.Mover.SetTargetMoveSpeed(0f);
+                    if (_sayExitLocatedTime < Time.time)
+                    {
+                        _sayExitLocatedTime = Time.time + 10;
+                        Bot.Talk.GroupSay(EPhraseTrigger.ExitLocated, null, true, 70);
+                    }
+                }
+                else {
+                    if (fightingEnemy)
+                    {
+                        setStatus(EExtractStatus.Fighting);
+                    }
+                    else
+                    {
+                        setStatus(EExtractStatus.MovingTo);
+                    }
+                    MoveToExtract(distance, point);
+                    Bot.Mover.SetTargetPose(1f);
+                    Bot.Mover.SetTargetMoveSpeed(1f);
+                }
+
+                Bot.Steering.SteerByPriority();
+                Shoot.Update();
+
+                yield return null;
+            }
+        }
+
         public static float MinDistanceToStartExtract { get; } = 6f;
 
-        private static readonly string Name = typeof(ExtractAction).Name;
-
-        public ExtractAction(BotOwner bot) : base(bot, Name)
+        public ExtractAction(BotOwner bot) : base(bot, "Extract")
         {
         }
 
@@ -24,89 +104,19 @@ namespace SAIN.Layers
 
         public override void Start()
         {
+            Toggle(true);
             Bot.Memory.Extract.ExtractStatus = EExtractStatus.Extracting;
         }
 
         public override void Stop()
         {
+            Toggle(false);
             Bot.Memory.Extract.ExtractStatus = EExtractStatus.None;
             BotOwner.Mover.MovementResume();
         }
 
         public override void Update()
         {
-            if (Bot?.Player == null) return;
-
-            float stamina = Bot.Player.Physical.Stamina.NormalValue;
-            bool fightingEnemy = isFightingEnemy();
-            // Environment id of 0 means a bot is outside.
-            if (Bot.Player.AIData.EnvironmentId != 0)
-            {
-                shallSprint = false;
-            }
-            else if (fightingEnemy)
-            {
-                shallSprint = false;
-            }
-            else if (stamina > 0.75f)
-            {
-                shallSprint = true;
-            }
-            else if (stamina < 0.2f)
-            {
-                shallSprint = false;
-            }
-
-            if (!BotOwner.GetPlayer.MovementContext.CanSprint)
-            {
-                shallSprint = false;
-            }
-
-            if (!Exfil.HasValue)
-            {
-                return;
-            }
-
-            Vector3 point = Exfil.Value;
-            float distance = (point - BotOwner.Position).sqrMagnitude;
-
-            if (distance < 8f)
-            {
-                shallSprint = false;
-            }
-
-            if (ExtractStarted)
-            {
-                setStatus(EExtractStatus.ExtractingNow);
-                StartExtract(point);
-                Bot.Mover.SetTargetPose(0f);
-                Bot.Mover.SetTargetMoveSpeed(0f);
-                if (_sayExitLocatedTime < Time.time)
-                {
-                    _sayExitLocatedTime = Time.time + 10;
-                    Bot.Talk.GroupSay(EPhraseTrigger.ExitLocated, null, true, 70);
-                }
-            }
-            else
-            {
-                if (fightingEnemy)
-                {
-                    setStatus(EExtractStatus.Fighting);
-                }
-                else
-                {
-                    setStatus(EExtractStatus.MovingTo);
-                }
-                MoveToExtract(distance, point);
-                Bot.Mover.SetTargetPose(1f);
-                Bot.Mover.SetTargetMoveSpeed(1f);
-            }
-
-            if (BotOwner.BotState == EBotState.Active)
-            {
-                Bot.Steering.SteerByPriority();
-                Shoot.Update();
-            }
         }
 
         private void setStatus(EExtractStatus status)
@@ -120,7 +130,7 @@ namespace SAIN.Layers
         {
             return Bot.Enemy != null
                 && Bot.Enemy.Seen
-                && (Bot.Enemy.EnemyPath.PathDistance < 50f || Bot.Enemy.InLineOfSight);
+                && (Bot.Enemy.Path.PathDistance < 50f || Bot.Enemy.InLineOfSight);
         }
 
         private bool shallSprint;
@@ -165,7 +175,7 @@ namespace SAIN.Layers
                     if ((pathStatus == NavMeshPathStatus.PathInvalid) || reachedEndOfIncompletePath)
                     {
                         // Need to reset the search timer to prevent the bot from immediately selecting (possibly) the same extract
-                        BotController.BotExtractManager.ResetExfilSearchTime(Bot);
+                        SAINBotController.Instance.BotExtractManager.ResetExfilSearchTime(Bot);
 
                         Bot.Memory.Extract.ExfilPoint = null;
                         Bot.Memory.Extract.ExfilPosition = null;
@@ -179,7 +189,7 @@ namespace SAIN.Layers
             Bot.Memory.Extract.ExtractStatus = EExtractStatus.ExtractingNow;
             if (ExtractTimer == -1f)
             {
-                ExtractTimer = BotController.BotExtractManager.GetExfilTime(Bot.Memory.Extract.ExfilPoint);
+                ExtractTimer = SAINBotController.Instance.BotExtractManager.GetExfilTime(Bot.Memory.Extract.ExfilPoint);
 
                 // Needed to get car extracts working
                 activateExfil(Bot.Memory.Extract.ExfilPoint);
@@ -192,7 +202,7 @@ namespace SAIN.Layers
             if (ExtractTimer < Time.time)
             {
                 Logger.LogInfo($"{BotOwner.name} Extracted at {point} for extract {Bot.Memory.Extract.ExfilPoint.Settings.Name} at {System.DateTime.UtcNow}");
-                SAINPlugin.BotController?.BotExtractManager?.LogExtractionOfBot(BotOwner, point, Bot.Memory.Extract.ExtractReason.ToString(), Bot.Memory.Extract.ExfilPoint);
+                SAINBotController.Instance?.BotExtractManager?.LogExtractionOfBot(BotOwner, point, Bot.Memory.Extract.ExtractReason.ToString(), Bot.Memory.Extract.ExfilPoint);
 
                 var botgame = Singleton<IBotGame>.Instance;
                 Player player = Bot.Player;

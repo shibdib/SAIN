@@ -16,8 +16,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            Bot.OnBotDisabled += endLoop;
-            Bot.Decision.OnSAINStatusChanged += toggleLoop;
+            Bot.BotActivation.OnBotStateChanged += toggleLoop;
         }
 
         public void Update()
@@ -28,30 +27,31 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private void endLoop()
-        {
-            toggleLoop(false);
-        }
-
         private void toggleLoop(bool value)
         {
-            if (!value && _friendlyFireCoroutine != null)
+            switch (value)
             {
-                Bot.StopCoroutine(_friendlyFireCoroutine);
-                _friendlyFireCoroutine = null;
-            }
-            if (value && _friendlyFireCoroutine == null)
-            {
-                _friendlyFireCoroutine = Bot.StartCoroutine(friendlyFireLoop());
-            }
+                case true:
+                    Bot.CoroutineManager.Add(friendlyFireLoop());
+                    break;
 
+                case false:
+                    Bot.CoroutineManager.Remove(friendlyFireLoop());
+                    break;
+            }
         }
 
         private IEnumerator friendlyFireLoop()
         {
             WaitForSeconds wait = new WaitForSeconds(FRIENDLYFIRE_FREQUENCY);
-            while (true)
+            while (Bot.BotActive)
             {
+                if (!Bot.SAINLayersActive)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 FriendlyFireStatus = CheckFriendlyFire();
                 yield return wait;
             }
@@ -59,7 +59,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            Bot.OnBotDisabled -= endLoop;
+            Bot.BotActivation.OnBotStateChanged += toggleLoop;
         }
 
         public FriendlyFireStatus CheckFriendlyFire()
@@ -123,7 +123,6 @@ namespace SAIN.SAINComponent.Classes
         }
 
         private const float FRIENDLYFIRE_FREQUENCY = 1f / FRIENDLYFIRE_FPS;
-        private const float FRIENDLYFIRE_FPS = 20f;
-        private Coroutine _friendlyFireCoroutine;
+        private const float FRIENDLYFIRE_FPS = 30f;
     }
 }

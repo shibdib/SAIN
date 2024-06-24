@@ -3,6 +3,7 @@ using EFT;
 using EFT.InventoryLogic;
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
+using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.Classes;
@@ -23,7 +24,7 @@ namespace SAIN.SAINComponent
 {
     public class BotComponent : MonoBehaviour
     {
-        public bool BotActive { get; private set; }
+        public bool BotActive => BotActivation.BotActive;
         public string ProfileId { get; private set; }
         public PersonClass Person { get; private set; }
 
@@ -48,7 +49,7 @@ namespace SAIN.SAINComponent
         public float CurrentTargetDistance => CurrentTarget.CurrentTargetDistance;
 
         public SAINMedical Medical { get; private set; }
-        public SAINActivationClass SAINActivation { get; private set; }
+        public SAINActivationClass BotActivation { get; private set; }
         public SAINDoorOpener DoorOpener { get; private set; }
         public ManualShootClass ManualShoot { get; private set; }
         public CurrentTargetClass CurrentTarget { get; private set; }
@@ -78,19 +79,12 @@ namespace SAIN.SAINComponent
         public SAINSelfActionClass SelfActions { get; private set; }
         public SAINBotGrenadeClass Grenade { get; private set; }
         public SAINSteeringClass Steering { get; private set; }
-
         public Action<string, BotOwner> OnSAINDisposed { get; set; }
 
-        public bool IsDead =>
-            PlayerComponent == null ||
-            BotOwner == null || 
-            BotOwner.IsDead || 
-            Player == null || 
-            Player.HealthController.IsAlive == false;
+        public CoroutineManager<BotComponent> CoroutineManager { get; private set; }
 
-        public bool GameIsEnding =>
-            Singleton<IBotGame>.Instance == null || 
-            Singleton<IBotGame>.Instance.Status == GameStatus.Stopping;
+        public bool IsDead => !Person.ActiveClass.IsAlive;
+        public bool GameEnding => BotActivation.GameEnding;
 
         public float DistanceToAimTarget
         {
@@ -173,37 +167,7 @@ namespace SAIN.SAINComponent
 
             try
             {
-                // Must be first, other classes use it
-                Squad = new SAINSquadClass(this);
-
-                Info = new SAINBotInfoClass(this);
-                Memory = new SAINMemoryClass(this);
-                BotStuck = new SAINBotUnstuckClass(this);
-                Hearing = new SAINHearingSensorClass(this);
-                Talk = new SAINBotTalkClass(this);
-                Decision = new SAINDecisionClass(this);
-                Cover = new SAINCoverClass(this);
-                SelfActions = new SAINSelfActionClass(this);
-                Steering = new SAINSteeringClass(this);
-                Grenade = new SAINBotGrenadeClass(this);
-                Mover = new SAINMoverClass(this);
-                EnemyController = new SAINEnemyController(this);
-                FriendlyFireClass = new SAINFriendlyFireClass(this);
-                Vision = new SAINVisionClass(this);
-                Search = new SAINSearchClass(this);
-                Vault = new SAINVaultClass(this);
-                Suppression = new SAINBotSuppressClass(this);
-                AILimit = new SAINAILimit(this);
-                AimDownSightsController = new AimDownSightsController(this);
-                BotHitReaction = new SAINBotHitReaction(this);
-                SpaceAwareness = new SAINBotSpaceAwareness(this);
-                DoorOpener = new SAINDoorOpener(this, person.BotOwner);
-                Medical = new SAINMedical(this);
-                BotLight = new BotLightController(this);
-                BackpackDropper = new BotBackpackDropClass(this);
-                CurrentTarget = new CurrentTargetClass(this);
-                ManualShoot = new ManualShootClass(this);
-                SAINActivation = new SAINActivationClass(this);
+                createClasses(person);
             }
             catch (Exception ex)
             {
@@ -213,31 +177,7 @@ namespace SAIN.SAINComponent
 
             try
             {
-                Search.Init();
-                Memory.Init();
-                EnemyController.Init();
-                FriendlyFireClass.Init();
-                Vision.Init();
-                Mover.Init();
-                BotStuck.Init();
-                Hearing.Init();
-                Talk.Init();
-                Decision.Init();
-                Cover.Init();
-                Info.Init();
-                Squad.Init();
-                SelfActions.Init();
-                Grenade.Init();
-                Steering.Init();
-                Vault.Init();
-                Suppression.Init();
-                AILimit.Init();
-                AimDownSightsController.Init();
-                BotHitReaction.Init();
-                SpaceAwareness.Init();
-                Medical.Init();
-                BotLight.Init();
-                BackpackDropper.Init();
+                initializeClasses();
             }
             catch (Exception ex)
             {
@@ -258,8 +198,6 @@ namespace SAIN.SAINComponent
                 {
                     IsSpeedHacker = true;
                 }
-
-                BotOwner.OnBotStateChange += resetBot;
             }
             catch (Exception ex)
             {
@@ -267,7 +205,74 @@ namespace SAIN.SAINComponent
                 return false;
             }
 
+            BotActivation.Init();
             return true;
+        }
+
+        private void createClasses(PersonClass person)
+        {
+            CoroutineManager = new CoroutineManager<BotComponent>(this);
+
+            // Must be first, other classes use it
+            Squad = new SAINSquadClass(this);
+
+            Info = new SAINBotInfoClass(this);
+            Memory = new SAINMemoryClass(this);
+            BotStuck = new SAINBotUnstuckClass(this);
+            Hearing = new SAINHearingSensorClass(this);
+            Talk = new SAINBotTalkClass(this);
+            Decision = new SAINDecisionClass(this);
+            Cover = new SAINCoverClass(this);
+            SelfActions = new SAINSelfActionClass(this);
+            Steering = new SAINSteeringClass(this);
+            Grenade = new SAINBotGrenadeClass(this);
+            Mover = new SAINMoverClass(this);
+            EnemyController = new SAINEnemyController(this);
+            FriendlyFireClass = new SAINFriendlyFireClass(this);
+            Vision = new SAINVisionClass(this);
+            Search = new SAINSearchClass(this);
+            Vault = new SAINVaultClass(this);
+            Suppression = new SAINBotSuppressClass(this);
+            AILimit = new SAINAILimit(this);
+            AimDownSightsController = new AimDownSightsController(this);
+            BotHitReaction = new SAINBotHitReaction(this);
+            SpaceAwareness = new SAINBotSpaceAwareness(this);
+            DoorOpener = new SAINDoorOpener(this, person.BotOwner);
+            Medical = new SAINMedical(this);
+            BotLight = new BotLightController(this);
+            BackpackDropper = new BotBackpackDropClass(this);
+            CurrentTarget = new CurrentTargetClass(this);
+            ManualShoot = new ManualShootClass(this);
+            BotActivation = new SAINActivationClass(this);
+        }
+
+        private void initializeClasses()
+        {
+            Search.Init();
+            Memory.Init();
+            EnemyController.Init();
+            FriendlyFireClass.Init();
+            Vision.Init();
+            Mover.Init();
+            BotStuck.Init();
+            Hearing.Init();
+            Talk.Init();
+            Decision.Init();
+            Cover.Init();
+            Info.Init();
+            Squad.Init();
+            SelfActions.Init();
+            Grenade.Init();
+            Steering.Init();
+            Vault.Init();
+            Suppression.Init();
+            AILimit.Init();
+            AimDownSightsController.Init();
+            BotHitReaction.Init();
+            SpaceAwareness.Init();
+            Medical.Init();
+            BotLight.Init();
+            BackpackDropper.Init();
         }
 
         private bool verifyBrain(PersonClass person)
@@ -283,23 +288,22 @@ namespace SAIN.SAINComponent
 
         private void OnDisable()
         {
-            BotActive = false;
-            OnBotDisabled?.Invoke();
+            BotActivation.SetActive(false);
             StopAllCoroutines();
         }
 
         public bool IsSpeedHacker { get; private set; }
-        public bool SAINLayersActive => SAINActivation.SAINLayersActive;
+        public bool SAINLayersActive => BotActivation.SAINLayersActive;
 
         public ESAINLayer ActiveLayer
         {
             get
             {
-                return SAINActivation.ActiveLayer;
+                return BotActivation.ActiveLayer;
             }
             set
             {
-                SAINActivation.SetActiveLayer(value);
+                BotActivation.SetActiveLayer(value);
             }
         }
 
@@ -310,74 +314,54 @@ namespace SAIN.SAINComponent
 
         private void Update()
         {
-            checkActive();
-
-            if (BotActive)
-            {
-                EnemyController.Update();
-                AILimit.Update();
-                CurrentTarget.Update();
-                Decision.Update();
-                Info.Update();
-                SAINActivation.Update();
-
-                DoorOpener.Update();
-                Search.Update();
-                Memory.Update();
-                FriendlyFireClass.Update();
-                Vision.Update();
-                Mover.Update();
-                BotStuck.Update();
-                Hearing.Update();
-                Talk.Update();
-                Cover.Update();
-                Squad.Update();
-                SelfActions.Update();
-                Grenade.Update();
-                Steering.Update();
-                Vault.Update();
-                Suppression.Update();
-                AimDownSightsController.Update();
-                BotHitReaction.Update();
-                SpaceAwareness.Update();
-                Medical.Update();
-                BotLight.Update();
-                ManualShoot.Update();
-
-                handleDumbShit();
-            }
-        }
-
-        public event Action OnBotDisabled;
-
-        private void LateUpdate()
-        {
-            checkActive();
-        }
-
-        private void checkActive()
-        {
-            if (IsDead || BotOwner.BotState == EBotState.Disposed)
-            {
-                BotActive = false;
-                Dispose();
-                return;
-            }
-
-            BotActive = _isActive;
+            BotActivation.Update();
 
             if (!BotActive)
             {
-                OnDisable();
+                return;
             }
+            if (BotOwner == null)
+            {
+                Logger.LogError("Botowner null");
+                return;
+            }
+
+            EnemyController.Update();
+            AILimit.Update();
+            CurrentTarget.Update();
+            Decision.Update();
+            Info.Update();
+
+            DoorOpener.Update();
+            Search.Update();
+            Memory.Update();
+            FriendlyFireClass.Update();
+            Vision.Update();
+            Mover.Update();
+            BotStuck.Update();
+            Hearing.Update();
+            Talk.Update();
+            Cover.Update();
+            Squad.Update();
+            SelfActions.Update();
+            Grenade.Update();
+            Steering.Update();
+            Vault.Update();
+            Suppression.Update();
+            AimDownSightsController.Update();
+            BotHitReaction.Update();
+            SpaceAwareness.Update();
+            Medical.Update();
+            BotLight.Update();
+            ManualShoot.Update();
+
+            handleDumbShit();
         }
 
-        private bool _isActive =>
-                !GameIsEnding &&
-                BotOwner.isActiveAndEnabled &&
-                Player.gameObject.activeInHierarchy &&
-                BotOwner.BotState == EBotState.Active &&
-                BotOwner.StandBy.StandByType == BotStandByType.active;
+        private void LateUpdate()
+        {
+            BotActivation.LateUpdate();
+        }
 
         private void handleDumbShit()
         {
@@ -411,8 +395,9 @@ namespace SAIN.SAINComponent
 
         public void Dispose()
         {
-            OnDisable();
+            BotActivation?.SetActive(false);
             OnSAINDisposed?.Invoke(ProfileId, BotOwner);
+            CoroutineManager?.Dispose();
 
             try
             {
@@ -462,11 +447,6 @@ namespace SAIN.SAINComponent
                 BotOwner.OnBotStateChange -= resetBot;
             }
             Destroy(this);
-        }
-
-        private void OnDestroy()
-        {
-            StopAllCoroutines();
         }
     }
 }

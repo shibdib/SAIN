@@ -1,7 +1,7 @@
 ﻿using EFT;
-using SAIN.Components.PlayerComponentSpace;
+using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using SAIN.Helpers;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +9,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyVision : EnemyBase, ISAINEnemyClass
     {
+        public event Action<Enemy, bool> OnVisionChange;
+        public event Action<Enemy> OnFirstSeen;
+
         public SAINEnemyVision(Enemy enemy) : base(enemy)
         {
             GainSight = new GainSightClass(enemy);
@@ -18,7 +21,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Bot.OnBotDisabled += stopVisionCheck;
             Enemy.OnEnemyForgotten += onEnemyForgotten;
             Enemy.OnEnemyKnown += onEnemyKnown;
         }
@@ -34,7 +36,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Update()
         {
-            startCheckingVision();
             getAngles();
             UpdateVisibleState(false);
             UpdateCanShootState(false);
@@ -42,37 +43,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Dispose()
         {
-            Bot.OnBotDisabled -= stopVisionCheck;
             Enemy.OnEnemyForgotten -= onEnemyForgotten;
             Enemy.OnEnemyKnown -= onEnemyKnown;
-        }
-
-        private void startCheckingVision()
-        {
-            if (_visionCoroutine == null)
-            {
-                _visionCoroutine = Enemy.Bot.StartCoroutine(checkVision());
-            }
-        }
-
-        private void stopVisionCheck()
-        {
-            if (_visionCoroutine != null)
-            {
-                Enemy.Bot.StopCoroutine(_visionCoroutine);
-                _visionCoroutine = null;
-            }
-        }
-
-        private Coroutine _visionCoroutine;
-
-        private IEnumerator checkVision()
-        {
-            while (true)
-            {
-                EnemyVisionChecker.CheckVision();
-                yield return null;
-            }
         }
 
         public float EnemyVelocity => EnemyTransform.PlayerVelocity;
@@ -86,8 +58,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private const float _repeatContactMinSeenTime = 12f;
 
         private const float _lostContactMinSeenTime = 12f;
-
-        private float _realLostVisionTime;
 
         private bool isEnemyInVisibleSector()
         {
@@ -156,22 +126,22 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     FirstContactOccured = true;
                     TimeFirstSeen = Time.time;
                     Seen = true;
+                    OnFirstSeen?.Invoke(Enemy);
                 }
-                _realLostVisionTime = Time.time;
-                TimeLastSeen = Time.time;
-                LastSeenPosition = EnemyPerson.Position;
-            }
 
-            if (Time.time - _realLostVisionTime < 1f)
-            {
-                Enemy.UpdateSeenPosition(EnemyPerson.Position);
+                TimeLastSeen = Time.time;
+                Enemy.UpdateCurrentEnemyPos(EnemyTransform.Position);
             }
 
             if (!IsVisible)
             {
-                if (Seen
-                    && TimeSinceSeen > _lostContactMinSeenTime
-                    && _nextReportLostVisualTime < Time.time)
+                if (wasVisible)
+                {
+                    Enemy.UpdateLastSeenPosition(EnemyTransform.Position);
+                }
+                if (Seen && 
+                    TimeSinceSeen > _lostContactMinSeenTime && 
+                    _nextReportLostVisualTime < Time.time)
                 {
                     _nextReportLostVisualTime = Time.time + 20f;
                     ShallReportLostVisual = true;
@@ -181,6 +151,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             if (IsVisible != wasVisible)
             {
+                OnVisionChange?.Invoke(Enemy, IsVisible);
                 LastChangeVisionTime = Time.time;
             }
         }

@@ -2,11 +2,13 @@
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.BotController.Classes
 {
@@ -79,7 +81,7 @@ namespace SAIN.BotController.Classes
                 Enemy enemy = member.Value?.Enemy;
                 if (enemy?.EnemyPlayer != null
                     && enemy.EnemyPlayer.ProfileId == profileId
-                    && enemy.EnemyStatus.EnemyIsSuppressed)
+                    && enemy.Status.EnemyIsSuppressed)
                 {
                     suppressingMember = member.Value;
                     return true;
@@ -101,92 +103,50 @@ namespace SAIN.BotController.Classes
 
         public Action<EnemyPlace, Enemy> OnEnemyHeard { get; set; }
 
-        public void AddPointToSearch(Vector3 position, float soundPower, BotComponent sain, SAINSoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
+        public void AddPointToSearch(BotSound sound, BotComponent sain)
+        {
+            Enemy enemy = sound.Enemy;
+            if (enemy == null)
+            {
+                Logger.LogError($"Could not find enemy!");
+                return;
+            }
+
+            enemy.Hearing.LastSoundHeard = sound;
+            addPlaceForCheck(sound.RandomizedPosition, sound.SoundType, sain, enemy, true);
+        }
+
+        private void addPlaceForCheck(Vector3 position, SAINSoundType soundType, BotComponent bot, Enemy enemy, bool heard)
         {
             if (EFTBotGroup == null)
             {
-                EFTBotGroup = sain.BotOwner.BotsGroup;
-                Logger.LogError("Botsgroup null");
-            }
-            if (GroupPlacesForCheck == null)
-            {
-                Logger.LogError("PlacesForCheck null");
-                return;
+                EFTBotGroup = bot.BotOwner.BotsGroup;
             }
 
-            AISoundType baseSoundType;
-            switch (soundType)
-            {
-                case SAINSoundType.SuppressedGunShot:
-                    baseSoundType = AISoundType.silencedGun;
-                    break;
-
-                case SAINSoundType.Gunshot:
-                    baseSoundType = AISoundType.gun;
-                    break;
-
-                default:
-                    baseSoundType = AISoundType.step;
-                    break;
-            }
-
+            AISoundType baseSoundType = soundType.Convert();
             bool isDanger = baseSoundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
-            PlaceForCheck newPlace = AddNewPlaceForCheck(sain.BotOwner, position, checkType, player);
+            PlaceForCheck newPlace = AddNewPlaceForCheck(bot.BotOwner, position, checkType, enemy.EnemyIPlayer);
             if (newPlace != null)
             {
-                sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, newPlace.Position, soundType, true);
-                if (searchType == ESearchPointType.Hearing)
-                {
+                enemy.SetHeardStatus(true, newPlace.Position, soundType, true);
+                if (heard)
                     OnSoundHeard?.Invoke(newPlace);
-                }
                 return;
             }
-            sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, position, soundType, true);
+            enemy.SetHeardStatus(true, position, soundType, true);
         }
 
         public void AddPointToSearch(Vector3 position, float soundPower, BotComponent sain, AISoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
         {
-            if (EFTBotGroup == null)
+            Enemy enemy = sain.EnemyController.CheckAddEnemy(player);
+            if (enemy == null)
             {
-                EFTBotGroup = sain.BotOwner.BotsGroup;
-                Logger.LogError("Botsgroup null");
-            }
-            if (GroupPlacesForCheck == null)
-            {
-                Logger.LogError("PlacesForCheck null");
+                Logger.LogError($"Could not find enemy!");
                 return;
             }
 
-            SAINSoundType sainSoundType;
-            switch (soundType)
-            {
-                case AISoundType.silencedGun:
-                    sainSoundType = SAINSoundType.SuppressedGunShot;
-                    break;
-
-                case AISoundType.gun:
-                    sainSoundType = SAINSoundType.Gunshot;
-                    break;
-
-                default:
-                    sainSoundType = SAINSoundType.None;
-                    break;
-            }
-
-            bool isDanger = soundType == AISoundType.step ? false : true;
-            PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
-            PlaceForCheck newPlace = AddNewPlaceForCheck(sain.BotOwner, position, checkType, player);
-            if (newPlace != null)
-            {
-                sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, newPlace.Position, sainSoundType, true);
-                if (searchType == ESearchPointType.Hearing)
-                {
-                    OnSoundHeard?.Invoke(newPlace);
-                }
-                return;
-            }
-            sain?.EnemyController?.CheckAddEnemy(player)?.SetHeardStatus(true, position, sainSoundType, true);
+            addPlaceForCheck(position, soundType.Convert(), sain, enemy, false);
         }
 
         public readonly Dictionary<string, PlaceForCheck> PlayerPlaceChecks = new Dictionary<string, PlaceForCheck>();
@@ -522,25 +482,26 @@ namespace SAIN.BotController.Classes
                 return;
             }
 
-            bool iHaveEarpeace = sain.PlayerComponent.Equipment.GearInfo.HasEarPiece;
-
-            float maxRangeSqr = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxRangeToReportEnemyActionNoHeadset.Sqr();
-
             foreach (var member in Members.Values)
             {
-                if (member != null &&
-                    member.ProfileId != sain.ProfileId &&
-                    isInCommunicationRange(sain, member))
+                if (member == null || member.ProfileId == sain.ProfileId)
                 {
-                    Enemy memberEnemy = member.EnemyController.CheckAddEnemy(player);
-                    if (memberEnemy != null)
-                    {
-                        memberEnemy.SetHeardStatus(true, position, soundType, false);
-                        if (action != EEnemyAction.None)
-                        {
-                            memberEnemy.EnemyStatus.VulnerableAction = action;
-                        }
-                    }
+                    continue;
+                }
+                if (!isInCommunicationRange(sain, member))
+                {
+                    continue;
+                }
+                Enemy memberEnemy = member.EnemyController.CheckAddEnemy(player);
+                if (memberEnemy == null)
+                {
+                    continue;
+                }
+
+                memberEnemy.SetHeardStatus(true, position, soundType, false);
+                if (action != EEnemyAction.None)
+                {
+                    memberEnemy.Status.SetVulnerableAction(action);
                 }
             }
         }

@@ -1,30 +1,47 @@
 ﻿using EFT;
 using SAIN.Helpers;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    public class StandAndShootAction : SAINAction
+    public class StandAndShootAction : SAINAction, ISAINAction
     {
         public StandAndShootAction(BotOwner bot) : base(bot, nameof(StandAndShootAction))
         {
         }
 
+        public void Toggle(bool value)
+        {
+            ToggleAction(value);
+        }
+
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
+                Bot.Steering.SteerByPriority();
+                if (!shallMoveShoot)
+                {
+                    Bot.Mover.Pose.SetPoseToCover();
+                }
+                Shoot.Update();
+
+                yield return null;
+            }
+        }
+
         public override void Update()
         {
-            Bot.Steering.SteerByPriority();
-            if (!shallMoveShoot)
-            {
-                Bot.Mover.Pose.SetPoseToCover();
-            }
-            Shoot.Update();
         }
 
         bool shallMoveShoot = false;
 
         public override void Start()
         {
+            Toggle(true);
+
             shallMoveShoot = moveShoot();
             if (!shallMoveShoot)
             {
@@ -69,6 +86,8 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Stop()
         {
+            Toggle(false);
+
             if (shallResume)
                 BotOwner.Mover.MovementResume();
         }

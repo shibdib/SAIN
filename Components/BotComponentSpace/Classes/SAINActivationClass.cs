@@ -1,90 +1,120 @@
-﻿using DrakiaXYZ.BigBrain.Brains;
+﻿using Comfort.Common;
+using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using System;
 
 namespace SAIN.SAINComponent.Classes
 {
-    public class SAINActivationClass : SAINBase
+    public class SAINActivationClass : SAINBase, ISAINClass
     {
+        public event Action<bool> OnBotStateChanged;
+
+        public bool BotActive { get; private set; }
+
+        public bool GameEnding { get; private set; } = false;
+
         public bool SAINLayersActive => ActiveLayer != ESAINLayer.None;
 
         public ESAINLayer ActiveLayer { get; private set; }
 
+        public void SetActive(bool value)
+        {
+            switch (value)
+            {
+                case true:
+                    if (!BotActive && 
+                        Bot.CoroutineManager.StartCoroutines())
+                    {
+                        BotActive = true;
+                        OnBotStateChanged?.Invoke(true);
+                        Logger.LogDebug($"Bot Active [{Bot.Info.Profile.Name}]");
+                    }
+                    break;
+
+                case false:
+                    if (BotActive)
+                    {
+                        BotActive = false;
+                        ActiveLayer = ESAINLayer.None;
+                        Bot.CoroutineManager.StopCoroutines();
+                        OnBotStateChanged?.Invoke(false);
+                    }
+                    break;
+            }
+        }
+
         public void SetActiveLayer(ESAINLayer layer)
         {
-            _layer = layer;
+            ActiveLayer = layer;
+        }
+
+        public void Update()
+        {
+            checkActive();
+            if (!BotActive && Bot.Person.ActiveClass.BotActive)
+            {
+                Logger.LogWarning($"Bot Component not active but should be!");
+                SetActive(true);
+            }
+        }
+
+        public void LateUpdate()
+        {
+            checkSpeedReset(); 
+            checkActive();
+        }
+
+        private void checkActive()
+        {
+            checkBotGame();
+
+            if (GameEnding && BotActive)
+            {
+                SetActive(false);
+            }
+        }
+
+        private void checkSpeedReset()
+        {
+            if (SAINLayersActive)
+            {
+                if (_speedReset)
+                    _speedReset = false;
+
+                return;
+            }
+
+            if (!_speedReset)
+            {
+                _speedReset = true;
+                BotOwner.SetTargetMoveSpeed(1f);
+                BotOwner.Mover.SetPose(1f);
+                Bot.Mover.SetTargetMoveSpeed(1f);
+                Bot.Mover.SetTargetPose(1f);
+            }
         }
 
         public SAINActivationClass(BotComponent botComponent) : base(botComponent)
         {
         }
 
-        public void Update()
+        public void Init()
         {
-            setActive();
-            handlePatrolData();
+            Bot.Person.ActiveClass.OnBotActiveChanged += SetActive;
+            SetActive(true);
         }
 
-        private void setActive()
+        private void checkBotGame()
         {
-            ActiveLayer = _layer;
+            var botGame = Singleton<IBotGame>.Instance;
+            GameEnding = botGame == null || botGame.Status == GameStatus.Stopping;
         }
 
-        private void handlePatrolData()
+        public void Dispose()
         {
-            bool paused = BotOwner.PatrollingData?.Status == PatrolStatus.pause;
-            bool customLayerActive = BrainManager.IsCustomLayerActive(BotOwner);
-            bool sainActive = SAINLayersActive;
-
-            setPatrolData(sainActive, paused, customLayerActive);
-
-            // Verify patrol data is being resumed correctly.
-            if (paused &&
-                !sainActive &&
-                !customLayerActive)
-            {
-                //string layer = BrainManager.GetActiveLayerName(BotOwner);
-                //Logger.LogWarning($"{BotOwner.name} Active Layer: {layer} Patrol data is paused!");
-                //BotOwner.PatrollingData?.Unpause();
-                //if (!_speedReset)
-                //{
-                //    _speedReset = true;
-                //    resetSpeed();
-                //}
-            }
+            Bot.Person.ActiveClass.OnBotActiveChanged -= SetActive;
         }
 
-        private void setPatrolData(bool value, bool paused, bool customLayerActive)
-        {
-            // SAIN layers are active, make sure patrol data is paused.
-            if (value && !paused)
-            {
-                _speedReset = false;
-                BotOwner.PatrollingData?.Pause();
-            }
-            // SAIN layers are not active, unpause patrol data
-            else if (!value)
-            {
-                if (!_speedReset)
-                {
-                    _speedReset = true;
-                    resetSpeed();
-                }
-                if (!customLayerActive && paused)
-                {
-                    BotOwner.PatrollingData?.Unpause();
-                }
-            }
-        }
-
-        private void resetSpeed()
-        {
-            BotOwner.SetTargetMoveSpeed(1f);
-            BotOwner.Mover.SetPose(1f);
-            Bot.Mover.SetTargetMoveSpeed(1f);
-            Bot.Mover.SetTargetPose(1f);
-        }
-
-        private ESAINLayer _layer;
         private bool _speedReset;
     }
 }

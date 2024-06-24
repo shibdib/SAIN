@@ -60,7 +60,7 @@ namespace SAIN.SAINComponent.Classes.Search
             if (!Searching)
             {
                 _cornersToEnemy.Clear();
-                _cornersToEnemy.AddRange(Enemy.EnemyPath.PathToEnemy.corners);
+                _cornersToEnemy.AddRange(Enemy.Path.PathToEnemy.corners);
                 _searchDestination = Enemy.LastKnownPosition.Value;
                 _searchCoroutine = Bot.StartCoroutine(search());
             }
@@ -88,13 +88,13 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public void Init()
         {
-            Bot.OnBotDisabled += StopSearch;
+           // Bot.OnBotDisabled += StopSearch;
             Bot.EnemyController.OnEnemyForgotten += checkStopSearch;
         }
 
         public void Dispose()
         {
-            Bot.OnBotDisabled -= StopSearch;
+            //Bot.OnBotDisabled -= StopSearch;
             Bot.EnemyController.OnEnemyForgotten -= checkStopSearch;
         }
 

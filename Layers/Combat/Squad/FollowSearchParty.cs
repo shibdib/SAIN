@@ -4,30 +4,44 @@ using SAIN.Layers.Combat.Solo;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Squad
 {
-    internal class FollowSearchParty : SAINAction
+    internal class FollowSearchParty : SAINAction, ISAINAction
     {
         public FollowSearchParty(BotOwner bot) : base(bot, nameof(FollowSearchParty))
         {
         }
 
+        public void Toggle(bool value)
+        {
+            ToggleAction(value);
+        }
+
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
+                if (!Bot.Mover.SprintController.Running)
+                {
+                    Shoot.Update();
+                    Bot.Steering.SteerByPriority();
+                }
+
+                if (_nextUpdatePosTime < Time.time)
+                {
+                    moveToLead(out float nextTime);
+                    _nextUpdatePosTime = Time.time + nextTime;
+                }
+                yield return null;
+            }
+        }
+
         public override void Update()
         {
-            if (!Bot.Mover.SprintController.Running)
-            {
-                Shoot.Update();
-                Bot.Steering.SteerByPriority();
-            }
-
-            if (_nextUpdatePosTime < Time.time)
-            {
-                moveToLead(out float nextTime);
-                _nextUpdatePosTime = Time.time + nextTime;
-            }
         }
 
         private void moveToLead(out float nextUpdateTime)
@@ -98,12 +112,14 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Start()
         {
+            Toggle(true);
             _nextUpdatePosTime = 0f;
             _LastLeadPos = Vector3.zero;
         }
 
         public override void Stop()
         {
+            Toggle(false);
             Bot.Mover.SprintController.CancelRun();
         }
     }

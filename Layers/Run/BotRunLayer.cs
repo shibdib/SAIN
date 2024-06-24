@@ -15,7 +15,7 @@ namespace SAIN.Layers.Combat.Run
         {
         }
 
-        public static readonly string Name = BuildLayerName<BotRunLayer>();
+        public static readonly string Name = BuildLayerName("Run Debug");
 
         public override Action GetNextAction()
         {
@@ -27,18 +27,18 @@ namespace SAIN.Layers.Combat.Run
             bool active = SAINPlugin.DebugSettings.ForceBotsToRunAround;
             if (active)
             {
-                SAINBot.ActiveLayer = ESAINLayer.Run;
+                Bot.ActiveLayer = ESAINLayer.Run;
             }
             return active;
         }
 
         public override bool IsCurrentActionEnding()
         {
-            if (SAINBot == null) return true;
+            if (Bot == null) return true;
 
             return false;
         }
 
-        public SoloDecision CurrentDecision => SAINBot.Decision.CurrentSoloDecision;
+        public SoloDecision CurrentDecision => Bot.Decision.CurrentSoloDecision;
     }
 }

@@ -11,31 +11,46 @@ using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SAIN.Layers.Combat.Solo;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
+using System.Collections;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
-    internal class HoldinCoverAction : SAINAction
+    internal class HoldinCoverAction : SAINAction, ISAINAction
     {
         public HoldinCoverAction(BotOwner bot) : base(bot, nameof(HoldinCoverAction))
         {
         }
 
+        public void Toggle(bool value)
+        {
+            ToggleAction(value);
+        }
+
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
+                yield return null;
+
+                Bot.Steering.SteerByPriority();
+                Shoot.Update();
+
+                CoverPoint coverInUse = CoverInUse;
+                if (coverInUse == null)
+                {
+                    Bot.Mover.DogFight.DogFightMove(false);
+                    continue;
+                }
+
+                adjustPosition();
+                Bot.Cover.DuckInCover();
+                checkSetProne();
+                checkSetLean();
+            }
+        }
+
         public override void Update()
         {
-            Bot.Steering.SteerByPriority();
-            Shoot.Update();
-
-            CoverPoint coverInUse = CoverInUse;
-            if (coverInUse == null)
-            {
-                Bot.Mover.DogFight.DogFightMove(false);
-                return;
-            }
-
-            adjustPosition();
-            Bot.Cover.DuckInCover();
-            checkSetProne();
-            checkSetLean();
         }
 
         private void adjustPosition()
@@ -150,12 +165,14 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
+            Toggle(true);
             ChangeLeanTimer = Time.time + 2f;
             CoverInUse = Bot.Cover.CoverInUse;
         }
 
         public override void Stop()
         {
+            Toggle(false);
             Bot.Cover.CheckResetCoverInUse();
             Bot.Mover.Prone.SetProne(false);
         }

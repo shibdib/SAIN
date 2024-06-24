@@ -15,7 +15,7 @@ namespace SAIN.Layers
         {
         }
 
-        public static readonly string Name = BuildLayerName<SAINAvoidThreatLayer>();
+        public static readonly string Name = BuildLayerName("Avoid Threat");
 
         public override Action GetNextAction()
         {
@@ -23,15 +23,15 @@ namespace SAIN.Layers
             switch (_lastActionDecision)
             {
                 case SoloDecision.DogFight:
-                    if (SAINBot.Decision.DogFightDecision.DogFightTarget != null)
+                    if (Bot.Decision.DogFightDecision.DogFightTarget != null)
                     {
                         return new Action(typeof(DogFightAction), $"Dog Fight - Enemy Close!");
                     }
-                    else if (SAINBot.Cover.CoverInUse?.Spotted == true)
+                    else if (Bot.Cover.CoverInUse?.Spotted == true)
                     {
                         return new Action(typeof(DogFightAction), $"Dog Fight - My Cover is Spotted!");
                     }
-                    else if (SAINBot.Decision.EnemyDecisions.ShotInCover)
+                    else if (Bot.Decision.EnemyDecisions.ShotInCover)
                     {
                         return new Action(typeof(DogFightAction), $"Dog Fight - Shot while in cover!");
                     }
@@ -51,23 +51,23 @@ namespace SAIN.Layers
         public override bool IsActive()
         {
             bool active = 
-                SAINBot?.BotActive == true &&
+                Bot?.BotActive == true &&
                 (CurrentDecision == SoloDecision.DogFight ||
                 CurrentDecision == SoloDecision.AvoidGrenade);
 
-            if (SAINBot != null)
+            if (Bot != null)
             {
-                SAINBot.ActiveLayer = ESAINLayer.AvoidThreat;
+                Bot.ActiveLayer = ESAINLayer.AvoidThreat;
             }
             return active;
         }
 
         public override bool IsCurrentActionEnding()
         {
-            return SAINBot?.BotActive == true && _lastActionDecision != CurrentDecision;
+            return Bot?.BotActive == true && _lastActionDecision != CurrentDecision;
         }
 
         private SoloDecision _lastActionDecision;
-        public SoloDecision CurrentDecision => SAINBot.Decision.CurrentSoloDecision;
+        public SoloDecision CurrentDecision => Bot.Decision.CurrentSoloDecision;
     }
 }

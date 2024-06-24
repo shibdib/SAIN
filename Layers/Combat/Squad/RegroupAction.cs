@@ -3,31 +3,46 @@ using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using SAIN.Layers.Combat.Solo;
 using SAIN.SAINComponent;
+using System.Collections;
 using UnityEngine;
 
 namespace SAIN.Layers.Combat.Squad
 {
-    internal class RegroupAction : SAINAction
+    internal class RegroupAction : SAINAction, ISAINAction
     {
         public RegroupAction(BotOwner bot) : base(bot, nameof(RegroupAction))
         {
         }
+        public void Toggle(bool value)
+        {
+            ToggleAction(value);
+        }
+
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
+                var SquadLeadPos = Bot.Squad.LeaderComponent?.Position;
+                if (SquadLeadPos != null)
+                {
+                    Bot.Mover.GoToPoint(SquadLeadPos.Value, out _);
+                    CheckShouldSprint(SquadLeadPos.Value);
+                }
+                Bot.Mover.SetTargetPose(1f);
+                Bot.Mover.SetTargetMoveSpeed(1f);
+                Bot.DoorOpener.Update();
+
+                yield return null;
+            }
+        }
 
         public override void Update()
         {
-            var SquadLeadPos = Bot.Squad.LeaderComponent?.Position;
-            if (SquadLeadPos != null)
-            {
-                Bot.Mover.GoToPoint(SquadLeadPos.Value, out _);
-                CheckShouldSprint(SquadLeadPos.Value);
-            }
-            Bot.Mover.SetTargetPose(1f);
-            Bot.Mover.SetTargetMoveSpeed(1f);
-            Bot.DoorOpener.Update();
         }
 
         public override void Start()
         {
+            Toggle(true);
         }
 
         private void CheckShouldSprint(Vector3 pos)
@@ -67,6 +82,7 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Stop()
         {
+            Toggle(false);
         }
     }
 }

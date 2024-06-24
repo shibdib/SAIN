@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Components;
 using SAIN.Preset.GlobalSettings;
 using UnityEngine;
 
@@ -107,7 +108,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 return 1f;
             }
-            return SAINPlugin.BotController.WeatherVision.InverseWeatherModifier;
+            return SAINBotController.Instance.WeatherVision.InverseWeatherModifier;
         }
 
         private float GetGainSightModifier()
@@ -191,7 +192,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private float calcMoveModifier()
         {
             LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
-            return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Enemy.EnemyVision.EnemyVelocity);
+            return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Enemy.Vision.EnemyVelocity);
         }
 
         private float calcElevationModifier()
@@ -229,7 +230,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                         float angle = Vector3.Angle(currentEnemyDir, myDir);
 
                         float minAngle = 20f;
-                        float maxAngle = Enemy.EnemyVision.MaxVisionAngle;
+                        float maxAngle = Enemy.Vision.MaxVisionAngle;
                         if (angle > minAngle && 
                             angle < maxAngle)
                         {
@@ -258,14 +259,14 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return 1f;
             }
 
-            float angle = Enemy.EnemyVision.AngleToEnemy;
+            float angle = Enemy.Vision.AngleToEnemy;
 
             float minAngle = _periphVisionStart;
             if (angle < minAngle)
             {
                 return 1f;
             }
-            float maxAngle = Enemy.EnemyVision.MaxVisionAngle;
+            float maxAngle = Enemy.Vision.MaxVisionAngle;
             float maxRatio = _maxPeriphVisionSpeedReduction;
             if (angle > maxAngle)
             {

@@ -3,6 +3,7 @@ using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -11,8 +12,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyController : SAINBase, ISAINClass
     {
-        public bool HasEnemy => ActiveEnemy?.EnemyPerson?.IsActive == true;
-        public bool HasLastEnemy => LastEnemy?.EnemyPerson?.IsActive == true;
+        public bool HasEnemy => ActiveEnemy?.EnemyPerson?.Active == true;
+        public bool HasLastEnemy => LastEnemy?.EnemyPerson?.Active == true;
         public Enemy ActiveEnemy { get; private set; }
         public Enemy LastEnemy { get; private set; }
         public System.Action<Player> OnEnemyKilled { get; set; }
@@ -32,13 +33,60 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
+            Bot.CoroutineManager.Add(enemyVisionCheck());
             BotOwner.Memory.OnAddEnemy += AddEnemy;
+            allAllEnemies();
         }
+
+        private void allAllEnemies()
+        {
+            foreach (var person in BotOwner.BotsGroup.Enemies.Keys)
+            {
+                AddEnemy(person);
+            }
+        }
+
+        private IEnumerator enemyVisionCheck()
+        {
+            while (true)
+            {
+                int enemiesChecked = 0;
+                int enemiesInLOS = 0;
+                int enemiesVisible = 0;
+
+                foreach (var enemy in Enemies.Values)
+                {
+                    if (enemy?.IsValid == true)
+                    {
+                        enemy.Vision.EnemyVisionChecker.CheckVision();
+                        enemiesChecked++;
+                        if (enemy.InLineOfSight)
+                            enemiesInLOS++;
+                        if (enemy.IsVisible)
+                            enemiesVisible++;
+                    }
+                }
+
+                if (_nextlog < Time.time)
+                {
+                    _nextlog = Time.time + 10;
+                    Logger.LogDebug($"Checked {enemiesChecked} enemies out of {Enemies.Count} total enemies. Total in LOS [{enemiesInLOS}] Total visible [{enemiesVisible}] Total EnemyInfos {BotOwner.BotsGroup.Enemies.Count}");
+                    Logger.LogDebug($"Active Enemy: {ActiveEnemy?.EnemyPerson.Name}");
+                    Logger.LogDebug($"Current Decision: {Bot.Decision.CurrentSoloDecision}");
+                }
+                yield return null;
+            }
+        }
+
+        private float _nextlog;
+
+        private readonly List<Enemy> _localList = new List<Enemy>();
 
         public void Update()
         {
-            removeInvalidEnemies();
+            compareEnemyLists();
             updateAllEnemies();
+            removeInvalidEnemies();
             checkHumanLOS();
             AssignActiveEnemy();
             checkActiveEnemies();
@@ -46,9 +94,19 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             updateDebug();
 
             if (ActiveEnemy != null &&
-                !ActiveEnemy.EnemyPerson.IsActive)
+                !ActiveEnemy.EnemyPerson.Active)
             {
                 setActiveEnemy(null);
+            }
+
+            checkDiscrepency();
+        }
+
+        private void compareEnemyLists()
+        {
+            if (Enemies.Count != BotOwner.BotsGroup.Enemies.Count)
+            {
+                allAllEnemies();
             }
         }
 
@@ -410,7 +468,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
             foreach (var enemy in Enemies.Values)
             {
-                if (enemy?.IsValid == true && enemy.EnemyStatus.ShotAtMeRecently)
+                if (enemy?.IsValid == true && enemy.Status.ShotAtMeRecently)
                 {
                     setActiveEnemy(enemy);
                     return;
@@ -447,7 +505,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                         setActiveEnemy(null);
                         return;
                     }
-                    if (!enemy.EnemyStatus.ShotAtMeRecently &&
+                    if (!enemy.Status.ShotAtMeRecently &&
                         !enemy.IsVisible)
                     {
                         setActiveEnemy(null);
@@ -482,7 +540,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void setActiveEnemy(Enemy enemy)
         {
-            if (enemy == null || (enemy.IsValid && enemy.EnemyPerson.IsActive))
+            if (enemy == null || (enemy.IsValid && enemy.EnemyPerson.Active))
             {
                 if (ActiveEnemy != null &&
                     ActiveEnemy.IsValid &&
@@ -497,8 +555,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void setLastEnemy(Enemy activeEnemy)
         {
-            bool nullActiveEnemy = activeEnemy?.EnemyPerson?.IsActive == true;
-            bool nullLastEnemy = LastEnemy?.EnemyPerson?.IsActive == true;
+            bool nullActiveEnemy = activeEnemy?.EnemyPerson?.Active == true;
+            bool nullLastEnemy = LastEnemy?.EnemyPerson?.Active == true;
 
             if (!nullLastEnemy && nullActiveEnemy)
             {
@@ -571,17 +629,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return null;
             }
 
-            if (Enemies.TryGetValue(enemyPlayer.ProfileId, out Enemy sainEnemy) &&
-                sainEnemy.IsValid)
+            if (Enemies.TryGetValue(enemyPlayer.ProfileId, out Enemy sainEnemy))
             {
                 return sainEnemy;
             }
 
             if (!BotOwner.EnemiesController.EnemyInfos.TryGetValue(enemyPlayer, out EnemyInfo enemyInfo))
             {
-                string debugString = $"Player {enemyPlayer.Profile.Nickname} : Side: {enemyPlayer.Profile.Side} is not in Botowner's {Player.Profile.Nickname} : Side: {Player.Profile.Side} EnemyInfos dictionary.: ";
-                debugString = findSourceDebug(debugString);
-                Logger.LogDebug(debugString);
+                //string debugString = $"Player {enemyPlayer.Profile.Nickname} : Side: {enemyPlayer.Profile.Side} is not in Botowner's {Player.Profile.Nickname} : Side: {Player.Profile.Side} EnemyInfos dictionary.: ";
+                //debugString = findSourceDebug(debugString);
+                //Logger.LogDebug(debugString);
                 return null;
             }
 
@@ -615,31 +672,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return debugString;
         }
 
-        public bool IsHumanPlayerLookAtMe(out Player lookingPlayer)
-        {
-            foreach (var enemy in Enemies.Values)
-            {
-                if (enemy == null || enemy.IsAI)
-                {
-                    continue;
-                }
-
-                Vector3 lookDir = enemy.Player.LookDirection;
-                Vector3 botDir = Bot.Person.Transform.BodyPosition - enemy.Player.MainParts[BodyPartType.head].Position;
-
-                if (Vector3.Dot(lookDir, botDir.normalized) > 0.75f)
-                {
-                    lookingPlayer = enemy.Player;
-                    return true;
-                }
-            }
-            lookingPlayer = null;
-            return false;
-        }
-
         public bool IsPlayerAnEnemy(string profileID)
         {
-            return Enemies.TryGetValue(profileID, out var enemy) && enemy?.IsValid == true;
+            return !profileID.IsNullOrEmpty() && Enemies.ContainsKey(profileID);
         }
 
         public bool IsPlayerFriendly(IPlayer iPlayer)
@@ -659,8 +694,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             // Check that the source isn't from a member of the bot's group.
-            if (iPlayer.AIData.IsAI
-            && BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
+            if (iPlayer.AIData.IsAI && 
+                BotOwner.BotsGroup.Contains(iPlayer.AIData.BotOwner))
             {
                 return true;
             }

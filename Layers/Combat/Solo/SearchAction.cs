@@ -7,46 +7,21 @@ using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    internal class SearchAction : SAINAction
+    internal class SearchAction : SAINAction, ISAINAction
     {
         public SearchAction(BotOwner bot) : base(bot, nameof(SearchAction))
         {
         }
 
-        public override void Start()
+        public void Toggle(bool value)
         {
-            _coroutine = Bot.StartCoroutine(search());
+            ToggleAction(value);
         }
 
-        private Vector3 TargetPosition => Search.FinalDestination;
-
-        public override void Stop()
+        public override IEnumerator ActionCoroutine()
         {
-            Bot.StopCoroutine(_coroutine);
-            _coroutine = null;
-
-            BotOwner.Mover.MovementResume();
-            Search.Reset();
-            HaveTalked = false;
-        }
-
-        private float _nextCheckTime;
-
-        public override void Update()
-        {
-        }
-
-        private Coroutine _coroutine;
-
-        private IEnumerator search()
-        {
-            while (true)
+            while (Active)
             {
-                if (Bot == null || !Bot.BotActive)
-                {
-                    break;
-                }
-
                 bool isBeingStealthy = Bot.Enemy?.EnemyHeardFromPeace == true;
                 if (isBeingStealthy)
                 {
@@ -54,7 +29,7 @@ namespace SAIN.Layers.Combat.Solo
                 }
                 else
                 {
-                    CheckShouldSprint(); 
+                    CheckShouldSprint();
                     talk();
                 }
 
@@ -74,6 +49,27 @@ namespace SAIN.Layers.Combat.Solo
 
                 yield return null;
             }
+        }
+
+        public override void Start()
+        {
+            Toggle(true);
+        }
+
+        private Vector3 TargetPosition => Search.FinalDestination;
+
+        public override void Stop()
+        {
+            Toggle(false);
+            BotOwner.Mover.MovementResume();
+            Search.Reset();
+            HaveTalked = false;
+        }
+
+        private float _nextCheckTime;
+
+        public override void Update()
+        {
         }
 
         private float _nextUpdateSearchTime;

@@ -490,20 +490,20 @@ namespace SAIN.SAINComponent.Classes.Mover
                 EnemySteerDir = EEnemySteerDir.VisibleLastKnown;
                 return adjustLookPoint(lastKnown.Value) + _weaponRootOffset;
             }
-            Vector3? blindCornerToEnemy = enemy.EnemyPath.BlindCornerToEnemy;
+            Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
             if (blindCornerToEnemy != null)
             {
                 EnemySteerDir = EEnemySteerDir.BlindCorner;
                 return adjustLookPoint(blindCornerToEnemy.Value);
             }
-            Vector3? lastCorner = enemy.EnemyPath.LastCornerToEnemy;
+            Vector3? lastCorner = enemy.Path.LastCornerToEnemy;
             if (lastCorner != null &&
-                enemy.EnemyPath.CanSeeLastCornerToEnemy)
+                enemy.Path.CanSeeLastCornerToEnemy)
             {
                 EnemySteerDir = EEnemySteerDir.LastCorner;
                 return adjustLookPoint(lastCorner.Value) + _weaponRootOffset;
             }
-            var enemyPath = enemy.EnemyPath.PathToEnemy;
+            var enemyPath = enemy.Path.PathToEnemy;
             if (enemyPath != null &&
                 enemyPath.corners.Length > 2)
             {
@@ -627,7 +627,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     LookToPoint(lastKnown.Value);
                     return;
                 }
-                var lastShotPos = shotMeRecent.EnemyStatus.LastShotPosition;
+                var lastShotPos = shotMeRecent.Status.LastShotPosition;
                 if (lastShotPos != null)
                 {
                     LookToPoint(lastShotPos.Value + _weaponRootOffset);

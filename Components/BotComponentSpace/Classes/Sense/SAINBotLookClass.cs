@@ -103,7 +103,7 @@ namespace SAIN.SAINComponent.Classes
         private float getDelay(Enemy enemy)
         {
             float delay;
-            if (enemy.EnemyPerson.IsActive) {
+            if (enemy.EnemyPerson.Active) {
                 delay = enemy.IsAI ? 0.2f : 0.1f;
             }
             else {

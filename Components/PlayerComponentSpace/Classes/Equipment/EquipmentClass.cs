@@ -68,7 +68,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                     range *= weather.RainSoundModifier;
                 }
 
-                SAINPlugin.BotController.BotHearing.PlayAISound(PlayerComponent, weapon.SoundType, PlayerComponent.Transform.WeaponFirePort, range, 1f, false);
+                SAINBotController.Instance.BotHearing.PlayAISound(PlayerComponent, weapon.SoundType, PlayerComponent.Transform.WeaponFirePort, range, 1f, false);
             }
             return true;
         }

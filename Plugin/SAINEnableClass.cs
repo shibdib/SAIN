@@ -102,7 +102,7 @@ namespace SAIN
         {
             return
                 WildSpawn.IsPMC(wildSpawnType) ||
-                SAINPlugin.BotController?.Bots?.ContainsKey(botOwner.name) == true;
+                SAINBotController.Instance?.Bots?.ContainsKey(botOwner.name) == true;
         }
 
         private static bool excludeBoss(WildSpawnType wildSpawnType)
@@ -180,12 +180,12 @@ namespace SAIN
             {
                 return false;
             }
-            if (SAINPlugin.BotController == null)
+            if (SAINBotController.Instance == null)
             {
                 Logger.LogError($"Bot Controller Null in [{patchName}]");
                 return false;
             }
-            return SAINPlugin.BotController.GetSAIN(botOwner, out sain);
+            return SAINBotController.Instance.GetSAIN(botOwner, out sain);
         }
 
         public static bool GetSAIN(Player player, out BotComponent sain, string patchName)

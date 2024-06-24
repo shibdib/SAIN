@@ -1,41 +1,58 @@
 ﻿using EFT;
+using SAIN.Helpers;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
-    internal class ShiftCoverAction : SAINAction
+    internal class ShiftCoverAction : SAINAction, ISAINAction
     {
         public ShiftCoverAction(BotOwner bot) : base(bot, nameof(ShiftCoverAction))
         {
         }
 
+        public void Toggle(bool value)
+        {
+            ToggleAction(value);
+        }
+
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
+                yield return null;
+
+                Bot.Steering.SteerByPriority();
+                Shoot.Update();
+                if (NewPoint == null
+                    && FindPointToGo())
+                {
+                    Bot.Mover.SetTargetMoveSpeed(GetSpeed());
+                    Bot.Mover.SetTargetPose(GetPose());
+                }
+                else if (NewPoint != null && NewPoint.Status == CoverStatus.InCover)
+                {
+                    Bot.Decision.EnemyDecisions.ShiftCoverComplete = true;
+                }
+                else if (NewPoint != null)
+                {
+                    Bot.Mover.SetTargetMoveSpeed(GetSpeed());
+                    Bot.Mover.SetTargetPose(GetPose());
+                    Bot.Mover.GoToPoint(NewPoint.Position, out _);
+                }
+                else
+                {
+                    Bot.Decision.EnemyDecisions.ShiftCoverComplete = true;
+                }
+
+            }
+        }
+
         public override void Update()
         {
-            Bot.Steering.SteerByPriority();
-            Shoot.Update();
-            if (NewPoint == null
-                && FindPointToGo())
-            {
-                Bot.Mover.SetTargetMoveSpeed(GetSpeed());
-                Bot.Mover.SetTargetPose(GetPose());
-            }
-            else if (NewPoint != null && NewPoint.Status == CoverStatus.InCover)
-            {
-                Bot.Decision.EnemyDecisions.ShiftCoverComplete = true;
-            }
-            else if (NewPoint != null)
-            {
-                Bot.Mover.SetTargetMoveSpeed(GetSpeed());
-                Bot.Mover.SetTargetPose(GetPose());
-                Bot.Mover.GoToPoint(NewPoint.Position, out _);
-            }
-            else
-            {
-                Bot.Decision.EnemyDecisions.ShiftCoverComplete = true;
-            }
         }
 
         private float GetSpeed()
@@ -99,6 +116,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
+            Toggle(true);
             Bot.Decision.EnemyDecisions.ShiftCoverComplete = false;
         }
 
@@ -107,6 +125,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
+            Toggle(false);
             Bot.Cover.CheckResetCoverInUse();
             NewPoint = null;
             UsedPoints.Clear();

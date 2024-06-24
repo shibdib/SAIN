@@ -107,8 +107,22 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             ColliderFinder = new ColliderFinder(this);
             CoverAnalyzer = new CoverAnalyzer(Bot, this);
 
-            botComponent.OnBotDisabled += StopLooking;
+            botComponent.BotActivation.OnBotStateChanged += ToggleCoverFinder;
             botComponent.OnSAINDisposed += botDisposed;
+        }
+
+        public void ToggleCoverFinder(bool value)
+        {
+            switch (value)
+            {
+                case true:
+                    LookForCover();
+                    break;
+
+                case false:
+                    StopLooking();
+                    break;
+            }
         }
 
         private void Update()
@@ -555,7 +569,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             if (Bot != null)
             {
                 Bot.OnSAINDisposed -= botDisposed;
-                Bot.OnBotDisabled -= StopLooking;
+                Bot.BotActivation.OnBotStateChanged -= ToggleCoverFinder;
             }
             Destroy(this);
         }

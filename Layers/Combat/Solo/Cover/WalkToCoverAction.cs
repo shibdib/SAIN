@@ -7,23 +7,21 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
-    internal class WalkToCoverAction : SAINAction
+    internal class WalkToCoverAction : SAINAction, ISAINAction
     {
         public WalkToCoverAction(BotOwner bot) : base(bot, nameof(WalkToCoverAction))
         {
         }
 
-        private float _nextUpdateCoverTime;
-        private Coroutine _coroutine;
-        private IEnumerator walkToCover()
+        public void Toggle(bool value)
         {
-            while (true)
-            {
-                if (Bot == null || !Bot.BotActive)
-                {
-                    break;
-                }
+            ToggleAction(value);
+        }
 
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
                 Bot.Mover.SetTargetMoveSpeed(1f);
                 Bot.Mover.SetTargetPose(1f);
 
@@ -52,6 +50,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 yield return null;
             }
         }
+
+        private float _nextUpdateCoverTime;
 
         public override void Update()
         {
@@ -159,15 +159,15 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 const float maxRange = 10f * 10f;
 
-                Vector3? blindCorner = Bot.Enemy.EnemyPath.BlindCornerToEnemy;
+                Vector3? blindCorner = Bot.Enemy.Path.BlindCornerToEnemy;
                 if (blindCorner != null
                     && (blindCorner.Value - lastKnown.Value).sqrMagnitude < maxRange)
                 {
                     return blindCorner;
                 }
 
-                Vector3? lastCorner = Bot.Enemy.EnemyPath.LastCornerToEnemy;
-                if (lastCorner != null && Bot.Enemy.EnemyPath.CanSeeLastCornerToEnemy
+                Vector3? lastCorner = Bot.Enemy.Path.LastCornerToEnemy;
+                if (lastCorner != null && Bot.Enemy.Path.CanSeeLastCornerToEnemy
                     && (lastCorner.Value - lastKnown.Value).sqrMagnitude < maxRange)
                 {
                     return lastCorner;
@@ -184,7 +184,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 bool shot = Bot.ManualShoot.TryShoot(true, position, true, EShootReason.WalkToCoverSuppress);
                 if (shot)
                 {
-                    Bot.Enemy.EnemyStatus.EnemyIsSuppressed = true;
+                    Bot.Enemy.Status.EnemyIsSuppressed = true;
                     if (Bot.Info.WeaponInfo.IWeaponClass == IWeaponClass.machinegun)
                     {
                         _suppressTime = Time.time + 0.05f * Random.Range(0.75f, 1.25f);
@@ -199,13 +199,12 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
-            _coroutine = Bot.StartCoroutine(walkToCover());
+            Toggle(true);
         }
 
         public override void Stop()
         {
-            Bot.StopCoroutine(_coroutine);
-            _coroutine = null;
+            Toggle(false);
 
             Bot.Mover.DogFight.ResetDogFightStatus();
             Bot.Cover.CheckResetCoverInUse();

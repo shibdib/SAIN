@@ -1,4 +1,5 @@
 using EFT;
+using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.SAINComponent.Classes.Decision;
@@ -129,9 +130,9 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool ShallReportLostVisual()
         {
             var enemy = Bot.Enemy;
-            if (enemy != null && enemy.EnemyVision.ShallReportLostVisual)
+            if (enemy != null && enemy.Vision.ShallReportLostVisual)
             {
-                enemy.EnemyVision.ShallReportLostVisual = false;
+                enemy.Vision.ShallReportLostVisual = false;
                 if (EFTMath.RandomBool(_reportLostVisualChance))
                 {
                     ETagStatus mask = PersonIsClose(enemy.EnemyPlayer) ? ETagStatus.Combat : ETagStatus.Aware;
@@ -158,11 +159,12 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
-            if (Bot.EnemyController.IsPlayerFriendly(player))
+            Enemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
+            if (enemy == null)
             {
                 return;
             }
-            if ((player.Position - Bot.Position).sqrMagnitude > _reportEnemyMaxDist * _reportEnemyMaxDist)
+            if (enemy.RealDistance > _reportEnemyMaxDist)
             {
                 return;
             }
@@ -191,7 +193,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     squad.OnSoundHeard -= onNoiseHeard;
                 }
 
-                var botController = SAINPlugin.BotController;
+                var botController = SAINBotController.Instance;
 
                 if (botController != null)
                     botController.PlayerTalk -= EnemyConversation;
@@ -212,7 +214,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
                 squad.MemberKilled += OnFriendlyDown;
                 squad.OnSoundHeard += onNoiseHeard;
-                SAINPlugin.BotController.PlayerTalk += EnemyConversation;
+                SAINBotController.Instance.PlayerTalk += EnemyConversation;
                 BotOwner.DeadBodyWork.OnStartLookToBody += OnLootBody;
                 Bot.EnemyController.OnEnemyKilled += OnEnemyDown;
             }
@@ -225,9 +227,10 @@ namespace SAIN.SAINComponent.Classes.Talk
                 _nextCheckEnemyHPTime = Time.time + _reportEnemyHealthFreq;
                 if (EFTMath.RandomBool(_reportEnemyHealthChance))
                 {
-                    ETagStatus health = Bot.Enemy.EnemyPlayer.HealthStatus;
-                    return (health == ETagStatus.Dying || health == ETagStatus.BadlyInjured)
-                        && Bot.Talk.GroupSay(EPhraseTrigger.OnEnemyShot, null, false, 100);
+                    ETagStatus health = Bot.Enemy.Status.EnemyHealthStatus;
+                    return 
+                        (health == ETagStatus.Dying || health == ETagStatus.BadlyInjured) && 
+                        Bot.Talk.GroupSay(EPhraseTrigger.OnEnemyShot, null, false, 100);
                 }
             }
             return false;
@@ -249,9 +252,9 @@ namespace SAIN.SAINComponent.Classes.Talk
                         return Bot.Talk.GroupSay(EPhraseTrigger.OnFirstContact, mask, true, 100);
                     }
                 }
-                if (enemy.EnemyVision.ShallReportRepeatContact)
+                if (enemy.Vision.ShallReportRepeatContact)
                 {
-                    enemy.EnemyVision.ShallReportRepeatContact = false;
+                    enemy.Vision.ShallReportRepeatContact = false;
                     if (EFTMath.RandomBool(40))
                     {
                         ETagStatus mask = PersonIsClose(enemy.EnemyPlayer) ? ETagStatus.Combat : ETagStatus.Aware;
@@ -342,10 +345,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void OnLootBody(float num)
         {
-            if (BotOwner.IsDead
-                || BotOwner.BotState != EBotState.Active
-                || Bot.Enemy != null
-                || !FriendIsClose)
+            if (!Bot.BotActive || !FriendIsClose)
             {
                 return;
             }
@@ -478,7 +478,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 var trigger = EPhraseTrigger.PhraseNone;
                 HurtTalkTimer = Time.time + Bot.Info.FileSettings.Mind.SquadMemberTalkFreq * 5f * Random.Range(0.66f, 1.33f);
 
-                if (Bot.HasEnemy && Bot.Enemy.RealDistance < 25f)
+                if (Bot.HasEnemy && Bot.Enemy.RealDistance < 35f)
                 {
                     return false;
                 }

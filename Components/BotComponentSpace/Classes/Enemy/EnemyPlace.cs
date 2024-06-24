@@ -1,4 +1,5 @@
 ﻿using EFT;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyPlace
     {
+        public event Action<EnemyPlace> OnPositionUpdated;
+
         public EnemyPlace(string ownerID, Vector3 position, float expireTime, bool isDanger, IPlayer player)
         {
             OwnerID = ownerID;
@@ -23,8 +26,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             get
             {
-                return false;
-
+                /*
                 if (TimeSincePositionUpdated > ExpireTime)
                 {
                     return true;
@@ -43,6 +45,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 {
                     return true;
                 }
+                */
                 if (Player?.HealthController?.IsAlive == false)
                 {
                     return true;
@@ -92,6 +95,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 TimePositionUpdated = Time.time;
                 _position = value;
+                OnPositionUpdated?.Invoke(this);
             }
         }
 
@@ -109,7 +113,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             return (_position - toPoint).sqrMagnitude;
         }
-
 
         public bool HasArrivedPersonal
         {

@@ -1,15 +1,10 @@
 ﻿using SAIN.SAINComponent.Classes.EnemyClasses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SAIN.Components.BotComponentSpace.Classes.Enemy
+namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 {
     public class EnemyKnownChecker : EnemyBase, ISAINEnemyClass
     {
-        public EnemyKnownChecker(SAINComponent.Classes.EnemyClasses.Enemy enemy) : base(enemy)
+        public EnemyKnownChecker(Enemy enemy) : base(enemy)
         {
 
         }

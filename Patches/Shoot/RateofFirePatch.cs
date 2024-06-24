@@ -2,6 +2,7 @@
 using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
+using SAIN.Components;
 using System.Reflection;
 using UnityEngine;
 using static SAIN.Helpers.Shoot;
@@ -62,7 +63,7 @@ namespace SAIN.Patches.Shoot.RateOfFire
             {
                 return;
             }
-            if (SAINPlugin.BotController.GetSAIN(___botOwner_0, out var component))
+            if (SAINBotController.Instance.GetSAIN(___botOwner_0, out var component))
             {
                 __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
             }
@@ -83,7 +84,7 @@ namespace SAIN.Patches.Shoot.RateOfFire
             {
                 return;
             }
-            if (SAINPlugin.BotController.GetSAIN(___botOwner_0, out var component))
+            if (SAINBotController.Instance.GetSAIN(___botOwner_0, out var component))
             {
                 __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
             }
@@ -104,7 +105,7 @@ namespace SAIN.Patches.Shoot.RateOfFire
             {
                 return;
             }
-            if (SAINPlugin.BotController.GetSAIN(___botOwner_0, out var component))
+            if (SAINBotController.Instance.GetSAIN(___botOwner_0, out var component))
             {
                 __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
             }

@@ -140,6 +140,11 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void ResetToNavMesh()
         {
+            if (BotOwner.Mover == null)
+            {
+                Logger.LogWarning("Bot Mover Null");
+                return;
+            }
             Vector3 position = Bot.Position;
             if ((_prevLinkPos - position).sqrMagnitude > 0f)
             {

@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Init()
         {
-            SquadInfo = SAINPlugin.BotController.BotSquads.GetSquad(Bot);
+            SquadInfo = SAINBotController.Instance.BotSquads.GetSquad(Bot);
         }
 
         public Squad SquadInfo { get; private set; }

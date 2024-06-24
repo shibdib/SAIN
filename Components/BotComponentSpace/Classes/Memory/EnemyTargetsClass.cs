@@ -37,8 +37,8 @@ namespace SAIN.SAINComponent.Classes.Memory
             return null;
         }
 
-        public bool HasEnemy => PrimaryEnemy?.EnemyPerson?.IsActive == true;
-        public bool HasLastEnemy => LastPrimaryEnemy?.EnemyPerson?.IsActive == true;
+        public bool HasEnemy => PrimaryEnemy?.EnemyPerson?.Active == true;
+        public bool HasLastEnemy => LastPrimaryEnemy?.EnemyPerson?.Active == true;
 
         public Enemy PrimaryEnemy
         {

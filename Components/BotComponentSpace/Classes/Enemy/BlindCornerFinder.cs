@@ -12,10 +12,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
         }
 
-        public IEnumerator FindBlindCorner(NavMeshPath path)
+        public IEnumerator FindBlindCorner(Vector3[] corners)
         {
             _corners.Clear();
-            _corners.AddRange(path.corners);
+            _corners.AddRange(corners);
             if (_corners.Count > 2)
             {
                 Vector3 lookPoint = Bot.Transform.EyePosition;

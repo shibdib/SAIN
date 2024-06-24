@@ -1,41 +1,56 @@
 ﻿using EFT;
+using System.Collections;
 using System.Text;
 using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
-    internal class DoSurgeryAction : SAINAction
+    internal class DoSurgeryAction : SAINAction, ISAINAction
     {
-        public DoSurgeryAction(BotOwner bot) : base(bot, nameof(DoSurgeryAction))
+        public DoSurgeryAction(BotOwner bot) : base(bot, "Surgery")
         {
+        }
+
+        public void Toggle(bool value)
+        {
+            ToggleAction(value);
+        }
+
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
+                if (Bot.Medical.Surgery.AreaClearForSurgery)
+                {
+                    Bot.Mover.PauseMovement(30);
+                    Bot.Mover.SprintController.CancelRun();
+                    Bot.Mover.SetTargetMoveSpeed(0f);
+                    Bot.Cover.DuckInCover();
+                    tryStartSurgery();
+                }
+                else
+                {
+                    BotOwner.Mover.MovementResume();
+                    Bot.Mover.SetTargetMoveSpeed(1);
+                    Bot.Mover.SetTargetPose(1);
+
+                    Bot.Medical.Surgery.SurgeryStarted = false;
+                    Bot.Medical.TryCancelHeal();
+                    Bot.Mover.DogFight.DogFightMove(false);
+                }
+
+                if (!Bot.Steering.SteerByPriority(false) &&
+                    !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy))
+                {
+                    Bot.Steering.LookToRandomPosition();
+                }
+
+                yield return null;
+            }
         }
 
         public override void Update()
         {
-            if (Bot.Medical.Surgery.AreaClearForSurgery)
-            {
-                Bot.Mover.PauseMovement(30);
-                Bot.Mover.SprintController.CancelRun();
-                Bot.Mover.SetTargetMoveSpeed(0f);
-                Bot.Cover.DuckInCover();
-                tryStartSurgery();
-            }
-            else
-            {
-                BotOwner.Mover.MovementResume();
-                Bot.Mover.SetTargetMoveSpeed(1);
-                Bot.Mover.SetTargetPose(1);
-
-                Bot.Medical.Surgery.SurgeryStarted = false;
-                Bot.Medical.TryCancelHeal();
-                Bot.Mover.DogFight.DogFightMove(false);
-            }
-
-            if (!Bot.Steering.SteerByPriority(false) &&
-                !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy))
-            {
-                Bot.Steering.LookToRandomPosition();
-            }
         }
 
         private bool tryStartSurgery()
@@ -97,7 +112,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Start()
         {
-            //SAINBot.Mover.StopMove();
+            Toggle(true);
             Bot.Mover.PauseMovement(3f);
             _startSurgeryTime = Time.time + 1f;
             _actionStartedTime = Time.time;
@@ -108,6 +123,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Stop()
         {
+            Toggle(false);
             Bot.Cover.CheckResetCoverInUse();
             Bot.Medical.Surgery.SurgeryStarted = false;
             BotOwner.MovementResume();

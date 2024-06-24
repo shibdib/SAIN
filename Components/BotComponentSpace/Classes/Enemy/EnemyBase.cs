@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Components.PlayerComponentSpace;
+using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses

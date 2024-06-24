@@ -1,4 +1,5 @@
 ﻿using EFT;
+using System.Collections;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -6,6 +7,24 @@ namespace SAIN.Layers.Combat.Solo
     {
         public FreezeAction(BotOwner bot) : base(bot, nameof(FreezeAction))
         {
+        }
+        public void Toggle(bool value)
+        {
+            ToggleAction(value);
+        }
+
+        public override IEnumerator ActionCoroutine()
+        {
+            while (Active)
+            {
+                Bot.Mover.SetTargetPose(0f);
+                if (!Bot.Steering.SteerByPriority(false))
+                {
+                    Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
+                }
+                Shoot.Update();
+                yield return null;
+            }
         }
 
         public override void Update()
@@ -20,11 +39,13 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Start()
         {
+            Toggle(true);
             Bot.Mover.StopMove();
         }
 
         public override void Stop()
         {
+            Toggle(false);
         }
     }
 }

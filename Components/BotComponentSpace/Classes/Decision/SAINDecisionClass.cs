@@ -61,7 +61,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
-            Bot.OnBotDisabled += resetDecisions;
+            Bot.BotActivation.OnBotStateChanged += resetDecisions;
         }
 
         public void Update()
@@ -82,7 +82,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Dispose()
         {
-            Bot.OnBotDisabled -= resetDecisions;
+            Bot.BotActivation.OnBotStateChanged -= resetDecisions;
         }
 
         private void getDecision()
@@ -214,16 +214,17 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void ResetDecisions(bool active)
         {
-            resetDecisions();
-            if (active && HasDecision)
+            bool hasDecision = HasDecision;
+            resetDecisions(false);
+            if (active && hasDecision)
             {
                 BotOwner.CalcGoal();
             }
         }
 
-        private void resetDecisions()
+        private void resetDecisions(bool value)
         {
-            if (HasDecision)
+            if (!value && HasDecision)
             {
                 SetDecisions(SoloDecision.None, SquadDecision.None, SelfDecision.None);
             }

@@ -122,13 +122,13 @@ namespace SAIN.SAINComponent.Classes.Decision
                 && Bot.Info.PersonalitySettings.Rush.CanRushEnemyReloadHeal)
             {
                 bool inRange = false;
-                float modifier = enemy.EnemyStatus.VulnerableAction == EEnemyAction.UsingSurgery ? 1.25f : 1f;
-                if (enemy.EnemyPath.PathDistance < PushSuppressedEnemyMaxPathDistanceSprint * modifier
+                float modifier = enemy.Status.VulnerableAction == EEnemyAction.UsingSurgery ? 1.25f : 1f;
+                if (enemy.Path.PathDistance < PushSuppressedEnemyMaxPathDistanceSprint * modifier
                     && BotOwner?.CanSprintPlayer == true)
                 {
                     inRange = true;
                 }
-                else if (enemy.EnemyPath.PathDistance < PushSuppressedEnemyMaxPathDistance * modifier)
+                else if (enemy.Path.PathDistance < PushSuppressedEnemyMaxPathDistance * modifier)
                 {
                     inRange = true;
                 }
@@ -138,8 +138,8 @@ namespace SAIN.SAINComponent.Classes.Decision
                     && Bot.Squad.SquadInfo.SquadIsSuppressEnemy(enemy.EnemyPlayer.ProfileId, out var suppressingMember) 
                     && suppressingMember != Bot)
                 {
-                    var enemyStatus = enemy.EnemyStatus;
-                    if (enemy.EnemyStatus.VulnerableAction != EEnemyAction.None)
+                    var enemyStatus = enemy.Status;
+                    if (enemy.Status.VulnerableAction != EEnemyAction.None)
                     {
                         return true;
                     }
@@ -246,7 +246,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallHelp(BotComponent member)
         {
-            float distance = member.Enemy.EnemyPath.PathDistance;
+            float distance = member.Enemy.Path.PathDistance;
             bool visible = member.Enemy.IsVisible;
 
             if (Bot.Decision.CurrentSquadDecision == SquadDecision.Help 

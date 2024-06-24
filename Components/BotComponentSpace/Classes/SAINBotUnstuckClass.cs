@@ -327,7 +327,7 @@ namespace SAIN.SAINComponent.Classes.Debug
             while (true)
             {
                 if (Bot.BotActive
-                && !Bot.GameIsEnding)
+                && !Bot.GameEnding)
                 {
                     checkFixOffMeshBot();
                     tryAutoVault();

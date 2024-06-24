@@ -75,7 +75,7 @@ namespace SAIN.Components
             }
             else if (bot.EnemyController.Enemies.TryGetValue(profileID, out var enemy))
             {
-                maxRange += enemy.EnemyVision.VisionDistance;
+                maxRange += enemy.Vision.VisionDistance;
             }
             maxRange = Mathf.Clamp(maxRange, 0f, direction.magnitude);
             return maxRange;

@@ -252,6 +252,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ReloadClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SAINEnemySearchClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINBotLookClass.cs" />
+    <Compile Include="Components\BotComponentSpace\CoroutineManager.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverFinderStatus.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\ECoverFailReason.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\BotHearingClass.cs" />
@@ -262,8 +263,10 @@
     <Compile Include="Components\PlayerComponentSpace\Classes\FlashLightPoint.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\PlayerAISoundPlayer.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\PlayerLocationClass.cs" />
-    <Compile Include="Components\PlayerComponentSpace\ShootPlayerClass.cs" />
+    <Compile Include="Components\PlayerComponentSpace\Classes\ShootPlayerClass.cs" />
+    <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonActiveClass.cs" />
     <Compile Include="Helpers\PerformanceHelpers.cs" />
+    <Compile Include="Layers\ISAINAction.cs" />
     <Compile Include="Patches\FixPatches.cs" />
     <Compile Include="Patches\Shoot\AimDataPatches.cs" />
     <Compile Include="Preset\Editor\Attributes\AttributesGUI.cs" />
@@ -390,8 +393,8 @@
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\BotLightController.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ManualShootClass.cs" />
     <Compile Include="Components\BotComponentSpace\ESAINLayer.cs" />
-    <Compile Include="Components\PlayerComponentSpace\PersonClass.cs" />
-    <Compile Include="Components\PlayerComponentSpace\PersonTransformClass.cs" />
+    <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonClass.cs" />
+    <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonTransformClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\SAINMemoryClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\ProfileClass.cs" />
     <Compile Include="Preset\BotSettings\SAINSettings\SAINSettingsGroupClass.cs" />

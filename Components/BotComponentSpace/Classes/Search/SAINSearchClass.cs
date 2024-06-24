@@ -75,7 +75,7 @@ namespace SAIN.SAINComponent.Classes.Search
             {
                 return true;
             }
-            if (enemy.EnemyStatus.SearchStarted)
+            if (enemy.Status.SearchStarted)
             {
                 return shallContinueSearch(enemy, timeBeforeSearch);
             }
@@ -103,9 +103,9 @@ namespace SAIN.SAINComponent.Classes.Search
 
         private bool shallSearchCauseLooting(Enemy enemy)
         {
-            if (enemy.EnemyStatus.EnemyIsLooting)
+            if (enemy.Status.EnemyIsLooting)
             {
-                if (!enemy.EnemyStatus.SearchStarted && _nextCheckLootTime < Time.time)
+                if (!enemy.Status.SearchStarted && _nextCheckLootTime < Time.time)
                 {
                     _nextCheckLootTime = Time.time + _checkLootFreq;
                     if (EFTMath.RandomBool(_searchLootChance))
@@ -113,7 +113,7 @@ namespace SAIN.SAINComponent.Classes.Search
                         return true;
                     }
                 }
-                if (enemy.EnemyStatus.SearchStarted)
+                if (enemy.Status.SearchStarted)
                 {
                     return true;
                 }

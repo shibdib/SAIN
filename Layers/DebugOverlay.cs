@@ -128,7 +128,7 @@ namespace SAIN.Layers
             stringBuilder.AppendLabeledValue("Enemy Name", $"{enemy.EnemyPlayer?.Profile.Nickname}", Color.white, Color.red, true);
             stringBuilder.AppendLabeledValue("Enemy Power Level ", $"{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}", Color.white, Color.red, true);
 
-            stringBuilder.AppendLabeledValue("Last GainSight Result", $"{enemy.EnemyVision.LastGainSightResult}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Last GainSight Result", $"{enemy.Vision.LastGainSightResult}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("SeenCoef", $"{enemy.EnemyInfo.SeenCoef}", Color.white, Color.yellow, true);
             //stringBuilder.AppendLabeledValue("PercentSpotted", $"{enemy.EnemyInfo.BodyData().Value?.PercentSpotted(out _)}", Color.white, Color.yellow, true);
 
@@ -145,7 +145,7 @@ namespace SAIN.Layers
             if (enemy.Heard)
             {
                 stringBuilder.AppendLabeledValue("Time Since Heard", $"{enemy.TimeSinceHeard}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Heard Recently?", $"{enemy.EnemyStatus.HeardRecently}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Heard Recently?", $"{enemy.Status.HeardRecently}", Color.white, Color.yellow, true);
             }
 
             var lastKnown = enemy.KnownPlaces.LastKnownPlace;

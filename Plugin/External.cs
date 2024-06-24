@@ -35,7 +35,7 @@ namespace SAIN.Plugin
 
         public static void GetExtractedBots(List<string> list)
         {
-            var botController = SAINPlugin.BotController;
+            var botController = SAINBotController.Instance;
             if (botController == null)
             {
                 Logger.LogWarning("SAIN Bot Controller is Null, cannot retrieve Extracted Bots List.");
@@ -53,7 +53,7 @@ namespace SAIN.Plugin
 
         public static void GetExtractionInfos(List<ExtractionInfo> list)
         {
-            var botController = SAINPlugin.BotController;
+            var botController = SAINBotController.Instance;
             if (botController == null)
             {
                 Logger.LogWarning("SAIN Bot Controller is Null, cannot retrieve Extracted Bots List.");
@@ -82,7 +82,7 @@ namespace SAIN.Plugin
                 Logger.LogWarning($"{bot.name} is not allowed to use extracting logic.");
             }
 
-            if (!SAINPlugin.BotController.BotExtractManager.TryFindExfilForBot(component))
+            if (!SAINBotController.Instance.BotExtractManager.TryFindExfilForBot(component))
             {
                 return false;
             }
@@ -175,7 +175,7 @@ namespace SAIN.Plugin
             }
 
             // Compare the corners in both paths, and check if the nodes used in each are the same.
-            if (SAINBotSpaceAwareness.ArePathsDifferent(path, enemy.EnemyPath.PathToEnemy, ratioSameOverAll, sqrDistCheck))
+            if (SAINBotSpaceAwareness.ArePathsDifferent(path, enemy.Path.PathToEnemy, ratioSameOverAll, sqrDistCheck))
             {
                 return false;
             }

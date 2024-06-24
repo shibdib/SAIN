@@ -119,7 +119,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 return null;
             }
-            return enemy.LastKnownPosition ?? enemy.EnemyStatus.LastShotPosition;
+            return enemy.LastKnownPosition ?? enemy.Status.LastShotPosition;
         }
 
         private Vector3? getUnderFirePosition()

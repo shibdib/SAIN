@@ -71,7 +71,7 @@ namespace SAIN.SAINComponent.Classes
             Vector3 enemyPosition = Bot.Enemy.EnemyPosition;
             Vector3 botPosition = Bot.Position;
 
-            Vector3? middleNode = FindMiddlePoint(enemy.EnemyPath.PathToEnemy, enemy.EnemyPath.PathDistance, out int index);
+            Vector3? middleNode = FindMiddlePoint(enemy.Path.PathToEnemy, enemy.Path.PathDistance, out int index);
 
             if (middleNode != null)
             {
@@ -122,7 +122,7 @@ namespace SAIN.SAINComponent.Classes
                 Vector3 flankPoint1 = path.corners[path.corners.Length - 1];
                 Vector3 flankPoint2 = path2.corners[path2.corners.Length - 1];
 
-                NavMeshPath pathToEnemy = enemy.EnemyPath.PathToEnemy;
+                NavMeshPath pathToEnemy = enemy.Path.PathToEnemy;
 
                 NavMeshPath flankPath = new NavMeshPath();
                 if (NavMesh.CalculatePath(botPosition, flankPoint1, -1, flankPath)
