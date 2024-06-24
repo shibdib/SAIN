@@ -39,6 +39,18 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
             }
         }
 
+        private void botStateChanged(EBotState state)
+        {
+            if (state == EBotState.Disposed)
+            {
+                if (_person.BotOwner != null)
+                    _person.BotOwner.OnBotStateChange -= botStateChanged;
+
+                IsAlive = false;
+                playerKilledOrNull();
+            }
+        }
+
         public PersonActiveClass(PersonClass person)
         {
             _person = person;
@@ -149,6 +161,11 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
         {
             Player player = _person.Player;
             return player != null && player.gameObject != null && player.Transform?.Original != null;
+        }
+
+        public void InitBotOwner(BotOwner botOwner)
+        {
+            botOwner.OnBotStateChange += botStateChanged;
         }
 
         private bool _playerNullOrDead;

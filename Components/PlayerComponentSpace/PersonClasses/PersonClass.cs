@@ -68,6 +68,7 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
                 Name = botOwner.name;
                 BotOwner = botOwner;
                 IsAI = true;
+                ActiveClass.InitBotOwner(botOwner);
             }
         }
 

@@ -1,5 +1,4 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using EFT.InventoryLogic;
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;

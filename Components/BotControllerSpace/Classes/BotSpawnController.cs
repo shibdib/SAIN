@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Components.PlayerComponentSpace;
+using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using SAIN.SAINComponent;
 using System;
 using System.Collections;
@@ -63,7 +64,16 @@ namespace SAIN.Components.BotController
 
         public void AddBot(BotOwner botOwner)
         {
-            BotController.StartCoroutine(addBot(botOwner));
+            PlayerComponent playerComponent = getPlayerComp(botOwner);
+            checkExisting(botOwner);
+
+            if (SAINPlugin.IsBotExluded(botOwner))
+            {
+                botOwner.gameObject.AddComponent<SAINNoBushESP>().Init(botOwner);
+                return;
+            }
+
+            initBotComp(botOwner, playerComponent);
         }
 
         public void Subscribe(BotSpawner botSpawner)
@@ -102,36 +112,17 @@ namespace SAIN.Components.BotController
             return null;
         }
 
-        private IEnumerator addBot(BotOwner botOwner)
-        {
-            yield return null;
-
-            try
-            {
-                PlayerComponent playerComponent = getPlayerComp(botOwner);
-                checkExisting(botOwner);
-
-                if (SAINPlugin.IsBotExluded(botOwner))
-                {
-                    botOwner.gameObject.AddComponent<SAINNoBushESP>().Init(botOwner);
-                    yield break;
-                }
-
-                initBotComp(botOwner, playerComponent);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"AddBot: Add Component Error: {ex}");
-            }
-
-            yield return null;
-        }
-
         private PlayerComponent getPlayerComp(BotOwner botOwner)
         {
             PlayerComponent playerComponent = botOwner.gameObject.GetComponent<PlayerComponent>();
             playerComponent.InitBotOwner(botOwner);
             return playerComponent;
+        }
+
+        private void removePerson(PersonClass person)
+        {
+            person.ActiveClass.OnPersonDeadOrDespawned -= removePerson;
+            removeBot(person.BotOwner);
         }
 
         private void checkExisting(BotOwner botOwner)
@@ -165,7 +156,7 @@ namespace SAIN.Components.BotController
                 BotDictionary.Add(botOwner.name, botComponent);
                 playerComponent.InitBotComponent(botComponent);
                 botOwner.LeaveData.OnLeave += removeBot;
-                playerComponent.OnComponentDestroyed += removeBot;
+                playerComponent.Person.ActiveClass.OnPersonDeadOrDespawned += removePerson;
             }
             else
             {
@@ -173,7 +164,7 @@ namespace SAIN.Components.BotController
             }
         }
 
-        private IEnumerator destroyBotComponent(BotOwner botOwner)
+        public void removeBot(BotOwner botOwner)
         {
             try
             {
@@ -198,27 +189,6 @@ namespace SAIN.Components.BotController
             {
                 Logger.LogError($"Dispose Component Error: {ex}");
             }
-            yield return null;
-        }
-
-        public void removeBot(IPlayer player)
-        {
-            removeBot(player?.AIData?.BotOwner);
-        }
-
-        private void removeBot(string profileID)
-        {
-            var playerComp = GameWorldComponent.Instance?.PlayerTracker.GetPlayerComponent(profileID);
-            if (playerComp != null)
-            {
-                playerComp.OnComponentDestroyed -= removeBot;
-                removeBot(playerComp.BotOwner);
-            }
-        }
-
-        public void removeBot(BotOwner botOwner)
-        {
-            destroyBotComponent(botOwner);
         }
     }
 }
