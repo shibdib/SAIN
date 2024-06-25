@@ -20,7 +20,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 Bot.Mover.SetTargetMoveSpeed(1f);
                 Bot.Mover.SetTargetPose(1f);

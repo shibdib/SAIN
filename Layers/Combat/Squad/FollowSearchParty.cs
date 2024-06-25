@@ -23,7 +23,7 @@ namespace SAIN.Layers.Combat.Squad
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 if (!Bot.Mover.SprintController.Running)
                 {

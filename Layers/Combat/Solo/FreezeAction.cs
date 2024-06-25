@@ -15,7 +15,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 Bot.Mover.SetTargetPose(0f);
                 if (!Bot.Steering.SteerByPriority(false))

@@ -32,11 +32,11 @@ namespace SAIN.SAINComponent.Classes
             switch (value)
             {
                 case true:
-                    Bot.CoroutineManager.Add(friendlyFireLoop());
+                    Bot.CoroutineManager.Add(friendlyFireLoop(), nameof(friendlyFireLoop));
                     break;
 
                 case false:
-                    Bot.CoroutineManager.Remove(friendlyFireLoop());
+                    Bot.CoroutineManager.Remove(nameof(friendlyFireLoop));
                     break;
             }
         }

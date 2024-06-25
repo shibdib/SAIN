@@ -18,7 +18,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 if (Bot.Medical.Surgery.AreaClearForSurgery)
                 {

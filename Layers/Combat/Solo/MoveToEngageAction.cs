@@ -20,7 +20,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 Enemy enemy = Bot.Enemy;
                 if (enemy == null)

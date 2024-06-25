@@ -21,7 +21,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 Bot.Steering.SteerByPriority();
                 Shoot.Update();

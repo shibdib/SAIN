@@ -2,7 +2,6 @@
 using EFT;
 using EFT.EnvironmentEffect;
 using HarmonyLib;
-using SAIN;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.SAINComponent;

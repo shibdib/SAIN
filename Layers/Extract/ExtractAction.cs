@@ -21,7 +21,7 @@ namespace SAIN.Layers
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 float stamina = Bot.Player.Physical.Stamina.NormalValue;
                 bool fightingEnemy = isFightingEnemy();

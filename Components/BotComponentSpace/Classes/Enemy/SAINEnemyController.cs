@@ -33,7 +33,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Bot.CoroutineManager.Add(enemyVisionCheck());
+            Bot.CoroutineManager.Add(enemyVisionCheck(), nameof(enemyVisionCheck));
             BotOwner.Memory.OnAddEnemy += AddEnemy;
             allAllEnemies();
         }
@@ -58,10 +58,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 {
                     if (enemy?.IsValid == true)
                     {
-                        enemy.Vision.EnemyVisionChecker.CheckVision();
+                        enemy.Vision.EnemyVisionChecker.CheckVision(out bool didCheck);
+
+                        if (!didCheck)
+                            continue;
+
                         enemiesChecked++;
+
                         if (enemy.InLineOfSight)
                             enemiesInLOS++;
+
                         if (enemy.IsVisible)
                             enemiesVisible++;
                     }
@@ -70,9 +76,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 if (_nextlog < Time.time)
                 {
                     _nextlog = Time.time + 10;
-                    Logger.LogDebug($"Checked {enemiesChecked} enemies out of {Enemies.Count} total enemies. Total in LOS [{enemiesInLOS}] Total visible [{enemiesVisible}] Total EnemyInfos {BotOwner.BotsGroup.Enemies.Count}");
-                    Logger.LogDebug($"Active Enemy: {ActiveEnemy?.EnemyPerson.Name}");
-                    Logger.LogDebug($"Current Decision: {Bot.Decision.CurrentSoloDecision}");
+                    //Logger.LogDebug($"Checked {enemiesChecked} enemies out of {Enemies.Count} total enemies. Total in LOS [{enemiesInLOS}] Total visible [{enemiesVisible}] Total EnemyInfos {BotOwner.BotsGroup.Enemies.Count}");
+                    //Logger.LogDebug($"Active Enemy: {ActiveEnemy?.EnemyPerson.Name}");
+                    //Logger.LogDebug($"Current Decision: {Bot.Decision.CurrentSoloDecision}");
                 }
                 yield return null;
             }

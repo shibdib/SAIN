@@ -28,7 +28,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 yield return null;
 

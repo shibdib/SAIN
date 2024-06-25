@@ -1,6 +1,5 @@
 ﻿using DrakiaXYZ.BigBrain.Brains;
 using EFT;
-using SAIN.Components;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using System.Collections;
@@ -10,7 +9,7 @@ namespace SAIN.Layers
 {
     public abstract class SAINAction : CustomLogic
     {
-        public static string Name { get; private set; }
+        public string Name { get; private set; }
 
         public SAINAction(BotOwner botOwner, string name) : base(botOwner)
         {
@@ -21,7 +20,7 @@ namespace SAIN.Layers
 
         public virtual IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 yield return null;
             }
@@ -40,13 +39,13 @@ namespace SAIN.Layers
             switch (value)
             {
                 case true:
-                    Bot.CoroutineManager.Add(ActionCoroutine());
+                    Bot.CoroutineManager.Add(ActionCoroutine(), Name);
                     BotOwner.PatrollingData?.Pause();
                     break;
 
                 case false:
                     BotOwner.PatrollingData?.Unpause();
-                    Bot.CoroutineManager.Remove(ActionCoroutine());
+                    Bot.CoroutineManager.Remove(Name);
                     break;
             }
         }

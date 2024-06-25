@@ -20,7 +20,7 @@ namespace SAIN.Layers.Combat.Squad
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 var SquadLeadPos = Bot.Squad.LeaderComponent?.Position;
                 if (SquadLeadPos != null)

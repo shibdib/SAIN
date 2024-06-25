@@ -17,7 +17,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 if (!Stopped && Time.time - StartTime > 1f || Bot.Cover.CheckLimbsForCover())
                 {

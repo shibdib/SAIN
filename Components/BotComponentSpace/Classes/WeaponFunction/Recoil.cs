@@ -54,7 +54,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             if (_recoilFinished)
             {
-                Bot.CoroutineManager.Add(RecoilLoop());
+                Bot.CoroutineManager.Add(RecoilLoop(), "RecoilLoop");
             }
         }
 
@@ -62,7 +62,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             if (!value)
             {
-                Bot.CoroutineManager.Remove(RecoilLoop());
+                Bot.CoroutineManager.Remove("RecoilLoop");
                 _recoilFinished = false;
                 _shotRegistered = false;
                 _barrelRising = false;

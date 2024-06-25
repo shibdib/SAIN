@@ -193,12 +193,27 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             EnemyParts = new SAINEnemyParts(enemy.EnemyPlayer.PlayerBones, enemy.Player.IsYourPlayer);
             _transform = enemy.Bot.Transform;
+            _startVisionTime = Time.time + UnityEngine.Random.Range(0.0f, 0.33f);
         }
+
+        private bool _visionStarted;
+        private float _startVisionTime;
 
         private PersonTransformClass _transform;
 
-        public void CheckVision()
+        public void CheckVision(out bool didCheck)
         {
+            if (!_visionStarted)
+            {
+                if (_startVisionTime > Time.time)
+                {
+                    didCheck = false;
+                    return;
+                }
+                _visionStarted = true;
+            }
+
+            didCheck = true;
             if (EnemyParts.CheckBodyLineOfSight(_transform.EyePosition))
             {
                 return;

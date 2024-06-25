@@ -20,7 +20,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override IEnumerator ActionCoroutine()
         {
-            while (Active)
+            while (true)
             {
                 bool isBeingStealthy = Bot.Enemy?.EnemyHeardFromPeace == true;
                 if (isBeingStealthy)

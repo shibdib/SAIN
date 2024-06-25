@@ -73,7 +73,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             get
             {
-                Vector3? blindCorner = _blindCornerFinder.BlindCorner;
+                Vector3? blindCorner = _blindCornerFinder.BlindCorner?.Corner(Bot.Transform.EyePosition, Bot.Position);
 
                 if (blindCorner != null &&
                     SAINPlugin.DebugMode)
@@ -135,7 +135,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     if (!_started)
                     {
                         _started = true;
-                        Bot.CoroutineManager.Add(calcPathLoop());
+                        Bot.CoroutineManager.Add(calcPathLoop(), nameof(calcPathLoop));
                     }
                     break;
 
@@ -143,7 +143,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     if (_started)
                     {
                         _started = false;
-                        Bot.CoroutineManager.Remove(calcPathLoop());
+                        Bot.CoroutineManager.Remove(nameof(calcPathLoop));
                         Clear();
                     }
                     break;
@@ -216,15 +216,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 {
                     case NavMeshPathStatus.PathInvalid:
                         LastCornerToEnemy = null;
+                        _blindCornerFinder.ClearBlindCorner();
                         break;
 
                     case NavMeshPathStatus.PathPartial:
                     case NavMeshPathStatus.PathComplete:
+
                         findLastCorner(enemyPosition, PathToEnemyStatus, corners);
                         if (isCurrentEnemy)
-                        {
-                            yield return Bot.StartCoroutine(_blindCornerFinder.FindBlindCorner(corners));
-                        }
+                            yield return Bot.StartCoroutine(_blindCornerFinder.FindBlindCorner(corners, enemyPosition));
+
                         break;
                 }
 
@@ -237,7 +238,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             PathToEnemy.ClearCorners();
             PathToEnemyStatus = NavMeshPathStatus.PathInvalid;
             LastCornerToEnemy = null;
-            _blindCornerFinder.BlindCorner = null;
+            _blindCornerFinder.ClearBlindCorner();
             PathDistance = float.MaxValue;
         }
 

@@ -1,161 +1,189 @@
-﻿using SAIN.Helpers;
+﻿using Comfort.Common;
+using EFT;
+using EFT.Interactive;
+using SAIN.Helpers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class BlindCornerFinder : EnemyBase
     {
+        public BlindCorner? BlindCorner { get; private set; }
+
         public BlindCornerFinder(Enemy enemy) : base(enemy)
         {
         }
 
-        public IEnumerator FindBlindCorner(Vector3[] corners)
+        public void ClearBlindCorner()
         {
-            _corners.Clear();
-            _corners.AddRange(corners);
-            if (_corners.Count > 2)
-            {
-                Vector3 lookPoint = Bot.Transform.EyePosition;
-                Vector3 lookOffset = lookPoint - Bot.Position;
-                yield return Bot.StartCoroutine(findBlindCorner(_corners, lookPoint, lookOffset.y));
-                yield return Bot.StartCoroutine(findRealCorner(_blindCornerGround, _cornerNotVisible, lookPoint, lookOffset.y));
-            }
-            else
-            {
-                BlindCorner = null;
-            }
-            _corners.Clear();
+            BlindCorner = null;
         }
 
-        private IEnumerator clearShortCorners(List<Vector3> corners, float min)
+        public IEnumerator FindBlindCorner(Vector3[] corners, Vector3 enemyPosition)
         {
-            int removed = 0;
-            int count = corners.Count;
-
-            //StringBuilder stringBuilder = new StringBuilder();
-            //stringBuilder.AppendLine($"Clearing Short Corners of [{count}] for [{Bot.name}] with min [{min}]...");
-
-            for (int i = count - 2; i >= count; i--)
+            int count = corners.Length;
+            if (count <= 1)
             {
-                Vector3 cornerA = corners[i];
-                Vector3 cornerB = corners[i + 1];
-
-                float magnitude = (cornerA - cornerB).magnitude;
-                //Logger.LogDebug($"{i} to {i + 1} mag: [{magnitude}] min [{min}]");
-
-                if (magnitude > min)
-                    continue;
-
-                corners[i + 1] = Vector3.Lerp(cornerA, cornerB, 0.5f);
-                corners.RemoveAt(i);
-
-                //stringBuilder.AppendLine($"Corner [{i + 1}] replaced. Removed [{i}] because Magnitude [{magnitude}] with min [{min}]");
-                removed++;
-            }
-
-            if (removed > 0)
-            {
-                //stringBuilder.AppendLine($"Finished Clearing Short Corners. Removed [{removed}] corners from [{count}]");
-                //Logger.LogDebug(stringBuilder.ToString());
-            }
-
-            yield return null;
-        }
-
-        private IEnumerator findBlindCorner(List<Vector3> corners, Vector3 lookPoint, float height)
-        {
-            Vector3? result = null;
-            Vector3? notVisCorner = null;
-            int count = corners.Count;
-            if (count > 2)
-            {
-                for (int i = 1; i < corners.Count; i++)
-                {
-                    Vector3 target = corners[i];
-                    target.y += height;
-                    Vector3 direction = target - lookPoint;
-
-                    if (Physics.Raycast(lookPoint, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
-                    {
-                        result = corners[i - 1];
-                        notVisCorner = corners[i];
-                        //DebugGizmos.Line(target, lookPoint, Color.red, 0.05f, true, 5f, true);
-                        break;
-                    }
-                    //DebugGizmos.Line(target, lookPoint, Color.white, 0.05f, true, 5f, true);
-                    //yield return null;
-                }
-                if (result == null && count > 1)
-                {
-                    result = corners[1];
-                }
-                if (notVisCorner == null && count > 2)
-                {
-                    notVisCorner = corners[count - 1];
-                }
-            }
-            _blindCornerGround = result ?? Vector3.zero;
-            _cornerNotVisible = notVisCorner ?? Vector3.zero;
-            yield return null;
-        }
-
-        private IEnumerator findRealCorner(Vector3 blindCorner, Vector3 notVisibleCorner, Vector3 lookPoint, float height, int iterations = 15)
-        {
-            //StringBuilder stringBuilder = new StringBuilder();
-            //stringBuilder.AppendLine($"Finding Real Blind Corner for [{Bot.name}]...");
-
-            if (blindCorner == Vector3.zero)
-            {
-                BlindCorner = null;
-                yield break;
-            }
-            blindCorner.y += height;
-            BlindCorner = blindCorner;
-            if (notVisibleCorner == Vector3.zero)
-            {
+                ClearBlindCorner();
                 yield break;
             }
 
-            float sign = Vector.FindFlatSignedAngle(blindCorner, notVisibleCorner, lookPoint);
-            float angle = sign <= 0 ? -10f : 10f;
-            float rotationStep = angle / iterations;
+            Stopwatch sw = Stopwatch.StartNew();
+            int totalRaycasts = 0;
+            const int MAX_CASTS_PER_FRAME = 2;
+            const int MAX_ITERATIONS_REAL_CORNER = 15;
 
-            //stringBuilder.AppendLine($"Angle to check [{angle}] Step Angle [{rotationStep}]");
+            Vector3 lookPoint = Bot.Transform.EyePosition;
+            Vector3 lookOffset = lookPoint - Bot.Position;
+            float heightOffset = lookOffset.y;
 
-            Vector3 directionToBlind = blindCorner - lookPoint;
+            Vector3 notVisibleCorner = enemyPosition;
+            Vector3 lastVisibleCorner = corners[1];
 
             int raycasts = 0;
 
-            for (int i = 0; i < iterations; i++)
+            if (count > 2)
             {
-                directionToBlind = Vector.Rotate(directionToBlind, 0, rotationStep, 0);
-                if (!Physics.Raycast(lookPoint, directionToBlind, directionToBlind.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
+                _corners.Clear();
+                _corners.AddRange(corners);
+
+                notVisibleCorner = _corners[2];
+                lastVisibleCorner = _corners[1];
+
+                for (int i = 1; i < count; i++)
                 {
-                    BlindCorner = lookPoint + directionToBlind;
+                    raycasts++;
+                    Vector3 checkingCorner = _corners[i];
+                    if (rayCastToCorner(checkingCorner, lookPoint, heightOffset))
+                    {
+                        lastVisibleCorner = _corners[i - 1];
+                        notVisibleCorner = checkingCorner;
+                        break;
+                    }
+                    if (raycasts >= MAX_CASTS_PER_FRAME)
+                    {
+                        totalRaycasts += raycasts;
+                        raycasts = 0;
+                        yield return null;
+                    }
                 }
-                else
-                {
-                    //stringBuilder.AppendLine($"Angle where LOS broken [{rotationStep * i}] after [{i}] iterations");
-                    break;
-                }
+                _corners.Clear();
+            }
+
+            if (raycasts > 0)
+            {
+                totalRaycasts += raycasts;
+                raycasts = 0;
+                yield return null;
+            }
+
+
+            lastVisibleCorner.y += heightOffset;
+            notVisibleCorner.y += heightOffset;
+            
+            Vector3 pointPastCorner = RaycastPastCorner(lastVisibleCorner, lookPoint, 0f, 10f);
+            raycasts++;
+
+            float sign = Vector.FindFlatSignedAngle(pointPastCorner, notVisibleCorner, lookPoint);
+            float angle = sign <= 0 ? -15f : 15f;
+            float rotationStep = angle / MAX_ITERATIONS_REAL_CORNER;
+
+            Vector3 blindCorner = lastVisibleCorner;
+            Vector3 directionToBlind = lastVisibleCorner - lookPoint;
+            float rayMaxDist = (pointPastCorner - lookPoint).magnitude;
+
+            for (int i = 0; i < MAX_ITERATIONS_REAL_CORNER; i++)
+            {
                 raycasts++;
 
-                if (raycasts >= 3)
+                directionToBlind = Vector.Rotate(directionToBlind, 0, rotationStep, 0);
+
+                bool hit = Physics.Raycast(lookPoint, directionToBlind, rayMaxDist, LayerMaskClass.HighPolyWithTerrainMask);
+                drawDebug(lookPoint + directionToBlind, lookPoint, hit);
+
+                if (hit)
                 {
+                    Logger.LogDebug($"Angle where LOS broken [{rotationStep * i}] after [{i}] iterations");
+                    break;
+                }
+
+                blindCorner = lookPoint + directionToBlind;
+
+                if (raycasts >= MAX_CASTS_PER_FRAME)
+                {
+                    totalRaycasts += raycasts;
+                    raycasts = 0;
                     yield return null;
                 }
             }
 
-            //stringBuilder.AppendLine("Finished Checking for real Blind Corner");
-            //Logger.LogAndNotifyDebug(stringBuilder.ToString());
+            blindCorner.y -= heightOffset;
+            BlindCorner = new BlindCorner(blindCorner, angle);
+
+            if (raycasts > 0)
+            {
+                totalRaycasts += raycasts;
+                raycasts = 0;
+                yield return null;
+            }
+            sw.Stop();
+            if (_nextLogTime < Time.time)
+            {
+                _nextLogTime = Time.time + 5f;
+                float time = (sw.ElapsedMilliseconds / 1000f).Round100();
+                Logger.LogDebug($"Total Raycasts: [{totalRaycasts}] Time To Complete: [{time}] seconds");
+            }
         }
 
-        public Vector3? BlindCorner { get; set; }
-        private Vector3 _blindCornerGround;
-        private Vector3 _cornerNotVisible;
+        private float _nextLogTime;
+
+        private void drawDebug(Vector3 corner, Vector3 lookPoint, bool hit)
+        {
+            if (SAINPlugin.DebugMode && SAINPlugin.DebugSettings.DebugDrawBlindCorner)
+            {
+                Color color = hit ? Color.red : Color.green;
+                float lineWidth = 0.01f;
+                float expireTime = 30f;
+
+                //float lowerHeight = (Bot.Position - Bot.Transform.EyePosition).y * 0.8f;
+                //corner.y += lowerHeight;
+                //lookPoint.y += lowerHeight;
+
+                DebugGizmos.Line(corner, lookPoint, color, lineWidth, true, expireTime, true);
+            }
+        }
+
+        public static Vector3 RaycastPastCorner(Vector3 corner, Vector3 lookPoint, float addHeight, float addDistance = 2f)
+        {
+            corner.y += addHeight;
+            Vector3 cornerDir = corner - lookPoint;
+            Vector3 dirPastCorner = cornerDir.normalized * addDistance;
+
+            Vector3 farPoint;
+            if (Physics.Raycast(lookPoint, cornerDir, out var hit, addDistance, _mask)) {
+                farPoint = hit.point;
+            }
+            else {
+                farPoint = corner + dirPastCorner;
+            }
+            Vector3 midPoint = Vector3.Lerp(farPoint, corner, 0.5f);
+            return midPoint;
+        }
+
+        private bool rayCastToCorner(Vector3 corner, Vector3 lookPoint, float heightOffset)
+        {
+            corner.y += heightOffset;
+            Vector3 direction = corner - lookPoint;
+            return Physics.Raycast(lookPoint, direction, direction.magnitude, _mask);
+        }
+
+        private static readonly LayerMask _mask = LayerMaskClass.HighPolyWithTerrainMask;
         private readonly List<Vector3> _corners = new List<Vector3>();
     }
 }

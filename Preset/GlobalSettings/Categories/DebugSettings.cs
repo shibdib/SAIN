@@ -45,6 +45,10 @@ namespace SAIN.Preset.GlobalSettings
         [Default(false)]
         public bool DebugDrawAimGizmos = false;
 
+        [Name("Draw Blind Corner Raycasts")]
+        [Default(false)]
+        public bool DebugDrawBlindCorner = false;
+
         [Name("Draw Debug Suppression Points")]
         [Default(false)]
         [Hidden]

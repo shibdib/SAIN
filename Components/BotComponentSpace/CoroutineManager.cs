@@ -11,47 +11,74 @@ namespace SAIN.SAINComponent
             Component = component;
         }
 
-        public Coroutine Add(IEnumerator enumerator)
+        public Coroutine Add(IEnumerator enumerator, string name)
         {
-            _enumerators.Add(enumerator);
-            Coroutine coroutine = null;
-            if (CoroutinesStarted)
+            if (!_enumerators.ContainsKey(name))
             {
-                coroutine = startCoroutine(enumerator);
-                _coroutines.Add(enumerator, coroutine);
+                _enumerators.Add(name, enumerator);
             }
+            if (!CoroutinesStarted)
+            {
+                return null;
+            }
+
+            if (_coroutines.TryGetValue(name, out Routine routine))
+            {
+                if (routine.Coroutine != null)
+                {
+                    Logger.LogDebug($"Coroutine [{name}] already exits and is active");
+                    return routine.Coroutine;
+                }
+                Logger.LogDebug($"Coroutine [{name}] already but is inactive");
+                _coroutines.Remove(name);
+            }
+
+            Coroutine coroutine = Component.StartCoroutine(enumerator);
+            if (coroutine == null)
+            {
+                Logger.LogDebug($"Coroutine Null. Not Started [{name}]");
+                return null;
+            }
+
+            Logger.LogDebug($"Coroutine Started. [{name}]");
+
+            routine = new Routine(enumerator, coroutine, name);
+            _coroutines.Add(name, routine);
             return coroutine;
         }
 
-        public void Remove(IEnumerator enumerator)
+        public void Remove(string name)
         {
-            _enumerators.Remove(enumerator);
-
-            if (CoroutinesStarted)
+            if (!_enumerators.Remove(name))
             {
-                if (Component == null)
-                {
-                    Logger.LogError($"Component is null, cannot stop Coroutine!");
-                    return;
-                }
-                stopCoroutine(enumerator);
-                _coroutines.Remove(enumerator);
+                Logger.LogDebug($"Enumerator not in list, couldn't remove. [{name}]");
             }
-        }
-
-        private bool stopCoroutine(IEnumerator enumerator)
-        {
-            if (_coroutines.TryGetValue(enumerator, out Coroutine coroutine))
+            if (!CoroutinesStarted)
             {
-                Component.StopCoroutine(coroutine);
-                return true;
+                return;
             }
-            return false;
-        }
 
-        private Coroutine startCoroutine(IEnumerator enumerator)
-        {
-            return Component.StartCoroutine(enumerator);
+            if (Component == null)
+            {
+                Logger.LogError($"Component is null, cannot stop Coroutine!");
+                return;
+            }
+            if (!_coroutines.TryGetValue(name, out Routine routine))
+            {
+                Logger.LogDebug($"Coroutine Not In Dictionary. [{name}]");
+                return;
+            }
+
+            if (routine.Coroutine != null)
+            {
+                Logger.LogDebug($"Coroutine stopped. [{routine.Enumerator.ToString()}] : [{name}]");
+                Component.StopCoroutine(routine.Coroutine);
+            }
+            else
+            {
+                Logger.LogDebug($"Coroutine already stopped. [{routine.Enumerator.ToString()}] : [{name}]");
+            }
+            _coroutines.Remove(name);
         }
 
         public bool CoroutinesStarted { get; private set; }
@@ -85,13 +112,13 @@ namespace SAIN.SAINComponent
             }
 
             int started = 0;
-            foreach (IEnumerator enumerator in _enumerators)
+            foreach (var kvp in _enumerators)
             {
-                Coroutine coroutine = startCoroutine(enumerator);
+                Coroutine coroutine = Component.StartCoroutine(kvp.Value);
                 if (coroutine != null)
                 {
                     started++;
-                    _coroutines.Add(enumerator, coroutine);
+                    _coroutines.Add(kvp.Key, new Routine(kvp.Value, coroutine, kvp.Key));
                 }
             }
 
@@ -133,35 +160,26 @@ namespace SAIN.SAINComponent
 
             int stopped = 0;
             int alreadyStopped = 0;
-            int notInDict = 0;
 
-            foreach (var enumerator in _enumerators)
+            foreach (var routine in _coroutines.Values)
             {
-                if (!_coroutines.TryGetValue(enumerator, out Coroutine coroutine))
-                {
-                    notInDict++;
-                    continue;
-                }
-                if (coroutine == null)
+                if (routine.Coroutine == null)
                 {
                     alreadyStopped++;
                     continue;
                 }
-                component.StopCoroutine(coroutine);
+                component.StopCoroutine(routine.Coroutine);
                 stopped++;
             }
 
             Logger.LogDebug($"Stopped [{stopped}] Coroutines. " +
-                $"[{alreadyStopped}] Coroutines were already stopped or null, and " +
-                $"[{notInDict}] enumerators not present in dictionary");
+                $"[{alreadyStopped}] Coroutines were already stopped or null");
 
             _coroutines.Clear();
         }
 
-        private readonly List<IEnumerator> _enumerators = new List<IEnumerator>();
-
-        private readonly Dictionary<IEnumerator, Coroutine> _coroutines = new Dictionary<IEnumerator, Coroutine>();
-
+        private readonly Dictionary<string, IEnumerator> _enumerators = new Dictionary<string, IEnumerator>();
+        private readonly Dictionary<string, Routine> _coroutines = new Dictionary<string, Routine>();
         private readonly T Component;
     }
 }
