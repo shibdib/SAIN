@@ -10,53 +10,63 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes
 {
-    public class BotSound
+    public class SoundDispersionClass : SAINBase
     {
-        public BotSound(PlayerComponent playerComponent, Vector3 originalPos, float power, float volume, SAINSoundType soundType, Enemy enemy)
+        public SoundDispersionClass(BotComponent bot) : base(bot) { }
+
+        public void Calculate(BotSound sound)
         {
-            PlayerComponent = playerComponent;
-            IsAI = playerComponent.IsAI;
-            OriginalPosition = originalPos;
-            Power = power;
-            Volume = volume;
-            SoundType = soundType;
-            Enemy = enemy;
+
         }
 
-        public readonly bool IsAI;
-        public readonly PlayerComponent PlayerComponent;
-        public readonly Vector3 OriginalPosition;
-        public readonly SAINSoundType SoundType;
-        public readonly float Power;
-        public readonly float Volume;
-        public readonly Enemy Enemy;
+        private void calcNewDispersion(BotSound sound)
+        {
 
-        public Vector3 ProjectionPoint;
-        public float ProjectionPointDistance;
-        public Vector3 RandomizedPosition;
+        }
 
-        public float SqrDistance;
-        public float Distance;
+        private void calcNewDispersionAngle(BotSound sound)
+        {
 
-        public float BaseRange;
-        public float Range;
-        public float OccludedRange => Range * OcclusionModifier;
+        }
 
-        public float OcclusionModifier = 1f;
-        public float BunkerReduction = 1f;
-        public float RangeModifier = 1f;
-        public float Dispersion = 0f;
-        public float ChanceToHear = 100f;
+        private void calcNewDispersionDistance(BotSound sound)
+        {
 
-        public bool IsGunShot;
-        public bool OutOfRange;
-        public bool VisibleSource;
-        public bool WasHeard;
-        public bool BulletFelt;
+        }
     }
-
     public class SAINHearingSensorClass : SAINBase, ISAINClass
     {
+        public bool SetIgnoreHearingExternal(bool value, bool ignoreUnderFire, float duration, out string reason)
+        {
+            if (Bot.Enemy?.IsVisible == true)
+            {
+                reason = "Enemy Visible";
+                return false;
+            }
+            if (BotOwner.Memory.IsUnderFire && !ignoreUnderFire)
+            {
+                reason = "Under Fire";
+                return false;
+            }
+
+            _ignoreUnderFire = ignoreUnderFire;
+            _hearingSetToIgnore = value;
+            if (value && duration > 0f)
+            {
+                _ignoreUntilTime = Time.time + duration;
+            }
+            else
+            {
+                _ignoreUntilTime = -1f;
+            }
+            reason = string.Empty;
+            return true;
+        }
+
+        private bool _ignoreUnderFire;
+        private bool _hearingSetToIgnore;
+        private float _ignoreUntilTime;
+
         public SAINHearingSensorClass(BotComponent sain) : base(sain)
         {
         }
@@ -70,6 +80,11 @@ namespace SAIN.SAINComponent.Classes
         private void bulletImpacted(EftBulletClass bullet)
         {
             if (!Bot.BotActive)
+            {
+                return;
+            }
+
+            if (checkIgnoreExternal())
             {
                 return;
             }
@@ -128,11 +143,34 @@ namespace SAIN.SAINComponent.Classes
         private const float IMPACT_MAX_HEAR_DISTANCE = 50f * 50f;
         private const float IMPACT_DISPERSION = 5f * 5f;
 
+        private bool checkIgnoreExternal()
+        {
+            if (!_hearingSetToIgnore)
+            {
+                return false;
+            }
+            if (_ignoreUntilTime > 0 &&
+                _ignoreUntilTime < Time.time)
+            {
+                _hearingSetToIgnore = false;
+                _ignoreUnderFire = false;
+                return false;
+            }
+            return true;
+        }
+
         private bool checkShallIgnore(PlayerComponent playerComponent, float volume)
         {
             if (!Bot.BotActive)
             {
                 return true;
+            }
+            if (_hearingSetToIgnore)
+            {
+                if (_ignoreUntilTime > 0 && _ignoreUntilTime < Time.time)
+                {
+                    _hearingSetToIgnore = false;
+                }
             }
             if (Bot.GameEnding)
             {
@@ -152,6 +190,13 @@ namespace SAIN.SAINComponent.Classes
         private void calcSqrDist(BotSound sound)
         {
             sound.IsGunShot = sound.SoundType.IsGunShot();
+
+            if (!sound.IsGunShot && checkIgnoreExternal())
+            {
+                sound.OutOfRange = true;
+                return;
+            }
+
             sound.SqrDistance = (sound.OriginalPosition - Bot.Transform.HeadPosition).sqrMagnitude;
 
             float power = sound.Power;
@@ -249,6 +294,10 @@ namespace SAIN.SAINComponent.Classes
             }
 
             if (!sound.WasHeard)
+            {
+                return;
+            }
+            if (checkIgnoreExternal())
             {
                 return;
             }
@@ -486,7 +535,13 @@ namespace SAIN.SAINComponent.Classes
 
             if (Bot != null && sound?.PlayerComponent != null)
             {
-                if (sound.ProjectionPointDistance <= SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaxUnderFireDistance)
+                bool underFire = sound.ProjectionPointDistance <= SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaxUnderFireDistance;
+                if (!underFire && _hearingSetToIgnore)
+                {
+                    yield break;
+                }
+
+                if (underFire)
                 {
                     BotOwner?.HearingSensor?.OnEnemySounHearded?.Invoke(sound.RandomizedPosition, sound.Distance, sound.SoundType.Convert());
                     Bot.Memory.SetUnderFire(sound.PlayerComponent.IPlayer, sound.RandomizedPosition);
@@ -556,6 +611,21 @@ namespace SAIN.SAINComponent.Classes
             }
 
             return dispersion;
+        }
+
+        private void calcNewDispersion(BotSound sound)
+        {
+
+        }
+
+        private void calcNewDispersionAngle(BotSound sound)
+        {
+
+        }
+
+        private void calcNewDispersionDistance(BotSound sound)
+        {
+
         }
 
         private float getDispersionModifier(Vector3 soundPosition)
@@ -634,6 +704,10 @@ namespace SAIN.SAINComponent.Classes
         private bool DidShotFlyByMe(BotSound sound, float maxDist)
         {
             if (!sound.IsGunShot)
+            {
+                return false;
+            }
+            if (_ignoreUnderFire)
             {
                 return false;
             }

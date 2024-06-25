@@ -250,6 +250,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyHearing.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyKnownChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\WeaponAIPresetHistory.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Sense\BotSound.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ReloadClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SAINEnemySearchClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINBotLookClass.cs" />

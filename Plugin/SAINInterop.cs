@@ -1,4 +1,5 @@
 ﻿using BepInEx.Bootstrap;
+using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using HarmonyLib;
@@ -29,6 +30,8 @@ namespace SAIN.Plugin
         private static MethodInfo _CanBotQuestMethod;
         private static MethodInfo _GetExtractedBotsMethod;
         private static MethodInfo _GetExtractionInfosMethod;
+        private static MethodInfo _IgnoreHearingMethod;
+        private static MethodInfo _GetPersonalityMethod;
 
         /**
          * Return true if SAIN is loaded in the client
@@ -70,11 +73,46 @@ namespace SAIN.Plugin
                     _CanBotQuestMethod = AccessTools.Method(_SAINExternalType, "CanBotQuest");
                     _GetExtractedBotsMethod = AccessTools.Method(_SAINExternalType, "GetExtractedBots");
                     _GetExtractionInfosMethod = AccessTools.Method(_SAINExternalType, "GetExtractionInfos");
+
+                    _IgnoreHearingMethod = AccessTools.Method(_SAINExternalType, "IgnoreHearing");
+                    _GetPersonalityMethod = AccessTools.Method(_SAINExternalType, "GetPersonality");
                 }
             }
 
             // If we found the External class, at least some of the methods are (probably) available
             return (_SAINExternalType != null);
+        }
+
+        /// <summary>
+        /// Sets this bot to ignore hearing for a specified duration, or until a bot sees an enemy;
+        /// </summary>
+        /// <param name="value">Set Ignore to On or Off</param>
+        /// <param name="ignoreUnderFire">Set bot to ignore being under fire (shots being ~2m or closer to them by default)</param>
+        /// <param name="duration">if greater than 0, stop ignoring hearing after that time has passed. 0 means they will ignore hearing forever until they see an enemy.</param>
+        /// <returns>True if the bot was successfully set to ignore hearing</returns>
+        public static bool IgnoreHearing(BotOwner botOwner, bool value, bool ignoreUnderFire, float duration = 0)
+        {
+            if (botOwner == null) return false;
+            if (!Init()) return false;
+            if (_IgnoreHearingMethod == null) return false;
+
+            return (bool) _IgnoreHearingMethod.Invoke(null, new object[] { botOwner, value, ignoreUnderFire, duration });
+        }
+
+        /// <summary>
+        /// Get the Current Personality of a bot;
+        /// </summary>
+        /// <param name="botOwner">The bot to check</param>
+        /// <returns>A string of a bot's personality, returns string.Empty if it could not be found.</returns>
+        public static string GetPersonality(BotOwner botOwner)
+        {
+            string result = string.Empty;
+            if (botOwner == null) return result;
+            if (!Init()) return result;
+            if (_GetPersonalityMethod == null) return result;
+
+            result = (string)_GetPersonalityMethod.Invoke(null, new object[] { botOwner });
+            return result;
         }
 
         /// <summary>
@@ -91,6 +129,7 @@ namespace SAIN.Plugin
             _GetExtractedBotsMethod.Invoke(null, new object[] { list });
             return true;
         }
+
         /// <summary>
         /// Get a list of all "Player.ProfileID"s of bots that have extracted. The list must not be null. The list is cleared before adding all extracted ProfileIDs;
         /// </summary>

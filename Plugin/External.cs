@@ -1,28 +1,53 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using HarmonyLib;
 using SAIN.Components;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
-using SAIN.Plugin;
 
 namespace SAIN.Plugin
 {
     public static class External
     {
+        public static bool IgnoreHearing(BotOwner bot, bool value, bool ignoreUnderFire, float duration)
+        {
+            var component = getBotComponent(bot);
+            if (component == null)
+            {
+                return false;
+            }
+
+            bool result = component.Hearing.SetIgnoreHearingExternal(value, ignoreUnderFire, duration, out string reason);
+            return result;
+        }
+
+        public static string GetPersonality(BotOwner bot)
+        {
+            var component = getBotComponent(bot);
+            if (component == null)
+            {
+                return string.Empty;
+            }
+            return component.Info.Personality.ToString();
+        }
+
+        private static BotComponent getBotComponent(BotOwner bot)
+        {
+            if (SAINBotController.Instance?.GetSAIN(bot, out BotComponent botComponent) == true)
+            {
+                return botComponent;
+            }
+            return bot.GetComponent<BotComponent>();
+        }
+
         public static bool ExtractBot(BotOwner bot)
         {
-            var component = bot.GetComponent<BotComponent>();
+            var component = getBotComponent(bot);
             if (component == null)
             {
                 return false;
@@ -71,7 +96,7 @@ namespace SAIN.Plugin
 
         public static bool TrySetExfilForBot(BotOwner bot)
         {
-            var component = bot.GetComponent<BotComponent>();
+            var component = getBotComponent(bot);
             if (component == null)
             {
                 return false;
@@ -94,7 +119,7 @@ namespace SAIN.Plugin
 
         public static bool ResetDecisionsForBot(BotOwner bot)
         {
-            var component = bot.GetComponent<BotComponent>();
+            var component = getBotComponent(bot);
             if (component == null)
             {
                 return false;
@@ -145,7 +170,7 @@ namespace SAIN.Plugin
 
         public static float TimeSinceSenseEnemy(BotOwner botOwner)
         {
-            var component = botOwner.GetComponent<BotComponent>();
+            var component = getBotComponent(botOwner);
             if (component == null)
             {
                 return float.MaxValue;
@@ -162,7 +187,7 @@ namespace SAIN.Plugin
 
         public static bool IsPathTowardEnemy(NavMeshPath path, BotOwner botOwner, float ratioSameOverAll = 0.25f, float sqrDistCheck = 0.05f)
         {
-            var component = botOwner.GetComponent<BotComponent>();
+            var component = getBotComponent(botOwner);
             if (component == null)
             {
                 return false;
@@ -185,7 +210,7 @@ namespace SAIN.Plugin
 
         public static bool CanBotQuest(BotOwner botOwner, Vector3 questPosition, float dotProductThresh = 0.33f)
         {
-            var component = botOwner.GetComponent<BotComponent>();
+            var component = getBotComponent(botOwner);
             if (component == null)
             {
                 return false;
