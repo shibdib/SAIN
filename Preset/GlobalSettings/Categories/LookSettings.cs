@@ -3,11 +3,12 @@ using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class LookSettings
+    public class LookSettings : SAINSettingsBase<LookSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly LookSettings Defaults = new LookSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Name("Global Vision Distance Multiplier")]
         [Description(

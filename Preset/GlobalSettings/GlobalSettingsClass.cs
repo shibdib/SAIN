@@ -2,6 +2,8 @@
 using SAIN.Attributes;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
+using System;
+using System.Collections.Generic;
 using static SAIN.Helpers.JsonUtility;
 
 namespace SAIN.Preset.GlobalSettings
@@ -11,7 +13,6 @@ namespace SAIN.Preset.GlobalSettings
         [JsonIgnore]
         public static GlobalSettingsClass Instance;
 
-        [JsonConstructor]
         public GlobalSettingsClass() {
             Instance = this;
         }

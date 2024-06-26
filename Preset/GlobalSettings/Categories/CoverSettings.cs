@@ -3,11 +3,12 @@ using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class CoverSettings
+    public class CoverSettings : SAINSettingsBase<CoverSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly CoverSettings Defaults = new CoverSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Default(60f)]
         [MinMax(20f, 100f, 10f)]

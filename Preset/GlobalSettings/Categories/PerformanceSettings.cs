@@ -3,11 +3,12 @@ using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class PerformanceSettings
+    public class PerformanceSettings : SAINSettingsBase<PerformanceSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly PerformanceSettings Defaults = new PerformanceSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Name("Performance Mode")]
         [Description("Limits the cover finder to maximize performance. If your PC is CPU limited, this might let you regain some frames lost while using SAIN. Can cause bots to take too long to find cover to go to.")]

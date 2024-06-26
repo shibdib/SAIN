@@ -3,11 +3,12 @@ using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings.Categories
 {
-    public class MindSettings
+    public class MindSettings : SAINSettingsBase<MindSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly MindSettings Defaults = new MindSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Default(1f)]
         [MinMax(0.1f, 5f, 100f)]

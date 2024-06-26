@@ -1,17 +1,11 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
-using Interpolation;
 using Newtonsoft.Json;
-using SAIN.Attributes;
-using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Preset.Personalities;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
-using System.Data;
-using static EFT.Player;
-using static SAIN.Preset.Personalities.PersonalitySettingsClass;
 
 namespace SAIN.Preset.GlobalSettings
 {

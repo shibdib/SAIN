@@ -3,11 +3,12 @@ using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class FlashlightSettings
+    public class FlashlightSettings : SAINSettingsBase<FlashlightSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly FlashlightSettings Defaults = new FlashlightSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Default(3f)]
         [MinMax(0.25f, 10f, 100f)]

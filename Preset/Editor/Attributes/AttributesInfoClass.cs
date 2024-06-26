@@ -96,7 +96,7 @@ namespace SAIN.Attributes
             Name = nameDescription?.Name ?? Get<NameAttribute>()?.Value ?? member.Name;
             Description = nameDescription?.Description ?? Get<DescriptionAttribute>()?.Value ?? string.Empty;
 
-            Default = Get<DefaultAttribute>()?.Value;
+            SetDefault(Get<DefaultAttribute>()?.Value);
 
             GUIValuesAttribute GUIValues = Get<GUIValuesAttribute>();
             if (GUIValues != null)
@@ -124,13 +124,23 @@ namespace SAIN.Attributes
 
         public string Description { get; private set; }
 
-        public object Default { get; private set; }
-
-        public object DefaultValue(object obj)
+        public object GetDefault(object settingsObject)
         {
-            var defaults = Reflection.GetStaticValue(DeclaringType, nameof(GeneralSettings.Defaults));
-            return GetValue(defaults) ?? Default;
+            if (settingsObject is ISAINSettings settings)
+            {
+                var defaults = settings.GetDefaults();
+                object value = GetValue(defaults);
+                return value ?? _default;
+            }
+            return _default;
         }
+
+        private void SetDefault(object value)
+        {
+            _default = value;
+        }
+
+        private object _default;
 
         public float Min { get; private set; } = 0f;
 

@@ -5,11 +5,12 @@ using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class HearingSettings
+    public class HearingSettings : SAINSettingsBase<HearingSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly HearingSettings Defaults = new HearingSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Name("Max Footstep Audio Distance")]
         [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters.")]

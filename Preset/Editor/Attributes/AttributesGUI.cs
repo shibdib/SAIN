@@ -240,10 +240,11 @@ namespace SAIN.Attributes
                     value = attributes.Clamp(value);
                 }
 
-                if (attributes.Default != null)
+                var defaultValue = attributes.GetDefault(settingsObject);
+                if (defaultValue != null)
                 {
                     if (Button("Reset", "Reset To Default Value", EUISoundType.ButtonClick, entryConfig.Reset))
-                        value = attributes.DefaultValue(settingsObject);
+                        value = defaultValue;
                 }
                 else
                 {

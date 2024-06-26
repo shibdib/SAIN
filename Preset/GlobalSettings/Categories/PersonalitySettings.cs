@@ -4,11 +4,12 @@ using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class PersonalitySettings
+    public class PersonalitySettings : SAINSettingsBase<PersonalitySettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly PersonalitySettings Defaults = new PersonalitySettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Name("Force Single Personality For All Bots")]
         [Description("All Spawned SAIN bots will be assigned the selected Personality, if any are set to true, no matter what.")]

@@ -3,11 +3,12 @@ using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class DebugSettings
+    public class DebugSettings : SAINSettingsBase<DebugSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly DebugSettings Defaults = new DebugSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Name("Global Debug Mode")]
         [Default(false)]

@@ -11,6 +11,7 @@ namespace SAIN.Preset
         public string SAINVersion;
         public string SAINPresetVersion;
         public string DateCreated;
+        public SAINDifficulty BaseSAINDifficulty;
         public bool IsCustom = true;
         public bool CanEditName = true;
 
@@ -25,17 +26,11 @@ namespace SAIN.Preset
                 SAINPresetVersion = AssemblyInfoClass.SAINPresetVersion,
                 DateCreated = DateTime.Now.ToString(),
                 IsCustom = true,
+                BaseSAINDifficulty = BaseSAINDifficulty,
             };
         }
 
-        public static SAINPresetClass CreateDefault(string difficulty, string description = null)
-        {
-            var definition = CreateDefaultDefinition(difficulty, description);
-            PresetHandler.SavePresetDefinition(definition);
-            return new SAINPresetClass(definition);
-        }
-
-        public static SAINPresetDefinition CreateDefaultDefinition(string difficulty, string description = null)
+        public static SAINPresetDefinition CreateDefaultDefinition(string difficulty, SAINDifficulty baseDifficulty, string description = null)
         {
             return new SAINPresetDefinition
             {
@@ -47,6 +42,7 @@ namespace SAIN.Preset
                 DateCreated = DateTime.Now.ToString(),
                 IsCustom = false,
                 CanEditName = false,
+                BaseSAINDifficulty = baseDifficulty,
             };
         }
     }

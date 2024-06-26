@@ -7,11 +7,12 @@ using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class LootingBotsSettings
+    public class LootingBotsSettings : SAINSettingsBase<LootingBotsSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly LootingBotsSettings Defaults = new LootingBotsSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Name("Bot Extraction From Loot")]
         [Default(true)]

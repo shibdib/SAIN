@@ -3,11 +3,12 @@ using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class AimSettings
+    public class AimSettings : SAINSettingsBase<AimSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly AimSettings Defaults = new AimSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Name("Always Aim Center Mass Global")]
         [Description("Force Bots to aim for center of mass. If this is disabled, all bots will have Always Aim Center Mass turned OFF, so their individual settings will be ignored.")]

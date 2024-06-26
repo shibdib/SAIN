@@ -7,11 +7,12 @@ using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class NoBushESPSettings
+    public class NoBushESPSettings : SAINSettingsBase<NoBushESPSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly NoBushESPSettings Defaults = new NoBushESPSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Name("No Bush ESP")]
         [Description("Adds extra vision check for bots to help prevent bots seeing or shooting through foliage.")]

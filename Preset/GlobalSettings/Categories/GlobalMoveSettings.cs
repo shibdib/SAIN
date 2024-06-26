@@ -3,11 +3,12 @@ using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class GlobalMoveSettings
+    public class GlobalMoveSettings : SAINSettingsBase<GlobalMoveSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly GlobalMoveSettings Defaults = new GlobalMoveSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Advanced]
         [Default(true)]

@@ -3,11 +3,12 @@ using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class ExtractSettings
+    public class ExtractSettings : SAINSettingsBase<ExtractSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly ExtractSettings Defaults = new ExtractSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Default(true)]
         public bool EnableExtractsGlobal = true;

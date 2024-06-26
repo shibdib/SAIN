@@ -3,11 +3,12 @@ using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class VanillaBotSettings
+    public class VanillaBotSettings : SAINSettingsBase<VanillaBotSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly VanillaBotSettings Defaults = new VanillaBotSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Name("Vanilla Scavs")]
         [Description("REQUIRES RESTART OF GAME. Non Player-Scavs will have vanilla ai behavior. Disabling sain for player scavs is not currently possible.")]

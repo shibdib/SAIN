@@ -5,11 +5,12 @@ using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class ShootSettings
+    public class ShootSettings : SAINSettingsBase<ShootSettings>, ISAINSettings
     {
-        [JsonIgnore]
-        [Hidden]
-        public static readonly ShootSettings Defaults = new ShootSettings();
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
 
         [Name("Global Scatter Multiplier")]
         [Description("Higher = more scattering. Modifies EFT's default scatter feature. 1.5 = 1.5x more scatter")]
