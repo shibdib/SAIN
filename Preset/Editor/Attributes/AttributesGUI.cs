@@ -58,7 +58,7 @@ namespace SAIN.Attributes
         private static GUIStyle LabelStyle;
         private static readonly Dictionary<string, AttributesInfoClass> AttributesClasses = new Dictionary<string, AttributesInfoClass>();
 
-        public static object EditValue(object value, AttributesInfoClass attributes, out bool wasEdited, GUIEntryConfig entryConfig = null)
+        public static object EditValue(object value, object settingsObject, AttributesInfoClass attributes, out bool wasEdited, GUIEntryConfig entryConfig = null)
         {
             wasEdited = false;
             if (value != null && attributes != null && !attributes.DoNotShowGUI)
@@ -72,7 +72,7 @@ namespace SAIN.Attributes
 
                 if (FloatBoolInt.Contains(attributes.ValueType))
                 {
-                    value = EditFloatBoolInt(value, attributes, entryConfig, out wasEdited);
+                    value = EditFloatBoolInt(value, settingsObject, attributes, entryConfig, out wasEdited);
                 }
                 else if (ExpandableList(attributes, entryConfig.EntryHeight + 5))
                 {
@@ -179,7 +179,7 @@ namespace SAIN.Attributes
             }
         }
 
-        public static object EditFloatBoolInt(object value, AttributesInfoClass attributes, GUIEntryConfig entryConfig, out bool wasEdited, bool showLabel = true, bool beginHoriz = true)
+        public static object EditFloatBoolInt(object value, object settingsObject, AttributesInfoClass attributes, GUIEntryConfig entryConfig, out bool wasEdited, bool showLabel = true, bool beginHoriz = true)
         {
             if (beginHoriz)
             {
@@ -243,7 +243,7 @@ namespace SAIN.Attributes
                 if (attributes.Default != null)
                 {
                     if (Button("Reset", "Reset To Default Value", EUISoundType.ButtonClick, entryConfig.Reset))
-                        value = attributes.Default;
+                        value = attributes.DefaultValue(settingsObject);
                 }
                 else
                 {
@@ -278,9 +278,9 @@ namespace SAIN.Attributes
 
         private static readonly Dictionary<string, bool> ListIsOpen = new Dictionary<string, bool>();
 
-        public static object EditValue(object value, FieldInfo field, out bool wasEdited, GUIEntryConfig entryConfig = null)
+        public static object EditValue(object value, object settingsObject, FieldInfo field, out bool wasEdited, GUIEntryConfig entryConfig = null)
         {
-            return EditValue(value, GetAttributeInfo(field), out wasEdited, entryConfig);
+            return EditValue(value, settingsObject, GetAttributeInfo(field), out wasEdited, entryConfig);
         }
 
         public static void EditBoolDictionary<T>(object dictValue, AttributesInfoClass attributes, out bool edited) where T : Enum
@@ -415,7 +415,7 @@ namespace SAIN.Attributes
                     continue;
                 }
                 object value = field.GetValue(obj);
-                object newValue = EditValue(value, attributes, out bool newEdit);
+                object newValue = EditValue(value, obj, attributes, out bool newEdit);
                 if (newEdit)
                 {
                     if (SAINPlugin.DebugMode)
@@ -434,7 +434,7 @@ namespace SAIN.Attributes
                     continue;
                 }
                 object value = field.GetValue(obj);
-                object newValue = EditValue(value, attributes, out bool newEdit);
+                object newValue = EditValue(value, obj, attributes, out bool newEdit);
                 if (newEdit)
                 {
                     if (SAINPlugin.DebugMode)
@@ -461,7 +461,7 @@ namespace SAIN.Attributes
                     continue;
                 }
                 object value = fieldAtt.GetValue(categoryObject);
-                object newValue = EditValue(value, fieldAtt, out bool newEdit);
+                object newValue = EditValue(value, categoryObject, fieldAtt, out bool newEdit);
                 if (newEdit)
                 {
                     if (SAINPlugin.DebugMode)
@@ -480,7 +480,7 @@ namespace SAIN.Attributes
                     continue;
                 }
                 object value = fieldAtt.GetValue(categoryObject);
-                object newValue = EditValue(value, fieldAtt, out bool newEdit);
+                object newValue = EditValue(value, categoryObject, fieldAtt, out bool newEdit);
                 if (newEdit)
                 {
                     if (SAINPlugin.DebugMode)
@@ -527,7 +527,7 @@ namespace SAIN.Attributes
 
                             BeginHorizontal();
                             Label($"{keyValuePair.Key}");
-                            object newValue = EditValue(value, targetField, out bool newEdit);
+                            object newValue = EditValue(value, targetCategoryObject, targetField, out bool newEdit);
                             if (newEdit)
                             {
                                 if (SAINPlugin.DebugMode)

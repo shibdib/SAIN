@@ -1,9 +1,14 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
     public class TalkSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly TalkSettings Defaults = new TalkSettings();
+
         [Name("Talkative Scavs")]
         [Description("When at peace, scavs will talk to each other and be noisy. Revealing their location.")]
         [Default(true)]

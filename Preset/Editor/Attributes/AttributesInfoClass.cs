@@ -1,6 +1,10 @@
-﻿using SAIN.Editor;
+﻿using HarmonyLib;
+using SAIN.Editor;
 using SAIN.Helpers;
+using SAIN.Preset.BotSettings.SAINSettings;
+using SAIN.Preset.GlobalSettings;
 using System;
+using System.Configuration;
 using System.Linq;
 using System.Reflection;
 
@@ -38,6 +42,9 @@ namespace SAIN.Attributes
 
         public object GetValue(object obj)
         {
+            if (obj == null)
+                return null;
+
             switch (MemberInfo.MemberType)
             {
                 case MemberTypes.Field:
@@ -118,6 +125,12 @@ namespace SAIN.Attributes
         public string Description { get; private set; }
 
         public object Default { get; private set; }
+
+        public object DefaultValue(object obj)
+        {
+            var defaults = Reflection.GetStaticValue(DeclaringType, nameof(GeneralSettings.Defaults));
+            return GetValue(defaults) ?? Default;
+        }
 
         public float Min { get; private set; } = 0f;
 

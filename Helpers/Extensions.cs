@@ -12,10 +12,10 @@ namespace SAIN.Helpers
             switch (aiSoundType)
             {
                 case AISoundType.silencedGun:
-                    return SAINSoundType.SuppressedGunShot;
+                    return SAINSoundType.SuppressedShot;
 
                 case AISoundType.gun:
-                    return SAINSoundType.Gunshot;
+                    return SAINSoundType.Shot;
 
                 default:
                     return SAINSoundType.Generic;
@@ -26,10 +26,10 @@ namespace SAIN.Helpers
         {
             switch (sainSoundType)
             {
-                case SAINSoundType.SuppressedGunShot:
+                case SAINSoundType.SuppressedShot:
                     return AISoundType.silencedGun;
 
-                case SAINSoundType.Gunshot:
+                case SAINSoundType.Shot:
                     return AISoundType.gun;
 
                 default:
@@ -41,8 +41,8 @@ namespace SAIN.Helpers
         {
             switch (sainSoundType)
             {
-                case SAINSoundType.SuppressedGunShot:
-                case SAINSoundType.Gunshot:
+                case SAINSoundType.SuppressedShot:
+                case SAINSoundType.Shot:
                     return true;
 
                 default:

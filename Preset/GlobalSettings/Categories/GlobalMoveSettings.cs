@@ -1,9 +1,14 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
     public class GlobalMoveSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly GlobalMoveSettings Defaults = new GlobalMoveSettings();
+
         [Advanced]
         [Default(true)]
         public bool EditSprintSpeed = true;

@@ -1,9 +1,14 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings.Categories
 {
     public class MindSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly MindSettings Defaults = new MindSettings();
+
         [Default(1f)]
         [MinMax(0.1f, 5f, 100f)]
         public float GlobalAggression = 1f;

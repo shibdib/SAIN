@@ -9,6 +9,10 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class LootingBotsSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly LootingBotsSettings Defaults = new LootingBotsSettings();
+
         [Name("Bot Extraction From Loot")]
         [Default(true)]
         public bool ExtractFromLoot = true;

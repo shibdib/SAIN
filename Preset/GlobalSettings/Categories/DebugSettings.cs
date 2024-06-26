@@ -5,6 +5,10 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class DebugSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly DebugSettings Defaults = new DebugSettings();
+
         [Name("Global Debug Mode")]
         [Default(false)]
         public bool GlobalDebugMode;

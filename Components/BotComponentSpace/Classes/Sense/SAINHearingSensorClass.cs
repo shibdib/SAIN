@@ -2,6 +2,7 @@
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
+using SAIN.Plugin;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,30 +11,117 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes
 {
+    public enum ESoundDispersionType
+    {
+        Footstep,
+        HeardShot,
+        HeardSuppressedShot,
+        UnheardShot,
+        UnheardSuppressedShot,
+    }
+
     public class SoundDispersionClass : SAINBase
     {
+
         public SoundDispersionClass(BotComponent bot) : base(bot) { }
 
-        public void Calculate(BotSound sound)
+        public void Calculate(BotSoundStruct sound)
+        {
+            sound.Dispersion = new SoundDispersionData
+            {
+                DispersionType = findType(sound),
+            };
+
+            calcDispersion(sound);
+        }
+
+        private ESoundDispersionType findType(BotSoundStruct sound)
+        {
+            bool heard = sound.Results.Heard;
+            switch (sound.Info.SoundType)
+            {
+                case SAINSoundType.Shot: 
+                    return heard ? ESoundDispersionType.HeardShot : ESoundDispersionType.UnheardShot;
+
+                case SAINSoundType.SuppressedShot: 
+                    return heard ? ESoundDispersionType.HeardSuppressedShot : ESoundDispersionType.UnheardSuppressedShot;
+
+                default: 
+                    return ESoundDispersionType.Footstep;
+            }
+        }
+
+        private void calcDispersion(BotSoundStruct sound)
+        {
+            calcDispersionAngle(sound);
+            calcDispersionDistance(sound);
+
+            sound.Dispersion.EstimatedPosition = estimatePosition(sound);
+        }
+
+        private Vector3 estimatePosition(BotSoundStruct sound)
+        {
+            return Vector3.zero;
+        }
+
+        private void calcDispersionAngle(BotSoundStruct sound)
+        {
+            bool gunshot = sound.Bullet != null;
+        }
+
+        private void calcDispersionDistance(BotSoundStruct sound)
         {
 
         }
 
-        private void calcNewDispersion(BotSound sound)
+        private static DispersionDictionary _dispersionValues;
+
+        static SoundDispersionClass()
+        {
+            PresetHandler.OnPresetUpdated += updateSettings;
+        }
+
+        private static void updateSettings()
+        {
+            _dispersionValues = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.DispersionValues;
+        }
+    }
+
+    public static class DispersionValuesDictionary
+    {
+        static DispersionValuesDictionary()
+        {
+            PresetHandler.OnPresetUpdated += updateSettings;
+        }
+
+        private static void updateSettings()
         {
 
         }
 
-        private void calcNewDispersionAngle(BotSound sound)
-        {
+        public static DispersionDictionary DispersionValues { get; private set; }
+    }
 
+    public class DispersionDictionary : Dictionary<ESoundDispersionType, DispersionValues>
+    {
+        static DispersionDictionary()
+        {
+            PresetHandler.OnPresetUpdated += updateSettings;
         }
 
-        private void calcNewDispersionDistance(BotSound sound)
+        private static void updateSettings()
         {
 
         }
     }
+
+    public struct DispersionValues
+    {
+        public float MinAngle;
+        public float MaxAngle;
+        public float DistanceModifier;
+    }
+
     public class SAINHearingSensorClass : SAINBase, ISAINClass
     {
         public bool SetIgnoreHearingExternal(bool value, bool ignoreUnderFire, float duration, out string reason)
@@ -253,6 +341,20 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
+            BotSoundStruct soundStruct = new BotSoundStruct
+            {
+                Info = new SoundInfoData
+                {
+                    PlayerComponent = playerComponent,
+                    IsAI = playerComponent.IsAI,
+                    OriginalPosition = soundPosition,
+                    Power = power,
+                    Volume = volume,
+                    SoundType = soundType,
+                    Enemy = enemy,
+                }
+            };
+
             var sound = new BotSound(playerComponent, soundPosition, power, volume, soundType, enemy);
 
             calcSqrDist(sound);
@@ -285,7 +387,7 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            if (DidShotFlyByMe(sound, SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaxSuppressionDistance))
+            if (DidShotFlyByMe(sound))
             {
                 float addDisp = sound.WasHeard ? 1f : 2f;
                 getSoundDispersion(sound, addDisp);
@@ -597,11 +699,11 @@ namespace SAIN.SAINComponent.Classes
             float dispersion;
             switch (soundType)
             {
-                case SAINSoundType.Gunshot:
+                case SAINSoundType.Shot:
                     dispersion = shooterDistance / dispGun;
                     break;
 
-                case SAINSoundType.SuppressedGunShot:
+                case SAINSoundType.SuppressedShot:
                     dispersion = shooterDistance / dispSuppGun;
                     break;
 
@@ -701,7 +803,7 @@ namespace SAIN.SAINComponent.Classes
             return source + randomPoint;
         }
 
-        private bool DidShotFlyByMe(BotSound sound, float maxDist)
+        private bool DidShotFlyByMe(BotSound sound)
         {
             if (!sound.IsGunShot)
             {
@@ -712,6 +814,7 @@ namespace SAIN.SAINComponent.Classes
                 return false;
             }
 
+            float maxDist = SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaxSuppressionDistance;
             float maxDistSqr = maxDist * maxDist;
             sound.ProjectionPoint = calcProjectionPoint(sound.PlayerComponent, sound.Distance);
             sound.ProjectionPointDistance = (sound.ProjectionPoint - Bot.Position).sqrMagnitude;
@@ -807,8 +910,8 @@ namespace SAIN.SAINComponent.Classes
         {
             switch (soundType)
             {
-                case SAINSoundType.Gunshot:
-                case SAINSoundType.SuppressedGunShot:
+                case SAINSoundType.Shot:
+                case SAINSoundType.SuppressedShot:
                     return true;
 
                 default:

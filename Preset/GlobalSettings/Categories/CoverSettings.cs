@@ -5,6 +5,10 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class CoverSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly CoverSettings Defaults = new CoverSettings();
+
         [Default(60f)]
         [MinMax(20f, 100f, 10f)]
         [Advanced]

@@ -1,10 +1,40 @@
-﻿using Newtonsoft.Json;
+﻿using HarmonyLib;
+using Newtonsoft.Json;
 using SAIN.Attributes;
+using System;
+using System.Reflection;
 
 namespace SAIN.Preset.GlobalSettings
 {
+    public static class CloneSettingsClass
+    {
+        public static object Clone(object original)
+        {
+            Type type = original.GetType();
+            object clone = Activator.CreateInstance(type);
+            FieldInfo[] fields = type.GetFields(System.Reflection.BindingFlags.Public);
+            foreach (FieldInfo field in fields)
+            {
+                object originalValue = field.GetValue(original);
+                field.SetValue(clone, originalValue);
+            }
+            return clone;
+        }
+    }
+
+    public abstract class SAINSettingsBase<T>
+    {
+        [Hidden]
+        [JsonIgnore]
+        public static readonly T Defaults = (T)Activator.CreateInstance(typeof(T));
+    }
+
     public class GeneralSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly GeneralSettings Defaults = new GeneralSettings();
+
         [Name("Bots Use Grenades")]
         [Default(true)]
         public bool BotsUseGrenades = true;

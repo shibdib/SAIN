@@ -1,4 +1,5 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings.Categories;
 using static SAIN.Helpers.JsonUtility;
@@ -7,7 +8,13 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class GlobalSettingsClass
     {
-        public static readonly GlobalSettingsClass Defaults = new GlobalSettingsClass();
+        [JsonIgnore]
+        public static GlobalSettingsClass Instance;
+
+        [JsonConstructor]
+        public GlobalSettingsClass() {
+            Instance = this;
+        }
 
         public static GlobalSettingsClass ImportGlobalSettings(SAINPresetDefinition Preset)
         {
@@ -22,6 +29,7 @@ namespace SAIN.Preset.GlobalSettings
             EFTCoreSettings.UpdateCoreSettings();
             return result;
         }
+
 
         public GeneralSettings General = new GeneralSettings();
 

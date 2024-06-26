@@ -1,9 +1,14 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
     public class LookSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly LookSettings Defaults = new LookSettings();
+
         [Name("Global Vision Distance Multiplier")]
         [Description(
             "Multiplies whatever a bot's visible distance is set to. " +

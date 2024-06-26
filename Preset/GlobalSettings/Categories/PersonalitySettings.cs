@@ -6,10 +6,24 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class PersonalitySettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly PersonalitySettings Defaults = new PersonalitySettings();
+
         [Name("Force Single Personality For All Bots")]
         [Description("All Spawned SAIN bots will be assigned the selected Personality, if any are set to true, no matter what.")]
         [DefaultDictionary(nameof(ForcePersonalityDefaults))]
-        public Dictionary<EPersonality, bool> ForcePersonality = new Dictionary<EPersonality, bool>(ForcePersonalityDefaults);
+        public Dictionary<EPersonality, bool> ForcePersonality = new Dictionary<EPersonality, bool>()
+        {
+            { EPersonality.Wreckless, false},
+            { EPersonality.GigaChad, false },
+            { EPersonality.Chad, false },
+            { EPersonality.SnappingTurtle, false},
+            { EPersonality.Rat, false },
+            { EPersonality.Coward, false },
+            { EPersonality.Timmy, false},
+            { EPersonality.Normal, false},
+        };
 
         [JsonIgnore]
         [Hidden]

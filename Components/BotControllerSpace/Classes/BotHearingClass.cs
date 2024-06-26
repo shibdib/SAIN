@@ -107,11 +107,11 @@ namespace SAIN.Components.BotControllerSpace.Classes
             AISoundType baseSoundType;
             switch (soundType)
             {
-                case SAINSoundType.Gunshot:
+                case SAINSoundType.Shot:
                     baseSoundType = AISoundType.gun;
                     break;
 
-                case SAINSoundType.SuppressedGunShot:
+                case SAINSoundType.SuppressedShot:
                     baseSoundType = AISoundType.silencedGun;
                     break;
 

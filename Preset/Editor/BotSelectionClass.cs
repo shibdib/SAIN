@@ -244,7 +244,7 @@ namespace SAIN.Editor
                                             Height(entryConfig.EntryHeight), 
                                             Width(200));
 
-                                        value = AttributesGUI.EditFloatBoolInt(value, fieldAtt, entryConfig, out bool newEdit, false, false);
+                                        value = AttributesGUI.EditFloatBoolInt(value, categoryValue, fieldAtt, entryConfig, out bool newEdit, false, false);
 
                                         if (newEdit)
                                         {

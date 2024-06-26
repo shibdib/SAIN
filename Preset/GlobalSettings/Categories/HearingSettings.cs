@@ -1,11 +1,16 @@
 ﻿using Newtonsoft.Json;
 using SAIN.Attributes;
+using SAIN.SAINComponent.Classes;
 using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
     public class HearingSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly HearingSettings Defaults = new HearingSettings();
+
         [Name("Max Footstep Audio Distance")]
         [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters.")]
         [Default(70f)]
@@ -17,6 +22,8 @@ namespace SAIN.Preset.GlobalSettings
         [Default(50f)]
         [MinMax(10f, 150f, 1f)]
         public float MaxFootstepAudioDistanceNoHeadphones = 50f;
+
+        public DispersionDictionary DispersionValues = new DispersionDictionary();
 
         [MinMax(1f, 150f, 100f)]
         [Default(60f)]
@@ -114,7 +121,37 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(30f, 400f, 10f)]
         [Advanced]
         [DefaultDictionary(nameof(HearingDistancesDefaults))]
-        public Dictionary<ICaliber, float> HearingDistances = new Dictionary<ICaliber, float>(HearingDistancesDefaults);
+        public Dictionary<ICaliber, float> HearingDistances = new Dictionary<ICaliber, float>
+        {
+            { ICaliber.Caliber9x18PM, 110f },
+            { ICaliber.Caliber9x19PARA, 110f },
+            { ICaliber.Caliber46x30, 120f },
+            { ICaliber.Caliber9x21, 120f },
+            { ICaliber.Caliber57x28, 120f },
+            { ICaliber.Caliber762x25TT, 120f },
+            { ICaliber.Caliber1143x23ACP, 115f },
+            { ICaliber.Caliber9x33R, 125 },
+            { ICaliber.Caliber545x39, 160 },
+            { ICaliber.Caliber556x45NATO, 160 },
+            { ICaliber.Caliber9x39, 160 },
+            { ICaliber.Caliber762x35, 175 },
+            { ICaliber.Caliber762x39, 175 },
+            { ICaliber.Caliber366TKM, 175 },
+            { ICaliber.Caliber762x51, 200f },
+            { ICaliber.Caliber127x55, 200f },
+            { ICaliber.Caliber762x54R, 225f },
+            { ICaliber.Caliber86x70, 250f },
+            { ICaliber.Caliber20g, 185 },
+            { ICaliber.Caliber12g, 185 },
+            { ICaliber.Caliber23x75, 210 },
+            { ICaliber.Caliber26x75, 50 },
+            { ICaliber.Caliber30x29, 50 },
+            { ICaliber.Caliber40x46, 50 },
+            { ICaliber.Caliber40mmRU, 50 },
+            { ICaliber.Caliber127x108, 300 },
+            { ICaliber.Caliber68x51, 200f },
+            { ICaliber.Default, 125 },
+        };
 
         [JsonIgnore]
         [Hidden]

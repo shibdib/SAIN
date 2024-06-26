@@ -9,6 +9,10 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class NoBushESPSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly NoBushESPSettings Defaults = new NoBushESPSettings();
+
         [Name("No Bush ESP")]
         [Description("Adds extra vision check for bots to help prevent bots seeing or shooting through foliage.")]
         [Default(true)]

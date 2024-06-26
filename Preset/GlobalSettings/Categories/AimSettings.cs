@@ -1,9 +1,14 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
     public class AimSettings
     {
+        [JsonIgnore]
+        [Hidden]
+        public static readonly AimSettings Defaults = new AimSettings();
+
         [Name("Always Aim Center Mass Global")]
         [Description("Force Bots to aim for center of mass. If this is disabled, all bots will have Always Aim Center Mass turned OFF, so their individual settings will be ignored.")]
         [Default(true)]
