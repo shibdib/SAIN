@@ -29,18 +29,15 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("Max AI vs AI audio range for Very Distant Bots")]
         [Description("Bots will not hear gunshots from other bots past this distance (meters) if they are VERY far away (around 400 meters) from the player")]
-        [Default(80f)]
         [Advanced]
         public float LimitAIvsAIMaxAudioRangeVeryFar = 80f;
 
         [Name("Random Speed Hacker AI")]
         [Description("Emulate the real Live-Like experience! 1% of bots will be a speed-hacker.")]
-        [Default(false)]
         public bool RandomSpeedHacker = false;
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
-        [Default(24)]
         [MinMax(0, 100)]
         [Hidden]
         [JsonIgnore]
@@ -48,7 +45,6 @@ namespace SAIN.Preset.GlobalSettings
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
-        [Default(22)]
         [MinMax(0, 100)]
         [Hidden]
         [JsonIgnore]
@@ -56,7 +52,6 @@ namespace SAIN.Preset.GlobalSettings
 
         [Description("Requires Restart. Dont touch unless you know what this is")]
         [Advanced]
-        [Default(20)]
         [MinMax(0, 100)]
         [Hidden]
         [JsonIgnore]

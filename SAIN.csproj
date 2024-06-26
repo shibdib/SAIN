@@ -349,7 +349,14 @@
     <Compile Include="Preset\GlobalSettings\Categories\LootingBotsSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\VanillaBotSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\PerformanceSettings.cs" />
-    <Compile Include="Preset\Personalities\PersonalityVariablesClass.cs" />
+    <Compile Include="Preset\Personalities\PersonalityAssignmentSettings.cs" />
+    <Compile Include="Preset\Personalities\PersonalityBehaviorSettings.cs" />
+    <Compile Include="Preset\Personalities\PersonalityCoverSettings.cs" />
+    <Compile Include="Preset\Personalities\PersonalityGeneralSettings.cs" />
+    <Compile Include="Preset\Personalities\PersonalityRushSettings.cs" />
+    <Compile Include="Preset\Personalities\PersonalitySearchSettings.cs" />
+    <Compile Include="Preset\Personalities\PersonalitySettingsClass.cs" />
+    <Compile Include="Preset\Personalities\PersonalityStatModifierSettings.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\CurrentTargetClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyAim.cs" />
@@ -418,7 +425,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\HearingSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\MindSettings.cs" />
     <Compile Include="Preset\GlobalSettings\GlobalSettingsClass.cs" />
-    <Compile Include="Preset\Personalities\PersonalitiesClass.cs" />
+    <Compile Include="Preset\Personalities\PersonalityTalkSettings.cs" />
     <Compile Include="Preset\Personalities\PersonalityManagerClass.cs" />
     <Compile Include="Preset\SAINPresetClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\PersonalitySettings.cs" />

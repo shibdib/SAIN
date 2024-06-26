@@ -135,18 +135,15 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         public WeaponInfo CurrentWeapon { get; private set; }
 
+        public WeaponInfo WeaponInInventory => PrimaryWeapon ?? SecondaryWeapon ?? HolsterWeapon;
+
         private WeaponInfo getCurrentWeapon()
         {
             Item item = Player.HandsController.Item;
             if (item != null)
             {
                 _currentWeapon = getInfoFromItem(item);
-                return _currentWeapon;
             }
-
-            if (_currentWeapon == null)
-                _currentWeapon = PrimaryWeapon ?? SecondaryWeapon ?? HolsterWeapon;
-
             return _currentWeapon;
         }
 

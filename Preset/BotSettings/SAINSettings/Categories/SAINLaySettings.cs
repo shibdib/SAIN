@@ -1,10 +1,16 @@
 ﻿using EFT;
 using Newtonsoft.Json;
+using SAIN.Preset.GlobalSettings;
 using System.Reflection;
 
 namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
-    public class SAINLaySettings
+    public class SAINLaySettings : SAINSettingsBase<SAINLaySettings>, ISAINSettings
     {
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
+
     }
 }

@@ -12,91 +12,75 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("Always Aim Center Mass Global")]
         [Description("Force Bots to aim for center of mass. If this is disabled, all bots will have Always Aim Center Mass turned OFF, so their individual settings will be ignored.")]
-        [Default(true)]
         public bool AimCenterMassGlobal = true;
 
         [Name("Aim Down Sight Aim Time Multiplier")]
         [Description("If a bot is aiming down sights, their time to aim will be multiplied by this number")]
         [MinMax(0.01f, 1f, 100f)]
-        [Default(0.8f)]
         public float AimDownSightsAimTimeMultiplier = 0.8f;
 
         [Description("Lower is more scatter")]
         [Advanced]
         [MinMax(0.5f, 1f, 100f)]
-        [Default(0.8f)]
         public float PoseLevelScatterMulti = 0.8f;
 
         [Description("Lower is more scatter")]
         [Advanced]
         [MinMax(0.5f, 1f, 100f)]
-        [Default(0.7f)]
         public float ProneScatterMulti = 0.7f;
 
         [Description("Lower is more scatter")]
         [Advanced]
         [MinMax(0.5f, 1f, 100f)]
-        [Default(0.75f)]
         public float PartVisScatterMulti = 0.75f;
 
         [Description("Lower is more scatter")]
         [Advanced]
         [MinMax(1f, 1.5f, 100f)]
-        [Default(1.2f)]
         public float OpticFarMulti = 1.2f;
 
         [Advanced]
         [MinMax(25f, 150f, 10f)]
-        [Default(100f)]
         public float OpticFarDistance = 100f;
 
         [Description("Lower is more scatter")]
         [Advanced]
         [MinMax(0.5f, 1f, 100f)]
-        [Default(0.8f)]
         public float OpticCloseMulti = 0.8f;
 
         [Advanced]
         [MinMax(25f, 150f, 10f)]
-        [Default(75f)]
         public float OpticCloseDistance = 75f;
 
         [Description("Lower is more scatter")]
         [Advanced]
         [MinMax(0.5f, 1f, 100f)]
-        [Default(0.85f)]
         public float RedDotFarMulti = 0.85f;
 
         [Advanced]
         [MinMax(25f, 150f, 10f)]
-        [Default(100f)]
         public float RedDotFarDistance = 100f;
 
         [Description("Lower is more scatter")]
         [Advanced]
         [MinMax(1f, 1.5f, 100f)]
-        [Default(1.15f)]
         public float RedDotCloseMulti = 1.15f;
 
         [Advanced]
         [MinMax(25f, 150f, 10f)]
-        [Default(75f)]
         public float RedDotCloseDistance = 65f;
 
         [Description("Lower is more scatter")]
         [Advanced]
         [MinMax(0.5f, 1f, 100f)]
-        [Default(0.75f)]
         public float IronSightFarMulti = 0.7f;
 
         [Advanced]
         [MinMax(25f, 200f, 10f)]
-        [Default(75f)]
         public float IronSightScaleDistanceStart = 50f;
 
         [Advanced]
         [MinMax(25f, 200f, 10f)]
-        [Default(125f)]
         public float IronSightScaleDistanceEnd = 100f;
 
         [Name("Center Mass Point")]
@@ -104,22 +88,18 @@ namespace SAIN.Preset.GlobalSettings
             "A value of 0 will be directly on the center your head, a value of 1 will be directly at the floor below you at your feet. " +
             "If their aim target is above this, the height will be adjusted to be where this point is.")]
         [Advanced]
-        [Default(0.3125f)]
         [MinMax(0f, 1f, 10000f)]
         public float CenterMassVal = 0.3125f;
 
         [Name("Global Accuracy Spread Multiplier")]
         [Description("Higher = less accurate. Modifies all bots base accuracy and spread. 1.5 = 1.5x higher accuracy spread")]
-        [Default(1f)]
         [MinMax(0.1f, 10f, 100f)]
         public float AccuracySpreadMultiGlobal = 1f;
 
         [Name("Global Faster CQB Reactions")]
         [Description("if this toggle is disabled, all bots will have Faster CQB Reactions turned OFF, so their individual settings will be ignored.")]
-        [Default(true)]
         public bool FasterCQBReactionsGlobal = true;
 
-        [Default(false)]
         public bool PMCSAimForHead = false;
     }
 }

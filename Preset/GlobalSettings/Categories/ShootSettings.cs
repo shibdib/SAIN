@@ -14,33 +14,28 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("Global Scatter Multiplier")]
         [Description("Higher = more scattering. Modifies EFT's default scatter feature. 1.5 = 1.5x more scatter")]
-        [Default(1f)]
         [MinMax(0.01f, 10f, 100f)]
         public float GlobalScatterMultiplier = 1f;
 
         [Name("Global Recoil Multiplier")]
         [Description("Higher = more recoil. Modifies SAIN's recoil scatter feature. 1.5 = 1.5x more recoilfrom a single gunshot")]
-        [Default(1f)]
         [MinMax(0.01f, 3f, 100f)]
         public float RecoilMultiplier = 1f;
 
         [Name("Add or Subtract Recoil")]
         [Description("Linearly add or subtract from the final recoil result")]
-        [Default(5f)]
         [MinMax(-20f, 20f, 100f)]
         [Advanced]
         public float AddRecoil = 5f;
 
         [Name("Recoil Decay Coefficient")]
         [Description("Controls the speed that bots will recover from a weapon's recoil. Higher = faster decay")]
-        [Default(1)]
         [MinMax(0.01f, 5f, 100f)]
         [Advanced]
         public float RecoilDecayCoef = 1;
 
         [Name("Recoil Barrel Rise Coefficient")]
         [Description("Controls the speed that a bot's weapon will rise after a shot occurs.  Higher = faster application")]
-        [Default(8)]
         [MinMax(0.01f, 20f, 100f)]
         [Advanced]
         public float RecoilRiseCoef = 8;
@@ -326,37 +321,31 @@ namespace SAIN.Preset.GlobalSettings
 
         [Description(Shootability)]
         [Advanced]
-        [Default(0.35f)]
         [Percentage01to99]
         public float WeaponClassScaling = 0.25f;
 
         [Description(Shootability)]
         [Advanced]
-        [Default(0.35f)]
         [Percentage01to99]
         public float RecoilScaling = 0.35f;
 
         [Description(Shootability)]
         [Advanced]
-        [Default(0.08f)]
         [Percentage01to99]
         public float ErgoScaling = 0.08f;
 
         [Description(Shootability)]
         [Advanced]
-        [Default(0.4f)]
         [Percentage01to99]
         public float AmmoCaliberScaling = 0.3f;
 
         [Description(Shootability)]
         [Advanced]
-        [Default(0.15f)]
         [Percentage01to99]
         public float WeaponProficiencyScaling = 0.3f;
 
         [Description(Shootability)]
         [Advanced]
-        [Default(0.2f)]
         [Percentage01to99]
         public float DifficultyScaling = 0.3f;
     }

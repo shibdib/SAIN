@@ -3,7 +3,6 @@ using EFT.InventoryLogic;
 using Newtonsoft.Json;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
-using SAIN.Preset.Personalities;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
 
@@ -18,7 +17,6 @@ namespace SAIN.Preset.GlobalSettings
         public float AimAccuracy = 1f;
         public float Aggression = 1f;
         public bool EnablePersonalityOverrides = true;
-        public Dictionary<EPersonality, PersonalityVariablesClass> LocationPersonalitySettings = new Dictionary<EPersonality, PersonalityVariablesClass>();
     }
 
     public class PowerCalcSettings
@@ -88,7 +86,7 @@ namespace SAIN.Preset.GlobalSettings
         {
             float result = 0f;
 
-            WeaponInfo weaponInfo = player.Equipment.CurrentWeapon;
+            WeaponInfo weaponInfo = player.Equipment.CurrentWeapon ?? player.Equipment.WeaponInInventory;
             if (weaponInfo == null)
             {
                 Logger.LogError("weaponInfo Null");

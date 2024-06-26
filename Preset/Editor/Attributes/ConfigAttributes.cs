@@ -46,16 +46,6 @@ namespace SAIN.Attributes
         }
     }
 
-    public sealed class DefaultAttribute : BaseAttribute
-    {
-        public DefaultAttribute(object value)
-        {
-            Value = value;
-        }
-
-        public readonly object Value;
-    }
-
     public sealed class RoundingValueAttribute : BaseAttribute
     {
         public RoundingValueAttribute(float rounding = 1f)

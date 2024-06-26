@@ -1,11 +1,16 @@
-﻿using Newtonsoft.Json;
-using SAIN.Attributes;
+﻿using SAIN.Attributes;
 using SAIN.Plugin;
+using SAIN.Preset.GlobalSettings;
 
 namespace SAIN.Editor
 {
-    public class PresetEditorDefaults
+    public class PresetEditorDefaults : SAINSettingsBase<PresetEditorDefaults>, ISAINSettings
     {
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
+
         public PresetEditorDefaults()
         {
             DefaultPreset = PresetHandler.DefaultPreset;
@@ -27,11 +32,9 @@ namespace SAIN.Editor
         public string DefaultPreset;
 
         [Name("Show Advanced Bot Configs")]
-        [Default(false)]
-        public bool AdvancedBotConfigs;
+        public bool AdvancedBotConfigs = false;
 
         [Name("GUI Size Scaling")]
-        [Default(1f)]
         [MinMax(1f, 2f, 100f)]
         public float ConfigScaling = 1f;
     }

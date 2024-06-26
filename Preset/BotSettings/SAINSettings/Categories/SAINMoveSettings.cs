@@ -1,14 +1,20 @@
 ﻿using Newtonsoft.Json;
 using SAIN.Attributes;
+using SAIN.Preset.GlobalSettings;
 
 namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
-    public class SAINMoveSettings
+    public class SAINMoveSettings : SAINSettingsBase<SAINMoveSettings>, ISAINSettings
     {
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
+
         //[Hidden]
         //[JsonIgnore]
         //public float BASE_ROTATE_SPEED = 300;
-        
+
         //[Hidden]
         //[JsonIgnore]
         //public float FIRST_TURN_SPEED = 160;

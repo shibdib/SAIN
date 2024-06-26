@@ -14,106 +14,86 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("Max Footstep Audio Distance")]
         [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters.")]
-        [Default(70f)]
         [MinMax(10f, 150f, 1f)]
         public float MaxFootstepAudioDistance = 70f;
 
         [Name("Max Footstep Audio Distance without Headphones")]
         [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters when not wearing headphones.")]
-        [Default(50f)]
         [MinMax(10f, 150f, 1f)]
         public float MaxFootstepAudioDistanceNoHeadphones = 50f;
 
         public DispersionDictionary DispersionValues = new DispersionDictionary();
 
         [MinMax(1f, 150f, 100f)]
-        [Default(60f)]
         [Advanced]
         public float BaseSoundRange_Looting = 60f;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(30f)]
         [Advanced]
         public float BaseSoundRange_MovementTurnSkid = 30f;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(35f)]
         [Advanced]
         public float BaseSoundRange_GrenadePinDraw = 35f;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(50f)]
         [Advanced]
         public float BaseSoundRange_Prone = 50f;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(40f)]
         [Advanced]
         public float BaseSoundRange_Healing = 40f;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(30f)]
         [Advanced]
         public float BaseSoundRange_Reload = 30f;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(55f)]
         [Advanced]
         public float BaseSoundRange_Surgery = 55f;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(10f)]
         [Advanced]
         public float BaseSoundRange_DryFire = 10f;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(50f)]
         [Advanced]
         public float MaxSoundRange_FallLanding = 70;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(35f)]
         [Advanced]
         public float BaseSoundRange_AimingandGearRattle = 35f;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(40f)]
         [Advanced]
         public float BaseSoundRange_EatDrink = 40f;
 
         [MinMax(1f, 150f, 100f)]
-        [Default(50f)]
         public float MaxRangeToReportEnemyActionNoHeadset = 50f;
 
         [Name("Hearing Delay / Reaction Time with Active Enemy")]
         [MinMax(0.0f, 1f, 100f)]
-        [Default(0.2f)]
         public float BaseHearingDelayWithEnemy = 0.2f;
 
         [Name("Hearing Delay / Reaction Time while At Peace")]
         [MinMax(0.0f, 1f, 100f)]
-        [Default(0.35f)]
         public float BaseHearingDelayAtPeace = 0.35f;
 
         [Name("Global Gunshot Audible Range Multiplier")]
-        [Default(1f)]
         [MinMax(0.1f, 2f, 100f)]
         public float GunshotAudioMultiplier = 1f;
 
         [Name("Global Footstep Audible Range Multiplier")]
-        [Default(1f)]
         [MinMax(0.1f, 2f, 100f)]
         public float FootstepAudioMultiplier = 1f;
 
         [Name("Suppressed Sound Modifier")]
         [Description("Audible Gun Range is multiplied by this number when using a suppressor")]
-        [Default(0.6f)]
         [MinMax(0.1f, 0.95f, 100f)]
         public float SuppressorModifier = 0.6f;
 
         [Name("Subsonic Sound Modifier")]
         [Description("Audible Gun Range is multiplied by this number when using a suppressor and subsonic ammo")]
-        [Default(0.33f)]
         [MinMax(0.1f, 0.95f, 100f)]
         public float SubsonicModifier = 0.33f;
 

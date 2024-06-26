@@ -10,7 +10,6 @@ namespace SAIN.Preset.GlobalSettings
             return Defaults;
         }
 
-        [Default(true)]
         public bool EnableExtractsGlobal = true;
     }
 }

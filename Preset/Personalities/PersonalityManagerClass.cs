@@ -119,7 +119,7 @@ namespace SAIN.Preset.Personalities
                     behavior.Talk.CanTaunt = true;
                     behavior.Talk.CanRespondToEnemyVoice = true;
                     behavior.Talk.TauntFrequency = 8;
-                    behavior.Talk.TauntChance = 65;
+                    behavior.Talk.TauntChance = 45;
                     behavior.Talk.TauntMaxDistance = 65f;
                     behavior.Talk.ConstantTaunt = true;
                     behavior.Talk.FrequentTaunt = true;
@@ -191,7 +191,7 @@ namespace SAIN.Preset.Personalities
                     behavior.Talk.CanTaunt = true;
                     behavior.Talk.CanRespondToEnemyVoice = true;
                     behavior.Talk.TauntFrequency = 4;
-                    behavior.Talk.TauntChance = 85;
+                    behavior.Talk.TauntChance = 33;
                     behavior.Talk.TauntMaxDistance = 75f;
                     behavior.Talk.ConstantTaunt = true;
                     behavior.Talk.FrequentTaunt = true;
@@ -332,8 +332,8 @@ namespace SAIN.Preset.Personalities
 
                     behavior.Talk.CanTaunt = true;
                     behavior.Talk.CanRespondToEnemyVoice = false;
-                    behavior.Talk.TauntFrequency = 15;
-                    behavior.Talk.TauntChance = 50;
+                    behavior.Talk.TauntFrequency = 20;
+                    behavior.Talk.TauntChance = 60;
                     behavior.Talk.TauntMaxDistance = 50f;
                     behavior.Talk.FrequentTaunt = true;
                     behavior.Talk.ConstantTaunt = false;
