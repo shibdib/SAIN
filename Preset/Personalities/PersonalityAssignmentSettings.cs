@@ -11,11 +11,6 @@ namespace SAIN.Preset.Personalities
 {
     public class PersonalityAssignmentSettings : SAINSettingsBase<PersonalityAssignmentSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         public bool CanBePersonality(SAINBotInfoClass infoClass)
         {
             if (Enabled)
@@ -41,9 +36,9 @@ namespace SAIN.Preset.Personalities
         private bool meetsRequirements(SAINBotInfoClass infoClass)
         {
             return AllowedTypes.Contains(infoClass.WildSpawnType) 
-                && infoClass.PowerLevel < PowerLevelMax 
+                && infoClass.PowerLevel <= PowerLevelMax 
                 && infoClass.PowerLevel > PowerLevelMin 
-                && infoClass.PlayerLevel < MaxLevel 
+                && infoClass.PlayerLevel <= MaxLevel 
                 && infoClass.PlayerLevel > MinLevel;
         }
 

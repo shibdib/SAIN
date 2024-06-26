@@ -5,11 +5,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class DebugSettings : SAINSettingsBase<DebugSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Global Debug Mode")]
         public bool GlobalDebugMode;
 

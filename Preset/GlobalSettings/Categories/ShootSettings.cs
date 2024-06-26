@@ -7,11 +7,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class ShootSettings : SAINSettingsBase<ShootSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Global Scatter Multiplier")]
         [Description("Higher = more scattering. Modifies EFT's default scatter feature. 1.5 = 1.5x more scatter")]
         [MinMax(0.01f, 10f, 100f)]

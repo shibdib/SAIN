@@ -7,11 +7,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class HearingSettings : SAINSettingsBase<HearingSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Max Footstep Audio Distance")]
         [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters.")]
         [MinMax(10f, 150f, 1f)]
@@ -22,7 +17,54 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(10f, 150f, 1f)]
         public float MaxFootstepAudioDistanceNoHeadphones = 50f;
 
-        public DispersionDictionary DispersionValues = new DispersionDictionary();
+        public DispersionDictionary DispersionValues = new DispersionDictionary
+        {
+            {
+                ESoundDispersionType.Footstep, new DispersionValues
+                {
+                    DistanceModifier = 1f,
+                    MinAngle = 1f,
+                    MaxAngle = 45,
+                    VerticalModifier = 0f
+                }
+            },
+            {
+                ESoundDispersionType.HeardShot, new DispersionValues
+                {
+                    DistanceModifier = 1f,
+                    MinAngle = 1f,
+                    MaxAngle = 30,
+                    VerticalModifier = 0f
+                }
+            },
+            {
+                ESoundDispersionType.UnheardShot, new DispersionValues
+                {
+                    DistanceModifier = 1f,
+                    MinAngle = 5f,
+                    MaxAngle = 90,
+                    VerticalModifier = 0f
+                }
+            },
+            {
+                ESoundDispersionType.HeardSuppressedShot, new DispersionValues
+                {
+                    DistanceModifier = 1f,
+                    MinAngle = 1f,
+                    MaxAngle = 45,
+                    VerticalModifier = 0f
+                }
+            },
+            {
+                ESoundDispersionType.UnheardSuppressedShot, new DispersionValues
+                {
+                    DistanceModifier = 1f,
+                    MinAngle = 15,
+                    MaxAngle = 90,
+                    VerticalModifier = 0f
+                }
+            },
+        };
 
         [MinMax(1f, 150f, 100f)]
         [Advanced]

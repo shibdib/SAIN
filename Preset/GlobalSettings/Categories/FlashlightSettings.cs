@@ -5,11 +5,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class FlashlightSettings : SAINSettingsBase<FlashlightSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [MinMax(0.25f, 10f, 100f)]
         public float DazzleEffectiveness = 3f;
 

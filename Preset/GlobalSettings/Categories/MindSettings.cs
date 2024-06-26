@@ -5,11 +5,6 @@ namespace SAIN.Preset.GlobalSettings.Categories
 {
     public class MindSettings : SAINSettingsBase<MindSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [MinMax(0.1f, 5f, 100f)]
         public float GlobalAggression = 1f;
 

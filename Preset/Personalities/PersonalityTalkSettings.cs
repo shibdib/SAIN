@@ -5,11 +5,6 @@ namespace SAIN.Preset.Personalities
 {
     public class PersonalityTalkSettings : SAINSettingsBase<PersonalityTalkSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Can Yell Taunts")]
         [Description("Hey you...yeah YOU! FUCK YOU! You heard?")]
         public bool CanTaunt = false;

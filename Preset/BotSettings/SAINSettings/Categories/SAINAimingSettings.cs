@@ -8,11 +8,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINAimingSettings : SAINSettingsBase<SAINAimingSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Always Aim Center Mass")]
         [Description("Force this bot type to aim for center of mass.")]
         public bool AimCenterMass = true;

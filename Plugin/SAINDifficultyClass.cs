@@ -1,8 +1,10 @@
-﻿using SAIN.Helpers;
+﻿using Comfort.Common;
+using SAIN.Helpers;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
 using System.Collections.Generic;
 using UnityEngine;
+using static HBAO_Core;
 
 namespace SAIN.Plugin
 {
@@ -95,37 +97,7 @@ namespace SAIN.Plugin
                 default:
                     return null;
             }
-
-            var global = result.GlobalSettings;
-            setDefault(global.Aiming);
-            setDefault(global.Cover);
-            setDefault(global.Extract);
-            setDefault(global.Flashlight);
-            setDefault(global.General);
-            setDefault(global.Hearing);
-            setDefault(global.Look);
-            setDefault(global.LootingBots);
-            setDefault(global.Mind);
-            setDefault(global.Move);
-            setDefault(global.NoBushESP);
-            setDefault(global.Performance);
-            setDefault(global.Personality);
-            setDefault(global.Shoot);
-            setDefault(global.SquadTalk);
-            setDefault(global.Talk);
-
             return result;
-        }
-
-        private static void setDefault<T>(T values) where T : SAINSettingsBase<T>
-        {
-            object defaults = SAINSettingsBase<T>.Defaults;
-            if (defaults != null)
-            {
-                CloneSettingsClass.CopyFields(values, defaults);
-                return;
-            }
-            Logger.LogError($"Defaults is null!");
         }
 
         private static SAINPresetClass CreateEasyPreset()

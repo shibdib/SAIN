@@ -4,15 +4,26 @@ using System;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public interface ISAINSettings
-    {
-        object GetDefaults();
-    }
 
-    public abstract class SAINSettingsBase<T>
+    public abstract class SAINSettingsBase<T> : ISAINSettings
     {
+        public object GetDefaults()
+        {
+            return Defaults;
+        }
+
+        public void CreateDefault()
+        {
+            Defaults = (T)Activator.CreateInstance(typeof(T));
+        }
+
+        public void UpdateDefaults(object values)
+        {
+            CloneSettingsClass.CopyFields(values, Defaults);
+        }
+
         [Hidden]
         [JsonIgnore]
-        public static readonly T Defaults = (T)Activator.CreateInstance(typeof(T));
+        public T Defaults;
     }
 }

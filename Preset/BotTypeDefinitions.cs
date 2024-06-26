@@ -1,9 +1,7 @@
 ﻿using EFT;
-using Newtonsoft.Json;
+using SAIN.Components.BotController;
 using SAIN.Helpers;
-using System;
 using System.Collections.Generic;
-using static SAIN.Helpers.JsonUtility;
 
 namespace SAIN.Preset
 {
@@ -40,6 +38,7 @@ namespace SAIN.Preset
         public static List<BotType> ImportBotTypes()
         {
             List<BotType> tempList = CreateBotTypes();
+            removeExcluded(tempList, out _);
 
             if (JsonUtility.Load.LoadObject(out List<BotType> importedList, FileName))
             {
@@ -71,8 +70,29 @@ namespace SAIN.Preset
                 {
                     importedList.Add(tempList[i]);
                 }
+
+            }
+            removeExcluded(importedList, out bool removed);
+            if (removed)
+            {
+                JsonUtility.SaveObjectToJson(importedList, FileName);
             }
         }
+
+        private static void removeExcluded(List<BotType> list, out bool removed)
+        {
+            removed = false;
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                if (BotSpawnController.StrictExclusionList.Contains(list[i].WildSpawnType))
+                {
+                    list.RemoveAt(i);
+                    removed = true;
+                }
+            }
+        }
+
+        private static readonly List<BotType> _typesToRemove = new List<BotType>();
 
         public static void ExportBotTypes()
         {

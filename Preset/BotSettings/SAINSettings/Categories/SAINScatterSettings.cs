@@ -5,11 +5,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINScatterSettings : SAINSettingsBase<SAINScatterSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("EFT Scatter Multiplier")]
         [Description("Higher = more scattering. Modifies EFT's default scatter feature. 1.5 = 1.5x more scatter")]
         [MinMax(0.1f, 10f, 100f)]

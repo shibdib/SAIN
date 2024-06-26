@@ -32,17 +32,30 @@ namespace SAIN.Preset
 
         public SAINPresetClass(SAINDifficulty sainDifficulty)
         {
+            EFTCoreSettings.UpdateCoreSettings();
+
             SAINPlugin.EditorDefaults.SelectedCustomPreset = string.Empty;
             SAINPlugin.EditorDefaults.SelectedDefaultPreset = sainDifficulty;
             PresetHandler.ExportEditorDefaults();
 
             Info = SAINDifficultyClass.DefaultPresetDefinitions[sainDifficulty];
-
             GlobalSettings = new GlobalSettingsClass();
-            EFTCoreSettings.UpdateCoreSettings();
-
             BotSettings = new BotSettings.SAINBotSettingsClass(this);
             PersonalityManager = new PersonalityManagerClass(this);
+        }
+
+        public void Init()
+        {
+            GlobalSettings.Init();
+            BotSettings.Init();
+            PersonalityManager.Init();
+        }
+
+        public void UpdateDefaults(SAINPresetClass preset = null)
+        {
+            GlobalSettings.UpdateDefaults(preset?.GlobalSettings);
+            BotSettings.UpdateDefaults(preset?.BotSettings);
+            PersonalityManager.UpdateDefaults(preset?.PersonalityManager);
         }
 
         public static void ExportAll(SAINPresetClass preset)

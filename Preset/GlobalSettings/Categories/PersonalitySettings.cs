@@ -6,11 +6,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class PersonalitySettings : SAINSettingsBase<PersonalitySettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Force Single Personality For All Bots")]
         [Description("All Spawned SAIN bots will be assigned the selected Personality, if any are set to true, no matter what.")]
         [DefaultDictionary(nameof(ForcePersonalityDefaults))]

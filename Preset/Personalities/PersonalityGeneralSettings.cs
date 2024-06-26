@@ -5,11 +5,6 @@ namespace SAIN.Preset.Personalities
 {
     public class PersonalityGeneralSettings : SAINSettingsBase<PersonalityGeneralSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Aggression Multiplier")]
         [Description("Linearly increases or decreases search time and hold ground time.")]
         [MinMax(0.01f, 5f, 100)]

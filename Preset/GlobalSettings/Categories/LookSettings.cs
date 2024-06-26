@@ -5,11 +5,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class LookSettings : SAINSettingsBase<LookSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Global Vision Distance Multiplier")]
         [Description(
             "Multiplies whatever a bot's visible distance is set to. " +

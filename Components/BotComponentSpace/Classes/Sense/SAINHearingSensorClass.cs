@@ -120,6 +120,7 @@ namespace SAIN.SAINComponent.Classes
         public float MinAngle;
         public float MaxAngle;
         public float DistanceModifier;
+        public float VerticalModifier;
     }
 
     public class SAINHearingSensorClass : SAINBase, ISAINClass

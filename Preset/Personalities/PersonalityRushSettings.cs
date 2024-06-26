@@ -5,11 +5,6 @@ namespace SAIN.Preset.Personalities
 {
     public class PersonalityRushSettings : SAINSettingsBase<PersonalityRushSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Can Rush Healing/Reloading/Grenade-Pulling Enemies")]
         public bool CanRushEnemyReloadHeal = false;
 

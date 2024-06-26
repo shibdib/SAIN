@@ -8,11 +8,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINCoreSettings : SAINSettingsBase<SAINCoreSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Field of View")]
         [MinMax(45f, 180f)]
         [CopyValue]

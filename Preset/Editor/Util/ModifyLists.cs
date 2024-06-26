@@ -32,9 +32,7 @@ namespace SAIN.Editor.Util
                 {
                     AddOrRemove(botType.WildSpawnType, list, out bool newEdit, botType.Name, botType.Description, options);
                     if (newEdit)
-                    {
                         wasEdited = true;
-                    }
                     i = ListSpacing(i, optionsPerLine);
                 }
                 EndListEdit();
@@ -53,18 +51,13 @@ namespace SAIN.Editor.Util
             {
                 string categoryName = category.CategoryInfo.Name;
                 string categoryDesciption = category.CategoryInfo.Description;
-
                 // Display the value of the category. And make it a openable dropdown menu
-                if (string.IsNullOrEmpty(search))
-                {
+                if (string.IsNullOrEmpty(search)) {
                     category.Open = BuilderClass.ExpandableMenu(categoryName, category.Open, categoryDesciption, 30f);
                     if (!category.Open)
-                    {
                         continue;
-                    }
                 }
-                else
-                {
+                else {
                     Label(categoryName, categoryDesciption, Height(30f));
                 }
 
@@ -74,23 +67,17 @@ namespace SAIN.Editor.Util
                 {
                     // Check if the user is searching
                     if (!string.IsNullOrEmpty(search) && !fieldAtt.Name.ToLower().Contains(search))
-                    {
                         continue;
-                    }
 
                     // Add or remove this field from the list
                     AddOrRemove(fieldAtt, category.SelectedList, out newEdit, fieldAtt.Name, fieldAtt.Description, dimensions);
                     if (newEdit)
-                    {
                         wasEdited = true;
-                    }
                 }
 
                 AddOrRemove(category, container.SelectedCategories, category.SelectedList.Count > 0, out newEdit);
                 if (newEdit)
-                {
                     wasEdited = true;
-                }
             }
         }
 
@@ -100,36 +87,28 @@ namespace SAIN.Editor.Util
             if (value)
             {
                 if (!list.Contains(item))
-                {
                     list.Add(item);
-                }
             }
             else
             {
                 if (list.Contains(item))
-                {
                     list.Remove(item);
-                }
             }
         }
 
         public static void AddOrRemove(List<BotDifficulty> list, out bool wasEdited, int optionsPerLine = 4, float width = 1200f, float height = 20f)
         {
             wasEdited = false;
-
             float optionWidth = (width / optionsPerLine).Round10();
             var dimensions = new GUILayoutOption[]
             {
                 Height(height), Width(optionWidth),
             };
-
             foreach (var dificulty in EnumValues.Difficulties)
             {
                 AddOrRemove(dificulty, list, out bool newEdit, null, null, dimensions);
                 if (newEdit)
-                {
                     wasEdited = true;
-                }
             }
         }
 
@@ -137,22 +116,15 @@ namespace SAIN.Editor.Util
         {
             wasEdited = false;
             int i = StartListEdit(optionsPerLine, out var options);
-
             List<BotType> botList = BotTypeDefinitions.BotTypesList;
-
             for (int b = 0; b < botList.Count; b++)
             {
                 BotType bot = botList[b];
-
                 AddOrRemove(bot, list, out bool newEdit, bot.Name, bot.Description, options);
-
                 if (newEdit)
-                {
                     wasEdited = true;
-                }
                 i = ListSpacing(i, optionsPerLine);
             }
-
             EndListEdit();
         }
 
@@ -160,22 +132,15 @@ namespace SAIN.Editor.Util
         {
             wasEdited = false;
             int i = StartListEdit(optionsPerLine, out var options);
-
             List<Brain> botList = BotBrains.AllBrainsList;
-
             for (int b = 0; b < botList.Count; b++)
             {
                 Brain brain = botList[b];
-
                 AddOrRemove(brain, list, out bool newEdit, null, null, options);
-
                 if (newEdit)
-                {
                     wasEdited = true;
-                }
                 i = ListSpacing(i, optionsPerLine);
             }
-
             EndListEdit();
         }
 
@@ -204,9 +169,7 @@ namespace SAIN.Editor.Util
 
                 AddOrRemove(value, list, toggleValue, out bool newEdit);
                 if (newEdit)
-                {
                     wasEdited = true;
-                }
             }
         }
 
@@ -215,7 +178,6 @@ namespace SAIN.Editor.Util
             BeginVertical();
             BeginHorizontal();
             Space(5);
-
             float width = (gridWidth / optionsPerLine).Round10();
             dimensions = new GUILayoutOption[]
             {

@@ -1,13 +1,17 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 using SAIN.Preset.GlobalSettings;
 
 namespace SAIN.Preset.Personalities
 {
     public class PersonalityCoverSettings : SAINSettingsBase<PersonalityCoverSettings>, ISAINSettings
     {
-        public object GetDefaults()
+        [JsonConstructor]
+        public PersonalityCoverSettings() { }
+
+        public PersonalityCoverSettings(bool createDefaults)
         {
-            return Defaults;
+
         }
 
         [Advanced]

@@ -6,11 +6,6 @@ namespace SAIN.Editor
 {
     public class PresetEditorDefaults : SAINSettingsBase<PresetEditorDefaults>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         public PresetEditorDefaults()
         {
             DefaultPreset = PresetHandler.DefaultPreset;

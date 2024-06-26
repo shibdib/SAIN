@@ -19,7 +19,7 @@ namespace SAIN.Preset.GlobalSettings
         public bool EnablePersonalityOverrides = true;
     }
 
-    public class PowerCalcSettings
+    public class PowerCalcSettings : SAINSettingsBase<PowerCalcSettings>, ISAINSettings
     {
         public float PMC_POWER = 20f;
         public float SCAV_POWER = -20f;

@@ -48,7 +48,7 @@ namespace SAIN.SAINComponent.Classes.Info
             FileSettings = SAINPlugin.LoadedPreset.BotSettings.GetSAINSettings(WildSpawnType, BotDifficulty);
             CalcPersonality();
             UpdateExtractTime();
-            //SetConfigValues(FileSettings);
+            SetConfigValues(FileSettings);
         }
 
         public void CalcPersonality()
@@ -102,10 +102,6 @@ namespace SAIN.SAINComponent.Classes.Info
                                 //Logger.LogInfo(message);
                                 //Logger.NotifyInfo(message);
                             }
-                            string message = $"[{eftVarField.Name}] : Default Value = [{eftVarField.GetValue(eftCategory)}] New Value = [{sainValue}]";
-                            //Logger.LogInfo(message);
-                            //Logger.NotifyInfo(message);
-
                             eftVarField.SetValue(eftCategory, sainValue);
                         }
                     }
@@ -226,9 +222,9 @@ namespace SAIN.SAINComponent.Classes.Info
             foreach (var setting 
                 in SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary)
             {
-                if (setting.Value.CanBePersonality(this))
+                if (setting.Value.Assignment.CanBePersonality(this))
                 {
-                    return setting.Value.SAINPersonality;
+                    return setting.Key;
                 }
             }
             if (Profile.IsPMC && EFTMath.RandomBool(40))

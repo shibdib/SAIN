@@ -5,11 +5,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINGrenadeSettings : SAINSettingsBase<SAINGrenadeSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [NameAndDescription(
             "Can Throw at Visible Enemies",
             "Toggles bots throwing grenades directly at enemies they can see.")]

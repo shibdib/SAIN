@@ -9,10 +9,5 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINHearingSettings : SAINSettingsBase<SAINHearingSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
     }
 }

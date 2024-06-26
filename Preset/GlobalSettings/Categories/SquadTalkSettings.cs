@@ -4,11 +4,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class SquadTalkSettings : SAINSettingsBase<SquadTalkSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Percentage]
         public float _reportReloadingChance = 33f;
 

@@ -7,10 +7,5 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINChangeSettings : SAINSettingsBase<SAINChangeSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
     }
 }

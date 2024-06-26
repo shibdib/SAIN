@@ -5,11 +5,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class GlobalMoveSettings : SAINSettingsBase<GlobalMoveSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Advanced]
         public bool EditSprintSpeed = true;
 

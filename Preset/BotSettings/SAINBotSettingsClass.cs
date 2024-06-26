@@ -1,6 +1,7 @@
 ﻿using EFT;
 using HarmonyLib;
 using SAIN.Attributes;
+using SAIN.Components.BotController;
 using SAIN.Helpers;
 using SAIN.Preset.BotSettings.SAINSettings;
 using System;
@@ -18,6 +19,30 @@ namespace SAIN.Preset.BotSettings
             LoadSAINSettings();
         }
 
+        public void Init()
+        {
+            foreach (var settings in SAINSettings)
+            {
+                foreach (var group in settings.Value.Settings)
+                {
+                    group.Value.Init();
+                }
+            }
+        }
+
+        public void UpdateDefaults(SAINBotSettingsClass replacement)
+        {
+            foreach (var settings in SAINSettings)
+            {
+                var replacementSettings = replacement?.SAINSettings[settings.Key];
+                foreach (var group in settings.Value.Settings)
+                {
+                    var replacementGroup = replacementSettings?.Settings[group.Key];
+                    group.Value.UpdateDefaults(replacementGroup);
+                }
+            }
+        }
+
         private void LoadSAINSettings()
         {
             BotDifficulty[] Difficulties = EnumValues.Difficulties;
@@ -25,6 +50,10 @@ namespace SAIN.Preset.BotSettings
             {
                 string name = BotType.Name;
                 WildSpawnType wildSpawnType = BotType.WildSpawnType;
+
+                if (BotSpawnController.StrictExclusionList.Contains(wildSpawnType))
+                {
+                }
 
                 SAINSettingsGroupClass sainSettingsGroup;
                 if (Preset.Info.IsCustom == false || !SAINPresetClass.Import(out sainSettingsGroup, Preset.Info.Name, name, "BotSettings"))

@@ -2,6 +2,7 @@
 using SAIN.Editor;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset.BotSettings.SAINSettings;
 using SAIN.Preset.GlobalSettings;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,23 @@ namespace SAIN.Preset.Personalities
         public PersonalityManagerClass(SAINPresetClass preset) : base(preset)
         {
             ImportPersonalities();
+        }
+
+        public void Init()
+        {
+            foreach (var settings in PersonalityDictionary.Values)
+            {
+                settings.Init();
+            }
+        }
+
+        public void UpdateDefaults(PersonalityManagerClass replacementClass = null)
+        {
+            foreach (var settings in PersonalityDictionary)
+            {
+                var replacementSettings = replacementClass?.PersonalityDictionary[settings.Key];
+                settings.Value.UpdateDefaults(replacementSettings);
+            }
         }
 
         public bool VerificationPassed = true;
@@ -86,8 +104,11 @@ namespace SAIN.Preset.Personalities
                 EPersonality GigaChad = EPersonality.GigaChad;
                 if (!Personalities.ContainsKey(GigaChad))
                 {
-                    string description = "A true alpha threat. Hyper Aggressive and typically wearing high tier equipment.";
-                    var settings = new PersonalitySettingsClass(GigaChad, GigaChad.ToString(), description);
+                    var settings = new PersonalitySettingsClass
+                    {
+                        Name = GigaChad.ToString(),
+                        Description = "A true alpha threat. Hyper Aggressive and typically wearing high tier equipment."
+                    };
 
                     var assignment = settings.Assignment;
                     assignment.Enabled = true;
@@ -157,9 +178,11 @@ namespace SAIN.Preset.Personalities
                 EPersonality Wreckless = EPersonality.Wreckless;
                 if (!Personalities.ContainsKey(Wreckless))
                 {
-                    string description = "Rush B Cyka Blyat. Who care if I die? Gotta get the clip";
-
-                    var settings = new PersonalitySettingsClass(Wreckless, Wreckless.ToString(), description);
+                    var settings = new PersonalitySettingsClass
+                    {
+                        Name = Wreckless.ToString(),
+                        Description = "This personality tends to sprint at their enemies, and will very frequently scream at everyone - Usually both at the same time. More Aggressive than Gigachads."
+                    };
 
                     var assignment = settings.Assignment;
                     assignment.Enabled = true;
@@ -229,8 +252,11 @@ namespace SAIN.Preset.Personalities
                 EPersonality SnappingTurtle = EPersonality.SnappingTurtle;
                 if (!Personalities.ContainsKey(SnappingTurtle))
                 {
-                    string description = "A player who finds the balance between rat and chad, yin and yang. Will rat you out but can spring out at any moment.";
-                    var settings = new PersonalitySettingsClass(SnappingTurtle, SnappingTurtle.ToString(), description);
+                    var settings = new PersonalitySettingsClass
+                    {
+                        Name = SnappingTurtle.ToString(),
+                        Description = "A player who finds the balance between rat and chad, yin and yang. Will rat you out but can spring out at any moment."
+                    };
 
                     var turtleAssignment = settings.Assignment;
                     turtleAssignment.Enabled = true;
@@ -301,10 +327,13 @@ namespace SAIN.Preset.Personalities
                 EPersonality Chad = EPersonality.Chad;
                 if (!Personalities.ContainsKey(Chad))
                 {
-                    string description = "An aggressive player. Typically wearing high tier equipment, and is more aggressive than usual.";
-                    var settings = new PersonalitySettingsClass(Chad, Chad.ToString(), description);
-                    var assignment = settings.Assignment;
+                    var settings = new PersonalitySettingsClass
+                    {
+                        Name = Chad.ToString(),
+                        Description = "An aggressive player. Typically wearing high tier equipment, and is more aggressive than usual.",
+                    };
 
+                    var assignment = settings.Assignment;
                     assignment.Enabled = true;
                     assignment.RandomlyAssignedChance = 8;
                     assignment.CanBeRandomlyAssigned = true;
@@ -374,10 +403,13 @@ namespace SAIN.Preset.Personalities
                 EPersonality Rat = EPersonality.Rat;
                 if (!Personalities.ContainsKey(Rat))
                 {
-                    string description = "Scum of Tarkov. Rarely Seeks out enemies, and when they do - they will crab walk all the way there";
-                    var settings = new PersonalitySettingsClass(Rat, Rat.ToString(), description);
-                    var assignment = settings.Assignment;
+                    var settings = new PersonalitySettingsClass
+                    {
+                        Name = Rat.ToString(),
+                        Description = "Scum of Tarkov. Rarely Seeks out enemies, and when they do - they will crab walk all the way there",
+                    };
 
+                    var assignment = settings.Assignment;
                     assignment.Enabled = true;
                     assignment.RandomlyAssignedChance = 10;
                     assignment.CanBeRandomlyAssigned = true;
@@ -454,10 +486,13 @@ namespace SAIN.Preset.Personalities
                 EPersonality Timmy = EPersonality.Timmy;
                 if (!Personalities.ContainsKey(Timmy))
                 {
-                    string description = "A New Player, terrified of everything.";
-                    var settings = new PersonalitySettingsClass(Timmy, Timmy.ToString(), description);
-                    var assignment = settings.Assignment;
+                    var settings = new PersonalitySettingsClass
+                    {
+                        Name = Timmy.ToString(),
+                        Description = "A New Player, terrified of everything."
+                    };
 
+                    var assignment = settings.Assignment;
                     assignment.Enabled = true;
                     assignment.RandomlyAssignedChance = 0;
                     assignment.CanBeRandomlyAssigned = false;
@@ -534,12 +569,13 @@ namespace SAIN.Preset.Personalities
                 EPersonality Coward = EPersonality.Coward;
                 if (!Personalities.ContainsKey(Coward))
                 {
-                    string name = Coward.ToString();
-                    string description = "A player who is more passive and afraid than usual. Will never seek out enemies and will hide in a closet until the scary thing goes away.";
+                    var settings = new PersonalitySettingsClass
+                    {
+                        Name = Coward.ToString(),
+                        Description = "A player who is more passive and afraid than usual. Will never seek out enemies and will hide in a closet until the scary thing goes away."
+                    };
 
-                    var settings = new PersonalitySettingsClass(Coward, Coward.ToString(), description);
                     var assignment = settings.Assignment;
-
                     assignment.Enabled = true;
                     assignment.RandomlyAssignedChance = 5;
                     assignment.CanBeRandomlyAssigned = true;
@@ -591,8 +627,12 @@ namespace SAIN.Preset.Personalities
                 EPersonality Normal = EPersonality.Normal;
                 if (!Personalities.ContainsKey(Normal))
                 {
-                    string description = "An Average Tarkov Enjoyer";
-                    var settings = new PersonalitySettingsClass(Normal, Normal.ToString(), description);
+                    var settings = new PersonalitySettingsClass
+                    {
+                        Name = Normal.ToString(),
+                        Description = "An Average Tarkov Enjoyer"
+                    };
+
                     var assignment = settings.Assignment;
 
                     assignment.Enabled = true;

@@ -53,13 +53,10 @@ namespace SAIN.Editor
                 GlobalSettingsWereEdited,
                 out bool saved);
 
-            if (newEdit)
-            {
-                GlobalSettingsWereEdited = true;
-            }
             if (saved)
             {
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
+                ConfigEditingTracker.Clear();
             }
         }
 

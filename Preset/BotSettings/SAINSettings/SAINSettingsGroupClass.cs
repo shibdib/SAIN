@@ -21,6 +21,22 @@ namespace SAIN.Preset.BotSettings.SAINSettings
             }
         }
 
+        public void Init()
+        {
+            foreach (var settings in Settings.Values)
+            {
+                settings.Init();
+            }
+        }
+
+        public void UpdateDefaults()
+        {
+            foreach (var settings in Settings.Values)
+            {
+                settings.UpdateDefaults();
+            }
+        }
+
         [JsonProperty]
         public string Name;
 

@@ -6,11 +6,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class GeneralSettings : SAINSettingsBase<GeneralSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Bots Use Grenades")]
         public bool BotsUseGrenades = true;
 

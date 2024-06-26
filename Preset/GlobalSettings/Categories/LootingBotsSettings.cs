@@ -9,11 +9,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class LootingBotsSettings : SAINSettingsBase<LootingBotsSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Bot Extraction From Loot")]
         public bool ExtractFromLoot = true;
 

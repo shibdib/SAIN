@@ -5,11 +5,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class CoverSettings : SAINSettingsBase<CoverSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [MinMax(20f, 100f, 10f)]
         [Advanced]
         public float MaxCoverPathLength = 60f;

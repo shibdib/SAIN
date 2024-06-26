@@ -6,11 +6,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINMindSettings : SAINSettingsBase<SAINMindSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Global Aggression Multiplier")]
         [Description("How quickly bots will move to search for enemies after losing sight, and how carefully they will search. Higher number equals higher aggression.")]
         [MinMax(0.01f, 3f, 10f)]

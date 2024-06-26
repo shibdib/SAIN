@@ -10,7 +10,7 @@ namespace SAIN.Preset.GlobalSettings
         {
             Type type = original.GetType();
             FieldInfo[] fields = type.GetFields();
-            Logger.LogDebug($"Copying {fields.Length - 1} fields in {type.Name}");
+            //Logger.LogDebug($"Copying {fields.Length - 1} fields in {type.Name}");
 
             foreach (FieldInfo field in fields)
             {
@@ -23,7 +23,7 @@ namespace SAIN.Preset.GlobalSettings
                 object originalValue = field.GetValue(original);
                 field.SetValue(clone, originalValue);
 
-                Logger.LogInfo($"Copied {field.Name} : Value: {field.GetValue(clone)}");
+                //Logger.LogInfo($"Copied {field.Name} : Value: {field.GetValue(clone)}");
             }
         }
     }

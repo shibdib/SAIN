@@ -7,11 +7,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINLookSettings : SAINSettingsBase<SAINLookSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [NameAndDescription(
             "Base Vision Speed Multiplier",
             "The Base vision speed multiplier, affects all ranges to enemy. " +

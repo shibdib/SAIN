@@ -1,7 +1,9 @@
-﻿using SAIN.Editor;
+﻿using SAIN.Attributes;
+using SAIN.Editor;
 using SAIN.Preset;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using static SAIN.Helpers.JsonUtility;
 
 namespace SAIN.Plugin
@@ -16,6 +18,38 @@ namespace SAIN.Plugin
         veryhard ,
         deathwish,
         custom,
+    }
+
+    internal static class ConfigEditingTracker
+    {
+        public static void Add(AttributesInfoClass info, object value)
+        {
+            if (EditedConfigValues.ContainsKey(info))
+            {
+                EditedConfigValues[info] = value;
+                return;
+            }
+            EditedConfigValues.Add(info, value);
+        }
+
+        public static void Remove(AttributesInfoClass info)
+        {
+            EditedConfigValues.Remove(info);
+        }
+
+        public static bool WasEdited(AttributesInfoClass info)
+        {
+            return EditedConfigValues.ContainsKey(info);
+        }
+
+        public static void Clear()
+        {
+            EditedConfigValues.Clear();
+        }
+
+        public static bool UnsavedChanges => EditedConfigValues.Count > 0;
+
+        public static readonly Dictionary<AttributesInfoClass, object> EditedConfigValues = new Dictionary<AttributesInfoClass, object>();
     }
 
     internal class PresetHandler
@@ -93,15 +127,18 @@ namespace SAIN.Plugin
             SaveObjectToJson(definition, "Info", PresetsFolder, definition.Name);
         }
 
+        private static void loadDefault()
+        {
+            LoadedPreset = SAINDifficultyClass.GetDefaultPreset(EditorDefaults.SelectedDefaultPreset) ?? SAINDifficultyClass.GetDefaultPreset(SAINDifficulty.hard);
+            LoadedPreset.Init();
+            LoadedPreset.UpdateDefaults();
+        }
+
         public static void InitPresetFromDefinition(SAINPresetDefinition def, bool isCopy = false)
         {
             if (def == null || def.IsCustom == false)
             {
-                LoadedPreset = SAINDifficultyClass.GetDefaultPreset(EditorDefaults.SelectedDefaultPreset);
-                if (LoadedPreset == null)
-                {
-                    LoadedPreset = SAINDifficultyClass.GetDefaultPreset(SAINDifficulty.hard);
-                }
+                loadDefault();
                 UpdateExistingBots();
                 ExportEditorDefaults();
                 return;
@@ -109,23 +146,19 @@ namespace SAIN.Plugin
 
             try
             {
-                if (def.BaseSAINDifficulty != SAINDifficulty.none)
-                {
-                    // This initializes the default preset, and sets default values to match what they are set to.
-                    SAINDifficultyClass.GetDefaultPreset(def.BaseSAINDifficulty);
-                }
+                var defaultPreset = SAINDifficultyClass.GetDefaultPreset(def.BaseSAINDifficulty);
+
                 LoadedPreset = new SAINPresetClass(def, isCopy);
+                LoadedPreset.Init();
+
+                if (defaultPreset != null)
+                    LoadedPreset.UpdateDefaults(defaultPreset);
             }
             catch (Exception ex)
             {
                 Sounds.PlaySound(EFT.UI.EUISoundType.ErrorMessage);
                 Logger.LogError(ex);
-
-                LoadedPreset = SAINDifficultyClass.GetDefaultPreset(EditorDefaults.SelectedDefaultPreset);
-                if (LoadedPreset == null)
-                {
-                    LoadedPreset = SAINDifficultyClass.GetDefaultPreset(SAINDifficulty.hard);
-                }
+                loadDefault();
             }
             UpdateExistingBots();
             ExportEditorDefaults();

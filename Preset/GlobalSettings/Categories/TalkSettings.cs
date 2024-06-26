@@ -5,11 +5,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class TalkSettings : SAINSettingsBase<TalkSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Talkative Scavs")]
         [Description("When at peace, scavs will talk to each other and be noisy. Revealing their location.")]
         public bool TalkativeScavs = true;

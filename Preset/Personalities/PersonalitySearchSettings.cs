@@ -5,11 +5,6 @@ namespace SAIN.Preset.Personalities
 {
     public class PersonalitySearchSettings : SAINSettingsBase<PersonalitySearchSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Advanced]
         public bool WillSearchForEnemy = true;
 

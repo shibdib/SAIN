@@ -5,11 +5,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class VanillaBotSettings : SAINSettingsBase<VanillaBotSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [Name("Vanilla Scavs")]
         [Description("REQUIRES RESTART OF GAME. Non Player-Scavs will have vanilla ai behavior. Disabling sain for player scavs is not currently possible.")]
         public bool VanillaScavs = false;

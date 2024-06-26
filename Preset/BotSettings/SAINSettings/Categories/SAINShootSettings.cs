@@ -5,11 +5,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINShootSettings : SAINSettingsBase<SAINShootSettings>, ISAINSettings
     {
-        public object GetDefaults()
-        {
-            return Defaults;
-        }
-
         [NameAndDescription("Recoil Scatter Multiplier",
             "Modifies how much recoil a bot gets from firing their weapon. " +
             "Higher = more recoil, more kick. 1.5 = 1.5x more recoil")]

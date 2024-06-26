@@ -11,7 +11,7 @@ namespace SAIN.Preset
         public string SAINVersion;
         public string SAINPresetVersion;
         public string DateCreated;
-        public SAINDifficulty BaseSAINDifficulty;
+        public SAINDifficulty BaseSAINDifficulty = SAINDifficulty.hard;
         public bool IsCustom = true;
         public bool CanEditName = true;
 

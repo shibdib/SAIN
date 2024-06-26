@@ -85,10 +85,10 @@ namespace SAIN
                 return false;
             }
 
-            return shallExcludeBotByType(wildSpawnType, botOwner);
+            return ShallExludeByWildSpawnType(wildSpawnType, botOwner);
         }
 
-        private static bool shallExcludeBotByType(WildSpawnType wildSpawnType, BotOwner botOwner)
+        public static bool ShallExludeByWildSpawnType(WildSpawnType wildSpawnType, BotOwner botOwner)
         {
             return
                 excludeOthers(wildSpawnType) ||

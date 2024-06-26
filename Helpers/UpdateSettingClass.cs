@@ -8,37 +8,13 @@ namespace SAIN.Helpers
 {
     internal class UpdateSettingClass
     {
-        public static readonly string[] AimMultiplierNames =
-        {
-                nameof(BotSettingsComponents.Aiming.BASE_SHIEF),
-                nameof(BotSettingsComponents.Aiming.BOTTOM_COEF)
-        };
-
-        public static readonly string[] ScatterMultiplierNames =
-        {
-                nameof(BotSettingsComponents.Aiming.XZ_COEF),
-                nameof(BotSettingsComponents.Aiming.XZ_COEF_STATIONARY_BULLET),
-                nameof(BotSettingsComponents.Aiming.XZ_COEF_STATIONARY_GRENADE),
-                nameof(BotSettingsComponents.Scattering.MinScatter),
-                nameof(BotSettingsComponents.Scattering.MaxScatter),
-                nameof(BotSettingsComponents.Scattering.WorkingScatter)
-        };
-
-        public static string VisibleDistance = nameof(BotSettingsComponents.Core.VisibleDistance);
-        public static string GainSightCoef = nameof(BotSettingsComponents.Core.GainSightCoef);
-
-        private static GlobalSettingsClass GlobalSettings => SAINPlugin.LoadedPreset.GlobalSettings;
-
         public static void ManualSettingsUpdate(WildSpawnType WildSpawnType, BotDifficulty botDifficulty, BotSettingsComponents eftSettings, BotSettingsComponents defaultSettings = null, SAINSettingsClass sainSettings = null)
         {
             if (sainSettings == null)
-            {
                 sainSettings = SAINPlugin.LoadedPreset.BotSettings.GetSAINSettings(WildSpawnType, botDifficulty);
-            }
+
             if (defaultSettings == null)
-            {
                 defaultSettings = HelpersGClass.GetEFTSettings(WildSpawnType, botDifficulty);
-            }
 
             StringBuilder debugString = new StringBuilder();
             if (SAINPlugin.DebugMode)
@@ -70,11 +46,11 @@ namespace SAIN.Helpers
 
             ManualSettingsUpdate(WildSpawnType, botDifficulty, eftSettings, null, sainSettings);
 
-            if (BotOwner.WeaponManager?.WeaponAIPreset != null)
-            {
-                BotOwner.WeaponManager.WeaponAIPreset.XZ_COEF = eftSettings.Aiming.XZ_COEF;
-                BotOwner.WeaponManager.WeaponAIPreset.BaseShift = eftSettings.Aiming.BASE_SHIEF;
-            }
+            //if (BotOwner.WeaponManager?.WeaponAIPreset != null)
+            //{
+            //    BotOwner.WeaponManager.WeaponAIPreset.XZ_COEF = eftSettings.Aiming.XZ_COEF;
+            //    BotOwner.WeaponManager.WeaponAIPreset.BaseShift = eftSettings.Aiming.BASE_SHIEF;
+            //}
         }
 
         private static float MultiplySetting(float defaultValue, float multiplier, string name, StringBuilder debugString)
@@ -88,9 +64,9 @@ namespace SAIN.Helpers
         }
 
         public static float VisionSpeedMulti(SAINSettingsClass SAINSettings) 
-            => Round(SAINSettings.Look.VisionSpeedModifier * GlobalSettings.Look.GlobalVisionSpeedModifier);
+            => Round(SAINSettings.Look.VisionSpeedModifier * GlobalSettingsClass.Instance.Look.GlobalVisionSpeedModifier);
 
-        public static float VisionDistanceMulti => GlobalSettings.Look.GlobalVisionDistanceMultiplier;
+        public static float VisionDistanceMulti => GlobalSettingsClass.Instance.Look.GlobalVisionDistanceMultiplier;
 
         private static float Round(float value)
         {
