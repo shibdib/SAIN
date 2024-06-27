@@ -10,14 +10,19 @@ namespace SAIN
 {
     public interface ISAINClass
     {
+        BotComponent Bot { get; }
+
         void Init();
         void Update();
         void Dispose();
     }
 
-    public interface ISAINEnemyClass : ISAINClass
+    public interface ISAINEnemyClass
     {
-        void onEnemyForgotten(Enemy enemy);
-        void onEnemyKnown(Enemy enemy);
+        void OnEnemyKnownChanged(Enemy enemy, bool known);
+
+        void Init();
+        void Update();
+        void Dispose();
     }
 }

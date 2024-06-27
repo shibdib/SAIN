@@ -10,7 +10,7 @@ namespace SAIN.SAINComponent.Classes
         }
 
         protected SAINBotMedicalClass Medical { get; private set; }
-        protected BotComponent Bot => Medical.Bot;
+        public BotComponent Bot => Medical.Bot;
         protected BotOwner BotOwner => Bot.Person.BotOwner;
         protected Player Player => Bot.Person.Player;
         protected IPlayer IPlayer => Bot.Person.IPlayer;

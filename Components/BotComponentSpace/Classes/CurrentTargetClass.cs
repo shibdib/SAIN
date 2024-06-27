@@ -40,7 +40,7 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private Enemy Enemy => Bot.EnemyController.ActiveEnemy;
+        private Enemy Enemy => Bot.Enemy;
         private Vector3 Position => Bot.Position;
 
         private void UpdateGoalTarget()

@@ -93,6 +93,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
             set
             {
+                _nextCheckDistTime = 0f;
                 TimePositionUpdated = Time.time;
                 _position = value;
                 OnPositionUpdated?.Invoke(this);
@@ -106,8 +107,23 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public float Distance(Vector3 toPoint)
         {
-            return (_position - toPoint).magnitude;
+            updateDistance(toPoint);
+            return _distance;
         }
+
+        private void updateDistance(Vector3 point)
+        {
+            if (_nextCheckDistTime > Time.time)
+            {
+                return;
+            }
+            _nextCheckDistTime = Time.time + 0.2f;
+            _distance = (_position - point).magnitude;
+        }
+
+        private float _distance;
+
+        private float _nextCheckDistTime;
 
         public float DistanceSqr(Vector3 toPoint)
         {

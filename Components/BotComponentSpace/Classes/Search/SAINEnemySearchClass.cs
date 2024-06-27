@@ -77,7 +77,7 @@ namespace SAIN.SAINComponent.Classes.Search
             }
         }
 
-        private void checkStopSearch(Enemy enemy, float time)
+        private void checkStopSearch(Enemy enemy)
         {
             if (Searching && 
                 enemy.EnemyProfileId == Enemy.EnemyProfileId)

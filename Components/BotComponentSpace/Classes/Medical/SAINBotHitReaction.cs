@@ -36,13 +36,10 @@ namespace SAIN.SAINComponent.Classes
             enemy.Status.GetHit(damageInfo);
         }
 
-        private void clearEnemy(string profileId)
+        private void clearEnemy(string profileId, Enemy enemy)
         {
-            if (EnemyWhoLastShotMe != null &&
-                EnemyWhoLastShotMe.EnemyProfileId == profileId)
-            {
+            if (enemy == EnemyWhoLastShotMe)
                 EnemyWhoLastShotMe = null;
-            }
         }
 
         public void Update()

@@ -212,10 +212,7 @@ namespace SAIN.SAINComponent.Classes.Debug
             BotOwner.Mover?.RecalcWay();
         }
 
-        private bool isHumanVisible()
-        {
-            return Bot.EnemyController.HumansInLineOfSight.Count > 0;
-        }
+        private bool isHumanVisible() => Bot.EnemyController.HumanEnemyInLineofSight;
 
         private bool isHumanClose()
         {

@@ -18,4 +18,20 @@ namespace SAIN.SAINComponent
         public IPlayer IPlayer => Bot.Person.IPlayer;
         public GlobalSettingsClass GlobalSettings => GlobalSettingsClass.Instance;
     }
+
+    public abstract class SAINSubBase<T> where T : ISAINClass
+    {
+        public SAINSubBase(T sainClass)
+        {
+            BaseClass = sainClass;
+        }
+
+        protected T BaseClass;
+
+        public BotComponent Bot => BaseClass.Bot;
+        protected BotOwner BotOwner => Bot.Person.BotOwner;
+        protected Player Player => Bot.Person.Player;
+        protected IPlayer IPlayer => Bot.Person.IPlayer;
+        protected GlobalSettingsClass GlobalSettings => GlobalSettingsClass.Instance;
+    }
 }

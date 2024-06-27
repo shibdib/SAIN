@@ -45,6 +45,11 @@ namespace SAIN.SAINComponent.Classes
                 BotComponent.AimDownSightsController.UpdateADSstatus();
             }
 
+            if (BotOwner.WeaponManager.Reload.Reloading)
+            {
+                return;
+            }
+
             BotComponent.BotLight.HandleLightForEnemy();
 
             aimAtEnemy();

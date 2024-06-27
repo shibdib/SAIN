@@ -46,11 +46,11 @@ namespace SAIN.Layers.Combat.Solo
                 //    Bot.SelfActions.TryReload();
                 //}
 
-                Vector3? LastSeenPosition = enemy.LastSeenPosition;
+                Vector3? lastKnown = enemy.KnownPlaces.LastKnownPosition;
                 Vector3 movePos;
-                if (LastSeenPosition != null)
+                if (lastKnown != null)
                 {
-                    movePos = LastSeenPosition.Value;
+                    movePos = lastKnown.Value;
                 }
                 else if (enemy.TimeSinceSeen < 5f)
                 {
@@ -103,76 +103,6 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            Enemy enemy = Bot.Enemy;
-            if (enemy == null)
-            {
-                Bot.Steering.SteerByPriority();
-                return;
-            }
-
-            Bot.Mover.SetTargetPose(1f);
-            Bot.Mover.SetTargetMoveSpeed(1f);
-
-            if (CheckShoot(enemy))
-            {
-                Bot.Steering.SteerByPriority();
-                Shoot.Update();
-                return;
-            }
-
-            //if (Bot.Decision.SelfActionDecisions.LowOnAmmo(0.66f))
-            //{
-            //    Bot.SelfActions.TryReload();
-            //}
-
-            Vector3? LastSeenPosition = enemy.LastSeenPosition;
-            Vector3 movePos;
-            if (LastSeenPosition != null)
-            {
-                movePos = LastSeenPosition.Value;
-            }
-            else if (enemy.TimeSinceSeen < 5f)
-            {
-                movePos = enemy.EnemyPosition;
-            }
-            else
-            {
-                Bot.Steering.SteerByPriority();
-                Shoot.Update();
-                return;
-            }
-            var cover = Bot.Cover.FindPointInDirection(movePos - Bot.Position, 0.5f, 3f);
-            if (cover != null)
-            {
-                movePos = cover.Position;
-            }
-
-            float distance = enemy.RealDistance;
-            if (distance > 40f && !BotOwner.Memory.IsUnderFire)
-            {
-                if (RecalcPathTimer < Time.time)
-                {
-                    RecalcPathTimer = Time.time + 2f;
-                    BotOwner.BotRun.Run(movePos, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
-                    Bot.Steering.LookToMovingDirection(500f, true);
-                }
-            }
-            else
-            {
-                Bot.Mover.Sprint(false);
-
-                if (RecalcPathTimer < Time.time)
-                {
-                    RecalcPathTimer = Time.time + 2f;
-                    BotOwner.MoveToEnemyData.TryMoveToEnemy(movePos);
-                }
-
-                if (!Bot.Steering.SteerByPriority(false))
-                {
-                    Bot.Steering.LookToMovingDirection();
-                    //SAIN.Steering.LookToPoint(movePos + Vector3.up * 1f);
-                }
-            }
         }
 
         private bool CheckShoot(Enemy enemy)

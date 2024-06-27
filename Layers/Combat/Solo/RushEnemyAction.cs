@@ -62,6 +62,7 @@ namespace SAIN.Layers.Combat.Solo
 
         private void enemyInSight()
         {
+            _pathUpdated = true;
             checkJumpEnemyInSight();
 
             Shoot.Update();

@@ -40,25 +40,23 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Enemy.OnEnemyForgotten += onEnemyForgotten;
-            Enemy.OnEnemyKnown += onEnemyKnown;
+            Enemy.EnemyKnownChecker.OnEnemyKnownChanged += OnEnemyKnownChanged;
         }
 
         public void Dispose()
         {
-            Enemy.OnEnemyForgotten -= onEnemyForgotten;
-            Enemy.OnEnemyKnown -= onEnemyKnown;
+            Enemy.EnemyKnownChecker.OnEnemyKnownChanged -= OnEnemyKnownChanged;
         }
 
-        public void onEnemyForgotten(Enemy enemy)
+        public void OnEnemyKnownChanged(Enemy enemy, bool known)
         {
+            if (known)
+            {
+                return;
+            }
+
             EnemyHealthStatus = ETagStatus.Healthy;
             SetVulnerableAction(EEnemyAction.None);
-        }
-
-        public void onEnemyKnown(Enemy enemy)
-        {
-
         }
 
         private EEnemyAction checkVulnerableAction()

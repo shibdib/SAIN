@@ -220,6 +220,23 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
         }
 
+        private void talkNoise(bool conversation)
+        {
+            if (_nextSayNoise < Time.time && 
+                Bot.Talk.GroupTalk.FriendIsClose && 
+                Bot.Squad.BotInGroup && 
+                (Bot.Enemy == null || Bot.Enemy.TimeSinceSeen > 20f))
+            {
+                _nextSayNoise = Time.time + 12f;
+                if (EFTMath.RandomBool(35))
+                {
+                    Bot.Talk.TalkAfterDelay(conversation ? EPhraseTrigger.OnEnemyConversation : EPhraseTrigger.NoisePhrase);
+                }
+            }
+        }
+
+        private float _nextSayNoise;
+
         private bool ShallReportEnemyHealth()
         {
             if (_nextCheckEnemyHPTime < Time.time && Bot.Enemy != null)

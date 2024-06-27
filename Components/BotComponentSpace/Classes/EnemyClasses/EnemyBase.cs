@@ -19,17 +19,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         }
 
         protected Enemy Enemy { get; private set; }
-        protected BotComponent Bot => Enemy.Bot;
+        public BotComponent Bot => Enemy.Bot;
         protected PlayerComponent PlayerComp => Enemy.Bot.PlayerComponent;
         protected BotOwner BotOwner => Enemy.BotOwner;
         protected EnemyInfo EnemyInfo => Enemy.EnemyInfo;
 
-        protected PlayerComponent EnemyPlayerComp => EnemyPerson.PlayerComponent;
+        protected PlayerComponent EnemyPlayerComponent => EnemyPerson.PlayerComponent;
         protected PersonClass EnemyPerson { get; private set; }
         protected Player EnemyPlayer => EnemyPerson.Player;
         protected IPlayer EnemyIPlayer => EnemyPerson.IPlayer;
         protected PersonTransformClass EnemyTransform => EnemyPerson.Transform;
         protected Vector3 EnemyPosition => EnemyPerson.Transform.Position;
-        protected Vector3 EnemyDirection => EnemyPerson.Transform.DirectionTo(Bot.Position);
     }
 }

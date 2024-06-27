@@ -4,9 +4,24 @@ using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
-    public class DogFightDecisionClass : SAINBase
+    public class DogFightDecisionClass : SAINBase, ISAINClass
     {
         public DogFightDecisionClass(BotComponent bot) : base(bot) { }
+
+        public void Init()
+        {
+            Bot.EnemyController.OnEnemyRemoved += checkClear;
+        }
+
+        public void Update()
+        {
+
+        }
+
+        public void Dispose()
+        {
+            Bot.EnemyController.OnEnemyRemoved -= checkClear;
+        }
 
         public bool ShallDogFight()
         {
@@ -148,6 +163,15 @@ namespace SAIN.SAINComponent.Classes.Decision
         private readonly List<Enemy> _dogFightTargets = new List<Enemy>();
 
         public Enemy DogFightTarget { get; set; }
+
+        private void checkClear(string profileID, Enemy enemy)
+        {
+            if (DogFightTarget != null &&
+                DogFightTarget.EnemyProfileId == profileID)
+            {
+                DogFightTarget = null;
+            }
+        }
 
         private bool shallDogFightEnemy(Enemy enemy)
         {

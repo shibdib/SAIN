@@ -243,17 +243,24 @@
     <None Include="Plugin\VersionChecker\setbuild.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\CornerHelpers.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyActiveThreatChecker.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyValidChecker.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyChooserClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\CornerHelpers.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EEnemyListType.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyList.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyListsClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyUpdaterClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\BodyPartHitEffectClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\BodyPartStatus.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\BotMedicalBase.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\BotSurgery.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\EHitReaction.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\EInjurySeverity.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\BlindCorner.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\BlindCornerFinder.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyHearing.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyKnownChecker.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyCorner.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\BlindCornerFinder.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyHearing.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyKnownChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\WeaponAIPresetHistory.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\BotSound.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ReloadClass.cs" />
@@ -367,9 +374,9 @@
     <Compile Include="Preset\SettingsGroupBase.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\CurrentTargetClass.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyAim.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyVisionDistanceClass.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\GainSightClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyAim.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyVisionDistanceClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\GainSightClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\BotBackpackDropClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\DogFightDecisionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\SAINActivationClass.cs" />
@@ -383,7 +390,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Memory\EExtractStatus.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\EnemyTarget.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\EnemyTargetsClass.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\EEnemyAction.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EEnemyAction.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\ExpirableBool.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\HealthTracker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\LocationTracker.cs" />
@@ -391,9 +398,9 @@
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\AimDownSightsController.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="Preset\Editor\PresetSelection.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyBase.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyKnownPlaces.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyPlace.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyBase.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyKnownPlaces.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyPlace.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\ESearchMove.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Mover\DogFight.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Mover\SAINDoorOpener.cs" />
@@ -404,9 +411,9 @@
     <Compile Include="Components\BotComponentSpace\Classes\Medical\SAINBotMedicalClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\SAINBotHitReaction.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\SAINBotUnstuckClass.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\SAINEnemyPath.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\SAINEnemyStatus.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\SAINEnemyVision.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\SAINEnemyPath.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\SAINEnemyStatus.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\SAINEnemyVision.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\SAINNotLooking.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SAINSearchClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINConcealment.cs" />
@@ -459,7 +466,7 @@
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverAnalyzer.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\SquadCoverFinder.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\SpottedCoverPoint.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\SAINEnemyController.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\SAINEnemyController.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Firerate.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Firemode.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Recoil.cs" />
@@ -547,7 +554,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Talk\EnemyTalkObject.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Talk\GroupTalk.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\BotSquadClass.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Enemy\Enemy.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Enemy.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\SAINBotInfoClass.cs" />
     <Compile Include="SAINEnum.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\GrenadeTrackerComponent.cs" />

@@ -9,6 +9,11 @@ using UnityEngine;
 
 namespace SAIN.Layers
 {
+    public class SAINOverlay
+    {
+
+    }
+
     public static class DebugOverlay
     {
         static DebugOverlay()
@@ -20,54 +25,34 @@ namespace SAIN.Layers
         private static FieldInfo TimeToAim;
         private static FieldInfo timeAiming;
 
-        private static void DisplayPropertyAndFieldValues(object obj, StringBuilder stringBuilder)
+        private static bool _changedOverlay;
+
+        public static void UpdateSelectedOverlay()
         {
-            if (obj == null)
+            if (_changedOverlay && SAINPlugin.NextDebugOverlay.Value.IsUp())
             {
-                stringBuilder.AppendLine($"null");
+                _changedOverlay = false;
+            }
+            if (_changedOverlay)
+            {
                 return;
             }
-
-            Type type = obj.GetType();
-
-            string name;
-            object resultValue;
-            int count = 0;
-
-            FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
-            foreach (FieldInfo field in fields)
+            if (SAINPlugin.NextDebugOverlay.Value.IsDown())
             {
-                name = field.Name;
-                resultValue = field.GetValue(obj);
-                string stringValue = null;
-                if (resultValue != null)
-                {
-                    count++;
-                    stringValue = resultValue.ToString();
-                    stringBuilder.AppendLabeledValue($"{count}. {name}", stringValue, Color.white, Color.yellow, true);
-                }
-            }
 
-            PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            foreach (PropertyInfo property in properties)
-            {
-                name = property.Name;
-                resultValue = property.GetValue(obj);
-                string stringValue = null;
-                if (resultValue != null)
-                {
-                    count++;
-                    stringValue = resultValue.ToString();
-                    stringBuilder.AppendLabeledValue($"{count}. {name}", stringValue, Color.white, Color.yellow, true);
-                }
             }
         }
+
+        private static int selectedOverlay;
 
         public static void AddBaseInfo(BotComponent sain, BotOwner botOwner, StringBuilder stringBuilder)
         {
             try
             {
-                var info = sain.Info;
+                var info = sain.Info; 
+                stringBuilder.AppendLine($"Active Layer: [{sain.ActiveLayer}] " +
+                    $"Known Enemies: [{sain.EnemyController.EnemyLists.GetEnemyList(EEnemyListType.Known).Count}]");
+
                 stringBuilder.AppendLine($"Name: [{sain.Person.Name}] Nickname: [{sain.Player.Profile.Nickname}] Personality: [{info.Personality}] Type: [{info.Profile.WildSpawnType}] PowerLevel: [{info.Profile.PowerLevel}]");
                 stringBuilder.AppendLine();
                 stringBuilder.AppendLine($"Steering: [{sain.Steering.CurrentSteerPriority}]");
@@ -155,22 +140,6 @@ namespace SAIN.Layers
                 stringBuilder.AppendLabeledValue("Enemy Distance from Last Known Position", $"{(enemy.EnemyPosition - lastKnown.Position).magnitude}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Has Arrived?", $"Personal: {lastKnown.HasArrivedPersonal} / Squad: {lastKnown.HasArrivedSquad}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Has Seen?", $"Personal: {lastKnown.HasSeenPersonal} / Squad: {lastKnown.HasSeenSquad}", Color.white, Color.yellow, true);
-            }
-
-
-        }
-
-        public static void AddAimData(BotOwner BotOwner, StringBuilder stringBuilder)
-        {
-            var aimData = BotOwner.AimingData;
-            if (aimData != null)
-            {
-                stringBuilder.AppendLine(nameof(BotOwner.AimingData));
-                stringBuilder.AppendLabeledValue("Aim: AimComplete?", $"{aimData.IsReady}", Color.red, Color.yellow, true);
-                var shoot = BotOwner.ShootData;
-                stringBuilder.AppendLabeledValue("Shoot: CanShootByState", $"{shoot?.CanShootByState}", Color.red, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Shoot: Shooting", $"{shoot?.Shooting}", Color.red, Color.yellow, true);
-                DisplayPropertyAndFieldValues(BotOwner.AimingData, stringBuilder);
             }
         }
     }

@@ -142,13 +142,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Enemy.OnEnemyForgotten += onEnemyForgotten;
-            Enemy.OnEnemyKnown += onEnemyKnown;
+            Enemy.EnemyKnownChecker.OnEnemyKnownChanged += OnEnemyKnownChanged;
         }
 
-        public void onEnemyForgotten(Enemy enemy)
+        public void OnEnemyKnownChanged(Enemy enemy, bool known)
         {
-            toggleCoroutine(false);
+            toggleCoroutine(known);
         }
 
         private void toggleCoroutine(bool value)
@@ -176,11 +175,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private bool _started;
 
-        public void onEnemyKnown(Enemy enemy)
-        {
-            toggleCoroutine(true);
-        }
-
         public void Update()
         {
             if (!_started && Enemy.EnemyKnown)
@@ -193,8 +187,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Dispose()
         {
             toggleCoroutine(false);
-            Enemy.OnEnemyForgotten -= onEnemyForgotten;
-            Enemy.OnEnemyKnown -= onEnemyKnown;
+            Enemy.EnemyKnownChecker.OnEnemyKnownChanged -= OnEnemyKnownChanged;
         }
 
         private IEnumerator calcPathLoop()

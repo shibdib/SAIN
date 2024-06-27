@@ -26,34 +26,20 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float calcRepeatSeenCoef()
         {
-            float result = 1f;
-            if (Enemy.Seen)
-            {
-                Vector3? lastSeenPos = Enemy.LastSeenPosition;
-                if (lastSeenPos != null)
-                {
-                    result = calcVisionSpeedPositional(
-                        lastSeenPos.Value,
-                        _minSeenSpeedCoef,
-                        _minDistRepeatSeen,
-                        _maxDistRepeatSeen,
-                        SeenSpeedCheck.Vision);
-                }
-            }
+            float result = calcVisionSpeedPositional(
+                Enemy.KnownPlaces.EnemyDistanceFromLastSeen,
+                _minSeenSpeedCoef,
+                _minDistRepeatSeen,
+                _maxDistRepeatSeen,
+                SeenSpeedCheck.Vision);
 
-            if (Enemy.Heard)
-            {
-                Vector3? lastHeardPosition = Enemy.LastHeardPosition;
-                if (lastHeardPosition != null)
-                {
-                    result *= calcVisionSpeedPositional(
-                        lastHeardPosition.Value,
-                        _minHeardSpeedCoef,
-                        _minDistRepeatHeard,
-                        _maxDistRepeatHeard,
-                        SeenSpeedCheck.Audio);
-                }
-            }
+            result *= calcVisionSpeedPositional(
+                Enemy.KnownPlaces.EnemyDistanceFromLastHeard,
+                _minHeardSpeedCoef,
+                _minDistRepeatHeard,
+                _maxDistRepeatHeard,
+                SeenSpeedCheck.Audio);
+
             return result;
         }
 
@@ -64,9 +50,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Audio = 2,
         }
 
-        private float calcVisionSpeedPositional(Vector3 position, float minSpeedCoef, float minDist, float maxDist, SeenSpeedCheck check)
+        private float calcVisionSpeedPositional(float distance, float minSpeedCoef, float minDist, float maxDist, SeenSpeedCheck check)
         {
-            float distance = (position - EnemyPosition).magnitude;
             if (distance <= minDist)
             {
                 return minSpeedCoef;

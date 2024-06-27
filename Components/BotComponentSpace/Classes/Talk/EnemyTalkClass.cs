@@ -463,7 +463,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
                     Bot.StartCoroutine(RespondToVoice(
                         EPhraseTrigger.MumblePhrase,
-                        Bot.EnemyController.NoEnemyContact ? ETagStatus.Unaware : ETagStatus.Combat,
+                        Bot.EnemyController.AtPeace ? ETagStatus.Unaware : ETagStatus.Combat,
                         Random.Range(_friendlyResponseMinRandom, _friendlyResponseMaxRandom),
                         player,
                         maxDist,
@@ -483,7 +483,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     _saySilenceTime = Time.time + 20f;
                     Bot.StartCoroutine(RespondToVoice(
                         EPhraseTrigger.Silence,
-                        Bot.EnemyController.NoEnemyContact ? ETagStatus.Combat : ETagStatus.Aware,
+                        Bot.EnemyController.AtPeace ? ETagStatus.Combat : ETagStatus.Aware,
                         Random.Range(0.2f, 0.5f),
                         player,
                         20f,

@@ -30,24 +30,33 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 {
                     return float.MaxValue;
                 }
-
-                float timeAdd = Enemy.IsCurrentEnemy ? 0.1f : 0.5f;
-                if (_nextUpdateDistTime + timeAdd < Time.time)
-                {
-                    _nextUpdateDistTime = Time.time;
-                    _enemyDist = (LastKnownPlace.Position - EnemyPosition).magnitude;
-                }
-
-                return _enemyDist;
-            }
-            private set
-            {
-                _enemyDist = value;
-                _nextUpdateDistTime = Time.time;
+                return LastKnownPlace.Distance(EnemyPosition);
             }
         }
 
-        private float _enemyDist;
+        public float EnemyDistanceFromLastSeen
+        {
+            get
+            {
+                if (LastSeenPlace == null)
+                {
+                    return float.MaxValue;
+                }
+                return LastSeenPlace.Distance(EnemyPosition);
+            }
+        }
+
+        public float EnemyDistanceFromLastHeard
+        {
+            get
+            {
+                if (LastHeardPlace == null)
+                {
+                    return float.MaxValue;
+                }
+                return LastHeardPlace.Distance(EnemyPosition);
+            }
+        }
 
         public bool SearchedAllKnownLocations { get; private set; }
 
@@ -92,16 +101,14 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Enemy.OnEnemyForgotten += onEnemyForgotten;
-            Enemy.OnEnemyKnown += onEnemyKnown;
+            Enemy.EnemyKnownChecker.OnEnemyKnownChanged += OnEnemyKnownChanged;
         }
 
         public void Dispose()
         {
             clearAllPlaces();
 
-            Enemy.OnEnemyForgotten -= onEnemyForgotten;
-            Enemy.OnEnemyKnown -= onEnemyKnown;
+            Enemy.EnemyKnownChecker.OnEnemyKnownChanged -= OnEnemyKnownChanged;
 
             foreach (var obj in _guiObjects)
             {
@@ -110,8 +117,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             _guiObjects?.Clear();
         }
 
-        public void onEnemyForgotten(Enemy enemy)
+        public void OnEnemyKnownChanged(Enemy enemy, bool known)
         {
+            if (known)
+            {
+                return;
+            }
             clearAllPlaces();
         }
 
@@ -132,9 +143,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Update()
         {
-            updateLastKnown();
             updatePlaces();
-
             if (Enemy.EnemyKnown)
             {
                 checkIfArrived(); 
@@ -425,20 +434,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             SearchedAllKnownLocations = false;
             TimeLastKnownUpdated = Time.time;
-
             LastKnownPlace = place;
-
             Vector3 pos = place.Position;
             LastKnownPosition = pos;
-            EnemyDistanceFromLastKnown = (pos - EnemyPosition).magnitude;
             OnLastKnownUpdated?.Invoke(pos);
         }
 
         public float TimeLastKnownUpdated { get; private set; }
-
-        private void updateLastKnown()
-        {
-        }
 
         private EnemyPlace findMostRecentPlace(out float timeUpdated)
         {
@@ -465,7 +467,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return result;
         }
 
-        private float _nextUpdateDistTime;
         private float _nextTalkClearTime;
         private float _checkArrivedTime;
         private const float _checkArriveFreq = 0.25f;

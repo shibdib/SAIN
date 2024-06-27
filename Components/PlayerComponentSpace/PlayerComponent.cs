@@ -143,8 +143,6 @@ namespace SAIN.Components.PlayerComponentSpace
         public Vector3 LookDirection => Person.Transform.LookDirection;
         public Vector3 LookSensorPosition => Transform.EyePosition;
 
-        public Vector3 DirectionTo(Vector3 point) => Person.Transform.DirectionTo(point);
-
         public PersonTransformClass Transform => Person.Transform;
         public Player Player => Person.Player;
         public IPlayer IPlayer => Person.IPlayer;

@@ -128,11 +128,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 return false;
             }
 
-            if (Bot.Enemy.LastSeenPosition == null)
+            if (Bot.Enemy.KnownPlaces.LastKnownPosition == null)
             {
                 return false;
             }
-            Vector3 lastKnownPos = Bot.Enemy.LastSeenPosition.Value;
+            Vector3 lastKnownPos = Bot.Enemy.KnownPlaces.LastKnownPosition.Value;
             lastKnownPos.y += 1.45f;
 
             Vector3 lastKnownDirection = lastKnownPos - headPos;

@@ -1,7 +1,5 @@
 ﻿using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using System;
-using System.Collections.Generic;
 
 namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 {
@@ -29,15 +27,11 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         }
 
-        public void onEnemyForgotten(Enemy enemy)
+        public void OnEnemyKnownChanged(Enemy enemy, bool known)
         {
 
         }
 
-        public void onEnemyKnown(Enemy enemy)
-        {
-
-        }
 
         public float DispersionModifier
         {

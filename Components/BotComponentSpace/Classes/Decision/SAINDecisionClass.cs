@@ -62,6 +62,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         public void Init()
         {
             Bot.BotActivation.OnBotStateChanged += resetDecisions;
+            DogFightDecision.Init();
         }
 
         public void Update()
@@ -72,17 +73,19 @@ namespace SAIN.SAINComponent.Classes.Decision
                 float delay = HasDecision ? DECISION_FREQUENCY : DECISION_FREQUENCY_PEACE;
                 _nextGetDecisionTime = Time.time + delay;
             }
+            DogFightDecision.Update();
         }
 
         private float _nextGetDecisionTime;
         const float DECISION_FREQUENCY = 1f / DECISION_FREQUENCY_FPS;
         const float DECISION_FREQUENCY_PEACE = 1f / DECISION_FREQUENCY_PEACE_FPS;
-        const float DECISION_FREQUENCY_FPS = 8;
-        const float DECISION_FREQUENCY_PEACE_FPS = 4;
+        const float DECISION_FREQUENCY_FPS = 10;
+        const float DECISION_FREQUENCY_PEACE_FPS = 5;
 
         public void Dispose()
         {
             Bot.BotActivation.OnBotStateChanged -= resetDecisions;
+            DogFightDecision?.Dispose();
         }
 
         private void getDecision()

@@ -25,9 +25,9 @@ namespace SAIN.SAINComponent.Classes.Memory
             Bot.EnemyController.OnEnemyRemoved += clearEnemy;
         }
 
-        private void clearEnemy(string profileId)
+        private void clearEnemy(string profileId, Enemy enemy)
         {
-            if (LastUnderFireEnemy != null && LastUnderFireEnemy.EnemyProfileId == profileId)
+            if (LastUnderFireEnemy == enemy)
             {
                 LastUnderFireEnemy = null;
                 resetUnderFire();

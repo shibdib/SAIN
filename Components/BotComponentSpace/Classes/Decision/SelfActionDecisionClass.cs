@@ -245,7 +245,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
-            if (Bot.EnemyController.NoEnemyContact)
+            if (Bot.EnemyController.AtPeace)
             {
                 return true;
             }
@@ -253,7 +253,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return true;
             }
-            foreach (Enemy enemy in Bot.EnemyController.ActiveEnemies)
+            foreach (Enemy enemy in Bot.EnemyController.EnemyLists.GetEnemyList(EEnemyListType.Known))
             {
                 if (!shallUseStimsCheckEnemy(enemy))
                 {
@@ -277,7 +277,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return true;
             }
-            foreach (Enemy enemy in Bot.EnemyController.ActiveEnemies)
+            foreach (Enemy enemy in Bot.EnemyController.EnemyLists.GetEnemyList(EEnemyListType.Known))
             {
                 if (!shallFirstAidCheckEnemy(enemy))
                 {

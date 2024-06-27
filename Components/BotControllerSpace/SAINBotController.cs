@@ -325,7 +325,7 @@ namespace SAIN.Components
             foreach (var bot in Bots.Values)
             {
                 if (bot?.BotActive == true &&
-                    !bot.EnemyController.IsPlayerFriendly(player) &&
+                    bot.EnemyController.IsPlayerAnEnemy(player.ProfileId) &&
                     (dangerPoint - bot.Position).sqrMagnitude < 100f * 100f)
                 {
                     bot.Grenade.EnemyGrenadeThrown(grenade, dangerPoint);

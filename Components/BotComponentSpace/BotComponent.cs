@@ -38,8 +38,8 @@ namespace SAIN.SAINComponent
 
         public AILimitSetting CurrentAILimit => AILimit.CurrentAILimit;
 
-        public bool HasEnemy => EnemyController.HasEnemy;
-        public bool HasLastEnemy => EnemyController.HasLastEnemy;
+        public bool HasEnemy => EnemyController.ActiveEnemy?.EnemyPerson.Active == true;
+        public bool HasLastEnemy => EnemyController.LastEnemy?.EnemyPerson.Active == true;
         public Enemy Enemy => HasEnemy ? EnemyController.ActiveEnemy : null;
         public Enemy LastEnemy => HasLastEnemy ? EnemyController.LastEnemy : null;
 

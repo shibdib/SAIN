@@ -21,17 +21,22 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Enemy.OnEnemyForgotten += onEnemyForgotten;
-            Enemy.OnEnemyKnown += onEnemyKnown;
+            Enemy.EnemyKnownChecker.OnEnemyKnownChanged += OnEnemyKnownChanged;
         }
 
-        public void onEnemyForgotten(Enemy enemy)
+        public void OnEnemyKnownChanged(Enemy enemy, bool known)
         {
+            if (known)
+            {
+                return;
+            }
+            UpdateVisibleState(true);
+            UpdateCanShootState(true);
         }
 
-        public void onEnemyKnown(Enemy enemy)
+        public void Dispose()
         {
-
+            Enemy.EnemyKnownChecker.OnEnemyKnownChanged -= OnEnemyKnownChanged;
         }
 
         public void Update()
@@ -41,11 +46,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             UpdateCanShootState(false);
         }
 
-        public void Dispose()
-        {
-            Enemy.OnEnemyForgotten -= onEnemyForgotten;
-            Enemy.OnEnemyKnown -= onEnemyKnown;
-        }
 
         public float EnemyVelocity => EnemyTransform.PlayerVelocity;
 
@@ -189,6 +189,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
     public class EnemyVisionChecker : EnemyBase
     {
+        public event Action<Enemy, bool> OnEnemyLineOfSightChanged;
+        public bool LineOfSight => EnemyParts.LineOfSight;
+        public SAINEnemyParts EnemyParts { get; private set; }
+
         public EnemyVisionChecker(Enemy enemy) : base(enemy)
         {
             EnemyParts = new SAINEnemyParts(enemy.EnemyPlayer.PlayerBones, enemy.Player.IsYourPlayer);
@@ -214,25 +218,32 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             didCheck = true;
-            if (EnemyParts.CheckBodyLineOfSight(_transform.EyePosition))
+            bool wasInLOS = LineOfSight;
+            if (checkLOS() != wasInLOS)
             {
-                return;
-            }
-            if (EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition))
-            {
-                return;
-            }
-            // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
-            if (Enemy.IsCurrentEnemy && !Enemy.IsAI && 
-                EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition))
-            {
-                return;
+                OnEnemyLineOfSightChanged?.Invoke(Enemy, LineOfSight);
             }
         }
 
-        public bool LineOfSight => EnemyParts.LineOfSight;
+        private bool checkLOS()
+        {
+            if (EnemyParts.CheckBodyLineOfSight(_transform.EyePosition))
+            {
+                return true;
+            }
+            if (EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition))
+            {
+                return true;
+            }
+            // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
+            if (Enemy.IsCurrentEnemy && !Enemy.IsAI &&
+                EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition))
+            {
+                return true;
+            }
+            return false;
+        }
 
-        public SAINEnemyParts EnemyParts { get; private set; }
     }
 
     public class SAINEnemyParts

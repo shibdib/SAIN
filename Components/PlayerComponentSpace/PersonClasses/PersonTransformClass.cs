@@ -14,9 +14,14 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
         public Vector3 WeaponFirePort { get; private set; }
         public Vector3 WeaponPointDirection { get; private set; }
 
-        public Vector3 DirectionTo(Vector3 point)
+        public Vector3 DirectionToMe(Vector3 point)
         {
             return Position - point;
+        }
+
+        public Vector3 DirectionToPoint(Vector3 point)
+        {
+            return point - Position;
         }
 
         public Vector3 Right()

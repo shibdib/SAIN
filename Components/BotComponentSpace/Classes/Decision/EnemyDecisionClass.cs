@@ -440,7 +440,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                             ShiftResetTimer = Time.time + ShiftCoverResetTime;
                             return true;
                         }
-                        if (!enemy.Seen && enemy.TimeSinceEnemyCreated > ShiftCoverTimeSinceEnemyCreated)
+                        if (!enemy.Seen && enemy.KnownPlaces.TimeSinceLastKnownUpdated > ShiftCoverTimeSinceEnemyCreated)
                         {
                             TimeForNewShift = Time.time + ShiftCoverNewCoverTime;
                             ShiftResetTimer = Time.time + ShiftCoverResetTime;

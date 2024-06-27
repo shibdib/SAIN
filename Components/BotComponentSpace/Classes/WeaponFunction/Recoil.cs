@@ -244,7 +244,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return result;
         }
 
-        private bool _shotRegistered;
         private bool _barrelRising;
         private Vector3 _recoilOffsetTarget;
         private bool _recoilFinished;

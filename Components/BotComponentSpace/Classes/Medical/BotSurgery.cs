@@ -66,7 +66,7 @@ namespace SAIN.SAINComponent.Classes
             if (_canStartSurgery)
             {
                 var enemy = Bot.Enemy;
-                if (Bot.EnemyController.NoEnemyContact)
+                if (Bot.EnemyController.AtPeace)
                 {
                     if (Bot.CurrentTargetPosition == null)
                     {

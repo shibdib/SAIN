@@ -621,7 +621,7 @@ namespace SAIN.SAINComponent.Classes
         private IEnumerator baseHearDelay(float distance)
         {
             float delay = distance / SPEED_OF_SOUND;
-            if (Bot?.EnemyController?.NoEnemyContact == true)
+            if (Bot?.EnemyController?.AtPeace == true)
             {
                 delay += SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayAtPeace;
             }

@@ -262,7 +262,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                         break;
                 }
             }
-            else if (!Bot.EnemyController.NoEnemyContact)
+            else if (!Bot.EnemyController.AtPeace)
             {
                 etagStatus |= ETagStatus.Aware;
             }
