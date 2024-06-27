@@ -203,7 +203,6 @@ namespace SAIN.SAINComponent
                 return false;
             }
 
-            BotActivation.Init();
             return true;
         }
 
@@ -245,6 +244,8 @@ namespace SAIN.SAINComponent
 
         private void initializeClasses()
         {
+            BotActivation.Init();
+
             Search.Init();
             Memory.Init();
             EnemyController.Init();

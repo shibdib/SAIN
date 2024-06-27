@@ -41,7 +41,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         }
 
-        private bool _isValid;
+        private bool _isValid = true;
 
         private bool isValid()
         {

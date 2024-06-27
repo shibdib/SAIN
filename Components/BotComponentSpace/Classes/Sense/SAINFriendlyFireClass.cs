@@ -17,6 +17,7 @@ namespace SAIN.SAINComponent.Classes
         public void Init()
         {
             Bot.BotActivation.OnBotStateChanged += toggleLoop;
+            Bot.CoroutineManager.Add(friendlyFireLoop(), nameof(friendlyFireLoop));
         }
 
         public void Update()
@@ -32,11 +33,9 @@ namespace SAIN.SAINComponent.Classes
             switch (value)
             {
                 case true:
-                    Bot.CoroutineManager.Add(friendlyFireLoop(), nameof(friendlyFireLoop));
                     break;
 
                 case false:
-                    Bot.CoroutineManager.Remove(nameof(friendlyFireLoop));
                     break;
             }
         }

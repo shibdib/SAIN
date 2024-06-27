@@ -9,6 +9,7 @@ using UnityEngine.AI;
 using System;
 using Random = UnityEngine.Random;
 using System.Collections;
+using System.IO;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
@@ -139,7 +140,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool LookToLastKnownEnemyPosition(Enemy enemy, Vector3? lastKnown = null)
         {
-            Vector3? place = lastKnown ?? findLastKnown(enemy);
+            Vector3? place = lastKnown ?? FindLastKnownTarget(enemy);
             if (place != null)
             {
                 LookToPoint(place.Value);
@@ -461,10 +462,10 @@ namespace SAIN.SAINComponent.Classes.Mover
         private Vector3 adjustLookPoint(Vector3 target)
         {
             Vector3 head = Bot.Transform.EyePosition;
+            Vector3 heightOffset = head - Bot.Position;
+            target.y += heightOffset.y;
             Vector3 direction = target - head;
-            direction.y = 0f;
-            direction = direction.normalized;
-            return target + direction;
+            return target + direction.normalized;
         }
 
         public Vector3? EnemyLastKnown(Enemy enemy, out bool visible)
@@ -476,10 +477,10 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return null;
             }
             visible = lastKnownPlace.PersonalClearLineOfSight(Bot.Transform.EyePosition, LayerMaskClass.HighPolyWithTerrainMask);
-            return lastKnownPlace.Position;
+            return lastKnownPlace.GroundedPosition();
         }
 
-        private Vector3? findLastKnown(Enemy enemy)
+        public Vector3? FindLastKnownTarget(Enemy enemy)
         {
             EnemySteerDir = EEnemySteerDir.None;
             if (enemy == null)
@@ -490,38 +491,48 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return enemy.EnemyPosition;
             }
+
+
             Vector3? lastKnown = EnemyLastKnown(enemy, out bool visible);
             if (lastKnown != null &&
                 visible)
             {
                 EnemySteerDir = EEnemySteerDir.VisibleLastKnown;
-                return adjustLookPoint(lastKnown.Value) + _weaponRootOffset;
+                return adjustLookPoint(lastKnown.Value);
             }
-            Vector3? blindCorner = enemy.Path.BlindCornerLookPoint;
+
+            EnemyCornerDictionary corners = enemy.Path.EnemyCorners;
+            Vector3? blindCorner = corners.PointPastCorner(ECornerType.Blind);
             if (blindCorner != null)
             {
                 EnemySteerDir = EEnemySteerDir.BlindCorner;
                 return blindCorner;
             }
-            Vector3? lastCorner = enemy.Path.LastCornerToEnemyGround;
-            if (lastCorner != null &&
-                enemy.Path.CanSeeLastCornerToEnemy)
+
+            if (enemy.Path.CanSeeLastCornerToEnemy)
             {
-                EnemySteerDir = EEnemySteerDir.LastCorner;
-                return adjustLookPoint(lastCorner.Value) + _weaponRootOffset;
+                Vector3? lastCorner = corners.PointPastCorner(ECornerType.Last);
+                if (lastCorner != null)
+                {
+                    EnemySteerDir = EEnemySteerDir.LastCorner;
+                    return lastCorner;
+                }
             }
-            var enemyPath = enemy.Path.PathToEnemy;
-            if (enemyPath != null &&
-                enemyPath.corners.Length > 2)
+
+            Vector3? first = corners.PointPastCorner(ECornerType.First);
+            if (first != null)
             {
                 EnemySteerDir = EEnemySteerDir.Path;
-                return adjustLookPoint(enemyPath.corners[1]) + _weaponRootOffset;
+                return first;
             }
-            if (lastKnown != null)
+
+            Vector3? lastKnownCorner = corners.PointPastCorner(ECornerType.LastKnown);
+            if (lastKnownCorner != null)
             {
                 EnemySteerDir = EEnemySteerDir.LastKnown;
-                return adjustLookPoint(lastKnown.Value) + _weaponRootOffset;
+                return lastKnownCorner;
             }
+
             return null;
         }
 
@@ -628,7 +639,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             var shotMeRecent = enemyShotMe();
             if (shotMeRecent != null)
             {
-                Vector3? lastKnown = findLastKnown(shotMeRecent);
+                Vector3? lastKnown = FindLastKnownTarget(shotMeRecent);
                 if (lastKnown != null)
                 {
                     LookToPoint(lastKnown.Value);
@@ -676,7 +687,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     return randomLookPosition;
                 }
             }
-            return findLastKnown(Bot.Enemy) ?? Vector3.zero;
+            return FindLastKnownTarget(Bot.Enemy) ?? Vector3.zero;
         }
 
         private Vector3 generateRandomLookPos()

@@ -28,7 +28,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 _blindCornerLookPoint = CornerHelpers.PointPastEyeLevelCorner(eyePos, botPosition, GroundPosition);
             }
             return _blindCornerLookPoint;
-
         }
 
         private Vector3 _blindCornerLookPoint;

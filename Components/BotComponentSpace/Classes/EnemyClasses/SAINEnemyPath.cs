@@ -43,33 +43,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public float PathDistance { get; private set; } = float.MaxValue;
 
-        public Vector3? LastCornerToEnemyGround
-        {
-            get
-            {
-                return LastCorner?.GroundPosition;
-            }
-        }
-        public Vector3? LastCornerToEnemyEyeLevel
-        {
-            get
-            {
-                return LastCorner?.EyeLevelCorner(Bot.Transform.EyePosition, Bot.Position);
-            }
-        }
-        public Vector3? LastCornerToEnemyEyeLevelPastCorner
-        {
-            get
-            {
-                return LastCorner?.PointPastCorner(Bot.Transform.EyePosition, Bot.Position);
-            }
-        }
+        public EnemyCornerDictionary EnemyCorners { get; private set; }
 
         public bool CanSeeLastCornerToEnemy
         {
             get
             {
-                var last = LastCornerToEnemyEyeLevel;
+                var last = EnemyCorners.EyeLevelPosition(ECornerType.Last);
                 if (last == null)
                 {
                     return false;
@@ -90,10 +70,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        public EnemyCorner? LastCorner { get; private set; }
-        public EnemyCorner? BlindCorner => _blindCornerFinder.BlindCorner;
-        public Vector3? BlindCornerLookPoint => _blindCornerFinder.BlindCorner?.PointPastCorner(Bot.Transform.EyePosition, Bot.Position);
-        public Vector3? BlindCornerToEnemy
+        public Vector3? BlindCornerToEnemyOld
         {
             get
             {
@@ -137,11 +114,15 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public SAINEnemyPath(Enemy enemy) : base(enemy)
         {
             PathToEnemy = new NavMeshPath();
+            EnemyCorners = new EnemyCornerDictionary(enemy.Bot.Transform);
             _blindCornerFinder = new BlindCornerFinder(enemy);
         }
 
+        private string CoroutineName;
+
         public void Init()
         {
+            CoroutineName = $"{nameof(calcPathLoop)}:{Enemy.EnemyProfileId}";
             Enemy.EnemyKnownChecker.OnEnemyKnownChanged += OnEnemyKnownChanged;
         }
 
@@ -158,7 +139,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     if (!_started)
                     {
                         _started = true;
-                        Bot.CoroutineManager.Add(calcPathLoop(), nameof(calcPathLoop));
+                        Bot.CoroutineManager.Add(calcPathLoop(), CoroutineName);
                     }
                     break;
 
@@ -166,7 +147,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     if (_started)
                     {
                         _started = false;
-                        Bot.CoroutineManager.Remove(nameof(calcPathLoop));
+                        Bot.CoroutineManager.Remove(CoroutineName);
                         Clear();
                     }
                     break;
@@ -187,18 +168,18 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Dispose()
         {
             toggleCoroutine(false);
+            EnemyCorners?.Clear();
             Enemy.EnemyKnownChecker.OnEnemyKnownChanged -= OnEnemyKnownChanged;
         }
 
         private IEnumerator calcPathLoop()
         {
-            while (Bot.BotActive)
+            while (true)
             {
-                yield return null;
-
                 float timeAdd = calcDelayOnDistance();
                 if (_calcPathTime + timeAdd > Time.time)
                 {
+                    yield return null;
                     continue;
                 }
 
@@ -207,6 +188,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 bool isCurrentEnemy = Enemy.IsCurrentEnemy;
                 if (!isCurrentEnemy && !isEnemyInRange())
                 {
+                    yield return null;
                     continue;
                 }
 
@@ -217,6 +199,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 // Did we already check the current enemy position and has the bot not moved? dont recalc path then
                 if (!checkPositionsChanged(botPosition, enemyPosition))
                 {
+                    yield return null;
                     continue;
                 }
 
@@ -232,22 +215,36 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 switch (PathToEnemyStatus)
                 {
                     case NavMeshPathStatus.PathInvalid:
-                        LastCorner = null;
-                        _blindCornerFinder.ClearBlindCorner();
+                        EnemyCorners.Clear();
                         break;
 
                     case NavMeshPathStatus.PathPartial:
                     case NavMeshPathStatus.PathComplete:
-
-                        findLastCorner(enemyPosition, PathToEnemyStatus, corners);
+                        findCorners(enemyPosition, PathToEnemyStatus, corners);
                         if (isCurrentEnemy)
                             yield return Bot.StartCoroutine(_blindCornerFinder.FindBlindCorner(corners, enemyPosition));
+                        else
+                            EnemyCorners.Remove(ECornerType.Blind);
 
                         break;
                 }
 
                 OnPathUpdated?.Invoke(Enemy, PathToEnemyStatus);
+
+                yield return null;
             }
+        }
+
+        private void findCorners(Vector3 enemyPosition, NavMeshPathStatus status, Vector3[] corners)
+        {
+            EnemyCorner? first = findFirstCorner(enemyPosition, corners);
+            EnemyCorners.AddOrReplace(ECornerType.First, first);
+
+            EnemyCorner? last = findLastCorner(enemyPosition, status, corners);
+            EnemyCorners.AddOrReplace(ECornerType.Last, last);
+
+            EnemyCorner? lastKnown = createLastKnownCorner(enemyPosition);
+            EnemyCorners.AddOrReplace(ECornerType.LastKnown, lastKnown);
         }
 
         public void Clear()
@@ -359,7 +356,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return result;
         }
 
-        private void findLastCorner(Vector3 enemyPosition, NavMeshPathStatus pathStatus, Vector3[] corners)
+        private EnemyCorner? findLastCorner(Vector3 enemyPosition, NavMeshPathStatus pathStatus, Vector3[] corners)
         {
             int length = corners.Length;
             // find the last corner before arriving at an enemy position, and then check if we can see it.
@@ -368,12 +365,31 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 length > 2)
             {
                 lastCorner = corners[length - 2];
-                return;
             }
-            lastCorner = corners[length - 1];
+            else
+            {
+                lastCorner = corners[length - 1];
+            }
 
             float signedAngle = Vector.FindFlatSignedAngle(lastCorner, enemyPosition, Bot.Transform.EyePosition);
-            LastCorner = new EnemyCorner(lastCorner, signedAngle);
+            return new EnemyCorner(lastCorner, signedAngle);
+        }
+
+        private EnemyCorner? findFirstCorner(Vector3 enemyPosition, Vector3[] corners)
+        {
+            if (corners.Length < 2)
+            {
+                return null;
+            }
+
+            Vector3 firstCorner = corners[1];
+            float signedAngle = Vector.FindFlatSignedAngle(firstCorner, enemyPosition, Bot.Transform.EyePosition);
+            return new EnemyCorner(firstCorner, signedAngle);
+        }
+
+        private EnemyCorner? createLastKnownCorner(Vector3 enemyPosition)
+        {
+            return new EnemyCorner(enemyPosition, 0f);
         }
 
         private GUIObject blindcornerGUIObject;

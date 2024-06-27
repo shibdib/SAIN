@@ -19,28 +19,27 @@ namespace SAIN.SAINComponent.Classes
 
         public void SetActive(bool value)
         {
+            if (BotActive == value) return;
+
             switch (value)
             {
                 case true:
-                    if (!BotActive && 
-                        Bot.CoroutineManager.StartCoroutines())
+                    Logger.LogDebug($"Trying to set Bot Active... [{Bot.Info.Profile.Name}]");
+                    if (Bot.CoroutineManager.StartCoroutines())
                     {
                         BotActive = true;
-                        OnBotStateChanged?.Invoke(true);
                         Logger.LogDebug($"Bot Active [{Bot.Info.Profile.Name}]");
                     }
                     break;
 
                 case false:
-                    if (BotActive)
-                    {
-                        BotActive = false;
-                        ActiveLayer = ESAINLayer.None;
-                        Bot.CoroutineManager.StopCoroutines();
-                        OnBotStateChanged?.Invoke(false);
-                    }
+                    BotActive = false;
+                    ActiveLayer = ESAINLayer.None;
+                    Bot.CoroutineManager.StopCoroutines();
                     break;
             }
+
+            OnBotStateChanged?.Invoke(value);
         }
 
         public void SetActiveLayer(ESAINLayer layer)
@@ -100,8 +99,8 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            Bot.Person.ActiveClass.OnBotActiveChanged += SetActive;
             SetActive(true);
+            Bot.Person.ActiveClass.OnBotActiveChanged += SetActive;
         }
 
         private void checkBotGame()

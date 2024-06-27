@@ -243,7 +243,9 @@
     <None Include="Plugin\VersionChecker\setbuild.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\ECornerType.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyActiveThreatChecker.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyCornerDictionary.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyValidChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyChooserClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\CornerHelpers.cs" />

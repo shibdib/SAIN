@@ -73,8 +73,16 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return;
             }
 
-            Vector3? targetPos = Bot.Steering.EnemyLastKnown(Bot.Enemy, out _);
-            if (targetPos == null)
+            Vector3? lastKnownPos = Bot.Enemy.KnownPlaces.LastKnownPosition;
+            if (lastKnownPos == null)
+            {
+                ResetBlindFire();
+                _changeBlindFireTime = Time.time + 0.5f;
+                return;
+            }
+
+            Vector3? targetPos = Bot.Steering.FindLastKnownTarget(Bot.Enemy);
+            if (targetPos == null || (lastKnownPos.Value - targetPos.Value).sqrMagnitude > 10f)
             {
                 ResetBlindFire();
                 _changeBlindFireTime = Time.time + 0.5f;

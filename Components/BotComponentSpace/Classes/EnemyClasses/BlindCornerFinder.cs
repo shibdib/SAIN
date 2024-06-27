@@ -8,7 +8,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class BlindCornerFinder : EnemyBase
     {
-        public EnemyCorner? BlindCorner { get; private set; }
+        public EnemyCorner? BlindCorner => Enemy.Path.EnemyCorners.GetCorner(ECornerType.Blind);
 
         public BlindCornerFinder(Enemy enemy) : base(enemy)
         {
@@ -16,7 +16,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void ClearBlindCorner()
         {
-            BlindCorner = null;
+            Enemy.Path.EnemyCorners.Remove(ECornerType.Blind);
         }
 
         public IEnumerator FindBlindCorner(Vector3[] corners, Vector3 enemyPosition)
@@ -103,7 +103,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
                 if (hit)
                 {
-                    Logger.LogDebug($"Angle where LOS broken [{rotationStep * i}] after [{i}] iterations");
+                    //Logger.LogDebug($"Angle where LOS broken [{rotationStep * i}] after [{i}] iterations");
                     break;
                 }
 
@@ -118,7 +118,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             blindCorner.y -= heightOffset;
-            BlindCorner = new EnemyCorner(blindCorner, angle);
+            Enemy.Path.EnemyCorners.AddOrReplace(ECornerType.Blind, new EnemyCorner(blindCorner, angle));
 
             if (raycasts > 0)
             {

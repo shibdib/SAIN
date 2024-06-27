@@ -135,14 +135,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     return null;
                 }
 
-                Vector3? blindCorner = Path.BlindCornerToEnemy;
+                EnemyCornerDictionary corners = Path.EnemyCorners;
+
+                Vector3? blindCorner = corners.EyeLevelPosition(ECornerType.Blind);
                 if (blindCorner != null &&
                     isTargetInSuppRange(enemyLastKnown.Value, blindCorner.Value))
                 {
                     return blindCorner;
                 }
 
-                Vector3? lastCorner = Path.LastCornerToEnemyEyeLevel;
+                Vector3? lastCorner = corners.EyeLevelPosition(ECornerType.Last);
                 if (lastCorner != null &&
                     Path.CanSeeLastCornerToEnemy &&
                     isTargetInSuppRange(enemyLastKnown.Value, lastCorner.Value))

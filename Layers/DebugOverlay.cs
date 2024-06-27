@@ -3,33 +3,48 @@ using HarmonyLib;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
 
 namespace SAIN.Layers
 {
-    public class SAINOverlay
-    {
-
-    }
-
     public static class DebugOverlay
     {
         static DebugOverlay()
         {
             TimeToAim = AccessTools.Field(Helpers.HelpersGClass.AimDataType, "float_7");
             timeAiming = AccessTools.Field(Helpers.HelpersGClass.AimDataType, "float_5");
+
+            int count = 0;
+            foreach (var name in _overlayNames)
+            {
+                _overlays.Add(count, name);
+                count++;
+            }
         }
 
         private static FieldInfo TimeToAim;
         private static FieldInfo timeAiming;
 
+        private static readonly Dictionary<int, string> _overlays = new Dictionary<int, string>();
+
+        private static readonly string[] _overlayNames =
+        {
+            "Bot Info",
+            "Bot Properties",
+            "Current Enemy Info",
+            "All Enemies Info",
+        };
+
         private static bool _changedOverlay;
 
         public static void UpdateSelectedOverlay()
         {
-            if (_changedOverlay && SAINPlugin.NextDebugOverlay.Value.IsUp())
+            if (_changedOverlay && 
+                SAINPlugin.NextDebugOverlay.Value.IsUp() && 
+                SAINPlugin.PreviousDebugOverlay.Value.IsUp())
             {
                 _changedOverlay = false;
             }
@@ -37,16 +52,50 @@ namespace SAIN.Layers
             {
                 return;
             }
+
             if (SAINPlugin.NextDebugOverlay.Value.IsDown())
             {
+                changeOverlay(true);
+                _changedOverlay = true;
+                return;
+            }
 
+            if (SAINPlugin.PreviousDebugOverlay.Value.IsDown())
+            {
+                changeOverlay(false);
+                _changedOverlay = true;
+                return;
             }
         }
 
-        private static int selectedOverlay;
+        private static void changeOverlay(bool next)
+        {
+            int count = _overlays.Count - 1;
+            if (next)
+            {
+                _selectedOverlay++;
+                if (_selectedOverlay > count)
+                {
+                    _selectedOverlay = 0;
+                }
+            }
+            else
+            {
+                _selectedOverlay--;
+                if (_selectedOverlay < 0)
+                {
+                    _selectedOverlay = count;
+                }
+            }
+            Logger.LogDebug($"{_selectedOverlay} : {next}");
+        }
+
+        private static int _selectedOverlay;
 
         public static void AddBaseInfo(BotComponent sain, BotOwner botOwner, StringBuilder stringBuilder)
         {
+            UpdateSelectedOverlay();
+
             try
             {
                 var info = sain.Info; 

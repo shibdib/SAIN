@@ -31,9 +31,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     }
                 }
 
-                OnEnemyChanged?.Invoke(value);
                 _activeEnemy = value;
-                _activeEnemy.EnemyKnownChecker.OnEnemyKnownChanged += onActiveEnemyForgotten;
+                OnEnemyChanged?.Invoke(value);
+
+                if (_activeEnemy != null)
+                    _activeEnemy.EnemyKnownChecker.OnEnemyKnownChanged += onActiveEnemyForgotten;
             }
         }
         public Enemy LastEnemy { get; private set; }

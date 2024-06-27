@@ -114,22 +114,26 @@ namespace SAIN.SAINComponent
             int started = 0;
             foreach (var kvp in _enumerators)
             {
-                Coroutine coroutine = Component.StartCoroutine(kvp.Value);
+                string name = kvp.Key;
+                IEnumerator enumerator = kvp.Value;
+                Coroutine coroutine = Component.StartCoroutine(enumerator);
                 if (coroutine != null)
                 {
                     started++;
-                    _coroutines.Add(kvp.Key, new Routine(kvp.Value, coroutine, kvp.Key));
+                    _coroutines.Add(name, new Routine(enumerator, coroutine, name));
                 }
             }
 
+            CoroutinesStarted = true;
             if (started > 0)
             {
                 Logger.LogDebug($"Started [{started}] Coroutines.");
-                CoroutinesStarted = true;
-                return true;
             }
-            Logger.LogDebug($"No Coroutines Started! {_enumerators.Count} enumerators in list.");
-            return false;
+            else
+            {
+                Logger.LogDebug($"No Coroutines Started! {_enumerators.Count} enumerators in list.");
+            }
+            return true;
         }
 
         public void Dispose()

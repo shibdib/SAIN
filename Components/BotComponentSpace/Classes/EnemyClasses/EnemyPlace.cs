@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -16,6 +17,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             ExpireTime = expireTime;
             IsDanger = isDanger;
             Player = player;
+        }
+
+        public Vector3 GroundedPosition(float range = 2f)
+        {
+            Vector3 pos = _position;
+            if (Physics.Raycast(pos, Vector3.down, out var hit, range, LayerMaskClass.HighPolyWithTerrainMask))
+            {
+                return hit.point;
+            }
+            return pos + (Vector3.down * range);
         }
 
         public readonly string OwnerID;
