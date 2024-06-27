@@ -119,6 +119,26 @@ namespace SAIN.Patches.Shoot.Aim
         }
     }
 
+    internal class HitEffectPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(HelpersGClass.AimDataType, "GetHit");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(BotOwner ___botOwner_0, DamageInfo damageInfo)
+        {
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            {
+                return true;
+            }
+
+            
+            return false;
+        }
+    }
+
     internal class WeaponPresetPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

@@ -8,7 +8,7 @@ namespace SAIN.Layers.Combat.Squad
     {
         public static readonly string Name = BuildLayerName("Squad Layer");
 
-        public CombatSquadLayer(BotOwner bot, int priority) : base(bot, priority, Name)
+        public CombatSquadLayer(BotOwner bot, int priority) : base(bot, priority, Name, ESAINLayer.Squad)
         {
         }
 
@@ -52,14 +52,12 @@ namespace SAIN.Layers.Combat.Squad
                 SquadDecision != SquadDecision.None &&
                 Bot.Decision.CurrentSelfDecision == SelfDecision.None;
 
-            if (active)
+            if (active && Bot.Cover.CoverInUse != null)
             {
-                Bot.ActiveLayer = ESAINLayer.Squad;
-                if (Bot.Cover.CoverInUse != null)
-                {
-                    Bot.Cover.CoverInUse = null;
-                }
+                Bot.Cover.CoverInUse = null;
             }
+
+            setLayer(active);
 
             return active;
         }

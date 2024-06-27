@@ -6,6 +6,7 @@ using SAIN.Helpers;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using static RootMotion.FinalIK.AimPoser;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -316,14 +317,31 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             get
             {
-                if (Path.CanSeeLastCornerToEnemy && LastCornerToEnemy != null)
+                Vector3? enemyLastKnown = KnownPlaces.LastKnownPosition;
+                if (enemyLastKnown == null)
                 {
-                    return LastCornerToEnemy.Value;
+                    return null;
                 }
+
+                Vector3? blindCorner = Path.BlindCornerToEnemy;
+                if (blindCorner != null && 
+                    isTargetInSuppRange(enemyLastKnown.Value, blindCorner.Value))
+                {
+                    return blindCorner;
+                }
+
+                Vector3? lastCorner = Path.LastCornerToEnemyEyeLevel;
+                if (lastCorner != null && 
+                    Path.CanSeeLastCornerToEnemy &&
+                    isTargetInSuppRange(enemyLastKnown.Value, lastCorner.Value))
+                {
+                    return lastCorner;
+                }
+
                 if (HidingBehindObject != null)
                 {
                     Vector3 pos = HidingBehindObject.transform.position + HidingBehindObject.bounds.size.z * Vector3.up;
-                    if ((pos - EnemyPosition).sqrMagnitude < 3f * 3f)
+                    if (isTargetInSuppRange(enemyLastKnown.Value, pos))
                     {
                         return pos;
                     }
@@ -331,6 +349,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return null;
             }
         }
+
+        private bool isTargetInSuppRange(Vector3 target, Vector3 suppressPoint)
+        {
+            return (target - suppressPoint).sqrMagnitude <= MAX_TARGET_SUPPRESS_DIST;
+        }
+
+        private const float MAX_TARGET_SUPPRESS_DIST = 5f * 5f;
 
         public Vector3? CenterMass
         {
@@ -383,8 +408,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public bool CanShoot => Vision.CanShoot;
 
         public bool Seen => Vision.Seen;
-
-        public Vector3? LastCornerToEnemy => Path.LastCornerToEnemy;
 
         public bool EnemyLookingAtMe => Status.EnemyLookingAtMe;
 

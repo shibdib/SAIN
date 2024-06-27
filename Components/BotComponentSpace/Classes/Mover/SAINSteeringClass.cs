@@ -444,10 +444,17 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private Enemy enemyShotMe()
         {
-            float timeSinceShot = Bot.BotHitReaction.TimeSinceShot;
-            if (timeSinceShot < 3f && timeSinceShot > 0.33f)
-                return Bot.BotHitReaction.EnemyWhoLastShotMe;
+            float timeSinceShot = Bot.Medical.TimeSinceShot;
+            if (timeSinceShot > 3f || timeSinceShot < 0.2f)
+            {
+                return null;
+            }
 
+            Enemy enemy = Bot.Medical.HitByEnemy.EnemyWhoLastShotMe;
+            if (enemy != null && enemy.IsValid && enemy.EnemyPerson.Active)
+            {
+                return enemy;
+            }
             return null;
         }
 
@@ -490,13 +497,13 @@ namespace SAIN.SAINComponent.Classes.Mover
                 EnemySteerDir = EEnemySteerDir.VisibleLastKnown;
                 return adjustLookPoint(lastKnown.Value) + _weaponRootOffset;
             }
-            Vector3? blindCornerToEnemy = enemy.Path.BlindCornerToEnemy;
-            if (blindCornerToEnemy != null)
+            Vector3? blindCorner = enemy.Path.BlindCornerLookPoint;
+            if (blindCorner != null)
             {
                 EnemySteerDir = EEnemySteerDir.BlindCorner;
-                return adjustLookPoint(blindCornerToEnemy.Value);
+                return blindCorner;
             }
-            Vector3? lastCorner = enemy.Path.LastCornerToEnemy;
+            Vector3? lastCorner = enemy.Path.LastCornerToEnemyGround;
             if (lastCorner != null &&
                 enemy.Path.CanSeeLastCornerToEnemy)
             {

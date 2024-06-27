@@ -159,7 +159,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
-            Enemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
+            Enemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId, true);
             if (enemy == null)
             {
                 return;

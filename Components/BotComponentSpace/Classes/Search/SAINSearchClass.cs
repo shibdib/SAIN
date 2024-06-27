@@ -158,15 +158,18 @@ namespace SAIN.SAINComponent.Classes.Search
                 && !Bot.Suppression.IsHeavySuppressed
                 && !enemy.IsVisible)
             {
-                timeBeforeSearch = Mathf.Clamp(timeBeforeSearch / 3f, 0f, 60f);
-
-                if (enemy.Seen && enemy.TimeSinceSeen >= timeBeforeSearch)
+                if (enemy.Seen)
                 {
+                    timeBeforeSearch = Mathf.Clamp(timeBeforeSearch / 3f, 0f, 120f);
+                    if (enemy.TimeSinceSeen < timeBeforeSearch)
+                    {
+                        return false;
+                    }
                     return true;
                 }
-                else if (enemy.Heard &&
-                    searchSettings.WillSearchFromAudio &&
-                    enemy.TimeSinceHeard >= timeBeforeSearch)
+
+                if (enemy.Heard &&
+                    searchSettings.WillSearchFromAudio)
                 {
                     return true;
                 }

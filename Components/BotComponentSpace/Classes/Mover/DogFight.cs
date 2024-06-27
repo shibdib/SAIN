@@ -42,34 +42,34 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return;
             }
 
-            if (_updateDogFightTimer < Time.time)
+            if (_updateDogFightTimer > Time.time)
             {
-                if (backUpFromEnemy())
-                {
-                    Status = EDogFightStatus.BackingUp;
-                    float baseTime = Bot.Enemy?.IsVisible == true ? 0.5f : 0.75f;
-                    _updateDogFightTimer = Time.time + baseTime * UnityEngine.Random.Range(0.66f, 1.33f);
-                    return;
-                }
-                else if (swing())
-                {
-                }
-
-                if (!aggressive)
-                {
-                    _updateDogFightTimer = Time.time + 0.5f;
-                    return;
-                }
-
-                if (moveToEnemy())
-                {
-                    Status = EDogFightStatus.MovingToEnemy;
-                    float timeAdd = Mathf.Clamp(0.1f * UnityEngine.Random.Range(0.5f, 1.25f), 0.05f, 0.66f);
-                    _updateDogFightTimer = Time.time + timeAdd;
-                    return;
-                }
-                _updateDogFightTimer = Time.time + 0.2f;
+                return;
             }
+
+            if (backUpFromEnemy())
+            {
+                Status = EDogFightStatus.BackingUp;
+                float baseTime = Bot.Enemy?.IsVisible == true ? 0.5f : 0.75f;
+                _updateDogFightTimer = Time.time + baseTime * UnityEngine.Random.Range(0.66f, 1.33f);
+                return;
+            }
+
+            if (!aggressive)
+            {
+                _updateDogFightTimer = Time.time + 0.5f;
+                return;
+            }
+
+            if (canMoveToEnemy() && 
+                Bot.Mover.GoToEnemy(Bot.Enemy, -1, false, false))
+            {
+                Status = EDogFightStatus.MovingToEnemy;
+                float timeAdd = Mathf.Clamp(0.1f * UnityEngine.Random.Range(0.5f, 1.25f), 0.05f, 0.66f);
+                _updateDogFightTimer = Time.time + timeAdd;
+                return;
+            }
+            _updateDogFightTimer = Time.time + 0.2f;
         }
 
         private bool swing()
@@ -88,13 +88,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             return Status == EDogFightStatus.MovingToEnemy && 
                 (enemy.InLineOfSight || enemy.IsVisible) && 
                 enemy.CanShoot;
-        }
-
-        private bool moveToEnemy()
-        {
-            Vector3? target = findMoveToEnemyTarget();
-            return target != null &&
-                Bot.Mover.GoToPoint(target.Value, out _, -1, false, false);
         }
 
         private bool backUpFromEnemy()
@@ -118,17 +111,17 @@ namespace SAIN.SAINComponent.Classes.Mover
             return null;
         }
 
-        private Vector3? findMoveToEnemyTarget()
+        private bool canMoveToEnemy()
         {
             Enemy enemy = Bot.Enemy;
             if (enemy != null &&
-                enemy.Seen &&
-                enemy.TimeSinceSeen >= _enemyTimeSinceSeenThreshold &&
+                //enemy.Seen &&
+                //enemy.TimeSinceSeen >= _enemyTimeSinceSeenThreshold &&
                 enemy.Path.PathToEnemy.status != NavMeshPathStatus.PathInvalid)
             {
-                return Bot.Enemy.LastKnownPosition;
+                return true;
             }
-            return null;
+            return false;
         }
 
         private float _enemyTimeSinceSeenThreshold = 1f;

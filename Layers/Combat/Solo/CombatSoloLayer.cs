@@ -8,7 +8,7 @@ namespace SAIN.Layers.Combat.Solo
     {
         public static readonly string Name = BuildLayerName("Combat Layer");
 
-        public CombatSoloLayer(BotOwner bot, int priority) : base(bot, priority, Name)
+        public CombatSoloLayer(BotOwner bot, int priority) : base(bot, priority, Name, ESAINLayer.Combat)
         {
         }
 
@@ -66,6 +66,9 @@ namespace SAIN.Layers.Combat.Solo
                 case SoloDecision.Search:
                     return new Action(typeof(SearchAction), $"{_lastDecision}");
 
+                case SoloDecision.Freeze:
+                    return new Action(typeof(FreezeAction), $"{_lastDecision}");
+
                 default:
                     return new Action(typeof(StandAndShootAction), $"DEFAULT! {_lastDecision}");
             }
@@ -78,14 +81,7 @@ namespace SAIN.Layers.Combat.Solo
                 return false;
             }
             bool active = _currentDecision != SoloDecision.None;
-            if (active)
-            {
-                Bot.ActiveLayer = ESAINLayer.Combat;
-            }
-            else
-            {
-                Bot.ActiveLayer = ESAINLayer.None;
-            }
+            setLayer(active);
             return active;
         }
 

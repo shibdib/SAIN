@@ -3,9 +3,9 @@ using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes
 {
-    public class BotSurgery : SAINBase, ISAINClass
+    public class BotSurgery : BotMedicalBase, ISAINClass
     {
-        public BotSurgery(BotComponent sain) : base(sain)
+        public BotSurgery(SAINBotMedicalClass medical) : base(medical)
         {
         }
 

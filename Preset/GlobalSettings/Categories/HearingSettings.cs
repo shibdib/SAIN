@@ -17,6 +17,8 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(10f, 150f, 1f)]
         public float MaxFootstepAudioDistanceNoHeadphones = 50f;
 
+        [Hidden]
+        [JsonIgnore]
         public DispersionDictionary DispersionValues = new DispersionDictionary
         {
             {
@@ -42,7 +44,7 @@ namespace SAIN.Preset.GlobalSettings
                 {
                     DistanceModifier = 1f,
                     MinAngle = 5f,
-                    MaxAngle = 90,
+                    MaxAngle = 120,
                     VerticalModifier = 0f
                 }
             },
@@ -60,7 +62,7 @@ namespace SAIN.Preset.GlobalSettings
                 {
                     DistanceModifier = 1f,
                     MinAngle = 15,
-                    MaxAngle = 90,
+                    MaxAngle = 160,
                     VerticalModifier = 0f
                 }
             },

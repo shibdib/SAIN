@@ -160,7 +160,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                         Logger.LogError("goalEnemy.ProfileId == SAINBot.Player.ProfileId");
                         return;
                     }
-                    Enemy sainEnemy = GetEnemy(goalEnemy.ProfileId);
+                    Enemy sainEnemy = GetEnemy(goalEnemy.ProfileId, true);
                     if (sainEnemy != null)
                     {
                         setActiveEnemy(sainEnemy);
@@ -340,19 +340,23 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Enemies?.Clear();
         }
 
-        public Enemy GetEnemy(string id)
+        public Enemy GetEnemy(string profileID, bool mustBeActive)
         {
-            if (Enemies.TryGetValue(id, out Enemy enemy))
+            if (!Enemies.TryGetValue(profileID, out Enemy enemy))
             {
-                if (enemy.EnemyPlayer == null)
-                {
-                    Enemies.Remove(id);
-                    removeEnemyInfo(enemy);
-                    return null;
-                }
-                return enemy;
+                return null;
             }
-            return null;
+            if (enemy == null || !enemy.IsValid)
+            {
+                Enemies.Remove(profileID);
+                removeEnemyInfo(enemy);
+                return null;
+            }
+            if (mustBeActive && !enemy.EnemyPerson.Active)
+            {
+                return null;
+            }
+            return enemy;
         }
 
         private void removeEnemyInfo(Enemy enemy)

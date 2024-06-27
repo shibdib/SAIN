@@ -56,7 +56,7 @@ namespace SAIN.BotController.Classes
                         && reportedEnemy.EnemyPlayer != null
                         && reportedEnemy.Player.ProfileId != member.ProfileId)
                     {
-                        member.EnemyController.GetEnemy(reportedEnemy.EnemyPlayer.ProfileId)?.EnemyPositionReported(place, seen);
+                        member.EnemyController.GetEnemy(reportedEnemy.EnemyPlayer.ProfileId, true)?.EnemyPositionReported(place, seen);
                     }
                 }
             }

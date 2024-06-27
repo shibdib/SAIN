@@ -11,7 +11,7 @@ namespace SAIN.Layers.Combat.Run
 {
     internal class BotUnstuckLayer : SAINLayer
     {
-        public BotUnstuckLayer(BotOwner bot, int priority) : base(bot, priority, Name)
+        public BotUnstuckLayer(BotOwner bot, int priority) : base(bot, priority, Name, ESAINLayer.Unstuck)
         {
         }
 
@@ -24,7 +24,8 @@ namespace SAIN.Layers.Combat.Run
 
         public override bool IsActive()
         {
-            return Bot?.BotStuck?.BotIsStuck == true;
+            setLayer(false);
+            return false;
         }
 
         public override bool IsCurrentActionEnding()

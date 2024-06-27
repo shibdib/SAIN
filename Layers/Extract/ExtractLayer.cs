@@ -9,7 +9,7 @@ namespace SAIN.Layers
     {
         public static readonly string Name = BuildLayerName("Extract");
 
-        public ExtractLayer(BotOwner bot, int priority) : base(bot, priority, Name)
+        public ExtractLayer(BotOwner bot, int priority) : base(bot, priority, Name, ESAINLayer.Extract)
         {
         }
 
@@ -21,10 +21,7 @@ namespace SAIN.Layers
         public override bool IsActive()
         {
             bool active = Bot != null && allowedToExtract() && hasExtractReason() && hasExtractLocation();
-            if (active)
-            {
-                Bot.ActiveLayer = ESAINLayer.Extract;
-            }
+            setLayer(active);
             return active;
         }
 

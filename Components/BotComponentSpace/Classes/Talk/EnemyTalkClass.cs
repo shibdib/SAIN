@@ -374,7 +374,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             float painRange = 50f;
             float breathRange = player.HeavyBreath ? 35f : 15f;
 
-            Enemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId);
+            Enemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId, true);
             if (enemy == null)
             {
                 if (!isPain && 

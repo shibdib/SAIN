@@ -47,7 +47,7 @@ namespace SAIN.SAINComponent
         public Vector3? CurrentTargetDirection => CurrentTarget.CurrentTargetDirection;
         public float CurrentTargetDistance => CurrentTarget.CurrentTargetDistance;
 
-        public SAINMedical Medical { get; private set; }
+        public SAINBotMedicalClass Medical { get; private set; }
         public SAINActivationClass BotActivation { get; private set; }
         public SAINDoorOpener DoorOpener { get; private set; }
         public ManualShootClass ManualShoot { get; private set; }
@@ -55,7 +55,6 @@ namespace SAIN.SAINComponent
         public BotBackpackDropClass BackpackDropper { get; private set; }
         public BotLightController BotLight { get; private set; }
         public SAINBotSpaceAwareness SpaceAwareness { get; private set; }
-        public SAINBotHitReaction BotHitReaction { get; private set; }
         public AimDownSightsController AimDownSightsController { get; private set; }
         public SAINAILimit AILimit { get; private set; }
         public SAINBotSuppressClass Suppression { get; private set; }
@@ -234,10 +233,9 @@ namespace SAIN.SAINComponent
             Suppression = new SAINBotSuppressClass(this);
             AILimit = new SAINAILimit(this);
             AimDownSightsController = new AimDownSightsController(this);
-            BotHitReaction = new SAINBotHitReaction(this);
             SpaceAwareness = new SAINBotSpaceAwareness(this);
             DoorOpener = new SAINDoorOpener(this, person.BotOwner);
-            Medical = new SAINMedical(this);
+            Medical = new SAINBotMedicalClass(this);
             BotLight = new BotLightController(this);
             BackpackDropper = new BotBackpackDropClass(this);
             CurrentTarget = new CurrentTargetClass(this);
@@ -267,7 +265,6 @@ namespace SAIN.SAINComponent
             Suppression.Init();
             AILimit.Init();
             AimDownSightsController.Init();
-            BotHitReaction.Init();
             SpaceAwareness.Init();
             Medical.Init();
             BotLight.Init();
@@ -348,7 +345,6 @@ namespace SAIN.SAINComponent
             Vault.Update();
             Suppression.Update();
             AimDownSightsController.Update();
-            BotHitReaction.Update();
             SpaceAwareness.Update();
             Medical.Update();
             BotLight.Update();
@@ -421,7 +417,6 @@ namespace SAIN.SAINComponent
                 Suppression?.Dispose();
                 AILimit?.Dispose();
                 AimDownSightsController?.Dispose();
-                BotHitReaction?.Dispose();
                 SpaceAwareness?.Dispose();
                 Medical?.Dispose();
                 BotLight?.Dispose();

@@ -17,7 +17,6 @@ namespace SAIN.Layers.Combat.Solo
         {
             while (true)
             {
-                Bot.Mover.SetTargetPose(0f);
                 if (!Bot.Steering.SteerByPriority(false))
                 {
                     Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
@@ -30,11 +29,6 @@ namespace SAIN.Layers.Combat.Solo
         public override void Update()
         {
             Bot.Mover.SetTargetPose(0f);
-            if (!Bot.Steering.SteerByPriority(false))
-            {
-                Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
-            }
-            Shoot.Update();
         }
 
         public override void Start()

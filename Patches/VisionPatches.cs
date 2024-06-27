@@ -262,9 +262,8 @@ namespace SAIN.Patches.Vision
         {
             if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPatch)))
             {
-                Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
-                if (enemy != null &&
-                    enemy.EnemyPerson.Active)
+                Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId, true);
+                if (enemy != null)
                 {
                     __result *= enemy.Vision.GainSightCoef;
                     enemy.Vision.LastGainSightResult = __result;
@@ -286,9 +285,8 @@ namespace SAIN.Patches.Vision
         {
             if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPatch)))
             {
-                Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId);
-                if (enemy != null && 
-                    enemy.EnemyPerson.Active)
+                Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId, true);
+                if (enemy != null)
                 {
                     addVisibility += enemy.Vision.VisionDistance;
                 }

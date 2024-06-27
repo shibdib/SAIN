@@ -1,9 +1,7 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
+﻿using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using SAIN.Components;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes.Decision;
 using System.Text;
 
 namespace SAIN.Layers
@@ -15,12 +13,26 @@ namespace SAIN.Layers
             return $"SAIN : {name}";
         }
 
-        public SAINLayer(BotOwner botOwner, int priority, string layerName) : base(botOwner, priority)
+        public SAINLayer(BotOwner botOwner, int priority, string layerName, ESAINLayer eSAINLayer) : base(botOwner, priority)
         {
             LayerName = layerName;
+            ELayer = eSAINLayer;
         }
 
         private readonly string LayerName;
+        private readonly ESAINLayer ELayer;
+
+        protected void setLayer(bool active)
+        {
+            if (active)
+            {
+                Bot.ActiveLayer = ELayer;
+            }
+            else if (Bot != null && Bot.ActiveLayer == ELayer)
+            {
+                Bot.ActiveLayer = ESAINLayer.None;
+            }
+        }
 
         public override string GetName() => LayerName;
 
@@ -37,7 +49,6 @@ namespace SAIN.Layers
                 }
                 if (_bot == null)
                 {
-                    Logger.LogWarning($"Had to getcomponent to find bot component?");
                     _bot = BotOwner.GetComponent<BotComponent>();
                 }
                 return _bot;

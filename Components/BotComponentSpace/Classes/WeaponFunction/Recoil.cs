@@ -12,15 +12,17 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         public Vector3 CurrentRecoilOffset { get; private set; } = Vector3.zero;
         private Vector3 _lookDir => Player.LookDirection * 10f;
 
-        public float ArmInjuryModifier => calcModFromInjury(Bot.BotHitReaction.LeftArmInjury) * calcModFromInjury(Bot.BotHitReaction.RightArmInjury);
+        public float ArmInjuryModifier => calcModFromInjury(Bot.Medical.HitReaction.LeftArmInjury) * calcModFromInjury(Bot.Medical.HitReaction.RightArmInjury);
 
         public Recoil(BotComponent sain) : base(sain)
         {
         }
 
+        private readonly StringBuilder _debugString = new StringBuilder();
+
         public void Init()
         {
-            Bot.BotActivation.OnBotStateChanged += stopLoop;
+            Bot.BotActivation.OnBotStateChanged += removeCoroutine;
         }
 
         private float calcModFromInjury(EInjurySeverity severity)
@@ -43,61 +45,49 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Update()
         {
-            if (_recoilFinished)
-            {
-                stopLoop(false);
-                return;
-            }
         }
 
-        private void checkStartLoop()
-        {
-            if (_recoilFinished)
-            {
-                Bot.CoroutineManager.Add(RecoilLoop(), "RecoilLoop");
-            }
-        }
-
-        private void stopLoop(bool value)
+        private void removeCoroutine(bool value)
         {
             if (!value)
             {
+                _recoilActive = false;
                 Bot.CoroutineManager.Remove("RecoilLoop");
-                _recoilFinished = false;
-                _shotRegistered = false;
+                _recoilFinished = true;
                 _barrelRising = false;
+                _debugString.Clear();
             }
         }
 
+        private bool _recoilActive;
+
+        private static bool _debugRecoilLogs => SAINPlugin.DebugSettings.DebugRecoilCalculations;
+
         private IEnumerator RecoilLoop()
         {
-            StringBuilder stringBuilder = SAINPlugin.DebugSettings.DebugRecoilCalculations ? new StringBuilder() : null;
-
-            while (!_recoilFinished)
+            while (true)
             {
-                checkApplyShot(stringBuilder);
-                calcBarrelRise(stringBuilder);
-                calcDecay(stringBuilder);
+                calcBarrelRise();
+                calcDecay();
+
+                if (_recoilFinished)
+                    break;
+
                 yield return null;
             }
 
             CurrentRecoilOffset = Vector3.zero;
-            if (stringBuilder != null)
-                Logger.LogDebug(stringBuilder.ToString());
-        }
-
-        private void checkApplyShot(StringBuilder stringBuilder)
-        {
-            if (_shotRegistered)
+            if (_debugRecoilLogs)
             {
-                _shotRegistered = false;
-                _barrelRising = true;
-                _recoilFinished = false;
-                calculateRecoil(stringBuilder);
+                Logger.LogDebug(_debugString.ToString());
+                _debugString.Clear();
             }
+
+
+            removeCoroutine(false);
         }
 
-        private void calcBarrelRise(StringBuilder stringBuilder)
+        private void calcBarrelRise()
         {
             if (!_barrelRising)
             {
@@ -106,7 +96,9 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
             float riseTime = Time.deltaTime * _barrelRiseCoef;
             _barrelRiseTime += riseTime;
-            stringBuilder?.AppendLine($"Barrel Rise Progress [{_barrelRiseTime}] Rise Step: {riseTime}");
+
+            if (_debugRecoilLogs)
+                _debugString.AppendLine($"Barrel Rise Progress [{_barrelRiseTime}] Rise Step: {riseTime}");
 
             if (_barrelRiseTime > 1)
             {
@@ -126,7 +118,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private static float _barrelRiseCoef => SAINPlugin.LoadedPreset.GlobalSettings.Shoot.RecoilRiseCoef;
         private float _barrelRiseTime;
 
-        private void calcDecay(StringBuilder stringBuilder)
+        private void calcDecay()
         {
             if (_recoilFinished)
             {
@@ -135,7 +127,9 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
             float decayTime = Time.deltaTime * _recoilDecayCoef;
             _barrelRecoveryTime += decayTime;
-            stringBuilder?.AppendLine($"Recoil Decay Progress [{_barrelRecoveryTime}] Decay Step: {decayTime}");
+
+            if (_debugRecoilLogs)
+                _debugString.AppendLine($"Recoil Decay Progress [{_barrelRecoveryTime}] Decay Step: {decayTime}");
 
             if (_barrelRecoveryTime > 1)
             {
@@ -160,16 +154,22 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-            Bot.BotActivation.OnBotStateChanged -= stopLoop;
+            Bot.BotActivation.OnBotStateChanged -= removeCoroutine;
         }
 
         public void WeaponShot()
         {
-            _shotRegistered = true; 
-            checkStartLoop();
+            calculateRecoil();
+            _barrelRising = true;
+            _recoilFinished = false;
+
+            if (!_recoilActive)
+            {
+                Bot.CoroutineManager.Add(RecoilLoop(), "RecoilLoop");
+            }
         }
 
-        private void calculateRecoil(StringBuilder stringBuilder)
+        private void calculateRecoil()
         {
             Weapon weapon = Bot.Info?.WeaponInfo?.CurrentWeapon;
             if (weapon == null)
@@ -180,22 +180,22 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             float addRecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.AddRecoil;
             float recoilMod = calcRecoilMod();
             float recoilTotal = weapon.RecoilTotal;
+            float recoilNum = calcRecoilNum(recoilTotal) + addRecoil;
+            float calcdRecoil = recoilNum * recoilMod;
 
-            float vertRecoil = (CalcVertRecoil(recoilTotal) + addRecoil) * recoilMod;
-            float randomvertRecoil = Random.Range(vertRecoil / 2f, vertRecoil) * randomSign();
-
-            float horizRecoil = (CalcHorizRecoil(recoilTotal) + addRecoil) * recoilMod;
-            float randomHorizRecoil = Random.Range(horizRecoil / 2f, horizRecoil) * randomSign();
+            float randomvertRecoil = Random.Range(calcdRecoil / 2f, calcdRecoil) * randomSign();
+            float randomHorizRecoil = Random.Range(calcdRecoil / 2f, calcdRecoil) * randomSign();
 
             Vector3 result = Vector.Rotate(_lookDir, randomHorizRecoil, randomvertRecoil, randomHorizRecoil);
             result -= _lookDir;
             _recoilOffsetTarget += result;
 
-            stringBuilder?.AppendLine($"Recoil! New Recoil: [{result.magnitude}] " +
+            if (_debugRecoilLogs)
+                _debugString.AppendLine($"Recoil! New Recoil: [{result.magnitude}] " +
                 $"Current Total Recoil Magnitude: [{_recoilOffsetTarget.magnitude}] " +
-                $"Vertical: [ [{vertRecoil}] : Randomized [{randomvertRecoil}] ]" +
-                $" Horizontal: [ [{horizRecoil}] : Randomized [{randomHorizRecoil}] ] " +
-                $"Modifiers [ Add: [{addRecoil}] Multi: [{recoilMod}] ]");
+                $"recoilNum: [{recoilNum}] calcdRecoil: [{calcdRecoil}] : " +
+                $"Randomized Vert [{randomvertRecoil}] : Randomized Horiz [{randomHorizRecoil}] " +
+                $"Modifiers [ Add: [{addRecoil}] Multi: [{recoilMod}] Weapon RecoilTotal [{recoilTotal}]]");
         }
 
         private float randomSign()
@@ -232,19 +232,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return recoilMod;
         }
 
-        float CalcVertRecoil(float recoilVal)
-        {
-            float result = recoilVal / 100;
-            if (ModDetection.RealismLoaded)
-            {
-                result = recoilVal / 150;
-            }
-            result *= Bot.Info.WeaponInfo.FinalModifier;
-            result *= UnityEngine.Random.Range(0.8f, 1.2f);
-            return result;
-        }
-
-        float CalcHorizRecoil(float recoilVal)
+        float calcRecoilNum(float recoilVal)
         {
             float result = recoilVal / 100;
             if (ModDetection.RealismLoaded)
@@ -260,7 +248,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private bool _barrelRising;
         private Vector3 _recoilOffsetTarget;
         private bool _recoilFinished;
-        private bool _armsInjured => Bot.BotHitReaction.ArmsInjured;
+        private bool _armsInjured => Bot.Medical.HitReaction.ArmsInjured;
         private float RecoilMultiplier => Mathf.Round(Bot.Info.FileSettings.Shoot.RecoilMultiplier * GlobalSettings.Shoot.RecoilMultiplier * 100f) / 100f;
 
         private float RecoilBaseline

@@ -1,7 +1,9 @@
 ﻿using EFT;
 using SAIN.Preset.GlobalSettings.Categories;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -188,37 +190,56 @@ namespace SAIN.SAINComponent.Classes.Mover
                 Bot.DoorOpener.Update();
                 return true;
             }
-            return CurrentPathStatus != NavMeshPathStatus.PathInvalid;
+            return false;
         }
 
-        public NavMeshPathStatus CurrentPathStatus { get; private set; } = NavMeshPathStatus.PathInvalid;
-
-        public bool CanGoToPoint(Vector3 point, out Vector3 pointToGo, bool mustHaveCompletePath = true, float navSampleRange = 5f)
+        public bool GoToEnemy(Enemy enemy, float reachDist = -1f, bool crawl = false, bool mustHaveCompletePath = true)
         {
-            pointToGo = point;
-            if (NavMesh.SamplePosition(point, out NavMeshHit targetHit, navSampleRange, -1) 
-                && NavMesh.SamplePosition(Bot.Transform.Position, out NavMeshHit botHit, navSampleRange, -1))
+            if (enemy == null)
             {
-                if (CurrentPath == null)
-                {
-                    CurrentPath = new NavMeshPath();
-                }
-                else
-                {
-                    CurrentPath.ClearCorners();
-                }
-                if (NavMesh.CalculatePath(botHit.position, targetHit.position, -1, CurrentPath) && CurrentPath.corners.Length > 1)
-                {
-                    if (mustHaveCompletePath && CurrentPath.status != NavMeshPathStatus.PathComplete)
+                return false;
+            }
+
+            var status = enemy.Path.PathToEnemyStatus;
+            switch (status)
+            {
+                case NavMeshPathStatus.PathInvalid:
+                    return false;
+
+                case NavMeshPathStatus.PathPartial:
+                    if (mustHaveCompletePath)
                     {
                         return false;
                     }
-                    pointToGo = targetHit.position;
-                    return true;
-                }
+                    break;
+
+                default:
+                    break;
             }
-            return false;
+
+            CurrentPathStatus = status;
+            return GoToPointByWay(enemy.Path.PathToEnemy.corners, reachDist, crawl);
         }
+
+        public bool GoToPointByWay(Vector3[] way, float reachDist = -1f, bool crawl = false)
+        {
+            if (way == null || way.Length < 2)
+            {
+                return false;
+            }
+
+            if (reachDist < 0f)
+                reachDist = SAINPlugin.LoadedPreset.GlobalSettings.General.BaseReachDistance;
+
+            if (crawl)
+                Prone.SetProne(true);
+
+            BotOwner.Mover.GoToByWay(way, reachDist);
+            Bot.DoorOpener.Update();
+            return true;
+        }
+
+        public NavMeshPathStatus CurrentPathStatus { get; private set; } = NavMeshPathStatus.PathInvalid;
 
         public bool CanGoToPoint(Vector3 point, out NavMeshPath path, bool mustHaveCompletePath = true, float navSampleRange = 1f)
         {

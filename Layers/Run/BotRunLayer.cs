@@ -11,7 +11,7 @@ namespace SAIN.Layers.Combat.Run
 {
     internal class BotRunLayer : SAINLayer
     {
-        public BotRunLayer(BotOwner bot, int priority) : base(bot, priority, Name)
+        public BotRunLayer(BotOwner bot, int priority) : base(bot, priority, Name, ESAINLayer.Run)
         {
         }
 
@@ -25,10 +25,7 @@ namespace SAIN.Layers.Combat.Run
         public override bool IsActive()
         {
             bool active = SAINPlugin.DebugSettings.ForceBotsToRunAround;
-            if (active)
-            {
-                Bot.ActiveLayer = ESAINLayer.Run;
-            }
+            setLayer(active);
             return active;
         }
 

@@ -63,12 +63,12 @@ namespace SAIN.SAINComponent.Classes.Memory
                 catch { }
 
                 LastUnderFireSource = source;
-                var enemy = Bot.EnemyController.GetEnemy(source.ProfileId);
-                if (enemy != null && enemy.IsValid)
-                {
-                    LastUnderFireEnemy = enemy;
-                }
                 UnderFireFromPosition = position;
+
+                var enemy = Bot.EnemyController.GetEnemy(source.ProfileId, true);
+
+                if (enemy != null)
+                    LastUnderFireEnemy = enemy;
             }
         }
 

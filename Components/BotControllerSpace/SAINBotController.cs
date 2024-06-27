@@ -287,7 +287,7 @@ namespace SAIN.Components
                     float distance = (bot.Position - explosionPosition).magnitude;
                     if (distance < range)
                     {
-                        Enemy enemy = bot.EnemyController.GetEnemy(playerProfileID);
+                        Enemy enemy = bot.EnemyController.GetEnemy(playerProfileID, true);
                         if (enemy != null)
                         {
                             float dispersion = distance / 10f;

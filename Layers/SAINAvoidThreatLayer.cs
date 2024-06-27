@@ -11,7 +11,7 @@ namespace SAIN.Layers
 {
     internal class SAINAvoidThreatLayer : SAINLayer
     {
-        public SAINAvoidThreatLayer(BotOwner bot, int priority) : base(bot, priority, Name)
+        public SAINAvoidThreatLayer(BotOwner bot, int priority) : base(bot, priority, Name, ESAINLayer.AvoidThreat)
         {
         }
 
@@ -55,10 +55,7 @@ namespace SAIN.Layers
                 (CurrentDecision == SoloDecision.DogFight ||
                 CurrentDecision == SoloDecision.AvoidGrenade);
 
-            if (Bot != null)
-            {
-                Bot.ActiveLayer = ESAINLayer.AvoidThreat;
-            }
+            setLayer(active);
             return active;
         }
 

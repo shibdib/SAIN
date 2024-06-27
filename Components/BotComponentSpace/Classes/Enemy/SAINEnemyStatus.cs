@@ -323,7 +323,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public float TimeSearchLastStarted { get; private set; }
         public float TimeSinceSearchLastStarted => Time.time - TimeSearchLastStarted;
 
-        public void RegisterShotByEnemy(DamageInfo damageInfo)
+        public void GetHit(DamageInfo damageInfo)
         {
             IPlayer player = damageInfo.Player?.iPlayer;
             if (player != null && 

@@ -81,11 +81,11 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [JsonIgnore]
         public int AIMING_TYPE = 1;
 
-        [Name("Friendly Fire Spherecast Size")]
-        [Description("")]
-        [MinMax(0f, 0.5f, 100f)]
-        [Advanced]
-        public float SHPERE_FRIENDY_FIRE_SIZE = 0.15f;
+        //[Name("Friendly Fire Spherecast Size")]
+        //[Description("")]
+        //[MinMax(0f, 0.5f, 100f)]
+        //[Advanced]
+        //public float SHPERE_FRIENDY_FIRE_SIZE = 0.15f;
 
         [Hidden]
         public float DAMAGE_TO_DISCARD_AIM_0_100 = 100;
@@ -110,6 +110,16 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [MinMax(0f, 25f, 10f)]
         [Advanced]
         public float BASE_HIT_AFFECTION_MAX_ANG = 5f;
+
+        [Name("Hit Aim Time Penalty Seconds - Min")]
+        [MinMax(0f, 1f, 100f)]
+        [Advanced]
+        public float MIN_TIME_DISCARD_AIM_SEC = 0.5f;
+
+        [Name("Hit Aim Time Penalty Seconds - Max")]
+        [MinMax(0f, 2f, 100f)]
+        [Advanced]
+        public float MAX_TIME_DISCARD_AIM_SEC = 1.5f;
 
         [Hidden]
         [JsonIgnore]

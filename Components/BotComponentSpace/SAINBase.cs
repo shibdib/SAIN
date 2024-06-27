@@ -16,6 +16,6 @@ namespace SAIN.SAINComponent
         public BotOwner BotOwner => Bot.Person.BotOwner;
         public Player Player => Bot.Person.Player;
         public IPlayer IPlayer => Bot.Person.IPlayer;
-        public GlobalSettingsClass GlobalSettings => SAINPlugin.LoadedPreset.GlobalSettings;
+        public GlobalSettingsClass GlobalSettings => GlobalSettingsClass.Instance;
     }
 }

@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class BlindCornerFinder : EnemyBase
     {
-        public BlindCorner? BlindCorner { get; private set; }
+        public EnemyCorner? BlindCorner { get; private set; }
 
         public BlindCornerFinder(Enemy enemy) : base(enemy)
         {
@@ -124,7 +124,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             blindCorner.y -= heightOffset;
-            BlindCorner = new BlindCorner(blindCorner, angle);
+            BlindCorner = new EnemyCorner(blindCorner, angle);
 
             if (raycasts > 0)
             {

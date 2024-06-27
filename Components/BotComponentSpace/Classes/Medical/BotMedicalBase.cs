@@ -1,0 +1,18 @@
+﻿using EFT;
+
+namespace SAIN.SAINComponent.Classes
+{
+    public abstract class BotMedicalBase
+    {
+        public BotMedicalBase(SAINBotMedicalClass medical)
+        {
+            Medical = medical;
+        }
+
+        protected SAINBotMedicalClass Medical { get; private set; }
+        protected BotComponent Bot => Medical.Bot;
+        protected BotOwner BotOwner => Bot.Person.BotOwner;
+        protected Player Player => Bot.Person.Player;
+        protected IPlayer IPlayer => Bot.Person.IPlayer;
+    }
+}

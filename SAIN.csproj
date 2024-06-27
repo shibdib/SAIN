@@ -243,8 +243,13 @@
     <None Include="Plugin\VersionChecker\setbuild.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\BotComponentSpace\Classes\BotSurgery.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\EInjurySeverity.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Enemy\CornerHelpers.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Medical\BodyPartHitEffectClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Medical\BodyPartStatus.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Medical\BotMedicalBase.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Medical\BotSurgery.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Medical\EHitReaction.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Medical\EInjurySeverity.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Enemy\BlindCorner.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Enemy\BlindCornerFinder.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Enemy\EnemyHearing.cs" />
@@ -396,8 +401,8 @@
     <Compile Include="Components\BotComponentSpace\Classes\Mover\SAINSprint.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Mover\SAINVaultClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\SAINAILimit.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\SAINMedical.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\SAINBotHitReaction.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Medical\SAINBotMedicalClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Medical\SAINBotHitReaction.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\SAINBotUnstuckClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Enemy\SAINEnemyPath.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Enemy\SAINEnemyStatus.cs" />

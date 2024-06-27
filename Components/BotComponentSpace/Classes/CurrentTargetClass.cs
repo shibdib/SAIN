@@ -107,18 +107,17 @@ namespace SAIN.SAINComponent.Classes
 
         private Vector3? getLastHitPosition()
         {
-            if (Bot.BotHitReaction.TimeSinceShot > 5f)
+            if (Bot.Medical.TimeSinceShot > 5f)
             {
                 return null;
             }
 
-            Enemy enemy = Bot.BotHitReaction.EnemyWhoLastShotMe;
-            if (enemy == null || 
-                !enemy.IsValid || 
-                enemy.IsCurrentEnemy)
+            Enemy enemy = Bot.Medical.HitByEnemy.EnemyWhoLastShotMe;
+            if (enemy == null || !enemy.IsValid ||  enemy.IsCurrentEnemy)
             {
                 return null;
             }
+
             return enemy.LastKnownPosition ?? enemy.Status.LastShotPosition;
         }
 

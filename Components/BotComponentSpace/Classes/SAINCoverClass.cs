@@ -47,7 +47,6 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            Player.BeingHitAction += OnBeingHit;
             CoverFinder.Init(Bot);
         }
 
@@ -94,13 +93,12 @@ namespace SAIN.SAINComponent.Classes
         {
             try
             {
-                Player.BeingHitAction -= OnBeingHit;
                 CoverFinder?.Dispose();
             }
             catch { }
         }
 
-        private void OnBeingHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
+        public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
             LastHitTime = Time.time;
 
