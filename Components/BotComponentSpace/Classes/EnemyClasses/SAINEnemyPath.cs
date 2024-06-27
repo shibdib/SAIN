@@ -251,8 +251,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             PathToEnemy.ClearCorners();
             PathToEnemyStatus = NavMeshPathStatus.PathInvalid;
-            LastCorner = null;
-            _blindCornerFinder.ClearBlindCorner();
+            EnemyCorners.Clear();
             PathDistance = float.MaxValue;
         }
 

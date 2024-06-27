@@ -83,7 +83,7 @@ namespace SAIN.Layers.Combat.Solo
             if (_shallTryJump && TryJumpTimer < Time.time && Bot.Player.IsSprintEnabled)
             {
                 //&& Bot.Enemy.Path.PathDistance > 3f
-                var corner = Enemy.Path.LastCornerToEnemyGround;
+                var corner = Enemy.Path.EnemyCorners.GroundPosition(ECornerType.Last);
                 if (corner != null &&
                     (corner.Value - Bot.Position).sqrMagnitude < 1f)
                 {
