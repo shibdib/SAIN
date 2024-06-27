@@ -19,7 +19,7 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
             if (wasGameObjectActive != GameObjectActive)
             {
                 OnGameObjectActiveChanged?.Invoke(GameObjectActive);
-                Logger.LogDebug($"GameObject {_person.Nickname} Active [{GameObjectActive}]");
+                //Logger.LogDebug($"GameObject {_person.Nickname} Active [{GameObjectActive}]");
             }
 
             bool wasActive = PlayerActive;
@@ -27,7 +27,7 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
             if (wasActive != PlayerActive)
             {
                 OnPlayerActiveChanged?.Invoke(PlayerActive);
-                Logger.LogDebug($"Player {_person.Nickname} Active [{PlayerActive}]");
+                //Logger.LogDebug($"Player {_person.Nickname} Active [{PlayerActive}]");
             }
 
             bool wasAIActive = BotActive;
@@ -35,7 +35,7 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
             if (wasAIActive != BotActive)
             {
                 OnBotActiveChanged?.Invoke(BotActive);
-                Logger.LogDebug($"Bot {_person.Nickname} Active [{BotActive}]");
+                //Logger.LogDebug($"Bot {_person.Nickname} Active [{BotActive}]");
             }
         }
 
@@ -113,7 +113,7 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
         {
             if (!_playerNullOrDead)
             {
-                Logger.LogDebug($"Person {_person.Nickname} Dead");
+                //Logger.LogDebug($"Person {_person.Nickname} Dead");
                 _playerNullOrDead = true;
 
                 var player = _person.Player;

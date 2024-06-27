@@ -22,6 +22,7 @@ namespace SAIN
         AvoidGrenade,
         Freeze,
         CreepOnEnemy,
+        MeleeAttack,
         DebugNoDecision
     }
 

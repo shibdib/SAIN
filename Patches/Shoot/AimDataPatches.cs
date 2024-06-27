@@ -3,7 +3,9 @@ using EFT;
 using HarmonyLib;
 using SAIN.Components;
 using SAIN.Helpers;
+using SAIN.Plugin;
 using SAIN.Preset.BotSettings.SAINSettings.Categories;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
@@ -29,7 +31,7 @@ namespace SAIN.Patches.Shoot.Aim
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref Vector3 ___vector3_5, ref Vector3 ___vector3_4, ref float ___float_13)
         {
-            if (!SAINEnableClass.GetSAIN(___botOwner_0, out var bot, nameof(AimOffsetPatch)))
+            if (!SAINEnableClass.GetSAIN(___botOwner_0, out var bot))
             {
                 return true;
             }
@@ -105,7 +107,7 @@ namespace SAIN.Patches.Shoot.Aim
         {
             additionCoef = 1f;
             additionCoef *= SAINPlugin.LoadedPreset.GlobalSettings.Shoot.GlobalScatterMultiplier;
-            if (!SAINEnableClass.GetSAIN(___botOwner_0, out var bot, nameof(ScatterPatch)))
+            if (!SAINEnableClass.GetSAIN(___botOwner_0, out var bot))
             {
                 return;
             }
@@ -114,6 +116,20 @@ namespace SAIN.Patches.Shoot.Aim
             if (enemy == null)
             {
                 return;
+            }
+            var weapon = ___botOwner_0.WeaponManager.CurrentWeapon;
+            if (weapon != null)
+            {
+                switch (weapon.FireMode.FireMode)
+                {
+                    case EFT.InventoryLogic.Weapon.EFireMode.fullauto:
+                    case EFT.InventoryLogic.Weapon.EFireMode.burst:
+                        additionCoef *= ___botOwner_0.Settings.FileSettings.Shoot.AUTOMATIC_FIRE_SCATTERING_COEF;
+                        break;
+
+                    default:
+                        break;
+                }
             }
             additionCoef /= enemy.Aim.AimAndScatterMultiplier;
         }
@@ -170,7 +186,7 @@ namespace SAIN.Patches.Shoot.Aim
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0, float dist, float ang, ref bool ___bool_1, ref float ___float_10, ref float __result)
         {
-            if (!SAINEnableClass.GetSAIN(___botOwner_0, out var bot, nameof(AimOffsetPatch)))
+            if (!SAINEnableClass.GetSAIN(___botOwner_0, out var bot))
             {
                 return true;
             }
@@ -335,6 +351,19 @@ namespace SAIN.Patches.Shoot.Aim
 
     public class AimRotateSpeedPatch : ModulePatch
     {
+        static AimRotateSpeedPatch()
+        {
+            PresetHandler.OnPresetUpdated += updateSettings;
+            updateSettings();
+        }
+
+        private static void updateSettings()
+        {
+            _aimTurnSpeed = GlobalSettingsClass.Instance.Move.AimTurnSpeed;
+        }
+
+        private static float _aimTurnSpeed = 300f;
+
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(HelpersGClass.AimDataType, "method_11");
@@ -344,7 +373,7 @@ namespace SAIN.Patches.Shoot.Aim
         public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref Vector3 ___vector3_2, ref Vector3 ___vector3_0, Vector3 dir)
         {
             ___vector3_2 = dir;
-            ___botOwner_0.Steering.LookToDirection(dir, 150);
+            ___botOwner_0.Steering.LookToDirection(dir, _aimTurnSpeed);
             ___botOwner_0.Steering.SetYByDir(___vector3_0);
             return false;
         }
@@ -362,10 +391,8 @@ namespace SAIN.Patches.Shoot.Aim
         {
             if (!__instance.Person.IsAI)
             {
-                canBehead =
-                    SAINPlugin.LoadedPreset.GlobalSettings.Aiming.PMCSAimForHead &&
-                    EnumValues.WildSpawn.IsPMC(__instance.Owner.Profile.Info.Settings.Role);
-
+                var aim = GlobalSettingsClass.Instance.Aiming;
+                canBehead = EFTMath.RandomBool(aim.PMCAimForHeadChance) && aim.PMCSAimForHead && isPMC(__instance);
                 withLegs = true;
             }
             else
@@ -373,6 +400,11 @@ namespace SAIN.Patches.Shoot.Aim
                 canBehead = true;
                 withLegs = true;
             }
+        }
+
+        private static bool isPMC(EnemyInfo __instance)
+        {
+            return EnumValues.WildSpawn.IsPMC(__instance.Owner.Profile.Info.Settings.Role);
         }
     }
 }

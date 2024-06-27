@@ -28,6 +28,9 @@ namespace SAIN.Layers.Combat.Solo
                 case SoloDecision.MoveToEngage:
                     return new Action(typeof(MoveToEngageAction), $"{_lastDecision}");
 
+                case SoloDecision.MeleeAttack:
+                    return new Action(typeof(MeleeAttackAction), $"{_lastDecision}");
+
                 case SoloDecision.RushEnemy:
                     return new Action(typeof(RushEnemyAction), $"{_lastDecision}");
 
@@ -54,14 +57,12 @@ namespace SAIN.Layers.Combat.Solo
                     return new Action(typeof(StandAndShootAction), $"{_lastDecision}");
 
                 case SoloDecision.HoldInCover:
+                    string label;
                     if (_lastSelfDecision != SelfDecision.None)
-                    {
-                        return new Action(typeof(HoldinCoverAction), $"{_lastDecision} + {_lastSelfDecision}");
-                    }
+                        label = $"{_lastDecision} + {_lastSelfDecision}";
                     else
-                    {
-                        return new Action(typeof(HoldinCoverAction), $"{_lastDecision}");
-                    }
+                        label = $"{_lastDecision}";
+                    return new Action(typeof(HoldinCoverAction), label);
 
                 case SoloDecision.Search:
                     return new Action(typeof(SearchAction), $"{_lastDecision}");

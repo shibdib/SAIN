@@ -79,7 +79,7 @@ namespace SAIN.Patches.Generic
             {
                 return;
             }
-            if (SAINEnableClass.GetSAIN(__instance.Owner, out var sain, nameof(HaveSeenEnemyPatch))
+            if (SAINEnableClass.GetSAIN(__instance.Owner, out var sain)
                 //&& sain.Info.Profile.IsPMC
                 && sain.EnemyController.CheckAddEnemy(__instance.Person)?.Heard == true)
             {
@@ -128,7 +128,7 @@ namespace SAIN.Patches.Generic
             BotsGroup group = enemyInfo.GroupOwner;
             for (int i = 0; i < group.MembersCount; i++)
             {
-                if (SAINEnableClass.GetSAIN(group.Member(i), out BotComponent sain, nameof(ShallKnowEnemyPatch))
+                if (SAINEnableClass.GetSAIN(group.Member(i), out BotComponent sain)
                     && EnemySenseRecently(sain, enemyInfo))
                 {
                     return true;

@@ -138,7 +138,6 @@ namespace SAIN
                 typeof(Patches.Shoot.Aim.ForceNoHeadAimPatch),
                 typeof(Patches.Shoot.Aim.AimRotateSpeedPatch),
 
-                typeof(Patches.Shoot.Recoil.OnMakingShotRecoilPatch),
                 typeof(Patches.Shoot.Recoil.RecoilPatch),
                 typeof(Patches.Shoot.Recoil.LoseRecoilPatch),
                 typeof(Patches.Shoot.Recoil.EndRecoilPatch),

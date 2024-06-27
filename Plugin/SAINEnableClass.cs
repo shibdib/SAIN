@@ -36,11 +36,15 @@ namespace SAIN
 
         private static bool shallExclude(BotOwner botOwner)
         {
-            if (botOwner != null)
+            bool exluded = isBotExcluded(botOwner);
+            if (botOwner.GetPlayer == null)
             {
-                botOwner.GetPlayer.OnIPlayerDeadOrUnspawn += clearBot;
+                return exluded;
             }
-            if (isBotExcluded(botOwner))
+
+            botOwner.GetPlayer.OnIPlayerDeadOrUnspawn += clearBot;
+
+            if (exluded)
             {
                 _excludedBots.Add(botOwner.name);
                 return true;
@@ -75,7 +79,12 @@ namespace SAIN
 
         public static bool isBotExcluded(BotOwner botOwner)
         {
-            WildSpawnType wildSpawnType = botOwner.Profile.Info.Settings.Role;
+            var settings = botOwner.Profile?.Info?.Settings;
+            if (settings == null)
+            {
+                return true;
+            }
+            WildSpawnType wildSpawnType = settings.Role;
             if (BotSpawnController.StrictExclusionList.Contains(wildSpawnType))
             {
                 return true;
@@ -173,7 +182,7 @@ namespace SAIN
             return false;
         }
 
-        public static bool GetSAIN(BotOwner botOwner, out BotComponent sain, string patchName)
+        public static bool GetSAIN(BotOwner botOwner, out BotComponent sain)
         {
             sain = null;
             if (IsSAINDisabledForBot(botOwner))
@@ -182,15 +191,15 @@ namespace SAIN
             }
             if (SAINBotController.Instance == null)
             {
-                Logger.LogError($"Bot Controller Null in [{patchName}]");
+                //Logger.LogError($"Bot Controller Null");
                 return false;
             }
             return SAINBotController.Instance.GetSAIN(botOwner, out sain);
         }
 
-        public static bool GetSAIN(Player player, out BotComponent sain, string patchName)
+        public static bool GetSAIN(Player player, out BotComponent sain)
         {
-            return GetSAIN(player?.AIData?.BotOwner, out sain, patchName);
+            return GetSAIN(player?.AIData?.BotOwner, out sain);
         }
 
         private static VanillaBotSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.VanillaBots;

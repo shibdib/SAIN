@@ -96,5 +96,8 @@ namespace SAIN.Preset.GlobalSettings
         public bool FasterCQBReactionsGlobal = true;
 
         public bool PMCSAimForHead = false;
+
+        [Percentage]
+        public float PMCAimForHeadChance = 33f;
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SAIN.Attributes;
 using SAIN.Preset.GlobalSettings;
-using System.ComponentModel;
 
 namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
@@ -15,24 +14,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [MinMax(0.1f, 3f, 10f)]
         public float VisionSpeedModifier = 1;
 
-        [NameAndDescription("Close Vision Speed Multiplier",
-            "Vision speed multiplier at close range. " +
-                "Bots will see this much faster, or slower, at close range. " +
-                "Higher is slower speed, so 1.5 would result in bots taking 1.5 times longer to spot an enemy")]
-        [MinMax(0.1f, 3f, 10f)]
-        public float CloseVisionSpeed = 1;
-
-        [NameAndDescription("Far Vision Speed Multiplier",
-            "Vision speed multiplier at Far range, the range is defined by (Close/Far Threshold Property)."
-            + "Bots will see this much faster, or slower, at Far range. "
-            + "Higher is slower speed, so 1.5 would result in bots taking 1.5 times longer to spot an enemy")]
-        [MinMax(0.1f, 3f, 10f)]
-        public float FarVisionSpeed = 1;
-
-        [NameAndDescription("Close/Far Threshold",
-            "The Distance that defines what is close or far for the Close Speed and Far Speed properties.")]
-        [MinMax(5, 150)]
-        public float CloseFarThresh = 50;
+        [Name("Minimum Vision Speed")]
+        [Description("Add a minimum vision speed, in seconds, for all vision checks. 0 means this is disabled.")]
+        [MinMax(0f, 1f, 100f)]
+        public float MinimumVisionSpeed = 0f;
 
         [Name("Can Use Flashlights")]
         public bool CAN_USE_LIGHT = true;
@@ -71,8 +56,8 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Advanced]
         public float VISIBLE_ANG_NIGHTVISION = 90f;
 
-        [Hidden]
-        public float LOOK_THROUGH_PERIOD_BY_HIT = 0f;
+        //[Hidden]
+        //public float LOOK_THROUGH_PERIOD_BY_HIT = 0f;
 
         [NameAndDescription("FlashLight On Distance",
             "After a bot is below this number in their vision distance, they will turn on their flashlight if available")]
@@ -106,7 +91,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Advanced]
         [JsonIgnore]
         [Hidden]
-        public float GOAL_TO_FULL_DISSAPEAR_GREEN = 0.15f;
+        public float GOAL_TO_FULL_DISSAPEAR_GREEN = 0.33f;
 
         [NameAndDescription("Lose Shoot Ability Time",
             "How Long after losing vision a bot will still be able to shoot an enemy")]
@@ -114,7 +99,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Advanced]
         [JsonIgnore]
         [Hidden]
-        public float GOAL_TO_FULL_DISSAPEAR_SHOOT = 0.1f;
+        public float GOAL_TO_FULL_DISSAPEAR_SHOOT = 0.15f;
 
         //[NameAndDescription("Max Grass Vision",
         //    "How far into grass a bot will be able to see, how far the depth must be to lose visibilty")]

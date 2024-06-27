@@ -24,11 +24,11 @@ namespace SAIN.SAINComponent.Classes
             switch (value)
             {
                 case true:
-                    Logger.LogDebug($"Trying to set Bot Active... [{Bot.Info.Profile.Name}]");
+                    //Logger.LogDebug($"Trying to set Bot Active... [{Bot.Info.Profile.Name}]");
                     if (Bot.CoroutineManager.StartCoroutines())
                     {
                         BotActive = true;
-                        Logger.LogDebug($"Bot Active [{Bot.Info.Profile.Name}]");
+                        //Logger.LogDebug($"Bot Active [{Bot.Info.Profile.Name}]");
                     }
                     break;
 

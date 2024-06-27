@@ -1,55 +1,22 @@
 ﻿using EFT;
 using HarmonyLib;
 using SAIN.Helpers;
+using SAIN.Plugin;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.WeaponFunction;
+using System.Collections;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
-using System;
 using Random = UnityEngine.Random;
-using System.Collections;
-using System.IO;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public enum EEnemySteerDir
-    {
-        None = 0,
-        BlindCorner = 1,
-        LastCorner = 2,
-        LastKnown = 3,
-        Path = 4,
-        VisibleLastKnown = 5,
-    }
-    public class SAINHeadSteering : SAINBase, ISAINClass
-    {
-        public SAINHeadSteering(BotComponent bot) : base(bot)
-        {
-
-        }
-
-        public void Init()
-        {
-
-        }
-
-        public void Update()
-        {
-
-        }
-
-        public void Dispose()
-        {
-
-        }
-    }
-
     public class SAINSteeringClass : SAINBase, ISAINClass
     {
-        public SteerPriority CurrentSteerPriority { get; private set; } = SteerPriority.None;
-        public SteerPriority LastSteerPriority { get; private set; } = SteerPriority.None;
-
+        public SteerPriority CurrentSteerPriority { get; private set; }
+        public SteerPriority LastSteerPriority { get; private set; }
         public EEnemySteerDir EnemySteerDir { get; private set; }
 
         // How long a bot will look at where they last saw an enemy instead of something they hear
@@ -64,9 +31,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         // How old a sound can be, in seconds, for them to react by looking toward it.
         private readonly float Steer_HeardSound_Age = 3f;
 
-        private readonly float baseTurnSpeed = 240f;
-
-        private readonly float baseTurnSpeedNoEnemy = 150f;
+        private static float baseTurnSpeed = 240f;
+        private static float baseTurnSpeedNoEnemy = 150f;
 
         public AimStatus AimStatus
         {
@@ -164,7 +130,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         public void LookToPoint(Vector3 point, float rotateSpeed = -1)
         {
             Vector3 direction = point - BotOwner.WeaponRoot.position;
-            if (direction.magnitude < 1f)
+            if (direction.sqrMagnitude < 1f)
             {
                 direction = direction.normalized;
                 //direction.y = 0f;
@@ -288,9 +254,8 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Update()
         {
-            handleRotateSpeed();
+            //handleRotateSpeed();
         }
-
         private void handleRotateSpeed()
         {
             if (Bot.HasEnemy)
@@ -739,27 +704,16 @@ namespace SAIN.SAINComponent.Classes.Mover
         static SAINSteeringClass()
         {
             aimStatusField = AccessTools.Field(Helpers.HelpersGClass.AimDataType, "aimStatus_0");
+            PresetHandler.OnPresetUpdated += updateSettings;
+            updateSettings();
         }
 
-        private static FieldInfo aimStatusField;
-    }
+        private static void updateSettings()
+        {
+            baseTurnSpeed = GlobalSettingsClass.Instance.Move.BaseTurnSpeed;
+        }
 
-    public enum SteerPriority
-    {
-        None,
-        Shooting,
-        ManualShooting,
-        Aiming,
-        EnemyVisible,
-        HeardThreat,
-        EnemyLastKnownLong,
-        RandomLook,
-        LastHit,
-        UnderFire,
-        MoveDirection,
-        Sprinting,
-        EnemyLastKnown,
-        Search,
-        RunningPath,
+
+        private static FieldInfo aimStatusField;
     }
 }

@@ -1,4 +1,5 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 using SAIN.Preset.GlobalSettings;
 
 namespace SAIN.Preset.BotSettings.SAINSettings.Categories
@@ -23,20 +24,21 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [MinMax(0.25f, 3f, 100f)]
         public float FireratMulti = 1.35f;
 
-        [MinMax(10f, 500f, 1f)]
-        public float MaxPointFireDistance = 80f;
+        [MinMax(50f, 500f, 1f)]
+        public float MaxPointFireDistance = 100f;
 
         [Advanced]
         public bool CAN_STOP_SHOOT_CAUSE_ANIMATOR = true;
 
-        [MinMax(0f, 100f)]
-        [Advanced]
-        public float CHANCE_TO_CHANGE_TO_AUTOMATIC_FIRE_100 = 100f;
+        [Hidden]
+        [JsonIgnore]
+        public float CHANCE_TO_CHANGE_TO_AUTOMATIC_FIRE_100 = 0f;
 
-        [MinMax(1f, 5f, 10f)]
+        [Name("Full Auto Scatter Multiplier")]
+        [MinMax(1f, 5f, 100f)]
         [Advanced]
         [CopyValue]
-        public float AUTOMATIC_FIRE_SCATTERING_COEF = 1.35f;
+        public float AUTOMATIC_FIRE_SCATTERING_COEF = 2f;
 
         [MinMax(0.1f, 2f, 10f)]
         [Advanced]

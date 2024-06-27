@@ -264,6 +264,9 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyHearing.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyKnownChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\WeaponAIPresetHistory.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Mover\EEnemySteerDir.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Mover\SAINHeadSteering.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Mover\SteerPriority.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\BotSound.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ReloadClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SAINEnemySearchClass.cs" />
@@ -283,6 +286,7 @@
     <Compile Include="Components\PlayerComponentSpace\Classes\ShootPlayerClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonActiveClass.cs" />
     <Compile Include="Helpers\PerformanceHelpers.cs" />
+    <Compile Include="Layers\Combat\Solo\MeleeAttackAction.cs" />
     <Compile Include="Layers\ISAINAction.cs" />
     <Compile Include="Patches\FixPatches.cs" />
     <Compile Include="Patches\Shoot\AimDataPatches.cs" />

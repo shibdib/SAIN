@@ -1,26 +1,11 @@
 ﻿using Aki.Reflection.Patching;
 using EFT;
 using HarmonyLib;
-using SAIN.SAINComponent;
 using System.Reflection;
 using UnityEngine;
 
 namespace SAIN.Patches.Shoot.Recoil
 {
-    internal class OnMakingShotRecoilPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod() => typeof(Player).GetMethod("OnMakingShot");
-
-        [PatchPrefix]
-        public static void PatchPrefix(ref Player __instance)
-        {
-            if (SAINEnableClass.GetSAIN(__instance, out var sain, nameof(OnMakingShotRecoilPatch)))
-            {
-                sain.Info.WeaponInfo.Recoil.WeaponShot();
-            }
-        }
-    }
-
     internal class RecoilPatch : ModulePatch
     {
         private static PropertyInfo _RecoilDataPI;

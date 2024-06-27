@@ -18,7 +18,7 @@ namespace SAIN.Patches.Movement
         [PatchPrefix]
         public static bool PatchPrefix(GClass423 __instance, BotOwner ___botOwner_0, Vector3 pos, bool slowAtTheEnd, bool getUpWithCheck)
         {
-            if (___botOwner_0.BotLay.IsLay && 
+            if (___botOwner_0.BotLay.IsLay &&
                 getUpWithCheck)
             {
                 Vector3 vector = pos - ___botOwner_0.Position;
@@ -39,8 +39,8 @@ namespace SAIN.Patches.Movement
             __instance.SlowAtTheEnd = slowAtTheEnd;
             return true;
         }
-
     }
+
     public class EncumberedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -51,42 +51,56 @@ namespace SAIN.Patches.Movement
         [PatchPrefix]
         public static bool PatchPrefix(bool ___bool_7, GClass681.IObserverToPlayerBridge ___iobserverToPlayerBridge_0, GClass681 __instance)
         {
-            if (!___bool_7)
+            if (___bool_7)
             {
-                bool isAI = ___iobserverToPlayerBridge_0.iPlayer.IsAI;
-
-                BackendConfigSettingsClass.GClass1368 stamina = Singleton<BackendConfigSettingsClass>.Instance.Stamina;
-
-                float carryWeightModifier = ___iobserverToPlayerBridge_0.Skills.CarryingWeightRelativeModifier;
-                float d = carryWeightModifier * carryWeightModifier;
-
-                float absoluteWeightModifier = ___iobserverToPlayerBridge_0.iPlayer.HealthController.CarryingWeightAbsoluteModifier;
-                Vector2 b = new Vector2(absoluteWeightModifier, absoluteWeightModifier);
-
-                BackendConfigSettingsClass.InertiaSettings inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
-                float strength = (float)___iobserverToPlayerBridge_0.Skills.Strength.SummaryLevel;
-                Vector3 b2 = new Vector3(inertia.InertiaLimitsStep * strength, inertia.InertiaLimitsStep * strength, 0f);
-
-                //Logger.LogDebug($"Strength {strength}");
-                //Logger.LogDebug($"carryWeightModifier {carryWeightModifier}");
-                //Logger.LogDebug($"absoluteWeightModifier {absoluteWeightModifier}");
-                //Logger.LogDebug($"d {d} : b {b.magnitude} : b2 {b2.magnitude}");
-
-                __instance.BaseInertiaLimits = inertia.InertiaLimits + b2;
-                __instance.WalkOverweightLimits = stamina.WalkOverweightLimits * d + b;
-                __instance.BaseOverweightLimits = stamina.BaseOverweightLimits * d + b;
-                __instance.SprintOverweightLimits = stamina.SprintOverweightLimits * d + b;
-                __instance.WalkSpeedOverweightLimits = stamina.WalkSpeedOverweightLimits * d + b;
-
-                //Logger.LogDebug($"BaseInertiaLimits {__instance.BaseInertiaLimits.magnitude}");
-                //Logger.LogDebug($"WalkOverweightLimits {__instance.WalkOverweightLimits.magnitude}");
-                //Logger.LogDebug($"BaseOverweightLimits {__instance.BaseOverweightLimits.magnitude}");
-                //Logger.LogDebug($"SprintOverweightLimits {__instance.SprintOverweightLimits.magnitude}");
-                //Logger.LogDebug($"WalkSpeedOverweightLimits {__instance.WalkSpeedOverweightLimits.magnitude}");
-
-                return false;
+                return true;
             }
-            return true;
+            IPlayer player = ___iobserverToPlayerBridge_0.iPlayer;
+            if (player == null)
+            {
+                Logger.LogWarning($"Player is Null, can't set weight limits for AI.");
+                return true;
+            }
+            bool isAI = player?.IsAI == true;
+            if (!isAI)
+            {
+                return true;
+            }
+            if (SAINPlugin.IsBotExluded(player.AIData.BotOwner))
+            {
+                return true;
+            }
+
+            BackendConfigSettingsClass.GClass1368 stamina = Singleton<BackendConfigSettingsClass>.Instance.Stamina;
+
+            float carryWeightModifier = ___iobserverToPlayerBridge_0.Skills.CarryingWeightRelativeModifier;
+            float d = carryWeightModifier * carryWeightModifier;
+
+            float absoluteWeightModifier = ___iobserverToPlayerBridge_0.iPlayer.HealthController.CarryingWeightAbsoluteModifier;
+            Vector2 b = new Vector2(absoluteWeightModifier, absoluteWeightModifier);
+
+            BackendConfigSettingsClass.InertiaSettings inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
+            float strength = (float)___iobserverToPlayerBridge_0.Skills.Strength.SummaryLevel;
+            Vector3 b2 = new Vector3(inertia.InertiaLimitsStep * strength, inertia.InertiaLimitsStep * strength, 0f);
+
+            //Logger.LogDebug($"Strength {strength}");
+            //Logger.LogDebug($"carryWeightModifier {carryWeightModifier}");
+            //Logger.LogDebug($"absoluteWeightModifier {absoluteWeightModifier}");
+            //Logger.LogDebug($"d {d} : b {b.magnitude} : b2 {b2.magnitude}");
+
+            __instance.BaseInertiaLimits = inertia.InertiaLimits + b2;
+            __instance.WalkOverweightLimits = stamina.WalkOverweightLimits * d + b;
+            __instance.BaseOverweightLimits = stamina.BaseOverweightLimits * d + b;
+            __instance.SprintOverweightLimits = stamina.SprintOverweightLimits * d + b;
+            __instance.WalkSpeedOverweightLimits = stamina.WalkSpeedOverweightLimits * d + b;
+
+            //Logger.LogDebug($"BaseInertiaLimits {__instance.BaseInertiaLimits.magnitude}");
+            //Logger.LogDebug($"WalkOverweightLimits {__instance.WalkOverweightLimits.magnitude}");
+            //Logger.LogDebug($"BaseOverweightLimits {__instance.BaseOverweightLimits.magnitude}");
+            //Logger.LogDebug($"SprintOverweightLimits {__instance.SprintOverweightLimits.magnitude}");
+            //Logger.LogDebug($"WalkSpeedOverweightLimits {__instance.WalkSpeedOverweightLimits.magnitude}");
+
+            return false;
         }
     }
 
@@ -109,7 +123,7 @@ namespace SAIN.Patches.Movement
                 return true;
             }
 
-            if (SAINEnableClass.GetSAIN(____owner, out var botComponent, nameof(DoorOpenerPatch)) &&
+            if (SAINEnableClass.GetSAIN(____owner, out var botComponent) &&
                 botComponent.HasEnemy)
             {
                 __result = botComponent.DoorOpener.Update();

@@ -102,6 +102,12 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return;
             }
 
+            if (BotOwner.WeaponManager.IsMelee)
+            {
+                SetDecisions(SoloDecision.MeleeAttack, SquadDecision.None, SelfDecision.None);
+                return;
+            }
+
             if (SelfActionDecisions.GetDecision(out SelfDecision selfDecision))
             {
                 SetDecisions(SoloDecision.Retreat, SquadDecision.None, selfDecision);

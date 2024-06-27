@@ -181,7 +181,6 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return true;
             }
 
-            bool result = false;
             var magWeapon = Bot.Info.WeaponInfo.Reload.ActiveMagazineWeapon;
             if (magWeapon != null)
             {
@@ -191,26 +190,29 @@ namespace SAIN.SAINComponent.Classes.Decision
                 }
             }
 
-            result = tryCatchReload();
+            if (tryCatchReload())
+            {
+                magWeapon?.botReloaded();
+                return true;
+            }
 
-            if (!result &&
-                magWeapon != null &&
+            if (magWeapon != null &&
                 magWeapon.FullMagazineCount == 0 &&
                 magWeapon.EmptyMagazineCount > 0 &&
                 magWeapon.TryRefillAllMags() &&
                 tryCatchReload())
             {
-                result = true;
+                magWeapon.botReloaded();
+                return true;
             }
-            if (!result)
+
+            if (!BotOwner.WeaponManager.Selector.TryChangeWeapon(true) && 
+                BotOwner.WeaponManager.Selector.CanChangeToMeleeWeapons)
             {
-                BotOwner.WeaponManager.Selector.TryChangeWeapon(true);
+                BotOwner.WeaponManager.Selector.ChangeToMelee();
             }
-            if (result)
-            {
-                magWeapon?.botReloaded();
-            }
-            return result;
+
+            return false;
         }
 
         private bool tryCatchReload()

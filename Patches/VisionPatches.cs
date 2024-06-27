@@ -23,25 +23,6 @@ using SAIN.Components.PlayerComponentSpace;
 
 namespace SAIN.Patches.Vision
 {
-    public class Math
-    {
-        public static float CalcVisSpeed(float dist, SAINSettingsClass preset)
-        {
-            float result = 1f;
-            if (dist >= preset.Look.CloseFarThresh)
-            {
-                result *= preset.Look.FarVisionSpeed;
-            }
-            else
-            {
-                result *= preset.Look.CloseVisionSpeed;
-            }
-            result *= preset.Look.VisionSpeedModifier;
-
-            return Mathf.Round(result * 100f) / 100f;
-        }
-    }
-
     public class SetPartPriorityPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -69,7 +50,7 @@ namespace SAIN.Patches.Vision
             }
 
             if (!isAI && 
-                SAINEnableClass.GetSAIN(__instance.Owner, out BotComponent botComponent, nameof(SetPartPriorityPatch)))
+                SAINEnableClass.GetSAIN(__instance.Owner, out BotComponent botComponent))
             {
                 Enemy enemy = botComponent.EnemyController.CheckAddEnemy(__instance.Person);
                 if (enemy != null)
@@ -260,13 +241,19 @@ namespace SAIN.Patches.Vision
         [PatchPostfix]
         public static void PatchPostfix(ref float __result, EnemyInfo __instance)
         {
-            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPatch)))
+            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain))
             {
                 Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId, true);
                 if (enemy != null)
                 {
                     __result *= enemy.Vision.GainSightCoef;
                     enemy.Vision.LastGainSightResult = __result;
+                }
+
+                float minSpeed = sain.Info.FileSettings.Look.MinimumVisionSpeed;
+                if (minSpeed > 0)
+                {
+                    __result = Mathf.Clamp(__result, minSpeed, float.MaxValue);
                 }
             }
             //__result = Mathf.Clamp(__result, 0.1f, 8888f);
@@ -283,7 +270,7 @@ namespace SAIN.Patches.Vision
         [PatchPrefix]
         public static void PatchPrefix(ref float addVisibility, EnemyInfo __instance)
         {
-            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain, nameof(VisionSpeedPatch)))
+            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain))
             {
                 Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId, true);
                 if (enemy != null)
