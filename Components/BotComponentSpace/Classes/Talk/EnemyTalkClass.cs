@@ -234,38 +234,27 @@ namespace SAIN.SAINComponent.Classes.Talk
             bool tauntEnemy = false;
             var enemy = Bot.Enemy;
 
-            if (enemy != null
-                && (enemy.EnemyPosition - Bot.Position).sqrMagnitude <= TauntDist * TauntDist)
+            if (!canTauntEnemy(enemy))
             {
-                if (Bot.Info.PersonalitySettings.Talk.ConstantTaunt)
-                {
-                    tauntEnemy = EFTMath.RandomBool(66);
-                }
-                if (!tauntEnemy &&
-                    (enemy.IsVisible || enemy.TimeSinceSeen < 3f))
-                {
-                    tauntEnemy = enemy.EnemyLookingAtMe || Bot.Info.PersonalitySettings.Talk.FrequentTaunt;
-                }
+                return false;
             }
 
-            //if (!tauntEnemy && BotOwner.AimingData != null)
-            //{
-            //    var aim = BotOwner.AimingData;
-            //    if (aim != null && aim.IsReady)
-            //    {
-            //        if (aim.LastDist2Target < TauntDist)
-            //        {
-            //            tauntEnemy = true;
-            //        }
-            //    }
-            //}
+            if (Bot.Info.PersonalitySettings.Talk.ConstantTaunt)
+            {
+                tauntEnemy = EFTMath.RandomBool(50);
+            }
+            if (!tauntEnemy &&
+                (enemy.IsVisible || enemy.TimeSinceSeen < 10f))
+            {
+                tauntEnemy = enemy.EnemyLookingAtMe || Bot.Info.PersonalitySettings.Talk.FrequentTaunt;
+            }
 
             if (tauntEnemy)
             {
                 if (enemy != null
                     && !enemy.IsVisible
                     && enemy.Seen 
-                    && enemy.TimeSinceSeen > 20f
+                    && enemy.TimeSinceSeen > 30f
                     && EFTMath.RandomBool(20))
                 {
                     Bot.Talk.Say(EPhraseTrigger.OnLostVisual, ETagStatus.Combat, true);
@@ -278,6 +267,42 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
 
             return tauntEnemy;
+        }
+
+        private bool canTauntEnemy(Enemy enemy)
+        {
+            if (enemy == null)
+            {
+                return false;
+            }
+            if (!enemy.Seen && !enemy.Heard)
+            {
+                return false;
+            }
+            if (enemy.KnownPlaces.EnemyDistanceFromLastKnown > TauntDist)
+            {
+                return false;
+            }
+            if (Bot.Decision.IsSearching)
+            {
+                return true;
+            }
+            if (!enemy.Status.ShotByEnemyRecently && !enemy.Status.ShotAtMeRecently)
+            {
+                if (!enemy.Seen)
+                {
+                    return false;
+                }
+                if (enemy.TimeSinceSeen > 90f)
+                {
+                    return false;
+                }
+                if (enemy.TimeSinceHeard > 20f)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private IEnumerator RespondToVoice(EPhraseTrigger trigger, ETagStatus mask, float delay, Player sourcePlayer, float responseDist, float chance = 100f, bool friendly = false)
@@ -323,8 +348,9 @@ namespace SAIN.SAINComponent.Classes.Talk
                 }
                 if (_nextGestureTime < Time.time)
                 {
-                    _nextGestureTime = Time.time + 3f;
+                    _nextGestureTime = Time.time + 6f;
                     Player.HandsController.ShowGesture(EGesture.Hello);
+                    Bot.Steering.LookToPoint(sourcePlayer.Position + Vector3.up * 1.4f);
                 }
                 Bot.Talk.Say(trigger, mask, false);
                 yield break;
@@ -405,7 +431,16 @@ namespace SAIN.SAINComponent.Classes.Talk
                 return;
             }
 
-            SetEnemyTalk(player);
+            if (enemy.RealDistance <= 65f)
+            {
+                Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
+                enemy.SetHeardStatus(true, randomizedPos, SAINSoundType.Breathing, true);
+            }
+
+            if (phrase == EPhraseTrigger.OnFight)
+            {
+                SetEnemyTalk(player);
+            }
         }
 
         private Vector3 randomizePos(Vector3 position, float distance, float dispersionFactor = 20f)

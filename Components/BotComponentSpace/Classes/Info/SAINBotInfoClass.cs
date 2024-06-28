@@ -45,18 +45,19 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void GetFileSettings()
         {
-            FileSettings = SAINPlugin.LoadedPreset.BotSettings.GetSAINSettings(WildSpawnType, BotDifficulty);
-            CalcPersonality();
-            UpdateExtractTime();
-            SetConfigValues(FileSettings);
-        }
+            if (FileSettings == null)
+                FileSettings = SAINPlugin.LoadedPreset.BotSettings.GetSAINSettings(Profile.WildSpawnType, Profile.BotDifficulty);
 
-        public void CalcPersonality()
-        {
-            Personality = GetPersonality();
-            PersonalitySettingsClass = SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary[Personality];
+            Personality = GetPersonality(out var settings);
+            PersonalitySettingsClass = settings;
+
+            _aggressionMulti = (FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.General.AggressionMultiplier).Round100();
+
             CalcTimeBeforeSearch();
             CalcHoldGroundDelay();
+            UpdateExtractTime();
+
+            SetConfigValues(FileSettings);
         }
 
         private void SetConfigValues(SAINSettingsClass sainFileSettings)
@@ -107,7 +108,7 @@ namespace SAIN.SAINComponent.Classes.Info
                     }
                 }
             }
-            UpdateSettingClass.ManualSettingsUpdate(WildSpawnType, BotDifficulty, BotOwner, FileSettings);
+            UpdateSettingClass.ManualSettingsUpdate(Profile.WildSpawnType, Profile.BotDifficulty, BotOwner, FileSettings);
         }
 
         public SAINSettingsClass FileSettings { get; private set; }
@@ -119,19 +120,18 @@ namespace SAIN.SAINComponent.Classes.Info
         public void CalcHoldGroundDelay()
         {
             var settings = PersonalitySettings;
-            float baseTime = settings.General.HoldGroundBaseTime * AggressionMultiplier;
+            float baseTime = settings.General.HoldGroundBaseTime * _aggressionMulti;
 
             float min = settings.General.HoldGroundMinRandom;
             float max = settings.General.HoldGroundMaxRandom;
             HoldGroundDelay = baseTime.Randomize(min, max).Round100();
         }
 
-        private float AggressionMultiplier => (FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.General.AggressionMultiplier).Round100();
 
         public void CalcTimeBeforeSearch()
         {
             float searchTime;
-            if (WildSpawnType == WildSpawnType.bossKilla || WildSpawnType == WildSpawnType.bossTagilla)
+            if (Profile.WildSpawnType == WildSpawnType.bossKilla || Profile.WildSpawnType == WildSpawnType.bossTagilla)
             {
                 searchTime = 0.1f;
             }
@@ -144,7 +144,7 @@ namespace SAIN.SAINComponent.Classes.Info
                 searchTime = PersonalitySettings.Search.SearchBaseTime;
             }
 
-            searchTime = (searchTime.Randomize(0.66f, 1.33f) / AggressionMultiplier).Round100();
+            searchTime = (searchTime.Randomize(0.66f, 1.33f) / _aggressionMulti).Round100();
             if (searchTime < 0.1f)
             {
                 searchTime = 0.1f;
@@ -160,11 +160,9 @@ namespace SAIN.SAINComponent.Classes.Info
 
             BotOwner.Settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = forgetTime;
             ForgetEnemyTime = forgetTime;
-            ForgetEnemyTimeAI = forgetTime * 0.66f;
         }
 
         public float ForgetEnemyTime { get; private set; }
-        public float ForgetEnemyTimeAI { get; private set; }
 
         private void UpdateExtractTime()
         {
@@ -201,94 +199,11 @@ namespace SAIN.SAINComponent.Classes.Info
             }
         }
 
-        public EPersonality GetPersonality()
+        public EPersonality GetPersonality(out PersonalitySettingsClass settings)
         {
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Personality.CheckForForceAllPers(out EPersonality result))
-            {
-                return result;
-            }
-
-            result = setNicknamePersonality(Player.Profile.Nickname.ToLower());
-            if (result != EPersonality.Normal)
-            {
-                return result;
-            }
-            result = setBossPersonality(WildSpawnType);
-            if (result != EPersonality.Normal)
-            {
-                return result;
-            }
-
-            foreach (var setting 
-                in SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary)
-            {
-                if (setting.Value.Assignment.CanBePersonality(this))
-                {
-                    return setting.Key;
-                }
-            }
-            if (Profile.IsPMC && EFTMath.RandomBool(40))
-            {
-                return EPersonality.Chad;
-            }
-            return EPersonality.Normal;
+            var dictionary = SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary;
+            return dictionary.GetPersonality(this, out settings);
         }
-
-        private EPersonality setNicknamePersonality(string nickname)
-        {
-            if (nickname.Contains("solarint"))
-            {
-                return EPersonality.GigaChad;
-            }
-            if (nickname.Contains("chomp") || nickname.Contains("senko"))
-            {
-                return EPersonality.Chad;
-            }
-            if (nickname.Contains("kaeno") || nickname.Contains("justnu"))
-            {
-                return EPersonality.Timmy;
-            }
-            if (nickname.Contains("ratthew") || nickname.Contains("choccy"))
-            {
-                return EPersonality.Rat;
-            }
-            return EPersonality.Normal;
-        }
-
-        private EPersonality setBossPersonality(WildSpawnType wildSpawnType)
-        {
-            switch (wildSpawnType)
-            {
-                case WildSpawnType.bossKilla:
-                case WildSpawnType.bossTagilla:
-                case WildSpawnType.bossKolontay:
-                    return EPersonality.Wreckless;
-
-                case WildSpawnType.bossKnight:
-                case WildSpawnType.followerBigPipe:
-                    return EPersonality.GigaChad;
-
-                case WildSpawnType.followerBirdEye:
-                case WildSpawnType.bossGluhar:
-                    return EPersonality.SnappingTurtle;
-
-                case WildSpawnType.bossKojaniy:
-                    return EPersonality.Rat;
-
-                case WildSpawnType.bossBully:
-                case WildSpawnType.bossSanitar:
-                case WildSpawnType.bossBoar:
-                    return EPersonality.Coward;
-
-                default:
-                    return EPersonality.Normal;
-            }
-        }
-
-        public WildSpawnType WildSpawnType => Profile.WildSpawnType;
-        public float PowerLevel => Profile.PowerLevel;
-        public int PlayerLevel => Profile.PlayerLevel;
-        public BotDifficulty BotDifficulty => Profile.BotDifficulty;
 
         public EPersonality Personality { get; private set; }
         public PersonalityBehaviorSettings PersonalitySettings => PersonalitySettingsClass?.Behavior;
@@ -296,7 +211,8 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public float PercentageBeforeExtract { get; set; } = -1f;
         public bool ForceExtract { get; set; } = false;
-
         public WeaponInfoClass WeaponInfo { get; private set; }
+
+        private float _aggressionMulti;
     }
 }

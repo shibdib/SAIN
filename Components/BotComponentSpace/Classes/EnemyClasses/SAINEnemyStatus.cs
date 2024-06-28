@@ -257,6 +257,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
+        public bool SearchingBecauseLooting { get; set; }
+
         public bool EnemyIsSuppressed
         {
             get

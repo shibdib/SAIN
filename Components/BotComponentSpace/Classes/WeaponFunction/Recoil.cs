@@ -51,6 +51,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             if (!value)
             {
+                CurrentRecoilOffset = Vector3.zero;
                 _recoilActive = false;
                 Bot.CoroutineManager.Remove("RecoilLoop");
                 _recoilFinished = true;
@@ -69,22 +70,18 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 calcBarrelRise();
                 calcDecay();
-
                 if (_recoilFinished)
+                {
+                    if (_debugRecoilLogs)
+                    {
+                        Logger.LogDebug(_debugString.ToString());
+                        _debugString.Clear();
+                    }
+                    removeCoroutine(false);
                     break;
-
+                }
                 yield return null;
             }
-
-            CurrentRecoilOffset = Vector3.zero;
-            if (_debugRecoilLogs)
-            {
-                Logger.LogDebug(_debugString.ToString());
-                _debugString.Clear();
-            }
-
-
-            removeCoroutine(false);
         }
 
         private void calcBarrelRise()
@@ -165,6 +162,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
             if (!_recoilActive)
             {
+                _recoilActive = true;
                 Bot.CoroutineManager.Add(RecoilLoop(), "RecoilLoop");
             }
         }

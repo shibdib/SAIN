@@ -181,9 +181,25 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return true;
             }
 
+            if (BotOwner.ShootData.Shooting)
+            {
+                return false;
+            }
+
+            if (BotOwner.WeaponManager.Malfunctions.HaveMalfunction() && 
+                BotOwner.WeaponManager.Malfunctions.MalfunctionType() != Weapon.EMalfunctionState.Misfire)
+            {
+                return false;
+            }
+
             var magWeapon = Bot.Info.WeaponInfo.Reload.ActiveMagazineWeapon;
             if (magWeapon != null)
             {
+                var currentMag = magWeapon.Weapon.GetCurrentMagazine();
+                if (currentMag != null && currentMag.Count == currentMag.MaxCount)
+                {
+                    return false;
+                }
                 if (magWeapon.FullMagazineCount == 0)
                 {
                     magWeapon.TryRefillMags(1);
@@ -192,7 +208,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             if (tryCatchReload())
             {
-                magWeapon?.botReloaded();
+                magWeapon?.BotReloaded();
                 return true;
             }
 
@@ -202,14 +218,25 @@ namespace SAIN.SAINComponent.Classes.Decision
                 magWeapon.TryRefillAllMags() &&
                 tryCatchReload())
             {
-                magWeapon.botReloaded();
+                magWeapon?.BotReloaded();
                 return true;
             }
 
             if (!BotOwner.WeaponManager.Selector.TryChangeWeapon(true) && 
                 BotOwner.WeaponManager.Selector.CanChangeToMeleeWeapons)
             {
-                BotOwner.WeaponManager.Selector.ChangeToMelee();
+                if (magWeapon != null &&
+                    magWeapon.FullMagazineCount == 0 &&
+                    magWeapon.PartialMagazineCount == 0)
+                {
+                    BotOwner.WeaponManager.Selector.ChangeToMelee();
+                }
+                if (magWeapon == null && 
+                    BotOwner.WeaponManager.Reload.BulletCount == 0 && 
+                    Bot.Enemy.RealDistance < 10f)
+                {
+                    BotOwner.WeaponManager.Selector.ChangeToMelee();
+                }
             }
 
             return false;
@@ -220,12 +247,29 @@ namespace SAIN.SAINComponent.Classes.Decision
             bool result = false;
             try
             {
-                BotOwner.WeaponManager.Reload.Reload();
-                result = BotOwner.WeaponManager.Reload.Reloading;
+                var reload = BotOwner.WeaponManager.Reload;
+                if (reload.CanReload(false, out var magazineClass, out var list))
+                {
+                    if (magazineClass != null)
+                    {
+                        reload.ReloadMagazine(magazineClass);
+                        result = true;
+                        reload.Reloading = true;
+                    }
+                    if (list != null && list.Count > 0)
+                    {
+                        reload.ReloadAmmo(list);
+                        result = true;
+                        reload.Reloading = true;
+                    }
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore
+                if (SAINPlugin.DebugMode || true)
+                {
+                    Logger.LogError($"Error Trying to get Bot to reload: {ex}");
+                }
             }
             return result;
         }

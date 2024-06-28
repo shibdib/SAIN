@@ -174,7 +174,7 @@ namespace SAIN.Components.BotController
             {
                 if (SAINPlugin.DebugMode)
                 {
-                    Logger.LogInfo($"{bot.name} could not find exfil. Bot spawn type: {bot.Info.WildSpawnType}");
+                    Logger.LogInfo($"{bot.name} could not find exfil. Bot spawn type: {bot.Info.Profile.WildSpawnType}");
                 }
 
                 ResetExfilSearchTime(bot);

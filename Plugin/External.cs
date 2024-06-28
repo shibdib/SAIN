@@ -251,7 +251,7 @@ namespace SAIN.Plugin
         {
             if (component.Decision.CurrentSoloDecision == SoloDecision.Search || component.Decision.CurrentSquadDecision == SquadDecision.Search)
             {
-                return !component.Search.SearchedTargetPosition;
+                return !component.Search.PathFinder.SearchedTargetPosition;
             }
             return false;
         }

@@ -13,7 +13,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public EnemyPlace(string ownerID, Vector3 position, float expireTime, bool isDanger, IPlayer player)
         {
             OwnerID = ownerID;
-            Position = position;
+            _position = position;
+            _nextCheckDistTime = 0f;
+            TimePositionUpdated = Time.time;
             ExpireTime = expireTime;
             IsDanger = isDanger;
             Player = player;

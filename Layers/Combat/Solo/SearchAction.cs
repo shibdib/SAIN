@@ -9,7 +9,7 @@ namespace SAIN.Layers.Combat.Solo
 {
     internal class SearchAction : SAINAction, ISAINAction
     {
-        public SearchAction(BotOwner bot) : base(bot, nameof(SearchAction))
+        public SearchAction(BotOwner bot) : base(bot, "Search")
         {
         }
 
@@ -22,7 +22,13 @@ namespace SAIN.Layers.Combat.Solo
         {
             while (true)
             {
-                bool isBeingStealthy = Bot.Enemy?.EnemyHeardFromPeace == true;
+                if (Bot.Enemy == null)
+                {
+                    yield return null;
+                    continue;
+                }
+
+                bool isBeingStealthy = Bot.Enemy.EnemyHeardFromPeace;
                 if (isBeingStealthy)
                 {
                     SprintEnabled = false;
@@ -35,9 +41,10 @@ namespace SAIN.Layers.Combat.Solo
 
                 if (_nextUpdateSearchTime < Time.time)
                 {
-                    _nextUpdateSearchTime = Time.time + 0.2f;
+                    _nextUpdateSearchTime = Time.time + 0.1f;
                     Search.Search(SprintEnabled);
                 }
+
                 Steer();
 
                 if (!SprintEnabled)
@@ -55,8 +62,6 @@ namespace SAIN.Layers.Combat.Solo
         {
             Toggle(true);
         }
-
-        private Vector3 TargetPosition => Search.FinalDestination;
 
         public override void Stop()
         {
@@ -76,10 +81,15 @@ namespace SAIN.Layers.Combat.Solo
 
         private void talk()
         {
+            if (Search.FinalDestination == null) 
+            {
+                return; 
+            }
+
             // Scavs will speak out and be more vocal
             if (!HaveTalked &&
                 Bot.Info.Profile.IsScav &&
-                (BotOwner.Position - TargetPosition).sqrMagnitude < 50f * 50f)
+                (BotOwner.Position - Search.FinalDestination.Value).sqrMagnitude < 50f * 50f)
             {
                 HaveTalked = true;
                 if (EFTMath.RandomBool(40))
@@ -133,7 +143,7 @@ namespace SAIN.Layers.Combat.Solo
             float chance = persSettings.Search.SprintWhileSearchChance;
             if (RandomSprintTimer < Time.time && chance > 0)
             {
-                float myPower = Bot.Info.PowerLevel;
+                float myPower = Bot.Info.Profile.PowerLevel;
                 if (Bot.Enemy?.EnemyPlayer != null && Bot.Enemy.EnemyPlayer.AIData.PowerOfEquipment < myPower * 0.5f)
                 {
                     chance = 100f;
@@ -169,7 +179,7 @@ namespace SAIN.Layers.Combat.Solo
         {
             point = Vector3.zero;
 
-            if (Search.SearchMovePoint == null || Search.CurrentState == ESearchMove.MoveToDangerPoint)
+            if (Search.PeekPoints == null || Search.CurrentState == ESearchMove.MoveToDangerPoint)
             {
                 LookPoint = Vector3.zero;
                 return false;
@@ -182,21 +192,21 @@ namespace SAIN.Layers.Combat.Solo
                 var headPosition = Bot.Transform.HeadPosition;
 
                 var canSeePoint = !Vector.Raycast(headPosition,
-                    Search.SearchMovePoint.DangerPoint,
+                    Search.PeekPoints.Value.DangerPoint,
                     LayerMaskClass.HighPolyWithTerrainMaskAI);
 
                 if (canSeePoint)
                 {
-                    LookPoint = Search.SearchMovePoint.DangerPoint + Vector3.up;
+                    LookPoint = Search.PeekPoints.Value.DangerPoint + Vector3.up;
                 }
                 else
                 {
                     canSeePoint = !Vector.Raycast(headPosition,
-                        Search.SearchMovePoint.Corner,
+                        Search.PeekPoints.Value.Corner,
                         LayerMaskClass.HighPolyWithTerrainMaskAI);
                     if (canSeePoint)
                     {
-                        LookPoint = Search.SearchMovePoint.Corner + Vector3.up;
+                        LookPoint = Search.PeekPoints.Value.Corner + Vector3.up;
                     }
                 }
 

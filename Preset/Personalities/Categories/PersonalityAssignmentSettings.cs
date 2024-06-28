@@ -1,67 +1,13 @@
 ﻿using EFT;
 using Newtonsoft.Json;
 using SAIN.Attributes;
-using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
-using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace SAIN.Preset.Personalities
 {
     public class PersonalityAssignmentSettings : SAINSettingsBase<PersonalityAssignmentSettings>, ISAINSettings
     {
-        public bool CanBePersonality(SAINBotInfoClass infoClass)
-        {
-            if (Enabled)
-            {
-                if (checkRandomAssignment())
-                {
-                    return true;
-                }
-                if (meetsRequirements(infoClass))
-                {
-                    float assignmentChance = getChance(infoClass.PowerLevel);
-                    return EFTMath.RandomBool(assignmentChance);
-                }
-            }
-            return false;
-        }
-
-        private bool checkRandomAssignment()
-        {
-            return CanBeRandomlyAssigned && EFTMath.RandomBool(RandomlyAssignedChance);
-        }
-
-        private bool meetsRequirements(SAINBotInfoClass infoClass)
-        {
-            return AllowedTypes.Contains(infoClass.WildSpawnType) 
-                && infoClass.PowerLevel <= PowerLevelMax 
-                && infoClass.PowerLevel > PowerLevelMin 
-                && infoClass.PlayerLevel <= MaxLevel 
-                && infoClass.PlayerLevel > MinLevel;
-        }
-
-        private float getChance(float powerLevel)
-        {
-            powerLevel = Mathf.Clamp(powerLevel, 0, 1000);
-            float modifier0to1 = (powerLevel - PowerLevelScaleStart) / (PowerLevelScaleEnd - PowerLevelScaleStart);
-            if (InverseScale)
-            {
-                modifier0to1 = 1f - modifier0to1;
-            }
-            float result = MaxChanceIfMeetRequirements * modifier0to1;
-            result = Mathf.Clamp(result, 0f, 100f);
-            //Logger.LogDebug($"Result: [{result}] Power: [{powerLevel}] PowerLevelScaleStart [{PowerLevelScaleStart}] PowerLevelScaleEnd [{PowerLevelScaleEnd}] MaxChanceIfMeetRequirements [{MaxChanceIfMeetRequirements}]");
-            return result;
-        }
-
-        [Name("Maximum of this Personality Per Raid")]
-        [Description("How many alive bots can be assigned this personality. 0 means no limit.")]
-        [MinMax(0f, 50f, 1f)]
-        [Hidden]
-        public float MaximumOfThisTypePerRaid = 0f;
-
         [JsonIgnore]
         [Hidden]
         private const string PowerLevelDescription = " Power level is a combined number that takes into account " +
@@ -118,9 +64,7 @@ namespace SAIN.Preset.Personalities
         [MinMax(0, 100, 1)]
         public float MaxChanceIfMeetRequirements = 50;
 
-        [Name("Bots Who Can Use This")]
-        [Description("Setting default on these always results in true")]
-        [DefaultDictionary(nameof(BotTypeDefinitions.BotTypesNames))]
+        [Name("Allowed Bot Types")]
         [Advanced]
         [Hidden]
         public List<WildSpawnType> AllowedTypes = new List<WildSpawnType>();

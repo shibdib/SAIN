@@ -23,6 +23,15 @@ namespace SAIN.Preset.Personalities
         {
             InitList();
             CreateDefaults();
+            Update();
+        }
+
+        public void Update()
+        {
+            foreach (var item in SettingsList)
+            {
+                item.Update();
+            }
         }
 
         protected bool initialized;

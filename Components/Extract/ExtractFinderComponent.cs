@@ -3,12 +3,9 @@ using EFT;
 using EFT.Interactive;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SAIN.Components.Extract
@@ -59,7 +56,7 @@ namespace SAIN.Components.Extract
 
         public void OnGUI()
         {
-            if (!SAINPlugin.DebugMode || !SAINPlugin.DebugSettings.DrawDebugLabels)
+            if (!DebugMode || !SAINPlugin.DebugSettings.DrawDebugLabels)
             {
                 return;
             }
@@ -88,31 +85,9 @@ namespace SAIN.Components.Extract
             }
         }
 
-        private void DrawLabel(Vector3 worldPos, string text, GUIStyle guiStyle)
-        {
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
-            if (screenPos.z <= 0)
-            {
-                return;
-            }
-
-            GUIContent content = new GUIContent(text);
-
-            float screenScale = 1.0f;
-            if (CameraClass.Instance.SSAA.isActiveAndEnabled)
-            {
-                screenScale = (float)CameraClass.Instance.SSAA.GetOutputWidth() / (float)CameraClass.Instance.SSAA.GetInputWidth();
-            }
-            Vector2 guiSize = guiStyle.CalcSize(content);
-            float x = (screenPos.x * screenScale) - (guiSize.x / 2);
-            float y = Screen.height - ((screenPos.y * screenScale) + guiSize.y);
-            Rect rect = new Rect(new Vector2(x, y), guiSize);
-            GUI.Label(rect, content);
-        }
-
         private void DrawGizmoSpheres(ExtractPositionFinder finder)
         {
-            if (!DebugGizmos.DrawGizmos)
+            if (!DebugGizmos.DrawGizmos || !DebugMode)
             {
                 return;
             }
@@ -153,13 +128,13 @@ namespace SAIN.Components.Extract
             }
 
             AllExfils = ExfilController.ExfiltrationPoints;
-            if (SAINPlugin.DebugMode && AllExfils != null)
+            if (DebugMode && AllExfils != null)
             {
                 Logger.LogInfo($"Found {AllExfils?.Length} possible Exfil Points in this map.");
             }
 
             AllScavExfils = ExfilController.ScavExfiltrationPoints;
-            if (SAINPlugin.DebugMode && AllScavExfils != null)
+            if (DebugMode && AllScavExfils != null)
             {
                 Logger.LogInfo($"Found {AllScavExfils?.Length} possible Scav Exfil Points in this map.");
             }
@@ -232,5 +207,7 @@ namespace SAIN.Components.Extract
 
             return job;
         }
+
+        public static bool DebugMode => SAINPlugin.DebugSettings.DebugExtract;
     }
 }

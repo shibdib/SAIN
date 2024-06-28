@@ -32,6 +32,12 @@ namespace SAIN.Layers.Combat.Squad
                 Bot.Mover.SetTargetMoveSpeed(1f);
                 Bot.DoorOpener.Update();
 
+                if (!Bot.Mover.SprintController.Running)
+                {
+                    Shoot.Update();
+                    Bot.Steering.SteerByPriority();
+                }
+
                 yield return null;
             }
         }

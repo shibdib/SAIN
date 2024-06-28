@@ -50,10 +50,20 @@ namespace SAIN.SAINComponent.Classes
         public void Update()
         {
             checkActive();
-            if (!BotActive && Bot.Person.ActiveClass.BotActive)
+
+            if (!BotActive && 
+                Bot.Person.ActiveClass.BotActive)
             {
                 Logger.LogWarning($"Bot Component not active but should be!");
                 SetActive(true);
+            }
+
+            if (BotActive && 
+                BotOwner.StandBy.StandByType != BotStandByType.active && 
+                Bot.CurrentTarget.HasTarget)
+            {
+                //Logger.LogWarning($"Had to activate bot manually because they were in stand by.");
+                BotOwner.StandBy.Activate();
             }
         }
 

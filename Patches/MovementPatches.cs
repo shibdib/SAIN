@@ -1,7 +1,6 @@
 ﻿using Aki.Reflection.Patching;
 using Comfort.Common;
 using EFT;
-using EFT.EnvironmentEffect;
 using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
@@ -55,17 +54,20 @@ namespace SAIN.Patches.Movement
             {
                 return true;
             }
+
             IPlayer player = ___iobserverToPlayerBridge_0.iPlayer;
             if (player == null)
             {
                 Logger.LogWarning($"Player is Null, can't set weight limits for AI.");
                 return true;
             }
+
             bool isAI = player?.IsAI == true;
             if (!isAI)
             {
                 return true;
             }
+
             if (SAINPlugin.IsBotExluded(player.AIData.BotOwner))
             {
                 return true;

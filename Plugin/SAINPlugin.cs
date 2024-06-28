@@ -7,6 +7,7 @@ using HarmonyLib;
 using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
+using SAIN.Patches.Generic;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
@@ -69,6 +70,7 @@ namespace SAIN
         public static ConfigEntry<KeyboardShortcut> OpenEditorConfigEntry { get; private set; }
 
         private List<Type> patches => new List<Type>() {
+                typeof(Patches.Generic.StopRefillMagsPatch),
                 typeof(Patches.Generic.SetEnvironmentPatch),
                 typeof(Patches.Generic.SetPanicPointPatch),
                 typeof(Patches.Generic.AddPointToSearchPatch),

@@ -40,7 +40,7 @@ namespace SAIN.SAINComponent
                 return null;
             }
 
-            Logger.LogDebug($"Coroutine Started. [{name}]");
+            //Logger.LogDebug($"Coroutine Started. [{name}]");
 
             routine = new Routine(enumerator, coroutine, name);
             _coroutines.Add(name, routine);
@@ -127,11 +127,11 @@ namespace SAIN.SAINComponent
             CoroutinesStarted = true;
             if (started > 0)
             {
-                Logger.LogDebug($"Started [{started}] Coroutines.");
+                //Logger.LogDebug($"Started [{started}] Coroutines.");
             }
             else
             {
-                Logger.LogDebug($"No Coroutines Started! {_enumerators.Count} enumerators in list.");
+                //Logger.LogDebug($"No Coroutines Started! {_enumerators.Count} enumerators in list.");
             }
             return true;
         }
@@ -176,8 +176,8 @@ namespace SAIN.SAINComponent
                 stopped++;
             }
 
-            Logger.LogDebug($"Stopped [{stopped}] Coroutines. " +
-                $"[{alreadyStopped}] Coroutines were already stopped or null");
+            //Logger.LogDebug($"Stopped [{stopped}] Coroutines. " +
+            //    $"[{alreadyStopped}] Coroutines were already stopped or null");
 
             _coroutines.Clear();
         }

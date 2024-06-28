@@ -61,7 +61,42 @@ namespace SAIN.Components.BotComponentSpace.Classes
             {
                 weapon?.Update();
             }
+            checkRefill();
         }
+
+        private void checkRefill()
+        {
+            if (_nextCheckRefillTime > Time.time)
+            {
+                return;
+            }
+            _nextCheckRefillTime = Time.time + 5;
+            if (!Bot.EnemyController.AtPeace || ActiveMagazineWeapon == null)
+            {
+                return;
+            }
+            if (BotOwner.WeaponManager.Reload.Reloading)
+            {
+                return;
+            }
+            ActiveMagazineWeapon.RecheckMagazines();
+            int magCount = ActiveMagazineWeapon.Magazines.Count;
+            if (magCount == 0)
+            {
+                return;
+            }
+            int fullCount = ActiveMagazineWeapon.FullMagazineCount;
+            float fullRatio = (float)fullCount / (float)magCount;
+            if (fullRatio < 0.5f)
+            {
+                int countToReload = Mathf.RoundToInt((float)magCount / 2f);
+                if (countToReload < 1)
+                    countToReload = 1;
+                ActiveMagazineWeapon.TryRefillMags(countToReload);
+            }
+        }
+
+        private float _nextCheckRefillTime;
 
         private void checkWeapChanged()
         {
@@ -216,13 +251,21 @@ namespace SAIN.Components.BotComponentSpace.Classes
             Weapon weapon = Weapon;
             if (weapon == null)
             {
-                //Logger.LogDebug("Weapon Null");
+                Logger.LogDebug("Weapon Null");
                 return false;
             }
             return getNonActiveMagazines() > 0;
         }
 
-        public void botReloaded()
+        public void RecheckMagazines()
+        {
+            _nextCheckTime = Time.time + 1f;
+            _needToRecheck = false;
+            _magsFound = findMags();
+            checkMagAmmoStatus();
+        }
+
+        public void BotReloaded()
         {
             _needToRecheck = true;
         }
@@ -232,12 +275,11 @@ namespace SAIN.Components.BotComponentSpace.Classes
 
         public void Update()
         {
-            if (_needToRecheck && _nextCheckTime < Time.time)
+            if (_needToRecheck && 
+                _nextCheckTime < Time.time && 
+                !_weaponManager.Reload.Reloading)
             {
-                _nextCheckTime = Time.time + 1f;
-                _needToRecheck = false;
-                _magsFound = findMags();
-                checkMagAmmoStatus();
+                RecheckMagazines();
             }
         }
 
@@ -247,7 +289,7 @@ namespace SAIN.Components.BotComponentSpace.Classes
         {
             if (getActiveMagazine() == null)
             {
-                //Logger.LogDebug("Active Magazine is Null!");
+                Logger.LogDebug("Active Magazine is Null!");
                 return 0;
             }
             Magazines.Clear();
@@ -262,26 +304,19 @@ namespace SAIN.Components.BotComponentSpace.Classes
 
         public bool TryRefillMags(int count)
         {
-            if (!IsMagazineFed)
-            {
-                //Logger.LogDebug($"weapon doesn't use mags!");
-                return false;
-            }
             if (!_magsFound)
             {
-                //Logger.LogDebug($"no magazines found!");
+                Logger.LogDebug($"no magazines found!");
                 return false;
             }
             Weapon weapon = Weapon;
             if (weapon == null)
             {
-                //Logger.LogDebug("Weapon Null");
+                Logger.LogDebug("Weapon Null");
                 return false;
             }
             return refillMagsInList(Magazines, weapon, count);
         }
-
-        public readonly bool IsMagazineFed;
 
         private Slot getActiveMagazine()
         {
@@ -319,6 +354,7 @@ namespace SAIN.Components.BotComponentSpace.Classes
                     }
                 }
             }
+            Logger.LogDebug($"Refilled {refilled} magazines");
             return refilled > 0;
         }
 

@@ -626,7 +626,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallSearch()
         {
-            return Bot.Search.ShallStartSearch(out _, true);
+            return Bot.Search.SearchDecider.ShallStartSearch(true);
         }
 
         public bool shallHoldInCover()

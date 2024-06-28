@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine.UIElements;
+﻿using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
-using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes
 {
     public class CurrentTargetClass : SAINBase
     {
+        public bool HasTarget { get; private set; } 
         public CurrentTargetClass(BotComponent bot) : base(bot) { }
 
         public void Update()
@@ -28,12 +23,14 @@ namespace SAIN.SAINComponent.Classes
                 _currentTarget = getTarget();
                 if (_currentTarget != null )
                 {
+                    HasTarget = true;
                     Vector3 dir = _currentTarget.Value - Position;
                     CurrentTargetDirection = dir;
                     CurrentTargetDistance = dir.magnitude;
                 }
                 else
                 {
+                    HasTarget = false;
                     CurrentTargetDirection = null;
                     CurrentTargetDistance = float.MaxValue;
                 }

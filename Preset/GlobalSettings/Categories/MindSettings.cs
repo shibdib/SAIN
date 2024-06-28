@@ -1,10 +1,18 @@
 ﻿using Newtonsoft.Json;
 using SAIN.Attributes;
+using SAIN.Helpers;
 
 namespace SAIN.Preset.GlobalSettings.Categories
 {
     public class MindSettings : SAINSettingsBase<MindSettings>, ISAINSettings
     {
+        public override void Update()
+        {
+            MaximumDistanceToBeSneaky_SQR = MaximumDistanceToBeSneaky.Sqr();
+            MaxSuppressionDistance_SQR = MaxSuppressionDistance.Sqr();
+            MaxUnderFireDistance_SQR = MaxUnderFireDistance.Sqr();
+        }
+
         [MinMax(0.1f, 5f, 100f)]
         public float GlobalAggression = 1f;
 
@@ -21,14 +29,26 @@ namespace SAIN.Preset.GlobalSettings.Categories
         [MinMax(5f, 200f, 10f)]
         public float MaximumDistanceToBeSneaky = 80f;
 
+        [JsonIgnore]
+        [Hidden]
+        public float MaximumDistanceToBeSneaky_SQR;
+
         [Description("The maximum distance between the bullet, and a bot's head to be considered Suppressing fire.")]
         [MinMax(1f, 30f, 10f)]
         [Advanced]
         public float MaxSuppressionDistance = 10f;
 
+        [JsonIgnore]
+        [Hidden]
+        public float MaxSuppressionDistance_SQR;
+
         [Description("The maximum distance between the bullet, and a bot's head to be considered under active enemy fire.")]
         [MinMax(0.1f, 20f, 10f)]
         [Advanced]
         public float MaxUnderFireDistance = 2f;
+
+        [JsonIgnore]
+        [Hidden]
+        public float MaxUnderFireDistance_SQR;
     }
 }

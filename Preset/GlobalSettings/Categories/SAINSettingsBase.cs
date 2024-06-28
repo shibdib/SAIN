@@ -7,6 +7,10 @@ namespace SAIN.Preset.GlobalSettings
 
     public abstract class SAINSettingsBase<T> : ISAINSettings
     {
+        public virtual void Update()
+        {
+        }
+
         public object GetDefaults()
         {
             return Defaults;

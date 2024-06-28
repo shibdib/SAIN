@@ -1,12 +1,4 @@
 ﻿using Newtonsoft.Json;
-using RootMotion.FinalIK;
-using SAIN.Attributes;
-using SAIN.Helpers;
-using SAIN.Preset.GlobalSettings;
-using SAIN.SAINComponent.Classes.Info;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using UnityEngine.UIElements.Experimental;
 
 namespace SAIN.Preset.Personalities
 {
@@ -14,12 +6,13 @@ namespace SAIN.Preset.Personalities
     {
         [JsonConstructor]
         public PersonalitySettingsClass()
-        { }
+        {
+        }
 
-        public PersonalitySettingsClass(EPersonality personality, string description)
+        public PersonalitySettingsClass(EPersonality personality)
         {
             Name = personality.ToString();
-            Description = description;
+            Description = PersonalityDescriptionsClass.PersonalityDescriptions[personality];
         }
 
         public string Name;
@@ -33,6 +26,7 @@ namespace SAIN.Preset.Personalities
             InitList();
             CreateDefaults();
             Behavior.Init();
+            Update();
         }
 
         public override void InitList()

@@ -131,7 +131,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 _nextLogTime = Time.time + 5f;
                 float time = (sw.ElapsedMilliseconds / 1000f).Round100();
-                Logger.LogDebug($"Total Raycasts: [{totalRaycasts}] Time To Complete: [{time}] seconds");
+                //Logger.LogDebug($"Total Raycasts: [{totalRaycasts}] Time To Complete: [{time}] seconds");
             }
         }
 

@@ -7,14 +7,16 @@ using System.Collections;
 
 namespace SAIN.SAINComponent.Classes.Search
 {
-    public sealed class MoveDangerPoint
+    public struct BotPeekPlan
     {
-        public MoveDangerPoint(Vector3 start, Vector3 end, Vector3 dangerPoint, Vector3 corner)
+        public BotPeekPlan(Vector3 start, Vector3 end, Vector3 dangerPoint, Vector3 corner)
         {
             PeekStart = new PeekPosition(start, dangerPoint);
             PeekEnd = new PeekPosition(end, dangerPoint);
             DangerPoint = dangerPoint;
             Corner = corner;
+            DebugVectorList = null;
+            DebugGameObjectList = null;
         }
 
         public PeekPosition PeekStart { get; private set; }

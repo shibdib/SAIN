@@ -23,6 +23,20 @@ namespace SAIN.Patches.Generic
         }
     }
 
+    public class StopRefillMagsPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotReload), "method_1");
+        }
+
+        [PatchPrefix]
+        public static bool Patch(BotOwner ___botOwner_0)
+        {
+            return SAINPlugin.IsBotExluded(___botOwner_0) || ___botOwner_0.Memory.GoalEnemy == null;
+        }
+    }
+
     public class SetEnvironmentPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

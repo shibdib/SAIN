@@ -51,6 +51,11 @@ namespace SAIN.SAINComponent.Classes.Decision
         public EnemyDecisionClass EnemyDecisions { get; private set; }
         public SquadDecisionClass SquadDecisions { get; private set; }
 
+        public bool IsSearching => 
+            CurrentSoloDecision == SoloDecision.Search || 
+            CurrentSquadDecision == SquadDecision.Search || 
+            CurrentSquadDecision == SquadDecision.GroupSearch;
+
         public SAINDecisionClass(BotComponent bot) : base(bot)
         {
             SelfActionDecisions = new SelfActionDecisionClass(bot);

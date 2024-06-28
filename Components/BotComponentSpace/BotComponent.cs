@@ -329,7 +329,11 @@ namespace SAIN.SAINComponent
             Decision.Update();
             Info.Update();
 
-            DoorOpener.Update();
+            if (BotOwner.Mover.IsMoving || Mover.SprintController.Running)
+            {
+                DoorOpener.Update();
+            }
+
             Search.Update();
             Memory.Update();
             FriendlyFireClass.Update();

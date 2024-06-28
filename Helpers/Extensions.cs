@@ -2,11 +2,21 @@
 using SAIN.Editor;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace SAIN.Helpers
 {
     public static class Extensions
     {
+        public static Vector3? LastCorner(this NavMeshPath path)
+        {
+            if (path == null) return null;
+            var corners = path.corners;
+            if (corners == null) return null;
+            if (corners.Length == 0) return null;
+            return corners[corners.Length - 1];
+        }
+
         public static SAINSoundType Convert(this AISoundType aiSoundType)
         {
             switch (aiSoundType)

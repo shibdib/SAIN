@@ -48,6 +48,8 @@ namespace SAIN.Preset.GlobalSettings
         [Name("Log Hearing Calc Results")]
         public bool DebugHearing = false;
 
+        public bool DebugExtract = false;
+
         [Hidden]
         [JsonIgnore]
         public bool DebugMovementPlan = false;

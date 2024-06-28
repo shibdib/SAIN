@@ -9,6 +9,7 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class GlobalSettingsClass : SettingsGroupBase<GlobalSettingsClass>
     {
+        [Hidden]
         [JsonIgnore]
         public static GlobalSettingsClass Instance;
 
@@ -63,7 +64,6 @@ namespace SAIN.Preset.GlobalSettings
         public override void InitList()
         {
             SettingsList.Clear();
-
             SettingsList.Add(General);
             SettingsList.Add(VanillaBots);
             SettingsList.Add(Performance);
