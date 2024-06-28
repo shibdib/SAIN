@@ -22,11 +22,6 @@ namespace SAIN.SAINComponent.Classes.Info
             IsScav = EnumValues.WildSpawn.IsScav(WildSpawnType);
             IsPMC = EnumValues.WildSpawn.IsPMC(WildSpawnType);
             IsPlayerScav = IsScav && SAINEnableClass.isPlayerScav(NickName);
-
-            if (IsPMC)
-            {
-                Logger.LogDebug($"Found PMC: [{WildSpawnType}]");
-            }
             SetDiffModifier(BotDifficulty);
         }
 

@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
+using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using SAIN.Helpers;
 using System;
 using System.Collections.Generic;
@@ -223,6 +224,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
+        private void removeEnemy(PersonClass person)
+        {
+            person.ActiveClass.OnPersonDeadOrDespawned -= removeEnemy;
+            RemoveEnemy(person.ProfileId);
+        }
+
         public void RemoveEnemy(string id)
         {
             if (Enemies.TryGetValue(id, out Enemy enemy))
@@ -231,14 +238,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 enemy.Dispose();
                 Enemies.Remove(id);
                 removeEnemyInfo(enemy);
-
                 enemy.OnEnemyHeard -= enemyHeard;
                 enemy.EnemyKnownChecker.OnEnemyKnownChanged -= enemyKnownChanged;
-                if (enemy.EnemyPlayerComponent != null)
-                {
-                    enemy.EnemyPlayerComponent.OnComponentDestroyed -= RemoveEnemy;
-                }
-                //Logger.LogDebug($"Removed [{id}] from [{BotOwner?.name}'s] Enemy List");
             }
         }
 
@@ -311,14 +312,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Enemy enemy = new Enemy(Bot, enemyPlayerComponent, enemyInfo);
             enemy.Init();
 
-            enemyPlayerComponent.OnComponentDestroyed += RemoveEnemy;
+            enemyPlayerComponent.Person.ActiveClass.OnPersonDeadOrDespawned += removeEnemy;
             enemyPlayerComponent.Player.OnPlayerDead += enemyKilled;
             enemy.EnemyKnownChecker.OnEnemyKnownChanged += enemyKnownChanged;
             enemy.OnEnemyHeard += enemyHeard;
-
             Enemies.Add(enemy.EnemyProfileId, enemy);
             OnEnemyAdded?.Invoke(enemy);
-
             return enemy;
         }
 

@@ -30,7 +30,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             Stopwatch sw = Stopwatch.StartNew();
             int totalRaycasts = 0;
-            const int MAX_CASTS_PER_FRAME = 2;
+            const int MAX_CASTS_PER_FRAME = 3;
             const int MAX_ITERATIONS_REAL_CORNER = 15;
 
             Vector3 lookPoint = Bot.Transform.EyePosition;
@@ -130,7 +130,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (_nextLogTime < Time.time)
             {
                 _nextLogTime = Time.time + 5f;
-                float time = (sw.ElapsedMilliseconds / 1000f).Round100();
+                //float time = (sw.ElapsedMilliseconds / 1000f).Round100();
                 //Logger.LogDebug($"Total Raycasts: [{totalRaycasts}] Time To Complete: [{time}] seconds");
             }
         }

@@ -51,7 +51,7 @@ namespace SAIN.SAINComponent
         {
             if (!_enumerators.Remove(name))
             {
-                Logger.LogDebug($"Enumerator not in list, couldn't remove. [{name}]");
+                //Logger.LogDebug($"Enumerator not in list, couldn't remove. [{name}]");
             }
             if (!CoroutinesStarted)
             {
@@ -60,23 +60,23 @@ namespace SAIN.SAINComponent
 
             if (Component == null)
             {
-                Logger.LogError($"Component is null, cannot stop Coroutine!");
+                //Logger.LogError($"Component is null, cannot stop Coroutine!");
                 return;
             }
             if (!_coroutines.TryGetValue(name, out Routine routine))
             {
-                Logger.LogDebug($"Coroutine Not In Dictionary. [{name}]");
+                //Logger.LogDebug($"Coroutine Not In Dictionary. [{name}]");
                 return;
             }
 
             if (routine.Coroutine != null)
             {
-                Logger.LogDebug($"Coroutine stopped. [{routine.Enumerator.ToString()}] : [{name}]");
+                //Logger.LogDebug($"Coroutine stopped. [{routine.Enumerator.ToString()}] : [{name}]");
                 Component.StopCoroutine(routine.Coroutine);
             }
             else
             {
-                Logger.LogDebug($"Coroutine already stopped. [{routine.Enumerator.ToString()}] : [{name}]");
+                //Logger.LogDebug($"Coroutine already stopped. [{routine.Enumerator.ToString()}] : [{name}]");
             }
             _coroutines.Remove(name);
         }
