@@ -187,13 +187,13 @@ namespace SAIN.SAINComponent.Classes.Decision
                 hasDecision)
             {
                 OnSAINStatusChanged?.Invoke(true);
-                Logger.LogDebug($"{BotOwner.name} Has Decision. SAIN Awake.");
+                //Logger.LogDebug($"{BotOwner.name} Has Decision. SAIN Awake.");
             }
             if (hasLastDecision && 
                 !hasDecision)
             {
                 OnSAINStatusChanged?.Invoke(false);
-                Logger.LogDebug($"{BotOwner.name} Has no Decision. SAIN Sleep.");
+                //Logger.LogDebug($"{BotOwner.name} Has no Decision. SAIN Sleep.");
                 DecisionsMadeThisFight = 0;
             }
         }

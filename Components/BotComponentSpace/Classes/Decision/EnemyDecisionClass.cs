@@ -293,7 +293,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             if (!grenades.AIGreanageThrowData.IsUpToDate())
             {
-                Logger.LogDebug("not up2date");
+                //Logger.LogDebug("not up2date");
                 return false;
             }
             grenades.DoThrow();
@@ -321,23 +321,29 @@ namespace SAIN.SAINComponent.Classes.Decision
                 _nextPosibleAttempt = 1f + Time.time;
                 return false;
             }
-            if (_angleValues == null)
-            {
-                _angleValues = EnumValues.GetEnum<AIGreandeAng>();
-            }
-            AIGreandeAng greandeAng = _angleValues.PickRandom();
+            var angles = Bot.Memory.Location.IsIndoors ? _indoorAngles : _outdoorAngles;
+            AIGreandeAng greandeAng = angles.PickRandom();
             AIGreanageThrowData aigreanageThrowData = GClass494.CanThrowGrenade2(from, trg, this.MaxPower, greandeAng, -1f, BotOwner.Settings.FileSettings.Grenade.MIN_THROW_DIST_PERCENT_0_1);
             if (aigreanageThrowData.CanThrow)
             {
                 _nextPosibleAttempt = 3f + Time.time;
                 BotOwner.WeaponManager.Grenades.SetThrowData(aigreanageThrowData);
-                Logger.LogDebug("canThrow");
+                //Logger.LogDebug("canThrow");
                 return true;
             }
             return false;
         }
 
-        private static AIGreandeAng[] _angleValues;
+        private static AIGreandeAng[] _indoorAngles =
+        {
+            AIGreandeAng.ang5,
+            AIGreandeAng.ang15,
+            AIGreandeAng.ang25,
+            AIGreandeAng.ang35,
+        };
+
+        private static AIGreandeAng[] _outdoorAngles = EnumValues.GetEnum<AIGreandeAng>();
+
         public float MaxPower => BotOwner.WeaponManager.Grenades.MaxPower;
 
         private bool checkFriendlyDistances(Vector3 trg)

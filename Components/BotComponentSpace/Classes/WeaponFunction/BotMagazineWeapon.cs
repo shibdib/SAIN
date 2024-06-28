@@ -182,7 +182,7 @@ namespace SAIN.Components.BotComponentSpace.Classes
                 if (numberToRefill < 0) continue;
                 if (refilled >= numberToRefill) break;
             }
-            Logger.LogDebug($"Refilled [{refilled}] magazines. Full Mags: [{full}]");
+            //Logger.LogDebug($"Refilled [{refilled}] magazines. Full Mags: [{full}]");
             return refilled > 0 || full > 0;
         }
 

@@ -26,17 +26,17 @@ namespace SAIN.SAINComponent
             {
                 if (routine.Coroutine != null)
                 {
-                    Logger.LogDebug($"Coroutine [{name}] already exits and is active");
+                    //Logger.LogDebug($"Coroutine [{name}] already exits and is active");
                     return routine.Coroutine;
                 }
-                Logger.LogDebug($"Coroutine [{name}] already but is inactive");
+                //Logger.LogDebug($"Coroutine [{name}] already but is inactive");
                 _coroutines.Remove(name);
             }
 
             Coroutine coroutine = Component.StartCoroutine(enumerator);
             if (coroutine == null)
             {
-                Logger.LogDebug($"Coroutine Null. Not Started [{name}]");
+                //Logger.LogDebug($"Coroutine Null. Not Started [{name}]");
                 return null;
             }
 
@@ -87,27 +87,27 @@ namespace SAIN.SAINComponent
         {
             if (CoroutinesStarted)
             {
-                Logger.LogWarning($"Coroutines already started.");
+                //Logger.LogWarning($"Coroutines already started.");
                 return false;
             }
 
             var component = Component;
             if (component == null)
             {
-                Logger.LogError($"Component is null, cannot start Coroutines!");
+                //Logger.LogError($"Component is null, cannot start Coroutines!");
                 return false;
             }
 
             GameObject gameObject = component.gameObject;
             if (gameObject == null)
             {
-                Logger.LogError($"Cannot Start Coroutines because gameobject is null.");
+                //Logger.LogError($"Cannot Start Coroutines because gameobject is null.");
                 return false;
             }
 
             if (!gameObject.activeInHierarchy)
             {
-                Logger.LogError($"Cannot Start Coroutines because gameobject is inactive.");
+                //Logger.LogError($"Cannot Start Coroutines because gameobject is inactive.");
                 return false;
             }
 
@@ -151,14 +151,14 @@ namespace SAIN.SAINComponent
         {
             if (!CoroutinesStarted)
             {
-                Logger.LogWarning($"Coroutines have not been started.");
+                //Logger.LogWarning($"Coroutines have not been started.");
                 return;
             }
 
             var component = Component;
             if (component == null)
             {
-                Logger.LogError($"Component is null, cannot stop Coroutines!");
+                //Logger.LogError($"Component is null, cannot stop Coroutines!");
                 return;
             }
 

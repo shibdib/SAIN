@@ -54,7 +54,7 @@ namespace SAIN.SAINComponent.Classes
             if (!BotActive && 
                 Bot.Person.ActiveClass.BotActive)
             {
-                Logger.LogWarning($"Bot Component not active but should be!");
+                //Logger.LogWarning($"Bot Component not active but should be!");
                 SetActive(true);
             }
 

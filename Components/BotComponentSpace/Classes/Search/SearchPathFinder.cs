@@ -246,6 +246,12 @@ namespace SAIN.SAINComponent.Classes.Search
             if (last != null)
                 newCorners.Add(last.Value);
 
+            if (newCorners.Count > 4)
+            {
+                newCorners.Clear();
+                return null;
+            }
+
             int count = newCorners.Count;
             for (int i = 0; i < count - 1; i++)
             {
