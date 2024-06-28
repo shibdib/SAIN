@@ -3,23 +3,10 @@ using SAIN.Editor;
 using SAIN.Preset;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using static SAIN.Helpers.JsonUtility;
 
 namespace SAIN.Plugin
 {
-    public enum SAINDifficulty
-    {
-        none,
-        easy,
-        lesshard,
-        hard,
-        harderpmcs,
-        veryhard ,
-        deathwish,
-        custom,
-    }
-
     internal static class ConfigEditingTracker
     {
         public static void Add(AttributesInfoClass info, object value)
@@ -192,6 +179,9 @@ namespace SAIN.Plugin
         public static void UpdateExistingBots()
         {
             OnPresetUpdated?.Invoke();
+            LoadedPreset?.GlobalSettings.Update();
+            LoadedPreset?.PersonalityManager.Update();
+            LoadedPreset?.BotSettings.Update();
         }
 
         private static bool CheckIfPresetLoaded(string presetName, out SAINPresetDefinition definition)

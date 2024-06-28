@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using SAIN.SAINComponent.Classes.EnemyClasses;
+using System.Collections.Generic;
 using UnityEngine;
-using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {

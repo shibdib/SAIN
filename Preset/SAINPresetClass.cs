@@ -105,7 +105,6 @@ namespace SAIN.Preset
             {
                 Export(globalSettings, presetName, "GlobalSettings");
                 success = true;
-                GUITabs.GlobalSettingsWereEdited = false;
             }
             catch (Exception ex)
             {
@@ -135,7 +134,6 @@ namespace SAIN.Preset
                     }
                 }
                 success = true;
-                BotPersonalityEditor.PersonalitiesWereEdited = false;
             }
             catch (Exception ex)
             {
@@ -154,7 +152,6 @@ namespace SAIN.Preset
                     Export(settings, presetName, settings.Name, "BotSettings");
                 }
                 success = true;
-                BotSelectionClass.BotSettingsWereEdited = false;
             }
             catch (Exception ex)
             {

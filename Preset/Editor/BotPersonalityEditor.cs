@@ -1,4 +1,5 @@
 ﻿using SAIN.Helpers;
+using SAIN.Plugin;
 using SAIN.Preset;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,7 +21,7 @@ namespace SAIN.Editor.GUISections
             string toolTip = $"Apply Values set below to Personalities. " +
                 $"Exports edited values to SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}/Personalities folder";
 
-            if (BuilderClass.SaveChanges(PersonalitiesWereEdited, toolTip, 35))
+            if (BuilderClass.SaveChanges(toolTip, 35))
             {
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
@@ -40,39 +41,16 @@ namespace SAIN.Editor.GUISections
                 if (OpenPersMenus[name])
                 {
                     EditAllValuesInObj(personality.Assignment, out bool newEdit);
-
-                    if (newEdit)
-                        PersonalitiesWereEdited = true;
-
                     EditAllValuesInObj(personality.Behavior.General, out newEdit);
-
-                    if (newEdit)
-                        PersonalitiesWereEdited = true;
-
                     EditAllValuesInObj(personality.Behavior.Rush, out newEdit);
-
-                    if (newEdit)
-                        PersonalitiesWereEdited = true;
-
                     EditAllValuesInObj(personality.Behavior.Search, out newEdit);
-
-                    if (newEdit)
-                        PersonalitiesWereEdited = true;
-
                     EditAllValuesInObj(personality.Behavior.Talk, out newEdit);
-
-                    if (newEdit)
-                        PersonalitiesWereEdited = true;
-
                     EditAllValuesInObj(personality.StatModifiers, out newEdit);
-
-                    if (newEdit)
-                        PersonalitiesWereEdited = true;
                 }
             }
         }
 
-        public static bool PersonalitiesWereEdited;
+        public static bool PersonalitiesWereEdited => ConfigEditingTracker.UnsavedChanges;
 
         private static readonly Dictionary<string, bool> OpenPersMenus = new Dictionary<string, bool>();
     }

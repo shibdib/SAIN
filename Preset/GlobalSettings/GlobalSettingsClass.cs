@@ -44,6 +44,7 @@ namespace SAIN.Preset.GlobalSettings
         public PersonalitySettings Personality = new PersonalitySettings();
         public HearingSettings Hearing = new HearingSettings();
         public LookSettings Look = new LookSettings();
+        public SteeringSettings Steering = new SteeringSettings();
         [Name("Looting Bots Integration")]
         [Description("Modify settings that relate to Looting Bots. Requires Looting Bots to be installed.")]
         public LootingBotsSettings LootingBots = new LootingBotsSettings();
@@ -83,6 +84,7 @@ namespace SAIN.Preset.GlobalSettings
             SettingsList.Add(SquadTalk);
             SettingsList.Add(Debug);
             SettingsList.Add(PowerCalc);
+            SettingsList.Add(Steering);
         }
     }
 }

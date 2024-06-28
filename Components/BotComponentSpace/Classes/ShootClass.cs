@@ -234,19 +234,35 @@ namespace SAIN.SAINComponent.Classes
         private void aimAtEnemy()
         {
             Vector3? pointToShoot = GetPointToShoot();
-            if (pointToShoot != null)
+            if (pointToShoot == null)
             {
-                BotOwner.AimingData.SetTarget(pointToShoot.Value);
-                BotOwner.AimingData.NodeUpdate();
-
-                if (BotOwner.AimingData.IsReady &&
-                    !BotComponent.NoBushESP.NoBushESPActive &&
-                    FriendlyFire.ClearShot)
-                {
-                    ReadyToShoot();
-                    Shoot.Update();
-                }
+                return;
             }
+
+            BotOwner.AimingData.SetTarget(pointToShoot.Value);
+            if (!BotOwner.AimingData.IsReady && !checkSteerDirection(30f))
+            {
+                BotComponent.Steering.LookToPoint(BotOwner.AimingData.EndTargetPoint, 200f);
+                return;
+            }
+
+            BotOwner.AimingData.NodeUpdate();
+            if (BotOwner.AimingData.IsReady &&
+                !BotComponent.NoBushESP.NoBushESPActive &&
+                FriendlyFire.CheckFriendlyFire())
+            {
+                ReadyToShoot();
+                Shoot.Update();
+            }
+        }
+
+        private bool checkSteerDirection(float maxAngle)
+        {
+            Vector3 target = BotOwner.AimingData.EndTargetPoint;
+            Vector3 weaponPointDir = BotComponent.LookDirection;
+            Vector3 directionToTarget = (target - BotOwner.WeaponRoot.position).normalized;
+            float angle = Vector3.Angle(directionToTarget, weaponPointDir);
+            return angle <= maxAngle;
         }
 
         private Vector3? blindShootTarget(Enemy enemy)
@@ -352,7 +368,7 @@ namespace SAIN.SAINComponent.Classes
 
         protected Vector3 Target;
 
-        public SAINFriendlyFireClass FriendlyFire => BotComponent.FriendlyFireClass;
+        public SAINFriendlyFireClass FriendlyFire => BotComponent.FriendlyFire;
     }
 
     public class BotShoot : BaseNodeClass

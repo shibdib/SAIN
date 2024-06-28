@@ -127,20 +127,53 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
         }
 
-        public void LookToPoint(Vector3 point, float rotateSpeed = -1)
+        public void LookToPoint(Vector3 point, float minTurnSpeed = -1)
         {
             Vector3 direction = point - BotOwner.WeaponRoot.position;
             if (direction.sqrMagnitude < 1f)
             {
                 direction = direction.normalized;
-                //direction.y = 0f;
             }
-            if (rotateSpeed < 0)
-            {
-                rotateSpeed = Bot.HasEnemy ? baseTurnSpeed : baseTurnSpeedNoEnemy;
-            }
-            BotOwner.Steering.LookToDirection(direction, rotateSpeed);
+            float turnSpeed = calcTurnSpeed(direction, minTurnSpeed);
+            BotOwner.Steering.LookToDirection(direction, turnSpeed);
         }
+
+        private float calcTurnSpeed(Vector3 targetDirection, float minTurnSpeed)
+        {
+            float minSpeed = minTurnSpeed > 0 ? minTurnSpeed : _minSpeed;
+            float maxSpeed = _maxSpeed;
+            if (minSpeed >= maxSpeed)
+            {
+                return minSpeed;
+            }
+
+            float maxAngle = _maxAngle;
+            Vector3 currentDir = _lookDirection;
+            float angle = Vector3.Angle(currentDir, targetDirection.normalized);
+
+            if (angle >= maxAngle)
+            {
+                return maxSpeed;
+            }
+            float minAngle = _minAngle;
+            if (angle <= minAngle)
+            {
+                return minSpeed;
+            }
+
+            float angleDiff = maxAngle - minAngle;
+            float targetDiff = angle - minAngle;
+            float ratio = targetDiff / angleDiff;
+            float result = Mathf.Lerp(minSpeed, maxSpeed, ratio);
+            //Logger.LogDebug($"Steer Speed Calc: Result: [{result}] Angle: [{angle}]");
+            return result;
+        }
+
+        private static SteeringSettings _settings => GlobalSettingsClass.Instance.Steering;
+        private float _maxAngle => _settings.SteerSpeed_MaxAngle;
+        private float _minAngle => _settings.SteerSpeed_MinAngle;
+        private float _maxSpeed => _settings.SteerSpeed_MaxSpeed;
+        private float _minSpeed => _settings.SteerSpeed_MinSpeed;
 
         public void LookToDirection(Vector3 direction, bool flat, float rotateSpeed = -1f)
         {
@@ -149,7 +182,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 direction.y = 0f;
             }
             Vector3 pos = BotOwner.WeaponRoot.position + direction.normalized;
-            LookToPoint(pos, rotateSpeed);
+            LookToPoint(pos, -1f);
         }
 
         public void LookToEnemy(Enemy enemy)
@@ -188,7 +221,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (_steerCoroutine != null)
             {
-
             }
         }
 
@@ -256,6 +288,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             //handleRotateSpeed();
         }
+
         private void handleRotateSpeed()
         {
             if (Bot.HasEnemy)
@@ -457,7 +490,6 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return enemy.EnemyPosition;
             }
 
-
             Vector3? lastKnown = EnemyLastKnown(enemy, out bool visible);
             if (lastKnown != null &&
                 visible)
@@ -552,10 +584,9 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void lookToHearPos(Vector3 soundPos, bool visionCheck = false)
         {
-            float turnSpeed = Bot.HasEnemy ? baseTurnSpeed : baseTurnSpeedNoEnemy;
             if ((soundPos - Bot.Position).sqrMagnitude > 125f.Sqr())
             {
-                LookToPoint(soundPos, turnSpeed);
+                LookToPoint(soundPos);
                 return;
             }
 
@@ -591,11 +622,11 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (_lastHeardSoundCorner != Vector3.zero)
             {
-                LookToPoint(_lastHeardSoundCorner, turnSpeed);
+                LookToPoint(_lastHeardSoundCorner);
             }
             else
             {
-                LookToPoint(soundPos, turnSpeed);
+                LookToPoint(soundPos);
             }
         }
 
@@ -712,7 +743,6 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             baseTurnSpeed = GlobalSettingsClass.Instance.Move.BaseTurnSpeed;
         }
-
 
         private static FieldInfo aimStatusField;
     }

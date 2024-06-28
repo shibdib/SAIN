@@ -1,17 +1,10 @@
-﻿using EFT.UI;
+﻿using SAIN.Attributes;
+using SAIN.Components;
 using SAIN.Editor.GUISections;
 using SAIN.Helpers;
 using SAIN.Plugin;
-using static Mono.Security.X509.X520;
-using System.ComponentModel;
-using static SAIN.Editor.SAINLayout;
-using UnityEngine;
-using static EFT.SpeedTree.TreeWind;
-using SAIN.Preset.GlobalSettings;
-using static GClass1711;
-using SAIN.Attributes;
 using SAIN.Preset;
-using SAIN.Components;
+using static SAIN.Editor.SAINLayout;
 
 namespace SAIN.Editor
 {
@@ -50,7 +43,6 @@ namespace SAIN.Editor
                 "Global Settings",
                 $"SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}",
                 35f,
-                GlobalSettingsWereEdited,
                 out bool saved);
 
             if (saved)
@@ -59,8 +51,6 @@ namespace SAIN.Editor
                 ConfigEditingTracker.Clear();
             }
         }
-
-        public static bool GlobalSettingsWereEdited;
 
         public static void BotSettings()
         {

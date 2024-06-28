@@ -133,7 +133,7 @@ namespace SAIN.Layers
                     stringBuilder.AppendLine($"Aim Status {sain.Steering.AimStatus} Last Aim Time: {sain.LastAimTime}");
                     stringBuilder.AppendLine($"Aim Time {timeAiming.GetValue(sain.BotOwner.AimingData)} TimeToAim: {TimeToAim.GetValue(sain.BotOwner.AimingData)}");
                     stringBuilder.AppendLine($"Aim Offset Magnitude {(sain.BotOwner.AimingData.RealTargetPoint - sain.BotOwner.AimingData.EndTargetPoint).magnitude}");
-                    stringBuilder.AppendLine($"Friendly Fire Status {sain.FriendlyFireClass.FriendlyFireStatus} No Bush ESP Status: {sain.NoBushESP.NoBushESPActive}");
+                    stringBuilder.AppendLine($"Friendly Fire Status {sain.FriendlyFire.FriendlyFireStatus} No Bush ESP Status: {sain.NoBushESP.NoBushESPActive}");
                 }
 
                 if (sain.HasEnemy)

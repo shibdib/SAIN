@@ -271,6 +271,8 @@
     <Compile Include="Components\BotComponentSpace\Classes\Search\SearchDeciderClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SearchPathFinder.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\BotSound.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\BotMagazineWeapon.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\MagRefillClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ReloadClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SAINEnemySearchClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINBotLookClass.cs" />
@@ -293,6 +295,7 @@
     <Compile Include="Layers\ISAINAction.cs" />
     <Compile Include="Patches\FixPatches.cs" />
     <Compile Include="Patches\Shoot\AimDataPatches.cs" />
+    <Compile Include="Plugin\SAINDifficulty.cs" />
     <Compile Include="Plugin\SAINDifficultyClass.cs" />
     <Compile Include="Preset\Editor\Attributes\AttributesGUI.cs" />
     <Compile Include="Preset\Editor\Attributes\AttributesInfoClass.cs" />
@@ -358,6 +361,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\ISAINSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\SAINSettingsBase.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\SquadTalkSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\SteeringSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\TalkSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\LocationSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\BotBrains.cs" />
@@ -577,7 +581,7 @@
     <Compile Include="Components\BotComponentSpace\BotComponent.cs" />
     <Compile Include="Layers\Combat\Solo\CombatSoloLayer.cs" />
     <Compile Include="Layers\Combat\Solo\ShootAction.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Mover\SAINSteeringClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\SAINSteeringClass.cs" />
     <Compile Include="Layers\Combat\Solo\DogFightAction.cs" />
     <Compile Include="Patches\AddComponentPatch.cs" />
     <Compile Include="Properties\ConfigurationManagerAttributes.cs" />

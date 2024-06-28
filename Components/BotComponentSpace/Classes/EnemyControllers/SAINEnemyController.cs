@@ -402,7 +402,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private readonly EnemyChooserClass _enemyChooser;
         private readonly EnemyUpdaterClass _enemyUpdater;
 
-        private bool _atPeace;
+        private bool _atPeace = true;
         private float _timePeaceStart;
         private GameObject debugLastSeenPosition;
         private GameObject debugLastHeardPosition;

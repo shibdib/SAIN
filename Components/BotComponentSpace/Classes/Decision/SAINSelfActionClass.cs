@@ -1,12 +1,4 @@
-﻿using BepInEx.Logging;
-using Comfort.Common;
-using EFT;
-using EFT.InventoryLogic;
-using HarmonyLib;
-using SAIN.Components;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using EFT;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Decision
@@ -30,70 +22,60 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return;
             }
-            if (!UsingMeds)
+            if (UsingMeds)
             {
-                if (_nextCheckTime > Time.time)
-                {
-                    return;
-                }
-                _nextCheckTime = Time.time + 0.1f;
+                return;
+            }
+            var decision = Bot.Decision.CurrentSelfDecision;
+            if (decision == SelfDecision.None)
+            {
+                return;
+            }
+            if (_nextCheckTime > Time.time)
+            {
+                return;
+            }
+            _nextCheckTime = Time.time + 0.1f;
 
-                if (Bot.Decision.CurrentSelfDecision == SelfDecision.Reload)
-                {
-                    TryReload();
-                    return;
-                }
-                if (_handsBusyTimer < Time.time)
-                {
-                    var handsController = Player.HandsController;
-                    if (handsController.IsInInteractionStrictCheck())
-                    {
-                        _handsBusyTimer = Time.time + 0.25f;
-                        return;
-                    }
+            if (decision == SelfDecision.Reload)
+            {
+                Bot.Info.WeaponInfo.Reload.TryReload();
+                return;
+            }
 
-                    bool didHeal = false;
-                    bool didReload = false;
+            if (_handsBusyTimer > Time.time)
+            {
+                return;
+            }
+            if (Player.HandsController.IsInInteractionStrictCheck())
+            {
+                _handsBusyTimer = Time.time + 0.25f;
+                return;
+            }
 
-                    switch (Bot.Decision.CurrentSelfDecision)
-                    {
-                        case SelfDecision.Reload:
-                            if (_healTime + 0.25f < Time.time)
-                            {
-                                didReload = TryReload();
-                            }
-                            break;
+            if (_healTime > Time.time)
+            {
+                return;
+            }
 
-                        case SelfDecision.Surgery:
-                            if (_healTime + 0.5f < Time.time)
-                            {
-                                //didHeal = DoSurgery();
-                            }
-                            break;
+            bool didAction = false;
+            switch (decision)
+            {
+                case SelfDecision.FirstAid:
+                    didAction = DoFirstAid();
+                    break;
 
-                        case SelfDecision.FirstAid:
-                            if (_healTime + 0.5f < Time.time)
-                            {
-                                didHeal = DoFirstAid();
-                            }
-                            break;
+                case SelfDecision.Stims:
+                    didAction = DoStims();
+                    break;
 
-                        case SelfDecision.Stims:
-                            if (_healTime + 0.5f < Time.time)
-                            {
-                                didHeal = DoStims();
-                            }
-                            break;
+                default:
+                    break;
+            }
 
-                        default:
-                            break;
-                    }
-
-                    if (didHeal || didReload)
-                    {
-                        _healTime = Time.time;
-                    }
-                }
+            if (didAction)
+            {
+                _healTime = Time.time + 1f;
             }
         }
 
@@ -164,114 +146,6 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool HaveStimsToHelp()
         {
             return false;
-        }
-
-        private float _reloadCallFreqLimit;
-
-        public bool TryReload()
-        {
-            if (_reloadCallFreqLimit > Time.time)
-            {
-                return false;
-            }
-            _reloadCallFreqLimit = Time.time + 0.25f;
-
-            if (BotOwner.WeaponManager.Reload.Reloading)
-            {
-                return true;
-            }
-
-            if (BotOwner.ShootData.Shooting)
-            {
-                return false;
-            }
-
-            if (BotOwner.WeaponManager.Malfunctions.HaveMalfunction() && 
-                BotOwner.WeaponManager.Malfunctions.MalfunctionType() != Weapon.EMalfunctionState.Misfire)
-            {
-                return false;
-            }
-
-            var magWeapon = Bot.Info.WeaponInfo.Reload.ActiveMagazineWeapon;
-            if (magWeapon != null)
-            {
-                var currentMag = magWeapon.Weapon.GetCurrentMagazine();
-                if (currentMag != null && currentMag.Count == currentMag.MaxCount)
-                {
-                    return false;
-                }
-                if (magWeapon.FullMagazineCount == 0)
-                {
-                    magWeapon.TryRefillMags(1);
-                }
-            }
-
-            if (tryCatchReload())
-            {
-                magWeapon?.BotReloaded();
-                return true;
-            }
-
-            if (magWeapon != null &&
-                magWeapon.FullMagazineCount == 0 &&
-                magWeapon.EmptyMagazineCount > 0 &&
-                magWeapon.TryRefillAllMags() &&
-                tryCatchReload())
-            {
-                magWeapon?.BotReloaded();
-                return true;
-            }
-
-            if (!BotOwner.WeaponManager.Selector.TryChangeWeapon(true) && 
-                BotOwner.WeaponManager.Selector.CanChangeToMeleeWeapons)
-            {
-                if (magWeapon != null &&
-                    magWeapon.FullMagazineCount == 0 &&
-                    magWeapon.PartialMagazineCount == 0)
-                {
-                    BotOwner.WeaponManager.Selector.ChangeToMelee();
-                }
-                if (magWeapon == null && 
-                    BotOwner.WeaponManager.Reload.BulletCount == 0 && 
-                    Bot.Enemy.RealDistance < 10f)
-                {
-                    BotOwner.WeaponManager.Selector.ChangeToMelee();
-                }
-            }
-
-            return false;
-        }
-
-        private bool tryCatchReload()
-        {
-            bool result = false;
-            try
-            {
-                var reload = BotOwner.WeaponManager.Reload;
-                if (reload.CanReload(false, out var magazineClass, out var list))
-                {
-                    if (magazineClass != null)
-                    {
-                        reload.ReloadMagazine(magazineClass);
-                        result = true;
-                        reload.Reloading = true;
-                    }
-                    if (list != null && list.Count > 0)
-                    {
-                        reload.ReloadAmmo(list);
-                        result = true;
-                        reload.Reloading = true;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                if (SAINPlugin.DebugMode || true)
-                {
-                    Logger.LogError($"Error Trying to get Bot to reload: {ex}");
-                }
-            }
-            return result;
         }
 
         public void BotCancelReload()

@@ -1,5 +1,6 @@
 ﻿using EFT.UI;
 using SAIN.Editor.Util;
+using SAIN.Plugin;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -155,7 +156,7 @@ namespace SAIN.Editor
             vertical,
         }
 
-        public static bool SaveChanges(bool unSaved, string toolTip, float height = 35)
+        public static bool SaveChanges(string toolTip, float height = 35)
         {
             BeginHorizontal();
 
@@ -167,7 +168,7 @@ namespace SAIN.Editor
 
             const float alertWidth = 250f;
 
-            if (unSaved)
+            if (ConfigEditingTracker.UnsavedChanges)
             {
                 Alert("Click Save to export changes, and send changes to bots if in-game", "YOU HAVE UNSAVED CHANGES", height, alertWidth, ColorNames.LightRed);
             }

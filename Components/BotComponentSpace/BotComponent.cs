@@ -63,7 +63,7 @@ namespace SAIN.SAINComponent
         public SAINMemoryClass Memory { get; private set; }
         public SAINEnemyController EnemyController { get; private set; }
         public SAINNoBushESP NoBushESP { get; private set; }
-        public SAINFriendlyFireClass FriendlyFireClass { get; private set; }
+        public SAINFriendlyFireClass FriendlyFire { get; private set; }
         public SAINVisionClass Vision { get; private set; }
         public SAINMoverClass Mover { get; private set; }
         public SAINBotUnstuckClass BotStuck { get; private set; }
@@ -225,7 +225,7 @@ namespace SAIN.SAINComponent
             Grenade = new SAINBotGrenadeClass(this);
             Mover = new SAINMoverClass(this);
             EnemyController = new SAINEnemyController(this);
-            FriendlyFireClass = new SAINFriendlyFireClass(this);
+            FriendlyFire = new SAINFriendlyFireClass(this);
             Vision = new SAINVisionClass(this);
             Search = new SAINSearchClass(this);
             Vault = new SAINVaultClass(this);
@@ -249,7 +249,7 @@ namespace SAIN.SAINComponent
             Search.Init();
             Memory.Init();
             EnemyController.Init();
-            FriendlyFireClass.Init();
+            FriendlyFire.Init();
             Vision.Init();
             Mover.Init();
             BotStuck.Init();
@@ -336,7 +336,7 @@ namespace SAIN.SAINComponent
 
             Search.Update();
             Memory.Update();
-            FriendlyFireClass.Update();
+            FriendlyFire.Update();
             Vision.Update();
             Mover.Update();
             BotStuck.Update();
@@ -404,7 +404,7 @@ namespace SAIN.SAINComponent
                 Search?.Dispose();
                 Memory?.Dispose();
                 EnemyController?.Dispose();
-                FriendlyFireClass?.Dispose();
+                FriendlyFire?.Dispose();
                 Vision?.Dispose();
                 Mover?.Dispose();
                 BotStuck?.Dispose();

@@ -33,7 +33,7 @@ namespace SAIN.Patches.Generic
         [PatchPrefix]
         public static bool Patch(BotOwner ___botOwner_0)
         {
-            return SAINPlugin.IsBotExluded(___botOwner_0) || ___botOwner_0.Memory.GoalEnemy == null;
+            return SAINPlugin.IsBotExluded(___botOwner_0);
         }
     }
 

@@ -104,38 +104,18 @@ namespace SAIN.Editor
         private static void MainWindowFunc(int TWCWindowID)
         {
             GUI.FocusWindow(TWCWindowID);
-
             CheckKeys();
-
             if (ToggleKeyPressed || EscapeKeyPressed)
             {
                 ToggleGUI();
                 return;
             }
-
             CreateDragBar();
-
             CreateTopBarOptions();
-
             EEditorTab selectedTab = EditTabsClass.TabSelectMenu(35f, 3f, 0.5f);
-
             float space = DragRect.height + EditTabsClass.TabMenuRect.height;
             Space(space);
-
-            if (!string.IsNullOrEmpty(ExceptionString))
-            {
-                BeginHorizontal();
-                BuilderClass.Alert(ExceptionString, "EXPORT ERROR",
-                    40f, 1000, ColorNames.MidRed);
-                BuilderClass.Alert(
-                    "LogOutput is located in Bepinex folder in SPT install. GitHub Link is available on the SAIN mod Page, right hand side.",
-                    "Please Report Issue to SAIN Github along with your LogOutput File",
-                    40f, 1000, ColorNames.MidRed);
-                EndHorizontal();
-            }
-
             GUITabs.CreateTabs(selectedTab);
-
             DrawTooltip();
         }
 

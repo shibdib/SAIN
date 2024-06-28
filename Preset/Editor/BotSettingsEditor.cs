@@ -2,6 +2,7 @@
 using SAIN.Attributes;
 using SAIN.Editor.Util;
 using SAIN.Helpers;
+using SAIN.Plugin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace SAIN.Editor.GUISections
 {
     public static class BotSettingsEditor
     {
-        public static void ShowAllSettingsGUI(object settings, out bool wasEdited, string name, string savePath, float height, bool unsavedChanges, out bool Saved)
+        public static void ShowAllSettingsGUI(object settings, out bool wasEdited, string name, string savePath, float height, out bool Saved)
         {
             BeginHorizontal();
 
@@ -40,7 +41,7 @@ namespace SAIN.Editor.GUISections
 
             Space(10);
 
-            if (unsavedChanges)
+            if (ConfigEditingTracker.UnsavedChanges)
             {
                 BuilderClass.Alert(
                     "Click Save to export changes, and send changes to bots if in-game",

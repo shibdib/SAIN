@@ -19,6 +19,17 @@ namespace SAIN.Preset.BotSettings
             LoadSAINSettings();
         }
 
+        public void Update()
+        {
+            foreach (var settings in SAINSettings)
+            {
+                foreach (var group in settings.Value.Settings)
+                {
+                    group.Value.Update();
+                }
+            }
+        }
+
         public void Init()
         {
             foreach (var settings in SAINSettings)

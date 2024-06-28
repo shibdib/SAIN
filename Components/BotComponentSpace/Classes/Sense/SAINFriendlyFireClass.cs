@@ -16,7 +16,6 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            Bot.BotActivation.OnBotStateChanged += toggleLoop;
             Bot.CoroutineManager.Add(friendlyFireLoop(), nameof(friendlyFireLoop));
         }
 
@@ -28,51 +27,50 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private void toggleLoop(bool value)
-        {
-            switch (value)
-            {
-                case true:
-                    break;
-
-                case false:
-                    break;
-            }
-        }
-
         private IEnumerator friendlyFireLoop()
         {
             WaitForSeconds wait = new WaitForSeconds(FRIENDLYFIRE_FREQUENCY);
-            while (Bot.BotActive)
+            while (true)
             {
-                if (!Bot.SAINLayersActive)
+                if (Bot.EnemyController.AtPeace)
                 {
                     yield return null;
                     continue;
                 }
-
-                FriendlyFireStatus = CheckFriendlyFire();
+                CheckFriendlyFire();
                 yield return wait;
             }
         }
 
         public void Dispose()
         {
-            Bot.BotActivation.OnBotStateChanged += toggleLoop;
         }
 
-        public FriendlyFireStatus CheckFriendlyFire()
+        public bool CheckFriendlyFire(Vector3? target = null)
         {
-            if (Bot.Squad.Members.Count <= 1)
+            FriendlyFireStatus = checkFriendlyFire(target);
+            return FriendlyFireStatus != FriendlyFireStatus.FriendlyBlock;
+        }
+
+        private FriendlyFireStatus checkFriendlyFire(Vector3? target = null)
+        {
+            var members = Bot.Squad?.Members;
+            if (members == null || members.Count <= 1)
             {
                 return FriendlyFireStatus.None;
             }
 
-            var aimData = BotOwner.AimingData;
+            if (target != null)
+            {
+                return checkFriendlyFire(target.Value);
+            }
+
+            var aimData = BotOwner?.AimingData;
             if (aimData == null)
             {
                 return FriendlyFireStatus.None;
             }
+
 
             FriendlyFireStatus friendlyFire = checkFriendlyFire(aimData.RealTargetPoint);
             if (friendlyFire != FriendlyFireStatus.FriendlyBlock)
@@ -101,8 +99,8 @@ namespace SAIN.SAINComponent.Classes
         private Collider sphereCast(Vector3 target)
         {
             Vector3 firePort = Bot.Transform.WeaponFirePort;
-            float distance = (target - firePort).magnitude;
-            float sphereCastRadius = BotOwner.ShootData.Shooting ? 0.2f : 0.1f;
+            float distance = (target - firePort).magnitude + 1;
+            float sphereCastRadius = 0.2f;
             Physics.SphereCast(firePort, sphereCastRadius, Bot.Transform.WeaponPointDirection, out var hit, distance, LayerMaskClass.PlayerMask);
             return hit.collider;
         }

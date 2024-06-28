@@ -33,13 +33,16 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                     Reason = EShootReason.None;
                     return false;
                 }
-
                 Bot.Steering.LookToPoint(targetPos);
                 if (Shooting)
                 {
                     return false;
                 }
                 if (Bot.Steering.AngleToPointFromLookDir(targetPos) > 5)
+                {
+                    return false;
+                }
+                if (!Bot.FriendlyFire.CheckFriendlyFire(targetPos))
                 {
                     return false;
                 }
@@ -59,7 +62,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public bool CanShoot(bool checkFF = true)
         {
-            if (checkFF && !Bot.FriendlyFireClass.ClearShot)
+            if (checkFF && !Bot.FriendlyFire.ClearShot)
             {
                 BotOwner.ShootData.EndShoot();
                 return false;
