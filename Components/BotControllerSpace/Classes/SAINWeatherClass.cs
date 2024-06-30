@@ -132,7 +132,7 @@ namespace SAIN.Components.BotController
             }
             */
 
-            fogScaleMin = 0.33f;
+            fogScaleMin = 0.4f;
 
             float fogModifier = InverseScaling(fogValue, fogScaleMin, 1f);
 
