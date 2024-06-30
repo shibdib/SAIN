@@ -143,7 +143,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (_nextLogTime < Time.time)
             {
                 _nextLogTime = Time.time + 30f;
-                Logger.LogDebug($"Vision Time Mod Result: [{result}] : EnemyDist: [{enemyDist}] Enemy Moving? [{moving}, {Enemy.Vision.EnemyVelocity}] Base Modifier: [{baseModifier}]");
+                //Logger.LogDebug($"Vision Time Mod Result: [{result}] : EnemyDist: [{enemyDist}] Enemy Moving? [{moving}, {Enemy.Vision.EnemyVelocity}] Base Modifier: [{baseModifier}]");
             }
             return result;
         }
@@ -185,7 +185,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             if (_nextLogTime < Time.time)
             {
-                Logger.LogDebug($"Vision Weather Mod Result: [{result}] : EnemyDist: [{enemyDist}] Enemy Moving? [{moving}, {Enemy.Vision.EnemyVelocity}] Base Modifier: [{baseModifier}]");
+                //Logger.LogDebug($"Vision Weather Mod Result: [{result}] : EnemyDist: [{enemyDist}] Enemy Moving? [{moving}, {Enemy.Vision.EnemyVelocity}] Base Modifier: [{baseModifier}]");
             }
             return result;
         }

@@ -37,6 +37,7 @@ namespace SAIN.SAINComponent.Classes.Search
             if (!BaseClass.PathFinder.HasPathToSearchTarget(out failReasons.PathCalcFailReason, mustHaveTarget))
             {
                 failReasons.NotSearchReason = ENotSearchReason.PathCalcFailed;
+                return false;
             }
             return true;
         }
