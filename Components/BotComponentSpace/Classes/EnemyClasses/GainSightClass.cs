@@ -199,8 +199,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return result;
         }
 
-        private static float _nextLogTime;
-
         private float baseWeatherMod(bool flareEnabled)
         {
             if (flareEnabled && Enemy.RealDistance < 100f)

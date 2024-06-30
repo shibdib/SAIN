@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using SAIN.Helpers;
+﻿using SAIN.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -7,7 +6,8 @@ namespace SAIN.Preset.GearStealthValues
 {
     public class GearStealthValuesClass
     {
-        public Dictionary<EItemType, List<ItemStealthValue>> ItemStealthValues = new Dictionary<EItemType, List<ItemStealthValue>>();
+        public Dictionary<EEquipmentType, List<ItemStealthValue>> ItemStealthValues = new Dictionary<EEquipmentType, List<ItemStealthValue>>();
+        public readonly List<ItemStealthValue> Defaults = new List<ItemStealthValue>();
 
         public GearStealthValuesClass(SAINPresetDefinition preset)
         {
@@ -36,16 +36,16 @@ namespace SAIN.Preset.GearStealthValues
 
             var list = new List<ItemStealthValue>();
             JsonUtility.Load.LoadStealthValues(list, "Presets", preset.Name, "ItemStealthValues");
-            foreach (var type in EnumValues.GetEnum<EItemType>())
+            foreach (var type in EnumValues.GetEnum<EEquipmentType>())
             {
                 var itemList = getList(type);
                 foreach (var item in list)
                 {
-                    if (item.ItemType != type)
+                    if (item.EquipmentType != type)
                         continue;
 
                     Logger.LogDebug($"Adding {item.Name}");
-                    addItem(item.Name, item.ItemType, item.ItemID, item.StealthValue, itemList);
+                    addItem(item.Name, item.EquipmentType, item.ItemID, item.StealthValue, itemList);
                 }
             }
         }
@@ -58,7 +58,7 @@ namespace SAIN.Preset.GearStealthValues
             }
 
             JsonUtility.CreateFolder("Presets", preset.Name, "ItemStealthValues");
-            JsonUtility.SaveObjectToJson(EnumValues.GetEnum<EItemType>(), "Possible Item Types For Stealth Modifiers", "Presets", preset.Name);
+            JsonUtility.SaveObjectToJson(EnumValues.GetEnum<EEquipmentType>(), "Possible Item Types For Stealth Modifiers", "Presets", preset.Name);
 
             foreach (var list in stealthValues.ItemStealthValues.Values)
             {
@@ -71,20 +71,20 @@ namespace SAIN.Preset.GearStealthValues
 
         private void initDefaults()
         {
-            var headWears = getList(EItemType.Headwear);
-            addItem("MILTEC", EItemType.Headwear, boonie_MILTEC, 1.2f, headWears);
-            addItem("CHIMERA", EItemType.Headwear, boonie_CHIMERA, 1.2f, headWears);
-            addItem("DOORKICKER", EItemType.Headwear, boonie_DOORKICKER, 1.2f, headWears);
-            addItem("JACK_PYKE", EItemType.Headwear, boonie_JACK_PYKE, 1.2f, headWears);
-            addItem("TAN_ULACH", EItemType.Headwear, helmet_TAN_ULACH, 0.9f, headWears);
-            addItem("UNTAR_BLUE", EItemType.Headwear, helmet_UNTAR_BLUE, 0.85f, headWears);
+            var headWears = getList(EEquipmentType.Headwear);
+            addItem("MILTEC", EEquipmentType.Headwear, boonie_MILTEC, 1.2f, headWears, true);
+            addItem("CHIMERA", EEquipmentType.Headwear, boonie_CHIMERA, 1.2f, headWears, true);
+            addItem("DOORKICKER", EEquipmentType.Headwear, boonie_DOORKICKER, 1.2f, headWears, true);
+            addItem("JACK_PYKE", EEquipmentType.Headwear, boonie_JACK_PYKE, 1.2f, headWears, true);
+            addItem("TAN_ULACH", EEquipmentType.Headwear, helmet_TAN_ULACH, 0.9f, headWears, true);
+            addItem("UNTAR_BLUE", EEquipmentType.Headwear, helmet_UNTAR_BLUE, 0.85f, headWears, true);
 
-            var backPacks = getList(EItemType.BackPack);
-            addItem("Pilgrim", EItemType.BackPack, backpack_pilgrim, 0.85f, backPacks);
-            addItem("Raid", EItemType.BackPack, backpack_raid, 0.875f, backPacks);
+            var backPacks = getList(EEquipmentType.BackPack);
+            addItem("Pilgrim", EEquipmentType.BackPack, backpack_pilgrim, 0.85f, backPacks, true);
+            addItem("Raid", EEquipmentType.BackPack, backpack_raid, 0.875f, backPacks, true);
         }
 
-        private List<ItemStealthValue> getList(EItemType type)
+        private List<ItemStealthValue> getList(EEquipmentType type)
         {
             if (!ItemStealthValues.TryGetValue(type, out var list))
             {
@@ -94,17 +94,21 @@ namespace SAIN.Preset.GearStealthValues
             return list;
         }
 
-        private void addItem(string name, EItemType type, string id, float stealthValue, List<ItemStealthValue> list)
+        private void addItem(string name, EEquipmentType type, string id, float stealthValue, List<ItemStealthValue> list, bool addAsDefault = false)
         {
             if (!doesItemExist(name, list))
             {
                 list.Add(new ItemStealthValue
                 {
                     Name = name,
-                    ItemType = type,
+                    EquipmentType = type,
                     ItemID = id,
                     StealthValue = stealthValue,
                 });
+            }
+            if (addAsDefault)
+            {
+                addItem(name, type, id, stealthValue, Defaults, false);
             }
         }
 
@@ -128,28 +132,5 @@ namespace SAIN.Preset.GearStealthValues
         private const string boonie_JACK_PYKE = "618aef6d0a5a59657e5f55ee";
         private const string helmet_TAN_ULACH = "5b40e2bc5acfc40016388216";
         private const string helmet_UNTAR_BLUE = "5aa7d03ae5b5b00016327db5";
-    }
-
-    public class ItemStealthValue
-    {
-        [JsonConstructor]
-        public ItemStealthValue()
-        {
-        }
-
-        public string Name;
-        public EItemType ItemType;
-        public string ItemID;
-        public float StealthValue;
-    }
-
-    public enum EItemType
-    {
-        Headwear,
-        FaceCover,
-        BackPack,
-        EyeWear,
-        ArmorVest,
-        Rig,
     }
 }

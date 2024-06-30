@@ -37,7 +37,7 @@ namespace SAIN.Editor
             FlexibleSpace();
             string toolTip = $"Apply Values set below to selected Bot Type. " +
                 $"Exports edited values to SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}/BotSettings folder";
-            if (BuilderClass.SaveChanges(toolTip, 35f))
+            if (BuilderClass.SaveChanges(ConfigEditingTracker.GetUnsavedValuesString(), 35f))
             {
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
@@ -181,7 +181,7 @@ namespace SAIN.Editor
                                         Label($"{bot.Name} : {difficulty}", Height(entryConfig.EntryHeight), Width(200));
                                         value = AttributesGUI.EditFloatBoolInt(ref value, categoryValue, fieldAtt, entryConfig, out bool newEdit, false, false);
                                         if (newEdit)
-                                            ConfigEditingTracker.Add(fieldAtt, value);
+                                            ConfigEditingTracker.Add(fieldAtt.Name, value);
                                         fieldAtt.SetValue(categoryValue, value);
                                         EndHorizontal();
                                     }

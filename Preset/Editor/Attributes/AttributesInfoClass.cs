@@ -18,6 +18,11 @@ namespace SAIN.Attributes
             GetInfo(member);
         }
 
+        public AttributesInfoClass(string name)
+        {
+            Name = name;
+        }
+
         public Type ValueType
         {
             get

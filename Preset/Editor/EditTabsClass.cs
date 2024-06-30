@@ -33,6 +33,13 @@ namespace SAIN.Editor
                     }
                 },
                 {
+                    EEditorTab.EquipmentStealth, new TabClass
+                    {
+                        Name = "Equipment Stealth",
+                        ToolTip = "Modify the stealth value that certain pieces of equipment provide.",
+                    }
+                },
+                {
                     EEditorTab.Advanced, new TabClass
                     {
                         Name = "Advanced Options",
@@ -113,6 +120,7 @@ namespace SAIN.Editor
         Home,
         BotSettings,
         Personalities,
+        EquipmentStealth,
         Advanced
     }
 }

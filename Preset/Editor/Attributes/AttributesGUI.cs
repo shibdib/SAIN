@@ -1,10 +1,12 @@
 ﻿using EFT;
 using EFT.UI;
+using Interpolation;
 using SAIN.Editor;
 using SAIN.Editor.Util;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset;
+using SAIN.Preset.GearStealthValues;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.Classes;
 using System;
@@ -12,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using static CW2.Animations.PhysicsSimulator.UnityValueDevice;
 using static SAIN.Editor.SAINLayout;
 
 namespace SAIN.Attributes
@@ -57,7 +60,7 @@ namespace SAIN.Attributes
             }
 
             if (wasEdited)
-                ConfigEditingTracker.Add(attributes, value);
+                ConfigEditingTracker.Add(attributes.Name, value);
 
             return value;
         }
@@ -187,17 +190,96 @@ namespace SAIN.Attributes
             return value;
         }
 
+        public static void EditAllStealthValues(GearStealthValuesClass stealthClass)
+        {
+            BeginVertical(5f);
+
+            var possibleTypes = EnumValues.GetEnum<EEquipmentType>();
+            int count = possibleTypes.Length;
+            var values = stealthClass.ItemStealthValues;
+            var defaults = stealthClass.Defaults;
+
+            for (int i = 0; i < count; i++)
+            {
+                var type = possibleTypes[i];
+                if (values.TryGetValue(type, out var list))
+                {
+                    if (!ExpandableList(type.ToString(), string.Empty, _defaultEntryConfig.EntryHeight + 5))
+                    {
+                        continue;
+                    }
+                    editStealthValueList(list, defaults);
+                }
+            }
+
+            EndVertical(5f);
+        }
+
+        private static void editStealthValueList(List<ItemStealthValue> list, List<ItemStealthValue> defaults)
+        {
+            if (list.Count == 0) return;
+            BeginVertical(10f);
+            for (int i = 0; i < list.Count; i++)
+            {
+                ItemStealthValue value = list[i];
+                ItemStealthValue defaultValue = getDefault(value, defaults);
+                editStealthValue(value, defaultValue);
+            }
+            EndVertical(10f);
+        }
+
+        private static ItemStealthValue getDefault(ItemStealthValue value, List<ItemStealthValue> defaults)
+        {
+            if (!defaults.Contains(value)) 
+                return null;
+
+            foreach (ItemStealthValue value2 in defaults)
+            {
+                if (value2.Name == value.Name) 
+                    return value2;
+            }
+            return null;
+        }
+
+        private static void editStealthValue(ItemStealthValue stealthValue, ItemStealthValue defaultValue)
+        {
+            BeginHorizontal(150);
+            string name = stealthValue.Name;
+            string description = $"The Stealth Value for {name}";
+            float fvalue = stealthValue.StealthValue;
+            float min = 0.1f;
+            float max = 2;
+
+            fvalue = slider(name, description, fvalue, min, max).Round(100f);
+            if (defaultValue != null && 
+                resetButton())
+            {
+                fvalue = defaultValue.StealthValue;
+            }
+
+            if (fvalue != stealthValue.StealthValue)
+            {
+                stealthValue.StealthValue = fvalue;
+                ConfigEditingTracker.Add(name, fvalue);
+            }
+            EndHorizontal(150);
+        }
+
         private static bool ExpandableList(AttributesInfoClass attributes, float height)
+        {
+            return ExpandableList(attributes.Name, attributes.Description, height);
+        }
+
+        private static bool ExpandableList(string name, string description, float height)
         {
             BeginHorizontal(100f);
 
-            string name = attributes.Name;
             if (!_listOpen.ContainsKey(name))
             {
                 _listOpen.Add(name, false);
             }
             bool isOpen = _listOpen[name];
-            isOpen = BuilderClass.ExpandableMenu(name, isOpen, attributes.Description, height);
+            isOpen = BuilderClass.ExpandableMenu(name, isOpen, description, height);
             _listOpen[name] = isOpen;
 
             EndHorizontal(100f);

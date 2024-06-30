@@ -301,6 +301,7 @@
     <Compile Include="Layers\ISAINAction.cs" />
     <Compile Include="Patches\FixPatches.cs" />
     <Compile Include="Patches\Shoot\AimDataPatches.cs" />
+    <Compile Include="Plugin\ConfigEditingTracker.cs" />
     <Compile Include="Plugin\SAINDifficulty.cs" />
     <Compile Include="Plugin\SAINDifficultyClass.cs" />
     <Compile Include="Preset\Editor\Attributes\AttributesGUI.cs" />
@@ -362,7 +363,9 @@
     <Compile Include="Plugin\SAINEnableClass.cs" />
     <Compile Include="Plugin\SAINInterop.cs" />
     <Compile Include="Preset\BotSettings\SAINSettings\Categories\SAINBossSettings.cs" />
+    <Compile Include="Preset\GearStealthValues\EEquipmentType.cs" />
     <Compile Include="Preset\GearStealthValues\GearStealthValuesClass.cs" />
+    <Compile Include="Preset\GearStealthValues\ItemStealthValue.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\AILimitSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\CloneSettingsClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\GlobalMoveSettings.cs" />

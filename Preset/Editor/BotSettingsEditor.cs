@@ -6,6 +6,7 @@ using SAIN.Plugin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using static SAIN.Editor.SAINLayout;
 
@@ -13,6 +14,7 @@ namespace SAIN.Editor.GUISections
 {
     public static class BotSettingsEditor
     {
+        private static readonly StringBuilder _stringBuilder = new StringBuilder();
         public static void ShowAllSettingsGUI(object settings, out bool wasEdited, string name, string savePath, float height, out bool Saved)
         {
             BeginHorizontal();
@@ -55,7 +57,7 @@ namespace SAIN.Editor.GUISections
 
             Saved = Button(
                 "Save and Export",
-                $"Apply Values set below. Exports edited values to {savePath} folder", 
+                ConfigEditingTracker.GetUnsavedValuesString(), 
                 EUISoundType.InsuranceInsured,
                 Height(height));
 

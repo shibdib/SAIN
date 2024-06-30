@@ -59,7 +59,10 @@ namespace SAIN.Patches.Vision
                 }
                 catch (Exception e)
                 {
-                    //Logger.LogError(e);
+                    if (SAINPlugin.DebugMode)
+                    {
+                        Logger.LogError(e);
+                    }
                 }
             }
             if (wantOff)
@@ -70,7 +73,10 @@ namespace SAIN.Patches.Vision
                 }
                 catch (Exception e)
                 {
-                    //Logger.LogError(e);
+                    if (SAINPlugin.DebugMode)
+                    {
+                        Logger.LogError(e);
+                    }
                 }
             }
 

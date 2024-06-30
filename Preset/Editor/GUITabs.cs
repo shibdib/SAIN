@@ -1,9 +1,11 @@
-﻿using SAIN.Attributes;
+﻿using EFT.UI;
+using SAIN.Attributes;
 using SAIN.Components;
 using SAIN.Editor.GUISections;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset;
+using UnityEngine;
 using static SAIN.Editor.SAINLayout;
 
 namespace SAIN.Editor
@@ -23,6 +25,9 @@ namespace SAIN.Editor
 
                 case EEditorTab.Personalities:
                     Personality(); break;
+
+                case EEditorTab.EquipmentStealth:
+                    Stealth(); break;
 
                 case EEditorTab.Advanced:
                     Advanced(); break;
@@ -60,6 +65,38 @@ namespace SAIN.Editor
         public static void Personality()
         {
             BotPersonalityEditor.PersonalityMenu();
+        }
+
+        private static void Stealth()
+        {
+            BeginVertical();
+
+            BeginHorizontal();
+            if (ConfigEditingTracker.UnsavedChanges)
+            {
+                BuilderClass.Alert(
+                    "Click Save to export changes, and send changes to bots if in-game",
+                    "YOU HAVE UNSAVED CHANGES!",
+                    35f, ColorNames.DarkRed);
+            }
+            else
+            {
+                BuilderClass.Alert(null, null, 35f, null);
+            }
+
+            if (Button(
+                "Save and Export",
+                ConfigEditingTracker.GetUnsavedValuesString(),
+                EUISoundType.InsuranceInsured,
+                Height(35f)))
+            {
+                SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
+            }
+
+            EndHorizontal();
+
+            AttributesGUI.EditAllStealthValues(SAINPlugin.LoadedPreset.GearStealthValuesClass);
+            EndVertical();
         }
 
         private static void forceDecisions(int spacing)

@@ -62,6 +62,8 @@ namespace SAIN.Preset
 
         public static void ExportAll(SAINPresetClass preset)
         {
+            ConfigEditingTracker.Clear();
+
             if (preset.Info.IsCustom == false)
             {
                 SAINPresetDefinition newPreset = preset.Info.Clone();

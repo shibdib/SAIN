@@ -134,7 +134,7 @@ namespace SAIN.Editor
         private static void CreateTopBarOptions()
         {
             var style = GetStyle(Style.toggle);
-            SaveContent.tooltip = $"Export All Changes to SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}";
+            SaveContent.tooltip = ConfigEditingTracker.GetUnsavedValuesString();
             if (GUI.Button(SaveAllRect, SaveContent, GetStyle(Style.button)))
             {
                 PlaySound(EUISoundType.InsuranceInsured);

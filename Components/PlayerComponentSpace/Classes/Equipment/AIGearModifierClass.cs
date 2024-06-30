@@ -125,9 +125,6 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
             }
         }
 
-        private float _nextGetSightModTime;
-        private float _sightMod;
-
         private const string backpack_pilgrim = "59e763f286f7742ee57895da";
         private const string backpack_raid = "5df8a4d786f77412672a1e3b";
         private const string boonie_MILTEC = "5b4327aa5acfc400175496e0";

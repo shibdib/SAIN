@@ -1,5 +1,4 @@
-﻿using SAIN.Attributes;
-using SAIN.Editor;
+﻿using SAIN.Editor;
 using SAIN.Preset;
 using System;
 using System.Collections.Generic;
@@ -7,38 +6,6 @@ using static SAIN.Helpers.JsonUtility;
 
 namespace SAIN.Plugin
 {
-    internal static class ConfigEditingTracker
-    {
-        public static void Add(AttributesInfoClass info, object value)
-        {
-            if (EditedConfigValues.ContainsKey(info))
-            {
-                EditedConfigValues[info] = value;
-                return;
-            }
-            EditedConfigValues.Add(info, value);
-        }
-
-        public static void Remove(AttributesInfoClass info)
-        {
-            EditedConfigValues.Remove(info);
-        }
-
-        public static bool WasEdited(AttributesInfoClass info)
-        {
-            return EditedConfigValues.ContainsKey(info);
-        }
-
-        public static void Clear()
-        {
-            EditedConfigValues.Clear();
-        }
-
-        public static bool UnsavedChanges => EditedConfigValues.Count > 0;
-
-        public static readonly Dictionary<AttributesInfoClass, object> EditedConfigValues = new Dictionary<AttributesInfoClass, object>();
-    }
-
     internal class PresetHandler
     {
         public const string DefaultPreset = "3. Default";

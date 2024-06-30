@@ -52,8 +52,6 @@ namespace SAIN.Components.BotController
             return timemodifier;
         }
 
-        private static float _nextTestTime;
-
         private float calcTime()
         {
             var nightSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;

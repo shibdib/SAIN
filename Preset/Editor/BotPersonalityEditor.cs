@@ -21,7 +21,7 @@ namespace SAIN.Editor.GUISections
             string toolTip = $"Apply Values set below to Personalities. " +
                 $"Exports edited values to SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}/Personalities folder";
 
-            if (BuilderClass.SaveChanges(toolTip, 35))
+            if (BuilderClass.SaveChanges(ConfigEditingTracker.GetUnsavedValuesString(), 35))
             {
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
