@@ -35,6 +35,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
+            GameWorldComponent.Instance.PlayerTracker.AlivePlayers.OnPlayerComponentRemoved += RemoveEnemy;
             EnemyLists.Init();
 
             var knownEnemies = EnemyLists.GetEnemyList(EEnemyListType.Known);
@@ -142,6 +143,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Dispose()
         {
+            GameWorldComponent.Instance.PlayerTracker.AlivePlayers.OnPlayerComponentRemoved -= RemoveEnemy;
+
             EnemyLists?.Dispose();
             _enemyUpdater?.Dispose();
             _enemyChooser?.Dispose();
@@ -154,7 +157,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             foreach (var enemy in Enemies)
             {
-                enemy.Value?.Dispose();
+                destroyEnemy(enemy.Value);
             }
             Enemies?.Clear();
         }
@@ -167,8 +170,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
             if (enemy == null || !enemy.IsValid)
             {
+                destroyEnemy(enemy);
                 Enemies.Remove(profileID);
-                removeEnemyInfo(enemy);
                 return null;
             }
             if (mustBeActive && !enemy.EnemyPerson.Active)
@@ -226,21 +229,31 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void removeEnemy(PersonClass person)
         {
-            person.ActiveClass.OnPersonDeadOrDespawned -= removeEnemy;
             RemoveEnemy(person.ProfileId);
         }
 
-        public void RemoveEnemy(string id)
+        public void RemoveEnemy(string profileId)
         {
-            if (Enemies.TryGetValue(id, out Enemy enemy))
+            if (Enemies.TryGetValue(profileId, out Enemy enemy))
             {
-                OnEnemyRemoved?.Invoke(id, enemy);
-                enemy.Dispose();
-                Enemies.Remove(id);
-                removeEnemyInfo(enemy);
-                enemy.OnEnemyHeard -= enemyHeard;
-                enemy.EnemyKnownChecker.OnEnemyKnownChanged -= enemyKnownChanged;
+                destroyEnemy(enemy);
+                Enemies.Remove(profileId);
             }
+        }
+
+        private void destroyEnemy(Enemy enemy)
+        {
+            if (enemy == null)
+                return;
+
+            OnEnemyRemoved?.Invoke(enemy.EnemyProfileId, enemy);
+            enemy.Dispose();
+            removeEnemyInfo(enemy);
+            enemy.OnEnemyHeard -= enemyHeard;
+            enemy.EnemyKnownChecker.OnEnemyKnownChanged -= enemyKnownChanged;
+
+            if (enemy.EnemyPerson != null)
+                enemy.EnemyPerson.ActiveClass.OnPersonDeadOrDespawned -= removeEnemy;
         }
 
         private void enemyHeard(Enemy enemy, SAINSoundType soundType, bool wasGunFire)
@@ -284,10 +297,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return null;
             }
 
-            PlayerComponent enemyPlayerComponent = GameWorldComponent.Instance.PlayerTracker.GetPlayerComponent(enemyPlayer.ProfileId);
+            PlayerComponent enemyPlayerComponent = getEnemyPlayerComponent(enemyPlayer);
             if (enemyPlayerComponent == null)
             {
-                Logger.LogDebug("Cannot add ai as enemy with null Player Component");
+                Logger.LogWarning("Cannot add enemy with null Player Component.");
                 return null;
             }
 
@@ -296,22 +309,58 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return sainEnemy;
             }
 
-            if (!BotOwner.EnemiesController.EnemyInfos.TryGetValue(enemyPlayer, out EnemyInfo enemyInfo))
+            EnemyInfo enemyInfo = getEnemyInfo(enemyPlayer);
+            if (enemyInfo == null)
             {
-                //string debugString = $"Player {enemyPlayer.Profile.Nickname} : Side: {enemyPlayer.Profile.Side} is not in Botowner's {Player.Profile.Nickname} : Side: {Player.Profile.Side} EnemyInfos dictionary.: ";
-                //debugString = findSourceDebug(debugString);
-                //Logger.LogDebug(debugString);
+                string debugString = $"Player [[{enemyPlayer.Profile.Nickname}] : Side: [{enemyPlayer.Profile.Side}]] is not in Botowner's [[{Player.Profile.Nickname}] : Side: [{Player.Profile.Side}]] EnemyInfos dictionary.: ";
+                Logger.LogDebug(debugString);
                 return null;
             }
 
             return createEnemy(enemyPlayerComponent, enemyInfo);
         }
 
+        private PlayerComponent getEnemyPlayerComponent(IPlayer enemyPlayer)
+        {
+            var playerTracker = GameWorldComponent.Instance.PlayerTracker;
+            PlayerComponent enemyPlayerComponent = playerTracker.GetPlayerComponent(enemyPlayer.ProfileId);
+            if (enemyPlayerComponent == null)
+            {
+                Logger.LogDebug("Cannot add enemy with null Player Component");
+                if (Enemies.TryGetValue(enemyPlayer.ProfileId, out Enemy oldEnemy))
+                {
+                    destroyEnemy(oldEnemy);
+                    Enemies.Remove(enemyPlayer.ProfileId);
+                    Logger.LogDebug($"Removed Old Enemy.");
+                }
+                enemyPlayerComponent = playerTracker.AddPlayerManual(enemyPlayer);
+                if (enemyPlayerComponent == null)
+                {
+                    Logger.LogError("Failed to recreate component!");
+                }
+            }
+            return enemyPlayerComponent;
+        }
+
+        private EnemyInfo getEnemyInfo(IPlayer enemyPlayer)
+        {
+            if (!BotOwner.EnemiesController.EnemyInfos.TryGetValue(enemyPlayer, out EnemyInfo enemyInfo) && 
+                BotOwner.BotsGroup.Enemies.TryGetValue(enemyPlayer, out BotSettingsClass value))
+            {
+                Logger.LogDebug($"Got EnemyInfo from Bot's Group Enemies.");
+                enemyInfo = BotOwner.EnemiesController.AddNew(BotOwner.BotsGroup, enemyPlayer, value);
+                if (enemyInfo != null)
+                {
+                    Logger.LogDebug($"Successfully Added new EnemyInfo.");
+                }
+            }
+            return enemyInfo;
+        }
+
         private Enemy createEnemy(PlayerComponent enemyPlayerComponent, EnemyInfo enemyInfo)
         {
             Enemy enemy = new Enemy(Bot, enemyPlayerComponent, enemyInfo);
             enemy.Init();
-
             enemyPlayerComponent.Person.ActiveClass.OnPersonDeadOrDespawned += removeEnemy;
             enemyPlayerComponent.Player.OnPlayerDead += enemyKilled;
             enemy.EnemyKnownChecker.OnEnemyKnownChanged += enemyKnownChanged;

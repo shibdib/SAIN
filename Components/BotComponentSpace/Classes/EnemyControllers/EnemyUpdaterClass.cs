@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -19,19 +20,39 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Update()
         {
-
+            if (Bot.BotActive)
+            {
+                // Very clumsy way of checking this, but I just want to make sure.
+                // Remove later once its confirmed working fine.
+                if (_timeLastUpdated + 1f > Time.time)
+                {
+                    Logger.LogError($"Enemy Updater is not running!");
+                    Bot.CoroutineManager.Remove(nameof(enemyUpdater));
+                    Bot.CoroutineManager.Add(enemyUpdater(), nameof(enemyUpdater));
+                }
+                if (_timeLastVisionChecked + 1f > Time.time)
+                {
+                    Logger.LogError($"Enemy Vision Checker is not running!");
+                    Bot.CoroutineManager.Remove(nameof(enemyVisionCheck));
+                    Bot.CoroutineManager.Add(enemyVisionCheck(), nameof(enemyVisionCheck));
+                }
+            }
         }
-
 
         public void Dispose()
         {
-
         }
+
+        private float _timeLastUpdated;
+        private float _timeLastVisionChecked;
 
         private IEnumerator enemyUpdater()
         {
             while (true)
             {
+                // Remove Later once its confirmed working.
+                _timeLastUpdated = Time.time;
+
                 foreach (var kvp in Enemies)
                 {
                     string profileId = kvp.Key;
@@ -74,6 +95,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             while (true)
             {
+                // Remove Later once its confirmed working.
+                _timeLastVisionChecked = Time.time;
+
                 foreach (var enemy in Enemies.Values)
                 {
                     enemy?.Vision.EnemyVisionChecker.CheckVision(out _);

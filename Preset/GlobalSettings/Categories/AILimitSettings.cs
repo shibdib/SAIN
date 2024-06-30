@@ -19,8 +19,8 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(150f, 600f, 1f)]
         public Dictionary<AILimitSetting, float> AILimitRanges = new Dictionary<AILimitSetting, float>
         {
-            { AILimitSetting.Far, 200f },
-            { AILimitSetting.VeryFar, 300f },
+            { AILimitSetting.Far, 150f },
+            { AILimitSetting.VeryFar, 250f },
             { AILimitSetting.Narnia, 400f },
         };
 

@@ -2,12 +2,17 @@
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.GlobalSettings;
+using System;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
 {
     public class SAINAILimit : SAINBase, ISAINClass
     {
+        public event Action<AILimitSetting> OnAILimitChanged;
+        public AILimitSetting CurrentAILimit { get; private set; }
+        public float ClosestPlayerDistanceSqr { get; private set; }
+
         public SAINAILimit(BotComponent sain) : base(sain)
         {
         }
@@ -21,25 +26,28 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose() { }
 
-        public AILimitSetting CurrentAILimit { get; private set; }
-
         private void checkAILimit()
         {
+            AILimitSetting lastLimit = CurrentAILimit;
             if (Bot.EnemyController.ActiveHumanEnemy)
             {
                 CurrentAILimit = AILimitSetting.None;
-                return;
+                ClosestPlayerDistanceSqr = -1f;
             }
-
-            if (_checkDistanceTime < Time.time)
+            else if (_checkDistanceTime < Time.time)
             {
-                _checkDistanceTime = Time.time + _frequency * Random.Range(0.9f, 1.1f);
+                _checkDistanceTime = Time.time + _frequency * UnityEngine.Random.Range(0.9f, 1.1f);
                 var gameWorld = GameWorldComponent.Instance;
                 if (gameWorld != null && 
                     gameWorld.PlayerTracker.FindClosestHumanPlayer(out float closestPlayerSqrMag, Bot.Position) != null)
                 {
                     CurrentAILimit = checkDistances(closestPlayerSqrMag);
+                    ClosestPlayerDistanceSqr = closestPlayerSqrMag;
                 }
+            }
+            if (lastLimit != CurrentAILimit)
+            {
+                OnAILimitChanged?.Invoke(CurrentAILimit);
             }
         }
 

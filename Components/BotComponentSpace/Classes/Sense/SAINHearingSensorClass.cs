@@ -195,7 +195,8 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            if (!Bot.EnemyController.Enemies.TryGetValue(player.ProfileId, out var enemy))
+            var enemy = Bot.EnemyController.CheckAddEnemy(player);
+            if (enemy == null)
             {
                 return;
             }
@@ -481,11 +482,10 @@ namespace SAIN.SAINComponent.Classes
                 maxRange = getMaxRange(enemyBot.CurrentAILimit);
             }
 
-            if (sound.SqrDistance > maxRange)
+            if (sound.SqrDistance <= maxRange)
             {
                 return false;
             }
-
             return true;
         }
 

@@ -53,11 +53,25 @@ namespace SAIN.Patches.Vision
 
             if (wantOn)
             {
-                __instance.TurnOn(true);
+                try
+                {
+                    __instance.TurnOn(true);
+                }
+                catch (Exception e)
+                {
+                    //Logger.LogError(e);
+                }
             }
             if (wantOff)
             {
-                __instance.TurnOff(true, true);
+                try
+                {
+                    __instance.TurnOff(true, true);
+                }
+                catch (Exception e)
+                {
+                    //Logger.LogError(e);
+                }
             }
 
             if (__instance.IsEnable)

@@ -191,6 +191,7 @@ namespace SAIN.Components.PlayerComponentSpace
 
         public void Dispose()
         {
+            Logger.LogDebug($"Destroying Playing Component for [Name: {Person?.Name} : Nickname: {Person?.Nickname}, ProfileID: {Person?.ProfileId}, at time: {Time.time}]");
             OnComponentDestroyed?.Invoke(ProfileId);
             stopCoroutines();
             Person.ActiveClass.OnBotActiveChanged -= handleCoroutines;
