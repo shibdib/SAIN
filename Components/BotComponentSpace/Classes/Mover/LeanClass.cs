@@ -1,4 +1,5 @@
 using EFT;
+using SAIN.Preset.GlobalSettings;
 using System.Linq;
 using UnityEngine;
 
@@ -39,9 +40,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                 ResetLean();
                 return;
             }
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI 
+            if (GlobalSettingsClass.Instance.AILimit.LimitAIvsAIGlobal 
                 && enemy.IsAI 
-                && Bot.CurrentAILimit != AILimitSetting.Close)
+                && Bot.CurrentAILimit != AILimitSetting.None)
             {
                 ResetLean();
                 return;

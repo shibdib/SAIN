@@ -2,6 +2,7 @@
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
+using SAIN.SAINComponent.Classes.Search;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using UnityEngine;
 
@@ -632,8 +633,15 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallSearch()
         {
-            return Bot.Search.SearchDecider.ShallStartSearch(true);
+            bool shallSearch = Bot.Search.SearchDecider.ShallStartSearch(true, out SearchReasonsStruct reasons);
+            DebugSearchReasons = reasons;
+            DebugShallSearch = shallSearch;
+            return shallSearch;
         }
+
+        public bool? DebugShallSearch { get; set; }
+
+        public SearchReasonsStruct DebugSearchReasons { get; private set; }
 
         public bool shallHoldInCover()
         {

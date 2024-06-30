@@ -143,11 +143,33 @@ namespace SAIN.Layers
                 }
                 stringBuilder.AppendLine();
 
-                if (sain.Decision.CurrentSoloDecision == SoloDecision.Search)
+                var enemyDecisions = sain.Decision.EnemyDecisions;
+                var shallSearch = enemyDecisions.DebugShallSearch;
+                if (shallSearch != null)
                 {
-                    stringBuilder.AppendLabeledValue("Searching", $"Current State: {sain.Search.CurrentState} Next: {sain.Search.NextState} Last: {sain.Search.LastState}", Color.white, Color.yellow, true);
-                }
+                    if (shallSearch == true)
+                        stringBuilder.AppendLabeledValue("Searching", 
+                            $"Current State: {sain.Search.CurrentState} " +
+                            $"Next: {sain.Search.NextState} " +
+                            $"Last: {sain.Search.LastState}", 
+                            Color.white, Color.yellow, true);
 
+                    var reasons = enemyDecisions.DebugSearchReasons;
+                    var wantReasons = reasons.WantSearchReasons;
+                    stringBuilder.AppendLabeledValue("Want Search Reasons", 
+                        $"[WantToSearchReason : {wantReasons.WantToSearchReason}] " +
+                        $"[NotWantToSearchReason: {wantReasons.NotWantToSearchReason}] " +
+                        $"[CantStartReason: {wantReasons.CantStartReason}]", 
+                        Color.white, Color.yellow, true);
+
+                    stringBuilder.AppendLabeledValue("Not Search Reason",
+                        $"{reasons.NotSearchReason}",
+                        Color.white, Color.yellow, true);
+
+                    stringBuilder.AppendLabeledValue("CalcPath Fail Reason",
+                        $"{reasons.PathCalcFailReason}",
+                        Color.white, Color.yellow, true);
+                }
             }
             catch (Exception ex)
             {

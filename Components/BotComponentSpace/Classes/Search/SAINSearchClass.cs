@@ -112,7 +112,7 @@ namespace SAIN.SAINComponent.Classes.Search
             checkShallWaitandReload();
 
             ESearchMove previousState = CurrentState;
-            PeekPosition peekPosition;
+            PeekPosition? peekPosition;
             switch (CurrentState)
             {
                 case ESearchMove.None:
@@ -156,11 +156,12 @@ namespace SAIN.SAINComponent.Classes.Search
 
                 case ESearchMove.MoveToStartPeek:
 
-                    peekPosition = PeekPoints.Value.PeekStart;
-                    if (!botIsAtPoint(peekPosition.Point))
+                    peekPosition = PeekPoints?.PeekStart;
+                    if (peekPosition != null && 
+                        !botIsAtPoint(peekPosition.Value.Point))
                     {
                         setSpeedPose(speed, pose);
-                        if (moveToPoint(peekPosition.Point, shallSprint))
+                        if (moveToPoint(peekPosition.Value.Point, shallSprint))
                         {
                             break;
                         }
@@ -170,11 +171,12 @@ namespace SAIN.SAINComponent.Classes.Search
 
                 case ESearchMove.MoveToEndPeek:
 
-                    peekPosition = PeekPoints.Value.PeekEnd;
-                    if (!botIsAtPoint(peekPosition.Point))
+                    peekPosition = PeekPoints?.PeekEnd;
+                    if (peekPosition != null &&
+                        !botIsAtPoint(peekPosition.Value.Point))
                     {
-                        setSpeedPose(0.5f, pose);
-                        if (moveToPoint(peekPosition.Point, shallSprint))
+                        setSpeedPose(speed, pose);
+                        if (moveToPoint(peekPosition.Value.Point, shallSprint))
                         {
                             break;
                         }
@@ -185,11 +187,12 @@ namespace SAIN.SAINComponent.Classes.Search
 
                 case ESearchMove.MoveToDangerPoint:
 
-                    Vector3 danger = PeekPoints.Value.DangerPoint;
-                    if (!botIsAtPoint(danger))
+                    Vector3? danger = PeekPoints?.DangerPoint;
+                    if (danger != null && 
+                        !botIsAtPoint(danger.Value))
                     {
                         setSpeedPose(speed, pose);
-                        if (moveToPoint(danger, shallSprint))
+                        if (moveToPoint(danger.Value, shallSprint))
                         {
                             break;
                         }
@@ -317,10 +320,15 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public void Reset()
         {
+            ResetStates();
+            PathFinder.Reset();
+        }
+
+        public void ResetStates()
+        {
             CurrentState = ESearchMove.None;
             LastState = ESearchMove.None;
             NextState = ESearchMove.None;
-            PathFinder.Reset();
         }
 
         public bool botIsAtPoint(Vector3 point, float reachDist = 0.2f)

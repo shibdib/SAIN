@@ -1,6 +1,8 @@
 ﻿using EFT;
 using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using SAIN.Helpers;
+using SAIN.Plugin;
+using SAIN.Preset.GlobalSettings;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,8 +16,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public SAINEnemyVision(Enemy enemy) : base(enemy)
         {
-            GainSight = new GainSightClass(enemy);
-            VisionDist = new EnemyVisionDistanceClass(enemy);
+            _gainSight = new GainSightClass(enemy);
+            _visionDistance = new EnemyVisionDistanceClass(enemy);
             EnemyVisionChecker = new EnemyVisionChecker(enemy);
         }
 
@@ -45,7 +47,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             UpdateVisibleState(false);
             UpdateCanShootState(false);
         }
-
 
         public float EnemyVelocity => EnemyTransform.PlayerVelocity;
 
@@ -179,11 +180,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public float TimeLastSeen { get; private set; }
         public float LastChangeVisionTime { get; private set; }
         public float LastGainSightResult { get; set; }
-        public float GainSightCoef => GainSight.GainSightCoef;
-        public float VisionDistance => VisionDist.VisionDistance;
+        public float GainSightCoef => _gainSight.Value;
+        public float VisionDistance => _visionDistance.Value;
 
-        private readonly GainSightClass GainSight;
-        private readonly EnemyVisionDistanceClass VisionDist;
+        private readonly GainSightClass _gainSight;
+        private readonly EnemyVisionDistanceClass _visionDistance;
         public EnemyVisionChecker EnemyVisionChecker { get; private set; }
     }
 
@@ -227,22 +228,99 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private bool checkLOS()
         {
-            if (EnemyParts.CheckBodyLineOfSight(_transform.EyePosition))
+            float maxRange = AIVisionRangeLimit();
+            if (EnemyParts.CheckBodyLineOfSight(_transform.EyePosition, maxRange))
             {
                 return true;
             }
-            if (EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition))
+            if (EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition, maxRange))
             {
                 return true;
             }
             // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
             if (Enemy.IsCurrentEnemy && !Enemy.IsAI &&
-                EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition))
+                EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition, maxRange))
             {
                 return true;
             }
             return false;
         }
+
+        public float AIVisionRangeLimit()
+        {
+            if (!Enemy.IsAI)
+            {
+                return float.MaxValue;
+            }
+            var aiLimit = GlobalSettingsClass.Instance.AILimit;
+            if (!aiLimit.LimitAIvsAIGlobal)
+            {
+                return float.MaxValue;
+            }
+            if (!aiLimit.LimitAIvsAIVision)
+            {
+                return float.MaxValue;
+            }
+            var enemyBot = Enemy.EnemyPerson.BotComponent;
+            if (enemyBot == null)
+            {
+                // if an enemy bot is not a sain bot, but has this bot as an enemy, dont limit at all.
+                if (Enemy.EnemyPerson.BotOwner?.Memory.GoalEnemy?.ProfileId == Bot.ProfileId)
+                {
+                    return float.MaxValue;
+                }
+                return getMaxVisionRange(Bot.CurrentAILimit);
+            }
+            else
+            {
+                if (enemyBot.Enemy?.EnemyProfileId == Bot.ProfileId)
+                {
+                    return float.MaxValue;
+                }
+                return getMaxVisionRange(enemyBot.CurrentAILimit);
+            }
+        }
+
+        private static float getMaxVisionRange(AILimitSetting aiLimit)
+        {
+            switch (aiLimit)
+            {
+                default:
+                    return float.MaxValue;
+
+                case AILimitSetting.Far:
+                    return _farDistance;
+
+                case AILimitSetting.VeryFar:
+                    return _veryFarDistance;
+
+                case AILimitSetting.Narnia:
+                    return _narniaDistance;
+            }
+        }
+
+        static EnemyVisionChecker()
+        {
+            PresetHandler.OnPresetUpdated += updateSettings;
+            updateSettings();
+        }
+
+        private static void updateSettings()
+        {
+            var aiLimit = GlobalSettingsClass.Instance.AILimit;
+            _farDistance = aiLimit.MaxVisionRanges[AILimitSetting.Far].Sqr();
+            _veryFarDistance = aiLimit.MaxVisionRanges[AILimitSetting.VeryFar].Sqr();
+            _narniaDistance = aiLimit.MaxVisionRanges[AILimitSetting.Narnia].Sqr();
+
+            if (SAINPlugin.DebugMode)
+            {
+                Logger.LogDebug($"Updated AI Vision Limit Settings: [{_farDistance.Sqrt()}, {_veryFarDistance.Sqrt()}, {_narniaDistance.Sqrt()}]");
+            }
+        }
+
+        private static float _farDistance;
+        private static float _veryFarDistance;
+        private static float _narniaDistance;
 
     }
 
@@ -278,7 +356,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float _lastSuccessTime;
 
-        public bool CheckBodyLineOfSight(Vector3 origin)
+        public bool CheckBodyLineOfSight(Vector3 origin, float maxRange)
         {
             if (LineOfSight)
             {
@@ -286,7 +364,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             SAINEnemyPartData checkingPart = Parts[EBodyPart.Chest];
-            if (checkingPart.CheckLineOfSight(origin))
+            if (checkingPart.CheckLineOfSight(origin, maxRange))
             {
                 _lastSuccessTime = Time.time;
                 return true;
@@ -295,7 +373,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return false;
         }
 
-        public bool CheckRandomPartLineOfSight(Vector3 origin)
+        public bool CheckRandomPartLineOfSight(Vector3 origin, float maxRange)
         {
             if (LineOfSight)
             {
@@ -304,7 +382,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             if (_lastCheckSuccessPart != null)
             {
-                if (_lastCheckSuccessPart.CheckLineOfSight(origin))
+                if (_lastCheckSuccessPart.CheckLineOfSight(origin, maxRange))
                 {
                     _lastSuccessTime = Time.time;
                     return true;
@@ -313,7 +391,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             SAINEnemyPartData checkingPart = getNextPart();
-            if (checkingPart.CheckLineOfSight(origin))
+            if (checkingPart.CheckLineOfSight(origin, maxRange))
             {
                 _lastCheckSuccessPart = checkingPart;
                 _lastSuccessTime = Time.time;
@@ -473,7 +551,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private int _index;
         private readonly int _indexMax;
 
-        public bool CheckLineOfSight(Vector3 origin)
+        public bool CheckLineOfSight(Vector3 origin, float maxRange)
         {
             if (LineOfSight)
             {
@@ -490,7 +568,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Vector3 castPoint = _lastSuccessCastPoint ?? getCastPoint(origin, collider);
 
             Vector3 direction = castPoint - origin;
-            bool lineOfSight = !Physics.Raycast(origin, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask);
+
+            float maxRayDistance = Mathf.Clamp(direction.magnitude, 0f, maxRange);
+            bool lineOfSight = !Physics.Raycast(origin, direction, maxRayDistance, LayerMaskClass.HighPolyWithTerrainMask);
 
             if (lineOfSight)
             {

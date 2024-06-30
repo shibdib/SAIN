@@ -10,10 +10,6 @@ namespace SAIN.Preset.GlobalSettings
         public float AimTurnSpeed = 300f;
 
         [Advanced]
-        [MinMax(150f, 500f, 1f)]
-        public float BaseTurnSpeed = 240f;
-
-        [Advanced]
         public bool EditSprintSpeed = true;
 
         [Advanced]

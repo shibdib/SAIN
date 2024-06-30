@@ -19,14 +19,14 @@ namespace SAIN.Components.BotController
             if (_getModifierTime < Time.time)
             {
                 _getModifierTime = Time.time + UpdateWeatherVisibilitySec;
-                VisibilityNum = CalcWeatherVisibility();
-                InverseWeatherModifier = 2f - VisibilityNum;
+                VisionDistanceModifier = CalcWeatherVisibility();
+                GainSightModifier = 2f - VisionDistanceModifier;
             }
         }
 
-        public float VisibilityNum { get; private set; }
+        public float VisionDistanceModifier { get; private set; }
 
-        public float InverseWeatherModifier { get; private set; }
+        public float GainSightModifier { get; private set; }
 
         private float _getModifierTime = 0f;
 
@@ -75,7 +75,7 @@ namespace SAIN.Components.BotController
             float weathermodifier = 1f * fogmod * rainmod * cloudsmod;
             weathermodifier = Mathf.Clamp(weathermodifier, 0.2f, 1f);
 
-            if (WeatherEventController.Instance?.EventActive == true)
+            if (GameWorldComponent.Instance.WinterActive)
             {
                 weathermodifier = Mathf.Clamp(weathermodifier, 0.35f, 1f);
                 Logger.LogWarning("Snow Active");

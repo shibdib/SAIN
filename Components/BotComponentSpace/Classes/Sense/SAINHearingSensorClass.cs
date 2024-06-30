@@ -3,6 +3,7 @@ using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections;
 using System.Collections.Generic;
@@ -448,24 +449,39 @@ namespace SAIN.SAINComponent.Classes
 
         private bool shallLimitAI(BotSound sound)
         {
-            if (!SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI)
-                return false;
-
             if (!sound.PlayerComponent.IsAI)
                 return false;
 
-            var currentLimit = Bot.CurrentAILimit;
-            if (currentLimit == AILimitSetting.Close)
+            var aiLimit = GlobalSettingsClass.Instance.AILimit;
+            if (!aiLimit.LimitAIvsAIGlobal)
+                return false;
+
+            if (!aiLimit.LimitAIvsAIHearing)
                 return false;
 
             if (Bot.Enemy?.EnemyProfileId == sound.PlayerComponent.ProfileId)
                 return false;
 
-            if (sound.PlayerComponent.IsSAINBot && sound.PlayerComponent.BotComponent?.CurrentAILimit == AILimitSetting.Close)
-                return false;
+            var enemyBot = sound.PlayerComponent.BotComponent;
+            float maxRange;
+            if (enemyBot == null)
+            {
+                if (sound.PlayerComponent.BotOwner?.Memory.GoalEnemy.ProfileId == Bot.ProfileId)
+                {
+                    return false;
+                }
+                maxRange = getMaxRange(Bot.CurrentAILimit);
+            }
+            else
+            {
+                if (enemyBot.Enemy?.EnemyProfileId == Bot.ProfileId)
+                {
+                    return false;
+                }
+                maxRange = getMaxRange(enemyBot.CurrentAILimit);
+            }
 
-            float maxRange = getMaxRange(currentLimit);
-            if (sound.SqrDistance > maxRange * maxRange)
+            if (sound.SqrDistance > maxRange)
             {
                 return false;
             }
@@ -478,11 +494,13 @@ namespace SAIN.SAINComponent.Classes
             switch (aiLimit)
             {
                 case AILimitSetting.Far:
+                    return _farDistance;
+
                 case AILimitSetting.VeryFar:
-                    return SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAIMaxAudioRange;
+                    return _veryFarDistance;
 
                 case AILimitSetting.Narnia:
-                    return SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAIMaxAudioRangeVeryFar;
+                    return _narniaDistance;
 
                 default:
                     return float.MaxValue;
@@ -1034,6 +1052,28 @@ namespace SAIN.SAINComponent.Classes
 
             return occlusionmodifier;
         }
+
+        static SAINHearingSensorClass()
+        {
+            PresetHandler.OnPresetUpdated += updateSettings;
+            updateSettings();
+        }
+
+        private static void updateSettings()
+        {
+            var aiLimit = GlobalSettingsClass.Instance.AILimit;
+            _farDistance = aiLimit.MaxHearingRanges[AILimitSetting.Far].Sqr();
+            _veryFarDistance = aiLimit.MaxHearingRanges[AILimitSetting.VeryFar].Sqr();
+            _narniaDistance = aiLimit.MaxHearingRanges[AILimitSetting.Narnia].Sqr();
+            if (SAINPlugin.DebugMode)
+            {
+                Logger.LogDebug($"Updated AI Hearing Limit Settings: [{_farDistance.Sqrt()}, {_veryFarDistance.Sqrt()}, {_narniaDistance.Sqrt()}]");
+            }
+        }
+
+        private static float _farDistance;
+        private static float _veryFarDistance;
+        private static float _narniaDistance;
 
         private float occlusionmodifier = 1f;
         private float raycasttimer = 0f;

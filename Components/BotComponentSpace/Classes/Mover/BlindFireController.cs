@@ -1,5 +1,6 @@
 using EFT;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using UnityEngine;
@@ -40,9 +41,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return false;
             }
 
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
+            if (GlobalSettingsClass.Instance.AILimit.LimitAIvsAIGlobal
                 && enemy.IsAI
-                && Bot.CurrentAILimit != AILimitSetting.Close)
+                && Bot.CurrentAILimit != AILimitSetting.None)
             {
                 return false;
             }

@@ -11,7 +11,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
         }
 
-        public float GainSightCoef
+        public float Value
         {
             get
             {
@@ -85,22 +85,143 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return Enemy.EnemyPlayerComponent.AIData.AIGearModifier.StealthModifier(Enemy.RealDistance);
         }
 
-        private float calcWeatherMod()
+        private float calcTimeModifier(bool flareEnabled)
         {
-            // Only apply vision speed debuff from weather if their enemy has not shot an unsuppressed weapon
-            if (EnemyPlayer.AIData?.GetFlare == true && 
-                Enemy.EnemyPlayerComponent?.Equipment.CurrentWeapon?.HasSuppressor == false)
+            float baseModifier = baseTimeModifier(flareEnabled);
+            if (baseModifier <= 1f)
             {
                 return 1f;
             }
-            return SAINBotController.Instance.WeatherVision.InverseWeatherModifier;
+            var flashlight = Enemy.EnemyPlayerComponent.Flashlight;
+            if (flashlight.WhiteLight)
+            {
+                return 0.75f;
+            }
+            if (flashlight.Laser)
+            {
+                return 1f;
+            }
+            bool usingNVGS = BotOwner.NightVision.UsingNow;
+            if (usingNVGS && (flashlight.IRLaser || flashlight.IRLight))
+            {
+                return 0.8f;
+            }
+
+            float max = 2f;
+            float min = 1f;
+            float maxDist = 150f;
+            float minDist = 10f;
+            float enemyDist = Enemy.RealDistance;
+
+            if (enemyDist >= maxDist)
+            {
+                return baseModifier * max;
+            }
+            if (enemyDist < minDist)
+            {
+                return baseModifier;
+            }
+
+            float num = maxDist - minDist;
+            float num2 = enemyDist - minDist;
+            float ratio = num2 / num;
+            float scaled = Mathf.Lerp(min, max, ratio);
+            float result = baseModifier * scaled;
+
+            bool moving = Enemy.Vision.EnemyVelocity > 0.1f;
+            if (!moving)
+            {
+                result *= 2f;
+            }
+
+            if (usingNVGS)
+            {
+                result /= 3f;
+                result = Mathf.Clamp(result, 1f, float.MaxValue);
+            }
+
+            if (_nextLogTime < Time.time)
+            {
+                _nextLogTime = Time.time + 30f;
+                Logger.LogDebug($"Vision Time Mod Result: [{result}] : EnemyDist: [{enemyDist}] Enemy Moving? [{moving}, {Enemy.Vision.EnemyVelocity}] Base Modifier: [{baseModifier}]");
+            }
+            return result;
+        }
+
+        private float calcWeatherMod(bool flareEnabled)
+        {
+            float baseModifier = baseWeatherMod(flareEnabled);
+            if (baseModifier <= 1f)
+            {
+                return 1f;
+            }
+
+            float max = 2f;
+            float min = 1f;
+            float maxDist = 125f;
+            float minDist = 10f;
+            float enemyDist = Enemy.RealDistance;
+
+            if (enemyDist >= maxDist)
+            {
+                return baseModifier * max;
+            }
+            if (enemyDist < minDist)
+            {
+                return baseModifier;
+            }
+
+            float num = maxDist - minDist;
+            float num2 = enemyDist - minDist;
+            float ratio = num2 / num;
+            float scaled = Mathf.Lerp(min, max, ratio);
+            float result = baseModifier * scaled;
+
+            bool moving = Enemy.Vision.EnemyVelocity > 0.1f;
+            if (!moving)
+            {
+                result *= 2f;
+            }
+
+            if (_nextLogTime < Time.time)
+            {
+                Logger.LogDebug($"Vision Weather Mod Result: [{result}] : EnemyDist: [{enemyDist}] Enemy Moving? [{moving}, {Enemy.Vision.EnemyVelocity}] Base Modifier: [{baseModifier}]");
+            }
+            return result;
+        }
+
+        private static float _nextLogTime;
+
+        private float baseWeatherMod(bool flareEnabled)
+        {
+            float weatherMod = SAINBotController.Instance.WeatherVision.GainSightModifier;
+            if (flareEnabled)
+            {
+                return Mathf.Clamp(weatherMod / 2f, 1f, 1.5f);
+            }
+            return weatherMod;
+        }
+
+        private float baseTimeModifier(bool flareEnabled)
+        {
+            float timeMod = SAINBotController.Instance.TimeVision.TimeGainSightModifier;
+            if (flareEnabled)
+            {
+                return Mathf.Clamp(timeMod / 2f, 1f, 1.5f);
+            }
+            return timeMod;
         }
 
         private float GetGainSightModifier()
         {
             float partMod = calcPartsMod();
             float gearMod = calcGearMod();
-            float weatherMod = calcWeatherMod();
+
+            bool flareEnabled = EnemyPlayer.AIData?.GetFlare == true &&
+                Enemy.EnemyPlayerComponent?.Equipment.CurrentWeapon?.HasSuppressor == false;
+            float weatherMod = calcWeatherMod(flareEnabled);
+            float timeMod = calcTimeModifier(flareEnabled);
+
             float moveMod = calcMoveModifier();
             float elevMod = calcElevationModifier();
             float thirdPartyMod = calcThirdPartyMod();
@@ -110,7 +231,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (!Enemy.IsAI)
                 notLookMod = SAINNotLooking.GetVisionSpeedDecrease(Enemy.EnemyInfo);
 
-            float result = 1f * partMod * gearMod * weatherMod * moveMod * elevMod * thirdPartyMod * angleMod * notLookMod;
+            float result = 1f * partMod * gearMod * weatherMod * timeMod * moveMod * elevMod * thirdPartyMod * angleMod * notLookMod;
 
             //if (EnemyPlayer.IsYourPlayer && result != 1f)
             //{

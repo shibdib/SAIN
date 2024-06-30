@@ -36,6 +36,7 @@ namespace SAIN.Preset.GlobalSettings
         [Description("If a option here is set to ON, they will use vanilla logic, ALL Features will be disabled for these types, including personality, recoil, difficulty, and behavior.")]
         public VanillaBotSettings VanillaBots = new VanillaBotSettings();
         public PerformanceSettings Performance = new PerformanceSettings();
+        public AILimitSettings AILimit = new AILimitSettings();
         public AimSettings Aiming = new AimSettings();
         public CoverSettings Cover = new CoverSettings();
         public ExtractSettings Extract = new ExtractSettings();
@@ -85,6 +86,7 @@ namespace SAIN.Preset.GlobalSettings
             SettingsList.Add(Debug);
             SettingsList.Add(PowerCalc);
             SettingsList.Add(Steering);
+            SettingsList.Add(AILimit);
         }
     }
 }

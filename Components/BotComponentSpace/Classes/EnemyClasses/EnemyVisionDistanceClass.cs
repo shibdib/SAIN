@@ -1,5 +1,9 @@
 ﻿using EFT;
+using SAIN.Helpers;
+using SAIN.Plugin;
+using SAIN.Preset.GlobalSettings;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -9,7 +13,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
         }
 
-        public float VisionDistance
+        public float Value
         {
             get
             {
@@ -35,15 +39,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             float positionalFlareMod = posFlare ? 1.5f : 1f;
             float underFire = shotAtMe ? 1.5f : 1f;
-
-            // Reduce vision distance for ai vs ai vision checks
-            bool shallLimit = Enemy.IsAI
-                && Enemy.Bot.CurrentAILimit != AILimitSetting.Close
-                && SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI;
-
-            float aiReduction = shallLimit ? 0.75f : 1f;
-
-            float finalModifier = (moveMod * angleMod * flareMod * positionalFlareMod * underFire * aiReduction) / gearMod;
+            float finalModifier = (moveMod * angleMod * flareMod * positionalFlareMod * underFire) / gearMod;
 
             float defaultVisDist = BotOwner.LookSensor.VisibleDist;
             float result = (defaultVisDist * finalModifier) - defaultVisDist;

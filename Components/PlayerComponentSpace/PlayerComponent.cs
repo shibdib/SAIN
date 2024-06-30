@@ -75,21 +75,6 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private Coroutine _gearCoroutine;
 
-        public Vector3? WeaponShotHitPoint
-        {
-            get
-            {
-                if (Time.frameCount != _cachedFrame)
-                {
-                    _cachedFrame = Time.frameCount;
-                    Vector3 firePort = Transform.WeaponFirePort;
-                    Vector3 weaponPointDir = Transform.WeaponPointDirection;
-
-                }
-                return _weaponShotHitPoint;
-            }
-        }
-
         public float DistanceToClosestHuman
         {
             get
@@ -97,9 +82,6 @@ namespace SAIN.Components.PlayerComponentSpace
                 return 0f;
             }
         }
-
-        private int _cachedFrame;
-        private Vector3? _weaponShotHitPoint;
 
         private void navRayCastAllDir()
         {

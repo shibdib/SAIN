@@ -7,6 +7,19 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.Search
 {
+    public enum EPathCalcFailReason
+    {
+        None,
+        NullDestination,
+        NoTarget,
+        NullPlace,
+        TooClose,
+        SampleStart,
+        SampleEnd,
+        CalcPath,
+        LastCorner,
+    }
+
     public class SearchPathFinder : SAINSubBase<SAINSearchClass>
     {
         public Vector3? FinalDestination { get; private set; }
@@ -15,42 +28,40 @@ namespace SAIN.SAINComponent.Classes.Search
         public bool SearchedTargetPosition { get; private set; }
         public bool FinishedPeeking { get; set; }
 
+        private EPathCalcFailReason _failReason;
+
         public SearchPathFinder(SAINSearchClass searchClass) : base(searchClass)
         {
             _searchPath = new NavMeshPath();
         }
 
-        public bool HasPathToSearchTarget(bool needTarget = true)
+        public bool HasPathToSearchTarget(out EPathCalcFailReason failReason, bool needTarget = true)
         {
             if (_nextCheckSearchTime < Time.time)
             {
                 _nextCheckSearchTime = Time.time + 1f;
-                _canStartSearch = false;
-                if (hasPath(needTarget))
-                {
-                    FinishedPeeking = false;
-                    _canStartSearch = true;
-                }
+                _canStartSearch = hasPath(needTarget, out failReason);
+                _failReason = failReason;
             }
+            failReason = _failReason;
             return _canStartSearch;
         }
 
-        private bool hasPath(bool needTarget)
+        private bool hasPath(bool needTarget, out EPathCalcFailReason failReason)
         {
             EnemyPlace destination = FindTargetPlace(out bool hasTarget);
             if (destination == null)
             {
-                FinalDestination = null;
+                failReason = EPathCalcFailReason.NullDestination;
                 return false;
             }
             if (needTarget && !hasTarget)
             {
-                FinalDestination = null;
+                failReason = EPathCalcFailReason.NoTarget;
                 return false;
             }
-            if (CalculatePath(destination))
+            if (!CalculatePath(destination, out failReason))
             {
-                FinalDestination = null;
                 return false;
             }
             return true;
@@ -84,15 +95,18 @@ namespace SAIN.SAINComponent.Classes.Search
                     FinalDestination = null;
                     return;
                 }
-                if (FinalDestination != null && 
+                if (FinalDestination != null &&
                     (newPlace.Position - FinalDestination.Value).sqrMagnitude < 2f * 2f)
                 {
                     return;
                 }
-                CalculatePath(newPlace);
+                if (!CalculatePath(newPlace, out EPathCalcFailReason failReason))
+                {
+                    Logger.LogDebug($"Failed to calc path during search for reason: [{failReason}]");
+                    FinalDestination = null;
+                }
             }
         }
-
 
         private void checkFinishedSearch()
         {
@@ -178,18 +192,19 @@ namespace SAIN.SAINComponent.Classes.Search
         public void Reset()
         {
             _searchPath.ClearCorners();
-            FinalDestination = null;
             PeekPoints?.DisposeDebug();
+            FinalDestination = null;
             PeekPoints = null;
             TargetPlace = null;
             SearchedTargetPosition = false;
             FinishedPeeking = false;
         }
 
-        public bool CalculatePath(EnemyPlace place)
+        public bool CalculatePath(EnemyPlace place, out EPathCalcFailReason failReason)
         {
             if (place == null)
             {
+                failReason = EPathCalcFailReason.NullPlace;
                 return false;
             }
 
@@ -197,37 +212,65 @@ namespace SAIN.SAINComponent.Classes.Search
             Vector3 start = Bot.Position;
             if ((point - start).sqrMagnitude <= 0.5f)
             {
+                failReason = EPathCalcFailReason.TooClose;
                 return false;
             }
 
-            FinalDestination = null;
-            PeekPoints = null;
-            TargetPlace = null;
-
-            if (NavMesh.SamplePosition(point, out var hit, 5f, -1) &&
-                NavMesh.SamplePosition(start, out var hit2, 1f, -1))
+            if (!NavMesh.SamplePosition(point, out var hit, 5f, -1))
             {
-                _searchPath.ClearCorners();
-                if (NavMesh.CalculatePath(hit2.position, hit.position, -1, _searchPath))
-                {
-                    Vector3? lastCorner = _searchPath.LastCorner();
-                    if (lastCorner == null)
-                    {
-                        return false;
-                    }
-
-                    FinalDestination = lastCorner;
-                    PeekPoints = findPeekPosition(hit2.position);
-                    TargetPlace = place;
-                    SearchedTargetPosition = false;
-                    FinishedPeeking = false;
-                    return true;
-                }
+                failReason = EPathCalcFailReason.SampleEnd;
+                return false;
             }
-            return false;
+            if (!NavMesh.SamplePosition(start, out var hit2, 1f, -1))
+            {
+                failReason = EPathCalcFailReason.SampleStart;
+                return false;
+            }
+            _searchPath.ClearCorners();
+            if (!NavMesh.CalculatePath(hit2.position, hit.position, -1, _searchPath))
+            {
+                failReason = EPathCalcFailReason.CalcPath;
+                return false;
+            }
+            Vector3? lastCorner = _searchPath.LastCorner();
+            if (lastCorner == null)
+            {
+                failReason = EPathCalcFailReason.LastCorner;
+                return false;
+            }
+
+            BaseClass.Reset();
+            FinalDestination = lastCorner;
+            PeekPoints = findPeekPosition(hit2.position);
+            TargetPlace = place;
+            failReason = EPathCalcFailReason.None;
+            return true;
         }
 
         private BotPeekPlan? findPeekPosition(Vector3 start)
+        {
+            findNewCorners();
+            int count = newCorners.Count;
+
+            for (int i = 0; i < count - 1; i++)
+            {
+                Vector3 A = newCorners[i];
+                Vector3 ADirection = A - start;
+                Vector3 B = newCorners[i + 1];
+                Vector3 BDirection = B - start;
+
+                Vector3 startPeekPos = GetPeekStartAndEnd(A, B, ADirection, BDirection, out var endPeekPos);
+                if (NavMesh.SamplePosition(startPeekPos, out var hit3, 5f, -1))
+                {
+                    newCorners.Clear();
+                    return new BotPeekPlan(hit3.position, endPeekPos, B, A);
+                }
+            }
+            newCorners.Clear();
+            return null;
+        }
+
+        private void findNewCorners()
         {
             var corners = _searchPath.corners;
             int cornerLength = corners.Length;
@@ -245,30 +288,6 @@ namespace SAIN.SAINComponent.Classes.Search
             Vector3? last = corners.LastElement();
             if (last != null)
                 newCorners.Add(last.Value);
-
-            if (newCorners.Count > 4)
-            {
-                newCorners.Clear();
-                return null;
-            }
-
-            int count = newCorners.Count;
-            for (int i = 0; i < count - 1; i++)
-            {
-                Vector3 A = newCorners[i];
-                Vector3 ADirection = A - start;
-                Vector3 B = newCorners[i + 1];
-                Vector3 BDirection = B - start;
-
-                Vector3 startPeekPos = GetPeekStartAndEnd(A, B, ADirection, BDirection, out var endPeekPos);
-                if (NavMesh.SamplePosition(startPeekPos, out var hit3, 5f, -1))
-                {
-                    newCorners.Clear();
-                    return new BotPeekPlan(hit3.position, endPeekPos, B, A);
-                }
-            }
-            newCorners.Clear();
-            return null;
         }
 
         private readonly List<Vector3> newCorners = new List<Vector3>();

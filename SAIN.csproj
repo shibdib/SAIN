@@ -264,13 +264,17 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyHearing.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyKnownChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\WeaponAIPresetHistory.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Mover\EEnemySteerDir.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Mover\SAINHeadSteering.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Mover\SteerPriority.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Steering\EEnemySteerDir.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Steering\HeardSoundSteeringClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Steering\RandomLookClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Steering\SAINHeadSteering.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Steering\SteerPriority.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\ESearchReason.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SearchDeciderClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SearchPathFinder.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Search\SearchReasonsStruct.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\BotSound.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Steering\SteerPriorityClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\BotMagazineWeapon.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\MagRefillClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ReloadClass.cs" />
@@ -282,6 +286,7 @@
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\ECoverFailReason.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\BotHearingClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\RayCastJobClass.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\TimeOfDayEnum.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\AIDataBase.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\DeviceMode.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\Equipment\AIGearModifierClass.cs" />
@@ -356,6 +361,7 @@
     <Compile Include="Plugin\SAINEnableClass.cs" />
     <Compile Include="Plugin\SAINInterop.cs" />
     <Compile Include="Preset\BotSettings\SAINSettings\Categories\SAINBossSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\AILimitSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\CloneSettingsClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\GlobalMoveSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\ISAINSettings.cs" />
@@ -407,7 +413,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Memory\EnemyTarget.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\EnemyTargetsClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EEnemyAction.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\ExpirableBool.cs" />
+    <Compile Include="Components\BotComponentSpace\ExpirableBool.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\HealthTracker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\LocationTracker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\SAINExtract.cs" />
@@ -581,7 +587,7 @@
     <Compile Include="Components\BotComponentSpace\BotComponent.cs" />
     <Compile Include="Layers\Combat\Solo\CombatSoloLayer.cs" />
     <Compile Include="Layers\Combat\Solo\ShootAction.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\SAINSteeringClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Steering\SAINSteeringClass.cs" />
     <Compile Include="Layers\Combat\Solo\DogFightAction.cs" />
     <Compile Include="Patches\AddComponentPatch.cs" />
     <Compile Include="Properties\ConfigurationManagerAttributes.cs" />

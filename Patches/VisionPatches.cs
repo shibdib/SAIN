@@ -1,28 +1,158 @@
 ﻿using Aki.Reflection.Patching;
 using EFT;
 using HarmonyLib;
-using SAIN.Preset;
 using SAIN.Components;
-using SAIN.Plugin;
-using SAIN.Preset.BotSettings.SAINSettings;
+using SAIN.Components.PlayerComponentSpace;
+using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings;
+using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Reflection;
 using UnityEngine;
-using Comfort.Common;
-using SAIN.SAINComponent.Classes;
-using SAIN.Helpers;
-using System.Collections.Generic;
-using UnityEngine.UIElements;
-using EFT.InventoryLogic;
-using SAIN.SAINComponent.Classes.EnemyClasses;
-using SAIN.Preset.GlobalSettings.Categories;
-using SAIN.SAINComponent;
-using SAIN.Preset.GlobalSettings;
-using System.Text;
-using SAIN.Components.PlayerComponentSpace;
 
 namespace SAIN.Patches.Vision
 {
+    public class UpdateLightEnablePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotLight), "UpdateLightEnable");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(
+            BotOwner ___botOwner_0, 
+            float curLightDist, 
+            ref float __result, 
+            bool ____haveLight, 
+            ref float ____curLightDist, 
+            ref bool ____canUseNow, 
+            BotLight __instance)
+        {
+            __result = curLightDist;
+            if (___botOwner_0.FlashGrenade.IsFlashed)
+            {
+                return false;
+            }
+            if (!____haveLight)
+            {
+                return false;
+            }
+            ____curLightDist = curLightDist;
+
+            float timeModifier = SAINBotController.Instance.TimeVision.TimeVisionDistanceModifier;
+            var lookSettings = GlobalSettingsClass.Instance.Look;
+            float turnOnRatio = lookSettings.LightOnRatio;
+            float turnOffRatio = lookSettings.LightOffRatio;
+
+            bool isOn = __instance.IsEnable;
+            bool wantOn = !isOn && timeModifier <= turnOnRatio && ___botOwner_0.Memory.IsPeace;
+            bool wantOff = isOn && timeModifier >= turnOffRatio;
+            ____canUseNow = timeModifier < turnOffRatio;
+
+            if (wantOn)
+            {
+                __instance.TurnOn(true);
+            }
+            if (wantOff)
+            {
+                __instance.TurnOff(true, true);
+            }
+
+            if (__instance.IsEnable)
+            {
+                var gameworld = GameWorldComponent.Instance;
+                if (gameworld == null)
+                {
+                    Logger.LogError($"GameWorldComponent is null, cannot check if bot has flashlight on!");
+                    return false;
+                }
+                PlayerComponent playerComponent = gameworld.PlayerTracker.GetPlayerComponent(___botOwner_0.ProfileId);
+                if (playerComponent == null)
+                {
+                    Logger.LogError($"Player Component is null, cannot check if bot has flashlight on!");
+                    return false;
+                }
+                if (playerComponent.Flashlight.WhiteLight || 
+                    (___botOwner_0.NightVision.UsingNow && playerComponent.Flashlight.IRLight))
+                {
+                    float min = ___botOwner_0.Settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT;
+                    __result = Mathf.Clamp(curLightDist, min, float.MaxValue);
+                }
+            }
+
+            return false;
+        }
+    }
+
+    public class UpdateLightEnablePatch2 : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotLight), "method_0");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(BotLight __instance)
+        {
+            if (!__instance.IsEnable)
+            {
+                return false;
+            }
+            float timeModifier = SAINBotController.Instance.TimeVision.TimeVisionDistanceModifier;
+            float turnOffRatio = GlobalSettingsClass.Instance.Look.LightOffRatio;
+            bool wantOff = timeModifier >= turnOffRatio;
+            if (wantOff)
+            {
+                __instance.TurnOff(true, true);
+            }
+            return false;
+        }
+    }
+
+    public class ToggleNightVisionPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotNightVisionData), "method_0");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(BotOwner ___botOwner_0, bool ____nightVisionAtPocket, BotNightVisionData __instance)
+        {
+            if (___botOwner_0.FlashGrenade.IsFlashed)
+            {
+                return false;
+            }
+
+            float timeModifier = SAINBotController.Instance.TimeVision.TimeVisionDistanceModifier;
+            var lookSettings = GlobalSettingsClass.Instance.Look;
+            float turnOnRatio = lookSettings.NightVisionOnRatio;
+            float turnOffRatio = lookSettings.NightVisionOffRatio;
+
+            if (____nightVisionAtPocket)
+            {
+                if (timeModifier < turnOnRatio)
+                {
+                    __instance.method_4();
+                    return false;
+                }
+            }
+            else
+            {
+                if (timeModifier < turnOnRatio)
+                {
+                    __instance.method_5();
+                }
+                if (timeModifier > turnOffRatio)
+                {
+                    __instance.method_1();
+                }
+            }
+            return false;
+        }
+    }
     public class SetPartPriorityPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -97,7 +227,7 @@ namespace SAIN.Patches.Vision
         [PatchPostfix]
         public static void Patch(BotGlobalLookData __instance)
         {
-            __instance.CHECK_HEAD_ANY_DIST = false;
+            __instance.CHECK_HEAD_ANY_DIST = true;
             __instance.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
             __instance.SHOOT_FROM_EYES = false;
         }
@@ -130,13 +260,13 @@ namespace SAIN.Patches.Vision
                 if (____botOwner.GameDateTime != null)
                 {
                     DateTime dateTime = SAINBotController.Instance.TimeVision.GameDateTime;
-                    timeMod = SAINBotController.Instance.TimeVision.TimeOfDayVisibility;
+                    timeMod = SAINBotController.Instance.TimeVision.TimeVisionDistanceModifier;
                     // Modify the Rounding of the "HourServer" property to the hour from the DateTime object
                     _HourServerProperty.SetValue(____botOwner.LookSensor, (int)((short)dateTime.Hour));
                 }
                 if (SAINBotController.Instance != null)
                 {
-                    weatherMod = SAINBotController.Instance.WeatherVision.VisibilityNum;
+                    weatherMod = SAINBotController.Instance.WeatherVision.VisionDistanceModifier;
                     weatherMod = Mathf.Clamp(weatherMod, 0.33f, 1f);
                 }
 

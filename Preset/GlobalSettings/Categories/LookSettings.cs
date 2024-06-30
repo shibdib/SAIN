@@ -106,6 +106,22 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         public float NotLookingAccuracyAmount = 0.33f;
 
+        [Advanced]
+        [MinMax(0.01f, 0.99f, 100f)]
+        public float LightOnRatio = 0.6f;
+
+        [Advanced]
+        [MinMax(0.01f, 0.99f, 100f)]
+        public float LightOffRatio = 0.8f;
+
+        [Advanced]
+        [MinMax(0.01f, 0.99f, 100f)]
+        public float NightVisionOnRatio = 0.6f;
+
+        [Advanced]
+        [MinMax(0.01f, 0.99f, 100f)]
+        public float NightVisionOffRatio = 0.8f;
+
         [Name("Nighttime Vision Modifier")]
         [Description(
             "By how much to lower visible distance at nighttime. " +
@@ -113,7 +129,7 @@ namespace SAIN.Preset.GlobalSettings
             "their base vision distance at night-time.")]
         [MinMax(0.01f, 1f, 100f)]
         [Advanced]
-        public float NightTimeVisionModifier = 0.3f;
+        public float NightTimeVisionModifier = 0.45f;
 
         [Name("Snow Nighttime Vision Modifier")]
         [Description(
@@ -122,7 +138,7 @@ namespace SAIN.Preset.GlobalSettings
             "their base vision distance at night-time.")]
         [MinMax(0.01f, 1f, 100f)]
         [Advanced]
-        public float NightTimeVisionModifierSnow = 0.40f;
+        public float NightTimeVisionModifierSnow = 0.6f;
 
         [Name("Dawn Start Hour")]
         [MinMax(5f, 8f, 1f)]

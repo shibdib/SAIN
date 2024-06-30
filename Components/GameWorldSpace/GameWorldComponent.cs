@@ -3,6 +3,7 @@ using EFT;
 using EFT.Game.Spawning;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
+using SAIN.Patches.Generic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,8 +13,9 @@ namespace SAIN.Components
 {
     public class GameWorldComponent : MonoBehaviour
     {
-        public static GameWorldComponent Instance { get; set; }
+        public bool WinterActive => WinterStatus == EWinterStatus.Winter;
 
+        public static GameWorldComponent Instance { get; set; }
         public ELocation Location { get; private set; }
         public GameWorld GameWorld { get; private set; }
         public PlayerSpawnTracker PlayerTracker { get; private set; }
@@ -23,9 +25,38 @@ namespace SAIN.Components
 
         private void Update()
         {
+            findWeather();
             findLocation();
             findSpawnPointMarkers();
         }
+
+        private void findWeather()
+        {
+            if (_weatherFound)
+            {
+                return;
+            }
+            if (_nextCheckWeatherTime > Time.time)
+            {
+                return;
+            }
+            _nextCheckWeatherTime = Time.time + 0.5f;
+
+            var weather = GameWorld.Class420_0;
+            if (weather == null)
+            {
+                WinterStatus = EWinterStatus.Summer;
+            }
+            else
+            {
+                Logger.LogWarning($"Got Weather! {weather.Status}");
+                WinterStatus = weather.Status;
+                _weatherFound = true;
+            }
+        }
+
+        private bool _weatherFound;
+        private float _nextCheckWeatherTime;
 
         private void findLocation()
         {
@@ -98,9 +129,12 @@ namespace SAIN.Components
                     Location = ELocation.None;
                     break;
             }
+
             _foundLocation = true;
             return Location;
         }
+
+        public EWinterStatus WinterStatus { get; private set; }
 
         private void findSpawnPointMarkers()
         {

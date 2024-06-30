@@ -9,8 +9,6 @@ namespace SAIN.Components.BotComponentSpace.Classes
 {
     public class BotMagazineWeapon
     {
-        public event Action OnSpareMagsEmpty;
-
         public BotMagazineWeapon(Weapon weapon, BotComponent bot)
         {
             Weapon = weapon;

@@ -101,6 +101,8 @@ namespace SAIN.SAINComponent.Classes.Decision
             //    return;
             //}
 
+            EnemyDecisions.DebugShallSearch = null;
+
             if (DogFightDecision.ShallDogFight())
             {
                 SetDecisions(SoloDecision.DogFight, SquadDecision.None, SelfDecision.None);

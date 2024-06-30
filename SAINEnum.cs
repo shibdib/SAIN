@@ -244,7 +244,7 @@ namespace SAIN
 
     public enum AILimitSetting
     {
-        Close = 0,
+        None = 0,
         Far = 1,
         VeryFar = 2,
         Narnia = 3,

@@ -1,4 +1,5 @@
 using EFT;
+using SAIN.Preset.GlobalSettings;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Mover
@@ -34,9 +35,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                 ResetSideStep(currentSideStep);
                 return;
             }
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.LimitAIvsAI
-                && enemy.IsAI
-                && Bot.CurrentAILimit != AILimitSetting.Close)
+            if (GlobalSettingsClass.Instance.AILimit.LimitAIvsAIGlobal && 
+                enemy.IsAI && 
+                Bot.CurrentAILimit != AILimitSetting.None)
             {
                 ResetSideStep(currentSideStep);
                 return;

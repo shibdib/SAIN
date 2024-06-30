@@ -8,6 +8,7 @@ using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
 using SAIN.Patches.Generic;
+using SAIN.Patches.Vision;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
@@ -70,6 +71,7 @@ namespace SAIN
         public static ConfigEntry<KeyboardShortcut> OpenEditorConfigEntry { get; private set; }
 
         private List<Type> patches => new List<Type>() {
+
                 typeof(Patches.Generic.StopRefillMagsPatch),
                 typeof(Patches.Generic.SetEnvironmentPatch),
                 typeof(Patches.Generic.SetPanicPointPatch),
@@ -124,6 +126,9 @@ namespace SAIN
                 typeof(Patches.Talk.BotTalkManualUpdatePatch),
 
                 typeof(Patches.Vision.DisableLookUpdatePatch),
+                typeof(Patches.Vision.UpdateLightEnablePatch),
+                typeof(Patches.Vision.UpdateLightEnablePatch2),
+                typeof(Patches.Vision.ToggleNightVisionPatch),
                 typeof(Patches.Vision.SetPartPriorityPatch),
                 typeof(Patches.Vision.GlobalLookSettingsPatch),
                 typeof(Patches.Vision.WeatherTimeVisibleDistancePatch),

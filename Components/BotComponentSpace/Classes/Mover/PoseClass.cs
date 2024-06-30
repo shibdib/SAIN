@@ -84,7 +84,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool FindCrouchFromCover(out float targetPose, bool useCollider = false)
         {
             targetPose = 1f;
-            if ((Bot.AILimit.CurrentAILimit == AILimitSetting.Close || Bot.Enemy?.IsAI == false))
+            if ((Bot.AILimit.CurrentAILimit == AILimitSetting.None || Bot.Enemy?.IsAI == false))
             {
                 Enemy enemy = Bot.Enemy;
                 if (enemy?.LastKnownPosition != null)
