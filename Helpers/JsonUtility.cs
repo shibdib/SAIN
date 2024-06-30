@@ -13,6 +13,7 @@ using System.IO;
 using System.Reflection;
 using SAIN.Preset.Personalities;
 using System.Diagnostics;
+using SAIN.Preset.GearStealthValues;
 
 namespace SAIN.Helpers
 {
@@ -80,10 +81,10 @@ namespace SAIN.Helpers
         {
             public static void LoadAllJsonFiles<T>(List<T> list, params string[] folders)
             {
-                LoadAllFiles(list, "*.json", folders);
+                LoadAllFiles(list, folders);
             }
 
-            public static void LoadCustommPresetOptions(List<SAINPresetDefinition> list)
+            public static void LoadCustomPresetOptions(List<SAINPresetDefinition> list)
             {
                 list.Clear();
                 if (!GetFoldersPath(out string foldersPath, PresetsFolder))
@@ -110,30 +111,29 @@ namespace SAIN.Helpers
                 }
             }
 
-            public static void LoadAllFiles<T>(List<T> list, string searchPattern = null , params string[] folders)
+            public static void LoadAllFiles<T>(List<T> list, params string[] folders)
             {
                 if (!GetFoldersPath(out string foldersPath, folders))
                 {
                     return;
                 }
-                string[] files;
-                if (searchPattern != null)
-                {
-                    files = Directory.GetFiles(foldersPath, searchPattern);
-                }
-                else
-                {
-                    files = Directory.GetFiles(foldersPath);
-                }
-
-                if (list == null)
-                {
-                    list = new List<T>();
-                }
-                foreach (var file in files)
+                foreach (var file in Directory.GetFiles(foldersPath, "*.json"))
                 {
                     string jsonContent = File.ReadAllText(file);
                     list.Add(JsonConvert.DeserializeObject<T>(jsonContent));
+                }
+            }
+
+            public static void LoadStealthValues(List<ItemStealthValue> list, params string[] folders)
+            {
+                if (!GetFoldersPath(out string foldersPath, folders))
+                {
+                    return;
+                }
+                foreach (var file in Directory.GetFiles(foldersPath, "*.json"))
+                {
+                    string jsonContent = File.ReadAllText(file);
+                    list.Add(JsonConvert.DeserializeObject<ItemStealthValue>(jsonContent));
                 }
             }
 
@@ -185,14 +185,32 @@ namespace SAIN.Helpers
             }
         }
 
+        public static void CreateFolder(params string[] subFolders)
+        {
+            string path = getPath(subFolders);
+            CheckCreateFolder(path);
+        }
+
+        public static bool DoesFolderExist(params string[] subFolders)
+        {
+            string path = getPath(subFolders);
+            return Directory.Exists(path);
+        }
+
         public static bool GetFoldersPath(out string path, params string[] folders)
         {
-            path = GetSAINPluginPath();
+            path = getPath(folders);
+            return Directory.Exists(path);
+        }
+
+        private static string getPath(params string[] folders)
+        {
+            string path = GetSAINPluginPath();
             for (int i = 0; i < folders.Length; i++)
             {
                 path = Path.Combine(path, folders[i]);
             }
-            return Directory.Exists(path);
+            return path;
         }
 
         public static string GetSAINPluginPath()

@@ -6,74 +6,123 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 {
     public class AIGearModifierClass : AIDataBase
     {
-        public AIGearModifierClass(SAINAIData sAINAIData) : base(sAINAIData) {
-
+        public AIGearModifierClass(SAINAIData sAINAIData) : base(sAINAIData)
+        {
         }
 
-        public float StealthModifier(float distance) {
-            if (_nextGetSightModTime < Time.time)
+        public float StealthModifier(float distance)
+        {
+            return getSightMod(distance);
+        }
+
+        private float gearStealthModifier
+        {
+            get
             {
-                _nextGetSightModTime = Time.time + 1f;
-                _sightMod = getSightMod(distance);
+                if (_calcGearTime < Time.time)
+                {
+                    _calcGearTime = Time.time + 1f;
+                    float backPackMod = getBackpackMod();
+                    float headWearMod = getHeadWearMod();
+                    float faceCoverMod = getFaceCoverMod();
+                    _gearStealthModifier = backPackMod * headWearMod * faceCoverMod;
+                }
+                return _gearStealthModifier;
             }
-            return _sightMod;
         }
 
+        private float _gearStealthModifier = 1f;
 
-        private float getSightMod(float distance) {
-            float gainVisionTime = 1f;
-            if (distance > 50f)  {
-                Item backpack = GearInfo.GetItem(EquipmentSlot.Backpack);
-                if (backpack != null) {
-                    switch (backpack.TemplateId)
-                    {
-                        case backpack_pilgrim:
-                            gainVisionTime *= 0.875f;
-                            break;
+        private float _calcGearTime;
 
-                        case backpack_raid:
-                            gainVisionTime *= 0.925f;
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-                else
-                {
-                    gainVisionTime *= 1.1f;
-                } 
-
-                Item headwear = GearInfo.GetItem(EquipmentSlot.Headwear);
-                if (headwear != null) {
-                    switch (headwear.TemplateId)
-                    {
-                        case boonie_MILTEC:
-                        case boonie_CHIMERA:
-                        case boonie_DOORKICKER:
-                        case boonie_JACK_PYKE:
-                            gainVisionTime *= 1.2f;
-                            break;
-
-                        case helmet_TAN_ULACH:
-                            gainVisionTime *= 0.925f;
-                            break;
-
-                        case helmet_UNTAR_BLUE:
-                            gainVisionTime *= 0.9f;
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-
-                Item faceCover = GearInfo.GetItem(EquipmentSlot.FaceCover);
-                if (faceCover != null) {
-                    gainVisionTime *= 1.05f;
-                }
+        private float getSightMod(float distance)
+        {
+            float min = 30f;
+            float max = 60f;
+            if (distance <= min)
+            {
+                return 1f;
             }
-            return gainVisionTime;
+
+            float modifier = gearStealthModifier;
+
+            if (distance >= max)
+            {
+                return modifier;
+            }
+
+            float num = max - min;
+            float num2 = distance - min;
+            float ratio = num2 / num;
+            float result = Mathf.Lerp(min, max, ratio);
+
+            return result;
+        }
+
+        private float getBackpackMod()
+        {
+            Item backpack = GearInfo.GetItem(EquipmentSlot.Backpack);
+            if (backpack == null)
+            {
+                return 1.15f;
+            }
+            switch (backpack.TemplateId)
+            {
+                case backpack_pilgrim:
+                    return 0.875f;
+
+                case backpack_raid:
+                    return 0.925f;
+
+                default:
+                    return 1f;
+            }
+        }
+
+        private float getHeadWearMod()
+        {
+            Item headwear = GearInfo.GetItem(EquipmentSlot.Headwear);
+            if (headwear == null)
+            {
+                return 1f;
+            }
+            switch (headwear.TemplateId)
+            {
+                case boonie_MILTEC:
+                    return 1.2f;
+
+                case boonie_CHIMERA:
+                    return 1.2f;
+
+                case boonie_DOORKICKER:
+                    return 1.2f;
+
+                case boonie_JACK_PYKE:
+                    return 1.2f;
+
+                case helmet_TAN_ULACH:
+                    return 0.925f;
+
+                case helmet_UNTAR_BLUE:
+                    return 0.9f;
+
+                default:
+                    return 1f;
+            }
+        }
+
+        private float getFaceCoverMod()
+        {
+            Item faceCover = GearInfo.GetItem(EquipmentSlot.FaceCover);
+            if (faceCover == null)
+            {
+                return 1f;
+            }
+            switch (faceCover.TemplateId)
+            {
+                default:
+                    return 1.05f;
+            }
         }
 
         private float _nextGetSightModTime;
@@ -91,6 +140,5 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         private Item _backpack => GearInfo.GetItem(EquipmentSlot.Backpack);
         private Item _headwear => GearInfo.GetItem(EquipmentSlot.Headwear);
         private Item _facecover => GearInfo.GetItem(EquipmentSlot.FaceCover);
-
     }
 }

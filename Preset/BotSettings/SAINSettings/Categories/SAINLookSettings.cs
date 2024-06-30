@@ -32,24 +32,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Advanced]
         public float MAX_DIST_CLAMP_TO_SEEN_SPEED = 500f;
 
-        [NameAndDescription("NightVision On Distance",
-            "After a bot is below this number in their vision distance, they will turn on night vision if available")]
-        [MinMax(10f, 250f)]
-        [Advanced]
-        public float NIGHT_VISION_ON = 150f;
-
-        [NameAndDescription("NightVision Off Distance",
-            "After a bot is above this number in their vision distance, they will turn off night vision if enabled")]
-        [MinMax(10f, 250f)]
-        [Advanced]
-        public float NIGHT_VISION_OFF = 200f;
-
-        [NameAndDescription("NightVision Visible Distance",
-            "How far a bot can see with NightVision Enabled")]
-        [MinMax(10f, 250f)]
-        [Advanced]
-        public float NIGHT_VISION_DIST = 175f;
-
         [NameAndDescription("NightVision Visible Angle",
             "The Maximum Angle of a bot's cone of vision with NightVision Enabled")]
         [MinMax(25, 180)]
@@ -59,23 +41,23 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         //[Hidden]
         //public float LOOK_THROUGH_PERIOD_BY_HIT = 0f;
 
-        [NameAndDescription("FlashLight On Distance",
-            "After a bot is below this number in their vision distance, they will turn on their flashlight if available")]
-        [MinMax(10, 100f)]
-        [Advanced]
-        public float LightOnVisionDistance = 80f;
-
         [NameAndDescription("FlashLight Visible Angle",
             "The Maximum Angle of a bot's cone of vision with Flashlight Enabled")]
         [MinMax(10, 180)]
         [Advanced]
         public float VISIBLE_ANG_LIGHT = 35f;
 
-        [NameAndDescription("FlashLight Visible Distance",
-            "How far a bot can see with a Flashlight Enabled")]
+        [NameAndDescription("White Light Visible Distance",
+            "How far a bot can see enemies with a White Light Enabled")]
         [MinMax(10, 100f)]
         [Advanced]
         public float VISIBLE_DISNACE_WITH_LIGHT = 65f;
+
+        [NameAndDescription("IR Light Visible Distance",
+            "How far a bot can see enemies with an IR Light Enabled, if they are using NVGs")]
+        [MinMax(10, 100f)]
+        [Advanced]
+        public float VISIBLE_DISNACE_WITH_IR_LIGHT = 65f;
 
         [NameAndDescription("Lose Vision Ability Time",
             "How Long after losing vision a bot will still be able to sense an enemy")]

@@ -57,7 +57,7 @@ namespace SAIN.Plugin
 
         public static void LoadCustomPresetOptions()
         {
-            Load.LoadCustommPresetOptions(CustomPresetOptions);
+            Load.LoadCustomPresetOptions(CustomPresetOptions);
         }
 
         public static void Init()

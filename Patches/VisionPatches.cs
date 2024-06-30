@@ -159,7 +159,7 @@ namespace SAIN.Patches.Vision
                 {
                     __instance.method_5();
                 }
-                if (timeModifier > turnOffRatio)
+                if (timeModifier >= turnOffRatio)
                 {
                     __instance.method_1();
                 }
@@ -167,6 +167,7 @@ namespace SAIN.Patches.Vision
             return false;
         }
     }
+
     public class SetPartPriorityPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

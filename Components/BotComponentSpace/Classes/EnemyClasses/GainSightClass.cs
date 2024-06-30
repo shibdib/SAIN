@@ -85,108 +85,117 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return Enemy.EnemyPlayerComponent.AIData.AIGearModifier.StealthModifier(Enemy.RealDistance);
         }
 
+        private float _visionSpeed_Max_Dist = 200f;
+        private float _visionSpeed_Max_Dist_NVGS = 250f;
+        private float _visionSpeed_Min_Dist = 10f;
+        private float _visionSpeed_Min_Dist_NVGS = 65f;
+
         private float calcTimeModifier(bool flareEnabled)
         {
             float baseModifier = baseTimeModifier(flareEnabled);
-            if (baseModifier <= 1f)
-            {
-                return 1f;
-            }
-            var flashlight = Enemy.EnemyPlayerComponent.Flashlight;
-            if (flashlight.WhiteLight)
-            {
-                return 0.75f;
-            }
-            if (flashlight.Laser)
-            {
-                return 1f;
-            }
-            bool usingNVGS = BotOwner.NightVision.UsingNow;
-            if (usingNVGS && (flashlight.IRLaser || flashlight.IRLight))
-            {
-                return 0.8f;
-            }
 
-            float max = 2f;
-            float min = 1f;
-            float maxDist = 150f;
-            float minDist = 10f;
+            if (baseModifier <= 1f)
+                return 1f;
+            if (enemyUsingLight(out float lightModifier))
+                return lightModifier;
+
+            bool usingNVGS = BotOwner.NightVision.UsingNow;
             float enemyDist = Enemy.RealDistance;
 
+            if (enemyInRangeOfLight(enemyDist, usingNVGS))
+                return 1f;
+
+            float max = 1f + baseModifier;
+            float min = 1f;
+            float maxDist = usingNVGS ? _visionSpeed_Max_Dist_NVGS : _visionSpeed_Max_Dist;
+            float minDist = usingNVGS ? _visionSpeed_Min_Dist_NVGS : _visionSpeed_Min_Dist;
+
             if (enemyDist >= maxDist)
-            {
-                return baseModifier * max;
-            }
+                return max;
             if (enemyDist < minDist)
+                return min;
+
+            float enemyVelocity = Enemy.Vision.EnemyVelocity;
+            bool moving = enemyVelocity > 0.1f;
+            if (!moving)
             {
-                return baseModifier;
+                min += 0.5f;
+                max += 1f;
             }
 
             float num = maxDist - minDist;
             float num2 = enemyDist - minDist;
             float ratio = num2 / num;
-            float scaled = Mathf.Lerp(min, max, ratio);
-            float result = baseModifier * scaled;
-
-            bool moving = Enemy.Vision.EnemyVelocity > 0.1f;
-            if (!moving)
-            {
-                result *= 2f;
-            }
-
-            if (usingNVGS)
-            {
-                result /= 3f;
-                result = Mathf.Clamp(result, 1f, float.MaxValue);
-            }
-
-            if (_nextLogTime < Time.time)
-            {
-                _nextLogTime = Time.time + 30f;
-                //Logger.LogDebug($"Vision Time Mod Result: [{result}] : EnemyDist: [{enemyDist}] Enemy Moving? [{moving}, {Enemy.Vision.EnemyVelocity}] Base Modifier: [{baseModifier}]");
-            }
+            float result = Mathf.Lerp(min, max, ratio);
             return result;
+        }
+
+        private bool enemyUsingLight(out float modifier)
+        {
+            var flashlight = Enemy.EnemyPlayerComponent.Flashlight;
+            if (flashlight.WhiteLight)
+            {
+                modifier = 0.75f;
+                return true;
+            }
+            if (flashlight.Laser)
+            {
+                modifier = 1f;
+                return true;
+            }
+            bool usingNVGS = BotOwner.NightVision.UsingNow;
+            if (usingNVGS && (flashlight.IRLaser || flashlight.IRLight))
+            {
+                modifier = 0.8f;
+                return true;
+            }
+            modifier = 1f;
+            return false;
+        }
+
+        private bool enemyInRangeOfLight(float enemyDist, bool usingNVGS)
+        {
+            var settings = Bot.Info.FileSettings.Look;
+            if (Bot.PlayerComponent.Flashlight.WhiteLight &&
+                enemyDist <= settings.VISIBLE_DISNACE_WITH_LIGHT)
+            {
+                return true;
+            }
+            if (usingNVGS && Bot.PlayerComponent.Flashlight.IRLight && enemyDist <= settings.VISIBLE_DISNACE_WITH_IR_LIGHT)
+            {
+                return true;
+            }
+            return false;
         }
 
         private float calcWeatherMod(bool flareEnabled)
         {
             float baseModifier = baseWeatherMod(flareEnabled);
-            if (baseModifier <= 1f)
-            {
-                return 1f;
-            }
 
-            float max = 2f;
+            if (baseModifier <= 1f)
+                return 1f;
+
+            float max = 1f + baseModifier;
             float min = 1f;
-            float maxDist = 125f;
-            float minDist = 10f;
+            float maxDist = 150f;
+            float minDist = 30f;
             float enemyDist = Enemy.RealDistance;
 
             if (enemyDist >= maxDist)
-            {
-                return baseModifier * max;
-            }
+                return max;
             if (enemyDist < minDist)
-            {
-                return baseModifier;
-            }
+                return min;
+            if (enemyUsingLight(out _))
+                return min;
+
+            bool moving = Enemy.Vision.EnemyVelocity > 0.1f;
+            if (!moving)
+                max += 1f;
 
             float num = maxDist - minDist;
             float num2 = enemyDist - minDist;
             float ratio = num2 / num;
-            float scaled = Mathf.Lerp(min, max, ratio);
-            float result = baseModifier * scaled;
-
-            bool moving = Enemy.Vision.EnemyVelocity > 0.1f;
-            if (!moving)
-            {
-                result *= 2f;
-            }
-
-            if (_nextLogTime < Time.time)
-            {
-                //Logger.LogDebug($"Vision Weather Mod Result: [{result}] : EnemyDist: [{enemyDist}] Enemy Moving? [{moving}, {Enemy.Vision.EnemyVelocity}] Base Modifier: [{baseModifier}]");
-            }
+            float result = Mathf.Lerp(min, max, ratio);
             return result;
         }
 
@@ -194,22 +203,20 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float baseWeatherMod(bool flareEnabled)
         {
-            float weatherMod = SAINBotController.Instance.WeatherVision.GainSightModifier;
-            if (flareEnabled)
+            if (flareEnabled && Enemy.RealDistance < 100f)
             {
-                return Mathf.Clamp(weatherMod / 2f, 1f, 1.5f);
+                return 1f;
             }
-            return weatherMod;
+            return SAINBotController.Instance.WeatherVision.GainSightModifier;
         }
 
         private float baseTimeModifier(bool flareEnabled)
         {
-            float timeMod = SAINBotController.Instance.TimeVision.TimeGainSightModifier;
             if (flareEnabled)
             {
-                return Mathf.Clamp(timeMod / 2f, 1f, 1.5f);
+                return 1f;
             }
-            return timeMod;
+            return SAINBotController.Instance.TimeVision.TimeGainSightModifier;
         }
 
         private float GetGainSightModifier()

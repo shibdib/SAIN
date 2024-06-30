@@ -1,10 +1,8 @@
-﻿using Comfort.Common;
-using SAIN.Editor;
-using SAIN.Editor.GUISections;
-using SAIN.Helpers;
+﻿using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.BotSettings;
 using SAIN.Preset.BotSettings.SAINSettings;
+using SAIN.Preset.GearStealthValues;
 using SAIN.Preset.GlobalSettings;
 using SAIN.Preset.Personalities;
 using System;
@@ -28,7 +26,10 @@ namespace SAIN.Preset
             GlobalSettings = GlobalSettingsClass.ImportGlobalSettings(preset);
             BotSettings = new BotSettings.SAINBotSettingsClass(this);
             PersonalityManager = new PersonalityManagerClass(this);
+            GearStealthValuesClass = new GearStealthValuesClass(preset);
         }
+
+        public GearStealthValuesClass GearStealthValuesClass { get; private set; }
 
         public SAINPresetClass(SAINDifficulty sainDifficulty)
         {
@@ -42,6 +43,7 @@ namespace SAIN.Preset
             GlobalSettings = new GlobalSettingsClass();
             BotSettings = new BotSettings.SAINBotSettingsClass(this);
             PersonalityManager = new PersonalityManagerClass(this);
+            GearStealthValuesClass = new GearStealthValuesClass(Info);
         }
 
         public void Init()
@@ -79,6 +81,7 @@ namespace SAIN.Preset
             ExportGlobalSettings(preset.GlobalSettings, preset.Info.Name);
             ExportPersonalities(preset.PersonalityManager, preset.Info.Name);
             ExportBotSettings(preset.BotSettings, preset.Info.Name);
+            GearStealthValuesClass.Export(preset.GearStealthValuesClass, preset.Info);
             PresetHandler.UpdateExistingBots();
         }
 
