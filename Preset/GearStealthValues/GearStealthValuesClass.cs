@@ -58,7 +58,7 @@ namespace SAIN.Preset.GearStealthValues
             }
 
             JsonUtility.CreateFolder("Presets", preset.Name, "ItemStealthValues");
-            JsonUtility.SaveObjectToJson(EnumValues.GetEnum<EItemType>(), "Possible Item Types", "Presets", preset.Name, "ItemStealthValues");
+            JsonUtility.SaveObjectToJson(EnumValues.GetEnum<EItemType>(), "Possible Item Types For Stealth Modifiers", "Presets", preset.Name);
 
             foreach (var list in stealthValues.ItemStealthValues.Values)
             {

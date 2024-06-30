@@ -362,7 +362,7 @@
     <Compile Include="Plugin\SAINEnableClass.cs" />
     <Compile Include="Plugin\SAINInterop.cs" />
     <Compile Include="Preset\BotSettings\SAINSettings\Categories\SAINBossSettings.cs" />
-    <Compile Include="Preset\GearStealthValues\GlobalSettingsClass.cs" />
+    <Compile Include="Preset\GearStealthValues\GearStealthValuesClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\AILimitSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\CloneSettingsClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\GlobalMoveSettings.cs" />
