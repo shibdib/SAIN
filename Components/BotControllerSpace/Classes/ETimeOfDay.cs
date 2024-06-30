@@ -1,6 +1,6 @@
 ﻿namespace SAIN.Components.BotController
 {
-    public enum TimeOfDayEnum
+    public enum ETimeOfDay
     {
         Night,
         Day,

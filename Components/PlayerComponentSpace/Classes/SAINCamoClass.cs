@@ -84,7 +84,7 @@ namespace SAIN.Components
         }
 
         private float FreqencyTimer;
-        public TimeOfDayEnum TimeOfDay { get; private set; }
+        public ETimeOfDay TimeOfDay { get; private set; }
         public bool NearBush { get; private set; }
         public bool InsideBush { get; private set; }
         public bool OnGrass { get; private set; }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SAIN.Helpers;
+using System;
+using System.Text;
 using UnityEngine;
 
 namespace SAIN.Components.BotController
@@ -26,76 +28,93 @@ namespace SAIN.Components.BotController
         public DateTime GameDateTime { get; private set; }
         public float TimeVisionDistanceModifier { get; private set; } = 1f;
         public float TimeGainSightModifier { get; private set; } = 1f;
-        public TimeOfDayEnum TimeOfDay { get; private set; }
+        public ETimeOfDay TimeOfDay { get; private set; }
 
         private float _visTime = 0f;
 
         private float Visibilty()
         {
+            float time = calcTime();
+            TimeOfDay = getTimeEnum(time);
+            float timemodifier = getModifier(time, TimeOfDay);
+            //if (_nextTestTime < Time.time)
+            //{
+            //    StringBuilder builder = new StringBuilder();
+            //    _nextTestTime = Time.time + 10f;
+            //    for (int i = 0; i < 24;  i++)
+            //    {
+            //        var timeOFDay = getTimeEnum(i + 1);
+            //        float test = getModifier(i + 1, timeOFDay);
+            //        builder.AppendLine($"{i + 1} {test} {timeOFDay}");
+            //    }
+            //    Logger.LogInfo(builder.ToString());
+            //}
+            return timemodifier;
+        }
+
+        private static float _nextTestTime;
+
+        private float calcTime()
+        {
             var nightSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
             GameDateTime = BotController.Bots.PickRandom().Value.BotOwner.GameDateTime.Calculate();
             float minutes = GameDateTime.Minute / 59f;
             float time = GameDateTime.Hour + minutes;
+            time = time.Round100();
+            return time;
+        }
 
-            float timemodifier = 1f;
-            // SeenTime Check
-            if (time >= nightSettings.HourDuskStart || time <= nightSettings.HourDawnEnd)
+        private static float getModifier(float time, ETimeOfDay timeOfDay)
+        {
+            var nightSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
+            float max = 1f;
+            bool snowActive = GameWorldComponent.Instance.WinterActive;
+            float min = snowActive ? nightSettings.NightTimeVisionModifierSnow : nightSettings.NightTimeVisionModifier;
+            float ratio;
+            float difference;
+            float current;
+            switch (timeOfDay)
             {
-                // Night
-                if (time > nightSettings.HourDuskEnd || time < nightSettings.HourDawnStart)
-                {
-                    TimeOfDay = TimeOfDayEnum.Night;
-                    timemodifier = nightSettings.NightTimeVisionModifier;
-                }
-                else
-                {
-                    float scalingA = 1f - nightSettings.NightTimeVisionModifier;
-                    float scalingB = nightSettings.NightTimeVisionModifier;
+                default:
+                    return max;
 
-                    if (GameWorldComponent.Instance.WinterActive)
-                    {
-                        scalingA = 1f - nightSettings.NightTimeVisionModifierSnow;
-                        scalingB = nightSettings.NightTimeVisionModifierSnow;
-                    }
+                case ETimeOfDay.Night:
+                    return min;
 
-                    // Dawn
-                    if (time <= nightSettings.HourDawnEnd)
-                    {
-                        TimeOfDay = TimeOfDayEnum.Dawn;
-                        float dawnDiff = nightSettings.HourDawnEnd - nightSettings.HourDawnStart;
-                        float dawnHours = (time - nightSettings.HourDawnStart) / dawnDiff;
-                        float scaledDawnHours = dawnHours * scalingA + scalingB;
+                case ETimeOfDay.Dawn:
+                    difference = nightSettings.HourDawnEnd - nightSettings.HourDawnStart;
+                    current = time - nightSettings.HourDawnStart;
+                    ratio = current / difference;
+                    break;
 
-                        // assigns modifier to our output
-                        timemodifier = scaledDawnHours;
-                    }
-                    // Dusk
-                    else if (time >= nightSettings.HourDuskStart)
-                    {
-                        TimeOfDay = TimeOfDayEnum.Dusk;
-                        float duskDiff = nightSettings.HourDuskEnd - nightSettings.HourDuskStart;
-                        float duskHours = (time - nightSettings.HourDuskStart) / duskDiff;
-                        float scaledDuskHours = duskHours * scalingA + scalingB;
-
-                        // Inverse Scale to reduce modifier as night falls
-                        float inverseScaledDuskHours = 1f - scaledDuskHours;
-
-                        // assigns modifier to our output
-                        timemodifier = inverseScaledDuskHours;
-                    }
-                }
+                case ETimeOfDay.Dusk:
+                    difference = nightSettings.HourDuskEnd - nightSettings.HourDuskStart;
+                    current = time - nightSettings.HourDuskStart;
+                    ratio = 1f - current / difference;
+                    break;
             }
-            // Day
-            else
+            float result = Mathf.Lerp(min, max, ratio);
+            return result;
+        }
+
+        private static ETimeOfDay getTimeEnum(float time)
+        {
+            var nightSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
+            if (time <= nightSettings.HourDuskStart &&
+                time >= nightSettings.HourDawnEnd)
             {
-                TimeOfDay = TimeOfDayEnum.Day;
-                timemodifier = 1f;
+                return ETimeOfDay.Day;
             }
-            if (SAINPlugin.DebugMode || true)
+            if (time >= nightSettings.HourDuskEnd ||
+                time <= nightSettings.HourDawnStart)
             {
-                Logger.LogInfo($"Time Vision Modifier: [{timemodifier}] at [{time}] with Config Settings VisionModifier: [{nightSettings.NightTimeVisionModifier}]");
+                return ETimeOfDay.Night;
             }
-            return timemodifier;
+            if (time < nightSettings.HourDawnEnd)
+            {
+                return ETimeOfDay.Dawn;
+            }
+            return ETimeOfDay.Dusk;
         }
     }
 }

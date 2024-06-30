@@ -44,7 +44,7 @@ namespace SAIN.Components.BotController
                     float Rain = WeatherController.Instance.WeatherCurve.Rain;
                     _rainSoundMod = 1f;
                     float max = 1f;
-                    float rainMin = 0.65f;
+                    float rainMin = 0.7f;
 
                     Rain = InverseScaling(Rain, rainMin, max);
 
@@ -78,7 +78,7 @@ namespace SAIN.Components.BotController
             if (GameWorldComponent.Instance.WinterActive)
             {
                 weathermodifier = Mathf.Clamp(weathermodifier, 0.35f, 1f);
-                Logger.LogWarning("Snow Active");
+                //Logger.LogWarning("Snow Active");
             }
 
             return weathermodifier;
@@ -132,7 +132,7 @@ namespace SAIN.Components.BotController
             }
             */
 
-            fogScaleMin = 0.2f;
+            fogScaleMin = 0.33f;
 
             float fogModifier = InverseScaling(fogValue, fogScaleMin, 1f);
 
@@ -201,12 +201,12 @@ namespace SAIN.Components.BotController
                 // Cloudy
                 if (cloudsScaled <= 0.66)
                 {
-                    minScaledClouds = 0.75f;
+                    minScaledClouds = 0.8f;
                 }
                 // Heavy Overcast
                 else
                 {
-                    minScaledClouds = 0.5f;
+                    minScaledClouds = 0.66f;
                 }
             }
 
