@@ -271,6 +271,18 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             tryAddEnemy(player);
         }
 
+        public bool IsBotInBotsGroup(BotOwner botOwner)
+        {
+            int count = BotOwner.BotsGroup.MembersCount;
+            for (int i = 0; i < count; i++)
+            {
+                var member = BotOwner.BotsGroup.Member(i);
+                if (member == null) continue;
+                if (member.name == botOwner.name) return true;
+            }
+            return false;
+        }
+
         private Enemy tryAddEnemy(IPlayer enemyPlayer)
         {
             if (enemyPlayer == null)
@@ -291,10 +303,18 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return null;
             }
 
-            if (enemyPlayer.IsAI && enemyPlayer.AIData?.BotOwner == null)
+            if (enemyPlayer.IsAI)
             {
-                Logger.LogDebug("Cannot add ai as enemy with null Botowner");
-                return null;
+                BotOwner botOwner = enemyPlayer.AIData?.BotOwner;
+                if (botOwner == null)
+                {
+                    Logger.LogDebug("Cannot add ai as enemy with null Botowner");
+                    return null;
+                }
+                if (IsBotInBotsGroup(botOwner))
+                {
+                    return null;
+                }
             }
 
             PlayerComponent enemyPlayerComponent = getEnemyPlayerComponent(enemyPlayer);
@@ -312,8 +332,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             EnemyInfo enemyInfo = getEnemyInfo(enemyPlayer);
             if (enemyInfo == null)
             {
-                string debugString = $"Player [[{enemyPlayer.Profile.Nickname}] : Side: [{enemyPlayer.Profile.Side}]] is not in Botowner's [[{Player.Profile.Nickname}] : Side: [{Player.Profile.Side}]] EnemyInfos dictionary.: ";
-                Logger.LogDebug(debugString);
+                //string debugString = $"Player [[{enemyPlayer.Profile.Nickname}] : Side: [{enemyPlayer.Profile.Side}]] is not in Botowner's [[{Player.Profile.Nickname}] : Side: [{Player.Profile.Side}]] EnemyInfos dictionary.: ";
+                //Logger.LogDebug(debugString);
                 return null;
             }
 

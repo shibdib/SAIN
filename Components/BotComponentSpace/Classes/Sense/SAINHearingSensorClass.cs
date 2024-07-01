@@ -195,6 +195,11 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
+            if (player.ProfileId == Bot.ProfileId)
+            {
+                return;
+            }
+
             var enemy = Bot.EnemyController.CheckAddEnemy(player);
             if (enemy == null)
             {

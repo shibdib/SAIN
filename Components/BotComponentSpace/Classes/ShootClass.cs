@@ -29,6 +29,7 @@ namespace SAIN.SAINComponent.Classes
             }
             if (BotComponent.Player.IsSprintEnabled)
             {
+                BotOwner.AimingData?.LoseTarget();
                 return;
             }
 
@@ -47,6 +48,7 @@ namespace SAIN.SAINComponent.Classes
 
             if (BotOwner.WeaponManager.Reload.Reloading)
             {
+                BotOwner.AimingData?.LoseTarget();
                 return;
             }
 
@@ -240,9 +242,9 @@ namespace SAIN.SAINComponent.Classes
             }
 
             BotOwner.AimingData.SetTarget(pointToShoot.Value);
-            if (!BotOwner.AimingData.IsReady && !checkSteerDirection(30f))
+            if (!BotOwner.AimingData.IsReady && !checkSteerDirection(20f))
             {
-                BotComponent.Steering.LookToPoint(BotOwner.AimingData.EndTargetPoint, 200f);
+                BotComponent.Steering.LookToPoint(BotOwner.AimingData.EndTargetPoint, 250f);
                 return;
             }
 

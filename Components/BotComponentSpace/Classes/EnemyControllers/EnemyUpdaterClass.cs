@@ -13,28 +13,40 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Bot.CoroutineManager.Add(enemyUpdater(), nameof(enemyUpdater));
-            Bot.CoroutineManager.Add(enemyVisionCheck(), nameof(enemyVisionCheck));
+            //Bot.CoroutineManager.Add(enemyUpdater(), nameof(enemyUpdater));
+            //Bot.CoroutineManager.Add(enemyVisionCheck(), nameof(enemyVisionCheck));
         }
-
 
         public void Update()
         {
+            foreach (var kvp in Enemies)
+            {
+                string profileId = kvp.Key;
+                Enemy enemy = kvp.Value;
+                if (!checkValid(profileId, enemy))
+                    continue;
+
+                enemy.Update();
+                enemy.Vision.EnemyVisionChecker.CheckVision(out _);
+            }
+
+            removeInvalid();
+
             if (Bot.BotActive)
             {
                 // Very clumsy way of checking this, but I just want to make sure.
                 // Remove later once its confirmed working fine.
                 if (_timeLastUpdated + 1f > Time.time)
                 {
-                    Logger.LogError($"Enemy Updater is not running!");
-                    Bot.CoroutineManager.Remove(nameof(enemyUpdater));
-                    Bot.CoroutineManager.Add(enemyUpdater(), nameof(enemyUpdater));
+                    //Logger.LogError($"Enemy Updater is not running!");
+                    //Bot.CoroutineManager.Remove(nameof(enemyUpdater));
+                    //Bot.CoroutineManager.Add(enemyUpdater(), nameof(enemyUpdater));
                 }
                 if (_timeLastVisionChecked + 1f > Time.time)
                 {
-                    Logger.LogError($"Enemy Vision Checker is not running!");
-                    Bot.CoroutineManager.Remove(nameof(enemyVisionCheck));
-                    Bot.CoroutineManager.Add(enemyVisionCheck(), nameof(enemyVisionCheck));
+                    //Logger.LogError($"Enemy Vision Checker is not running!");
+                    //Bot.CoroutineManager.Remove(nameof(enemyVisionCheck));
+                    //Bot.CoroutineManager.Add(enemyVisionCheck(), nameof(enemyVisionCheck));
                 }
             }
         }
