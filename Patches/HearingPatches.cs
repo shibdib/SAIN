@@ -332,23 +332,6 @@ namespace SAIN.Patches.Hearing
             }
         }
     }
-    public class LightOnSoundPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(Player), "SpawnInHands");
-        }
-
-        [PatchPostfix]
-        public static void PatchPostfix(Player __instance, Item item)
-        {
-            AudioClip itemClip = Singleton<GUISounds>.Instance.GetItemClip(item.ItemSound, EInventorySoundType.pickup);
-            if (itemClip != null)
-            {
-                SAINBotController.Instance?.BotHearing.PlayAISound(__instance.ProfileId, SAINSoundType.GearSound, __instance.Position, 30f, 1f);
-            }
-        }
-    }
 
     public class PlaySwitchHeadlightSoundPatch : ModulePatch
     {

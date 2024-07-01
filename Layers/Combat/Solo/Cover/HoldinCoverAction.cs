@@ -59,7 +59,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 _nextCheckPosTime = Time.time + 1f;
                 Vector3 coverPos = CoverInUse.Position;
-                if ((coverPos - _position).sqrMagnitude > 0.25f)
+                if (!Bot.Player.IsInPronePose && (coverPos - _position).sqrMagnitude > 0.25f)
                 {
                     _position = coverPos;
                     Bot.Mover.GoToPoint(coverPos, out _, 0.25f);
@@ -122,8 +122,30 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     ChangeLeanTimer = Time.time + 2f * Random.Range(0.66f, 1.33f);
                     break;
             }
+
+            if (checkLeanIntoObject(newLean))
+            {
+                return;
+            }
             CurrentLean = newLean;
             Bot.Mover.FastLean(newLean);
+        }
+
+        private const float RAYCAST_LEAN_HITOBJECT_DIST = 0.5f;
+
+        private bool checkLeanIntoObject(LeanSetting lean)
+        {
+            Vector3 headPos = Bot.Transform.HeadPosition;
+            Vector3 rayEnd = lean == LeanSetting.Right ? Bot.Transform.Right() : Bot.Transform.Left();
+            switch (lean)
+            {
+                case LeanSetting.Right:
+                case LeanSetting.Left:
+                    return Vector.Raycast(headPos, headPos + (rayEnd * RAYCAST_LEAN_HITOBJECT_DIST), LayerMaskClass.HighPolyWithTerrainMask);
+
+                default:
+                    return false;
+            }
         }
 
         private bool ShallHoldLean()
@@ -206,7 +228,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 stringBuilder.AppendLabeledValue("Path Length", $"{CoverInUse.PathLength}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Straight Distance", $"{(CoverInUse.Position - Bot.Position).magnitude}", Color.white, Color.yellow, true);
             }
-
         }
     }
 }

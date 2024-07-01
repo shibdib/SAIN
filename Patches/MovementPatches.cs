@@ -17,6 +17,10 @@ namespace SAIN.Patches.Movement
         [PatchPrefix]
         public static bool PatchPrefix(GClass423 __instance, BotOwner ___botOwner_0, Vector3 pos, bool slowAtTheEnd, bool getUpWithCheck)
         {
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            {
+                return true;
+            }
             if (___botOwner_0.BotLay.IsLay &&
                 getUpWithCheck)
             {
@@ -37,6 +41,29 @@ namespace SAIN.Patches.Movement
             ___botOwner_0.WeaponManager.Stationary.StartMove();
             __instance.SlowAtTheEnd = slowAtTheEnd;
             return true;
+        }
+    }
+
+    public class CrawlPatch2 : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotMover), "DoProne");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(BotOwner ___botOwner_0, bool val)
+        {
+            if (!val)
+            {
+                return true;
+            }
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            {
+                return true;
+            }
+            ___botOwner_0.GetPlayer.MovementContext.IsInPronePose = true;
+            return false;
         }
     }
 

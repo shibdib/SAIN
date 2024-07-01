@@ -27,15 +27,25 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
+        private bool isEnemyAlwaysInVisibleDistance()
+        {
+            if (Enemy.Vision.AngleToEnemy < 30f &&
+                Enemy.KnownPlaces.EnemyDistanceFromLastKnown < 3 &&
+                SAINBotController.Instance.TimeVision.VisibilityPercent > 50f)
+            {
+                return true;
+            }
+            return false;
+        }
+
         private float CalcVisionDistance()
         {
-            float angleMod = calcAngleMod();
-            if (angleMod > 0f && 
-                Enemy.KnownPlaces.EnemyDistanceFromLastKnown < 3 && 
-                SAINBotController.Instance.TimeVision.VisibilityPercent > 50f)
+            if (isEnemyAlwaysInVisibleDistance())
             {
                 return 1000f;
             }
+
+            float angleMod = calcAngleMod();
 
             float moveMod = calcMovementMod();
             float gearMod = calcGearStealthMod();
@@ -91,6 +101,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             float minAngle = 15f;
             if (angleToEnemy <= minAngle)
             {
+                if (Bot.PlayerComponent.Equipment.CurrentWeapon?.HasOptic == true)
+                {
+                    return 3f;
+                }
                 return 1.5f;
             }
 

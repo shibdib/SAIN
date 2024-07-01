@@ -97,11 +97,15 @@ namespace SAIN
                 typeof(Patches.Movement.EncumberedPatch),
                 typeof(Patches.Movement.DoorOpenerPatch),
                 typeof(Patches.Movement.CrawlPatch),
+                typeof(Patches.Movement.CrawlPatch2),
 
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
                 typeof(Patches.Hearing.OnMakingShotPatch),
                 typeof(Patches.Hearing.HearingSensorPatch),
 
+                typeof(Patches.Hearing.ToggleSoundPatch),
+                typeof(Patches.Hearing.SpawnInHandsSoundPatch),
+                typeof(Patches.Hearing.PlaySwitchHeadlightSoundPatch),
                 typeof(Patches.Hearing.BulletImpactPatch),
                 typeof(Patches.Hearing.TreeSoundPatch),
                 typeof(Patches.Hearing.DoorBreachSoundPatch),
