@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.UI;
 using HarmonyLib;
 using SAIN.Components;
 using SAIN.Components.Helpers;
@@ -219,7 +220,15 @@ namespace SAIN.Patches.Hearing
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ____botOwner)
         {
-            return SAINPlugin.IsBotExluded(____botOwner);
+            if (!SAINPlugin.IsBotExluded(____botOwner))
+            {
+                return false;
+            }
+            if (____botOwner == null || ____botOwner.GetPlayer == null)
+            {
+                return false;
+            }
+            return true;
         }
     }
 
@@ -236,11 +245,11 @@ namespace SAIN.Patches.Hearing
         [PatchPrefix]
         public static bool PatchPrefix(AIData __instance)
         {
-            if (__instance.IsAI && 
-                SAINPlugin.IsBotExluded(__instance.BotOwner))
-            {
-                return true;
-            }
+            //if (__instance.IsAI && 
+            //    SAINPlugin.IsBotExluded(__instance.BotOwner))
+            //{
+            //    return true;
+            //}
             AIFlareEnabled.SetValue(__instance, true);
             return false;
         }
@@ -285,6 +294,73 @@ namespace SAIN.Patches.Hearing
                 Player player = _Player.Invoke(playerBridge, null) as Player;
                 SAINSoundTypeHandler.AISoundFileChecker(soundName, player);
             }
+        }
+    }
+
+    public class ToggleSoundPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "PlayToggleSound");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(Player __instance, bool previousState, bool isOn, Vector3 ___SpeechLocalPosition)
+        {
+            if (previousState != isOn)
+            {
+                float baseRange = 5f;
+                SAINBotController.Instance?.BotHearing.PlayAISound(__instance.ProfileId, SAINSoundType.GearSound, __instance.Position + ___SpeechLocalPosition, baseRange, 1f);
+            }
+        }
+    }
+
+    public class SpawnInHandsSoundPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "SpawnInHands");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(Player __instance, Item item)
+        {
+            AudioClip itemClip = Singleton<GUISounds>.Instance.GetItemClip(item.ItemSound, EInventorySoundType.pickup);
+            if (itemClip != null)
+            {
+                SAINBotController.Instance?.BotHearing.PlayAISound(__instance.ProfileId, SAINSoundType.GearSound, __instance.Position, 30f, 1f);
+            }
+        }
+    }
+    public class LightOnSoundPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "SpawnInHands");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(Player __instance, Item item)
+        {
+            AudioClip itemClip = Singleton<GUISounds>.Instance.GetItemClip(item.ItemSound, EInventorySoundType.pickup);
+            if (itemClip != null)
+            {
+                SAINBotController.Instance?.BotHearing.PlayAISound(__instance.ProfileId, SAINSoundType.GearSound, __instance.Position, 30f, 1f);
+            }
+        }
+    }
+
+    public class PlaySwitchHeadlightSoundPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), "PlaySwitchHeadlightSound");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(Player __instance, Vector3 ___SpeechLocalPosition)
+        {
+            SAINBotController.Instance?.BotHearing.PlayAISound(__instance.ProfileId, SAINSoundType.GearSound, __instance.Position + ___SpeechLocalPosition, 5f, 1f);
         }
     }
 

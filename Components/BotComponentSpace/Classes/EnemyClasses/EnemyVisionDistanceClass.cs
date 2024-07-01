@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset.GlobalSettings;
@@ -28,9 +29,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float CalcVisionDistance()
         {
+            float angleMod = calcAngleMod();
+            if (angleMod > 0f && 
+                Enemy.KnownPlaces.EnemyDistanceFromLastKnown < 3 && 
+                SAINBotController.Instance.TimeVision.VisibilityPercent > 50f)
+            {
+                return 1000f;
+            }
+
             float moveMod = calcMovementMod();
             float gearMod = calcGearStealthMod();
-            float angleMod = calcAngleMod();
             float flareMod = getFlare();
 
             SAINEnemyStatus status = Enemy.Status;

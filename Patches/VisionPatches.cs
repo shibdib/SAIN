@@ -449,6 +449,7 @@ namespace SAIN.Patches.Vision
             PlayerComponent playerComponent = GameWorldComponent.Instance?.PlayerTracker.GetPlayerComponent(____player?.ProfileId);
             if (playerComponent != null)
             {
+                SAINBotController.Instance.BotHearing.PlayAISound(playerComponent, SAINSoundType.GearSound, playerComponent.Player.WeaponRoot.position, 60f, 1f, true);
                 var flashLight = playerComponent.Flashlight;
                 flashLight.CheckDevice();
 

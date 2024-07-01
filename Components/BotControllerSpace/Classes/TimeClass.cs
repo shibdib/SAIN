@@ -25,6 +25,7 @@ namespace SAIN.Components.BotController
             }
         }
 
+        public float VisibilityPercent { get; private set; }
         public DateTime GameDateTime { get; private set; }
         public float TimeVisionDistanceModifier { get; private set; } = 1f;
         public float TimeGainSightModifier { get; private set; } = 1f;
@@ -36,7 +37,9 @@ namespace SAIN.Components.BotController
         {
             float time = calcTime();
             TimeOfDay = getTimeEnum(time);
-            float timemodifier = getModifier(time, TimeOfDay);
+            float timemodifier = getModifier(time, TimeOfDay, out float visibilityPercent);
+            VisibilityPercent = visibilityPercent;
+
             //if (_nextTestTime < Time.time)
             //{
             //    StringBuilder builder = new StringBuilder();
@@ -62,7 +65,7 @@ namespace SAIN.Components.BotController
             return time;
         }
 
-        private static float getModifier(float time, ETimeOfDay timeOfDay)
+        private static float getModifier(float time, ETimeOfDay timeOfDay, out float percentage)
         {
             var nightSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
             float max = 1f;
@@ -74,9 +77,11 @@ namespace SAIN.Components.BotController
             switch (timeOfDay)
             {
                 default:
+                    percentage = 100f;
                     return max;
 
                 case ETimeOfDay.Night:
+                    percentage = 0f;
                     return min;
 
                 case ETimeOfDay.Dawn:
@@ -91,6 +96,7 @@ namespace SAIN.Components.BotController
                     ratio = 1f - current / difference;
                     break;
             }
+            percentage = ratio * 100f;
             float result = Mathf.Lerp(min, max, ratio);
             return result;
         }
