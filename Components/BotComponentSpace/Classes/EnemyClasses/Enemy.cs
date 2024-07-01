@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class Enemy : SAINBase, ISAINClass
+    public class Enemy : BotBaseClass, ISAINClass
     {
         public event Action<Enemy, SAINSoundType, bool> OnEnemyHeard;
 

@@ -2,6 +2,7 @@ using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.SAINComponent.Classes.Decision;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Info;
@@ -11,7 +12,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
-    public class GroupTalk : SAINBase, ISAINClass
+    public class GroupTalk : BotBaseClass, ISAINClass
     {
         public GroupTalk(BotComponent bot) : base(bot)
         {
@@ -38,7 +39,6 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
-            updateConfigSettings();
         }
 
         public void Update()
@@ -799,7 +799,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             return Vector3.Dot(enemyDirectionNormalized, direction) > threshold;
         }
 
-        public void updateConfigSettings()
+        public void updateConfigSettings(SAINPresetClass preset)
         {
             var squadTalk = SAINPlugin.LoadedPreset?.GlobalSettings?.SquadTalk;
             if (squadTalk != null)

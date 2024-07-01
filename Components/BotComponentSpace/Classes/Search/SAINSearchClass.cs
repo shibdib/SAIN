@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Search
 {
-    public class SAINSearchClass : SAINBase, ISAINClass
+    public class SAINSearchClass : BotBaseClass, ISAINClass
     {
         public ESearchMove NextState { get; private set; }
         public ESearchMove CurrentState { get; private set; }

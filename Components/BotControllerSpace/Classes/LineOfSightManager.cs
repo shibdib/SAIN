@@ -1,4 +1,5 @@
 using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.SAINComponent;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace SAIN.Components
             var bots = Bots;
             if (bots != null && bots.Count > 0)
             {
+                _localBotList.Clear();
                 _localBotList.AddRange(bots.Values);
                 _localBotList.Sort((x, y) => x.LastCheckVisibleTime.CompareTo(y.LastCheckVisibleTime));
 
@@ -53,12 +55,12 @@ namespace SAIN.Components
         static LineOfSightManager()
         {
             PresetHandler.OnPresetUpdated += updateSettings;
-            updateSettings();
+            updateSettings(SAINPresetClass.Instance);
         }
 
-        private static void updateSettings()
+        private static void updateSettings(SAINPresetClass preset)
         {
-            maxBotsPerFrame = Mathf.RoundToInt(SAINPlugin.LoadedPreset.GlobalSettings.Performance.MaxBotsToCheckVisionPerFrame);
+            maxBotsPerFrame = Mathf.RoundToInt(preset.GlobalSettings.Performance.MaxBotsToCheckVisionPerFrame);
         }
     }
 }

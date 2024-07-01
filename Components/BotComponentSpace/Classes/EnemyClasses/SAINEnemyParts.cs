@@ -35,36 +35,46 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
+        public Vector3 LastSuccessPosition { get; private set; }
+
         private float _lastSuccessTime;
 
-        public bool CheckBodyLineOfSight(Vector3 origin, float maxRange)
+        public bool CheckBodyLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)
         {
             if (LineOfSight)
             {
+                successPoint = LastSuccessPosition;
                 return true;
             }
 
             SAINEnemyPartData checkingPart = Parts[EBodyPart.Chest];
-            if (checkingPart.CheckLineOfSight(origin, maxRange))
+            if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint))
             {
+                if (successPoint != null)
+                    LastSuccessPosition = successPoint.Value;
+
                 _lastSuccessTime = Time.time;
                 return true;
             }
-
+            successPoint = null;
             return false;
         }
 
-        public bool CheckRandomPartLineOfSight(Vector3 origin, float maxRange)
+        public bool CheckRandomPartLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)
         {
             if (LineOfSight)
             {
+                successPoint = LastSuccessPosition;
                 return true;
             }
 
             if (_lastCheckSuccessPart != null)
             {
-                if (_lastCheckSuccessPart.CheckLineOfSight(origin, maxRange))
+                if (_lastCheckSuccessPart.CheckLineOfSight(origin, maxRange, out successPoint))
                 {
+                    if (successPoint != null)
+                        LastSuccessPosition = successPoint.Value;
+
                     _lastSuccessTime = Time.time;
                     return true;
                 }
@@ -72,13 +82,17 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             SAINEnemyPartData checkingPart = getNextPart();
-            if (checkingPart.CheckLineOfSight(origin, maxRange))
+            if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint))
             {
+                if (successPoint != null)
+                    LastSuccessPosition = successPoint.Value;
+
                 _lastCheckSuccessPart = checkingPart;
                 _lastSuccessTime = Time.time;
                 return true;
             }
 
+            successPoint = null;
             _lastSuccessTime = 0f;
             return false;
         }

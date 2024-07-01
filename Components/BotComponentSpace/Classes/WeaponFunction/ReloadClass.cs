@@ -8,7 +8,7 @@ using static EFT.InventoryLogic.Weapon;
 
 namespace SAIN.Components.BotComponentSpace.Classes
 {
-    public class ReloadClass : SAINBase, ISAINClass
+    public class ReloadClass : BotBaseClass, ISAINClass
     {
         public bool TryReload()
         {

@@ -9,7 +9,7 @@ using SAIN.SAINComponent.Classes.Info;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
-    public class Firemode : SAINBase, ISAINClass
+    public class Firemode : BotBaseClass, ISAINClass
     {
         public Firemode(BotComponent sain) : base(sain)
         {

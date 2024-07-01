@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
-    public class DogFightDecisionClass : SAINBase, ISAINClass
+    public class DogFightDecisionClass : BotBaseClass, ISAINClass
     {
         public DogFightDecisionClass(BotComponent bot) : base(bot) { }
 

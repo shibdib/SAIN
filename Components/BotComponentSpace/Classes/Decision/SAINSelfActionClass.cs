@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
-    public class SAINSelfActionClass : SAINBase, ISAINClass
+    public class SAINSelfActionClass : BotBaseClass, ISAINClass
     {
         public SAINSelfActionClass(BotComponent sain) : base(sain)
         {

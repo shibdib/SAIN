@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
 {
-    public class SAINFriendlyFireClass : SAINBase, ISAINClass
+    public class SAINFriendlyFireClass : BotBaseClass, ISAINClass
     {
         public bool ClearShot => FriendlyFireStatus != FriendlyFireStatus.FriendlyBlock;
         public FriendlyFireStatus FriendlyFireStatus { get; private set; }

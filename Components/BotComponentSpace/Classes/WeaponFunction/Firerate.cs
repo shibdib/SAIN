@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
-    public class Firerate : SAINBase, ISAINClass
+    public class Firerate : BotBaseClass, ISAINClass
     {
         public Firerate(BotComponent sain) : base(sain)
         {

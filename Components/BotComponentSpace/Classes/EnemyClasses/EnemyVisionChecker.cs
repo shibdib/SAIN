@@ -1,6 +1,6 @@
 ﻿using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using SAIN.Helpers;
-using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
 using System;
 using UnityEngine;
@@ -10,6 +10,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
     public class EnemyVisionChecker : EnemyBase
     {
         public event Action<Enemy, bool> OnEnemyLineOfSightChanged;
+        public Vector3 LastSeenPoint { get; private set; }
         public bool LineOfSight => EnemyParts.LineOfSight;
         public SAINEnemyParts EnemyParts { get; private set; }
 
@@ -39,26 +40,31 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             didCheck = true;
             bool wasInLOS = LineOfSight;
-            if (checkLOS() != wasInLOS)
+            if (checkLOS(out Vector3? successPoint) != wasInLOS)
             {
                 OnEnemyLineOfSightChanged?.Invoke(Enemy, LineOfSight);
             }
+            if (successPoint != null)
+            {
+                LastSeenPoint = successPoint.Value;
+            }
         }
 
-        private bool checkLOS()
+        private bool checkLOS(out Vector3? seenPosition)
         {
+            Vector3 lookPoint = _transform.EyePosition;
             float maxRange = AIVisionRangeLimit();
-            if (EnemyParts.CheckBodyLineOfSight(_transform.EyePosition, maxRange))
+            if (EnemyParts.CheckBodyLineOfSight(lookPoint, maxRange, out seenPosition))
             {
                 return true;
             }
-            if (EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition, maxRange))
+            if (EnemyParts.CheckRandomPartLineOfSight(lookPoint, maxRange, out seenPosition))
             {
                 return true;
             }
             // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
             if (Enemy.IsCurrentEnemy && !Enemy.IsAI &&
-                EnemyParts.CheckRandomPartLineOfSight(_transform.EyePosition, maxRange))
+                EnemyParts.CheckRandomPartLineOfSight(lookPoint, maxRange, out seenPosition))
             {
                 return true;
             }
@@ -118,15 +124,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        static EnemyVisionChecker()
+        public override void UpdatePresetSettings(SAINPresetClass preset)
         {
-            PresetHandler.OnPresetUpdated += updateSettings;
-            updateSettings();
-        }
-
-        private static void updateSettings()
-        {
-            var aiLimit = GlobalSettingsClass.Instance.AILimit;
+            var aiLimit = preset.GlobalSettings.AILimit;
             _farDistance = aiLimit.MaxVisionRanges[AILimitSetting.Far].Sqr();
             _veryFarDistance = aiLimit.MaxVisionRanges[AILimitSetting.VeryFar].Sqr();
             _narniaDistance = aiLimit.MaxVisionRanges[AILimitSetting.Narnia].Sqr();

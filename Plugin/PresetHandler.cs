@@ -13,8 +13,8 @@ namespace SAIN.Plugin
 
         private const string Settings = "ConfigSettings";
 
-        public static Action OnPresetUpdated;
-        public static Action OnEditorSettingsChanged;
+        public static event Action<SAINPresetClass> OnPresetUpdated;
+        public static event Action<PresetEditorDefaults> OnEditorSettingsChanged;
 
         public static readonly List<SAINPresetDefinition> CustomPresetOptions = new List<SAINPresetDefinition>();
 
@@ -129,6 +129,7 @@ namespace SAIN.Plugin
                 EditorDefaults.SelectedCustomPreset = string.Empty;
             }
             SaveObjectToJson(EditorDefaults, Settings, PresetsFolder);
+            OnEditorSettingsChanged?.Invoke(EditorDefaults);
         }
 
         public static void ImportEditorDefaults()
@@ -145,7 +146,7 @@ namespace SAIN.Plugin
 
         public static void UpdateExistingBots()
         {
-            OnPresetUpdated?.Invoke();
+            OnPresetUpdated?.Invoke(LoadedPreset);
             LoadedPreset?.GlobalSettings.Update();
             LoadedPreset?.PersonalityManager.Update();
             LoadedPreset?.BotSettings.Update();

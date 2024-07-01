@@ -5,7 +5,7 @@ using static SAIN.SAINComponent.Classes.Search.SearchReasonsStruct;
 
 namespace SAIN.SAINComponent.Classes.Search
 {
-    public class SearchDeciderClass : SAINSubBase<SAINSearchClass>
+    public class SearchDeciderClass : BotSubClassBase<SAINSearchClass>
     {
         public SearchDeciderClass(SAINSearchClass searchClass) : base(searchClass)
         {

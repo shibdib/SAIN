@@ -5,17 +5,12 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public abstract class EnemyBase
+    public abstract class EnemyBase : PresetUpdaterBase
     {
-        public EnemyBase(Enemy enemy)
+        public EnemyBase(Enemy enemy) : base(enemy)
         {
             Enemy = enemy;
             EnemyPerson = enemy.EnemyPerson;
-        }
-
-        public virtual void OnEnemyForgotten(Enemy enemy)
-        {
-
         }
 
         protected Enemy Enemy { get; private set; }

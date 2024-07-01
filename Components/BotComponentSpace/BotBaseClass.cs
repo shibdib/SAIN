@@ -1,13 +1,11 @@
 ﻿using EFT;
-using SAIN.Preset.BotSettings.SAINSettings;
 using SAIN.Preset.GlobalSettings;
-using SAIN.Preset.Personalities;
 
 namespace SAIN.SAINComponent
 {
-    public abstract class SAINBase
+    public abstract class BotBaseClass : PresetUpdaterBase
     {
-        public SAINBase(BotComponent bot)
+        public BotBaseClass(BotComponent bot) : base(bot)
         {
             Bot = bot;
         }
@@ -19,9 +17,9 @@ namespace SAIN.SAINComponent
         public GlobalSettingsClass GlobalSettings => GlobalSettingsClass.Instance;
     }
 
-    public abstract class SAINSubBase<T> where T : ISAINClass
+    public abstract class BotSubClassBase<T> : PresetUpdaterBase where T : ISAINClass
     {
-        public SAINSubBase(T sainClass)
+        public BotSubClassBase(T sainClass) : base(sainClass)
         {
             BaseClass = sainClass;
         }

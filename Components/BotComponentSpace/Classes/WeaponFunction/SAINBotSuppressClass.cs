@@ -11,7 +11,7 @@ using SAIN.Helpers;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
-    public class SAINBotSuppressClass : SAINBase, ISAINClass
+    public class SAINBotSuppressClass : BotBaseClass, ISAINClass
     {
         public ESuppressionStatus SuppressionStatus { get; private set; }
 

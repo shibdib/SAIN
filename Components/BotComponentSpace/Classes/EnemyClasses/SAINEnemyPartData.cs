@@ -63,21 +63,24 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private int _index;
         private readonly int _indexMax;
 
-        public bool CheckLineOfSight(Vector3 origin, float maxRange)
+        public bool CheckLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)
         {
             if (LineOfSight)
             {
+                successPoint = _lastSuccessCastPoint;
                 return true;
             }
 
             if (_nextCheckTime > Time.time)
             {
+                successPoint = null;
                 return false;
             }
             _nextCheckTime = Time.time + 0.1f;
 
             BodyPartCollider collider = getCollider();
-            Vector3 castPoint = _lastSuccessCastPoint ?? getCastPoint(origin, collider);
+            Vector3 castPoint = getCastPoint(origin, collider);
+            //Vector3 castPoint = _lastSuccessCastPoint ?? getCastPoint(origin, collider);
 
             Vector3 direction = castPoint - origin;
 
@@ -96,6 +99,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 _lastSuccessPart = null;
                 _lastSuccessCastPoint = null;
             }
+
+            successPoint = _lastSuccessCastPoint;
 
             if (SAINPlugin.DebugMode &&
                 IsYourPlayer &&

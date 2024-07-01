@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class SAINEnemyController : SAINBase, ISAINClass
+    public class SAINEnemyController : BotBaseClass, ISAINClass
     {
         public event Action<Enemy> OnEnemyAdded;
         public event Action<string, Enemy> OnEnemyRemoved;
@@ -28,27 +28,23 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public SAINEnemyController(BotComponent sain) : base(sain)
         {
+            _enemyUpdater = sain.gameObject.AddComponent<EnemyUpdaterComponent>();
             EnemyLists = new EnemyListsClass(this);
-            _enemyUpdater = new EnemyUpdaterClass(this);
             _enemyChooser = new EnemyChooserClass(this);
         }
 
         public void Init()
         {
+            _enemyUpdater.Init(Bot);
             GameWorldComponent.Instance.PlayerTracker.AlivePlayers.OnPlayerComponentRemoved += RemoveEnemy;
             EnemyLists.Init();
-
             var knownEnemies = EnemyLists.GetEnemyList(EEnemyListType.Known);
             knownEnemies.OnListEmptyOrGetFirst += SetAtPeace;
             knownEnemies.OnListEmptyOrGetFirstHuman += changeHaveHumanActive;
-
             var enemiesInLOS = EnemyLists.GetEnemyList(EEnemyListType.InLineOfSight);
             enemiesInLOS.OnListEmptyOrGetFirstHuman += changeHumaninLOS;
-
             BotOwner.Memory.OnAddEnemy += enemyAdded;
             addAllEnemies();
-
-            _enemyUpdater.Init();
             _enemyChooser.Init();
         }
 
@@ -74,11 +70,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Update()
         {
             compareEnemyLists();
-
             EnemyLists.Update();
-            _enemyUpdater.Update();
             _enemyChooser.Update();
-
             updateDebug();
         }
 
@@ -143,10 +136,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Dispose()
         {
-            GameWorldComponent.Instance.PlayerTracker.AlivePlayers.OnPlayerComponentRemoved -= RemoveEnemy;
+            GameObject.Destroy(_enemyUpdater);
 
+            GameWorldComponent.Instance.PlayerTracker.AlivePlayers.OnPlayerComponentRemoved -= RemoveEnemy;
             EnemyLists?.Dispose();
-            _enemyUpdater?.Dispose();
             _enemyChooser?.Dispose();
 
             BotMemoryClass memory = BotOwner?.Memory;
@@ -468,7 +461,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         }
 
         private readonly EnemyChooserClass _enemyChooser;
-        private readonly EnemyUpdaterClass _enemyUpdater;
+        private readonly EnemyUpdaterComponent _enemyUpdater;
 
         private bool _atPeace = true;
         private float _timePeaceStart;

@@ -16,6 +16,7 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(1f, 20f, 1f)]
         public float MinJobSize = 2;
 
+        [JsonIgnore]
         [Advanced]
         [MinMax(0.01f, 0.1f, 1000f)]
         [Hidden]

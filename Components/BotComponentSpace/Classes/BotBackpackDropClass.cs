@@ -13,7 +13,7 @@ namespace SAIN.SAINComponent.Classes
         NoBackpack = 3,
     }
 
-    public class BotBackpackDropClass : SAINBase, ISAINClass
+    public class BotBackpackDropClass : BotBaseClass, ISAINClass
     {
         public BotBackpackDropClass(BotComponent sain) : base(sain)
         {

@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes
         on = 1,
     }
 
-    public class SAINCoverClass : SAINBase, ISAINClass
+    public class SAINCoverClass : BotBaseClass, ISAINClass
     {
         public SAINCoverClass(BotComponent bot) : base(bot)
         {

@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,17 +9,38 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
-    public class ManualShootClass : SAINBase
+    public class ManualShootClass : BotBaseClass
     {
         public ManualShootClass(BotComponent bot) : base(bot) { }
 
         public void Update()
         {
-            if (Reason != EShootReason.None && 
-                (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 2f < Time.time || !BotOwner.ShootData.Shooting))
+            if (Reason != EShootReason.None)
             {
-                TryShoot(false, Vector3.zero);
+                if (!BotOwner.WeaponManager.HaveBullets || _timeStartManualShoot + 2f < Time.time || !BotOwner.ShootData.Shooting)
+                {
+                    TryShoot(false, Vector3.zero);
+                    return;
+                }
+                if (Shooting && !Bot.FriendlyFire.CheckFriendlyFire(ShootPosition))
+                {
+                    TryShoot(false, Vector3.zero);
+                }
+                return;
             }
+            if (Shooting && !isEnemyVisibleForShoot(Bot.Enemy) && !isEnemyVisibleForShoot(Bot.LastEnemy))
+            {
+                BotOwner.ShootData.EndShoot();
+            }
+        }
+
+        private bool isEnemyVisibleForShoot(Enemy enemy)
+        {
+            if (enemy != null && !enemy.IsVisible && enemy.TimeSinceSeen > 0.25f)
+            {
+                return false;
+            }
+            return true;
         }
 
         public bool TryShoot(bool value, Vector3 targetPos, bool checkFF = true, EShootReason reason = EShootReason.None)

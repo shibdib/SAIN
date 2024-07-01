@@ -9,14 +9,12 @@ using Random = UnityEngine.Random;
 
 namespace SAIN.SAINComponent.Classes.Info
 {
-    public class SAINBotInfoClass : SAINBase, ISAINClass
+    public class SAINBotInfoClass : BotBaseClass, ISAINClass
     {
         public SAINBotInfoClass(BotComponent sain) : base(sain)
         {
             Profile = new ProfileClass(sain);
             WeaponInfo = new WeaponInfoClass(sain);
-            PresetHandler.OnPresetUpdated += GetFileSettings;
-            GetFileSettings();
         }
 
         public void Init()
@@ -31,7 +29,6 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Dispose()
         {
-            PresetHandler.OnPresetUpdated -= GetFileSettings;
             WeaponInfo.Dispose();
         }
 

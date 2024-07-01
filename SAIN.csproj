@@ -255,7 +255,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EEnemyListType.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyList.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyListsClass.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyUpdaterClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyUpdaterComponent.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\BodyPartHitEffectClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\BodyPartStatus.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\BotMedicalBase.cs" />
@@ -267,6 +267,10 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyHearing.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyKnownChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\WeaponAIPresetHistory.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Sense\DispersionDictionary.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Sense\DispersionValues.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Sense\ESoundDispersionType.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Sense\SoundDispersionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Steering\EEnemySteerDir.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Steering\HeardSoundSteeringClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Steering\RandomLookClass.cs" />
@@ -284,6 +288,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Search\SAINEnemySearchClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINBotLookClass.cs" />
     <Compile Include="Components\BotComponentSpace\CoroutineManager.cs" />
+    <Compile Include="Components\BotComponentSpace\PresetUpdaterBase.cs" />
     <Compile Include="Components\BotComponentSpace\Routine.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverFinderStatus.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\ECoverFailReason.cs" />
@@ -602,7 +607,7 @@
     <Compile Include="Patches\GenericPatches.cs" />
     <Compile Include="Plugin\SAINPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Components\BotComponentSpace\SAINBase.cs" />
+    <Compile Include="Components\BotComponentSpace\BotBaseClass.cs" />
     <Compile Include="Plugin\VersionChecker\VersionChecker.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\ShootSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\LookSettings.cs" />

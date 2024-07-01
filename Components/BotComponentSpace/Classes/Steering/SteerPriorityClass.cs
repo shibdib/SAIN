@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class SteerPriorityClass : SAINSubBase<SAINSteeringClass>
+    public class SteerPriorityClass : BotSubClassBase<SAINSteeringClass>
     {
         public SteerPriority CurrentSteerPriority { get; private set; }
         public SteerPriority LastSteerPriority { get; private set; }
@@ -30,6 +30,15 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 object aimStatus = aimStatusField.GetValue(BotOwner.AimingData);
                 if (aimStatus == null)
+                {
+                    return AimStatus.NoTarget;
+                }
+
+                var status = (AimStatus)aimStatus;
+
+                if (status != AimStatus.NoTarget && 
+                    Bot.Enemy?.IsVisible == false && 
+                    Bot.LastEnemy?.IsVisible == false)
                 {
                     return AimStatus.NoTarget;
                 }
@@ -220,11 +229,9 @@ namespace SAIN.SAINComponent.Classes.Mover
         static SteerPriorityClass()
         {
             aimStatusField = AccessTools.Field(Helpers.HelpersGClass.AimDataType, "aimStatus_0");
-            PresetHandler.OnPresetUpdated += updateSettings;
-            updateSettings();
         }
 
-        private static void updateSettings()
+        private void updateSettings()
         {
         }
 

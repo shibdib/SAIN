@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
-    public class SAINDecisionClass : SAINBase, ISAINClass
+    public class SAINDecisionClass : BotBaseClass, ISAINClass
     {
         public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnDecisionMade;
 

@@ -161,12 +161,10 @@ namespace SAIN.Editor
 
         public static void Advanced()
         {
-
             AttributesGUI.EditAllValuesInObj(PresetHandler.EditorDefaults, out bool newEdit);
             if (newEdit)
             {
                 PresetHandler.ExportEditorDefaults();
-                PresetHandler.OnEditorSettingsChanged?.Invoke();
             }
 
             if (!SAINPlugin.DebugMode)

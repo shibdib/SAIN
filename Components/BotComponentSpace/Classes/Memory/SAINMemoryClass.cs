@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Memory
 {
-    public class SAINMemoryClass : SAINBase, ISAINClass
+    public class SAINMemoryClass : BotBaseClass, ISAINClass
     {
         public readonly EnemyTargetsClass EnemyTargets = new EnemyTargetsClass();
 

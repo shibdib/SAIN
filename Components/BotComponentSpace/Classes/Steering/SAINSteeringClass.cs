@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
@@ -9,7 +10,7 @@ using Random = UnityEngine.Random;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class SAINSteeringClass : SAINBase, ISAINClass
+    public class SAINSteeringClass : BotBaseClass, ISAINClass
     {
         public SteerPriority CurrentSteerPriority => _steerPriorityClass.CurrentSteerPriority;
         public SteerPriority LastSteerPriority => _steerPriorityClass.LastSteerPriority;
@@ -306,13 +307,8 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private Vector3 _lookDirection => Bot.LookDirection;
 
-        static SAINSteeringClass()
-        {
-            PresetHandler.OnPresetUpdated += updateSettings;
-            updateSettings();
-        }
 
-        private static void updateSettings()
+        public override void UpdatePresetSettings(SAINPresetClass preset)
         {
         }
     }

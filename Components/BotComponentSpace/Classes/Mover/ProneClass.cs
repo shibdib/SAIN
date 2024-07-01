@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class ProneClass : SAINBase, ISAINClass
+    public class ProneClass : BotBaseClass, ISAINClass
     {
         public ProneClass(BotComponent sain) : base(sain)
         {

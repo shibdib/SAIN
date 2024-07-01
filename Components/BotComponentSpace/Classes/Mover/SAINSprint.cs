@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         ShortCorner = 8,
     }
 
-    public class SAINSprint : SAINBase, ISAINClass
+    public class SAINSprint : BotBaseClass, ISAINClass
     {
         static SAINSprint()
         {
@@ -126,6 +126,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (_runToPointCoroutine != null)
                 Bot.StopCoroutine(_runToPointCoroutine);
 
+            BotOwner.AimingData?.LoseTarget();
             LastRunDestination = point;
             CurrentPath = path;
             _lastUrgency = urgency;

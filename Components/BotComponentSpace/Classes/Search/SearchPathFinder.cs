@@ -20,7 +20,7 @@ namespace SAIN.SAINComponent.Classes.Search
         LastCorner,
     }
 
-    public class SearchPathFinder : SAINSubBase<SAINSearchClass>
+    public class SearchPathFinder : BotSubClassBase<SAINSearchClass>
     {
         public Vector3? FinalDestination { get; private set; }
         public EnemyPlace TargetPlace { get; private set; }

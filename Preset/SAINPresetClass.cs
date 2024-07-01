@@ -12,35 +12,59 @@ namespace SAIN.Preset
 {
     public class SAINPresetClass
     {
+        public static SAINPresetClass Instance { get; private set; }
+
+        public SAINPresetDefinition Info { get; private set; }
+        public GlobalSettingsClass GlobalSettings { get; private set; }
+        public SAINBotSettingsClass BotSettings { get; private set; }
+        public PersonalityManagerClass PersonalityManager { get; private set; }
+        public GearStealthValuesClass GearStealthValuesClass { get; private set; }
+
         public SAINPresetClass(SAINPresetDefinition preset, bool isCopy = false)
         {
+            Instance = this;
             SAINPlugin.EditorDefaults.SelectedDefaultPreset = SAINDifficulty.none;
-            if (isCopy && SAINPlugin.LoadedPreset != null)
+            if (isCopy)
+            {
+                copyPreset(preset);
+            }
+            createSettings(preset, preset.BaseSAINDifficulty);
+        }
+
+        private void copyPreset(SAINPresetDefinition preset)
+        {
+            if (Instance != null)
             {
                 SAINPresetDefinition oldDefinition = SAINPlugin.LoadedPreset.Info;
                 SAINPlugin.LoadedPreset.Info = preset;
                 ExportAll(SAINPlugin.LoadedPreset);
                 SAINPlugin.LoadedPreset.Info = oldDefinition;
             }
-            Info = preset;
-            GlobalSettings = GlobalSettingsClass.ImportGlobalSettings(preset);
-            BotSettings = new BotSettings.SAINBotSettingsClass(this);
-            PersonalityManager = new PersonalityManagerClass(this);
-            GearStealthValuesClass = new GearStealthValuesClass(preset);
         }
 
-        public GearStealthValuesClass GearStealthValuesClass { get; private set; }
 
         public SAINPresetClass(SAINDifficulty sainDifficulty)
         {
+            Instance = this;
             EFTCoreSettings.UpdateCoreSettings();
-
             SAINPlugin.EditorDefaults.SelectedCustomPreset = string.Empty;
             SAINPlugin.EditorDefaults.SelectedDefaultPreset = sainDifficulty;
             PresetHandler.ExportEditorDefaults();
+            createSettings(null, sainDifficulty);
+        }
 
-            Info = SAINDifficultyClass.DefaultPresetDefinitions[sainDifficulty];
-            GlobalSettings = new GlobalSettingsClass();
+        private void createSettings(SAINPresetDefinition preset, SAINDifficulty difficulty)
+        {
+            if (preset == null)
+            {
+                Info = SAINDifficultyClass.DefaultPresetDefinitions[difficulty];
+                GlobalSettings = new GlobalSettingsClass();
+            }
+            else
+            {
+                Info = preset;
+                GlobalSettings = GlobalSettingsClass.ImportGlobalSettings(preset);
+            }
             BotSettings = new BotSettings.SAINBotSettingsClass(this);
             PersonalityManager = new PersonalityManagerClass(this);
             GearStealthValuesClass = new GearStealthValuesClass(Info);
@@ -240,10 +264,6 @@ namespace SAIN.Preset
             return result;
         }
 
-        public SAINPresetDefinition Info;
-        public GlobalSettingsClass GlobalSettings;
-        public BotSettings.SAINBotSettingsClass BotSettings;
-        public PersonalityManagerClass PersonalityManager;
 
         private static void LogExportError(Exception ex)
         {

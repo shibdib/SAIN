@@ -6,7 +6,7 @@ using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class PoseClass : SAINBase, ISAINClass
+    public class PoseClass : BotBaseClass, ISAINClass
     {
         public PoseClass(BotComponent sain) : base(sain)
         {

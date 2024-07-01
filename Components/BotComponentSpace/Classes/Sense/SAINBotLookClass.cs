@@ -9,7 +9,7 @@ using LookAllData = GClass522;
 
 namespace SAIN.SAINComponent.Classes
 {
-    public class SAINBotLookClass : SAINBase
+    public class SAINBotLookClass : BotBaseClass
     {
         public SAINBotLookClass(BotComponent component) : base(component)
         {

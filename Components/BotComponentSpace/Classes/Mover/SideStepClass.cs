@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class SideStepClass : SAINBase, ISAINClass
+    public class SideStepClass : BotBaseClass, ISAINClass
     {
         public SideStepClass(BotComponent sain) : base(sain)
         {

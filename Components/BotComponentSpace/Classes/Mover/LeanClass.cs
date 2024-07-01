@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class LeanClass : SAINBase, ISAINClass
+    public class LeanClass : BotBaseClass, ISAINClass
     {
         public LeanClass(BotComponent sain) : base(sain)
         {

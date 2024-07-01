@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -625,10 +626,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         static CoverFinderComponent()
         {
             PresetHandler.OnPresetUpdated += updateSettings;
-            updateSettings();
+            updateSettings(SAINPresetClass.Instance);
         }
 
-        private static void updateSettings()
+        private static void updateSettings(SAINPresetClass preset)
         {
             PerformanceMode = SAINPlugin.LoadedPreset.GlobalSettings.Performance.PerformanceMode;
             CoverMinHeight = SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverMinHeight;

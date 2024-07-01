@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Info
 {
-    public class SAINSquadClass : SAINBase, ISAINClass
+    public class SAINSquadClass : BotBaseClass, ISAINClass
     {
         public SAINSquadClass(BotComponent sain) : base(sain)
         {

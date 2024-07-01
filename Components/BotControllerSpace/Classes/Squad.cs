@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
@@ -21,12 +22,12 @@ namespace SAIN.BotController.Classes
         {
             CheckSquadTimer = Time.time + 10f;
             PresetHandler.OnPresetUpdated += updateSettings;
-            updateSettings();
+            updateSettings(SAINPresetClass.Instance);
         }
 
-        private void updateSettings()
+        private void updateSettings(SAINPresetClass preset)
         {
-            maxReportActionRangeSqr = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxRangeToReportEnemyActionNoHeadset.Sqr();
+            maxReportActionRangeSqr = preset.GlobalSettings.Hearing.MaxRangeToReportEnemyActionNoHeadset.Sqr();
         }
 
         private float maxReportActionRangeSqr;

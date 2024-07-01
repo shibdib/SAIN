@@ -3,6 +3,7 @@ using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections;
@@ -12,119 +13,7 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes
 {
-    public enum ESoundDispersionType
-    {
-        Footstep,
-        HeardShot,
-        HeardSuppressedShot,
-        UnheardShot,
-        UnheardSuppressedShot,
-    }
-
-    public class SoundDispersionClass : SAINBase
-    {
-
-        public SoundDispersionClass(BotComponent bot) : base(bot) { }
-
-        public void Calculate(BotSoundStruct sound)
-        {
-            sound.Dispersion = new SoundDispersionData
-            {
-                DispersionType = findType(sound),
-            };
-
-            calcDispersion(sound);
-        }
-
-        private ESoundDispersionType findType(BotSoundStruct sound)
-        {
-            bool heard = sound.Results.Heard;
-            switch (sound.Info.SoundType)
-            {
-                case SAINSoundType.Shot: 
-                    return heard ? ESoundDispersionType.HeardShot : ESoundDispersionType.UnheardShot;
-
-                case SAINSoundType.SuppressedShot: 
-                    return heard ? ESoundDispersionType.HeardSuppressedShot : ESoundDispersionType.UnheardSuppressedShot;
-
-                default: 
-                    return ESoundDispersionType.Footstep;
-            }
-        }
-
-        private void calcDispersion(BotSoundStruct sound)
-        {
-            calcDispersionAngle(sound);
-            calcDispersionDistance(sound);
-
-            sound.Dispersion.EstimatedPosition = estimatePosition(sound);
-        }
-
-        private Vector3 estimatePosition(BotSoundStruct sound)
-        {
-            return Vector3.zero;
-        }
-
-        private void calcDispersionAngle(BotSoundStruct sound)
-        {
-            bool gunshot = sound.Bullet != null;
-        }
-
-        private void calcDispersionDistance(BotSoundStruct sound)
-        {
-
-        }
-
-        private static DispersionDictionary _dispersionValues;
-
-        static SoundDispersionClass()
-        {
-            PresetHandler.OnPresetUpdated += updateSettings;
-        }
-
-        private static void updateSettings()
-        {
-            _dispersionValues = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.DispersionValues;
-        }
-    }
-
-    public static class DispersionValuesDictionary
-    {
-        static DispersionValuesDictionary()
-        {
-            PresetHandler.OnPresetUpdated += updateSettings;
-        }
-
-        private static void updateSettings()
-        {
-
-        }
-
-        public static DispersionDictionary DispersionValues { get; private set; }
-    }
-
-    public class DispersionDictionary : Dictionary<ESoundDispersionType, DispersionValues>
-    {
-        static DispersionDictionary()
-        {
-            PresetHandler.OnPresetUpdated += updateSettings;
-        }
-
-        private static void updateSettings()
-        {
-
-        }
-    }
-
-    public struct DispersionValues
-    {
-        public float MinAngle;
-        public float MaxAngle;
-        public float DistanceModifier;
-        public float VerticalModifier;
-    }
-
-    public class SAINHearingSensorClass : SAINBase, ISAINClass
+    public class SAINHearingSensorClass : BotBaseClass, ISAINClass
     {
         public bool SetIgnoreHearingExternal(bool value, bool ignoreUnderFire, float duration, out string reason)
         {
@@ -1058,15 +947,9 @@ namespace SAIN.SAINComponent.Classes
             return occlusionmodifier;
         }
 
-        static SAINHearingSensorClass()
+        public override void UpdatePresetSettings(SAINPresetClass preset)
         {
-            PresetHandler.OnPresetUpdated += updateSettings;
-            updateSettings();
-        }
-
-        private static void updateSettings()
-        {
-            var aiLimit = GlobalSettingsClass.Instance.AILimit;
+            var aiLimit = preset.GlobalSettings.AILimit;
             _farDistance = aiLimit.MaxHearingRanges[AILimitSetting.Far].Sqr();
             _veryFarDistance = aiLimit.MaxHearingRanges[AILimitSetting.VeryFar].Sqr();
             _narniaDistance = aiLimit.MaxHearingRanges[AILimitSetting.Narnia].Sqr();

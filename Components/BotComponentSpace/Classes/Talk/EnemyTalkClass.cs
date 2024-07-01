@@ -3,6 +3,7 @@ using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.Preset.BotSettings.SAINSettings;
 using SAIN.Preset.Personalities;
 using SAIN.SAINComponent.Classes.EnemyClasses;
@@ -11,7 +12,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
-    public class EnemyTalk : SAINBase, ISAINClass
+    public class EnemyTalk : BotBaseClass, ISAINClass
     {
         public EnemyTalk(BotComponent bot) : base(bot)
         {
@@ -20,8 +21,6 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
-            UpdateSettings();
-            PresetHandler.OnPresetUpdated += UpdateSettings;
             if (Singleton<BotEventHandler>.Instance != null)
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += tryFakeDeathGrenade;
@@ -93,7 +92,6 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Dispose()
         {
-            PresetHandler.OnPresetUpdated -= UpdateSettings;
             if (Singleton<BotEventHandler>.Instance != null)
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= tryFakeDeathGrenade;
@@ -110,7 +108,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private float FakeDeathChance = 2f;
 
-        private void UpdateSettings()
+        public override void UpdatePresetSettings(SAINPresetClass preset)
         {
             if (PersonalitySettings != null && FileSettings != null)
             {
@@ -121,20 +119,20 @@ namespace SAIN.SAINComponent.Classes.Talk
                 TauntDist = PersonalitySettings.TauntMaxDistance * _randomizationFactor;
                 TauntFreq = PersonalitySettings.TauntFrequency * _randomizationFactor;
                 _canRespondToEnemy = PersonalitySettings.CanRespondToEnemyVoice;
-
-                var talkSettings = SAINPlugin.LoadedPreset.GlobalSettings.Talk;
-                _friendlyResponseChance = talkSettings.FriendlyReponseChance;
-                _friendlyResponseChanceAI = talkSettings.FriendlyReponseChanceAI;
-                _friendlyResponseDistance = talkSettings.FriendlyReponseDistance;
-                _friendlyResponseDistanceAI = talkSettings.FriendlyReponseDistanceAI;
-                _friendlyResponseFrequencyLimit = talkSettings.FriendlyResponseFrequencyLimit;
-                _friendlyResponseMinRandom = talkSettings.FriendlyResponseMinRandomDelay;
-                _friendlyResponseMaxRandom = talkSettings.FriendlyResponseMaxRandomDelay;
             }
             else
             {
                 Logger.LogAndNotifyError("Personality settings or filesettings are null! Cannot Apply Settings!");
             }
+
+            var talkSettings = preset.GlobalSettings.Talk;
+            _friendlyResponseChance = talkSettings.FriendlyReponseChance;
+            _friendlyResponseChanceAI = talkSettings.FriendlyReponseChanceAI;
+            _friendlyResponseDistance = talkSettings.FriendlyReponseDistance;
+            _friendlyResponseDistanceAI = talkSettings.FriendlyReponseDistanceAI;
+            _friendlyResponseFrequencyLimit = talkSettings.FriendlyResponseFrequencyLimit;
+            _friendlyResponseMinRandom = talkSettings.FriendlyResponseMinRandomDelay;
+            _friendlyResponseMaxRandom = talkSettings.FriendlyResponseMaxRandomDelay;
         }
 
         private bool CanTaunt = true;
@@ -253,7 +251,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 if (enemy != null
                     && !enemy.IsVisible
-                    && enemy.Seen 
+                    && enemy.Seen
                     && enemy.TimeSinceSeen > 30f
                     && EFTMath.RandomBool(20))
                 {
@@ -403,8 +401,8 @@ namespace SAIN.SAINComponent.Classes.Talk
             Enemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId, true);
             if (enemy == null)
             {
-                if (!isPain && 
-                    phrase != EPhraseTrigger.OnBreath && 
+                if (!isPain &&
+                    phrase != EPhraseTrigger.OnBreath &&
                     phrase != EPhraseTrigger.OnFight)
                 {
                     SetFriendlyTalked(player);

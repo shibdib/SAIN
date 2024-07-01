@@ -64,7 +64,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         }
     }
 
-    public class SAINMoverClass : SAINBase, ISAINClass
+    public class SAINMoverClass : BotBaseClass, ISAINClass
     {
         public SAINMoverClass(BotComponent sain) : base(sain)
         {

@@ -1,6 +1,6 @@
 ﻿namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class SAINHeadSteering : SAINBase, ISAINClass
+    public class SAINHeadSteering : BotBaseClass, ISAINClass
     {
         public SAINHeadSteering(BotComponent bot) : base(bot)
         {

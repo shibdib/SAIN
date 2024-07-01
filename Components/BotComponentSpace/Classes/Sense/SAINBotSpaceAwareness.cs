@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.Classes
         public NavMeshPath ThirdPath;
     }
 
-    public class SAINBotSpaceAwareness : SAINBase, ISAINClass
+    public class SAINBotSpaceAwareness : BotBaseClass, ISAINClass
     {
         public SAINBotSpaceAwareness(BotComponent sain) : base(sain)
         {

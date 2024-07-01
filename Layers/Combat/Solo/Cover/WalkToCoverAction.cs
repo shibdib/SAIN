@@ -169,6 +169,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 return;
             }
+
+            BotOwner.AimingData?.LoseTarget();
              
             suppressing = true;
             Bot.Enemy.Status.EnemyIsSuppressed = true;

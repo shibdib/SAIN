@@ -4,6 +4,7 @@ using HarmonyLib;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.Preset.BotSettings.SAINSettings.Categories;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent;
@@ -354,12 +355,12 @@ namespace SAIN.Patches.Shoot.Aim
         static AimRotateSpeedPatch()
         {
             PresetHandler.OnPresetUpdated += updateSettings;
-            updateSettings();
+            updateSettings(SAINPresetClass.Instance);
         }
 
-        private static void updateSettings()
+        private static void updateSettings(SAINPresetClass preset)
         {
-            _aimTurnSpeed = GlobalSettingsClass.Instance.Move.AimTurnSpeed;
+            _aimTurnSpeed = preset.GlobalSettings.Move.AimTurnSpeed;
         }
 
         private static float _aimTurnSpeed = 300f;

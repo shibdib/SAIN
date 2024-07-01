@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class EnemyChooserClass : SAINSubBase<SAINEnemyController>, ISAINClass
+    public class EnemyChooserClass : BotSubClassBase<SAINEnemyController>, ISAINClass
     {
         public event Action<Enemy> OnEnemyChanged;
 

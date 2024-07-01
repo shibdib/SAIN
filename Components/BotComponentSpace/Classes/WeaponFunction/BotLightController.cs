@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
-    public class BotLightController : SAINBase, ISAINClass
+    public class BotLightController : BotBaseClass, ISAINClass
     {
         public BotLightController(BotComponent sain) : base(sain)
         {

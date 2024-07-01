@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
-    public class CoverAnalyzer : SAINBase
+    public class CoverAnalyzer : BotBaseClass
     {
         public CoverAnalyzer(BotComponent botOwner, CoverFinderComponent coverFinder) : base(botOwner)
         {

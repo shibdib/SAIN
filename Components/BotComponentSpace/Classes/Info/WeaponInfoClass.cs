@@ -4,6 +4,7 @@ using SAIN.Components;
 using SAIN.Components.BotComponentSpace.Classes;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ using static EFT.InventoryLogic.Weapon;
 
 namespace SAIN.SAINComponent.Classes.Info
 {
-    public class WeaponInfoClass : SAINBase, ISAINClass
+    public class WeaponInfoClass : BotBaseClass, ISAINClass
     {
         public ReloadClass Reload { get; private set; }
 
@@ -50,12 +51,12 @@ namespace SAIN.SAINComponent.Classes.Info
             WeaponAIPresetHistory history = _presets[type];
             preset.BaseShift = history.BaseShift * accuracyModifier;
             preset.XZ_COEF = history.XZ_COEF * accuracyModifier;
-            forceRecheckWeapon();
+            forceRecheckWeapon(SAINPresetClass.Instance);
         }
 
         private readonly Dictionary<EWeaponAIPresetType, WeaponAIPresetHistory> _presets = new Dictionary<EWeaponAIPresetType, WeaponAIPresetHistory>();
 
-        private void forceRecheckWeapon()
+        private void forceRecheckWeapon(SAINPresetClass preset)
         {
             forceNewCheck = true;
         }

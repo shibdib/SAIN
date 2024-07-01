@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class BlindFireController : SAINBase, ISAINClass
+    public class BlindFireController : BotBaseClass, ISAINClass
     {
         public BlindFireController(BotComponent sain) : base(sain)
         {

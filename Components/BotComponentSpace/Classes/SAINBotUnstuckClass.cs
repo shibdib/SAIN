@@ -11,7 +11,7 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.Debug
 {
-    public class SAINBotUnstuckClass : SAINBase, ISAINClass
+    public class SAINBotUnstuckClass : BotBaseClass, ISAINClass
     {
         static SAINBotUnstuckClass()
         {

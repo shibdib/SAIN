@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         Shooting = 3,
     }
 
-    public class DogFight : SAINBase
+    public class DogFight : BotBaseClass
     {
         public EDogFightStatus Status { get; private set; }
 

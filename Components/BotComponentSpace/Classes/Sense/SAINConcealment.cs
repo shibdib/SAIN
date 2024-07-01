@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Sense
 {
-    public class SAINConcealment : SAINBase, ISAINClass
+    public class SAINConcealment : BotBaseClass, ISAINClass
     {
         public SAINConcealment(BotComponent sain) : base(sain)
         {

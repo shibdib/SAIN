@@ -1,13 +1,14 @@
 ﻿using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
 using System;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
 {
-    public class SAINAILimit : SAINBase, ISAINClass
+    public class SAINAILimit : BotBaseClass, ISAINClass
     {
         public event Action<AILimitSetting> OnAILimitChanged;
         public AILimitSetting CurrentAILimit { get; private set; }
@@ -70,13 +71,7 @@ namespace SAIN.SAINComponent.Classes
 
         private float _checkDistanceTime;
 
-        static SAINAILimit()
-        {
-            PresetHandler.OnPresetUpdated += updateSettings;
-            updateSettings();
-        }
-
-        private static void updateSettings()
+        public override void UpdatePresetSettings(SAINPresetClass preset)
         {
             var aiLimit = GlobalSettingsClass.Instance.AILimit;
             _frequency = aiLimit.AILimitUpdateFrequency;

@@ -1,6 +1,7 @@
 ﻿using EFT.InventoryLogic;
 using SAIN.Helpers;
 using SAIN.Plugin;
+using SAIN.Preset;
 using System;
 using UnityEngine;
 
@@ -13,17 +14,17 @@ namespace SAIN.SAINComponent.Classes.Info
             Weapon = weapon;
             WeaponClass = TryGetWeaponClass(weapon);
             AmmoCaliber = TryGetAmmoCaliber(weapon);
-            updateSettings();
+            updateSettings(SAINPresetClass.Instance);
             PresetHandler.OnPresetUpdated += updateSettings;
         }
 
-        private void updateSettings()
+        private void updateSettings(SAINPresetClass preset)
         {
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Shoot.EngagementDistance.TryGetValue(WeaponClass, out float distance))
+            if (preset.GlobalSettings.Shoot.EngagementDistance.TryGetValue(WeaponClass, out float distance))
             {
                 EngagementDistance = distance;
             }
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Hearing.HearingDistances.TryGetValue(AmmoCaliber, out float range))
+            if (preset.GlobalSettings.Hearing.HearingDistances.TryGetValue(AmmoCaliber, out float range))
             {
                 BaseAudibleRange = range;
             }

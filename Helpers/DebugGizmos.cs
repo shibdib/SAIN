@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using EFT;
+using SAIN.Editor;
 using SAIN.Plugin;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace SAIN.Helpers
             PresetHandler.OnEditorSettingsChanged += Update;
         }
 
-        public static void Update()
+        public static void Update(PresetEditorDefaults defaults)
         {
             if (!DrawGizmos)
             {

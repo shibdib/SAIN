@@ -89,7 +89,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
                         Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
                     }
                     Shoot.Update();
+                    continue;
                 }
+                BotOwner.AimingData?.LoseTarget();
             }
         }
 
@@ -249,12 +251,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 Bot.Decision.CurrentSelfDecision != SelfDecision.None;
 
             return isUrgent ? ESprintUrgency.High : ESprintUrgency.Middle;
-        }
-
-        private void EngageEnemy()
-        {
-            Bot.Steering.SteerByPriority();
-            Shoot.Update();
         }
 
         public override void Start()

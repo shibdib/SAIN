@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Decision
 {
-    public class SquadDecisionClass : SAINBase, ISAINClass
+    public class SquadDecisionClass : BotBaseClass, ISAINClass
     {
         public SquadDecisionClass(BotComponent sain) : base(sain)
         {

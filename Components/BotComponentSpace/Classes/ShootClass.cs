@@ -1,5 +1,6 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
+using SAIN.Components;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Info;
 using UnityEngine;
@@ -10,24 +11,42 @@ namespace SAIN.SAINComponent.Classes
     {
         public ShootClass(BotOwner owner) : base(owner)
         {
-            BotComponent = owner.GetComponent<BotComponent>();
             Shoot = new BotShoot(owner);
         }
 
         private readonly BotShoot Shoot;
         private BotOwner BotOwner => botOwner_0;
 
-        private readonly BotComponent BotComponent;
+        private BotComponent Bot
+        {
+            get
+            {
+                if (_bot == null)
+                {
+                    if (SAINBotController.Instance?.GetSAIN(BotOwner, out var bot) == true)
+                    {
+                        _bot = bot;
+                    }
+                    else if (BotOwner.TryGetComponent(out bot))
+                    {
+                        _bot = bot;
+                    }
+                }
+                return _bot;
+            }
+        }
+
+        private BotComponent _bot;
 
         private float changeAimTimer;
 
         public override void Update()
         {
-            if (BotOwner == null || BotComponent == null)
+            if (BotOwner == null || Bot == null)
             {
                 return;
             }
-            if (BotComponent.Player.IsSprintEnabled)
+            if (Bot.Player.IsSprintEnabled)
             {
                 BotOwner.AimingData?.LoseTarget();
                 return;
@@ -43,7 +62,7 @@ namespace SAIN.SAINComponent.Classes
             if (changeAimTimer < Time.time)
             {
                 changeAimTimer = Time.time + 0.5f;
-                BotComponent.AimDownSightsController.UpdateADSstatus();
+                Bot.AimDownSightsController.UpdateADSstatus();
             }
 
             if (BotOwner.WeaponManager.Reload.Reloading)
@@ -52,7 +71,7 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            BotComponent.BotLight.HandleLightForEnemy();
+            Bot.BotLight.HandleLightForEnemy();
 
             aimAtEnemy();
         }
@@ -72,7 +91,7 @@ namespace SAIN.SAINComponent.Classes
                     !IsMovementPaused)
                 {
                     _nextPauseMoveTime = Time.time + Random.Range(_pauseMoveFrequencyMin, _pauseMoveFrequencyMax);
-                    BotComponent.Mover.PauseMovement(Random.Range(_pauseMoveDurationMin, _pauseMoveDurationMax));
+                    Bot.Mover.PauseMovement(Random.Range(_pauseMoveDurationMin, _pauseMoveDurationMax));
                 }
                 if (!IsMovementPaused)
                 {
@@ -89,10 +108,10 @@ namespace SAIN.SAINComponent.Classes
 
         public bool ShallPauseForShoot()
         {
-            float maxPointFireDist = BotComponent.Info.FileSettings.Shoot.MaxPointFireDistance;
+            float maxPointFireDist = Bot.Info.FileSettings.Shoot.MaxPointFireDistance;
             return
-                BotComponent.Enemy != null &&
-                BotComponent.Enemy.RealDistance > maxPointFireDist &&
+                Bot.Enemy != null &&
+                Bot.Enemy.RealDistance > maxPointFireDist &&
                 IsAiming;
         }
 
@@ -159,10 +178,10 @@ namespace SAIN.SAINComponent.Classes
             if (_nextGetDistTime < Time.time)
             {
                 _nextGetDistTime = Time.time + 0.5f;
-                Vector3? target = BotComponent.CurrentTargetPosition;
+                Vector3? target = Bot.CurrentTargetPosition;
                 if (target != null)
                 {
-                    _lastDistance = BotComponent.CurrentTargetDistance;
+                    _lastDistance = Bot.CurrentTargetDistance;
                 }
             }
             return _lastDistance;
@@ -177,7 +196,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 _nextCheckOptimalTime = Time.time + 0.5f;
 
-                var equipment = BotComponent.PlayerComponent.Equipment;
+                var equipment = Bot.PlayerComponent.Equipment;
 
                 float? primaryEngageDist = null;
                 var primary = equipment.PrimaryWeapon;
@@ -244,24 +263,32 @@ namespace SAIN.SAINComponent.Classes
             BotOwner.AimingData.SetTarget(pointToShoot.Value);
             if (!BotOwner.AimingData.IsReady && !checkSteerDirection(20f))
             {
-                BotComponent.Steering.LookToPoint(BotOwner.AimingData.EndTargetPoint, 250f);
+                Bot.Steering.LookToPoint(BotOwner.AimingData.EndTargetPoint, 250f);
                 return;
             }
 
             BotOwner.AimingData.NodeUpdate();
-            if (BotOwner.AimingData.IsReady &&
-                !BotComponent.NoBushESP.NoBushESPActive &&
-                FriendlyFire.CheckFriendlyFire())
+            if (!BotOwner.AimingData.IsReady)
             {
-                ReadyToShoot();
-                Shoot.Update();
+                return;
             }
+            if (Bot.NoBushESP.NoBushESPActive)
+            {
+                return;
+            }
+            if (!FriendlyFire.CheckFriendlyFire())
+            {
+                BotOwner.ShootData.EndShoot();
+                return;
+            }
+            ReadyToShoot();
+            Shoot.Update();
         }
 
         private bool checkSteerDirection(float maxAngle)
         {
             Vector3 target = BotOwner.AimingData.EndTargetPoint;
-            Vector3 weaponPointDir = BotComponent.LookDirection;
+            Vector3 weaponPointDir = Bot.LookDirection;
             Vector3 directionToTarget = (target - BotOwner.WeaponRoot.position).normalized;
             float angle = Vector3.Angle(directionToTarget, weaponPointDir);
             return angle <= maxAngle;
@@ -289,11 +316,11 @@ namespace SAIN.SAINComponent.Classes
 
         protected virtual Vector3? GetTarget()
         {
-            Vector3? target = getAimTarget(BotComponent.Enemy);
+            Vector3? target = getAimTarget(Bot.Enemy);
 
             if (target == null)
             {
-                target = getAimTarget(BotComponent.LastEnemy);
+                target = getAimTarget(Bot.LastEnemy);
             }
             return target;
         }
@@ -333,7 +360,7 @@ namespace SAIN.SAINComponent.Classes
             {
                 return null;
             }
-            if (!BotComponent.Info.FileSettings.Aiming.AimCenterMass)
+            if (!Bot.Info.FileSettings.Aiming.AimCenterMass)
             {
                 return null;
             }
@@ -370,7 +397,7 @@ namespace SAIN.SAINComponent.Classes
 
         protected Vector3 Target;
 
-        public SAINFriendlyFireClass FriendlyFire => BotComponent.FriendlyFire;
+        public SAINFriendlyFireClass FriendlyFire => Bot.FriendlyFire;
     }
 
     public class BotShoot : BaseNodeClass
