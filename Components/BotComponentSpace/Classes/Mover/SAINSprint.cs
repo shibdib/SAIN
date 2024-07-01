@@ -31,16 +31,13 @@ namespace SAIN.SAINComponent.Classes.Mover
 
     public class SAINSprint : BotBaseClass, ISAINClass
     {
-        static SAINSprint()
-        {
-        }
-
         public SAINSprint(BotComponent sain) : base(sain)
         {
         }
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()

@@ -370,6 +370,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return 1f;
             }
 
+            if (Enemy.RealDistance < 10f)
+            {
+                return 1f;
+            }
+
             float angle = Enemy.Vision.AngleToEnemy;
 
             float minAngle = _periphVisionStart;

@@ -14,6 +14,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()

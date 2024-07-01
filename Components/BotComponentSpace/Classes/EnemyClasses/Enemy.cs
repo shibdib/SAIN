@@ -14,6 +14,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+
             ValidChecker.Init();
             EnemyKnownChecker.Init();
             ActiveThreatChecker.Init();

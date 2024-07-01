@@ -63,6 +63,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             Recoil.Init();
             Firerate.Init();
             Firemode.Init();

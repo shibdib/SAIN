@@ -16,6 +16,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()

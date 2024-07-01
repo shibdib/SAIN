@@ -19,6 +19,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             Player.BeingHitAction += GetHit;
             GroupTalk.Init();
             EnemyTalk.Init();

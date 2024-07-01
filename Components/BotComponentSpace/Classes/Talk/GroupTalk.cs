@@ -39,6 +39,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()

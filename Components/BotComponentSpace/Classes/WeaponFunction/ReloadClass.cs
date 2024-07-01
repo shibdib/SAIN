@@ -163,6 +163,7 @@ namespace SAIN.Components.BotComponentSpace.Classes
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             _weaponManager.Selector.OnActiveEquipmentSlotChanged += weaponChanged;
         }
 

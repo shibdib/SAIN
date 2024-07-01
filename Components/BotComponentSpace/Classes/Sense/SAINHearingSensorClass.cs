@@ -52,6 +52,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             SAINBotController.Instance.AISoundPlayed += soundHeard;
             SAINBotController.Instance.BulletImpact += bulletImpacted;
         }

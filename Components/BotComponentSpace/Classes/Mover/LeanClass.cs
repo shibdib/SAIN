@@ -13,6 +13,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         private static readonly SoloDecision[] DontLean =

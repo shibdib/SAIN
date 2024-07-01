@@ -18,7 +18,10 @@ namespace SAIN.SAINComponent.Classes
         {
         }
 
-        public void Init() { }
+        public void Init()
+        {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+        }
 
         public void Update()
         {

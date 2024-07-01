@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Init()
         {
-
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()

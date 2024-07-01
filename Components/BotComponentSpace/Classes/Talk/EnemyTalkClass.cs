@@ -21,6 +21,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             if (Singleton<BotEventHandler>.Instance != null)
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += tryFakeDeathGrenade;

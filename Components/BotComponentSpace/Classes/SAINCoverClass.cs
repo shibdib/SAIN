@@ -47,6 +47,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             CoverFinder.Init(Bot);
         }
 

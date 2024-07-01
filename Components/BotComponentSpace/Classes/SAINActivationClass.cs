@@ -109,6 +109,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             SetActive(true);
             Bot.Person.ActiveClass.OnBotActiveChanged += SetActive;
         }

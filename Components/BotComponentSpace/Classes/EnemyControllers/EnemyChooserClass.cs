@@ -46,12 +46,14 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Bot.CoroutineManager.Add(enemyChooser(), nameof(enemyChooser));
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             BaseClass.OnEnemyRemoved += enemyRemoved;
         }
 
         public void Update()
         {
+            assignActiveEnemy();
+            checkDiscrepency();
         }
 
         public void Dispose()

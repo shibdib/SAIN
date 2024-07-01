@@ -30,6 +30,8 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+
             Player.BeingHitAction += GetHit;
 
             Surgery.Init();

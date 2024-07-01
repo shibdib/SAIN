@@ -15,6 +15,7 @@ namespace SAIN.SAINComponent.Classes.Sense
         }
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()

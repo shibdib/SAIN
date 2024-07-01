@@ -1,13 +1,7 @@
-﻿using EFT.InventoryLogic;
-using HarmonyLib;
-using SAIN.Plugin;
+﻿using HarmonyLib;
 using SAIN.Preset;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
@@ -37,7 +31,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 {
                     return AimStatus.NoTarget;
                 }
-                return (AimStatus)aimStatus;
+                return status;
             }
         }
 
@@ -47,7 +41,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Init()
         {
-
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()

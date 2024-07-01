@@ -14,7 +14,9 @@ namespace SAIN.SAINComponent.Classes.Memory
         }
 
         public void Init()
-        { }
+        {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+        }
 
         public void Update()
         {

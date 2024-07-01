@@ -33,6 +33,20 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             removeInvalid();
         }
 
+        private void LateUpdate()
+        {
+            if (Bot == null || Bot.EnemyController == null || !Bot.BotActive)
+            {
+                return;
+            }
+
+            foreach (var kvp in Enemies)
+            {
+                checkValid(kvp.Key, kvp.Value);
+            }
+            removeInvalid();
+        }
+
         private bool checkValid(string id, Enemy enemy)
         {
             if (enemy == null || enemy.IsValid == false)

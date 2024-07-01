@@ -10,6 +10,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             Bot.EnemyController.OnEnemyRemoved += checkClear;
         }
 

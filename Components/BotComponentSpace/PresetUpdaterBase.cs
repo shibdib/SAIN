@@ -9,7 +9,6 @@ namespace SAIN.SAINComponent
         {
             _obj = obj;
             PresetHandler.OnPresetUpdated += checkUpdateSettings;
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         private readonly object _obj;
@@ -19,7 +18,7 @@ namespace SAIN.SAINComponent
             if (_obj == null)
             {
                 PresetHandler.OnPresetUpdated -= checkUpdateSettings;
-                Logger.LogDebug($"Object is null, Unsubd to Preset Updater Event");
+                //Logger.LogDebug($"Object is null, Unsubd to Preset Updater Event");
                 return;
             }
             UpdatePresetSettings(preset);

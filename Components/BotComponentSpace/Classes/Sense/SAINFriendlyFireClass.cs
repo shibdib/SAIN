@@ -16,6 +16,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             Bot.CoroutineManager.Add(friendlyFireLoop(), nameof(friendlyFireLoop));
         }
 

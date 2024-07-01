@@ -11,6 +11,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         private float _handsBusyTimer;

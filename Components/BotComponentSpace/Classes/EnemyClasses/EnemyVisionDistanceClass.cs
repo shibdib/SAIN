@@ -107,6 +107,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 }
                 return 1.5f;
             }
+            if (Enemy.RealDistance < 10f)
+            {
+                return 1f;
+            }
 
             float num = maxAngle - minAngle;
             float num2 = angleToEnemy - minAngle;

@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public void Init()
         {
-
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()

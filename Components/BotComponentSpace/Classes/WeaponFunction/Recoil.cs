@@ -22,6 +22,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             Bot.BotActivation.OnBotStateChanged += removeCoroutine;
         }
 

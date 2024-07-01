@@ -35,6 +35,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             _enemyUpdater.Init(Bot);
             GameWorldComponent.Instance.PlayerTracker.AlivePlayers.OnPlayerComponentRemoved += RemoveEnemy;
             EnemyLists.Init();

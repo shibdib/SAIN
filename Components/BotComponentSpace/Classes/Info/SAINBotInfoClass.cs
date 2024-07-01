@@ -1,6 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
-using SAIN.Plugin;
+using SAIN.Preset;
 using SAIN.Preset.BotSettings.SAINSettings;
 using SAIN.Preset.Personalities;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ namespace SAIN.SAINComponent.Classes.Info
         {
             Profile = new ProfileClass(sain);
             WeaponInfo = new WeaponInfoClass(sain);
+            GetFileSettings();
         }
 
         public void Init()
@@ -30,6 +31,11 @@ namespace SAIN.SAINComponent.Classes.Info
         public void Dispose()
         {
             WeaponInfo.Dispose();
+        }
+
+        public override void UpdatePresetSettings(SAINPresetClass preset)
+        {
+            GetFileSettings();
         }
 
         public ProfileClass Profile { get; private set; }

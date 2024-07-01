@@ -14,6 +14,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             SquadInfo = SAINBotController.Instance.BotSquads.GetSquad(Bot);
         }
 

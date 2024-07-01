@@ -38,6 +38,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             Bot.EnemyController.OnEnemyAdded += enemyAdded;
             Bot.EnemyController.OnEnemyRemoved += enemyRemoved;
         }

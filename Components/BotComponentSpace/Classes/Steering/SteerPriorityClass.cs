@@ -194,7 +194,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return false;
             }
-            if (AimStatus == AimStatus.NoTarget)
+            if (Bot.Aim.AimStatus == AimStatus.NoTarget)
             {
                 return false;
             }

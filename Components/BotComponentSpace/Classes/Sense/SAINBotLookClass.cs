@@ -18,6 +18,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             _enemies = Bot.EnemyController.Enemies;
         }
 

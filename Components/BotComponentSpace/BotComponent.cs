@@ -77,6 +77,9 @@ namespace SAIN.SAINComponent
         public SAINSelfActionClass SelfActions { get; private set; }
         public SAINBotGrenadeClass Grenade { get; private set; }
         public SAINSteeringClass Steering { get; private set; }
+        public AimClass Aim { get; private set; }
+
+
         public Action<string, BotOwner> OnSAINDisposed { get; set; }
 
         public CoroutineManager<BotComponent> CoroutineManager { get; private set; }
@@ -240,10 +243,12 @@ namespace SAIN.SAINComponent
             CurrentTarget = new CurrentTargetClass(this);
             ManualShoot = new ManualShootClass(this);
             BotActivation = new SAINActivationClass(this);
+            Aim = new AimClass(this);
         }
 
         private void initializeClasses()
         {
+            Info.Init();
             BotActivation.Init();
 
             Search.Init();
@@ -257,7 +262,6 @@ namespace SAIN.SAINComponent
             Talk.Init();
             Decision.Init();
             Cover.Init();
-            Info.Init();
             Squad.Init();
             SelfActions.Init();
             Grenade.Init();
@@ -270,6 +274,7 @@ namespace SAIN.SAINComponent
             Medical.Init();
             BotLight.Init();
             BackpackDropper.Init();
+            Aim.Init();
         }
 
         private bool verifyBrain(PersonClass person)
@@ -334,6 +339,7 @@ namespace SAIN.SAINComponent
                 DoorOpener.Update();
             }
 
+            Aim.Update();
             Search.Update();
             Memory.Update();
             FriendlyFire.Update();

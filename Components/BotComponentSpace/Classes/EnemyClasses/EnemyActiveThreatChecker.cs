@@ -16,7 +16,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         public void Init()
         {
-
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()

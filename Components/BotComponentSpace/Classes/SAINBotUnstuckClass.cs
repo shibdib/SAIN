@@ -26,6 +26,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         public void Init()
         {
+            UpdatePresetSettings(SAINPlugin.LoadedPreset);
             PathController = _pathControllerField.GetValue(BotOwner.Mover) as PathControllerClass;
             DontUnstuckMe = DontUnstuckTheseTypes.Contains(Bot.Info.Profile.WildSpawnType);
         }
