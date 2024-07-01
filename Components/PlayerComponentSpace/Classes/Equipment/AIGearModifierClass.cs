@@ -1,5 +1,8 @@
 ﻿using EFT.InventoryLogic;
+using SAIN.Preset.GearStealthValues;
 using SAIN.SAINComponent.Classes.Info;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
@@ -22,13 +25,114 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
                 if (_calcGearTime < Time.time)
                 {
                     _calcGearTime = Time.time + 1f;
-                    float backPackMod = getBackpackMod();
-                    float headWearMod = getHeadWearMod();
-                    float faceCoverMod = getFaceCoverMod();
-                    _gearStealthModifier = backPackMod * headWearMod * faceCoverMod;
+
+                    float modifier = 1f;
+                    bool success = false;
+                    try
+                    {
+                        modifier = calcGearEffects();
+                        success = true;
+                    }
+                    catch (Exception e)
+                    {
+                        if (SAINPlugin.DebugMode)
+                            Logger.LogError(e);
+                    }
+
+                    if (success)
+                    {
+                        if (_nextLogTime < Time.time && modifier != 1f)
+                        {
+                            _nextLogTime = Time.time + 60f;
+                            Logger.LogDebug($"Stealth Mod: {modifier}");
+                        }
+                        _gearStealthModifier = modifier;
+                    }
+                    else
+                    {
+                        float backPackMod = getBackpackMod();
+                        float headWearMod = getHeadWearMod();
+                        float faceCoverMod = getFaceCoverMod();
+                        _gearStealthModifier = backPackMod * headWearMod * faceCoverMod;
+                    }
                 }
                 return _gearStealthModifier;
             }
+        }
+
+        private static float _nextLogTime;
+
+        private float calcGearEffects()
+        {
+            var stealthValues = SAINPlugin.LoadedPreset.GearStealthValuesClass.ItemStealthValues;
+            float result = 1f;
+            Item item;
+            foreach (var value in stealthValues)
+            {
+                if (value.Value.Count == 0)
+                    continue;
+
+                switch (value.Key)
+                {
+                    case EEquipmentType.Headwear:
+                        item = GearInfo.GetItem(EquipmentSlot.Headwear);
+                        if (item != null)
+                            result *= calcEffect(item.TemplateId, value.Value);
+                        break;
+
+                    case EEquipmentType.BackPack:
+                        item = GearInfo.GetItem(EquipmentSlot.Backpack);
+                        if (item != null)
+                            result *= calcEffect(item.TemplateId, value.Value);
+                        else
+                            result *= 1.1f;
+                        break;
+
+                    case EEquipmentType.FaceCover:
+                        item = GearInfo.GetItem(EquipmentSlot.FaceCover);
+                        if (item != null)
+                        {
+                            float faceCoverValue = calcEffect(item.TemplateId, value.Value);
+                            if (faceCoverValue == 1f)
+                                result *= 1.05f;
+                        }
+                        break;
+
+                    case EEquipmentType.Rig:
+                        item = GearInfo.GetItem(EquipmentSlot.TacticalVest);
+                        if (item != null)
+                            result *= calcEffect(item.TemplateId, value.Value);
+                        break;
+
+                    case EEquipmentType.ArmorVest:
+                        item = GearInfo.GetItem(EquipmentSlot.ArmorVest);
+                        if (item != null)
+                            result *= calcEffect(item.TemplateId, value.Value);
+                        break;
+
+                    case EEquipmentType.EyeWear:
+                        item = GearInfo.GetItem(EquipmentSlot.Eyewear);
+                        if (item != null)
+                            result *= calcEffect(item.TemplateId, value.Value);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return result;
+        }
+
+        private float calcEffect(string id, List<ItemStealthValue> values)
+        {
+            foreach ( var value in values )
+            {
+                if (value.ItemID == id)
+                {
+                    return value.StealthValue;
+                }
+            }
+            return 1f;
         }
 
         private float _gearStealthModifier = 1f;
