@@ -28,7 +28,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            base.InitPreset();
             _enemyUpdater.Init(Bot);
             Events.Init();
             _listController.Init();
@@ -48,7 +47,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Dispose()
         {
-            base.DisposePreset();
             GameObject.Destroy(_enemyUpdater);
             Events.Dispose();
             EnemyLists.Dispose();

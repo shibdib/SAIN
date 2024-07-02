@@ -127,14 +127,12 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            if (SAINPlugin.IsBotExluded(__instance.Owner))
+            if (!SAINEnableClass.GetSAIN(__instance.Owner, out var botComponent))
             {
                 return;
             }
-            if (BotsGroupSenseRecently(__instance))
-            {
-                __result = true;
-            }
+            var enemy = botComponent.EnemyController.CheckAddEnemy(__instance.Person);
+            __result = enemy?.EnemyKnown == true;
         }
 
         public static bool BotsGroupSenseRecently(EnemyInfo enemyInfo)
@@ -178,14 +176,12 @@ namespace SAIN.Patches.Generic
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            if (SAINPlugin.IsBotExluded(__instance.Owner))
+            if (!SAINEnableClass.GetSAIN(__instance.Owner, out var botComponent))
             {
                 return;
             }
-            if (ShallKnowEnemyPatch.BotsGroupSenseRecently(__instance))
-            {
-                __result = true;
-            }
+            var enemy = botComponent.EnemyController.CheckAddEnemy(__instance.Person);
+            __result = enemy?.EnemyKnown == true;
         }
     }
 

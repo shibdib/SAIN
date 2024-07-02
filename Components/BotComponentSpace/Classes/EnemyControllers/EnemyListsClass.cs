@@ -38,7 +38,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            base.InitPreset();
             Bot.EnemyController.Events.OnEnemyAdded += enemyAdded;
             Bot.EnemyController.Events.OnEnemyRemoved += enemyRemoved;
         }
@@ -63,7 +62,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Dispose()
         {
-            base.DisposePreset();
             var controller = Bot.EnemyController;
             if (controller != null)
             {

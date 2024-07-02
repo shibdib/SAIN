@@ -31,7 +31,6 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public void Init()
         {
-            base.InitPreset();
         }
 
         public void Update()
@@ -41,7 +40,6 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         public void ToggleSearch(bool value, Enemy target)

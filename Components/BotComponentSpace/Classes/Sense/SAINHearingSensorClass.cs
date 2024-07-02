@@ -52,9 +52,19 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(UpdatePresetSettings);
             SAINBotController.Instance.AISoundPlayed += soundHeard;
             SAINBotController.Instance.BulletImpact += bulletImpacted;
+        }
+
+        public void Update()
+        {
+        }
+
+        public void Dispose()
+        {
+            SAINBotController.Instance.AISoundPlayed -= soundHeard;
+            SAINBotController.Instance.BulletImpact -= bulletImpacted;
         }
 
         private void bulletImpacted(EftBulletClass bullet)
@@ -331,16 +341,6 @@ namespace SAIN.SAINComponent.Classes
                 }
             }
             sound.BunkerReduction = 1f;
-        }
-
-        public void Update()
-        {
-        }
-
-        public void Dispose()
-        {
-            SAINBotController.Instance.AISoundPlayed -= soundHeard;
-            SAINBotController.Instance.BulletImpact -= bulletImpacted;
         }
 
         private bool shallLimitAI(BotSound sound)
@@ -948,10 +948,8 @@ namespace SAIN.SAINComponent.Classes
             return occlusionmodifier;
         }
 
-        protected override void UpdatePresetSettings(SAINPresetClass preset)
+        protected void UpdatePresetSettings(SAINPresetClass preset)
         {
-            base.UpdatePresetSettings(preset);
-
             var aiLimit = preset.GlobalSettings.AILimit;
             _farDistance = aiLimit.MaxHearingRanges[AILimitSetting.Far].Sqr();
             _veryFarDistance = aiLimit.MaxHearingRanges[AILimitSetting.VeryFar].Sqr();

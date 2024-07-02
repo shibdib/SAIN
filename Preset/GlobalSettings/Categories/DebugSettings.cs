@@ -11,17 +11,26 @@ namespace SAIN.Preset.GlobalSettings
         [Name("Test Bot Sprint Pathfinder")]
         public bool ForceBotsToRunAround;
 
-        [Name("Debug External")]
-        public bool DebugExternal;
-
         [Name("Draw Debug Gizmos")]
         public bool DrawDebugGizmos;
+
+        [Name("Draw Debug Labels")]
+        public bool DrawDebugLabels;
+
+        [Name("Debug External")]
+        public bool DebugExternal;
 
         [Name("Draw Transform Gizmos")]
         public bool DrawTransformGizmos;
 
-        [Name("Draw Debug Labels")]
-        public bool DrawDebugLabels;
+        public bool Overlay_Info = true;
+        public bool Overlay_Info_Expanded = false;
+        public bool Overlay_Search = false;
+        public bool Overlay_EnemyLists = true;
+        public bool Overlay_EnemyInfo = true;
+        public bool Overlay_EnemyInfo_Expanded = true;
+        public bool Overlay_Decisions = false;
+        public bool OverLay_AimInfo = false;
 
         [Name("Log Recoil Calculations")]
         public bool DebugRecoilCalculations = false;

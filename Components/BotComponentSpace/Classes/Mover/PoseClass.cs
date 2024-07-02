@@ -14,20 +14,19 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
         }
 
         public void Update()
         {
             if (Player.IsSprintEnabled)
             {
-                _stopSprintPoseTime = Time.time + 0.5f;
+                _stopSprintPoseTime = Time.time + 1f;
             }
         }
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         public bool SetPoseToCover()

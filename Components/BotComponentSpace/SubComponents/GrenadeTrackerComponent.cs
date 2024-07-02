@@ -1,5 +1,6 @@
 ﻿using EFT;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent.SubComponents
 {
@@ -12,6 +13,19 @@ namespace SAIN.SAINComponent.SubComponents
             DangerPoint = dangerPoint;
             Grenade = grenade;
             if ((grenade.transform.position - bot.Position).magnitude < 10f)
+            {
+                setSpotted();
+            }
+        }
+
+        public void CheckHeardGrenadeCollision(float maxRange)
+        {
+            if (_spotted)
+            {
+                return;
+            }
+            maxRange *= 0.75f;
+            if (GrenadeDistance < maxRange)
             {
                 setSpotted();
             }
@@ -32,19 +46,29 @@ namespace SAIN.SAINComponent.SubComponents
             if (!_sentToBot && CanReact)
             {
                 _sentToBot = true;
-                BotOwner.BewareGrenade.AddGrenadeDanger(DangerPoint, Grenade);
-                Bot.Talk.GroupSay(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat, false, 80);
+                var collisionSound = Grenade.GrenadeSettings.CollisionSound;
+                bool isFrag = collisionSound == GrenadeSettings.CollisionSounds.frag;
+                var trigger = isFrag ? EPhraseTrigger.OnEnemyGrenade : EPhraseTrigger.Attention;
+                Bot.Talk.GroupSay(trigger, ETagStatus.Combat, false, 70);
+
+                Vector3 pos = DangerPoint;
+                BotOwner.BewareGrenade.AddGrenadeDanger(pos, Grenade);
+                return;
+            }
+
+            if (_spotted)
+            {
                 return;
             }
 
             GrenadeDistance = (Grenade.transform.position - BotOwner.Position).magnitude;
-            if (GrenadeDistance < 5f)
+            if (GrenadeDistance < 3f)
             {
                 setSpotted();
+                return;
             }
 
-            if (!_spotted &&
-                _nextCheckRaycastTime < Time.time)
+            if (_nextCheckRaycastTime < Time.time)
             {
                 _nextCheckRaycastTime = Time.time + 0.05f;
                 if (checkVisibility())

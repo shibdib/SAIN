@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class EnemyVisionChecker : EnemyBase
+    public class EnemyVisionChecker : EnemyBase, ISAINClass
     {
         public Vector3 LastSeenPoint { get; private set; }
         public bool LineOfSight => EnemyParts.LineOfSight;
@@ -18,6 +18,18 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             EnemyParts = new SAINEnemyParts(enemy.EnemyPlayer.PlayerBones, enemy.Player.IsYourPlayer);
             _transform = enemy.Bot.Transform;
             _startVisionTime = Time.time + UnityEngine.Random.Range(0.0f, 0.33f);
+        }
+
+        public void Init()
+        {
+        }
+
+        public void Update()
+        {
+        }
+
+        public void Dispose()
+        {
         }
 
         public void CheckVision(out bool didCheck)
@@ -115,10 +127,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        protected override void UpdatePresetSettings(SAINPresetClass preset)
+        public void UpdatePresetSettings(SAINPresetClass preset)
         {
-            base.UpdatePresetSettings(preset);
-
             var aiLimit = preset.GlobalSettings.AILimit;
             _farDistance = aiLimit.MaxVisionRanges[AILimitSetting.Far].Sqr();
             _veryFarDistance = aiLimit.MaxVisionRanges[AILimitSetting.VeryFar].Sqr();

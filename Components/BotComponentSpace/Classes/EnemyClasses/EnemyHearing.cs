@@ -22,7 +22,6 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         public void Init()
         {
-            base.InitPreset();
             Enemy.Events.OnFirstSeen += resetHeardFromPeace;
         }
 
@@ -38,7 +37,6 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         public void Dispose()
         {
-            base.DisposePreset();
             Enemy.Events.OnFirstSeen -= resetHeardFromPeace;
         }
 

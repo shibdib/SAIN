@@ -20,7 +20,6 @@ namespace SAIN.SAINComponent.Classes.Memory
 
         public void Init()
         {
-            base.InitPreset();
         }
 
         public void Update()
@@ -42,7 +41,6 @@ namespace SAIN.SAINComponent.Classes.Memory
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         private float _nextHealthUpdateTime = 0f;

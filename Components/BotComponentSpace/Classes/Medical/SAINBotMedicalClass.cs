@@ -30,10 +30,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            base.InitPreset();
-
             Player.BeingHitAction += GetHit;
-
             Surgery.Init();
             HitReaction.Init();
             HitByEnemy.Init();
@@ -48,12 +45,8 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            base.DisposePreset();
             if (Player != null)
-            {
                 Player.BeingHitAction -= GetHit;
-            }
-
             Surgery?.Dispose();
             HitReaction?.Dispose();
             HitByEnemy?.Dispose();

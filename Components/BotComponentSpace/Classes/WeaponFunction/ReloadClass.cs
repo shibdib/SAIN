@@ -163,7 +163,6 @@ namespace SAIN.Components.BotComponentSpace.Classes
 
         public void Init()
         {
-            base.InitPreset();
             _weaponManager.Selector.OnActiveEquipmentSlotChanged += weaponChanged;
         }
 
@@ -268,7 +267,7 @@ namespace SAIN.Components.BotComponentSpace.Classes
 
         public void Dispose()
         {
-            base.DisposePreset();
+            base.UnSubscribeToPresetChanges();
             if (_weaponManager.Selector != null)
             {
                 _weaponManager.Selector.OnActiveEquipmentSlotChanged -= weaponChanged;

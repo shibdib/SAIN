@@ -42,16 +42,15 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(UpdatePresetSettings);
             Recoil.Init();
             Firerate.Init();
             Firemode.Init();
             Reload.Init();
         }
 
-        protected override void UpdatePresetSettings(SAINPresetClass preset)
+        protected void UpdatePresetSettings(SAINPresetClass preset)
         {
-            base.UpdatePresetSettings(preset);
             _forceNewCheck = true;
         }
 
@@ -170,7 +169,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Dispose()
         {
-            base.DisposePreset();
+            base.UnSubscribeToPresetChanges();
             Recoil.Dispose();
             Firerate.Dispose();
             Firemode.Dispose();

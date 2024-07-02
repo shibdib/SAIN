@@ -19,7 +19,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Init()
         {
-            base.InitPreset();
         }
 
         public void Update()
@@ -29,7 +28,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-            base.DisposePreset();
+            base.UnSubscribeToPresetChanges();
         }
 
         public void UpdateADSstatus()

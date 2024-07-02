@@ -39,7 +39,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(updateConfigSettings);
         }
 
         public void Update()
@@ -182,7 +182,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Dispose()
         {
-            base.DisposePreset(); 
+            base.UnSubscribeToPresetChanges(); 
             unsub();
         }
 

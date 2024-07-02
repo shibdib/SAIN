@@ -14,17 +14,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             EnemyPerson = enemy.EnemyPerson;
         }
 
-        protected void InitPreset()
-        {
-            base.Subscribe();
-            UpdatePresetSettings(SAINPresetClass.Instance);
-        }
-
-        protected void DisposePreset()
-        {
-            base.UnSubscribe();
-        }
-
         protected Enemy Enemy { get; private set; }
         public BotComponent Bot => Enemy.Bot;
         protected PlayerComponent PlayerComp => Enemy.Bot.PlayerComponent;

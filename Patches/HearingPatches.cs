@@ -14,6 +14,21 @@ using UnityEngine;
 
 namespace SAIN.Patches.Hearing
 {
+    public class GrenadeCollisionPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Grenade), "OnCollisionHandler");
+        }
+
+        [PatchPostfix]
+        public static void Patch(Grenade __instance, SoundBank ___soundBank_0)
+        {
+            float range = ___soundBank_0 != null ? ___soundBank_0.Rolloff : 20f;
+            SAINBotController.Instance?.GrenadeCollided(__instance, range);
+        }
+    }
+
     public class TreeSoundPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

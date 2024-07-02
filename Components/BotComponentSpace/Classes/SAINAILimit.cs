@@ -20,7 +20,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(UpdatePresetSettings);
         }
 
         public void Update()
@@ -30,7 +30,6 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         private void checkAILimit()
@@ -77,10 +76,8 @@ namespace SAIN.SAINComponent.Classes
 
         private float _checkDistanceTime;
 
-        protected override void UpdatePresetSettings(SAINPresetClass preset)
+        protected void UpdatePresetSettings(SAINPresetClass preset)
         {
-            base.UpdatePresetSettings(preset);
-
             var aiLimit = GlobalSettingsClass.Instance.AILimit;
             _frequency = aiLimit.AILimitUpdateFrequency;
             _farDistance = aiLimit.AILimitRanges[AILimitSetting.Far].Sqr();

@@ -18,7 +18,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
         }
 
         public void Update()
@@ -27,7 +27,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         private SAINSquadClass Squad => Bot.Squad;

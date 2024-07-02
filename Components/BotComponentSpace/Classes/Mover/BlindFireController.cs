@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
         }
 
         private bool checkAllowBlindFire()
@@ -133,7 +133,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         public void ResetBlindFire()

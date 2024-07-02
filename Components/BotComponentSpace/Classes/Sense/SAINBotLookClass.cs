@@ -18,13 +18,12 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
             _enemies = Bot.EnemyController.Enemies;
         }
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         private Dictionary<string, Enemy> _enemies;

@@ -12,7 +12,6 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            base.InitPreset();
             BotLook.Init();
         }
 
@@ -23,7 +22,6 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            base.DisposePreset();
             BotLook.Dispose();
         }
 

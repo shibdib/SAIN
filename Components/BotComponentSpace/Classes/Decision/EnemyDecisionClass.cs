@@ -16,7 +16,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
         }
 
         public void Update()
@@ -25,7 +25,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Dispose()
         {
-            base.DisposePreset();
+            base.UnSubscribeToPresetChanges();
         }
 
         public bool GetDecision(out SoloDecision Decision)

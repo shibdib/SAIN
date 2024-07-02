@@ -95,7 +95,8 @@ namespace SAIN.SAINComponent.Classes.Search
                     FinalDestination = null;
                     return;
                 }
-                if (FinalDestination != null &&
+                if (PeekPoints != null && 
+                    FinalDestination != null &&
                     (newPlace.Position - FinalDestination.Value).sqrMagnitude < 2f * 2f)
                 {
                     return;

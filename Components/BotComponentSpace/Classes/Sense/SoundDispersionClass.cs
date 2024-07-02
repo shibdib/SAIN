@@ -58,9 +58,8 @@ namespace SAIN.SAINComponent.Classes
 
         private static DispersionDictionary _dispersionValues;
 
-        protected override void UpdatePresetSettings(SAINPresetClass preset)
+        protected void UpdatePresetSettings(SAINPresetClass preset)
         {
-            base.UpdatePresetSettings(preset);
             _dispersionValues = preset.GlobalSettings.Hearing.DispersionValues;
         }
     }

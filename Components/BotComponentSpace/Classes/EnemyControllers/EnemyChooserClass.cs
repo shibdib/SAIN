@@ -34,7 +34,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            base.InitPreset();
             BaseClass.Events.OnEnemyRemoved += enemyRemoved;
             BaseClass.Events.OnEnemyKnownChanged += enemyKnownChanged;
         }
@@ -47,7 +46,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Dispose()
         {
-            base.DisposePreset();
             BaseClass.Events.OnEnemyRemoved -= enemyRemoved;
             BaseClass.Events.OnEnemyKnownChanged -= enemyKnownChanged;
         }

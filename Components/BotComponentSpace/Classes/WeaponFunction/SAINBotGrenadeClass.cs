@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Components;
 using SAIN.SAINComponent.SubComponents;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Init()
         {
-            base.InitPreset();
+            SAINBotController.Instance.OnGrenadeCollision += grenadeCollision;
         }
 
         public void Update()
@@ -35,7 +36,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-            base.DisposePreset();
+            base.UnSubscribeToPresetChanges();
+            SAINBotController.Instance.OnGrenadeCollision -= grenadeCollision;
         }
 
         public void EnemyGrenadeThrown(Grenade grenade, Vector3 dangerPoint)
@@ -45,6 +47,17 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 float reactionTime = GetReactionTime(Bot.Info.Profile.DifficultyModifier);
                 ActiveGrenades.Add(grenade.Id, new GrenadeTracker(Bot, grenade, dangerPoint, reactionTime));
                 grenade.DestroyEvent += removeGrenade;
+            }
+        }
+
+        private void grenadeCollision(Grenade grenade, float maxRange)
+        {
+            foreach (var tracker in ActiveGrenades.Values)
+            {
+                if (tracker.Grenade == grenade)
+                {
+                    tracker.CheckHeardGrenadeCollision(maxRange);
+                }
             }
         }
 

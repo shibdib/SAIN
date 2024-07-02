@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
             PathController = _pathControllerField.GetValue(BotOwner.Mover) as PathControllerClass;
             DontUnstuckMe = DontUnstuckTheseTypes.Contains(Bot.Info.Profile.WildSpawnType);
         }
@@ -608,7 +608,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         public void Dispose()
         {
-            base.DisposePreset();
+            base.UnSubscribeToPresetChanges();
         }
 
         private RaycastHit StuckHit = new RaycastHit();

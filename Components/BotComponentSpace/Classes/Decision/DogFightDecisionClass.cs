@@ -10,7 +10,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
             Bot.EnemyController.Events.OnEnemyRemoved += checkClear;
         }
 
@@ -21,7 +21,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Dispose()
         {
-            base.DisposePreset();
             Bot.EnemyController.Events.OnEnemyRemoved -= checkClear;
         }
 

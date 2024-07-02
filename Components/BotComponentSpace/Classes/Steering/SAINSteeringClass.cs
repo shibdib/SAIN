@@ -189,7 +189,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(UpdatePresetSettings);
         }
 
         public void Update()
@@ -198,7 +198,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         private Vector3 adjustLookPoint(Vector3 target)
@@ -310,9 +309,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         private Vector3 _lookDirection => Bot.LookDirection;
 
 
-        protected override void UpdatePresetSettings(SAINPresetClass preset)
+        protected void UpdatePresetSettings(SAINPresetClass preset)
         {
-            base.UpdatePresetSettings(preset);
         }
     }
 }

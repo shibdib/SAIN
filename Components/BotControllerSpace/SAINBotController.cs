@@ -25,6 +25,8 @@ namespace SAIN.Components
         public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; set; }
         public Action<EftBulletClass> BulletImpact { get; set; }
 
+        public event Action<Grenade, float> OnGrenadeCollision;
+
         public Dictionary<string, BotComponent> Bots => BotSpawnController.Bots;
         public GameWorld GameWorld => SAINGameWorld.GameWorld;
         public IBotGame BotGame => Singleton<IBotGame>.Instance;
@@ -129,6 +131,11 @@ namespace SAIN.Components
             //PathManager.Update();
             //AddNavObstacles();
             //UpdateObstacles();
+        }
+
+        public void GrenadeCollided(Grenade grenade, float maxRange)
+        {
+            OnGrenadeCollision?.Invoke(grenade, maxRange);
         }
 
         private void showBotInfoDebug()

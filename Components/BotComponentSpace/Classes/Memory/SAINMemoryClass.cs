@@ -26,7 +26,6 @@ namespace SAIN.SAINComponent.Classes.Memory
 
         public void Init()
         {
-            base.InitPreset();
             Bot.EnemyController.Events.OnEnemyRemoved += clearEnemy;
         }
 
@@ -39,7 +38,6 @@ namespace SAIN.SAINComponent.Classes.Memory
 
         public void Dispose()
         {
-            base.DisposePreset();
             Bot.EnemyController.Events.OnEnemyRemoved -= clearEnemy;
         }
 

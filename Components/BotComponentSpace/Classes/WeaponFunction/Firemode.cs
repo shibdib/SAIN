@@ -17,7 +17,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Init()
         {
-            base.InitPreset();
         }
 
         public void Update()
@@ -35,7 +34,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-            base.DisposePreset();
+            base.UnSubscribeToPresetChanges();
         }
 
         private bool checkSwapMachineGun()
@@ -139,6 +138,5 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private float NextCheckTimer;
         private float _nextSwapTime;
         private float _swapFreq = 0.2f;
-
     }
 }

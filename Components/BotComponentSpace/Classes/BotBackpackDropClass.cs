@@ -21,7 +21,6 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            base.InitPreset();
         }
 
         public void Update()
@@ -46,7 +45,6 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         public bool DropBackpack()

@@ -66,7 +66,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
             Bot.BotActivation.OnBotStateChanged += resetDecisions;
             DogFightDecision.Init();
         }
@@ -90,7 +90,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Dispose()
         {
-            base.DisposePreset();
             Bot.BotActivation.OnBotStateChanged -= resetDecisions;
             DogFightDecision?.Dispose();
         }

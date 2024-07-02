@@ -47,7 +47,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
             CoverFinder.Init(Bot);
         }
 
@@ -92,7 +92,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            base.DisposePreset();
+            base.UnSubscribeToPresetChanges();
             try
             {
                 CoverFinder?.Dispose();

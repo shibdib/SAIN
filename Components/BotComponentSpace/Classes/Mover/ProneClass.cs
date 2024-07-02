@@ -16,7 +16,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
         }
 
         public void Update()
@@ -25,7 +25,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         static ProneClass()

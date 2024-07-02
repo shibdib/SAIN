@@ -555,12 +555,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             StopAllCoroutines();
         }
 
-        private void botDisposed(string profileId, BotOwner bot)
+        private void botDisposed()
         {
-            if (ProfileId == profileId)
-            {
-                Dispose();
-            }
+            Dispose();
         }
 
         public void Dispose()

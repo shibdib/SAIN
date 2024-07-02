@@ -1,20 +1,33 @@
 ﻿using SAIN.Plugin;
 using SAIN.Preset;
+using System;
 
 namespace SAIN.SAINComponent
 {
     public abstract class PresetUpdaterBase
     {
-        protected void Subscribe()
+        protected virtual void SubscribeToPresetChanges(Action<SAINPresetClass> func)
         {
-            PresetHandler.OnPresetUpdated += UpdatePresetSettings;
+            if (func == null)
+            {
+                return;
+            }
+
+            _func = func;
+            func.Invoke(SAINPresetClass.Instance);
+            PresetHandler.OnPresetUpdated += func;
         }
 
-        protected void UnSubscribe()
-        {
-            PresetHandler.OnPresetUpdated -= UpdatePresetSettings;
-        }
+        private Action<SAINPresetClass> _func;
 
-        protected virtual void UpdatePresetSettings(SAINPresetClass preset) { }
+        protected virtual void UnSubscribeToPresetChanges()
+        {
+            if (_func == null)
+            {
+                return;
+            }
+            Logger.LogDebug($"UnSubed");
+            PresetHandler.OnPresetUpdated -= _func;
+        }
     }
 }

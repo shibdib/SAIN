@@ -22,7 +22,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Init()
         {
-            base.InitPreset();
             Bot.BotActivation.OnBotStateChanged += removeCoroutine;
         }
 
@@ -152,7 +151,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-            base.DisposePreset();
+            base.UnSubscribeToPresetChanges();
             Bot.BotActivation.OnBotStateChanged -= removeCoroutine;
         }
 

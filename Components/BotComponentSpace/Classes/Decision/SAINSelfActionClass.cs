@@ -11,7 +11,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
         }
 
         private float _handsBusyTimer;
@@ -82,7 +82,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         private bool UsingMeds => BotOwner.Medecine?.Using == true;

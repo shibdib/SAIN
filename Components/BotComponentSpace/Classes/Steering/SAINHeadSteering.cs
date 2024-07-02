@@ -9,7 +9,7 @@
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
         }
 
         public void Update()
@@ -19,7 +19,6 @@
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
     }
 }

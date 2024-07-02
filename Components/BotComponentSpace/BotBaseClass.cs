@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
+using System;
 
 namespace SAIN.SAINComponent
 {
@@ -11,15 +12,16 @@ namespace SAIN.SAINComponent
             Bot = bot;
         }
 
-        protected void InitPreset()
+        protected override void SubscribeToPresetChanges(Action<SAINPresetClass> func)
         {
-            base.Subscribe();
-            base.UpdatePresetSettings(SAINPresetClass.Instance);
+            base.SubscribeToPresetChanges(func);
+            Bot.OnSAINDisposed += this.UnSubscribeToPresetChanges;
         }
 
-        protected void DisposePreset()
+        protected override void UnSubscribeToPresetChanges()
         {
-            base.UnSubscribe();
+            base.UnSubscribeToPresetChanges();
+            Bot.OnSAINDisposed -= this.UnSubscribeToPresetChanges;
         }
 
         public BotComponent Bot { get; private set; }
@@ -38,14 +40,16 @@ namespace SAIN.SAINComponent
 
         protected T BaseClass;
 
-        protected void InitPreset()
+        protected override void SubscribeToPresetChanges(Action<SAINPresetClass> func)
         {
-            base.Subscribe();
+            base.SubscribeToPresetChanges(func);
+            Bot.OnSAINDisposed += this.UnSubscribeToPresetChanges;
         }
 
-        protected void DisposePreset()
+        protected override void UnSubscribeToPresetChanges()
         {
-            base.UnSubscribe();
+            base.UnSubscribeToPresetChanges();
+            Bot.OnSAINDisposed -= this.UnSubscribeToPresetChanges;
         }
 
         public BotComponent Bot => BaseClass.Bot;

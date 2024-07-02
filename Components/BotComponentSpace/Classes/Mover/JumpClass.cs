@@ -12,7 +12,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            base.InitPreset();
         }
 
         public void Update()
@@ -38,7 +37,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Dispose()
         {
-            base.DisposePreset();
         }
 
         private float JumpOffLedgeTimer = 0f;

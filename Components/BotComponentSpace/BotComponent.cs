@@ -79,8 +79,7 @@ namespace SAIN.SAINComponent
         public SAINSteeringClass Steering { get; private set; }
         public AimClass Aim { get; private set; }
 
-
-        public Action<string, BotOwner> OnSAINDisposed { get; set; }
+        public Action OnSAINDisposed { get; set; }
 
         public CoroutineManager<BotComponent> CoroutineManager { get; private set; }
 
@@ -402,7 +401,7 @@ namespace SAIN.SAINComponent
         public void Dispose()
         {
             BotActivation?.SetActive(false);
-            OnSAINDisposed?.Invoke(ProfileId, BotOwner);
+            OnSAINDisposed?.Invoke();
             CoroutineManager?.Dispose();
 
             try

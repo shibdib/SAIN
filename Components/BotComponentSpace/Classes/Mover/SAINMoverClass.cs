@@ -82,7 +82,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(null);
             UpdateBodyNavObstacle(false);
         }
 
@@ -163,7 +163,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Dispose()
         {
-            base.DisposePreset();
             SprintController?.Dispose();
         }
 

@@ -3,6 +3,7 @@ using SAIN.Components.BotComponentSpace.Classes.EnemyClasses;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using SAIN.Helpers;
+using SAIN.Preset;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
@@ -58,7 +59,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(updatePresetSettings);
 
             Events.Init();
             _validChecker.Init();
@@ -91,7 +92,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Dispose()
         {
-            base.DisposePreset();
+            base.UnSubscribeToPresetChanges();
             Events?.Dispose();
             _validChecker?.Dispose();
             _knownChecker?.Dispose();
@@ -319,6 +320,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 Bot.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.33f, 0.66f));
             }
+        }
+
+        private void updatePresetSettings(SAINPresetClass preset)
+        {
+
         }
 
         public float NextCheckFlashLightTime;

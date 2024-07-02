@@ -21,7 +21,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
-            base.InitPreset();
+            base.SubscribeToPresetChanges(UpdatePresetSettings);
             if (Singleton<BotEventHandler>.Instance != null)
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += tryFakeDeathGrenade;
@@ -93,7 +93,6 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Dispose()
         {
-            base.DisposePreset();
             if (Singleton<BotEventHandler>.Instance != null)
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= tryFakeDeathGrenade;
@@ -110,9 +109,8 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private float FakeDeathChance = 2f;
 
-        protected override void UpdatePresetSettings(SAINPresetClass preset)
+        protected void UpdatePresetSettings(SAINPresetClass preset)
         {
-            base.UpdatePresetSettings(preset);
             if (PersonalitySettings != null && FileSettings != null)
             {
                 CanFakeDeath = PersonalitySettings.CanFakeDeathRare;

@@ -38,7 +38,7 @@ namespace SAIN.SAINComponent.Classes.Info
         {
             Profile = new ProfileClass(sain);
             WeaponInfo = new WeaponInfoClass(sain);
-            base.InitPreset();
+            base.SubscribeToPresetChanges(UpdatePresetSettings);
         }
 
         public void Init()
@@ -53,14 +53,11 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Dispose()
         {
-            base.DisposePreset();
             WeaponInfo.Dispose();
         }
 
-        protected override void UpdatePresetSettings(SAINPresetClass preset)
+        protected void UpdatePresetSettings(SAINPresetClass preset)
         {
-            base.UpdatePresetSettings(preset);
-
             Personality = GetPersonality(out var settings);
             PersonalitySettingsClass = settings;
 
