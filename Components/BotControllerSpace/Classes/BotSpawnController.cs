@@ -64,6 +64,7 @@ namespace SAIN.Components.BotController
 
         public void AddBot(BotOwner botOwner)
         {
+            Logger.LogDebug($"Checking {botOwner.name} for adding sain");
             BotController.StartCoroutine(addBot(botOwner));
             return;
 
@@ -81,16 +82,27 @@ namespace SAIN.Components.BotController
 
         private IEnumerator addBot(BotOwner botOwner)
         {
-            PlayerComponent playerComponent = getPlayerComp(botOwner);
-            checkExisting(botOwner);
-
-            if (SAINPlugin.IsBotExluded(botOwner))
+            try
             {
-                botOwner.gameObject.AddComponent<SAINNoBushESP>().Init(botOwner);
-                yield break;
-            }
+                Logger.LogDebug($"Checking {botOwner.name}...");
+                PlayerComponent playerComponent = getPlayerComp(botOwner);
+                checkExisting(botOwner);
+                Logger.LogDebug($"Checking if {botOwner.name} excluded...");
+                if (SAINPlugin.IsBotExluded(botOwner))
+                {
+                    Logger.LogDebug($"{botOwner.name} is excluded");
+                    botOwner.gameObject.AddComponent<SAINNoBushESP>().Init(botOwner);
+                    yield break;
+                }
 
-            initBotComp(botOwner, playerComponent);
+                Logger.LogDebug($"Adding SAIN to {botOwner.name}...");
+                initBotComp(botOwner, playerComponent);
+                Logger.LogDebug($"Finished {botOwner.name}");
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e);
+            }
             yield return null;
         }
 

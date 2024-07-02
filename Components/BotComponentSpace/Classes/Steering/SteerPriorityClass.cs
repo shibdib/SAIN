@@ -51,10 +51,10 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         }
 
-        public SteerPriority GetCurrentSteerPriority(bool lookRandom)
+        public SteerPriority GetCurrentSteerPriority(bool lookRandom, bool ignoreRunningPath)
         {
             var lastPriority = CurrentSteerPriority;
-            CurrentSteerPriority = findSteerPriority(lookRandom);
+            CurrentSteerPriority = findSteerPriority(lookRandom, ignoreRunningPath);
 
             if (CurrentSteerPriority != lastPriority)
                 LastSteerPriority = lastPriority;
@@ -62,9 +62,9 @@ namespace SAIN.SAINComponent.Classes.Mover
             return CurrentSteerPriority;
         }
 
-        private SteerPriority findSteerPriority(bool lookRandom)
+        private SteerPriority findSteerPriority(bool lookRandom, bool ignoreRunningPath)
         {
-            SteerPriority result = strickChecks();
+            SteerPriority result = strickChecks(ignoreRunningPath);
 
             if (result != SteerPriority.None)
             {
@@ -92,9 +92,9 @@ namespace SAIN.SAINComponent.Classes.Mover
             return SteerPriority.None;
         }
 
-        private SteerPriority strickChecks()
+        private SteerPriority strickChecks(bool ignoreRunningPath)
         {
-            if (Bot.Mover.SprintController.Running)
+            if (!ignoreRunningPath && Bot.Mover.SprintController.Running)
                 return SteerPriority.RunningPath;
 
             if (Player.IsSprintEnabled)

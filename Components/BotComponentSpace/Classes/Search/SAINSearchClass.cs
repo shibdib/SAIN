@@ -84,13 +84,14 @@ namespace SAIN.SAINComponent.Classes.Search
 
         private bool moveToPoint(Vector3 destination, bool shallSprint)
         {
-            if (!shallSprint)
+            var sprint = Bot.Mover.SprintController;
+            if (!shallSprint && sprint.Running)
             {
-                Bot.Mover.SprintController.CancelRun();
-                Bot.Mover.Sprint(false);
+                Bot.Mover.SprintController.CancelRun(0.25f);
+                return false;
             }
 
-            if (shallSprint && Bot.Mover.SprintController.RunToPoint(destination, Mover.ESprintUrgency.Middle))
+            if (shallSprint && Bot.Mover.SprintController.RunToPoint(destination, Mover.ESprintUrgency.Middle, true))
             {
                 return true;
             }

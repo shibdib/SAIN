@@ -193,7 +193,7 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            sound.SqrDistance = (sound.OriginalPosition - Bot.Transform.HeadPosition).sqrMagnitude;
+            sound.SqrDistance = (sound.OriginalPosition - Bot.Position).sqrMagnitude;
 
             float power = sound.Power;
             if (!sound.IsGunShot &&
@@ -207,16 +207,17 @@ namespace SAIN.SAINComponent.Classes
         {
             sound.BaseRange = sound.Power * sound.Volume;
             calcBunkerVolumeReduction(sound);
-            sound.Range = sound.BaseRange * sound.BunkerReduction;
+            float range = sound.BaseRange * sound.BunkerReduction;
 
             float maxAffectDist = HEAR_MODIFIER_MAX_AFFECT_DIST / 2;
-            if (sound.Range > maxAffectDist)
+            if (range > maxAffectDist)
             {
                 getSoundRangeModifier(sound);
-                sound.Range = Mathf.Clamp(sound.Range * sound.RangeModifier, maxAffectDist, float.MaxValue);
+                range = Mathf.Clamp(range * sound.RangeModifier, maxAffectDist, float.MaxValue);
             }
-            float range = sound.Range;
-            if (!sound.IsGunShot && range * range < sound.SqrDistance)
+            sound.Range = range;
+            if (!sound.IsGunShot && 
+                range * range < sound.SqrDistance)
             {
                 sound.OutOfRange = true;
             }
@@ -284,8 +285,6 @@ namespace SAIN.SAINComponent.Classes
             {
                 return;
             }
-
-            sound.Distance = Mathf.Sqrt(sound.SqrDistance);
 
             checkSoundHeard(sound);
             doIFeelBullet(sound);
@@ -454,13 +453,13 @@ namespace SAIN.SAINComponent.Classes
             sound.RangeModifier = Mathf.Clamp(modifier, HEAR_MODIFIER_MIN_CLAMP, HEAR_MODIFIER_MAX_CLAMP);
         }
 
-        private const float HEAR_MODIFIER_MAX_AFFECT_DIST = 15f * 15f;
+        private const float HEAR_MODIFIER_MAX_AFFECT_DIST = 15f;
         private const float HEAR_MODIFIER_NO_EARS = 0.65f;
         private const float HEAR_MODIFIER_HEAVY_HELMET = 0.8f;
         private const float HEAR_MODIFIER_DYING = 0.8f;
         private const float HEAR_MODIFIER_SPRINT = 0.85f;
         private const float HEAR_MODIFIER_HEAVYBREATH = 0.65f;
-        private const float HEAR_MODIFIER_MIN_CLAMP = 0.2f;
+        private const float HEAR_MODIFIER_MIN_CLAMP = 0.35f;
         private const float HEAR_MODIFIER_MAX_CLAMP = 5f;
 
         private void doIFeelBullet(BotSound sound)
@@ -799,7 +798,7 @@ namespace SAIN.SAINComponent.Classes
                 }
             }
 
-            if (Player.Velocity.magnitude < 0.5f)
+            if (Bot.PlayerComponent.Transform.PlayerVelocity < 0.1f)
             {
                 minimumChance += 5f;
             }
@@ -807,7 +806,7 @@ namespace SAIN.SAINComponent.Classes
             if (Bot.HasEnemy &&
                 Bot.Enemy.EnemyProfileId == sound.PlayerComponent.ProfileId)
             {
-                minimumChance += 25f;
+                minimumChance += 20f;
             }
 
             float num = farhearing - closehearing;
@@ -820,35 +819,20 @@ namespace SAIN.SAINComponent.Classes
             return EFTMath.RandomBool(chanceToHear);
         }
 
-        private static bool isGunshot(SAINSoundType soundType)
-        {
-            switch (soundType)
-            {
-                case SAINSoundType.Shot:
-                case SAINSoundType.SuppressedShot:
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
         public void checkSoundHeard(BotSound sound)
         {
             sound.Distance = Mathf.Sqrt(sound.SqrDistance);
-
             if (!doIDetectFootsteps(sound))
             {
                 sound.OutOfRange = true;
                 return;
             }
-
             checkOcclusion(sound);
-
-            if (!sound.OutOfRange)
+            if (sound.OutOfRange)
             {
-                sound.WasHeard = true;
+                return;
             }
+            sound.WasHeard = true;
         }
 
         private void checkOcclusion(BotSound sound)
@@ -868,7 +852,7 @@ namespace SAIN.SAINComponent.Classes
             Vector3 position = sound.OriginalPosition;
             if (!sound.IsGunShot)
             {
-                position.y += 0.1f;
+                position.y += 0.5f;
             }
 
             Vector3 botheadpos = BotOwner.MyHead.position;

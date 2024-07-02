@@ -153,7 +153,7 @@ namespace SAIN.Patches.Movement
             }
 
             if (SAINEnableClass.GetSAIN(____owner, out var botComponent) &&
-                botComponent.HasEnemy)
+                botComponent.EnemyController.AtPeace == false)
             {
                 __result = botComponent.DoorOpener.Update();
                 return false;

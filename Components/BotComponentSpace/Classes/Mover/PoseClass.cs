@@ -35,28 +35,26 @@ namespace SAIN.SAINComponent.Classes.Mover
             return SetTargetPose(ObjectTargetPoseCover);
         }
 
-        public void SetTargetPose(float num)
+        public bool SetTargetPose(float num)
         {
             if (canChangePose())
             {
                 BotOwner.Mover?.SetPose(num);
+                return true;
             }
+            return false;
         }
 
         private bool canChangePose()
         {
-            return _stopSprintPoseTime < Time.time;
+            return _stopSprintPoseTime < Time.time && !Bot.Mover.Crawling;
         }
 
         private float _stopSprintPoseTime;
 
         public bool SetTargetPose(float? num)
         {
-            if (num != null)
-            {
-                SetTargetPose(num.Value);
-            }
-            return num != null;
+            return num != null && SetTargetPose(num.Value);
         }
 
         public bool ObjectInFront => ObjectTargetPoseCover != null;

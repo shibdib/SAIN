@@ -18,9 +18,9 @@ namespace SAIN.SAINComponent.Classes.Mover
         public Vector3 WeaponRootOffset => BotOwner.WeaponRoot.position - Bot.Position;
         public AimStatus AimStatus => _steerPriorityClass.AimStatus;
 
-        public bool SteerByPriority(bool lookRandom = true)
+        public bool SteerByPriority(bool lookRandom = true, bool ignoreRunningPath = false)
         {
-            switch (_steerPriorityClass.GetCurrentSteerPriority(lookRandom))
+            switch (_steerPriorityClass.GetCurrentSteerPriority(lookRandom, ignoreRunningPath))
             {
                 case SteerPriority.RunningPath:
                 case SteerPriority.Aiming:

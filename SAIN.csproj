@@ -253,6 +253,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\SAINEnemyParts.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyControllerEvents.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyListController.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Mover\ObstacleAgent.cs" />
     <Compile Include="Helpers\Events\ToggleEvent.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyChooserClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\CornerHelpers.cs" />

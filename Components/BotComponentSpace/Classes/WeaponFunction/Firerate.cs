@@ -70,11 +70,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
                 if (perMeterDictionary != null && weapInfo != null)
                 {
-                    if (perMeterDictionary.TryGetValue(weapInfo.IWeaponClass, out float perMeter))
+                    if (perMeterDictionary.TryGetValue(weapInfo.EWeaponClass, out float perMeter))
                     {
                         return perMeter;
                     }
-                    if (perMeterDictionary.TryGetValue(IWeaponClass.Default, out perMeter))
+                    if (perMeterDictionary.TryGetValue(EWeaponClass.Default, out perMeter))
                     {
                         return perMeter;
                     }
