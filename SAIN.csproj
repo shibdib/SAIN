@@ -310,6 +310,7 @@
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonActiveClass.cs" />
     <Compile Include="Helpers\PerformanceHelpers.cs" />
     <Compile Include="Layers\Combat\Solo\MeleeAttackAction.cs" />
+    <Compile Include="Layers\Debug\CrawlAction.cs" />
     <Compile Include="Layers\ISAINAction.cs" />
     <Compile Include="Patches\FixPatches.cs" />
     <Compile Include="Patches\Shoot\AimDataPatches.cs" />
@@ -362,8 +363,8 @@
     <Compile Include="Layers\DebugOverlay.cs" />
     <Compile Include="Layers\Extract\LootingBotsInterop.cs" />
     <Compile Include="Layers\Extract\SAINLootingBotsIntegration.cs" />
-    <Compile Include="Layers\Run\BotRunLayer.cs" />
-    <Compile Include="Layers\Run\RunningAction.cs" />
+    <Compile Include="Layers\Debug\DebugLayer.cs" />
+    <Compile Include="Layers\Debug\RunningAction.cs" />
     <Compile Include="Layers\SAINAction.cs" />
     <Compile Include="Layers\SAINLayer.cs" />
     <Compile Include="Layers\Unstuck\BotUnstuckLayer.cs" />

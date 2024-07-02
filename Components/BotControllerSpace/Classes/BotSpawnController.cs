@@ -64,6 +64,9 @@ namespace SAIN.Components.BotController
 
         public void AddBot(BotOwner botOwner)
         {
+            BotController.StartCoroutine(addBot(botOwner));
+            return;
+
             PlayerComponent playerComponent = getPlayerComp(botOwner);
             checkExisting(botOwner);
 
@@ -74,6 +77,21 @@ namespace SAIN.Components.BotController
             }
 
             initBotComp(botOwner, playerComponent);
+        }
+
+        private IEnumerator addBot(BotOwner botOwner)
+        {
+            PlayerComponent playerComponent = getPlayerComp(botOwner);
+            checkExisting(botOwner);
+
+            if (SAINPlugin.IsBotExluded(botOwner))
+            {
+                botOwner.gameObject.AddComponent<SAINNoBushESP>().Init(botOwner);
+                yield break;
+            }
+
+            initBotComp(botOwner, playerComponent);
+            yield return null;
         }
 
         public void Subscribe(BotSpawner botSpawner)
