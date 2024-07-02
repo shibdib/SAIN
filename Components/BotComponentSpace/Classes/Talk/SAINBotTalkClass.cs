@@ -19,7 +19,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
             Player.BeingHitAction += GetHit;
             GroupTalk.Init();
             EnemyTalk.Init();
@@ -107,6 +107,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Dispose()
         {
+            base.DisposePreset();
             if (Player != null)
             {
                 Player.BeingHitAction -= GetHit;

@@ -9,8 +9,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyPath : EnemyBase, ISAINEnemyClass
     {
-        public event Action<Enemy, NavMeshPathStatus> OnPathUpdated;
-
         public EPathDistance EPathDistance
         {
             get
@@ -123,10 +121,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Init()
         {
             CoroutineName = $"{nameof(calcPathLoop)}:{Enemy.EnemyProfileId}";
-            Enemy.EnemyKnownChecker.OnEnemyKnownChanged += OnEnemyKnownChanged;
+            Enemy.Events.OnEnemyKnownChanged.OnToggle += OnEnemyKnownChanged;
         }
 
-        public void OnEnemyKnownChanged(Enemy enemy, bool known)
+        public void OnEnemyKnownChanged(bool known, Enemy enemy)
         {
             toggleCoroutine(known);
         }
@@ -169,7 +167,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             toggleCoroutine(false);
             EnemyCorners?.Clear();
-            Enemy.EnemyKnownChecker.OnEnemyKnownChanged -= OnEnemyKnownChanged;
+            Enemy.Events.OnEnemyKnownChanged.OnToggle -= OnEnemyKnownChanged;
         }
 
         private IEnumerator calcPathLoop()
@@ -229,8 +227,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                         break;
                 }
 
-                OnPathUpdated?.Invoke(Enemy, PathToEnemyStatus);
-
+                Enemy.Events.PathUpdated(PathToEnemyStatus);
                 yield return null;
             }
         }

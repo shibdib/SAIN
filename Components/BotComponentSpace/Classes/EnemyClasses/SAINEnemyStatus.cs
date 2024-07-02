@@ -6,8 +6,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyStatus : EnemyBase, ISAINEnemyClass
     {
-        public event Action<Enemy, EEnemyAction> OnVulnerableStateChanged;
-        public event Action<Enemy, ETagStatus> OnHealthStatusChanged;
+        public ETagStatus EnemyHealthStatus { get; private set; }
+        public EEnemyAction VulnerableAction { get; private set; }
+
+        public void Init()
+        {
+            Enemy.Events.OnEnemyKnownChanged.OnToggle += OnEnemyKnownChanged;
+        }
 
         public void Update()
         {
@@ -16,6 +21,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 updateVulnerableState();
                 updateHealthStatus();
             }
+        }
+
+        public void Dispose()
+        {
+            Enemy.Events.OnEnemyKnownChanged.OnToggle -= OnEnemyKnownChanged;
         }
 
         private void updateHealthStatus()
@@ -30,25 +40,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             EnemyHealthStatus = EnemyPlayer.HealthStatus;
             if (lastStatus != EnemyHealthStatus)
             {
-                OnHealthStatusChanged?.Invoke(Enemy, EnemyHealthStatus);
+                Enemy.Events.HealthStatusChanged(EnemyHealthStatus);
             }
         }
 
-        public ETagStatus EnemyHealthStatus { get; private set; }
-
-        private float _nextCheckHealthTime;
-
-        public void Init()
-        {
-            Enemy.EnemyKnownChecker.OnEnemyKnownChanged += OnEnemyKnownChanged;
-        }
-
-        public void Dispose()
-        {
-            Enemy.EnemyKnownChecker.OnEnemyKnownChanged -= OnEnemyKnownChanged;
-        }
-
-        public void OnEnemyKnownChanged(Enemy enemy, bool known)
+        public void OnEnemyKnownChanged(bool known, Enemy enemy)
         {
             if (known)
             {
@@ -90,7 +86,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             VulnerableAction = checkVulnerableAction();
             if (lastAction != VulnerableAction)
             {
-                OnVulnerableStateChanged?.Invoke(Enemy, VulnerableAction);
+                Enemy.Events.EnemyVulnerableChanged(VulnerableAction);
             }
         }
 
@@ -128,11 +124,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     default:
                         break;
                 }
-                OnVulnerableStateChanged?.Invoke(Enemy, action);
+                Enemy.Events.EnemyVulnerableChanged(action);
             }
         }
-
-        public EEnemyAction VulnerableAction { get; private set; }
 
         private void resetActions()
         {
@@ -144,6 +138,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             EnemyHasGrenadeOut = false;
             EnemyIsHealing = false;
             EnemyIsReloading = false;
+            ShotByEnemy = false;
+            TimeFirstShot = 0f;
+            LastShotPosition = null;
         }
 
         public bool PositionalFlareEnabled => 
@@ -158,10 +155,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
             set
             {
-                if (value && !Enemy.Heard)
-                {
-                    Enemy.Heard = true;
-                }
                 _heardRecently.Value = value;
             }
         }
@@ -179,22 +172,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     _enemyLookAtMe = dot >= 0.9f;
                 }
                 return _enemyLookAtMe;
-            }
-        }
-
-        public bool SearchStarted
-        {
-            get
-            {
-                return _searchStarted.Value;
-            }
-            set
-            {
-                if (value)
-                {
-                    TimeSearchLastStarted = Time.time;
-                }
-                _searchStarted.Value = value;
             }
         }
 
@@ -320,8 +297,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         }
 
         public int NumberOfSearchesStarted { get; set; }
-        public float TimeSearchLastStarted { get; private set; }
-        public float TimeSinceSearchLastStarted => Time.time - TimeSearchLastStarted;
 
         public void GetHit(DamageInfo damageInfo)
         {
@@ -330,6 +305,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 player.ProfileId == Enemy.EnemyProfileId)
             {
                 ShotByEnemyRecently = true;
+                Enemy.Events.ShotByEnemy();
             }
         }
 
@@ -349,10 +325,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private readonly ExpirableBool _enemyIsSuppressed = new ExpirableBool(4f, 0.85f, 1.15f);
         private readonly ExpirableBool _enemyLooting = new ExpirableBool(30f, 0.85f, 1.15f);
         private readonly ExpirableBool _enemySurgery = new ExpirableBool(8f, 0.85f, 1.15f);
-        private readonly ExpirableBool _searchStarted = new ExpirableBool(300f, 0.85f, 1.15f);
         private readonly ExpirableBool _shotByEnemy = new ExpirableBool(2f, 0.75f, 1.25f);
         private bool _enemyLookAtMe;
         private float _nextCheckEnemyLookTime;
         private const float _maxDistFromPosFlareEnabled = 10f;
+        private float _nextCheckHealthTime;
     }
 }

@@ -39,7 +39,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         public void Update()
@@ -53,13 +53,13 @@ namespace SAIN.SAINComponent.Classes.Talk
                 SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
             {
                 if (Subscribed)
-                    Dispose();
+                    unsub();
 
                 return;
             }
 
             if (!Subscribed)
-                Subscribe();
+                sub();
 
             checkGroupTalk();
         }
@@ -182,6 +182,12 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Dispose()
         {
+            base.DisposePreset(); 
+            unsub();
+        }
+
+        private void unsub()
+        {
             if (Subscribed)
             {
                 Subscribed = false;
@@ -200,11 +206,11 @@ namespace SAIN.SAINComponent.Classes.Talk
                     botController.PlayerTalk -= EnemyConversation;
 
                 if (Bot.EnemyController != null)
-                    Bot.EnemyController.OnEnemyKilled -= OnEnemyDown;
+                    Bot.EnemyController.Events.OnEnemyKilled -= OnEnemyDown;
             }
         }
 
-        private void Subscribe()
+        private void sub()
         {
             var squad = Bot?.Squad?.SquadInfo;
             if (!Subscribed && squad != null)
@@ -217,7 +223,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 squad.OnSoundHeard += onNoiseHeard;
                 SAINBotController.Instance.PlayerTalk += EnemyConversation;
                 BotOwner.DeadBodyWork.OnStartLookToBody += OnLootBody;
-                Bot.EnemyController.OnEnemyKilled += OnEnemyDown;
+                Bot.EnemyController.Events.OnEnemyKilled += OnEnemyDown;
             }
         }
 

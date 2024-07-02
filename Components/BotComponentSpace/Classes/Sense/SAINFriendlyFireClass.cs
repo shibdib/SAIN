@@ -16,8 +16,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
-            Bot.CoroutineManager.Add(friendlyFireLoop(), nameof(friendlyFireLoop));
+            base.InitPreset();
         }
 
         public void Update()
@@ -28,23 +27,9 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private IEnumerator friendlyFireLoop()
-        {
-            WaitForSeconds wait = new WaitForSeconds(FRIENDLYFIRE_FREQUENCY);
-            while (true)
-            {
-                if (Bot.EnemyController.AtPeace)
-                {
-                    yield return null;
-                    continue;
-                }
-                CheckFriendlyFire();
-                yield return wait;
-            }
-        }
-
         public void Dispose()
         {
+            base.DisposePreset();
         }
 
         public bool CheckFriendlyFire(Vector3? target = null)
@@ -84,15 +69,27 @@ namespace SAIN.SAINComponent.Classes
 
         private FriendlyFireStatus checkFriendlyFire(Vector3 target)
         {
-            Collider hitCollider = sphereCast(target);
-            if (hitCollider == null)
+            var hits = sphereCastAll(target);
+            int count = hits.Length;
+            if (count == 0)
             {
                 return FriendlyFireStatus.None;
             }
 
-            if (!isColliderEnemy(hitCollider))
+            for (int i = 0; i < count; i++)
             {
-                return FriendlyFireStatus.FriendlyBlock;
+                var hit = hits[i];
+                if (hit.collider == null)
+                    continue;
+
+                Player player = GameWorldComponent.Instance.GameWorld.GetPlayerByCollider(hit.collider);
+                if (player == null)
+                    continue;
+                if (player.ProfileId == Bot.ProfileId)
+                    continue;
+
+                if (!Bot.EnemyController.IsPlayerAnEnemy(player.ProfileId))
+                    return FriendlyFireStatus.FriendlyBlock;
             }
             return FriendlyFireStatus.Clear;
         }
@@ -102,8 +99,20 @@ namespace SAIN.SAINComponent.Classes
             Vector3 firePort = Bot.Transform.WeaponFirePort;
             float distance = (target - firePort).magnitude + 1;
             float sphereCastRadius = 0.2f;
+
+            var hits = Physics.SphereCastAll(firePort, sphereCastRadius, Bot.Transform.WeaponPointDirection, distance, LayerMaskClass.PlayerMask);
+
             Physics.SphereCast(firePort, sphereCastRadius, Bot.Transform.WeaponPointDirection, out var hit, distance, LayerMaskClass.PlayerMask);
             return hit.collider;
+        }
+
+        private RaycastHit[] sphereCastAll(Vector3 target)
+        {
+            Vector3 firePort = Bot.Transform.WeaponFirePort;
+            float distance = (target - firePort).magnitude + 1;
+            float sphereCastRadius = 0.2f;
+            var hits = Physics.SphereCastAll(firePort, sphereCastRadius, Bot.Transform.WeaponPointDirection, distance, LayerMaskClass.PlayerMask);
+            return hits;
         }
 
         private bool isColliderEnemy(Collider collider)

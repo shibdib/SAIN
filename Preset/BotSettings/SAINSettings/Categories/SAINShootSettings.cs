@@ -25,10 +25,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         public float FireratMulti = 1.35f;
 
         [MinMax(50f, 500f, 1f)]
-        public float MaxPointFireDistance = 100f;
+        public float MaxPointFireDistance = 150f;
 
         [Advanced]
-        public bool CAN_STOP_SHOOT_CAUSE_ANIMATOR = true;
+        public bool CAN_STOP_SHOOT_CAUSE_ANIMATOR = false;
 
         [Hidden]
         [JsonIgnore]

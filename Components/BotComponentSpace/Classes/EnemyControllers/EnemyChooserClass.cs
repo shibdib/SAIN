@@ -7,8 +7,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyChooserClass : BotSubClassBase<SAINEnemyController>, ISAINClass
     {
-        public event Action<Enemy> OnEnemyChanged;
-
         public Enemy ActiveEnemy
         {
             get
@@ -22,22 +20,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     return;
                 }
 
-                if (_activeEnemy != null)
-                {
-                    _activeEnemy.EnemyKnownChecker.OnEnemyKnownChanged -= onActiveEnemyForgotten;
-                    if (_activeEnemy.IsValid)
-                    {
-                        setLastEnemy(_activeEnemy);
-                    }
-                }
-
+                LastEnemy = _activeEnemy;
                 _activeEnemy = value;
-                OnEnemyChanged?.Invoke(value);
-
-                if (_activeEnemy != null)
-                    _activeEnemy.EnemyKnownChecker.OnEnemyKnownChanged += onActiveEnemyForgotten;
+                BaseClass.Events.EnemyChanged(value, LastEnemy);
             }
         }
+
         public Enemy LastEnemy { get; private set; }
 
         public EnemyChooserClass(SAINEnemyController controller) : base(controller)
@@ -46,8 +34,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
-            BaseClass.OnEnemyRemoved += enemyRemoved;
+            base.InitPreset();
+            BaseClass.Events.OnEnemyRemoved += enemyRemoved;
+            BaseClass.Events.OnEnemyKnownChanged += enemyKnownChanged;
         }
 
         public void Update()
@@ -58,7 +47,19 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Dispose()
         {
-            BaseClass.OnEnemyRemoved -= enemyRemoved;
+            base.DisposePreset();
+            BaseClass.Events.OnEnemyRemoved -= enemyRemoved;
+            BaseClass.Events.OnEnemyKnownChanged -= enemyKnownChanged;
+        }
+
+        private void enemyKnownChanged(bool known, Enemy enemy)
+        {
+            if (!known && 
+                _activeEnemy != null && 
+                _activeEnemy.EnemyProfileId == enemy.EnemyProfileId)
+            {
+                setActiveEnemy(null);
+            }
         }
 
         private void enemyRemoved(string profileId, Enemy enemy)
@@ -67,6 +68,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 ActiveEnemy.EnemyProfileId == profileId)
             {
                 ActiveEnemy = null;
+                LastEnemy = null;
+                return;
             }
             if (LastEnemy != null &&
                 LastEnemy.EnemyProfileId == profileId)
@@ -78,36 +81,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void ClearEnemy()
         {
             setActiveEnemy(null);
-        }
-
-        private void onActiveEnemyForgotten(Enemy enemy, bool known)
-        {
-            if (known)
-            {
-                return;
-            }
-            if (ActiveEnemy == null)
-            {
-                Logger.LogWarning("Active Enemy is already null");
-                return;
-            }
-            if (ActiveEnemy.EnemyProfileId != enemy.EnemyProfileId)
-            {
-                Logger.LogWarning("You fucked up");
-                return;
-            }
-            setActiveEnemy(null);
-        }
-
-        private IEnumerator enemyChooser()
-        {
-            while (true)
-            {
-                assignActiveEnemy();
-                checkDiscrepency();
-
-                yield return null;
-            }
         }
 
         private void assignActiveEnemy()

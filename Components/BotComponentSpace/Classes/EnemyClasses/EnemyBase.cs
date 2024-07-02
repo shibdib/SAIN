@@ -1,16 +1,28 @@
 ﻿using EFT;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Components.PlayerComponentSpace.PersonClasses;
+using SAIN.Preset;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public abstract class EnemyBase : PresetUpdaterBase
     {
-        public EnemyBase(Enemy enemy) : base(enemy)
+        public EnemyBase(Enemy enemy)
         {
             Enemy = enemy;
             EnemyPerson = enemy.EnemyPerson;
+        }
+
+        protected void InitPreset()
+        {
+            base.Subscribe();
+            UpdatePresetSettings(SAINPresetClass.Instance);
+        }
+
+        protected void DisposePreset()
+        {
+            base.UnSubscribe();
         }
 
         protected Enemy Enemy { get; private set; }

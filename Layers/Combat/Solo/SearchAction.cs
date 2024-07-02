@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Search;
 using System.Collections;
 using UnityEngine;
@@ -22,16 +23,22 @@ namespace SAIN.Layers.Combat.Solo
         {
             while (true)
             {
-                if (Bot.Enemy == null)
+                if (_searchTarget == null)
                 {
-                    yield return null;
-                    continue;
+                    var enemy = Bot.Enemy;
+                    if (enemy == null)
+                    {
+                        yield return null;
+                        continue;
+                    }
+                    _searchTarget = enemy;
+                    Search.ToggleSearch(true, enemy);
                 }
 
-                bool isBeingStealthy = Bot.Enemy.EnemyHeardFromPeace;
+                bool isBeingStealthy = _searchTarget.Hearing.EnemyHeardFromPeace;
                 if (isBeingStealthy)
                 {
-                    SprintEnabled = false;
+                    _sprintEnabled = false;
                 }
                 else
                 {
@@ -42,12 +49,12 @@ namespace SAIN.Layers.Combat.Solo
                 if (_nextUpdateSearchTime < Time.time)
                 {
                     _nextUpdateSearchTime = Time.time + 0.1f;
-                    Search.Search(SprintEnabled);
+                    Search.Search(_sprintEnabled);
                 }
 
                 Steer();
 
-                if (!SprintEnabled)
+                if (!_sprintEnabled)
                 {
                     Shoot.Update();
                     if (!isBeingStealthy)
@@ -58,16 +65,21 @@ namespace SAIN.Layers.Combat.Solo
             }
         }
 
+        private Enemy _searchTarget;
+
         public override void Start()
         {
+            _searchTarget = Bot.Enemy;
+            Search.ToggleSearch(true, _searchTarget);
             Toggle(true);
         }
 
         public override void Stop()
         {
+            Search.ToggleSearch(false, _searchTarget);
+            _searchTarget = null;
             Toggle(false);
             BotOwner.Mover.MovementResume();
-            Search.Reset();
             HaveTalked = false;
         }
 
@@ -123,19 +135,19 @@ namespace SAIN.Layers.Combat.Solo
         {
             if (Search.CurrentState == ESearchMove.MoveToEndPeek || Search.CurrentState == ESearchMove.Wait || Search.CurrentState == ESearchMove.MoveToDangerPoint)
             {
-                SprintEnabled = false;
+                _sprintEnabled = false;
                 return;
             }
 
             if (Bot.Enemy?.IsVisible == true || Bot.Enemy?.InLineOfSight == true)
             {
-                SprintEnabled = false;
+                _sprintEnabled = false;
                 return;
             }
 
             if (Bot.Decision.CurrentSquadDecision == SquadDecision.Help)
             {
-                SprintEnabled = true;
+                _sprintEnabled = true;
                 return;
             }
 
@@ -149,9 +161,9 @@ namespace SAIN.Layers.Combat.Solo
                     chance = 100f;
                 }
 
-                SprintEnabled = EFTMath.RandomBool(chance);
+                _sprintEnabled = EFTMath.RandomBool(chance);
                 float timeAdd;
-                if (SprintEnabled)
+                if (_sprintEnabled)
                 {
                     timeAdd = 2f * Random.Range(0.75f, 4.00f);
                 }
@@ -163,7 +175,7 @@ namespace SAIN.Layers.Combat.Solo
             }
         }
 
-        private bool SprintEnabled = false;
+        private bool _sprintEnabled = false;
         private float RandomSprintTimer = 0f;
 
         private void Steer()

@@ -21,7 +21,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         public void Update()
@@ -45,7 +45,9 @@ namespace SAIN.SAINComponent.Classes
         //private float _nextTryDropTime;
 
         public void Dispose()
-        { }
+        {
+            base.DisposePreset();
+        }
 
         public bool DropBackpack()
         {

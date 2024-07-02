@@ -9,7 +9,7 @@
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         public void Update()
@@ -19,7 +19,7 @@
 
         public void Dispose()
         {
-
+            base.DisposePreset();
         }
     }
 }

@@ -1,22 +1,27 @@
 ﻿using EFT;
 using SAIN.Preset.Personalities;
 using SAIN.SAINComponent.Classes.EnemyClasses;
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace SAIN.SAINComponent.Classes.Search
 {
     public class SAINSearchClass : BotBaseClass, ISAINClass
     {
+        public bool SearchActive { get; private set; }
+        public Enemy SearchTarget { get; private set; }
+
         public ESearchMove NextState { get; private set; }
         public ESearchMove CurrentState { get; private set; }
         public ESearchMove LastState { get; private set; }
 
         public Vector3? FinalDestination => PathFinder.FinalDestination;
         public BotPeekPlan? PeekPoints => PathFinder.PeekPoints;
-        public Enemy SearchTarget { get; set; }
 
         public SearchDeciderClass SearchDecider { get; private set; }
         public SearchPathFinder PathFinder { get; private set; }
+
 
         public SAINSearchClass(BotComponent sain) : base(sain)
         {
@@ -26,7 +31,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         public void Update()
@@ -36,7 +41,21 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public void Dispose()
         {
+            base.DisposePreset();
+        }
 
+        public void ToggleSearch(bool value, Enemy target)
+        {
+            SearchActive = value;
+            SearchTarget = value ? target : null;
+            if (target != null)
+            {
+                target.Events.OnSearch.CheckToggle(value);
+            }
+            if (!value)
+            {
+                Reset();
+            }
         }
 
         public void Search(bool shallSprint)

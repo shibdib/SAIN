@@ -7,15 +7,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyParts
     {
-        public SAINEnemyParts(PlayerBones bones, bool isYourPlayer)
-        {
-            IsYourPlayer = isYourPlayer;
-            createPartDatas(bones);
-            _indexMax = Parts.Count;
-        }
-
-        private bool IsYourPlayer;
-
         public bool LineOfSight
         {
             get
@@ -36,8 +27,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         }
 
         public Vector3 LastSuccessPosition { get; private set; }
-
-        private float _lastSuccessTime;
+        public Dictionary<EBodyPart, SAINEnemyPartData> Parts { get; } = new Dictionary<EBodyPart, SAINEnemyPartData>();
 
         public bool CheckBodyLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)
         {
@@ -97,6 +87,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return false;
         }
 
+        public SAINEnemyParts(PlayerBones bones, bool isYourPlayer)
+        {
+            IsYourPlayer = isYourPlayer;
+            createPartDatas(bones);
+            _indexMax = Parts.Count;
+        }
+
         private SAINEnemyPartData getNextPart()
         {
             SAINEnemyPartData result = null;
@@ -115,11 +112,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             return result;
         }
-
-        private int _index;
-        private readonly int _indexMax;
-
-        private SAINEnemyPartData _lastCheckSuccessPart;
 
         private void createPartDatas(PlayerBones bones)
         {
@@ -184,7 +176,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     break;
             }
         }
-
-        public Dictionary<EBodyPart, SAINEnemyPartData> Parts = new Dictionary<EBodyPart, SAINEnemyPartData>();
+        private bool IsYourPlayer;
+        private float _lastSuccessTime;
+        private int _index;
+        private readonly int _indexMax;
+        private SAINEnemyPartData _lastCheckSuccessPart;
     }
 }

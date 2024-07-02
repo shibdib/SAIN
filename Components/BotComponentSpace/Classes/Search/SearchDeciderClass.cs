@@ -95,7 +95,7 @@ namespace SAIN.SAINComponent.Classes.Search
             }
 
             float timeBeforeSearch = Bot.Info.TimeBeforeSearch;
-            if (enemy.Status.SearchStarted)
+            if (enemy.Events.OnSearch.Value)
             {
                 return shallContinueSearch(enemy, timeBeforeSearch, out reason);
             }
@@ -113,7 +113,7 @@ namespace SAIN.SAINComponent.Classes.Search
             {
                 return false;
             }
-            if (!enemy.EnemyHeardFromPeace)
+            if (!enemy.Hearing.EnemyHeardFromPeace)
             {
                 return false;
             }

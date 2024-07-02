@@ -88,14 +88,10 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public void Init()
         {
-           // Bot.OnBotDisabled += StopSearch;
-            Bot.EnemyController.OnEnemyForgotten += checkStopSearch;
         }
 
         public void Dispose()
         {
-            //Bot.OnBotDisabled -= StopSearch;
-            Bot.EnemyController.OnEnemyForgotten -= checkStopSearch;
         }
 
         public SAINEnemySearchClass(Enemy enemy) : base(enemy)

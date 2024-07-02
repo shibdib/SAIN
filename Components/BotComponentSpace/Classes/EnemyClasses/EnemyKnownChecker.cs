@@ -5,8 +5,6 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 {
     public class EnemyKnownChecker : EnemyBase, ISAINClass
     {
-        public event Action<Enemy, bool> OnEnemyKnownChanged;
-
         public bool EnemyKnown {  get; private set; }
 
         public EnemyKnownChecker(Enemy enemy) : base(enemy)
@@ -45,12 +43,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         private void setEnemyKnown(bool enemyKnown)
         {
-            if (EnemyKnown != enemyKnown)
-            {
-                bool wasKnown = EnemyKnown;
-                EnemyKnown = enemyKnown;
-                OnEnemyKnownChanged?.Invoke(Enemy, enemyKnown);
-            }
+            Enemy.Events.OnEnemyKnownChanged.CheckToggle(enemyKnown);
         }
 
         private bool shallKnowEnemy()

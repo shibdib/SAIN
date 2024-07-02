@@ -29,7 +29,7 @@ namespace SAIN.Layers.Combat.Solo
                     continue;
                 }
 
-                if (Enemy.InLineOfSight)
+                if (_enemy.InLineOfSight)
                 {
                     enemyInSight();
                     yield return null;
@@ -44,15 +44,15 @@ namespace SAIN.Layers.Combat.Solo
 
         private bool checkHasEnemy()
         {
-            if (Enemy != null)
+            if (_enemy != null)
             {
                 return true;
             }
 
-            Enemy = Bot.Enemy;
-            if (Enemy != null)
+            _enemy = Bot.Enemy;
+            if (_enemy != null)
             {
-                Enemy.Path.OnPathUpdated += onPathUpdated;
+                _enemy.Events.OnPathUpdated += onPathUpdated;
                 _pathUpdated = true;
                 return true;
             }
@@ -70,12 +70,12 @@ namespace SAIN.Layers.Combat.Solo
             Bot.Mover.SprintController.CancelRun();
             Bot.Mover.DogFight.DogFightMove(true);
 
-            if (Enemy.IsVisible && Enemy.CanShoot)
+            if (_enemy.IsVisible && _enemy.CanShoot)
             {
                 Bot.Steering.SteerByPriority();
                 return;
             }
-            Bot.Steering.LookToEnemy(Enemy);
+            Bot.Steering.LookToEnemy(_enemy);
         }
 
         private void checkJump()
@@ -83,7 +83,7 @@ namespace SAIN.Layers.Combat.Solo
             if (_shallTryJump && TryJumpTimer < Time.time && Bot.Player.IsSprintEnabled)
             {
                 //&& Bot.Enemy.Path.PathDistance > 3f
-                var corner = Enemy.Path.EnemyCorners.GroundPosition(ECornerType.Last);
+                var corner = _enemy.Path.EnemyCorners.GroundPosition(ECornerType.Last);
                 if (corner != null &&
                     (corner.Value - Bot.Position).sqrMagnitude < 1f)
                 {
@@ -120,7 +120,7 @@ namespace SAIN.Layers.Combat.Solo
             if (_pathUpdated && _updateMoveTime < Time.time)
             {
                 _updateMoveTime = Time.time + 0.1f;
-                if (updateMove(Enemy))
+                if (updateMove(_enemy))
                 {
                     _pathUpdated = false;
                 }
@@ -189,13 +189,13 @@ namespace SAIN.Layers.Combat.Solo
             _shallBunnyHop = false;
         }
 
-        private Enemy Enemy;
+        private Enemy _enemy;
 
         private void onPathUpdated(Enemy enemy, NavMeshPathStatus status)
         {
-            if (Enemy != enemy)
+            if (_enemy != enemy)
             {
-                enemy.Path.OnPathUpdated -= onPathUpdated;
+                enemy.Events.OnPathUpdated -= onPathUpdated;
                 return;
             }
 
@@ -210,10 +210,10 @@ namespace SAIN.Layers.Combat.Solo
         public override void Stop()
         {
             Toggle(false);
-            if (Enemy != null)
+            if (_enemy != null)
             {
-                Enemy.Path.OnPathUpdated -= onPathUpdated;
-                Enemy = null;
+                _enemy.Events.OnPathUpdated -= onPathUpdated;
+                _enemy = null;
             }
 
             Bot.Mover.DogFight.ResetDogFightStatus();

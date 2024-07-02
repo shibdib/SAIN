@@ -50,7 +50,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float UNDER_FIRE_PERIOD = 6f;
+        public float UNDER_FIRE_PERIOD = 5f;
 
         [Hidden]
         [JsonIgnore]
@@ -94,10 +94,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float HIT_DELAY_WHEN_PEACE = 0.5f;
+        public float HIT_DELAY_WHEN_PEACE = 0.4f;
 
         [Hidden]
         [JsonIgnore]
-        public float HIT_DELAY_WHEN_HAVE_SMT = 0.25f;
+        public float HIT_DELAY_WHEN_HAVE_SMT = 0.2f;
     }
 }

@@ -10,8 +10,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
-            Bot.EnemyController.OnEnemyRemoved += checkClear;
+            base.InitPreset();
+            Bot.EnemyController.Events.OnEnemyRemoved += checkClear;
         }
 
         public void Update()
@@ -21,7 +21,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Dispose()
         {
-            Bot.EnemyController.OnEnemyRemoved -= checkClear;
+            base.DisposePreset();
+            Bot.EnemyController.Events.OnEnemyRemoved -= checkClear;
         }
 
         public bool ShallDogFight()

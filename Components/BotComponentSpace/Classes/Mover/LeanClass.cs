@@ -13,7 +13,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         private static readonly SoloDecision[] DontLean =
@@ -78,6 +78,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Dispose()
         {
+            base.DisposePreset();
         }
 
         public LeanSetting LeanDirection { get; private set; }

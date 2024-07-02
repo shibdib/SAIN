@@ -16,7 +16,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         public void Update()
@@ -200,6 +200,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Dispose()
         {
+            base.DisposePreset();
         }
     }
 

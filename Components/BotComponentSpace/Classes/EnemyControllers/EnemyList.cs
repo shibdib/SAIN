@@ -8,7 +8,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public event Action<bool> OnListEmptyOrGetFirst;
         public event Action<bool> OnListEmptyOrGetFirstHuman;
 
-        public void AddOrRemoveEnemy(Enemy enemy, bool value)
+        public void AddOrRemoveEnemy(bool value, Enemy enemy)
         {
             if (value)
             {

@@ -52,7 +52,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
             SAINBotController.Instance.AISoundPlayed += soundHeard;
             SAINBotController.Instance.BulletImpact += bulletImpacted;
         }
@@ -120,7 +120,7 @@ namespace SAIN.SAINComponent.Classes
             random.y = 0;
             random = random.normalized * dispersion;
             Vector3 estimatedPos = enemy.EnemyPosition + random;
-            enemy.SetHeardStatus(true, estimatedPos, SAINSoundType.BulletImpact, true);
+            enemy.Hearing.SetHeard(estimatedPos, SAINSoundType.BulletImpact, true);
         }
 
         private float _nextHearImpactTime;
@@ -948,8 +948,10 @@ namespace SAIN.SAINComponent.Classes
             return occlusionmodifier;
         }
 
-        public override void UpdatePresetSettings(SAINPresetClass preset)
+        protected override void UpdatePresetSettings(SAINPresetClass preset)
         {
+            base.UpdatePresetSettings(preset);
+
             var aiLimit = preset.GlobalSettings.AILimit;
             _farDistance = aiLimit.MaxHearingRanges[AILimitSetting.Far].Sqr();
             _veryFarDistance = aiLimit.MaxHearingRanges[AILimitSetting.VeryFar].Sqr();

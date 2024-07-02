@@ -130,12 +130,12 @@ namespace SAIN.BotController.Classes
             PlaceForCheck newPlace = AddNewPlaceForCheck(bot.BotOwner, position, checkType, enemy.EnemyIPlayer);
             if (newPlace != null)
             {
-                enemy.SetHeardStatus(true, newPlace.Position, soundType, true);
+                enemy.Hearing.SetHeard(newPlace.Position, soundType, true);
                 if (heard)
                     OnSoundHeard?.Invoke(newPlace);
                 return;
             }
-            enemy.SetHeardStatus(true, position, soundType, true);
+            enemy.Hearing.SetHeard(position, soundType, true);
         }
 
         public void AddPointToSearch(Vector3 position, float soundPower, BotComponent sain, AISoundType soundType, IPlayer player, ESearchPointType searchType = ESearchPointType.Hearing)
@@ -499,7 +499,7 @@ namespace SAIN.BotController.Classes
                     continue;
                 }
 
-                memberEnemy.SetHeardStatus(true, position, soundType, false);
+                memberEnemy.Hearing.SetHeard(position, soundType, false);
                 if (action != EEnemyAction.None)
                 {
                     memberEnemy.Status.SetVulnerableAction(action);

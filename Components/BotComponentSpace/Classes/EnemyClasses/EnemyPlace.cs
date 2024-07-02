@@ -82,11 +82,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     if (Player != null)
                     {
                         float sqrMag = (Player.Position - Position).sqrMagnitude;
-                        if (Player?.IsAI == true && sqrMag > 75f * 75f)
+                        if (Player?.IsAI == true && sqrMag > 125f * 125f)
                         {
                             return true;
                         }
-                        if (Player?.IsAI == false && sqrMag > 125f * 125f)
+                        if (Player?.IsAI == false && sqrMag > 150f * 150f)
                         {
                             return true;
                         }

@@ -109,7 +109,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
             SetActive(true);
             Bot.Person.ActiveClass.OnBotActiveChanged += SetActive;
         }
@@ -122,7 +122,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            Bot.Person.ActiveClass.OnBotActiveChanged -= SetActive;
+            base.DisposePreset();
         }
 
         private bool _speedReset;

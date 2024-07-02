@@ -8,15 +8,12 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
     {
         public bool ActiveThreat { get; private set; }
 
-        public event Action<Enemy, bool> OnActiveThreatChanged;
-
         public EnemyActiveThreatChecker(Enemy enemy) : base(enemy)
         {
         }
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()
@@ -26,17 +23,12 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         public void Dispose()
         {
-
         }
 
         private void checkActiveThreat()
         {
-            bool wasActiveThreat = ActiveThreat;
             ActiveThreat = isActiveThreat();
-            if (wasActiveThreat != ActiveThreat)
-            {
-                OnActiveThreatChanged?.Invoke(Enemy, ActiveThreat);
-            }
+            Enemy.Events.OnActiveThreatChanged.CheckToggle(ActiveThreat);
         }
 
         private bool isActiveThreat()

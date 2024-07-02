@@ -5,9 +5,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyVision : EnemyBase, ISAINEnemyClass
     {
-        public event Action<Enemy, bool> OnVisionChange;
-        public event Action<Enemy> OnFirstSeen;
-
         public SAINEnemyVision(Enemy enemy) : base(enemy)
         {
             _gainSight = new GainSightClass(enemy);
@@ -17,10 +14,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Enemy.EnemyKnownChecker.OnEnemyKnownChanged += OnEnemyKnownChanged;
+            Enemy.Events.OnEnemyKnownChanged.OnToggle += OnEnemyKnownChanged;
         }
 
-        public void OnEnemyKnownChanged(Enemy enemy, bool known)
+        public void OnEnemyKnownChanged(bool known, Enemy enemy)
         {
             if (known)
             {
@@ -32,7 +29,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Dispose()
         {
-            Enemy.EnemyKnownChecker.OnEnemyKnownChanged -= OnEnemyKnownChanged;
+            Enemy.Events.OnEnemyKnownChanged.OnToggle -= OnEnemyKnownChanged;
         }
 
         public void Update()
@@ -121,7 +118,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     FirstContactOccured = true;
                     TimeFirstSeen = Time.time;
                     Seen = true;
-                    OnFirstSeen?.Invoke(Enemy);
+                    Enemy.Events.EnemyFirstSeen();
                 }
 
                 TimeLastSeen = Time.time;
@@ -131,9 +128,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (!IsVisible)
             {
                 if (wasVisible)
-                {
                     Enemy.UpdateLastSeenPosition(EnemyTransform.Position);
-                }
+
                 if (Seen && 
                     TimeSinceSeen > _lostContactMinSeenTime && 
                     _nextReportLostVisualTime < Time.time)
@@ -144,9 +140,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 VisibleStartTime = -1f;
             }
 
+            Enemy.Events.OnVisionChange.CheckToggle(IsVisible);
             if (IsVisible != wasVisible)
             {
-                OnVisionChange?.Invoke(Enemy, IsVisible);
                 LastChangeVisionTime = Time.time;
             }
         }

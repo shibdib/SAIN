@@ -16,6 +16,15 @@ namespace SAIN.SAINComponent.Classes.Info
 {
     public class WeaponInfoClass : BotBaseClass, ISAINClass
     {
+        public float FinalModifier { get; private set; }
+        public IWeaponClass IWeaponClass { get; private set; }
+        public ICaliber ICaliber { get; private set; }
+        public float SwapToSemiDist { get; private set; } = 50f;
+        public float SwapToAutoDist { get; private set; } = 45f;
+
+        public Recoil Recoil { get; private set; }
+        public Firerate Firerate { get; private set; }
+        public Firemode Firemode { get; private set; }
         public ReloadClass Reload { get; private set; }
 
         public WeaponInfoClass(BotComponent bot) : base(bot)
@@ -24,50 +33,26 @@ namespace SAIN.SAINComponent.Classes.Info
             Firerate = new Firerate(bot);
             Firemode = new Firemode(bot);
             Reload = new ReloadClass(bot);
-
-            PresetHandler.OnPresetUpdated += forceRecheckWeapon;
-            SAINBotController.Instance.OnBotWeaponChange += weaponChanged;
         }
-
-        private void weaponChanged(string name, IFirearmHandsController firearmController)
-        {
-            if (name != BotOwner?.name)
-            {
-                return;
-            }
-            WeaponAIPreset preset = BotOwner?.WeaponManager?.WeaponAIPreset;
-            if (preset == null)
-            {
-                return;
-            }
-            var type = preset.WeaponAIPresetType;
-            if (!_presets.ContainsKey(type))
-            {
-                _presets.Add(type, new WeaponAIPresetHistory(preset));
-            }
-
-            float accuracyModifier = Bot.Info.FileSettings.Aiming.AccuracySpreadMulti * SAINPlugin.LoadedPreset.GlobalSettings.Aiming.AccuracySpreadMultiGlobal;
-
-            WeaponAIPresetHistory history = _presets[type];
-            preset.BaseShift = history.BaseShift * accuracyModifier;
-            preset.XZ_COEF = history.XZ_COEF * accuracyModifier;
-            forceRecheckWeapon(SAINPresetClass.Instance);
-        }
-
-        private readonly Dictionary<EWeaponAIPresetType, WeaponAIPresetHistory> _presets = new Dictionary<EWeaponAIPresetType, WeaponAIPresetHistory>();
 
         private void forceRecheckWeapon(SAINPresetClass preset)
         {
-            forceNewCheck = true;
+            _forceNewCheck = true;
         }
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
             Recoil.Init();
             Firerate.Init();
             Firemode.Init();
             Reload.Init();
+        }
+
+        protected override void UpdatePresetSettings(SAINPresetClass preset)
+        {
+            base.UpdatePresetSettings(preset);
+            _forceNewCheck = true;
         }
 
         public void Update()
@@ -79,29 +64,21 @@ namespace SAIN.SAINComponent.Classes.Info
             Reload.Update();
         }
 
-        private Weapon LastCheckedWeapon;
-
-        private float _nextRecalcTime;
-        private const float _recalcFreq = 60f;
-        private float _nextCheckWeapTime;
-        private const float _checkWeapFreq = 1f;
-        private bool forceNewCheck = false;
-
         public void checkCalcWeaponInfo()
         {
-            if (_nextCheckWeapTime < Time.time || forceNewCheck)
+            if (_nextCheckWeapTime < Time.time || _forceNewCheck)
             {
                 Weapon currentWeapon = CurrentWeapon;
                 if (currentWeapon != null)
                 {
                     _nextCheckWeapTime = Time.time + _checkWeapFreq;
-                    if (forceNewCheck || _nextRecalcTime < Time.time || LastCheckedWeapon == null || LastCheckedWeapon != currentWeapon)
+                    if (_forceNewCheck || _nextRecalcTime < Time.time || _lastCheckedWeapon == null || _lastCheckedWeapon != currentWeapon)
                     {
-                        if (forceNewCheck)
-                            forceNewCheck = false;
+                        if (_forceNewCheck)
+                            _forceNewCheck = false;
 
                         _nextRecalcTime = Time.time + _recalcFreq;
-                        LastCheckedWeapon = currentWeapon;
+                        _lastCheckedWeapon = currentWeapon;
                         calculateCurrentWeapon(currentWeapon);
                     }
                 }
@@ -112,37 +89,32 @@ namespace SAIN.SAINComponent.Classes.Info
         {
             IWeaponClass = EnumValues.ParseWeaponClass(weapon.Template.weapClass);
             ICaliber = EnumValues.ParseCaliber(weapon.CurrentAmmoTemplate.Caliber);
-            CalculateShootModifier();
-            SwapToSemiDist = GetWeaponSwapToSemiDist(ICaliber, IWeaponClass);
-            SwapToAutoDist = GetWeaponSwapToFullAutoDist(ICaliber, IWeaponClass);
+            calculateShootModifier();
+            SwapToSemiDist = getWeaponSwapToSemiDist(ICaliber, IWeaponClass);
+            SwapToAutoDist = getWeaponSwapToFullAutoDist(ICaliber, IWeaponClass);
         }
 
-        public IWeaponClass IWeaponClass { get; private set; }
-        public ICaliber ICaliber { get; private set; }
-
-        private static ShootSettings ShootSettings => SAINPlugin.LoadedPreset.GlobalSettings.Shoot;
-
-        private static float GetAmmoShootability(ICaliber caliber)
+        private static float getAmmoShootability(ICaliber caliber)
         {
-            if (ShootSettings.AmmoCaliberShootability.TryGetValue(caliber, out var ammo))
+            if (_shootSettings.AmmoCaliberShootability.TryGetValue(caliber, out var ammo))
             {
                 return ammo;
             }
             return 0.5f;
         }
 
-        private static float GetWeaponShootability(IWeaponClass weaponClass)
+        private static float getWeaponShootability(IWeaponClass weaponClass)
         {
-            if (ShootSettings.WeaponClassShootability.TryGetValue(weaponClass, out var weap))
+            if (_shootSettings.WeaponClassShootability.TryGetValue(weaponClass, out var weap))
             {
                 return weap;
             }
             return 0.5f;
         }
 
-        private static float GetWeaponSwapToSemiDist(ICaliber caliber, IWeaponClass weaponClass)
+        private static float getWeaponSwapToSemiDist(ICaliber caliber, IWeaponClass weaponClass)
         {
-            if (ShootSettings.AmmoCaliberFullAutoMaxDistances.TryGetValue(caliber, out var caliberDist))
+            if (_shootSettings.AmmoCaliberFullAutoMaxDistances.TryGetValue(caliber, out var caliberDist))
             {
                 if (weaponClass == IWeaponClass.machinegun)
                 {
@@ -153,43 +125,43 @@ namespace SAIN.SAINComponent.Classes.Info
             return 55f;
         }
 
-        private static float GetWeaponSwapToFullAutoDist(ICaliber caliber, IWeaponClass weaponClass)
+        private static float getWeaponSwapToFullAutoDist(ICaliber caliber, IWeaponClass weaponClass)
         {
-            return GetWeaponSwapToSemiDist(caliber, weaponClass) * 0.85f;
+            return getWeaponSwapToSemiDist(caliber, weaponClass) * 0.85f;
         }
 
-        private void CalculateShootModifier()
+        private void calculateShootModifier()
         {
             var weapInfo = Bot.Info.WeaponInfo;
 
             float AmmoCaliberModifier =
-                GetAmmoShootability(ICaliber)
-                .Scale0to1(ShootSettings.AmmoCaliberScaling)
+                getAmmoShootability(ICaliber)
+                .Scale0to1(_shootSettings.AmmoCaliberScaling)
                 .Round100();
 
             float WeaponClassModifier =
-                GetWeaponShootability(IWeaponClass)
-                .Scale0to1(ShootSettings.WeaponClassScaling)
+                getWeaponShootability(IWeaponClass)
+                .Scale0to1(_shootSettings.WeaponClassScaling)
                 .Round100();
 
             float ProficiencyModifier =
                 Bot.Info.FileSettings.Mind.WeaponProficiency
-                .Scale0to1(ShootSettings.WeaponProficiencyScaling)
+                .Scale0to1(_shootSettings.WeaponProficiencyScaling)
                 .Round100();
 
             var weapon = weapInfo.CurrentWeapon;
             float ErgoModifier =
                 Mathf.Clamp(1f - weapon.ErgonomicsTotal / 100f, 0.01f, 1f)
-                .Scale0to1(ShootSettings.ErgoScaling)
+                .Scale0to1(_shootSettings.ErgoScaling)
                 .Round100();
 
             float RecoilModifier = ((weapon.RecoilTotal / weapon.RecoilBase) + (weapon.CurrentAmmoTemplate.ammoRec / 200f))
-                .Scale0to1(ShootSettings.RecoilScaling)
+                .Scale0to1(_shootSettings.RecoilScaling)
                 .Round100();
 
             float DifficultyModifier =
                 Bot.Info.Profile.DifficultyModifier
-                .Scale0to1(ShootSettings.DifficultyScaling)
+                .Scale0to1(_shootSettings.DifficultyScaling)
                 .Round100();
 
             FinalModifier = (WeaponClassModifier * RecoilModifier * ErgoModifier * AmmoCaliberModifier * ProficiencyModifier * DifficultyModifier)
@@ -198,20 +170,12 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Dispose()
         {
+            base.DisposePreset();
             Recoil.Dispose();
             Firerate.Dispose();
             Firemode.Dispose();
             Reload.Dispose();
-            PresetHandler.OnPresetUpdated -= forceRecheckWeapon;
-            SAINBotController.Instance.OnBotWeaponChange -= weaponChanged;
         }
-
-        public float SwapToSemiDist { get; private set; } = 50f;
-        public float SwapToAutoDist { get; private set; } = 45f;
-        public Recoil Recoil { get; private set; }
-        public Firerate Firerate { get; private set; }
-        public Firemode Firemode { get; private set; }
-        public float FinalModifier { get; private set; }
 
         public float EffectiveWeaponDistance
         {
@@ -242,25 +206,13 @@ namespace SAIN.SAINComponent.Classes.Info
             return SelectedFireMode == mode;
         }
 
-        public bool HasFullAuto()
-        {
-            return HasFireMode(EFireMode.fullauto);
-        }
+        public bool HasFullAuto => HasFireMode(EFireMode.fullauto);
 
-        public bool HasBurst()
-        {
-            return HasFireMode(EFireMode.burst);
-        }
+        public bool HasBurst => HasFireMode(EFireMode.burst);
 
-        public bool HasSemi()
-        {
-            return HasFireMode(EFireMode.single);
-        }
+        public bool HasSemi => HasFireMode(EFireMode.single);
 
-        public bool HasDoubleAction()
-        {
-            return HasFireMode(EFireMode.doubleaction);
-        }
+        public bool HasDoubleAction => HasFireMode(EFireMode.doubleaction);
 
         public bool HasFireMode(EFireMode fireMode)
         {
@@ -281,44 +233,6 @@ namespace SAIN.SAINComponent.Classes.Info
             }
         }
 
-        public float RecoilForceUp
-        {
-            get
-            {
-                var template = CurrentWeapon?.Template;
-                if (template != null)
-                {
-                    return template.RecoilForceUp;
-                }
-                else
-                {
-                    return 150f;
-                }
-            }
-        }
-
-        public float RecoilForceBack
-        {
-            get
-            {
-                var template = CurrentWeapon?.Template;
-                if (template != null)
-                {
-                    return template.RecoilForceBack;
-                }
-                else
-                {
-                    return 150f;
-                }
-            }
-        }
-
-        public WeaponInfoClass WeaponInfo => Bot.Info?.WeaponInfo;
-
-        public string WeaponClass => CurrentWeapon.Template.weapClass;
-
-        public string AmmoCaliber => CurrentWeapon.CurrentAmmoTemplate.Caliber;
-
         public Weapon CurrentWeapon
         {
             get
@@ -331,5 +245,13 @@ namespace SAIN.SAINComponent.Classes.Info
                 return null;
             }
         }
+
+        private Weapon _lastCheckedWeapon;
+        private float _nextRecalcTime;
+        private const float _recalcFreq = 60f;
+        private float _nextCheckWeapTime;
+        private const float _checkWeapFreq = 1f;
+        private bool _forceNewCheck = false;
+        private static ShootSettings _shootSettings => SAINPlugin.LoadedPreset.GlobalSettings.Shoot;
     }
 }

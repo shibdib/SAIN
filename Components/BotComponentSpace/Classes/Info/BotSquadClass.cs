@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
             SquadInfo = SAINBotController.Instance.BotSquads.GetSquad(Bot);
         }
 
@@ -87,6 +87,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Dispose()
         {
+            base.DisposePreset();
         }
 
         private void checkVisibleMembers()

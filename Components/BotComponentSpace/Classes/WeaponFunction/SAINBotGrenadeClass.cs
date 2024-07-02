@@ -17,7 +17,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         public void Update()
@@ -35,6 +35,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
+            base.DisposePreset();
         }
 
         public void EnemyGrenadeThrown(Grenade grenade, Vector3 dangerPoint)

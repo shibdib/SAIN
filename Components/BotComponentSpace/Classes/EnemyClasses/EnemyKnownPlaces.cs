@@ -9,9 +9,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyKnownPlaces : EnemyBase, ISAINEnemyClass
     {
-        public event Action<Vector3> OnLastKnownUpdated;
-        public event Action<Enemy> OnEnemyLocationsSearched;
-
         public EnemyPlace LastSeenPlace { get; private set; }
         public EnemyPlace LastHeardPlace { get; private set; }
         public EnemyPlace LastSquadSeenPlace { get; private set; }
@@ -87,7 +84,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (allSearched
                 && !SearchedAllKnownLocations)
             {
-                OnEnemyLocationsSearched?.Invoke(Enemy);
+                Enemy.Events.EnemyLocationsSearched();
             }
 
             SearchedAllKnownLocations = allSearched;
@@ -101,14 +98,14 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Enemy.EnemyKnownChecker.OnEnemyKnownChanged += OnEnemyKnownChanged;
+            Enemy.Events.OnEnemyKnownChanged.OnToggle += OnEnemyKnownChanged;
         }
 
         public void Dispose()
         {
             clearAllPlaces();
 
-            Enemy.EnemyKnownChecker.OnEnemyKnownChanged -= OnEnemyKnownChanged;
+            Enemy.Events.OnEnemyKnownChanged.OnToggle -= OnEnemyKnownChanged;
 
             foreach (var obj in _guiObjects)
             {
@@ -117,17 +114,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             _guiObjects?.Clear();
         }
 
-        public void OnEnemyKnownChanged(Enemy enemy, bool known)
+        public void OnEnemyKnownChanged(bool known, Enemy enemy)
         {
             if (known)
             {
                 return;
             }
             clearAllPlaces();
-        }
-
-        public void onEnemyKnown(Enemy enemy)
-        {
         }
 
         private void clearAllPlaces()
@@ -437,7 +430,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             LastKnownPlace = place;
             Vector3 pos = place.Position;
             LastKnownPosition = pos;
-            OnLastKnownUpdated?.Invoke(pos);
+            Enemy.Events.LastKnownUpdated(place);
         }
 
         public float TimeLastKnownUpdated { get; private set; }

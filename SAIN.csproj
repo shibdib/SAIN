@@ -246,10 +246,14 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\ECornerType.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyActiveThreatChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyCornerDictionary.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyEvents.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyValidChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyVisionChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\SAINEnemyPartData.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\SAINEnemyParts.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyControllerEvents.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyListController.cs" />
+    <Compile Include="Helpers\Events\ToggleEvent.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyChooserClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\CornerHelpers.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EEnemyListType.cs" />

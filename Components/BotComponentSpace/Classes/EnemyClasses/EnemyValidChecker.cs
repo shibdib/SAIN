@@ -8,15 +8,12 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
     {
         public bool IsValid => checkValid();
 
-        public event Action<Enemy> OnEnemyInvalid;
-
         public EnemyValidChecker(Enemy enemy) : base(enemy)
         {
         }
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
         }
 
         public void Update()
@@ -36,10 +33,9 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
             _isValid = isValid();
             if (!_isValid)
             {
-                OnEnemyInvalid?.Invoke(Enemy);
+                Enemy.Events.SetEnemyAsInvalid();
             }
             return _isValid;
-
         }
 
         private bool _isValid = true;

@@ -21,13 +21,13 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
             if (Singleton<BotEventHandler>.Instance != null)
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive += tryFakeDeathGrenade;
             }
             SAINBotController.Instance.PlayerTalk += playerTalked;
-            Bot.EnemyController.OnEnemyKilled += enemyKilled;
+            Bot.EnemyController.Events.OnEnemyKilled += enemyKilled;
         }
 
         private void enemyKilled(Player player)
@@ -93,6 +93,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Dispose()
         {
+            base.DisposePreset();
             if (Singleton<BotEventHandler>.Instance != null)
             {
                 Singleton<BotEventHandler>.Instance.OnGrenadeExplosive -= tryFakeDeathGrenade;
@@ -100,7 +101,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             SAINBotController.Instance.PlayerTalk -= playerTalked;
             if (Bot?.EnemyController != null)
             {
-                Bot.EnemyController.OnEnemyKilled -= enemyKilled;
+                Bot.EnemyController.Events.OnEnemyKilled -= enemyKilled;
             }
         }
 
@@ -109,8 +110,9 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private float FakeDeathChance = 2f;
 
-        public override void UpdatePresetSettings(SAINPresetClass preset)
+        protected override void UpdatePresetSettings(SAINPresetClass preset)
         {
+            base.UpdatePresetSettings(preset);
             if (PersonalitySettings != null && FileSettings != null)
             {
                 CanFakeDeath = PersonalitySettings.CanFakeDeathRare;
@@ -416,7 +418,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 if (enemy.RealDistance <= painRange)
                 {
                     Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
-                    enemy.SetHeardStatus(true, randomizedPos, SAINSoundType.Pain, true);
+                    enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Pain, true);
                 }
                 return;
             }
@@ -425,7 +427,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 if (enemy.RealDistance <= breathRange)
                 {
                     Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
-                    enemy.SetHeardStatus(true, randomizedPos, SAINSoundType.Breathing, true);
+                    enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Breathing, true);
                 }
                 return;
             }
@@ -433,7 +435,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (enemy.RealDistance <= 65f)
             {
                 Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
-                enemy.SetHeardStatus(true, randomizedPos, SAINSoundType.Breathing, true);
+                enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Breathing, true);
             }
 
             if (phrase == EPhraseTrigger.OnFight)

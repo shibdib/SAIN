@@ -34,7 +34,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         public void Update()
@@ -57,6 +57,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
+            base.DisposePreset();
         }
 
         public FlankRoute FindFlankRoute()

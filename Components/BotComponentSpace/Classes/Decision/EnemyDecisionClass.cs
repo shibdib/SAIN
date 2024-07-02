@@ -16,7 +16,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         public void Update()
@@ -25,6 +25,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Dispose()
         {
+            base.DisposePreset();
         }
 
         public bool GetDecision(out SoloDecision Decision)
@@ -39,10 +40,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             if (shallDogFight(enemy))
             {
                 Decision = SoloDecision.DogFight;
-            }
-            else if (shallThrowGrenade(enemy))
-            {
-                Decision = SoloDecision.ThrowGrenade;
             }
             else if (shallStandAndShoot(enemy))
             {
@@ -60,15 +57,15 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 Decision = SoloDecision.RushEnemy;
             }
+            else if (shallThrowGrenade(enemy))
+            {
+                Decision = SoloDecision.ThrowGrenade;
+            }
             else if (shallSearch())
             {
                 if (Bot.Decision.CurrentSoloDecision != SoloDecision.Search)
                 {
                     enemy.Status.NumberOfSearchesStarted++;
-                }
-                if (!enemy.Status.SearchStarted)
-                {
-                    enemy.Status.SearchStarted = true;
                 }
                 Decision = SoloDecision.Search;
             }
@@ -124,7 +121,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallFreezeAndWait(Enemy enemy)
         {
-            if (enemy.EnemyHeardFromPeace &&
+            if (enemy.Hearing.EnemyHeardFromPeace &&
                 Bot.Memory.Location.IsIndoors &&
                 (!enemy.Seen || enemy.TimeSinceSeen > 240f) &&
                 enemy.TimeSinceLastKnownUpdated < 90f)
@@ -136,10 +133,6 @@ namespace SAIN.SAINComponent.Classes.Decision
                     return true;
                 }
             }
-
-            if (enemy.EnemyHeardFromPeace)
-                enemy.EnemyHeardFromPeace = false;
-
             return false;
         }
 
@@ -170,7 +163,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             if (_nextGrenadeCheckTime < Time.time &&
                 canTryThrow(enemy))
             {
-                _nextGrenadeCheckTime = Time.time + 0.5f;
+                //_nextGrenadeCheckTime = Time.time + 0.1f;
                 if (findThrowTarget(enemy) &&
                     tryThrowGrenade())
                 {
@@ -219,6 +212,13 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             if (tryThrowToPos(lastKnown.Value, "LastKnownPosition"))
+            {
+                return true;
+            }
+            Vector3? blindCorner = enemy.Path.EnemyCorners.GroundPosition(ECornerType.Blind);
+            if (blindCorner != null &&
+                (blindCorner.Value - lastKnown.Value).sqrMagnitude < 5f * 5f &&
+                tryThrowToPos(blindCorner.Value, "BlindCornerToEnemy"))
             {
                 return true;
             }

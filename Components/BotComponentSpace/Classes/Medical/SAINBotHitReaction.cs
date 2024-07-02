@@ -17,7 +17,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            Bot.EnemyController.OnEnemyRemoved += clearEnemy;
+            Bot.EnemyController.Events.OnEnemyRemoved += clearEnemy;
         }
 
         public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
@@ -49,7 +49,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            Bot.EnemyController.OnEnemyRemoved -= clearEnemy;
+            Bot.EnemyController.Events.OnEnemyRemoved -= clearEnemy;
         }
     }
 

@@ -5,28 +5,16 @@ namespace SAIN.SAINComponent
 {
     public abstract class PresetUpdaterBase
     {
-        public PresetUpdaterBase(object obj)
+        protected void Subscribe()
         {
-            _obj = obj;
-            PresetHandler.OnPresetUpdated += checkUpdateSettings;
+            PresetHandler.OnPresetUpdated += UpdatePresetSettings;
         }
 
-        private readonly object _obj;
-
-        private void checkUpdateSettings(SAINPresetClass preset)
+        protected void UnSubscribe()
         {
-            if (_obj == null)
-            {
-                PresetHandler.OnPresetUpdated -= checkUpdateSettings;
-                //Logger.LogDebug($"Object is null, Unsubd to Preset Updater Event");
-                return;
-            }
-            UpdatePresetSettings(preset);
+            PresetHandler.OnPresetUpdated -= UpdatePresetSettings;
         }
 
-        public virtual void UpdatePresetSettings(SAINPresetClass preset)
-        {
-
-        }
+        protected virtual void UpdatePresetSettings(SAINPresetClass preset) { }
     }
 }

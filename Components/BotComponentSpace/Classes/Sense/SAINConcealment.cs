@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes.Sense
         }
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         public void Update()
@@ -24,6 +24,7 @@ namespace SAIN.SAINComponent.Classes.Sense
 
         public void Dispose()
         {
+            base.DisposePreset();
         }
 
         public bool IsConcealed { get; set; }

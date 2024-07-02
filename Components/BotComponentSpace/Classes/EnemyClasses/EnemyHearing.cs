@@ -1,11 +1,19 @@
-﻿using SAIN.SAINComponent.Classes;
+﻿using SAIN.Helpers;
+using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
+using UnityEngine;
 
 namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 {
     public class EnemyHearing : EnemyBase, ISAINEnemyClass
     {
+        public bool Heard { get; private set; }
+        public bool EnemyHeardFromPeace { get; set; }
+        public float TimeSinceHeard => Time.time - _timeLastHeard;
         public BotSound LastSoundHeard { get; set; }
+        public Vector3? LastHeardPosition { get; private set; }
+
+        private const float REPORT_HEARD_FREQUENCY = 1f;
 
         public EnemyHearing(Enemy enemy) : base(enemy)
         {
@@ -14,7 +22,8 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         public void Init()
         {
-
+            base.InitPreset();
+            Enemy.Events.OnFirstSeen += resetHeardFromPeace;
         }
 
         public void Update()
@@ -22,10 +31,105 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         }
 
+        private void resetHeardFromPeace(Enemy enemy)
+        {
+            EnemyHeardFromPeace = false;
+        }
+
         public void Dispose()
         {
-
+            base.DisposePreset();
+            Enemy.Events.OnFirstSeen -= resetHeardFromPeace;
         }
+
+        public void OnEnemyKnownChanged(bool known, Enemy enemy)
+        {
+            if (!known)
+            {
+                Heard = false;
+                LastSoundHeard = null;
+                LastHeardPosition = null;
+                _timeLastHeard = 0f;
+                EnemyHeardFromPeace = false;
+            }
+        }
+
+        public void SetHeard(Vector3 pos, SAINSoundType soundType, bool shallReport)
+        {
+            if (Enemy.IsVisible)
+            {
+                pos = Enemy.EnemyPosition;
+            }
+
+            bool wasGunfire = soundType.IsGunShot();
+            Enemy.Status.HeardRecently = true;
+            _timeLastHeard = Time.time;
+
+            UpdateHeardPosition(pos, wasGunfire, shallReport);
+
+            if (!Bot.HasEnemy)
+                EnemyHeardFromPeace = true;
+
+            Enemy.Events.EnemyHeard(soundType, wasGunfire);
+            if (wasGunfire || !shallReport)
+            {
+                return;
+            }
+            updateEnemyAction(soundType, pos);
+        }
+
+        private void updateEnemyAction(SAINSoundType soundType, Vector3 soundPosition)
+        {
+            EEnemyAction action;
+            switch (soundType)
+            {
+                case SAINSoundType.GrenadeDraw:
+                case SAINSoundType.GrenadePin:
+                    action = EEnemyAction.HasGrenade;
+                    break;
+
+                case SAINSoundType.Reload:
+                case SAINSoundType.DryFire:
+                    action = EEnemyAction.Reloading;
+                    break;
+
+                case SAINSoundType.Looting:
+                    action = EEnemyAction.Looting;
+                    break;
+
+                case SAINSoundType.Heal:
+                    action = EEnemyAction.Healing;
+                    break;
+
+                case SAINSoundType.Surgery:
+                    action = EEnemyAction.UsingSurgery;
+                    break;
+
+                default:
+                    action = EEnemyAction.None;
+                    break;
+            }
+
+            if (action != EEnemyAction.None)
+            {
+                Enemy.Status.SetVulnerableAction(action);
+                Bot.Squad.SquadInfo.UpdateSharedEnemyStatus(EnemyIPlayer, action, Bot, soundType, soundPosition);
+            }
+        }
+
+        public void UpdateHeardPosition(Vector3 position, bool wasGunfire, bool shallReport)
+        {
+            EnemyPlace place = Enemy.KnownPlaces.UpdatePersonalHeardPosition(position, wasGunfire);
+            if (shallReport &&
+                place != null &&
+                _nextReportHeardTime < Time.time)
+            {
+                _nextReportHeardTime = Time.time + REPORT_HEARD_FREQUENCY;
+                Bot.Squad?.SquadInfo?.ReportEnemyPosition(Enemy, place, false);
+            }
+        }
+
+        private float _nextReportHeardTime;
 
         public void OnEnemyKnownChanged(Enemy enemy, bool known)
         {
@@ -60,5 +164,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
         {
             return 1f;
         }
+
+        private float _timeLastHeard;
     }
 }

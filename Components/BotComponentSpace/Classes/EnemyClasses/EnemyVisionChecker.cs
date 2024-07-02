@@ -9,10 +9,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyVisionChecker : EnemyBase
     {
-        public event Action<Enemy, bool> OnEnemyLineOfSightChanged;
         public Vector3 LastSeenPoint { get; private set; }
         public bool LineOfSight => EnemyParts.LineOfSight;
-        public SAINEnemyParts EnemyParts { get; private set; }
+        public SAINEnemyParts EnemyParts { get; }
 
         public EnemyVisionChecker(Enemy enemy) : base(enemy)
         {
@@ -20,11 +19,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             _transform = enemy.Bot.Transform;
             _startVisionTime = Time.time + UnityEngine.Random.Range(0.0f, 0.33f);
         }
-
-        private bool _visionStarted;
-        private float _startVisionTime;
-
-        private PersonTransformClass _transform;
 
         public void CheckVision(out bool didCheck)
         {
@@ -39,11 +33,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             didCheck = true;
-            bool wasInLOS = LineOfSight;
-            if (checkLOS(out Vector3? successPoint) != wasInLOS)
-            {
-                OnEnemyLineOfSightChanged?.Invoke(Enemy, LineOfSight);
-            }
+            checkLOS(out Vector3? successPoint);
+            Enemy.Events.OnEnemyLineOfSightChanged.CheckToggle(LineOfSight);
             if (successPoint != null)
             {
                 LastSeenPoint = successPoint.Value;
@@ -124,8 +115,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        public override void UpdatePresetSettings(SAINPresetClass preset)
+        protected override void UpdatePresetSettings(SAINPresetClass preset)
         {
+            base.UpdatePresetSettings(preset);
+
             var aiLimit = preset.GlobalSettings.AILimit;
             _farDistance = aiLimit.MaxVisionRanges[AILimitSetting.Far].Sqr();
             _veryFarDistance = aiLimit.MaxVisionRanges[AILimitSetting.VeryFar].Sqr();
@@ -137,9 +130,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
+        private bool _visionStarted;
+        private float _startVisionTime;
+        private PersonTransformClass _transform;
         private static float _farDistance;
         private static float _veryFarDistance;
         private static float _narniaDistance;
-
     }
 }

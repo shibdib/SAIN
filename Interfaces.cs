@@ -19,7 +19,7 @@ namespace SAIN
 
     public interface ISAINEnemyClass
     {
-        void OnEnemyKnownChanged(Enemy enemy, bool known);
+        void OnEnemyKnownChanged(bool known, Enemy enemy);
 
         void Init();
         void Update();

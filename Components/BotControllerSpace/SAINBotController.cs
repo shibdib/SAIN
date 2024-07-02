@@ -294,7 +294,7 @@ namespace SAIN.Components
                             Vector3 random = UnityEngine.Random.onUnitSphere * dispersion;
                             random.y = 0;
                             Vector3 estimatedThrowPosition = enemy.EnemyPosition + random;
-                            enemy.SetHeardStatus(true, estimatedThrowPosition, SAINSoundType.GrenadeExplosion, true);
+                            enemy.Hearing.SetHeard(estimatedThrowPosition, SAINSoundType.GrenadeExplosion, true);
                         }
                     }
                 }

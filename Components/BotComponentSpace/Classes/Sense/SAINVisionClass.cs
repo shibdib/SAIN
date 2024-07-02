@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
             BotLook.Init();
         }
 
@@ -23,6 +23,8 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
+            base.DisposePreset();
+            BotLook.Dispose();
         }
 
         public FlashLightDazzleClass FlashLightDazzle { get; private set; }

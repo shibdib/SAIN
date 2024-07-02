@@ -106,11 +106,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         }
 
-
-        public override void UpdatePresetSettings(SAINPresetClass preset)
-        {
-        }
-
         static AimClass()
         {
             aimStatusField = AccessTools.Field(Helpers.HelpersGClass.AimDataType, "aimStatus_0");

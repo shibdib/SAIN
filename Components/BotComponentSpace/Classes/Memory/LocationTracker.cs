@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes.Memory
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
         }
 
         public void Update()
@@ -28,7 +28,9 @@ namespace SAIN.SAINComponent.Classes.Memory
         }
 
         public void Dispose()
-        { }
+        {
+            base.DisposePreset();
+        }
 
         private float _checkIndoorsTime;
     }

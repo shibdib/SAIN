@@ -30,7 +30,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Init()
         {
-            UpdatePresetSettings(SAINPlugin.LoadedPreset);
+            base.InitPreset();
 
             Player.BeingHitAction += GetHit;
 
@@ -48,6 +48,7 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
+            base.DisposePreset();
             if (Player != null)
             {
                 Player.BeingHitAction -= GetHit;
