@@ -18,8 +18,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public bool IsCurrentEnemy { get; private set; }
         public float LastCheckLookTime { get; set; }
+        public float RealDistance { get; private set; }
+        public bool IsSniper { get; private set; }
 
         public EnemyEvents Events { get; }
+        public EnemyKnownPlaces KnownPlaces { get; private set; }
         public SAINEnemyStatus Status { get; }
         public SAINEnemyVision Vision { get; }
         public SAINEnemyPath Path { get; }
@@ -167,10 +170,22 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private bool isTargetInSuppRange(Vector3 target, Vector3 suppressPoint)
         {
-            return (target - suppressPoint).sqrMagnitude <= MAX_TARGET_SUPPRESS_DIST;
+            if ((target - suppressPoint).sqrMagnitude <= MAX_TARGET_SUPPRESS_DIST)
+            {
+                return true;
+            }
+            Vector3 directionToSuppPoint = suppressPoint - Bot.Position;
+            Vector3 directionToTarget = target - Bot.Position;
+            float angle = Vector3.Angle(directionToSuppPoint.normalized, directionToTarget.normalized);
+            if (angle < MAX_TARGET_SUPPRESS_ANGLE)
+            {
+                return true;
+            }
+            return false;
         }
 
         private const float MAX_TARGET_SUPPRESS_DIST = 5f * 5f;
+        private const float MAX_TARGET_SUPPRESS_ANGLE = 20f;
 
         public Vector3? CenterMass
         {
@@ -201,7 +216,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public float TimeSinceLastKnownUpdated => KnownPlaces.TimeSinceLastKnownUpdated;
         public Vector3 EnemyMoveDirection => EnemyPlayer.MovementContext.MovementDirection;
 
-        public EnemyKnownPlaces KnownPlaces { get; private set; }
 
         public Vector3 EnemyPosition => EnemyTransform.Position;
         public Vector3 EnemyDirection => EnemyTransform.DirectionToMe(Bot.Transform.Position);
@@ -216,8 +230,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public bool EnemyLookingAtMe => Status.EnemyLookingAtMe;
         public float TimeSinceSeen => Vision.TimeSinceSeen;
         public float TimeSinceHeard => Hearing.TimeSinceHeard;
-
-        public float RealDistance { get; private set; }
 
         private void updateRealDistance()
         {
@@ -241,8 +253,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 RealDistance = (EnemyPlayerComponent.Position - Bot.Position).magnitude;
             }
         }
-
-        public bool IsSniper { get; private set; }
 
         private void updateActiveState()
         {
