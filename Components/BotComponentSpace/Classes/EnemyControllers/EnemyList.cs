@@ -5,6 +5,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyList : List<Enemy>
     {
+        public EnemyList(string name)
+        {
+            Name = name;
+        }
+
+        public string Name { get; }
+
         public event Action<bool> OnListEmptyOrGetFirst;
         public event Action<bool> OnListEmptyOrGetFirstHuman;
 
@@ -12,10 +19,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             if (value)
             {
+                //Logger.LogDebug($"EnemyList {Name} added {enemy.EnemyName} IsAI? {enemy.IsAI}");
                 this.AddEnemy(enemy);
             }
             else
             {
+                //Logger.LogDebug($"EnemyList {Name} removed {enemy.EnemyName} IsAI? {enemy.IsAI}");
                 this.RemoveEnemy(enemy);
             }
         }
@@ -59,33 +68,29 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        public bool RemoveEnemy(Enemy enemy)
+        public void RemoveEnemy(Enemy enemy)
         {
             if (enemy == null) 
-                return false;
+                return;
 
-            bool removed = this.Remove(enemy);
+            this.Remove(enemy);
 
-            if (removed)  {
-                if (!enemy.IsAI)
+            if (!enemy.IsAI)
+            {
+                Humans--;
+                if (Humans == 0)
                 {
-                    Humans--;
-                    if (Humans == 0)
-                    {
-                        OnListEmptyOrGetFirstHuman?.Invoke(false);
-                    }
-                }
-                else
-                {
-                    Bots--;
+                    OnListEmptyOrGetFirstHuman?.Invoke(false);
                 }
             }
+            else
+            {
+                Bots--;
+            }
 
-            if (removed && this.Count == 0) {
+            if (this.Count == 0) {
                 OnListEmptyOrGetFirst?.Invoke(false);
             }
-
-            return removed;
         }
 
         public int Humans { get; private set; }

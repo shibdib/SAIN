@@ -30,10 +30,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
-            Events.Init();
             _listController.Init();
-            _enemyChooser.Init();
+            Events.Init();
             EnemyLists.Init();
+            _enemyChooser.Init();
         }
 
         public void Update()

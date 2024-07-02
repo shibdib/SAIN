@@ -7,27 +7,37 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class SAINEnemyParts
     {
-        public bool LineOfSight
-        {
-            get
-            {
-                if (_lastSuccessTime + 0.2f > Time.time)
-                {
-                    return true;
-                }
-                foreach (var part in Parts.Values)
-                {
-                    if (part.LineOfSight)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
-
+        public bool LineOfSight { get; private set; }
         public Vector3 LastSuccessPosition { get; private set; }
         public Dictionary<EBodyPart, SAINEnemyPartData> Parts { get; } = new Dictionary<EBodyPart, SAINEnemyPartData>();
+
+        public void Update()
+        {
+            var visiblePart = findPartInLOS();
+            if (visiblePart != null)
+            {
+                LineOfSight = true;
+                if (visiblePart.LastSuccessPoint != null)
+                    LastSuccessPosition = visiblePart.LastSuccessPoint.Value;
+
+                return;
+            }
+            LineOfSight = false;
+        }
+
+
+        private SAINEnemyPartData findPartInLOS()
+        {
+            foreach (var part in Parts.Values)
+            {
+                if (part.LineOfSight)
+                {
+                    return part;
+                }
+            }
+            return null;
+        }
+
 
         public bool CheckBodyLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)
         {

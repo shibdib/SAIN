@@ -11,7 +11,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             foreach (var type in _types)
             {
-                EnemyLists.Add(type, new EnemyList());
+                EnemyLists.Add(type, new EnemyList(type.ToString()));
             }
         }
 
@@ -79,37 +79,38 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void subOrUnSub(bool value, Enemy enemy)
         {
+            EnemyList list;
             switch (value)
             {
                 case true:
 
-                    enemy.Events.OnEnemyKnownChanged.OnToggle +=
-                        EnemyLists[EEnemyListType.Known].AddOrRemoveEnemy;
+                    list = GetEnemyList(EEnemyListType.Known);
+                    enemy.Events.OnEnemyKnownChanged.OnToggle += list.AddOrRemoveEnemy;
 
-                    enemy.Events.OnActiveThreatChanged.OnToggle +=
-                        EnemyLists[EEnemyListType.ActiveThreats].AddOrRemoveEnemy;
+                    list = GetEnemyList(EEnemyListType.ActiveThreats);
+                    enemy.Events.OnActiveThreatChanged.OnToggle += list.AddOrRemoveEnemy;
 
-                    enemy.Events.OnVisionChange.OnToggle +=
-                        EnemyLists[EEnemyListType.Visible].AddOrRemoveEnemy;
+                    list = GetEnemyList(EEnemyListType.Visible);
+                    enemy.Events.OnVisionChange.OnToggle += list.AddOrRemoveEnemy;
 
-                    enemy.Events.OnEnemyLineOfSightChanged.OnToggle +=
-                        EnemyLists[EEnemyListType.InLineOfSight].AddOrRemoveEnemy;
+                    list = GetEnemyList(EEnemyListType.InLineOfSight);
+                    enemy.Events.OnEnemyLineOfSightChanged.OnToggle += list.AddOrRemoveEnemy;
 
                     break;
 
                 case false:
 
-                    enemy.Events.OnEnemyKnownChanged.OnToggle -=
-                        EnemyLists[EEnemyListType.Known].AddOrRemoveEnemy;
+                    list = GetEnemyList(EEnemyListType.Known);
+                    enemy.Events.OnEnemyKnownChanged.OnToggle -= list.AddOrRemoveEnemy;
 
-                    enemy.Events.OnActiveThreatChanged.OnToggle -=
-                        EnemyLists[EEnemyListType.ActiveThreats].AddOrRemoveEnemy;
+                    list = GetEnemyList(EEnemyListType.ActiveThreats);
+                    enemy.Events.OnActiveThreatChanged.OnToggle -= list.AddOrRemoveEnemy;
 
-                    enemy.Events.OnVisionChange.OnToggle -=
-                        EnemyLists[EEnemyListType.Visible].AddOrRemoveEnemy;
+                    list = GetEnemyList(EEnemyListType.Visible);
+                    enemy.Events.OnVisionChange.OnToggle -= list.AddOrRemoveEnemy;
 
-                    enemy.Events.OnEnemyLineOfSightChanged.OnToggle -=
-                        EnemyLists[EEnemyListType.InLineOfSight].AddOrRemoveEnemy;
+                    list = GetEnemyList(EEnemyListType.InLineOfSight);
+                    enemy.Events.OnEnemyLineOfSightChanged.OnToggle -= list.AddOrRemoveEnemy;
 
                     break;
             }

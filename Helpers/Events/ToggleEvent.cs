@@ -55,13 +55,15 @@ namespace SAIN.Helpers.Events
     {
         public event Action<bool, T> OnToggle;
 
-        public void CheckToggle(bool value)
+        public bool CheckToggle(bool value)
         {
             if (Value != value)
             {
                 base.SetValue(value);
                 OnToggle?.Invoke(value, Object);
+                return true;
             }
+            return false;
         }
 
         private readonly T Object;

@@ -230,16 +230,16 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (enemy.IsVisible)
             {
-                return enemy.EnemyPosition;
+                return adjustLookPoint(enemy.EnemyPosition);
             }
 
-            Vector3? lastKnown = EnemyLastKnown(enemy, out bool visible);
-            if (lastKnown != null &&
-                visible)
-            {
-                EnemySteerDir = EEnemySteerDir.VisibleLastKnown;
-                return adjustLookPoint(lastKnown.Value);
-            }
+            //Vector3? lastKnown = EnemyLastKnown(enemy, out bool visible);
+            //if (lastKnown != null &&
+            //    visible)
+            //{
+            //    EnemySteerDir = EEnemySteerDir.VisibleLastKnown;
+            //    return adjustLookPoint(lastKnown.Value);
+            //}
 
             EnemyCornerDictionary corners = enemy.Path.EnemyCorners;
             Vector3? blindCorner = corners.PointPastCorner(ECornerType.Blind);

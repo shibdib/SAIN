@@ -19,7 +19,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             GameWorldComponent.Instance.PlayerTracker.AlivePlayers.OnPlayerComponentRemoved += RemoveEnemy;
             BotOwner.Memory.OnAddEnemy += enemyAdded;
-            addAllEnemies();
         }
 
         public void Update()

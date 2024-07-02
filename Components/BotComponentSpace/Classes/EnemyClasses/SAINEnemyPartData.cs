@@ -31,6 +31,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
+        public Vector3? LastSuccessPoint => _lastSuccessCastPoint;
+
         private bool IsYourPlayer;
         private Vector3 _position;
 

@@ -15,6 +15,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Init()
         {
             Enemy.Events.OnEnemyKnownChanged.OnToggle += OnEnemyKnownChanged;
+            EnemyVisionChecker.Init();
         }
 
         public void OnEnemyKnownChanged(bool known, Enemy enemy)
@@ -30,10 +31,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Dispose()
         {
             Enemy.Events.OnEnemyKnownChanged.OnToggle -= OnEnemyKnownChanged;
+            EnemyVisionChecker.Dispose();
         }
 
         public void Update()
         {
+            EnemyVisionChecker.Update();
             getAngles();
             UpdateVisibleState(false);
             UpdateCanShootState(false);
