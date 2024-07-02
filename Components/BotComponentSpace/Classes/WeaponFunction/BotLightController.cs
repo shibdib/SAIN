@@ -42,7 +42,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-            base.UnSubscribeToPresetChanges();
         }
 
         private void setLight(bool value)

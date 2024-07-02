@@ -608,7 +608,6 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         public void Dispose()
         {
-            base.UnSubscribeToPresetChanges();
         }
 
         private RaycastHit StuckHit = new RaycastHit();

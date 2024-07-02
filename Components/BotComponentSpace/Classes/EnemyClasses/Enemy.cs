@@ -12,10 +12,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
     {
         public string EnemyName { get; }
         public string EnemyProfileId { get; }
-        public bool IsAI { get; }
         public PlayerComponent EnemyPlayerComponent { get; }
         public PersonClass EnemyPerson { get; }
         public PersonTransformClass EnemyTransform { get; }
+        public bool IsAI => EnemyPlayer.IsAI;
 
         public bool IsCurrentEnemy { get; private set; }
         public float LastCheckLookTime { get; set; }
@@ -42,7 +42,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             EnemyTransform = playerComponent.Transform;
             EnemyName = $"{playerComponent.Name} ({playerComponent.Person.Nickname})";
             EnemyInfo = enemyInfo;
-            IsAI = playerComponent.IsAI;
             EnemyProfileId = playerComponent.ProfileId;
 
             Events = new EnemyEvents(this);
@@ -104,7 +103,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Status?.Dispose();
         }
 
-        public bool EnemyKnown => _knownChecker.EnemyKnown;
+        public bool EnemyKnown => Events.OnEnemyKnownChanged.Value;
         public bool EnemyNotLooking => IsVisible && !Status.EnemyLookingAtMe && !Status.ShotAtMeRecently;
         public bool IsValid => _validChecker.IsValid;
         public bool ActiveThreat => _activeThreatChecker.ActiveThreat;

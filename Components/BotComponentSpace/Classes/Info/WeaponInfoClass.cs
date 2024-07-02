@@ -169,7 +169,6 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Dispose()
         {
-            base.UnSubscribeToPresetChanges();
             Recoil.Dispose();
             Firerate.Dispose();
             Firemode.Dispose();

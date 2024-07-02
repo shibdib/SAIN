@@ -98,7 +98,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Dispose()
         {
-            base.UnSubscribeToPresetChanges();
         }
 
         public SideStepSetting SideStepSetting { get; private set; }

@@ -92,7 +92,6 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            base.UnSubscribeToPresetChanges();
             try
             {
                 CoverFinder?.Dispose();

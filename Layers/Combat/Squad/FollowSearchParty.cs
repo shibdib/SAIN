@@ -1,9 +1,5 @@
-﻿using DrakiaXYZ.BigBrain.Brains;
-using EFT;
-using SAIN.Layers.Combat.Solo;
-using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents.CoverFinder;
+﻿using EFT;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -19,6 +15,7 @@ namespace SAIN.Layers.Combat.Squad
         public void Toggle(bool value)
         {
             ToggleAction(value);
+            Bot.Search.ToggleSearch(true, _enemy);
         }
 
         public override IEnumerator ActionCoroutine()
@@ -112,14 +109,18 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Start()
         {
+            _enemy = Bot.Enemy;
             Toggle(true);
             _nextUpdatePosTime = 0f;
             _LastLeadPos = Vector3.zero;
         }
 
+        private Enemy _enemy;
+
         public override void Stop()
         {
             Toggle(false);
+            _enemy = null;
             Bot.Mover.SprintController.CancelRun();
         }
     }

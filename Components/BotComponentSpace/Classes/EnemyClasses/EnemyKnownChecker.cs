@@ -5,8 +5,6 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 {
     public class EnemyKnownChecker : EnemyBase, ISAINClass
     {
-        public bool EnemyKnown {  get; private set; }
-
         public EnemyKnownChecker(Enemy enemy) : base(enemy)
         {
 
@@ -74,8 +72,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
             {
                 return false;
             }
-            Enemy searchTarget = Bot.Search.SearchTarget;
-            if (searchTarget != null && searchTarget == Enemy)
+            if (Enemy.Events.OnSearch.Value)
             {
                 return !Enemy.KnownPlaces.SearchedAllKnownLocations;
             }

@@ -267,7 +267,6 @@ namespace SAIN.Components.BotComponentSpace.Classes
 
         public void Dispose()
         {
-            base.UnSubscribeToPresetChanges();
             if (_weaponManager.Selector != null)
             {
                 _weaponManager.Selector.OnActiveEquipmentSlotChanged -= weaponChanged;

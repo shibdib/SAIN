@@ -58,6 +58,8 @@ namespace SAIN.SAINComponent.Classes.Info
 
         protected void UpdatePresetSettings(SAINPresetClass preset)
         {
+            Logger.LogDebug($"updated");
+
             Personality = GetPersonality(out var settings);
             PersonalitySettingsClass = settings;
 

@@ -65,7 +65,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 {
                     Bot.EnemyController.RemoveEnemy(id);
                 }
-                Logger.LogAndNotifyInfo($"Removed {_idsToRemove.Count} Invalid Enemies");
+                Logger.LogWarning($"Removed {_idsToRemove.Count} Invalid Enemies");
                 _idsToRemove.Clear();
             }
         }

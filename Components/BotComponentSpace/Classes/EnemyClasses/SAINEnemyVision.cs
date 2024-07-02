@@ -90,8 +90,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void UpdateVisibleState(bool forceOff)
         {
             bool wasVisible = IsVisible;
-            bool lineOfSight = InLineOfSight;
-
             if (forceOff)
             {
                 IsVisible = false;

@@ -14,6 +14,11 @@ namespace SAIN.SAINComponent
 
         protected override void SubscribeToPresetChanges(Action<SAINPresetClass> func)
         {
+            if (func == null)
+            {
+                return;
+            }
+            func.Invoke(SAINPresetClass.Instance);
             base.SubscribeToPresetChanges(func);
             Bot.OnSAINDisposed += this.UnSubscribeToPresetChanges;
         }
@@ -42,6 +47,11 @@ namespace SAIN.SAINComponent
 
         protected override void SubscribeToPresetChanges(Action<SAINPresetClass> func)
         {
+            if (func == null)
+            {
+                return;
+            }
+            func.Invoke(SAINPresetClass.Instance);
             base.SubscribeToPresetChanges(func);
             Bot.OnSAINDisposed += this.UnSubscribeToPresetChanges;
         }

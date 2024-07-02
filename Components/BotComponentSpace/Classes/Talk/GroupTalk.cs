@@ -182,7 +182,6 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Dispose()
         {
-            base.UnSubscribeToPresetChanges(); 
             unsub();
         }
 

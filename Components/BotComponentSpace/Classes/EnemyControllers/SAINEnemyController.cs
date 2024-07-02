@@ -23,12 +23,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             EnemyLists = new EnemyListsClass(this);
             _listController = new EnemyListController(this);
             _enemyChooser = new EnemyChooserClass(this);
+
             _enemyUpdater = sain.gameObject.AddComponent<EnemyUpdaterComponent>();
+            _enemyUpdater.Init(sain);
         }
 
         public void Init()
         {
-            _enemyUpdater.Init(Bot);
             Events.Init();
             _listController.Init();
             _enemyChooser.Init();

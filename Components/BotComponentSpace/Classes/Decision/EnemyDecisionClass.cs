@@ -25,7 +25,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Dispose()
         {
-            base.UnSubscribeToPresetChanges();
         }
 
         public bool GetDecision(out SoloDecision Decision)

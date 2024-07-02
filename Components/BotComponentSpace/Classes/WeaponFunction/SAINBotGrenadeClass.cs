@@ -36,7 +36,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-            base.UnSubscribeToPresetChanges();
             SAINBotController.Instance.OnGrenadeCollision -= grenadeCollision;
         }
 

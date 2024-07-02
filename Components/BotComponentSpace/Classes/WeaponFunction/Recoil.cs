@@ -151,7 +151,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-            base.UnSubscribeToPresetChanges();
             Bot.BotActivation.OnBotStateChanged -= removeCoroutine;
         }
 
