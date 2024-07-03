@@ -6,7 +6,7 @@ using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class PoseClass : BotBaseClass, ISAINClass
+    public class PoseClass : BotBase, IBotClass
     {
         public PoseClass(BotComponent sain) : base(sain)
         {
@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            base.SubscribeToPresetChanges(null);
+            base.SubscribeToPreset(null);
         }
 
         public void Update()

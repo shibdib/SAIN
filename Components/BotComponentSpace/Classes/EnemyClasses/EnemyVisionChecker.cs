@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class EnemyVisionChecker : EnemyBase, ISAINClass
+    public class EnemyVisionChecker : EnemyBase, IBotClass
     {
         public Vector3 LastSeenPoint { get; private set; }
         public bool LineOfSight => EnemyParts.LineOfSight;

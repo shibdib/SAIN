@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class SteerPriorityClass : BotSubClassBase<SAINSteeringClass>
+    public class SteerPriorityClass : BotSubClass<SAINSteeringClass>
     {
         public SteerPriority CurrentSteerPriority { get; private set; }
         public SteerPriority LastSteerPriority { get; private set; }

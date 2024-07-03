@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace SAIN.SAINComponent.Classes.Search
 {
-    public class SAINSearchClass : BotBaseClass, ISAINClass
+    public class SAINSearchClass : BotBase, IBotClass
     {
         public bool SearchActive { get; private set; }
         public Enemy SearchTarget { get; private set; }

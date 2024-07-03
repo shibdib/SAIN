@@ -10,7 +10,7 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.Mover
 {
-    public class SAINMoverClass : BotBaseClass, ISAINClass
+    public class SAINMoverClass : BotBase, IBotClass
     {
         public SAINMoverClass(BotComponent sain) : base(sain)
         {
@@ -28,7 +28,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            base.SubscribeToPresetChanges(null);
+            base.SubscribeToPreset(null);
             UpdateBodyNavObstacle(false);
         }
 

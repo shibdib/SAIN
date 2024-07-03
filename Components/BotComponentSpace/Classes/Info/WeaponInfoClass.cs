@@ -14,7 +14,7 @@ using static EFT.InventoryLogic.Weapon;
 
 namespace SAIN.SAINComponent.Classes.Info
 {
-    public class WeaponInfoClass : BotBaseClass, ISAINClass
+    public class WeaponInfoClass : BotBase, IBotClass
     {
         public float FinalModifier { get; private set; }
         public EWeaponClass EWeaponClass { get; private set; }
@@ -42,7 +42,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Init()
         {
-            base.SubscribeToPresetChanges(UpdatePresetSettings);
+            base.SubscribeToPreset(UpdatePresetSettings);
             Recoil.Init();
             Firerate.Init();
             Firemode.Init();

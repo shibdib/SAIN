@@ -31,7 +31,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         Canceling,
     }
 
-    public class SAINSprint : BotBaseClass, ISAINClass
+    public class SAINSprint : BotBase, IBotClass
     {
         public SAINSprint(BotComponent sain) : base(sain)
         {
@@ -39,7 +39,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            base.SubscribeToPresetChanges(null);
+            base.SubscribeToPreset(null);
         }
 
         public void Update()
@@ -592,11 +592,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (!BotOwner.DoorOpener.Interacting)
             {
-                if (shallSteerbyPriority())
-                {
-                    Bot.Steering.SteerByPriority(true, true);
-                }
-                else
+                if (!shallSteerbyPriority() || !Bot.Steering.SteerByPriority(false, true))
                 {
                     Bot.Steering.LookToDirection(targetLookDirNormal, true, turnSpeed);
                 }
