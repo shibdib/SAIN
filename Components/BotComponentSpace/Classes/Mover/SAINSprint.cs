@@ -22,11 +22,11 @@ namespace SAIN.SAINComponent.Classes.Mover
         FirstTurn,
         Running,
         Turning,
+        ShortCorner,
         NoStamina,
         InteractingWithDoor,
-        ArrivingAtDestination ,
-        CantSprint ,
-        ShortCorner,
+        ArrivingAtDestination,
+        CantSprint,
         LookAtEnemyNoSprint,
         Canceling,
     }
@@ -153,9 +153,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void startRun(NavMeshPath path, Vector3 point, ESprintUrgency urgency, System.Action callback)
         {
-            if (_runToPointCoroutine != null)
-                Bot.StopCoroutine(_runToPointCoroutine);
-
+            stopRunCoroutine();
             BotOwner.AimingData?.LoseTarget();
             LastRunDestination = point;
             CurrentPath = path;
@@ -454,7 +452,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             // If we arne't already sprinting, and our corner were moving to is far enough away, and I have enough stamina, and the angle isn't too sharp... enable sprint
             if (shallStartSprintStamina(staminaValue, urgency) && 
-                _timeStartCorner + 0.5f < Time.time)
+                _timeStartCorner + 0.25f < Time.time)
             {
                 Bot.Mover.EnableSprintPlayer(true);
                 CurrentRunStatus = RunStatus.Running;
@@ -469,8 +467,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool shallPauseSprintAngle()
         {
             Vector3? currentCorner = this.CurrentCornerDestination();
-            return currentCorner != null && 
-                checkShallPauseSprintFromTurn(currentCorner.Value, _moveSettings.BotSprintCurrentCornerAngleMax);
+            return currentCorner != null && checkShallPauseSprintFromTurn(currentCorner.Value, _moveSettings.BotSprintCurrentCornerAngleMax);
         }
 
         private bool shallPauseMoveAngle()
@@ -497,7 +494,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private float findAngleFromLook(Vector3 end)
         {
-            Vector3 origin = Bot.Position;
+            Vector3 origin = BotOwner.WeaponRoot.position;
             Vector3 aDir = Bot.LookDirection;
             Vector3 bDir = end - origin;
             aDir.y = 0;
@@ -592,7 +589,11 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (!BotOwner.DoorOpener.Interacting)
             {
-                if (!shallSteerbyPriority() || !Bot.Steering.SteerByPriority(false, true))
+                if (shallLookAtEnemy())
+                {
+                    Bot.Steering.LookToEnemy(Bot.Enemy);
+                }
+                else if (!shallSteerbyPriority() || !Bot.Steering.SteerByPriority(false, true))
                 {
                     Bot.Steering.LookToDirection(targetLookDirNormal, true, turnSpeed);
                 }
@@ -608,6 +609,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 case RunStatus.Turning:
                 case RunStatus.FirstTurn:
                 case RunStatus.Running:
+                case RunStatus.ShortCorner:
                     return false;
 
                 default:
