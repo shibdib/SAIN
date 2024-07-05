@@ -140,6 +140,10 @@ namespace SAIN.Patches.Shoot.Aim
                         break;
                 }
             }
+            if (___botOwner_0.WeaponManager.ShootController?.IsAiming == true)
+            {
+                additionCoef *= 0.8f;
+            }
             additionCoef /= enemy.Aim.AimAndScatterMultiplier;
         }
     }
