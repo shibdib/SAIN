@@ -90,7 +90,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         private void checkEndDoorOpening()
         {
             //this.BotOwner.Steering.SetYAngle(0f);
-            if (this._traversingEnd < Time.time || (_lastInteractedInfo != null && _lastInteractedInfo.Door.DoorState != EDoorState.Interacting))
+            if (this._traversingEnd < Time.time || 
+                (_lastInteractedInfo != null && _lastInteractedInfo.Door.DoorState != EDoorState.Interacting))
             {
                 endDoorInteraction();
             }
@@ -236,7 +237,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     selectedDoor = data;
                 }
             }
-            if (selectedDoor != null && selectedDoor.DotProduct > 0.75f)
+            if (selectedDoor != null && selectedDoor.DotProduct > 0f)
             {
                 return selectedDoor;
             }
