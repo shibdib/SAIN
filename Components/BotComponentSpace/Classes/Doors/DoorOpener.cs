@@ -246,12 +246,12 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private DoorData checkWantToCloseAnyDoors(List<DoorData> doors)
         {
-            float lowestDot = 0f;
+            //float lowestDot = 0f;
             DoorData selectedDoor = null;
             foreach (var data in doors)
             {
-                if (data.DoorInFront)
-                    continue;
+                //if (data.DoorInFront)
+                //    continue;
 
                 NavMeshDoorLink link = data.Link;
                 Door door = link.Door;
@@ -259,11 +259,8 @@ namespace SAIN.SAINComponent.Classes.Mover
                 if (door.DoorState != EDoorState.Open)
                     continue;
 
-                if (data.DotProduct < lowestDot)
-                {
-                    lowestDot = data.DotProduct;
-                    selectedDoor = data;
-                }
+                selectedDoor = data;
+                break;
             }
             return selectedDoor;
         }
