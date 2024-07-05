@@ -166,10 +166,8 @@ namespace SAIN.SAINComponent.Classes
 
         private IEnumerator delayReact(BotSoundStruct sound)
         {
-            float speed = -1f;
             var weapon = sound.Info.EnemyPlayer.Equipment.CurrentWeapon;
-            if (weapon != null && weapon.Weapon?.CurrentAmmoTemplate != null)
-                speed = weapon.Weapon.CurrentAmmoTemplate.InitialSpeed * weapon.SpeedFactor;
+            float speed = weapon != null ? weapon.BulletSpeed : -1f;
 
             yield return baseHearDelay(sound.Info.EnemyDistance, speed);
 
