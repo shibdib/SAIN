@@ -6,6 +6,7 @@ using SAIN.Components;
 using System.Reflection;
 using UnityEngine;
 using static SAIN.Helpers.Shoot;
+using WeaponAIPresetManager = GClass396;
 
 namespace SAIN.Patches.Shoot.RateOfFire
 {
@@ -53,7 +54,7 @@ namespace SAIN.Patches.Shoot.RateOfFire
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass396), "method_1");
+            return AccessTools.Method(typeof(WeaponAIPresetManager), "method_1");
         }
 
         [PatchPostfix]
@@ -74,7 +75,7 @@ namespace SAIN.Patches.Shoot.RateOfFire
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass396), "method_6");
+            return AccessTools.Method(typeof(WeaponAIPresetManager), "method_6");
         }
 
         [PatchPostfix]
@@ -95,7 +96,7 @@ namespace SAIN.Patches.Shoot.RateOfFire
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass396), "method_0");
+            return AccessTools.Method(typeof(WeaponAIPresetManager), "method_0");
         }
 
         [PatchPostfix]

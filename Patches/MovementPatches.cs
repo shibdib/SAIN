@@ -147,15 +147,9 @@ namespace SAIN.Patches.Movement
             {
                 return true;
             }
-            if (SAINPlugin.IsBotExluded(____owner))
+            if (SAINEnableClass.GetSAIN(____owner, out var botComponent) && botComponent.SAINLayersActive)
             {
-                return true;
-            }
-
-            if (SAINEnableClass.GetSAIN(____owner, out var botComponent) &&
-                botComponent.EnemyController.AtPeace == false)
-            {
-                __result = botComponent.DoorOpener.Update();
+                __result = botComponent.DoorOpener.FindDoorsToOpen();
                 return false;
             }
             return true;
