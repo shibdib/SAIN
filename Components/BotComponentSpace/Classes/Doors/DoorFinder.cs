@@ -34,9 +34,9 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Init()
         {
-            Bot.Mover.OnNewGoToPoint += newMove;
-            Bot.Mover.SprintController.OnNewSprint += newMove;
-            Bot.Mover.SprintController.OnNewCornerMoveTo += newMove;
+            //Bot.Mover.OnNewGoToPoint += newMove;
+            //Bot.Mover.SprintController.OnNewSprint += newMove;
+            //Bot.Mover.SprintController.OnNewCornerMoveTo += newMove;
         }
 
         public void Update()
@@ -62,9 +62,9 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Dispose()
         {
-            Bot.Mover.OnNewGoToPoint -= newMove;
-            Bot.Mover.SprintController.OnNewSprint -= newMove;
-            Bot.Mover.SprintController.OnNewCornerMoveTo -= newMove;
+            //Bot.Mover.OnNewGoToPoint -= newMove;
+            //Bot.Mover.SprintController.OnNewSprint -= newMove;
+            //Bot.Mover.SprintController.OnNewCornerMoveTo -= newMove;
         }
 
         private void updateCurrentDoors()
@@ -135,15 +135,15 @@ namespace SAIN.SAINComponent.Classes.Mover
                 _nextUpdateInteractTime = Time.time + DOORS_FIND_INTERACTION_FREQ;
 
                 findDoorsInRange(DOORS_INTERACTION_DISTANCE, CloseDoors, InteractionDoors);
-
-                Vector3 targetMovePos;
-                if (BotOwner.Mover.HavePath)
-                    targetMovePos = BotOwner.Mover.RealDestPoint;
-                else if (Bot.Mover.SprintController.Running)
-                    targetMovePos = Bot.Mover.SprintController.CurrentCornerDestination();
-                else return;
-
-                findDotProducts(botPosition, targetMovePos);
+                //
+                //Vector3 targetMovePos;
+                //if (BotOwner.Mover.HavePath)
+                //    targetMovePos = BotOwner.Mover.RealDestPoint;
+                //else if (Bot.Mover.SprintController.Running)
+                //    targetMovePos = Bot.Mover.SprintController.CurrentCornerDestination();
+                //else return;
+                //
+                //findDotProducts(botPosition, targetMovePos);
             }
         }
 

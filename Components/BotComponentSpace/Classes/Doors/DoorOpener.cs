@@ -216,7 +216,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private DoorData checkWantToOpenAnyDoors(List<DoorData> doors)
         {
-            float highestDot = 0f;
+            float highestDot = -1f;
             DoorData selectedDoor = null;
             foreach (var data in doors)
             {
@@ -269,7 +269,17 @@ namespace SAIN.SAINComponent.Classes.Mover
         private void findPossibleInteractDoors(List<DoorData> list)
         {
             _possibleInteractDoors.Clear();
+
+            Vector3 targetMovePos;
+            if (BotOwner.Mover.HavePath)
+                targetMovePos = BotOwner.Mover.RealDestPoint;
+            else if (Bot.Mover.SprintController.Running)
+                targetMovePos = Bot.Mover.SprintController.CurrentCornerDestination();
+            else return;
+
             Vector3 botPos = BotOwner.Transform.position;
+            Vector3 moveDirection = (targetMovePos - botPos).normalized;
+
             foreach (var data in list)
             {
                 //Logger.LogDebug($"Checking {link.Id}...");
@@ -303,8 +313,12 @@ namespace SAIN.SAINComponent.Classes.Mover
 
                 //Logger.LogDebug($"Door {link.Id} is either open or closed.");
 
+                data.CalcDirection(botPos);
+
                 if (data.CurrentSqrMagnitude > maxDistance)
                     continue;
+
+                data.DotProduct = Vector3.Dot(data.DirectionNormal, moveDirection);
 
                 if (!CheckWantToInteract(data, botPos))
                     continue;
@@ -570,10 +584,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             switch (data.Door.DoorState)
             {
                 case EDoorState.Open:
-                    return !data.DoorInFront;
+                    return data.DotProduct < 0;
 
                 case EDoorState.Shut:
-                    return data.DotProduct > 0.5f;
+                    return data.DotProduct > 0.1f;
 
                 default:
                     return false;

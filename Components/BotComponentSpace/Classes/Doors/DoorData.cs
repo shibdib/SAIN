@@ -6,7 +6,7 @@ namespace SAIN.SAINComponent.Classes.Mover
     public class DoorData
     {
         private const float DOOR_SINGLE_INTERACTION_FREQ = 1f;
-        private const float UPDATE_SQRMAG_FREQ = 1f;
+        private const float UPDATE_SQRMAG_FREQ = 0.5f;
 
         public DoorData(NavMeshDoorLink link)
         {

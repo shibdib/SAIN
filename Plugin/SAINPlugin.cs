@@ -8,6 +8,7 @@ using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
 using SAIN.Patches.Generic;
+using SAIN.Patches.Movement;
 using SAIN.Patches.Vision;
 using SAIN.Plugin;
 using SAIN.Preset;
@@ -96,6 +97,7 @@ namespace SAIN
 
                 typeof(Patches.Movement.EncumberedPatch),
                 typeof(Patches.Movement.DoorOpenerPatch),
+                typeof(Patches.Movement.DoorDisabledPatch),
                 typeof(Patches.Movement.CrawlPatch),
                 typeof(Patches.Movement.CrawlPatch2),
 

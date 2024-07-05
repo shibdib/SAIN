@@ -1,6 +1,7 @@
 ﻿using Aki.Reflection.Patching;
 using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
@@ -150,6 +151,24 @@ namespace SAIN.Patches.Movement
             if (SAINEnableClass.GetSAIN(____owner, out var botComponent) && botComponent.SAINLayersActive)
             {
                 __result = botComponent.DoorOpener.FindDoorsToOpen();
+                return false;
+            }
+            return true;
+        }
+    }
+
+    public class DoorDisabledPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(WorldInteractiveObject), "method_3");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(WorldInteractiveObject __instance)
+        {
+            if (!__instance.enabled || !__instance.gameObject.activeInHierarchy)
+            {
                 return false;
             }
             return true;
