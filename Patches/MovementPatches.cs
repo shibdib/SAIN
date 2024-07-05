@@ -3,6 +3,7 @@ using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using HarmonyLib;
+using SAIN.Preset.GlobalSettings;
 using System.Reflection;
 using UnityEngine;
 
@@ -144,11 +145,15 @@ namespace SAIN.Patches.Movement
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ____owner, ref bool __result)
         {
-            if (!SAINPlugin.LoadedPreset.GlobalSettings.General.NewDoorOpening)
+            var settings = GlobalSettingsClass.Instance.General;
+            if (settings.DisableAllDoors)
             {
-                return true;
+                __result = false;
+                return false;
             }
-            if (SAINEnableClass.GetSAIN(____owner, out var botComponent) && botComponent.SAINLayersActive)
+            if (settings.NewDoorOpening && 
+                SAINEnableClass.GetSAIN(____owner, out var botComponent) && 
+                botComponent.SAINLayersActive)
             {
                 __result = botComponent.DoorOpener.FindDoorsToOpen();
                 return false;
