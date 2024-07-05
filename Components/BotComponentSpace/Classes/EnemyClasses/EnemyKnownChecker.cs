@@ -54,6 +54,10 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
             {
                 return false;
             }
+            if (Enemy.LastKnownPosition == null)
+            {
+                return false;
+            }
 
             if (Enemy.KnownPlaces.TimeSinceLastKnownUpdated < Bot.Info.ForgetEnemyTime)
             {
