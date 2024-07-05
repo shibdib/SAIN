@@ -131,6 +131,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             LastSquadHeardPlace = null;
             LastKnownPosition = null;
             LastKnownPlace = null;
+            TimeLastKnownUpdated = -1000f;
         }
 
         public void Update()
@@ -432,7 +433,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Enemy.Events.LastKnownUpdated(place);
         }
 
-        public float TimeLastKnownUpdated { get; private set; }
+        public float TimeLastKnownUpdated { get; private set; } = -1000f;
 
         private EnemyPlace findMostRecentPlace(out float timeUpdated)
         {

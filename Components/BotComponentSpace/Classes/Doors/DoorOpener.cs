@@ -3,6 +3,7 @@ using EFT.Interactive;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -89,7 +90,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private void checkEndDoorOpening()
         {
             //this.BotOwner.Steering.SetYAngle(0f);
-            if (this._traversingEnd < Time.time)
+            if (this._traversingEnd < Time.time || (_lastInteractedInfo != null && _lastInteractedInfo.Door.DoorState != EDoorState.Interacting))
             {
                 endDoorInteraction();
             }
@@ -388,6 +389,16 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (gstruct.Succeeded)
             {
                 Logger.LogDebug("Success");
+                switch (type)
+                {
+                    case EInteractionType.Breach:
+                        Player.vmethod_0(door, gstruct.Value, new Action(endDoorInteraction));
+                        break;
+
+                    default:
+                        Player.vmethod_1(door, gstruct.Value);
+                        break;
+                }
                 Player.vmethod_1(door, gstruct.Value);
                 return;
             }
@@ -544,33 +555,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             return true;
         }
 
-        public bool isDoorInLookDirection(NavMeshDoorLink link)
-        {
-            GClass297 gclass = null;
-            EDoorState doorState = link.Door.DoorState;
-
-            switch (link.Door.DoorState)
-            {
-                case EDoorState.Open:
-                    gclass = link.SegmentClose;
-                    break;
-
-                case EDoorState.Shut:
-                    gclass = link.SegmentOpen;
-                    break;
-
-                default:
-                    return false;
-            }
-
-            Vector3 vector = GClass760.Rotate90(gclass.a - gclass.b, 1);
-            if (Vector3.Dot(vector.normalized, this.BotOwner.LookDirection) < 0f)
-            {
-                vector = -vector;
-            }
-            return !Vector.IsAngLessNormalized(Vector.NormalizeFastSelf(this.BotOwner.LookDirection), Vector.NormalizeFastSelf(vector), 0.9396926f);
-        }
-
         // Token: 0x060010AF RID: 4271 RVA: 0x0004CED4 File Offset: 0x0004B0D4
         public bool CheckWantToInteract(DoorData data, Vector3 botPosition)
         {
@@ -587,7 +571,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     return data.DotProduct < 0;
 
                 case EDoorState.Shut:
-                    return data.DotProduct > 0.1f;
+                    return data.DotProduct > 0f;
 
                 default:
                     return false;
