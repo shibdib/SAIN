@@ -146,9 +146,13 @@ namespace SAIN.SAINComponent.Classes
             return pos;
         }
 
-        private IEnumerator baseHearDelay(float distance)
+        private IEnumerator baseHearDelay(float distance, float soundSpeed = -1f)
         {
-            float delay = distance / SPEED_OF_SOUND;
+            if (soundSpeed == -1f)
+            {
+                soundSpeed = SPEED_OF_SOUND;
+            }
+            float delay = distance / soundSpeed;
             if (Bot?.EnemyController?.AtPeace == true)
             {
                 delay += SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseHearingDelayAtPeace;
@@ -162,7 +166,12 @@ namespace SAIN.SAINComponent.Classes
 
         private IEnumerator delayReact(BotSoundStruct sound)
         {
-            yield return baseHearDelay(sound.Info.EnemyDistance);
+            float speed = -1f;
+            var weapon = sound.Info.EnemyPlayer.Equipment.CurrentWeapon;
+            if (weapon != null && weapon.Weapon?.CurrentAmmoTemplate != null)
+                speed = weapon.Weapon.CurrentAmmoTemplate.InitialSpeed * weapon.SpeedFactor;
+
+            yield return baseHearDelay(sound.Info.EnemyDistance, speed);
 
             if (Bot != null && 
                 sound.Info.EnemyPlayer != null && 
