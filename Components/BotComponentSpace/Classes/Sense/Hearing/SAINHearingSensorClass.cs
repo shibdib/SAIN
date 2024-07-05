@@ -1,14 +1,9 @@
 ﻿using EFT;
 using SAIN.Helpers;
-using SAIN.Preset;
-using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using SAIN.SAINComponent.Classes.Mover;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements.Experimental;
 
 namespace SAIN.SAINComponent.Classes
 {

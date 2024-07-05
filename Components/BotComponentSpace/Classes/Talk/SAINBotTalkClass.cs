@@ -30,6 +30,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
+
             if (EFTMath.RandomBool(33) && 
                 _nextGetHitTime < Time.time && 
                 GroupTalk.FriendIsClose)
@@ -50,6 +51,11 @@ namespace SAIN.SAINComponent.Classes.Talk
             GroupTalk.Update();
 
             if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
+            {
+                return;
+            }
+
+            if (IsSpeaking)
             {
                 return;
             }
@@ -128,10 +134,12 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return false;
             }
-            if ((CanTalk && _timeCanTalk < Time.time)
-                || phrase == EPhraseTrigger.OnDeath
+
+            bool skipCheck = phrase == EPhraseTrigger.OnDeath
                 || phrase == EPhraseTrigger.OnAgony
-                || phrase == EPhraseTrigger.OnBeingHurt)
+                || phrase == EPhraseTrigger.OnBeingHurt;
+
+            if ((CanTalk && _timeCanTalk < Time.time) || skipCheck)
             {
                 if (withGroupDelay &&
                     !CanSay(phrase))
@@ -190,10 +198,20 @@ namespace SAIN.SAINComponent.Classes.Talk
             Say(type, false, 0f, mask, 100, mask == ETagStatus.Combat);
         }
 
+        public bool IsSpeaking => Player.Speaker?.Speaking == true;
+
         private void Say(EPhraseTrigger trigger, bool demand = false, float delay = 0f, ETagStatus mask = (ETagStatus)0, int probability = 100, bool aggressive = false)
         {
+            if (Player?.Speaker == null)
+            {
+                return;
+            }
+            if (IsSpeaking)
+            {
+                return;
+            }
+
             if (Player?.HealthController?.IsAlive == true &&
-                Player.Speaker != null &&
                 _nextCanTalkTime < Time.time)
             {
                 _nextCanTalkTime = Time.time + 0.1f;

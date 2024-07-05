@@ -338,6 +338,11 @@ namespace SAIN.SAINComponent.Classes.Talk
                 yield break;
             }
 
+            if (Bot.Talk.IsSpeaking)
+            {
+                yield break;
+            }
+
             if (friendly)
             {
                 if (!BotOwner.Memory.IsPeace)

@@ -9,7 +9,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 {
     public class SAINDecisionClass : BotBase, IBotClass
     {
-        public event Action<SoloDecision, SquadDecision, SelfDecision, float> OnDecisionMade;
+        public event Action<SoloDecision, SquadDecision, SelfDecision, BotComponent> OnDecisionMade;
 
         public bool HasDecision => HasDecisionToggle.Value;
         public ToggleEvent HasDecisionToggle { get; } = new ToggleEvent();
@@ -172,7 +172,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
                 TotalDecisionsMade++;
                 ChangeDecisionTime = Time.time;
-                OnDecisionMade?.Invoke(solo, squad, self, Time.time);
+                OnDecisionMade?.Invoke(solo, squad, self, Bot);
             }
         }
 
@@ -339,7 +339,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public static readonly SoloDecision[] RETREAT_DECISIONS =
         { 
-            SoloDecision.Retreat 
+            SoloDecision.Retreat,
+            SoloDecision.RunToCover,
         };
     }
 }

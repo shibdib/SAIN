@@ -397,10 +397,8 @@ namespace SAIN.SAINComponent.Classes.Mover
                         Player.vmethod_1(door, gstruct.Value);
                         break;
                 }
-                Player.vmethod_1(door, gstruct.Value);
                 return;
             }
-
             Logger.LogDebug("Fail");
         }
 
@@ -508,15 +506,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             Logger.LogDebug($"{BotOwner.name} Auto Opening Door on {doorInfo.Link.Id}");
 
-            //_traversingEnd = Time.time + 0.45f;
-
-            bool inverted = false;
-            if (ShallInvertDoorAngle(door))
-            {
-                inverted = true;
-                door.OpenAngle = -door.OpenAngle;
-            }
-
             EDoorState state = EDoorState.None;
             switch (Etype)
             {
@@ -533,10 +522,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                     return;
             }
 
-            door.method_3(state);
+            bool shallInvert = ShallInvertDoorAngle(door);
+            GameWorldComponent.Instance.ChangeDoorState(door, state, shallInvert);
             SAINBotController.Instance.BotHearing.PlayAISound(PlayerComponent, SAINSoundType.Door, door.transform.position, 30f, 1f, true);
-            if (inverted)
-                door.OpenAngle = -door.OpenAngle;
         }
 
         private bool ShallInvertDoorAngle(Door door)
