@@ -59,6 +59,8 @@ namespace SAIN.Components
 
         private void checkDoors()
         {
+            if (Singleton<IBotGame>.Instance == null) { return; }
+
             if (!_doorsDisabled &&
                 GlobalSettingsClass.Instance.General.DisableAllDoors)
             {
@@ -75,28 +77,34 @@ namespace SAIN.Components
             }
         }
 
+        public bool DisableDoor(Door door)
+        {
+            // We don't support doors that don't start open/closed
+            if (door.DoorState != EDoorState.Open && door.DoorState != EDoorState.Shut)
+                return false;
+
+            // We don't support non-operatable doors
+            if (!door.Operatable || !door.enabled)
+                return false;
+
+            // We don't support doors that aren't on the "Interactive" layer
+            if (door.gameObject.layer != LayerMaskClass.InteractiveLayer)
+                return false;
+
+            door.gameObject.SmartDisable();
+            door.enabled = false;
+            _disabledDoors.Add(door);
+            return true;
+        }
+
         private void disableDoors()
         {
             int doorCount = 0;
             // Code taken from Drakia's Door Randomizer Mod
             FindObjectsOfType<Door>().ExecuteForEach(door =>
             {
-                // We don't support doors that don't start open/closed
-                if (door.DoorState != EDoorState.Open && door.DoorState != EDoorState.Shut)
-                    return;
-
-                // We don't support non-operatable doors
-                if (!door.Operatable || !door.enabled)
-                    return;
-
-                // We don't support doors that aren't on the "Interactive" layer
-                if (door.gameObject.layer != LayerMaskClass.InteractiveLayer)
-                    return;
-
-                doorCount++;
-                door.gameObject.SmartDisable();
-                door.enabled = false;
-                _disabledDoors.Add(door);
+                if (DisableDoor(door))
+                    doorCount++;
             });
 
             _doorsDisabled = true;
