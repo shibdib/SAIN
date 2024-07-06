@@ -28,7 +28,7 @@ namespace SAIN.BotController.Classes
             _squad?.RemoveMember(ProfileId);
         }
 
-        private void UpdateDecisions(SoloDecision solo, SquadDecision squad, SelfDecision self, BotComponent member)
+        private void UpdateDecisions(CombatDecision solo, SquadDecision squad, SelfDecision self, BotComponent member)
         {
             SoloDecision = solo;
             SquadDecision = squad;
@@ -61,7 +61,7 @@ namespace SAIN.BotController.Classes
 
         public ETagStatus HealthStatus;
 
-        public SoloDecision SoloDecision { get; private set; }
+        public CombatDecision SoloDecision { get; private set; }
         public SquadDecision SquadDecision { get; private set; }
         public SelfDecision SelfDecision { get; private set; }
         public float PowerLevel { get; private set; }

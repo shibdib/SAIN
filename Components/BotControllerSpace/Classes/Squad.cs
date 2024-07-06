@@ -14,7 +14,7 @@ namespace SAIN.BotController.Classes
 {
     public class Squad
     {
-        public event Action<SoloDecision, SquadDecision, SelfDecision, BotComponent> OnMemberDecisionMade;
+        public event Action<CombatDecision, SquadDecision, SelfDecision, BotComponent> OnMemberDecisionMade;
         public event Action<EnemyPlace, Enemy, SAINSoundType> OnMemberHeardEnemy;
         public event Action<Squad> OnSquadEmpty;
         public event Action<IPlayer, DamageInfo, float> LeaderKilled;
@@ -41,7 +41,7 @@ namespace SAIN.BotController.Classes
         {
             get
             {
-                return MemberHasDecision(SoloDecision.Retreat, SoloDecision.RunAway, SoloDecision.RunToCover);
+                return MemberHasDecision(CombatDecision.Retreat, CombatDecision.RunAway, CombatDecision.RunToCover);
             }
         }
 
@@ -310,7 +310,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        public bool MemberHasDecision(params SoloDecision[] decisionsToCheck)
+        public bool MemberHasDecision(params CombatDecision[] decisionsToCheck)
         {
             foreach (var member in MemberInfos.Values)
             {
@@ -624,7 +624,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        private void memberMadeDecision(SoloDecision solo, SquadDecision squad, SelfDecision self, BotComponent member)
+        private void memberMadeDecision(CombatDecision solo, SquadDecision squad, SelfDecision self, BotComponent member)
         {
             OnMemberDecisionMade?.Invoke(solo, squad, self, member);
         }

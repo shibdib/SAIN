@@ -77,7 +77,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Update()
         {
             IsCurrentEnemy = Bot.Enemy?.EnemyProfileId == EnemyProfileId;
-            updateRealDistance();
+            updateDistAndDirection();
 
             Events.Update();
             _validChecker.Update();
@@ -247,7 +247,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public Vector3 LastMoveDirection { get; private set; }
         public Vector3 LastSprintDirection { get; private set; }
         public Vector3 EnemyPosition => EnemyTransform.Position;
-        public Vector3 EnemyDirection => EnemyTransform.DirectionToMe(Bot.Transform.Position);
+        public Vector3 EnemyDirection { get; private set; }
+        public Vector3 EnemyDirectionNormal { get; private set; }
         public Vector3 EnemyHeadPosition => EnemyTransform.HeadPosition;
 
         public float TimeSinceLastKnownUpdated => KnownPlaces.TimeSinceLastKnownUpdated;
@@ -261,13 +262,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public float TimeSinceSeen => Vision.TimeSinceSeen;
         public float TimeSinceHeard => Hearing.TimeSinceHeard;
 
-        private void updateRealDistance()
+        private void updateDistAndDirection()
         {
             float timeAdd = calcMagnitudeDelay();
             if (_lastUpdateDistanceTime + timeAdd < Time.time)
             {
                 _lastUpdateDistanceTime = Time.time;
-                RealDistance = (EnemyPosition - Bot.Position).magnitude;
+                Vector3 dir = EnemyPosition - Bot.Position;
+                EnemyDirection = dir;
+                EnemyDirectionNormal = dir.normalized;
+                RealDistance = dir.magnitude;
             }
         }
 

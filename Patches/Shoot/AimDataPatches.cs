@@ -273,7 +273,7 @@ namespace SAIN.Patches.Shoot.Aim
         private static float calcCoverMod(float baseAimTime, BotOwner botOwner, BotComponent botComponent, BotSettingsComponents fileSettings, StringBuilder stringBuilder)
         {
             CoverPoint coverInUse = botComponent?.Cover.CoverInUse;
-            bool inCover = botOwner.Memory.IsInCover || (coverInUse != null && coverInUse.Status == CoverStatus.InCover);
+            bool inCover = botOwner.Memory.IsInCover || (coverInUse != null && coverInUse.StraightDistanceStatus == CoverStatus.InCover);
             if (inCover)
             {
                 baseAimTime *= fileSettings.Aiming.COEF_FROM_COVER;

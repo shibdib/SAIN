@@ -141,9 +141,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
             }
 
             CoverPoint fallback = Bot.Cover.FallBackPoint;
-            SoloDecision currentDecision = Bot.Decision.CurrentSoloDecision;
+            CombatDecision currentDecision = Bot.Decision.CurrentSoloDecision;
 
-            if (currentDecision == SoloDecision.Retreat &&
+            if (currentDecision == CombatDecision.Retreat &&
                 fallback != null &&
                 tryRun(fallback, out sprinting, tryWalk))
             {
@@ -241,7 +241,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (tryWalk)
             {
                 bool shallCrawl = Bot.Player.IsInPronePose || (Bot.Decision.CurrentSelfDecision != SelfDecision.None
-                    && coverPoint.Status == CoverStatus.FarFromCover
+                    && coverPoint.StraightDistanceStatus == CoverStatus.FarFromCover
                     && Bot.Mover.Prone.ShallProneHide());
 
                 result = Bot.Mover.GoToPoint(destination, out _, 0.5f, shallCrawl, false);
@@ -263,7 +263,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             Toggle(true);
 
-            if (Bot.Decision.CurrentSoloDecision == SoloDecision.AvoidGrenade
+            if (Bot.Decision.CurrentSoloDecision == CombatDecision.AvoidGrenade
                 && Bot.Talk.GroupTalk.FriendIsClose)
             {
                 Bot.Talk.TalkAfterDelay(EPhraseTrigger.OnEnemyGrenade, ETagStatus.Combat, 0.33f);
@@ -312,7 +312,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (_coverDestination != null)
             {
                 stringBuilder.AppendLine("Cover Destination");
-                stringBuilder.AppendLabeledValue("Status", $"{_coverDestination.Status}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Status", $"{_coverDestination.StraightDistanceStatus}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Height / Value", $"{_coverDestination.CoverHeight} {_coverDestination.CoverValue}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Path Length", $"{_coverDestination.PathLength}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Straight Distance", $"{(_coverDestination.Position - Bot.Position).magnitude}", Color.white, Color.yellow, true);

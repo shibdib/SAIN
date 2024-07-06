@@ -35,6 +35,7 @@
         public enum EWantToSearchReason
         {
             None,
+            HeardFromPeaceSearchNow,
             BeingStealthy,
             NewSearch_Looting,
             NewSearch_PowerLevel,

@@ -25,7 +25,7 @@ namespace SAIN.SAINComponent.Classes.Search
                 return false;
             }
 
-            if (Bot.Decision.CurrentSoloDecision == SoloDecision.Search)
+            if (Bot.Decision.CurrentSoloDecision == CombatDecision.Search)
             {
                 if (BaseClass.FinalDestination == null)
                 {
@@ -45,7 +45,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
         private void calcSearchTime()
         {
-            if (Bot.Decision.CurrentSoloDecision != SoloDecision.Search
+            if (Bot.Decision.CurrentSoloDecision != CombatDecision.Search
                 && _nextRecalcSearchTime < Time.time)
             {
                 _nextRecalcSearchTime = Time.time + 120f;
@@ -87,6 +87,12 @@ namespace SAIN.SAINComponent.Classes.Search
 
         private bool shallSearch(Enemy enemy, out EWantToSearchReason reason)
         {
+            if (enemy.Hearing.EnemyHeardFromPeace && 
+                Bot.Info.PersonalitySettings.Search.HeardFromPeaceBehavior == EHeardFromPeaceBehavior.SearchNow)
+            {
+                reason = EWantToSearchReason.HeardFromPeaceSearchNow;
+                return true;
+            }
             if (ShallBeStealthyDuringSearch(enemy) &&
                 Bot.Decision.EnemyDecisions.UnFreezeTime > Time.time &&
                 enemy.TimeSinceLastKnownUpdated > 10f)
@@ -115,6 +121,10 @@ namespace SAIN.SAINComponent.Classes.Search
                 return false;
             }
             if (!enemy.Hearing.EnemyHeardFromPeace)
+            {
+                return false;
+            }
+            if (Bot.Info.PersonalitySettings.Search.HeardFromPeaceBehavior == EHeardFromPeaceBehavior.SearchNow)
             {
                 return false;
             }
