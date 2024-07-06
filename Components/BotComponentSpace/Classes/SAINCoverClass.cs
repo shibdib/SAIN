@@ -70,12 +70,12 @@ namespace SAIN.SAINComponent.Classes
         public SAINCoverClass(BotComponent bot) : base(bot)
         {
             CoverFinder = bot.GetOrAddComponent<CoverFinderComponent>();
-            CoverFinder.Init(Bot);
         }
 
         public void Init()
         {
             base.SubscribeToPreset(null);
+            CoverFinder.Init(Bot);
         }
 
         public void Update()
