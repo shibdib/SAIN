@@ -45,6 +45,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public bool TryShoot(bool value, Vector3 targetPos, bool checkFF = true, EShootReason reason = EShootReason.None)
         {
+            targetPos += Bot.Info.WeaponInfo.Recoil.CurrentRecoilOffset;
             ShootPosition = targetPos;
             Reason = value ? reason : EShootReason.None;
 
@@ -55,6 +56,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                     Reason = EShootReason.None;
                     return false;
                 }
+                BotOwner.AimingData?.SetTarget(targetPos);
                 Bot.Steering.LookToPoint(targetPos);
                 if (Shooting)
                 {

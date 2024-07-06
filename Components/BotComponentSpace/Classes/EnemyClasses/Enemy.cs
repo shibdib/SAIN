@@ -324,15 +324,15 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return result;
         }
 
-        private const float ENEMY_DISTANCE_UPDATE_CURRENTENEMY = 0.05f;
-        private const float ENEMY_DISTANCE_UPDATE_CURRENTENEMY_AI = 0.1f;
-        private const float ENEMY_DISTANCE_UPDATE_ENEMYKNOWN = 0.1f;
-        private const float ENEMY_DISTANCE_UPDATE_ENEMYKNOWN_AI = 0.33f;
+        private const float ENEMY_DISTANCE_UPDATE_CURRENTENEMY = 0.025f;
+        private const float ENEMY_DISTANCE_UPDATE_CURRENTENEMY_AI = 0.15f;
+        private const float ENEMY_DISTANCE_UPDATE_ENEMYKNOWN = 0.2f;
+        private const float ENEMY_DISTANCE_UPDATE_ENEMYKNOWN_AI = 0.5f;
         private const float ENEMY_DISTANCE_UPDATE_UNKNOWN = 0.5f;
         private const float ENEMY_DISTANCE_UPDATE_UNKNOWN_AI = 1f;
         private const float ENEMY_UPDATEFREQUENCY_MAX_SCALE = 5f;
         private const float ENEMY_UPDATEFREQUENCY_MAX_DIST = 500f;
-        private const float ENEMY_UPDATEFREQUENCY_MIN_DIST = 100f;
+        private const float ENEMY_UPDATEFREQUENCY_MIN_DIST = 50f;
 
 
         private void updateActiveState()

@@ -178,7 +178,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public float AngleToPointFromLookDir(Vector3 point)
         {
-            Vector3 direction = (point - Bot.Transform.HeadPosition).normalized;
+            Vector3 direction = (point - BotOwner.WeaponRoot.position).normalized;
             return Vector3.Angle(_lookDirection, direction);
         }
 

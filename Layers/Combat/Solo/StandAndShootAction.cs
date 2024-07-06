@@ -55,6 +55,10 @@ namespace SAIN.Layers.Combat.Solo
 
         private bool moveShoot()
         {
+            if (Bot.Player.IsInPronePose)
+            {
+                return false;
+            }
             if (Bot.Enemy != null &&
                 Bot.Enemy.RealDistance < 50)
             {

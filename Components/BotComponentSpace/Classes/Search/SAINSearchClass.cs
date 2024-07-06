@@ -1,7 +1,6 @@
 ﻿using EFT;
 using SAIN.Preset.Personalities;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -10,7 +9,6 @@ namespace SAIN.SAINComponent.Classes.Search
     public class SAINSearchClass : BotBase, IBotClass
     {
         public bool SearchActive { get; private set; }
-        public Enemy SearchTarget { get; private set; }
 
         public ESearchMove NextState { get; private set; }
         public ESearchMove CurrentState { get; private set; }
@@ -45,7 +43,6 @@ namespace SAIN.SAINComponent.Classes.Search
         public void ToggleSearch(bool value, Enemy target)
         {
             SearchActive = value;
-            SearchTarget = value ? target : null;
             if (target != null)
             {
                 target.Events.OnSearch.CheckToggle(value);
@@ -56,10 +53,10 @@ namespace SAIN.SAINComponent.Classes.Search
             }
         }
 
-        public void Search(bool shallSprint)
+        public void Search(bool shallSprint, Enemy enemy)
         {
-            PathFinder.UpdateSearchDestination();
-            SwitchSearchModes(shallSprint);
+            PathFinder.UpdateSearchDestination(enemy);
+            SwitchSearchModes(shallSprint, enemy);
             PeekPoints?.DrawDebug();
         }
 
@@ -92,7 +89,6 @@ namespace SAIN.SAINComponent.Classes.Search
             }
             if (Bot.Mover.GoToPoint(destination, out _))
             {
-                sprint.CancelRun();
                 return true;
             }
             return false;
@@ -116,7 +112,7 @@ namespace SAIN.SAINComponent.Classes.Search
             }
         }
 
-        private void SwitchSearchModes(bool shallSprint)
+        private void SwitchSearchModes(bool shallSprint, Enemy enemy)
         {
             if (FinalDestination == null)
             {
@@ -124,7 +120,7 @@ namespace SAIN.SAINComponent.Classes.Search
                 return;
             }
 
-            bool shallBeStealthy = Bot.Enemy != null && SearchDecider.ShallBeStealthyDuringSearch(Bot.Enemy);
+            bool shallBeStealthy = SearchDecider.ShallBeStealthyDuringSearch(enemy);
             getSpeedandPose(out float speed, out float pose, shallSprint, shallBeStealthy);
             handleLight(shallBeStealthy);
             checkShallWaitandReload();

@@ -12,11 +12,9 @@ namespace SAIN.SAINComponent.Classes.Search
         {
         }
 
-        public bool ShallStartSearch(bool mustHaveTarget, out SearchReasonsStruct failReasons)
+        public bool ShallStartSearch(Enemy enemy, out SearchReasonsStruct failReasons)
         {
             calcSearchTime();
-            Enemy enemy = Bot.Enemy;
-
             failReasons = new SearchReasonsStruct();
 
             if (!WantToSearch(enemy, out failReasons.WantSearchReasons))
@@ -25,17 +23,17 @@ namespace SAIN.SAINComponent.Classes.Search
                 return false;
             }
 
-            if (Bot.Decision.CurrentSoloDecision == CombatDecision.Search)
+            if (enemy.Events.OnSearch.Value)
             {
-                if (BaseClass.FinalDestination == null)
+                if (BaseClass.PathFinder.TargetPlace == null)
                 {
-                    failReasons.NotSearchReason = ENotSearchReason.NullDestination;
+                    failReasons.NotSearchReason = ENotSearchReason.NullTargetPlace;
                     return false;
                 }
                 return true;
             }
 
-            if (!BaseClass.PathFinder.HasPathToSearchTarget(out failReasons.PathCalcFailReason, mustHaveTarget))
+            if (!BaseClass.PathFinder.HasPathToSearchTarget(enemy, out string failreason))
             {
                 failReasons.NotSearchReason = ENotSearchReason.PathCalcFailed;
                 return false;
@@ -61,9 +59,15 @@ namespace SAIN.SAINComponent.Classes.Search
                 reasons.NotWantToSearchReason = ENotWantToSearchReason.NullEnemy;
                 return false;
             }
-            if (enemy.LastKnownPosition == null)
+            var lastKnown = enemy.KnownPlaces.LastKnownPlace;
+            if (lastKnown == null)
             {
                 reasons.NotWantToSearchReason = ENotWantToSearchReason.NullLastKnown;
+                return false;
+            }
+            if (lastKnown.HasArrivedPersonal || lastKnown.HasArrivedSquad)
+            {
+                reasons.NotWantToSearchReason = ENotWantToSearchReason.AlreadySearchedLastKnown;
                 return false;
             }
             if (!enemy.Seen && !Bot.Info.PersonalitySettings.Search.WillSearchFromAudio)

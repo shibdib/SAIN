@@ -93,7 +93,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             FailedDecisionReasons.AppendLine($"{CombatDecision.ThrowGrenade} {reason}");
 
-            if (shallSearch(out reason))
+            if (shallSearch(enemy, out reason))
             {
                 if (Bot.Decision.CurrentSoloDecision != CombatDecision.Search)
                 {
@@ -163,7 +163,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 Decision = CombatDecision.ThrowGrenade;
             }
-            else if (shallSearch(out _))
+            else if (shallSearch(enemy, out _))
             {
                 if (Bot.Decision.CurrentSoloDecision != CombatDecision.Search)
                 {
@@ -823,9 +823,9 @@ namespace SAIN.SAINComponent.Classes.Decision
             return true;
         }
 
-        private bool shallSearch(out string reason)
+        private bool shallSearch(Enemy enemy, out string reason)
         {
-            bool shallSearch = Bot.Search.SearchDecider.ShallStartSearch(true, out SearchReasonsStruct reasons);
+            bool shallSearch = Bot.Search.SearchDecider.ShallStartSearch(enemy, out SearchReasonsStruct reasons);
             DebugSearchReasons = reasons;
             DebugShallSearch = shallSearch;
             if (shallSearch)

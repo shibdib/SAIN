@@ -62,22 +62,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 return;
             }
-            _nextCheckSearchTime = Time.time + 0.5f;
+            _nextCheckSearchTime = Time.time + 0.25f;
 
             bool allSearched = true;
-            foreach (var place in AllEnemyPlaces)
+            if (LastKnownPlace != null && !LastKnownPlace.HasArrivedPersonal && !LastKnownPlace.HasArrivedSquad)
             {
-                if (place == null)
-                {
-                    continue;
-                }
-
-                if (!place.HasArrivedPersonal &&
-                    !place.HasArrivedSquad)
-                {
-                    allSearched = false;
-                    break;
-                }
+                allSearched = false;
             }
 
             if (allSearched
@@ -139,12 +129,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             updatePlaces();
             if (Enemy.EnemyKnown)
             {
-                checkIfArrived(); 
+                //checkIfArrived(); 
                 checkSearched();
 
                 if (Enemy.IsCurrentEnemy)
                 {
-                    checkIfSeen();
+                    //checkIfSeen();
                     createDebug();
                 }
             }
@@ -207,9 +197,22 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private void tryTalk()
         {
             if (_nextTalkClearTime < Time.time 
-                && Bot.Talk.GroupSay(EFTMath.RandomBool(66) ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 33))
+                && Bot.Talk.GroupSay(EFTMath.RandomBool(66) ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 75))
             {
                 _nextTalkClearTime = Time.time + 5f;
+            }
+        }
+
+        public void SetPlaceAsSearched(EnemyPlace place)
+        {
+            tryTalk();
+            if (place.OwnerID == Bot.ProfileId)
+            {
+                place.HasArrivedPersonal = true;
+            }
+            else
+            {
+                place.HasArrivedSquad = true;
             }
         }
 
@@ -229,11 +232,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                         bool ismyPlace = place.OwnerID == myProfileID;
                         if (ismyPlace && checkPersonalArrived(place, myPosition))
                         {
-                            tryTalk();
+                            if (LastKnownPlace == place)
+                                tryTalk();
                         }
                         else if (!ismyPlace && checkSquadArrived(place, myPosition))
                         {
-                            tryTalk();
+                            if (LastKnownPlace == place)
+                                tryTalk();
                         }
                     }
                 }

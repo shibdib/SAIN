@@ -11,7 +11,7 @@
             None,
             DontWantTo,
             PathCalcFailed,
-            NullDestination,
+            NullTargetPlace,
         }
 
         public struct WantSearchReasonsStruct
@@ -30,6 +30,7 @@
             WontSearchFromAudio,
             CantStart,
             ShallNotSearch,
+            AlreadySearchedLastKnown,
         }
 
         public enum EWantToSearchReason

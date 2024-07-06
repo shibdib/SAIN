@@ -91,14 +91,9 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             if (!CanAim)
             {
-                LoseTarget();
+                BotOwner.AimingData?.LoseTarget();
                 return;
             }
-        }
-
-        public void LoseTarget()
-        {
-            BotOwner.AimingData?.LoseTarget();
         }
 
         public void Dispose()

@@ -87,8 +87,8 @@ namespace SAIN.SAINComponent.Classes.Decision
         private float _nextGetDecisionTime;
         const float DECISION_FREQUENCY = 1f / DECISION_FREQUENCY_FPS;
         const float DECISION_FREQUENCY_PEACE = 1f / DECISION_FREQUENCY_PEACE_FPS;
-        const float DECISION_FREQUENCY_FPS = 10;
-        const float DECISION_FREQUENCY_PEACE_FPS = 5;
+        const float DECISION_FREQUENCY_FPS = 30;
+        const float DECISION_FREQUENCY_PEACE_FPS = 10;
 
         public void Dispose()
         {
@@ -120,12 +120,14 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             if (SelfActionDecisions.GetDecision(out SelfDecision selfDecision))
             {
-                SetDecisions(CombatDecision.Retreat, SquadDecision.None, selfDecision);
+                var combatDecision = Bot.Cover.InCover ? CombatDecision.HoldInCover : CombatDecision.Retreat;
+                SetDecisions(combatDecision, SquadDecision.None, selfDecision);
                 return;
             }
 
             if (CheckContinueRetreat())
             {
+                SetDecisions(CombatDecision.Retreat, SquadDecision.None, SelfDecision.None);
                 return;
             }
 
@@ -378,9 +380,13 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return false;
             }
+            if (Bot.Cover.InCover)
+            {
+                return false;
+            }
 
             float timeChangeDec = Bot.Decision.TimeSinceChangeDecision;
-            if (timeChangeDec < 1)
+            if (timeChangeDec < 0.5f)
             {
                 return true;
             }
@@ -391,24 +397,19 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
 
-            //if (Running && !Bot.BotStuck.BotHasChangedPosition && Bot.BotStuck.TimeSpentNotMoving > 1f && timeChangeDec > 2f)
-            //{
-            //    return false;
-            //}
-
             CoverPoint coverInUse = Bot.Cover.CoverInUse;
             if (coverInUse == null)
             {
                 return false;
             }
 
-            switch (coverInUse.StraightDistanceStatus)
+            switch (coverInUse.PathDistanceStatus)
             {
                 case CoverStatus.InCover:
                     return false;
 
                 case CoverStatus.CloseToCover:
-                    return Bot.Mover.SprintController.Running || BotOwner.Mover.IsMoving;
+                    return Bot.Mover.SprintController.Running;
 
                 default:
                     return !coverInUse.IsBad;
