@@ -24,7 +24,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 case SteerPriority.RunningPath:
                 case SteerPriority.Aiming:
+                    return true;
+
                 case SteerPriority.ManualShooting:
+                    LookToPoint(Bot.ManualShoot.ShootPosition + Bot.Info.WeaponInfo.Recoil.CurrentRecoilOffset);
                     return true;
 
                 case SteerPriority.EnemyVisible:

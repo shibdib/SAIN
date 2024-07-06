@@ -27,9 +27,13 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 jumpToCover();
 
-                if (shallRecalcDestination())
+                if (_recalcMoveTimer < Time.time)
                 {
                     _moveSuccess = moveToCover(out bool sprinting, out CoverPoint coverDestination, false);
+                    if (_moveSuccess)
+                    {
+                        _runFailed = false;
+                    }
                     if (!_moveSuccess)
                     {
                         _moveSuccess = moveToCover(out sprinting, out coverDestination, true);
@@ -65,7 +69,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 //    Bot.SelfActions.TryReload();
                 //}
 
-                if (Bot.Cover.CoverPoints.Count == 0 && !_moveSuccess)
+                if (!_moveSuccess)
                 {
                     Bot.Mover.EnableSprintPlayer(false);
                     Bot.Cover.CoverInUse = null;
@@ -100,12 +104,6 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             Bot.Mover.SetTargetMoveSpeed(1f);
             Bot.Mover.SetTargetPose(1f);
-        }
-
-        private bool shallRecalcDestination()
-        {
-            return _recalcMoveTimer < Time.time &&
-                (!Bot.Mover.SprintController.Running || Bot.Cover.CoverInUse?.IsBad == true);
         }
 
         private void jumpToCover()

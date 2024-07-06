@@ -2,11 +2,9 @@ using EFT;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Preset;
-using SAIN.SAINComponent.Classes.Decision;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Talk
@@ -738,6 +736,14 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             if (HurtTalkTimer < Time.time)
             {
+                if ((status == ETagStatus.Dying || status == ETagStatus.BadlyInjured) &&
+                    BotOwner.Medecine.FirstAid?.HaveSmth2Use == false &&
+                    Bot.Talk.Say(EPhraseTrigger.NeedMedkit, null, true, false))
+                {
+                    HurtTalkTimer = Time.time + Bot.Info.FileSettings.Mind.SquadMemberTalkFreq * 5f * Random.Range(0.5f, 1.5f);
+                    return;
+                }
+
                 var trigger = EPhraseTrigger.PhraseNone;
                 switch (status)
                 {
@@ -836,9 +842,22 @@ namespace SAIN.SAINComponent.Classes.Talk
                     _leaderCommandTime = Time.time + Bot.Info.FileSettings.Mind.SquadLeadTalkFreq;
                     return true;
                 }
+                if (_nextsayNeedSniperTime < Time.time && 
+                    Bot.Enemy?.IsSniper == true && Bot.Talk.CanSay(EPhraseTrigger.NeedSniper, true, false))
+                {
+                    _nextsayNeedSniperTime = Time.time + _needSniperFreq;
+                    if (EFTMath.RandomBool(_needSniperChance) && Bot.Talk.Say(EPhraseTrigger.NeedSniper, ETagStatus.Combat, false, true))
+                    {
+                        return true;
+                    }
+                }
             }
             return false;
         }
+
+        private float _nextsayNeedSniperTime;
+        private float _needSniperFreq = 60f;
+        private float _needSniperChance = 50f;
 
         private bool checkLeaderTalk(EGesture gesture, EPhraseTrigger commandTrigger, EPhraseTrigger memberTrigger)
         {

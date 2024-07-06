@@ -391,7 +391,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return true;
             }
 
-            if (timeChangeDec > 5 && 
+            if (timeChangeDec > 3 && 
                 !Bot.BotStuck.BotHasChangedPosition)
             {
                 return false;
@@ -412,7 +412,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     return Bot.Mover.SprintController.Running;
 
                 default:
-                    return !coverInUse.IsBad;
+                    return Bot.Mover.SprintController.Running && !coverInUse.IsBad;
             }
         }
 

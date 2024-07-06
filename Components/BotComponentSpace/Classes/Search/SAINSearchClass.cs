@@ -345,7 +345,7 @@ namespace SAIN.SAINComponent.Classes.Search
             NextState = ESearchMove.None;
         }
 
-        public bool botIsAtPoint(Vector3 point, float reachDist = 0.2f)
+        public bool botIsAtPoint(Vector3 point, float reachDist = 0.5f)
         {
             return DistanceToDestination(point) < reachDist;
         }
