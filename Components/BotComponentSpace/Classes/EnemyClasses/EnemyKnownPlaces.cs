@@ -192,13 +192,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                         !place.HasSeenPersonal &&
                         place.PersonalClearLineOfSight(lookSensor, LayerMaskClass.HighPolyWithTerrainMaskAI))
                     {
-                        tryTalk();
+                        //tryTalk();
                     }
                     else if (!ismyPlace &&
                         !place.HasSeenSquad &&
                         place.SquadClearLineOfSight(lookSensor, LayerMaskClass.HighPolyWithTerrainMaskAI))
                     {
-                        tryTalk();
+                        //tryTalk();
                     }
                 }
             }
@@ -207,7 +207,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private void tryTalk()
         {
             if (_nextTalkClearTime < Time.time 
-                && Bot.Talk.GroupSay(EFTMath.RandomBool() ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 33))
+                && Bot.Talk.GroupSay(EFTMath.RandomBool(66) ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 33))
             {
                 _nextTalkClearTime = Time.time + 5f;
             }

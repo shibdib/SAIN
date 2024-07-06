@@ -131,29 +131,32 @@ namespace SAIN.SAINComponent.Classes.Search
         {
             hasTarget = false;
             var enemy = Bot.Enemy;
-            if (enemy != null && (enemy.Seen || enemy.Heard))
+
+            if (enemy == null)
             {
-                if (enemy.IsVisible)
+                return null;
+            }
+
+            if (enemy.IsVisible && enemy.KnownPlaces.LastSeenPlace != null)
+            {
+                hasTarget = true;
+                return enemy.KnownPlaces.LastSeenPlace;
+            }
+
+            var knownPlaces = enemy.KnownPlaces.AllEnemyPlaces;
+            for (int i = 0; i < knownPlaces.Count; i++)
+            {
+                EnemyPlace enemyPlace = knownPlaces[i];
+                if (enemyPlace != null &&
+                    !enemyPlace.HasArrivedPersonal)
                 {
                     hasTarget = true;
-                    return enemy.KnownPlaces.LastSeenPlace;
+                    return enemyPlace;
                 }
-
-                var knownPlaces = enemy.KnownPlaces.AllEnemyPlaces;
-                for (int i = 0; i < knownPlaces.Count; i++)
-                {
-                    EnemyPlace enemyPlace = knownPlaces[i];
-                    if (enemyPlace != null &&
-                        !enemyPlace.HasArrivedPersonal)
-                    {
-                        hasTarget = true;
-                        return enemyPlace;
-                    }
-                }
-                if (randomSearch)
-                {
-                    //return RandomSearch();
-                }
+            }
+            if (randomSearch)
+            {
+                //return RandomSearch();
             }
             return null;
         }

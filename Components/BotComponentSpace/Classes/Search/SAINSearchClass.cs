@@ -85,17 +85,17 @@ namespace SAIN.SAINComponent.Classes.Search
         private bool moveToPoint(Vector3 destination, bool shallSprint)
         {
             var sprint = Bot.Mover.SprintController;
-            if (!shallSprint && sprint.Running)
-            {
-                Bot.Mover.SprintController.CancelRun(0.25f);
-                return false;
-            }
-
-            if (shallSprint && Bot.Mover.SprintController.RunToPoint(destination, Mover.ESprintUrgency.Middle, true))
+            if (shallSprint && 
+                sprint.RunToPoint(destination, Mover.ESprintUrgency.Middle, true))
             {
                 return true;
             }
-            return Bot.Mover.GoToPoint(destination, out _);
+            if (Bot.Mover.GoToPoint(destination, out _))
+            {
+                sprint.CancelRun();
+                return true;
+            }
+            return false;
         }
 
         private void handleLight(bool stealthy)

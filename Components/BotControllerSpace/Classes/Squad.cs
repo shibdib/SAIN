@@ -167,6 +167,8 @@ namespace SAIN.BotController.Classes
                 _botsGroup = bot.BotOwner.BotsGroup;
             }
 
+            position.y = enemy.EnemyPosition.y;
+
             AISoundType baseSoundType = soundType.Convert();
             bool isDanger = baseSoundType == AISoundType.step ? false : true;
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
@@ -230,7 +232,7 @@ namespace SAIN.BotController.Classes
             return null;
         }
 
-        private bool findNavMesh(Vector3 position, out Vector3 hitPosition, float navSampleDist = 5f)
+        private bool findNavMesh(Vector3 position, out Vector3 hitPosition, float navSampleDist = 2f)
         {
             if (NavMesh.SamplePosition(position, out NavMeshHit hit, navSampleDist, -1))
             {
