@@ -20,9 +20,9 @@ namespace SAIN.SAINComponent.Classes.Mover
         // How long a bot will look at where they last saw an enemy if they don't hear any other threats
         private readonly float Steer_TimeSinceSeen_Long = 60f;
         // How far a sound can be for them to react by looking toward it.
-        private readonly float Steer_HeardSound_Dist = 60f;
+        private readonly float Steer_HeardSound_Dist = 50f;
         // How old a sound can be, in seconds, for them to react by looking toward it.
-        private readonly float Steer_HeardSound_Age = 3f;
+        private readonly float Steer_HeardSound_Age = 2f;
 
         public AimStatus AimStatus
         {
@@ -177,7 +177,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             Enemy enemy = Bot.Medical.HitByEnemy.EnemyWhoLastShotMe;
             if (enemy != null && 
-                enemy.IsValid && 
+                enemy.CheckValid() && 
                 enemy.EnemyPerson.Active && 
                 !enemy.IsCurrentEnemy)
             {

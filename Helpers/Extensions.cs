@@ -1,5 +1,8 @@
 ﻿using EFT.UI;
+using JetBrains.Annotations;
 using SAIN.Editor;
+using SAIN.SAINComponent.Classes.EnemyClasses;
+using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -8,6 +11,21 @@ namespace SAIN.Helpers
 {
     public static class Extensions
     {
+        public static bool IsSame([NotNull]this Enemy enemy, [NotNull]Enemy other)
+        {
+            return enemy.EnemyProfileId == other.EnemyProfileId;
+        }
+        public static bool IsDifferent([NotNull] this Enemy enemy, [NotNull] Enemy other)
+        {
+            return !enemy.IsSame(other);
+        }
+
+        public static Vector3? Position(this EnemyPlace place)
+        {
+            if (place == null) return null;
+            return place.Position;
+        }
+
         public static bool isLegs(this EBodyPart part)
         {
             switch (part)

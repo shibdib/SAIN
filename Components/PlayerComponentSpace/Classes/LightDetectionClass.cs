@@ -215,7 +215,7 @@ namespace SAIN.Components.PlayerComponentSpace
             {
                 return false;
             }
-            if (!enemy.IsValid)
+            if (!enemy.CheckValid())
             {
                 return false;
             }

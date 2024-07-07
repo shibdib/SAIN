@@ -17,23 +17,14 @@ namespace SAIN.Layers.Combat.Solo
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                Bot.Steering.SteerByPriority();
-                if (!shallMoveShoot)
-                {
-                    Bot.Mover.Pose.SetPoseToCover();
-                }
-                Shoot.Update();
-
-                yield return null;
-            }
-        }
-
         public override void Update()
         {
+            Bot.Steering.SteerByPriority();
+            if (!shallMoveShoot)
+            {
+                Bot.Mover.Pose.SetPoseToCover();
+            }
+            Shoot.Update();
         }
 
         bool shallMoveShoot = false;

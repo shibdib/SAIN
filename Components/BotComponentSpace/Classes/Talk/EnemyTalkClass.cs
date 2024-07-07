@@ -370,7 +370,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             yield return new WaitForSeconds(delay);
 
-            if (enemy == null || !enemy.IsValid)
+            if (enemy == null || !enemy.CheckValid())
             {
                 yield break;
             }

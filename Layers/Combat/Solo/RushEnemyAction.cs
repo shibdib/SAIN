@@ -13,33 +13,29 @@ namespace SAIN.Layers.Combat.Solo
         {
         }
 
+        public override void Update()
+        {
+            Bot.Mover.SetTargetPose(1f);
+            Bot.Mover.SetTargetMoveSpeed(1f);
+            if (!checkHasEnemy())
+            {
+                Bot.Steering.SteerByPriority(true);
+                return;
+            }
+
+            if (_enemy.InLineOfSight)
+            {
+                enemyInSight();
+                return;
+            }
+
+            checkUpdateMove();
+            checkJump();
+        }
+
         public void Toggle(bool value)
         {
             ToggleAction(value);
-        }
-
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                if (!checkHasEnemy())
-                {
-                    Bot.Steering.SteerByPriority(true);
-                    yield return null;
-                    continue;
-                }
-
-                if (_enemy.InLineOfSight)
-                {
-                    enemyInSight();
-                    yield return null;
-                    continue;
-                }
-
-                checkUpdateMove();
-                checkJump();
-                yield return null;
-            }
         }
 
         private bool checkHasEnemy()
@@ -136,11 +132,6 @@ namespace SAIN.Layers.Combat.Solo
 
         private float TryJumpTimer;
 
-        public override void Update()
-        {
-            Bot.Mover.SetTargetPose(1f);
-            Bot.Mover.SetTargetMoveSpeed(1f);
-        }
 
         private bool updateMove(Enemy enemy)
         {

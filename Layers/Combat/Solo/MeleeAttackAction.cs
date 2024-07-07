@@ -11,15 +11,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-        }
-
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                BotOwner.WeaponManager.Melee.RunToEnemyUpdate();
-                yield return null;
-            }
+            BotOwner.WeaponManager.Melee.RunToEnemyUpdate();
         }
 
         public override void Start()

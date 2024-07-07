@@ -21,89 +21,79 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private bool _runFailed;
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                jumpToCover();
-
-                if (_recalcMoveTimer < Time.time)
-                {
-                    _moveSuccess = moveToCover(out bool sprinting, out CoverPoint coverDestination, false);
-                    if (_moveSuccess)
-                    {
-                        _runFailed = false;
-                    }
-                    if (!_moveSuccess)
-                    {
-                        _moveSuccess = moveToCover(out sprinting, out coverDestination, true);
-                        _runFailed = true;
-                    }
-
-                    _sprinting = sprinting;
-
-                    if (_moveSuccess)
-                    {
-                        _recalcMoveTimer = Time.time + 2f;
-                        _shallJumpToCover = EFTMath.RandomBool(10)
-                            && _sprinting
-                            && BotOwner.Memory.IsUnderFire
-                            && Bot.Info.Profile.IsPMC;
-
-                        Bot.Cover.CoverInUse = coverDestination;
-                        _runDestination = coverDestination.Position;
-                    }
-                    else
-                    {
-                        _recalcMoveTimer = Time.time + 0.25f;
-                        Bot.Cover.CoverInUse = null;
-                    }
-                }
-
-                //if (_moveSuccess && 
-                //    _sprinting && 
-                //    _nextTryReloadTime < Time.time && 
-                //    Bot.Decision.SelfActionDecisions.LowOnAmmo(0.5f))
-                //{
-                //    _nextTryReloadTime = Time.time + 2f;
-                //    Bot.SelfActions.TryReload();
-                //}
-
-                if (!_moveSuccess)
-                {
-                    Bot.Mover.EnableSprintPlayer(false);
-                    Bot.Cover.CoverInUse = null;
-                    Bot.Mover.SprintController.CancelRun();
-                    Bot.Mover.DogFight.DogFightMove(false);
-
-                    if (!Bot.Steering.SteerByPriority(false))
-                    {
-                        Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
-                    }
-                    Shoot.Update();
-                    yield return null;
-                    continue;
-                }
-
-                if (!isRunning)
-                {
-                    Bot.Mover.EnableSprintPlayer(false);
-                    if (!Bot.Steering.SteerByPriority(false))
-                    {
-                        Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
-                    }
-                    Shoot.Update();
-                    yield return null;
-                    continue;
-                }
-                yield return null;
-            }
-        }
-
         public override void Update()
         {
             Bot.Mover.SetTargetMoveSpeed(1f);
             Bot.Mover.SetTargetPose(1f);
+            jumpToCover();
+
+            if (_recalcMoveTimer < Time.time)
+            {
+                _moveSuccess = moveToCover(out bool sprinting, out CoverPoint coverDestination, false);
+                if (_moveSuccess)
+                {
+                    _runFailed = false;
+                }
+                if (!_moveSuccess)
+                {
+                    _moveSuccess = moveToCover(out sprinting, out coverDestination, true);
+                    _runFailed = true;
+                }
+
+                _sprinting = sprinting;
+
+                if (_moveSuccess)
+                {
+                    _recalcMoveTimer = Time.time + 2f;
+                    _shallJumpToCover = EFTMath.RandomBool(10)
+                        && _sprinting
+                        && BotOwner.Memory.IsUnderFire
+                        && Bot.Info.Profile.IsPMC;
+
+                    Bot.Cover.CoverInUse = coverDestination;
+                    _runDestination = coverDestination.Position;
+                }
+                else
+                {
+                    _recalcMoveTimer = Time.time + 0.25f;
+                    Bot.Cover.CoverInUse = null;
+                }
+            }
+
+            //if (_moveSuccess && 
+            //    _sprinting && 
+            //    _nextTryReloadTime < Time.time && 
+            //    Bot.Decision.SelfActionDecisions.LowOnAmmo(0.5f))
+            //{
+            //    _nextTryReloadTime = Time.time + 2f;
+            //    Bot.SelfActions.TryReload();
+            //}
+
+            if (!_moveSuccess)
+            {
+                Bot.Mover.EnableSprintPlayer(false);
+                Bot.Cover.CoverInUse = null;
+                Bot.Mover.SprintController.CancelRun();
+                Bot.Mover.DogFight.DogFightMove(true);
+
+                if (!Bot.Steering.SteerByPriority(false))
+                {
+                    Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
+                }
+                Shoot.Update();
+                return;
+            }
+
+            if (!isRunning)
+            {
+                Bot.Mover.EnableSprintPlayer(false);
+                if (!Bot.Steering.SteerByPriority(false))
+                {
+                    Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
+                }
+                Shoot.Update();
+                return;
+            }
         }
 
         private void jumpToCover()
@@ -141,7 +131,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 return true;
             }
 
-            CoverPoint fallback = Bot.Cover.FallBackPoint;
+            //CoverPoint fallback = Bot.Cover.FallBackPoint;
             CombatDecision currentDecision = Bot.Decision.CurrentSoloDecision;
 
             //if (currentDecision == CombatDecision.Retreat &&
@@ -176,7 +166,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 return false;
             }
-            if (!coverPoint.IsBad)
+            if (!coverPoint.CoverData.IsBad)
             {
                 return true;
             }
@@ -185,7 +175,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 return true;
             }
-            float dot = Vector3.Dot(coverPoint.DirectionToColliderNormal, (target - coverPoint.Position).normalized);
+            float dot = Vector3.Dot(coverPoint.CoverData.ProtectionDirection, (target - coverPoint.Position).normalized);
             return dot > minDot;
         }
 
@@ -297,7 +287,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (_coverDestination != null)
             {
                 stringBuilder.AppendLine("CoverInUse");
-                stringBuilder.AppendLabeledValue("Is Bad?", $"{_coverDestination.IsBad}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Is Bad?", $"{_coverDestination.CoverData.IsBad}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Straight Status", $"{_coverDestination.StraightDistanceStatus}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Straight Distance", $"{_coverDestination.Distance}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Path Length Status", $"{_coverDestination.PathDistanceStatus}", Color.white, Color.yellow, true);
@@ -311,7 +301,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     stringBuilder.AppendLabeledValue("Distance To Last Corner", $"{(lastCorner.Value - Bot.Position).magnitude}", Color.white, Color.yellow, true);
                     stringBuilder.AppendLabeledValue("Last Path Corner to Position Difference", $"{(lastCorner.Value - _coverDestination.Position).magnitude}", Color.white, Color.yellow, true);
                 }
-                stringBuilder.AppendLabeledValue("Height / Value", $"{_coverDestination.CoverHeight} {_coverDestination.CoverValue}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Height / Value", $"{_coverDestination.CoverHeight} {_coverDestination.HardData.Value}", Color.white, Color.yellow, true);
             }
         }
 

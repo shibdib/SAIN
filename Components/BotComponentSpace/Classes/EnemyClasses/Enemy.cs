@@ -109,7 +109,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public bool EnemyKnown => Events.OnEnemyKnownChanged.Value;
         public bool EnemyNotLooking => IsVisible && !Status.EnemyLookingAtMe && !Status.ShotAtMeRecently;
-        public bool IsValid => _validChecker.IsValid;
+
+        public bool CheckValid()
+        {
+            return _validChecker.CheckValid();
+        }
+        public bool WasValid => _validChecker.WasValid;
+
         public bool ActiveThreat => _activeThreatChecker.ActiveThreat;
         public float TimeSinceCurrentEnemy => _hasBeenActive ? Time.time - _timeLastActive : float.MaxValue;
 

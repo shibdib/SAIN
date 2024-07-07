@@ -118,7 +118,6 @@ namespace SAIN.SAINComponent.Classes
             float randomHeight = dispersion / 10f;
             float randomX = UnityEngine.Random.Range(-dispersion, dispersion);
             //float randomY = UnityEngine.Random.Range(-randomHeight, randomHeight);
-            float randomY = 0f;
             float randomZ = UnityEngine.Random.Range(-dispersion, dispersion);
             Vector3 randomdirection = new Vector3(randomX, 0, randomZ);
 

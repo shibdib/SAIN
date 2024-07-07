@@ -28,20 +28,12 @@ namespace SAIN.Layers.Combat.Solo
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                Enemy enemy = Bot.Enemy;
-                if (enemy != null)
-                {
-                }
-                yield return null;
-            }
-        }
-
         public override void Update()
         {
+            Enemy enemy = Bot.Enemy;
+            if (enemy != null)
+            {
+            }
         }
 
         private FlankRoute FindFlankRoute()

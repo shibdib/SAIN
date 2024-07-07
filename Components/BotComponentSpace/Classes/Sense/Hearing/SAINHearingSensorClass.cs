@@ -168,7 +168,7 @@ namespace SAIN.SAINComponent.Classes
 
             if (Bot != null && 
                 sound.Info.EnemyPlayer != null && 
-                sound.Info.Enemy?.IsValid == true)
+                sound.Info.Enemy?.CheckValid() == true)
             {
                 float projDist = sound.BulletData.ProjectionPointDistance;
                 bool underFire = projDist <= SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaxUnderFireDistance;
@@ -199,7 +199,7 @@ namespace SAIN.SAINComponent.Classes
 
             if (Bot != null &&
                 sound.Info.EnemyPlayer != null &&
-                sound.Info.Enemy?.IsValid == true)
+                sound.Info.Enemy?.CheckValid() == true)
             {
                 addPointToSearch(sound);
             }

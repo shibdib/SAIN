@@ -153,7 +153,7 @@ namespace SAIN.Patches.Generic
         public static bool EnemySenseRecently(BotComponent sain, EnemyInfo enemyInfo)
         {
             Enemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
-            return myEnemy?.IsValid == true && myEnemy.EnemyKnown;
+            return myEnemy?.CheckValid() == true && myEnemy.EnemyKnown;
         }
     }
 

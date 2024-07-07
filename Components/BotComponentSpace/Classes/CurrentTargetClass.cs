@@ -1,46 +1,56 @@
-﻿using SAIN.SAINComponent.Classes.EnemyClasses;
+﻿using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.EnemyClasses;
+using System;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
 {
     public class CurrentTargetClass : BotBase
     {
-        public bool HasTarget { get; private set; } 
-        public CurrentTargetClass(BotComponent bot) : base(bot) { }
+        public event Action<Enemy, Vector3> OnNewTargetEnemy;
+
+        public event Action OnLoseTarget;
+
+        public Enemy CurrentTargetEnemy { get; private set; }
+        public Vector3? CurrentTargetPosition => _currentTarget;
+        public Vector3? CurrentTargetDirection => CurrentTargetEnemy?.EnemyDirection;
+        public float CurrentTargetDistance => HasTarget ? CurrentTargetEnemy.RealDistance : float.MaxValue;
+        public bool HasTarget => CurrentTargetEnemy != null;
+        public string TargetProfileId => CurrentTargetEnemy?.EnemyProfileId;
+
+        public CurrentTargetClass(BotComponent bot) : base(bot)
+        {
+        }
 
         public void Update()
         {
             updateCurrentTarget();
-            UpdateGoalTarget();
+            updateGoalTarget();
         }
 
         private void updateCurrentTarget()
         {
-            _nextGetTargetTime += Time.deltaTime;
-            if (_nextGetTargetTime > 0.05f)
+            Vector3? target = getTarget(out Enemy newTargetEnemy);
+            _currentTarget = target;
+            if (target == null)
             {
-                _nextGetTargetTime = 0f;
-                _currentTarget = getTarget();
-                if (_currentTarget != null )
+                if (CurrentTargetEnemy != null)
                 {
-                    HasTarget = true;
-                    Vector3 dir = _currentTarget.Value - Position;
-                    CurrentTargetDirection = dir;
-                    CurrentTargetDistance = dir.magnitude;
+                    OnLoseTarget?.Invoke();
+                    CurrentTargetEnemy = null;
                 }
-                else
-                {
-                    HasTarget = false;
-                    CurrentTargetDirection = null;
-                    CurrentTargetDistance = float.MaxValue;
-                }
+                return;
+            }
+
+            if (CurrentTargetEnemy == null ||
+                CurrentTargetEnemy.IsDifferent(newTargetEnemy))
+            {
+                CurrentTargetEnemy = newTargetEnemy;
+                OnNewTargetEnemy?.Invoke(newTargetEnemy, target.Value);
             }
         }
 
-        private Enemy Enemy => Bot.Enemy;
-        private Vector3 Position => Bot.Position;
-
-        private void UpdateGoalTarget()
+        private void updateGoalTarget()
         {
             if (_updateGoalTargetTime < Time.time)
             {
@@ -50,7 +60,7 @@ namespace SAIN.SAINComponent.Classes
                 var Target = goalTarget?.Position;
                 if (Target != null)
                 {
-                    if ((Target.Value - Position).sqrMagnitude < 2f ||
+                    if ((Target.Value - Bot.Position).sqrMagnitude < 1f ||
                         goalTarget.CreatedTime > 120f)
                     {
                         goalTarget.Clear();
@@ -60,38 +70,26 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private float _updateGoalTargetTime;
-
-        public Vector3? GoalTargetPosition => BotOwner.Memory.GoalTarget.Position;
-
-        public Vector3? CurrentTargetPosition => _currentTarget;
-
-        public Vector3? CurrentTargetDirection { get; private set; }
-
-        public float CurrentTargetDistance { get; private set; }
-
-        private float _nextGetTargetTime;
-        private Vector3? _currentTarget;
-
-        private Vector3? getTarget()
+        private Vector3? getTarget(out Enemy targetEnemy)
         {
-            Vector3? target = 
-                getVisibleEnemyPos() ?? 
-                getLastHitPosition() ?? 
-                getUnderFirePosition() ??
-                getEnemylastKnownPos();
+            Vector3? target =
+                getVisibleEnemyPos(out targetEnemy) ??
+                getLastHitPosition(out targetEnemy) ??
+                getUnderFirePosition(out targetEnemy) ??
+                getEnemylastKnownPos(out targetEnemy);
 
             return target;
         }
 
-        private Vector3? getVisibleEnemyPos()
+        private Vector3? getVisibleEnemyPos(out Enemy targetEnemy)
         {
-            Enemy enemy = Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy != null)
             {
                 Vector3 pos = enemy.EnemyPosition;
                 if (enemy.IsVisible)
                 {
+                    targetEnemy = enemy;
                     return pos;
                 }
                 if (enemy.Seen && enemy.TimeSinceSeen < 1f)
@@ -99,27 +97,30 @@ namespace SAIN.SAINComponent.Classes
                     //return pos;
                 }
             }
+            targetEnemy = null;
             return null;
         }
 
-        private Vector3? getLastHitPosition()
+        private Vector3? getLastHitPosition(out Enemy targetEnemy)
         {
+            targetEnemy = null;
             if (Bot.Medical.TimeSinceShot > 5f)
             {
                 return null;
             }
 
             Enemy enemy = Bot.Medical.HitByEnemy.EnemyWhoLastShotMe;
-            if (enemy == null || !enemy.IsValid ||  enemy.IsCurrentEnemy)
+            if (enemy == null || !enemy.CheckValid() || enemy.IsCurrentEnemy)
             {
                 return null;
             }
-
+            targetEnemy = enemy;
             return enemy.LastKnownPosition ?? enemy.Status.LastShotPosition;
         }
 
-        private Vector3? getUnderFirePosition()
+        private Vector3? getUnderFirePosition(out Enemy targetEnemy)
         {
+            targetEnemy = null;
             if (!BotOwner.Memory.IsUnderFire)
             {
                 return null;
@@ -127,34 +128,38 @@ namespace SAIN.SAINComponent.Classes
 
             Enemy enemy = Bot.Memory.LastUnderFireEnemy;
             if (enemy == null ||
-                !enemy.IsValid ||
+                !enemy.CheckValid() ||
                 enemy.IsCurrentEnemy)
             {
                 return null;
             }
+            targetEnemy = enemy;
             return enemy.LastKnownPosition ?? Bot.Memory.UnderFireFromPosition;
         }
 
-        private Vector3? getEnemylastKnownPos()
+        private Vector3? getEnemylastKnownPos(out Enemy targetEnemy)
         {
-            Enemy enemy = Enemy;
+            Enemy enemy = Bot.Enemy;
             if (enemy != null)
             {
-                var lastKnownPlace = enemy.KnownPlaces.LastKnownPlace;
-                if (lastKnownPlace != null)
+                var lastKnown = getLastKnown(enemy);
+                if (lastKnown != null)
                 {
-                    return lastKnownPlace.Position;
-                }
-                if (enemy.KnownPlaces.LastSeenPlace != null)
-                {
-                    return enemy.KnownPlaces.LastSeenPlace.Position;
-                }
-                if (enemy.KnownPlaces.LastHeardPlace != null)
-                {
-                    return enemy.KnownPlaces.LastHeardPlace.Position;
+                    targetEnemy = enemy;
+                    return lastKnown.Value;
                 }
             }
+            targetEnemy = null;
             return null;
         }
+
+        private Vector3? getLastKnown(Enemy enemy)
+        {
+            var places = enemy.KnownPlaces;
+            return places.LastKnownPlace?.Position ?? places.LastSeenPlace?.Position ?? places.LastHeardPlace?.Position;
+        }
+
+        private float _updateGoalTargetTime;
+        private Vector3? _currentTarget;
     }
 }

@@ -14,57 +14,52 @@ namespace SAIN.Layers.Combat.Solo
         {
         }
 
+        public override void Update()
+        {
+            var enemy = _searchTarget;
+            if (enemy == null)
+            {
+                enemy = Bot.Enemy;
+                if (enemy == null)
+                {
+                    return;
+                }
+                _searchTarget = enemy;
+                enemy = _searchTarget;
+                Search.ToggleSearch(true, enemy);
+            }
+
+            bool isBeingStealthy = enemy.Hearing.EnemyHeardFromPeace;
+            if (isBeingStealthy)
+            {
+                _sprintEnabled = false;
+            }
+            else
+            {
+                CheckShouldSprint();
+                talk();
+            }
+
+            if (_nextUpdateSearchTime < Time.time)
+            {
+                _nextUpdateSearchTime = Time.time + 0.1f;
+                Search.Search(_sprintEnabled, enemy);
+            }
+
+            Steer();
+
+            if (!_sprintEnabled)
+            {
+                Shoot.Update();
+                if (!isBeingStealthy)
+                    checkWeapon();
+            }
+
+        }
+
         public void Toggle(bool value)
         {
             ToggleAction(value);
-        }
-
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                var enemy = _searchTarget;
-                if (enemy == null)
-                {
-                    enemy = Bot.Enemy;
-                    if (enemy == null)
-                    {
-                        yield return null;
-                        continue;
-                    }
-                    _searchTarget = enemy;
-                    enemy = _searchTarget;
-                    Search.ToggleSearch(true, enemy);
-                }
-
-                bool isBeingStealthy = enemy.Hearing.EnemyHeardFromPeace;
-                if (isBeingStealthy)
-                {
-                    _sprintEnabled = false;
-                }
-                else
-                {
-                    CheckShouldSprint();
-                    talk();
-                }
-
-                if (_nextUpdateSearchTime < Time.time)
-                {
-                    _nextUpdateSearchTime = Time.time + 0.1f;
-                    Search.Search(_sprintEnabled, enemy);
-                }
-
-                Steer();
-
-                if (!_sprintEnabled)
-                {
-                    Shoot.Update();
-                    if (!isBeingStealthy)
-                        checkWeapon();
-                }
-
-                yield return null;
-            }
         }
 
         private Enemy _searchTarget;
@@ -87,9 +82,6 @@ namespace SAIN.Layers.Combat.Solo
 
         private float _nextCheckTime;
 
-        public override void Update()
-        {
-        }
 
         private float _nextUpdateSearchTime;
 
@@ -182,8 +174,9 @@ namespace SAIN.Layers.Combat.Solo
 
         private void Steer()
         {
-            if (!SteerByPriority(false)
-                && !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy))
+            if (!SteerByPriority(false) && 
+                !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy) && 
+                BotOwner.Mover.HavePath)
             {
                 LookToMovingDirection();
             }

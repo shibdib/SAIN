@@ -18,27 +18,19 @@ namespace SAIN.Layers.Combat.Squad
             Bot.Search.ToggleSearch(true, _enemy);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                if (!Bot.Mover.SprintController.Running)
-                {
-                    Shoot.Update();
-                    Bot.Steering.SteerByPriority();
-                }
-
-                if (_nextUpdatePosTime < Time.time)
-                {
-                    moveToLead(out float nextTime);
-                    _nextUpdatePosTime = Time.time + nextTime;
-                }
-                yield return null;
-            }
-        }
-
         public override void Update()
         {
+            if (!Bot.Mover.SprintController.Running)
+            {
+                Shoot.Update();
+                Bot.Steering.SteerByPriority();
+            }
+
+            if (_nextUpdatePosTime < Time.time)
+            {
+                moveToLead(out float nextTime);
+                _nextUpdatePosTime = Time.time + nextTime;
+            }
         }
 
         private void moveToLead(out float nextUpdateTime)

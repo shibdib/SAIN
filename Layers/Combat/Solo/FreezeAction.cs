@@ -13,22 +13,14 @@ namespace SAIN.Layers.Combat.Solo
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                if (!Bot.Steering.SteerByPriority(false))
-                {
-                    Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
-                }
-                Shoot.Update();
-                yield return null;
-            }
-        }
-
         public override void Update()
         {
             Bot.Mover.SetTargetPose(0f);
+            if (!Bot.Steering.SteerByPriority(false))
+            {
+                Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
+            }
+            Shoot.Update();
         }
 
         public override void Start()

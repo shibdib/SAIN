@@ -46,7 +46,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         private bool shallKnowEnemy()
         {
-            if (!Enemy.IsValid)
+            if (!Enemy.CheckValid())
             {
                 return false;
             }

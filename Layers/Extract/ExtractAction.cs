@@ -19,81 +19,6 @@ namespace SAIN.Layers
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                float stamina = Bot.Player.Physical.Stamina.NormalValue;
-                bool fightingEnemy = isFightingEnemy();
-                // Environment id of 0 means a bot is outside.
-                if (Bot.Player.AIData.EnvironmentId != 0)
-                {
-                    shallSprint = false;
-                }
-                else if (fightingEnemy)
-                {
-                    shallSprint = false;
-                }
-                else if (stamina > 0.75f)
-                {
-                    shallSprint = true;
-                }
-                else if (stamina < 0.2f)
-                {
-                    shallSprint = false;
-                }
-
-                if (!BotOwner.GetPlayer.MovementContext.CanSprint)
-                {
-                    shallSprint = false;
-                }
-
-                if (!Exfil.HasValue)
-                {
-                    yield return null;
-                    continue;
-                }
-
-                Vector3 point = Exfil.Value;
-                float distance = (point - BotOwner.Position).sqrMagnitude;
-
-                if (distance < 8f)
-                {
-                    shallSprint = false;
-                }
-
-                if (ExtractStarted) {
-                    setStatus(EExtractStatus.ExtractingNow);
-                    StartExtract(point);
-                    Bot.Mover.SetTargetPose(0f);
-                    Bot.Mover.SetTargetMoveSpeed(0f);
-                    if (_sayExitLocatedTime < Time.time)
-                    {
-                        _sayExitLocatedTime = Time.time + 10;
-                        Bot.Talk.GroupSay(EPhraseTrigger.ExitLocated, null, true, 70);
-                    }
-                }
-                else {
-                    if (fightingEnemy)
-                    {
-                        setStatus(EExtractStatus.Fighting);
-                    }
-                    else
-                    {
-                        setStatus(EExtractStatus.MovingTo);
-                    }
-                    MoveToExtract(distance, point);
-                    Bot.Mover.SetTargetPose(1f);
-                    Bot.Mover.SetTargetMoveSpeed(1f);
-                }
-
-                Bot.Steering.SteerByPriority();
-                Shoot.Update();
-
-                yield return null;
-            }
-        }
-
         public static float MinDistanceToStartExtract { get; } = 6f;
 
         public ExtractAction(BotOwner bot) : base(bot, "Extract")
@@ -117,6 +42,74 @@ namespace SAIN.Layers
 
         public override void Update()
         {
+            float stamina = Bot.Player.Physical.Stamina.NormalValue;
+            bool fightingEnemy = isFightingEnemy();
+            // Environment id of 0 means a bot is outside.
+            if (Bot.Player.AIData.EnvironmentId != 0)
+            {
+                shallSprint = false;
+            }
+            else if (fightingEnemy)
+            {
+                shallSprint = false;
+            }
+            else if (stamina > 0.75f)
+            {
+                shallSprint = true;
+            }
+            else if (stamina < 0.2f)
+            {
+                shallSprint = false;
+            }
+
+            if (!BotOwner.GetPlayer.MovementContext.CanSprint)
+            {
+                shallSprint = false;
+            }
+
+            if (!Exfil.HasValue)
+            {
+                return;
+            }
+
+            Vector3 point = Exfil.Value;
+            float distance = (point - BotOwner.Position).sqrMagnitude;
+
+            if (distance < 8f)
+            {
+                shallSprint = false;
+            }
+
+            if (ExtractStarted)
+            {
+                setStatus(EExtractStatus.ExtractingNow);
+                StartExtract(point);
+                Bot.Mover.SetTargetPose(0f);
+                Bot.Mover.SetTargetMoveSpeed(0f);
+                if (_sayExitLocatedTime < Time.time)
+                {
+                    _sayExitLocatedTime = Time.time + 10;
+                    Bot.Talk.GroupSay(EPhraseTrigger.ExitLocated, null, true, 70);
+                }
+            }
+            else
+            {
+                if (fightingEnemy)
+                {
+                    setStatus(EExtractStatus.Fighting);
+                }
+                else
+                {
+                    setStatus(EExtractStatus.MovingTo);
+                }
+                MoveToExtract(distance, point);
+                Bot.Mover.SetTargetPose(1f);
+                Bot.Mover.SetTargetMoveSpeed(1f);
+            }
+
+            Bot.Steering.SteerByPriority();
+            Shoot.Update();
+
         }
 
         private void setStatus(EExtractStatus status)

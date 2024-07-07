@@ -21,66 +21,55 @@ namespace SAIN.Layers.Combat.Squad
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                var enemy = Bot.Enemy;
-                if (enemy != null)
-                {
-                    if (enemy.IsVisible && enemy.CanShoot)
-                    {
-                        Bot.Mover.StopMove();
-                        Shoot.Update();
-                        yield return null;
-                        continue;
-                    }
-
-                    if (Bot.ManualShoot.CanShoot(true) &&
-                        FindSuppressionTarget(out var target) &&
-                        CanSeeSuppressionTarget(target))
-                    {
-                        _manualShooting = true;
-                        Bot.Mover.StopMove();
-
-                        bool hasMachineGun = Bot.Info.WeaponInfo.EWeaponClass == EWeaponClass.machinegun;
-                        if (hasMachineGun
-                            && Bot.Mover.Prone.ShallProne(true))
-                        {
-                            Bot.Mover.Prone.SetProne(true);
-                        }
-
-                        bool shot = Bot.ManualShoot.TryShoot(true, target.Value, true, EShootReason.SquadSuppressing);
-
-                        if (shot)
-                        {
-                            enemy.Status.EnemyIsSuppressed = true;
-                            float waitTime = hasMachineGun ? 0.1f : 0.5f;
-                            _nextShotTime = Time.time + (waitTime * Random.Range(0.75f, 1.25f));
-                        }
-                        yield return null;
-                        continue;
-                    }
-
-                    Vector3? lastKnown = enemy.LastKnownPosition;
-                    if (lastKnown != null)
-                    {
-                        Bot.Mover.GoToPoint(lastKnown.Value, out _, -1, false, false, false);
-                    }
-                }
-
-                resetManualShoot();
-                if (!Bot.Steering.SteerByPriority(false))
-                {
-                    Bot.Steering.LookToLastKnownEnemyPosition(enemy);
-                }
-
-                yield return null;
-            }
-        }
-
         public override void Update()
         {
+            var enemy = Bot.Enemy;
+            if (enemy != null)
+            {
+                if (enemy.IsVisible && enemy.CanShoot)
+                {
+                    Bot.Mover.StopMove();
+                    Shoot.Update();
+                    return;
+                }
+
+                if (Bot.ManualShoot.CanShoot(true) &&
+                    FindSuppressionTarget(out var target) &&
+                    CanSeeSuppressionTarget(target))
+                {
+                    _manualShooting = true;
+                    Bot.Mover.StopMove();
+
+                    bool hasMachineGun = Bot.Info.WeaponInfo.EWeaponClass == EWeaponClass.machinegun;
+                    if (hasMachineGun
+                        && Bot.Mover.Prone.ShallProne(true))
+                    {
+                        Bot.Mover.Prone.SetProne(true);
+                    }
+
+                    bool shot = Bot.ManualShoot.TryShoot(true, target.Value, true, EShootReason.SquadSuppressing);
+
+                    if (shot)
+                    {
+                        enemy.Status.EnemyIsSuppressed = true;
+                        float waitTime = hasMachineGun ? 0.1f : 0.5f;
+                        _nextShotTime = Time.time + (waitTime * Random.Range(0.75f, 1.25f));
+                    }
+                    return;
+                }
+
+                Vector3? lastKnown = enemy.LastKnownPosition;
+                if (lastKnown != null)
+                {
+                    Bot.Mover.GoToPoint(lastKnown.Value, out _, -1, false, false, false);
+                }
+            }
+
+            resetManualShoot();
+            if (!Bot.Steering.SteerByPriority(false))
+            {
+                Bot.Steering.LookToLastKnownEnemyPosition(enemy);
+            }
         }
 
         private void resetManualShoot()

@@ -1,7 +1,6 @@
 ﻿using EFT;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
-using System.Collections;
 using System.Text;
 using UnityEngine;
 
@@ -18,64 +17,53 @@ namespace SAIN.Layers.Combat.Solo.Cover
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                Bot.Mover.SetTargetMoveSpeed(1f);
-                Bot.Mover.SetTargetPose(1f);
-
-                if (Bot.Enemy == null)
-                {
-                    yield return null;
-                    continue;
-                }
-
-                if (Bot.Cover.CoverPoints.Count == 0)
-                {
-                    Bot.Mover.DogFight.DogFightMove(false);
-                    EngageEnemy();
-                    yield return null;
-                    continue;
-                }
-
-                if (_nextUpdateCoverTime < Time.time)
-                {
-                    _nextUpdateCoverTime = Time.time + 0.1f;
-
-                    findCover();
-                    reCheckCover();
-                }
-
-                if (Bot.Cover.CoverInUse == null)
-                {
-                    Bot.Mover.DogFight.DogFightMove(false);
-                }
-
-                EngageEnemy();
-                yield return null;
-            }
-        }
-
         private float _nextUpdateCoverTime;
 
         public override void Update()
         {
+            Bot.Mover.SetTargetMoveSpeed(1f);
+            Bot.Mover.SetTargetPose(1f);
+
+            if (Bot.Enemy == null)
+            {
+                return;
+            }
+
+            if (Bot.Cover.CoverPoints.Count == 0)
+            {
+                Bot.Mover.DogFight.DogFightMove(true);
+                EngageEnemy();
+                return;
+            }
+
+            if (_nextUpdateCoverTime < Time.time)
+            {
+                _nextUpdateCoverTime = Time.time + 0.1f;
+
+                findCover();
+                reCheckCover();
+            }
+
+            if (Bot.Cover.CoverInUse == null)
+            {
+                Bot.Mover.DogFight.DogFightMove(false);
+            }
+
+            EngageEnemy();
         }
 
         private void findCover()
         {
             CoverPoint coverInUse = Bot.Cover.CoverInUse;
-            if (coverInUse == null || coverInUse.IsBad)
+            if (coverInUse == null || coverInUse.CoverData.IsBad)
             {
-                if (shallFallback())
-                {
-                    RecalcPathTimer = Time.time + 1f;
-                    return;
-                }
+                //if (shallFallback())
+                //{
+                //    RecalcPathTimer = Time.time + 1f;
+                //    return;
+                //}
 
                 Bot.Cover.SortPointsByPathDist();
-
                 var points = Bot.Cover.CoverPoints;
                 for (int i = 0; i < points.Count; i++)
                 {
@@ -114,7 +102,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         {
             if (coverPoint != null &&
                 !coverPoint.Spotted &&
-                !coverPoint.IsBad &&
+                !coverPoint.CoverData.IsBad &&
                 Bot.Mover.GoToPoint(coverPoint.Position, out _, 0.2f, false, true, true))
             {
                 Bot.Cover.CoverInUse = coverPoint;
@@ -232,7 +220,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 stringBuilder.AppendLine("Cover Destination");
                 stringBuilder.AppendLabeledValue("Status", $"{_coverDestination.StraightDistanceStatus}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Height / Value", $"{_coverDestination.CoverHeight} {_coverDestination.CoverValue}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Height / Value", $"{_coverDestination.CoverHeight} {_coverDestination.HardData.Value}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Path Length", $"{_coverDestination.PathLength}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Straight Distance", $"{(_coverDestination.Position - Bot.Position).magnitude}", Color.white, Color.yellow, true);
             }

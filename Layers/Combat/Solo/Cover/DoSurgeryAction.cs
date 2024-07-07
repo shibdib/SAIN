@@ -16,41 +16,32 @@ namespace SAIN.Layers.Combat.Solo.Cover
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                if (Bot.Medical.Surgery.AreaClearForSurgery)
-                {
-                    Bot.Mover.PauseMovement(30);
-                    Bot.Mover.SprintController.CancelRun();
-                    Bot.Mover.SetTargetMoveSpeed(0f);
-                    Bot.Cover.DuckInCover();
-                    tryStartSurgery();
-                }
-                else
-                {
-                    BotOwner.Mover.MovementResume();
-                    Bot.Mover.SetTargetMoveSpeed(1);
-                    Bot.Mover.SetTargetPose(1);
-
-                    Bot.Medical.Surgery.SurgeryStarted = false;
-                    Bot.Medical.TryCancelHeal();
-                    Bot.Mover.DogFight.DogFightMove(false);
-                }
-
-                if (!Bot.Steering.SteerByPriority(false) &&
-                    !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy))
-                {
-                    Bot.Steering.LookToRandomPosition();
-                }
-
-                yield return null;
-            }
-        }
-
         public override void Update()
         {
+            if (Bot.Medical.Surgery.AreaClearForSurgery)
+            {
+                Bot.Mover.PauseMovement(30);
+                Bot.Mover.SprintController.CancelRun();
+                Bot.Mover.SetTargetMoveSpeed(0f);
+                Bot.Cover.DuckInCover();
+                tryStartSurgery();
+            }
+            else
+            {
+                BotOwner.Mover.MovementResume();
+                Bot.Mover.SetTargetMoveSpeed(1);
+                Bot.Mover.SetTargetPose(1);
+
+                Bot.Medical.Surgery.SurgeryStarted = false;
+                Bot.Medical.TryCancelHeal();
+                Bot.Mover.DogFight.DogFightMove(false);
+            }
+
+            if (!Bot.Steering.SteerByPriority(false) &&
+                !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy))
+            {
+                Bot.Steering.LookToRandomPosition();
+            }
         }
 
         private bool tryStartSurgery()

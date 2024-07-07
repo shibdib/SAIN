@@ -18,32 +18,23 @@ namespace SAIN.Layers.Combat.Squad
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                var SquadLeadPos = Bot.Squad.LeaderComponent?.Position;
-                if (SquadLeadPos != null)
-                {
-                    Bot.Mover.GoToPoint(SquadLeadPos.Value, out _);
-                    CheckShouldSprint(SquadLeadPos.Value);
-                }
-
-                Bot.Mover.SetTargetPose(1f);
-                Bot.Mover.SetTargetMoveSpeed(1f);
-
-                if (!Bot.Mover.SprintController.Running)
-                {
-                    Shoot.Update();
-                    Bot.Steering.SteerByPriority();
-                }
-
-                yield return null;
-            }
-        }
-
         public override void Update()
         {
+            var SquadLeadPos = Bot.Squad.LeaderComponent?.Position;
+            if (SquadLeadPos != null)
+            {
+                Bot.Mover.GoToPoint(SquadLeadPos.Value, out _);
+                CheckShouldSprint(SquadLeadPos.Value);
+            }
+
+            Bot.Mover.SetTargetPose(1f);
+            Bot.Mover.SetTargetMoveSpeed(1f);
+
+            if (!Bot.Mover.SprintController.Running)
+            {
+                Shoot.Update();
+                Bot.Steering.SteerByPriority();
+            }
         }
 
         public override void Start()

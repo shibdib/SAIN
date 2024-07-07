@@ -18,30 +18,22 @@ namespace SAIN.Layers.Combat.Run
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                //Bot.Mover.SetTargetPose(1f);
-                Bot.Mover.SetTargetMoveSpeed(1f);
-
-                if (nextRandomRunTime > Time.time && (_runDestination - Bot.Position).sqrMagnitude < 1f)
-                {
-                    nextRandomRunTime = 0f;
-                }
-
-                if (nextRandomRunTime < Time.time && 
-                    findRandomPlace(out var path) && 
-                    Bot.Mover.GoToPoint(_runDestination, out _, -1f, true))
-                {
-                    nextRandomRunTime = Time.time + 20f;
-                }
-                yield return null;
-            }
-        }
-
         public override void Update()
         {
+            //Bot.Mover.SetTargetPose(1f);
+            Bot.Mover.SetTargetMoveSpeed(1f);
+
+            if (nextRandomRunTime > Time.time && (_runDestination - Bot.Position).sqrMagnitude < 1f)
+            {
+                nextRandomRunTime = 0f;
+            }
+
+            if (nextRandomRunTime < Time.time &&
+                findRandomPlace(out var path) &&
+                Bot.Mover.GoToPoint(_runDestination, out _, -1f, true))
+            {
+                nextRandomRunTime = Time.time + 20f;
+            }
         }
 
         private Vector3 _runDestination;

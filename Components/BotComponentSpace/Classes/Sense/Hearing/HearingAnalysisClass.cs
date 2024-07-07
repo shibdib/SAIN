@@ -211,7 +211,7 @@ namespace SAIN.SAINComponent.Classes
             float maxRange;
             if (enemyBot == null)
             {
-                if (enemyPlayer.BotOwner?.Memory.GoalEnemy.ProfileId == Bot.ProfileId)
+                if (enemyPlayer.BotOwner?.Memory.GoalEnemy?.ProfileId == Bot.ProfileId)
                 {
                     return false;
                 }

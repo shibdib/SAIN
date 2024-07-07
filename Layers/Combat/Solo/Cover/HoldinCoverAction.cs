@@ -26,31 +26,22 @@ namespace SAIN.Layers.Combat.Solo.Cover
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                yield return null;
-
-                Bot.Steering.SteerByPriority();
-                Shoot.Update();
-
-                CoverPoint coverInUse = CoverInUse;
-                if (coverInUse == null)
-                {
-                    Bot.Mover.DogFight.DogFightMove(false);
-                    continue;
-                }
-
-                adjustPosition();
-                Bot.Cover.DuckInCover();
-                checkSetProne();
-                checkSetLean();
-            }
-        }
-
         public override void Update()
         {
+            Bot.Steering.SteerByPriority();
+            Shoot.Update();
+
+            CoverPoint coverInUse = CoverInUse;
+            if (coverInUse == null)
+            {
+                Bot.Mover.DogFight.DogFightMove(true);
+                return;
+            }
+
+            adjustPosition();
+            Bot.Cover.DuckInCover();
+            checkSetProne();
+            checkSetLean();
         }
 
         private void adjustPosition()
@@ -207,8 +198,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
             stringBuilder.AppendLabeledValue("Cover Count", $"{cover.CoverPoints.Count}", Color.white, Color.yellow, true);
 
             stringBuilder.AppendLabeledValue("Current Cover Status", $"{CoverInUse?.StraightDistanceStatus}", Color.white, Color.yellow, true);
-            stringBuilder.AppendLabeledValue("Current Cover Height", $"{CoverInUse?.CoverHeight}", Color.white, Color.yellow, true);
-            stringBuilder.AppendLabeledValue("Current Cover Value", $"{CoverInUse?.CoverValue}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Current Cover Height", $"{CoverInUse?.HardData.Height}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Current Cover Value", $"{CoverInUse?.HardData.Value}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("CoverFinder State", $"{cover.CurrentCoverFinderState}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("Cover Count", $"{cover.CoverPoints.Count}", Color.white, Color.yellow, true);
             if (Bot.CurrentTargetPosition != null)
@@ -224,7 +215,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             {
                 stringBuilder.AppendLine("Cover In Use");
                 stringBuilder.AppendLabeledValue("Status", $"{CoverInUse.StraightDistanceStatus}", Color.white, Color.yellow, true);
-                stringBuilder.AppendLabeledValue("Height / Value", $"{CoverInUse.CoverHeight} {CoverInUse.CoverValue}", Color.white, Color.yellow, true);
+                stringBuilder.AppendLabeledValue("Height / Value", $"{CoverInUse.CoverHeight} {CoverInUse.HardData.Value}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Path Length", $"{CoverInUse.PathLength}", Color.white, Color.yellow, true);
                 stringBuilder.AppendLabeledValue("Straight Distance", $"{(CoverInUse.Position - Bot.Position).magnitude}", Color.white, Color.yellow, true);
             }

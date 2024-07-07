@@ -20,7 +20,7 @@ namespace SAIN.SAINComponent.Classes.Sense
 
         public void CheckIfDazzleApplied(Enemy enemy)
         {
-            if (enemy?.IsValid == true && 
+            if (enemy?.CheckValid() == true && 
                 enemy.IsVisible)
             {
                 // If modifier is already applied, don't re-apply it

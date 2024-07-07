@@ -262,6 +262,13 @@
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingBulletAnalysisClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingDispersionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingInputClass.cs" />
+    <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\ColliderData.cs" />
+    <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverData.cs" />
+    <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverHitCounts.cs" />
+    <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\HardColliderData.cs" />
+    <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\HardCoverData.cs" />
+    <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\PathData.cs" />
+    <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\TargetData.cs" />
     <Compile Include="Helpers\Events\ToggleEvent.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyChooserClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\CornerHelpers.cs" />
@@ -304,7 +311,6 @@
     <Compile Include="Components\BotComponentSpace\PresetUpdaterBase.cs" />
     <Compile Include="Components\BotComponentSpace\Routine.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverFinderStatus.cs" />
-    <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\ECoverFailReason.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\BotHearingClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\RayCastJobClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\ETimeOfDay.cs" />
@@ -563,7 +569,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINFriendlyFireClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Mover\JumpClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Mover\SAINMoverClass.cs" />
-    <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverPointClass.cs" />
+    <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverPoint.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\SAINDecisionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\SAINHearingSensorClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\BotPeekPlan.cs" />

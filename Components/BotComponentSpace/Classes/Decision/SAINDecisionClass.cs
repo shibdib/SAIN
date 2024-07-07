@@ -412,7 +412,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                     return Bot.Mover.SprintController.Running;
 
                 default:
-                    return Bot.Mover.SprintController.Running && !coverInUse.IsBad;
+                    return Bot.Mover.SprintController.Running && !coverInUse.CoverData.IsBad;
             }
         }
 

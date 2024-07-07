@@ -107,7 +107,7 @@ namespace SAIN.SAINComponent.Classes
                 CoverPoint point = CoverPoints[i];
                 if (point != null && 
                     !point.Spotted && 
-                    !point.IsBad)
+                    !point.CoverData.IsBad)
                 {
                     Vector3 coverPosition = point.Position;
                     Vector3 directionToPoint = botPosition - coverPosition;
@@ -221,7 +221,7 @@ namespace SAIN.SAINComponent.Classes
         public void CheckResetCoverInUse()
         {
             CoverPoint coverInUse = Bot.Cover.CoverInUse;
-            if (coverInUse != null && coverInUse.IsBad)
+            if (coverInUse != null && coverInUse.CoverData.IsBad)
             {
                 Bot.Cover.CoverInUse = null;
                 return;

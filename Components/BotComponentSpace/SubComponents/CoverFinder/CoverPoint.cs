@@ -1,13 +1,7 @@
 ﻿using EFT;
-using EFT.Game.Spawning;
-using SAIN.Components;
 using SAIN.Helpers;
-using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -34,15 +28,18 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         private const float DIST_COVER_CLOSE = 10f;
         private const float DIST_COVER_MID = 20f;
 
+        public CoverData CoverData { get; } = new CoverData();
+
         public Vector3 Position
         {
             get
             {
-                return _position;
+                return CoverData.Position;
             }
             set
             {
-                if ((value - _position).sqrMagnitude < 0.001)
+                var current = CoverData.Position;
+                if ((value - current).sqrMagnitude < 0.001)
                 {
                     //Logger.LogWarning($"new Pos is the same as old pos!");
                     return;
@@ -51,6 +48,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 OnPositionUpdated?.Invoke(value);
             }
         }
+
         public float Distance
         {
             get
@@ -58,22 +56,22 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 if (_nextGetDistTime < Time.time)
                 {
                     float dist = (Position - Bot.Position).magnitude;
-                    _distance = dist;
+                    CoverData.BotDistance = dist;
                     _nextGetDistTime = Time.time + calcMagnitudeDelay(dist);
                 }
-                return _distance;
+                return CoverData.BotDistance;
             }
         }
+
         public float PathLength
         {
             get
             {
-                return _pathLength;
+                return PathData.PathLength;
             }
             set
             {
-                RoundedPathLength = Mathf.RoundToInt(value);
-                _pathLength = value;
+                PathData.PathLength = value;
             }
         }
 
@@ -82,34 +80,37 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             get
             {
                 // are we already spotted? check if it has expired
-                if (_spotted)
+                var hits = _hitsInCover;
+                if (hits.Spotted)
                 {
-                    if (Time.time - _timeSpotted > SpottedCoverPoint.SPOTTED_PERIOD)
+                    if (Time.time - hits.TimeSpotted > SpottedCoverPoint.SPOTTED_PERIOD)
                         ResetGetHit();
 
-                    return _spotted;
+                    return hits.Spotted;
                 }
 
                 // we aren't currently spotted, check to make sure we weren't hit too many times
-                _spotted = checkSpotted();
-                if (_spotted)
-                    _timeSpotted = Time.time;
+                hits.Spotted = checkSpotted();
 
-                return _spotted;
+                if (hits.Spotted)
+                    hits.TimeSpotted = Time.time;
+
+                return hits.Spotted;
             }
         }
+
         public CoverStatus StraightDistanceStatus
         {
             get
             {
                 float distance = Distance;
-                if (_lastStraightDistStatus == CoverStatus.InCover &&
+                if (CoverData.StraightLengthStatus == CoverStatus.InCover &&
                     distance <= DIST_COVER_INCOVER_STAY)
                 {
                     return CoverStatus.InCover;
                 }
-                _lastStraightDistStatus = checkStatus(distance);
-                return _lastStraightDistStatus;
+                CoverData.StraightLengthStatus = checkStatus(distance);
+                return CoverData.StraightLengthStatus;
             }
         }
 
@@ -118,30 +119,39 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             get
             {
                 float pathLength = PathLength;
-                if (_lastPathDistStatus == CoverStatus.InCover &&
+                if (CoverData.PathLengthStatus == CoverStatus.InCover &&
                     pathLength <= DIST_COVER_INCOVER_STAY)
                 {
                     return CoverStatus.InCover;
                 }
-                _lastPathDistStatus = checkStatus(pathLength);
-                return _lastPathDistStatus;
+                CoverData.PathLengthStatus = checkStatus(pathLength);
+                return CoverData.PathLengthStatus;
             }
         }
-
-        public float CoverValue { get; private set; }
-        public NavMeshPath PathToPoint { get; private set; }
-        public float CoverHeight { get; private set; }
-        public Collider Collider { get; private set; }
-        public float TimeCreated { get; private set; }
-        public bool IsBad { get; set; } = false;
+        public NavMeshPath PathToPoint => PathData.Path;
+        public float CoverHeight => HardData.Height;
+        public Collider Collider => HardColliderData.Collider;
+        public HardColliderData HardColliderData { get; }
         public float LastHitInCoverTime { get; private set; }
-        public int Id { get; }
         public bool IsCurrent => Bot.Cover.CoverInUse == this;
-        public bool ShallUpdate => Time.time - _timeUpdated > (IsCurrent ? 0.2f : 0.5f);
-        public Vector3 DirectionToCollider { get; private set; }
-        public Vector3 DirectionToColliderNormal { get; private set; }
-        public Vector3 ColliderPosition { get; }
-        public int RoundedPathLength { get; private set; }
+
+        public bool ShallUpdate(string targetProfileId)
+        {
+            if (_lastCheckedProfileId != targetProfileId)
+            {
+                _lastCheckedProfileId = targetProfileId;
+                return true;
+            }
+            float delay = IsCurrent ? 0.2f : 0.5f;
+            if (CoverData.TimeSinceUpdated >= delay)
+            {
+                return true;
+            }
+            return false;
+
+        }
+        private string _lastCheckedProfileId;
+        public int RoundedPathLength => PathData.RoundedPathLength;
         public bool BotInThisCover => IsCurrent && (StraightDistanceStatus == CoverStatus.InCover || PathDistanceStatus == CoverStatus.InCover);
 
         public void GetHit(DamageInfo damageInfo, EBodyPart partHit, Enemy currentEnemy)
@@ -175,7 +185,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     hits.Legs += hitCount;
 
                 // Did the player who shot me shoot me from a direction that this cover doesn't protect from?
-                if (Vector3.Dot(thirdParty.EnemyDirectionNormal, DirectionToColliderNormal) < 0.25f)
+                if (Vector3.Dot(thirdParty.EnemyDirectionNormal, CoverData.ProtectionDirection) < 0.25f)
                     hits.ThirdParty += hitCount;
 
                 return;
@@ -192,39 +202,38 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public void ResetGetHit()
         {
-            _spotted = false; 
-            _hitsInCover = new CoverHitCounts();
+            _hitsInCover.Reset();
         }
 
-        public CoverPoint(BotComponent sain, Vector3 point, Collider collider, NavMeshPath pathToPoint, float pathLength)
+        public CoverPoint(BotComponent bot, HardColliderData colliderData, PathData pathData, Vector3 coverPosition)
         {
-            Id = _count;
+            Bot = bot;
+            HardColliderData = colliderData;
+            PathData = pathData;
+            Vector3 size = colliderData.Collider.bounds.size;
+            HardData = new HardCoverData
+            {
+                Id = _count,
+                Height = size.y,
+                Value = (size.x + size.y + size.z).Round10(),
+            };
+            updateDirAndPos(coverPosition);
             _count++;
-
-            Bot = sain;
-            TimeCreated = Time.time;
-
-            Collider = collider;
-            ColliderPosition = collider.transform.position;
-            Vector3 size = collider.bounds.size;
-            CoverHeight = size.y;
-            CoverValue = (size.x + size.y + size.z).Round10();
-
-            PathToPoint = pathToPoint;
-            PathLength = pathLength;
-
-            updateDirAndPos(point);
         }
 
-        private void updateDirAndPos(Vector3 value)
+        public HardCoverData HardData { get; }
+
+        public PathData PathData { get; }
+
+        private CoverHitCounts _hitsInCover { get; } = new CoverHitCounts();
+
+        private void updateDirAndPos(Vector3 coverPosition)
         {
-            Vector3 dir = ColliderPosition - value;
+            CoverData.Position = coverPosition;
+            Vector3 dir = HardColliderData.Position - coverPosition;
             dir.y = 0;
-            DirectionToCollider = dir;
-            _distance = dir.magnitude;
-            DirectionToColliderNormal = dir.normalized;
-            _position = value;
-            _timeUpdated = Time.time;
+            CoverData.ProtectionDirection = dir.normalized;
+            CoverData.TimeLastUpdated = Time.time;
         }
 
         private CoverStatus checkStatus(float distance)
@@ -307,28 +316,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return result;
         }
 
-        private float _distance;
         private float _nextGetDistTime;
-
-        private CoverHitCounts _hitsInCover = new CoverHitCounts();
-
         private static int _count;
         private readonly BotComponent Bot;
-        private Vector3 _position;
-        private float _timeUpdated;
-        private float _pathLength;
-        private CoverStatus _lastPathDistStatus;
-        private CoverStatus _lastStraightDistStatus;
-        private float _timeSpotted;
-        private bool _spotted;
-    }
-
-    public struct CoverHitCounts
-    {
-        public int Total;
-        public int Unknown;
-        public int ThirdParty;
-        public int CantSee;
-        public int Legs;
     }
 }

@@ -176,7 +176,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallDogFightEnemy(Enemy enemy)
         {
-            return enemy?.IsValid == true && 
+            return enemy?.CheckValid() == true && 
                 enemy.IsVisible && 
                 enemy.EnemyKnown && 
                 enemy.Path.PathDistance <= _dogFightStartDist;

@@ -48,7 +48,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 return null;
             }
-            if (enemy == null || !enemy.IsValid)
+            if (enemy == null || !enemy.CheckValid())
             {
                 destroyEnemy(enemy);
                 Enemies.Remove(profileID);

@@ -12,20 +12,11 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-        }
-
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                Bot.Mover.SetTargetPose(1f);
-                Bot.Mover.SetTargetMoveSpeed(1f);
-                Bot.Steering.SteerByPriority();
-                Bot.Mover.DogFight.DogFightMove(true);
-                Shoot.Update();
-
-                yield return null;
-            }
+            Bot.Mover.SetTargetPose(1f);
+            Bot.Mover.SetTargetMoveSpeed(1f);
+            Bot.Steering.SteerByPriority();
+            Bot.Mover.DogFight.DogFightMove(true);
+            Shoot.Update();
         }
 
         public override void Start()

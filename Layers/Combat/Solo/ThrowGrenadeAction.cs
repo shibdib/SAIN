@@ -15,27 +15,18 @@ namespace SAIN.Layers.Combat.Solo
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                if (!Stopped && Time.time - StartTime > 1f || Bot.Cover.CheckLimbsForCover())
-                {
-                    Stopped = true;
-                    BotOwner.StopMove();
-                }
-
-                if (Bot.Squad.BotInGroup && Bot.Talk.GroupTalk.FriendIsClose)
-                {
-                    Bot.Talk.Say(EPhraseTrigger.OnGrenade);
-                }
-
-                yield return null;
-            }
-        }
-
         public override void Update()
         {
+            if (!Stopped && Time.time - StartTime > 1f || Bot.Cover.CheckLimbsForCover())
+            {
+                Stopped = true;
+                BotOwner.StopMove();
+            }
+
+            if (Bot.Squad.BotInGroup && Bot.Talk.GroupTalk.FriendIsClose)
+            {
+                Bot.Talk.Say(EPhraseTrigger.OnGrenade);
+            }
         }
 
         private float StartTime = 0f;

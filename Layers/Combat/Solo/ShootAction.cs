@@ -19,16 +19,6 @@ namespace SAIN.Layers.Combat.Solo
             ToggleAction(value);
         }
 
-        public override IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                Bot.Steering.SteerByPriority();
-                Shoot.Update();
-                yield return null;
-            }
-        }
-
         public override void Start()
         {
             Toggle(true);
@@ -41,6 +31,8 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
+            Bot.Steering.SteerByPriority();
+            Shoot.Update();
         }
     }
 }

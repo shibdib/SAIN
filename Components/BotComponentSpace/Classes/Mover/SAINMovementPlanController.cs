@@ -194,10 +194,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
 
             var coverFinder = SAINMovementPlan.SAIN.Cover.CoverFinder;
-            if (coverFinder.PointStillGood(SavedCoverPoint, out _, out ECoverFailReason failReason))
-            {
-                return SavedCoverPoint;
-            }
+            //if (coverFinder.PointStillGood(SavedCoverPoint, out _, out ECoverFailReason failReason))
+            //{
+            //    return SavedCoverPoint;
+            //}
 
             SavedCoverPoint = null;
 

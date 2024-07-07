@@ -2,7 +2,6 @@
 using EFT;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
-using System.Collections;
 using System.Text;
 
 namespace SAIN.Layers
@@ -18,16 +17,7 @@ namespace SAIN.Layers
             Shoot = new ShootClass(botOwner);
         }
 
-        public virtual IEnumerator ActionCoroutine()
-        {
-            while (true)
-            {
-                yield return null;
-            }
-        }
-
         public readonly BotComponent Bot;
-
         public readonly ShootClass Shoot;
 
         private bool _actionActive;
@@ -39,13 +29,11 @@ namespace SAIN.Layers
             switch (value)
             {
                 case true:
-                    Bot.CoroutineManager.Add(ActionCoroutine(), Name);
                     BotOwner.PatrollingData?.Pause();
                     break;
 
                 case false:
                     BotOwner.PatrollingData?.Unpause();
-                    Bot.CoroutineManager.Remove(Name);
                     break;
             }
         }

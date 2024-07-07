@@ -346,7 +346,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallFirstAidCheckEnemy(Enemy enemy)
         {
-            if (enemy == null || !enemy.IsValid)
+            if (enemy == null || !enemy.CheckValid())
             {
                 return true;
             }
