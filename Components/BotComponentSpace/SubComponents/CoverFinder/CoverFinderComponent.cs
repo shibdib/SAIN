@@ -296,7 +296,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
         }
 
-        private IEnumerator recheckCoverPoints(List<CoverPoint> coverPoints, bool limit = true)
+        private IEnumerator recheckCoverPoints(List<CoverPoint> tempList, bool limit = true)
         {
             if (!havePositionsChanged(TargetData))
             {
@@ -309,7 +309,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             CoverFinderStatus lastStatus = CurrentStatus;
             CurrentStatus = shallLimit ? CoverFinderStatus.RecheckingPointsWithLimit : CoverFinderStatus.RecheckingPointsNoLimit;
 
-            foreach (var coverPoint in CoverPoints) {
+            foreach (var coverPoint in tempList) {
                 var data = TargetData;
                 if (data != null && coverPoint != null)
                     yield return checkCoverPoint(coverPoint, data, wait);
