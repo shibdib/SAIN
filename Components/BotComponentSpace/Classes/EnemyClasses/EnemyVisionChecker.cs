@@ -22,6 +22,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Init()
         {
+            SubscribeToPreset(UpdatePresetSettings);
         }
 
         public void Update()
@@ -141,13 +142,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void UpdatePresetSettings(SAINPresetClass preset)
         {
             var aiLimit = preset.GlobalSettings.AILimit;
-            _farDistance = aiLimit.MaxVisionRanges[AILimitSetting.Far].Sqr();
-            _veryFarDistance = aiLimit.MaxVisionRanges[AILimitSetting.VeryFar].Sqr();
-            _narniaDistance = aiLimit.MaxVisionRanges[AILimitSetting.Narnia].Sqr();
+            _farDistance = aiLimit.MaxVisionRanges[AILimitSetting.Far];
+            _veryFarDistance = aiLimit.MaxVisionRanges[AILimitSetting.VeryFar];
+            _narniaDistance = aiLimit.MaxVisionRanges[AILimitSetting.Narnia];
 
             if (SAINPlugin.DebugMode)
             {
-                Logger.LogDebug($"Updated AI Vision Limit Settings: [{_farDistance.Sqrt()}, {_veryFarDistance.Sqrt()}, {_narniaDistance.Sqrt()}]");
+                Logger.LogDebug($"Updated AI Vision Limit Settings: [{_farDistance}, {_veryFarDistance}, {_narniaDistance}]");
             }
         }
 
