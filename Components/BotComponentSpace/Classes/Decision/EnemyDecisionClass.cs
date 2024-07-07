@@ -7,6 +7,7 @@ using SAIN.SAINComponent.Classes.Search;
 using System;
 using System.Text;
 using UnityEngine;
+using GrenadeThrowChecker = GClass493;
 
 namespace SAIN.SAINComponent.Classes.Decision.Reasons
 {
@@ -459,7 +460,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             var angles = Bot.Memory.Location.IsIndoors ? _indoorAngles : _outdoorAngles;
             AIGreandeAng greandeAng = angles.PickRandom();
-            AIGreanageThrowData aigreanageThrowData = GClass494.CanThrowGrenade2(from, trg, this.MaxPower, greandeAng, -1f, BotOwner.Settings.FileSettings.Grenade.MIN_THROW_DIST_PERCENT_0_1);
+            AIGreanageThrowData aigreanageThrowData = GrenadeThrowChecker.CanThrowGrenade2(from, trg, this.MaxPower, greandeAng, -1f, BotOwner.Settings.FileSettings.Grenade.MIN_THROW_DIST_PERCENT_0_1);
             if (aigreanageThrowData.CanThrow)
             {
                 _nextPosibleAttempt = 3f + Time.time;

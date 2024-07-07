@@ -1,4 +1,4 @@
-using Aki.Reflection.Patching;
+using SPT.Reflection.Patching;
 using BepInEx;
 using BepInEx.Configuration;
 using DrakiaXYZ.VersionChecker;
@@ -92,7 +92,7 @@ namespace SAIN
                 //typeof(Patches.Generic.Fixes.NoTeleportPatch),
                 typeof(Patches.Generic.Fixes.FixItemTakerPatch),
                 typeof(Patches.Generic.Fixes.FixItemTakerPatch2),
-                typeof(Patches.Generic.Fixes.FixPatrolDataPatch),
+                //typeof(Patches.Generic.Fixes.FixPatrolDataPatch),
                 typeof(Patches.Generic.Fixes.RotateClampPatch),
 
                 typeof(Patches.Movement.EncumberedPatch),

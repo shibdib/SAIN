@@ -1,4 +1,5 @@
 ﻿using Comfort.Common;
+using EFT;
 using SAIN.Helpers;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
@@ -166,7 +167,7 @@ namespace SAIN.Plugin
             var botSettings = preset.BotSettings;
             foreach (var botsetting in botSettings.SAINSettings)
             {
-                if (botsetting.Key == EnumValues.WildSpawn.Usec || botsetting.Key == EnumValues.WildSpawn.Bear)
+                if (botsetting.Key == WildSpawnType.pmcUSEC || botsetting.Key == WildSpawnType.pmcBEAR)
                 {
                     var pmcSettings = botsetting.Value.Settings;
 

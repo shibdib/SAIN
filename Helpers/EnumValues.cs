@@ -36,7 +36,7 @@ namespace SAIN.Helpers
 
             public static bool IsPMC(WildSpawnType type)
             {
-                return type == Bear || type == Usec;
+                return type == WildSpawnType.pmcUSEC || type == WildSpawnType.pmcBEAR;
             }
 
             public static bool IsGoons(WildSpawnType type)
@@ -71,9 +71,6 @@ namespace SAIN.Helpers
                 WildSpawnType.sectantPriest,
                 WildSpawnType.sectantWarrior,
             };
-
-            public static readonly WildSpawnType Usec = Parse<WildSpawnType>("sptUsec");
-            public static readonly WildSpawnType Bear = Parse<WildSpawnType>("sptBear");
 
             public static List<WildSpawnType> Bosses;
             public static List<WildSpawnType> Followers;

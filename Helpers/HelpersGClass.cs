@@ -1,21 +1,13 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using HarmonyLib;
 using Newtonsoft.Json;
+using SPT.Reflection.Utils;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using UnityEngine;
-using EFTCore = GClass531;
-using EFTCoreContainer = GClass532;
-using EFTFileSettings = BotSettingsComponents;
-using EFTSettingsGroup = GClass458;
-using EFTStatModifiersClass = GClass529;
-using EFTTime = GClass1296;
-using EFTSearchPoint = PlaceForCheck;
-using Aki.Reflection.Patching;
-using Aki.Reflection.Utils;
 using System.Linq;
+using System.Reflection;
+using EFTCore = GClass531;
+using EFTStatModifiersClass = GClass528;
 
 ////////
 // Fixed some GClass References here, but classes were renamed in the deobfuscation, so much of this isn't necessary anymore. Need to clean this up
@@ -57,9 +49,9 @@ namespace SAIN.Helpers
             return (PathControllerClass)PathControllerField.GetValue(botMover);
         }
 
-        public static EFTCore EFTCore => EFTCoreContainer.Core;
-        public static float Gravity => EFTCore.G;
-        public static float SMOKE_GRENADE_RADIUS_COEF => EFTCore.SMOKE_GRENADE_RADIUS_COEF;
+        public static float LAY_DOWN_ANG_SHOOT => EFTCore.Core.LAY_DOWN_ANG_SHOOT;
+        public static float Gravity => EFTCore.Core.G;
+        public static float SMOKE_GRENADE_RADIUS_COEF => EFTCore.Core.SMOKE_GRENADE_RADIUS_COEF;
     }
 
     public class TemporaryStatModifiers
@@ -79,16 +71,11 @@ namespace SAIN.Helpers
         public EFTStatModifiersClass Modifiers;
     }
 
-    public class SearchPoint
-    {
-        public EFTSearchPoint Point;
-    }
-
     public class EFTCoreSettings
     {
         public static void UpdateCoreSettings()
         {
-            var core = EFTCoreContainer.Core;
+            var core = EFTCore.Core;
 
             core.SCAV_GROUPS_TOGETHER = true;
             core.DIST_NOT_TO_GROUP = 50f;
@@ -116,7 +103,7 @@ namespace SAIN.Helpers
 
         public static void UpdateArmorClassCoef(float coef)
         {
-            EFTCoreContainer.Core.ARMOR_CLASS_COEF = coef;
+            EFTCore.Core.ARMOR_CLASS_COEF = coef;
         }
 
         public EFTCore Core;
@@ -134,7 +121,7 @@ namespace SAIN.Helpers
             WildSpawnType = type;
             foreach (BotDifficulty diff in difficulties)
             {
-                Settings.Add(diff, EFTCoreContainer.GetSettings(diff, type));
+                Settings.Add(diff, EFTCore.GetSettings(diff, type));
             }
         }
 

@@ -223,7 +223,7 @@ namespace SAIN.Preset.BotSettings
             {
                 Logger.LogError($"[{type}] does not exist in SAINSettings Dictionary!");
             }
-            return SAINSettings[EnumValues.WildSpawn.Usec].Settings[BotDifficulty.normal];
+            return SAINSettings[WildSpawnType.pmcUSEC].Settings[BotDifficulty.normal];
         }
 
         public object GetEFTSettings(WildSpawnType type, BotDifficulty difficulty)
@@ -244,7 +244,7 @@ namespace SAIN.Preset.BotSettings
             {
                 Logger.LogError($"[{type}] does not exist in EFTSettings Dictionary!");
             }
-            return EFTSettings[EnumValues.WildSpawn.Usec].Settings[BotDifficulty.normal];
+            return EFTSettings[WildSpawnType.pmcUSEC].Settings[BotDifficulty.normal];
         }
 
         public Dictionary<WildSpawnType, SAINSettingsGroupClass> SAINSettings = new Dictionary<WildSpawnType, SAINSettingsGroupClass>();
@@ -288,8 +288,8 @@ namespace SAIN.Preset.BotSettings
                 { WildSpawnType.arenaFighter, 0.66f },
                 { WildSpawnType.arenaFighterEvent, 0.66f },
 
-                { EnumValues.WildSpawn.Usec, 1f },
-                { EnumValues.WildSpawn.Bear, 1f },
+                { WildSpawnType.pmcUSEC, 1f },
+                { WildSpawnType.pmcBEAR, 1f },
             };
 
             foreach (WildSpawnType type in BotTypeDefinitions.BotTypes.Keys)

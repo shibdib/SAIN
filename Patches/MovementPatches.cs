@@ -1,11 +1,12 @@
-﻿using Aki.Reflection.Patching;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using HarmonyLib;
 using SAIN.Preset.GlobalSettings;
+using SPT.Reflection.Patching;
 using System.Reflection;
 using UnityEngine;
+using PathFinderClass = GClass422;
 
 namespace SAIN.Patches.Movement
 {
@@ -13,11 +14,11 @@ namespace SAIN.Patches.Movement
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass423), "method_0");
+            return AccessTools.Method(typeof(PathFinderClass), "method_0");
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(GClass423 __instance, BotOwner ___botOwner_0, Vector3 pos, bool slowAtTheEnd, bool getUpWithCheck)
+        public static bool PatchPrefix(PathFinderClass __instance, BotOwner ___botOwner_0, Vector3 pos, bool slowAtTheEnd, bool getUpWithCheck)
         {
             if (SAINPlugin.IsBotExluded(___botOwner_0))
             {
@@ -73,11 +74,11 @@ namespace SAIN.Patches.Movement
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass681), "UpdateWeightLimits");
+            return AccessTools.Method(typeof(BasePhysicalClass), "UpdateWeightLimits");
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(bool ___bool_7, GClass681.IObserverToPlayerBridge ___iobserverToPlayerBridge_0, GClass681 __instance)
+        public static bool PatchPrefix(bool ___bool_7, BasePhysicalClass.IObserverToPlayerBridge ___iobserverToPlayerBridge_0, BasePhysicalClass __instance)
         {
             if (___bool_7)
             {
@@ -102,7 +103,7 @@ namespace SAIN.Patches.Movement
                 return true;
             }
 
-            BackendConfigSettingsClass.GClass1368 stamina = Singleton<BackendConfigSettingsClass>.Instance.Stamina;
+            BackendConfigSettingsClass.GClass1376 stamina = Singleton<BackendConfigSettingsClass>.Instance.Stamina;
 
             float carryWeightModifier = ___iobserverToPlayerBridge_0.Skills.CarryingWeightRelativeModifier;
             float d = carryWeightModifier * carryWeightModifier;

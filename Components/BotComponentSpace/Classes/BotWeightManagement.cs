@@ -1,13 +1,8 @@
 ﻿using EFT.InventoryLogic;
-using SAIN.Components;
-using SAIN.Helpers;
-using SAIN.Plugin;
-using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
-using FloatFunc = GClass754<float>;
+using FloatFunc = GClass755<float>;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -22,7 +17,7 @@ namespace SAIN.SAINComponent.Classes
             if (GlobalSettingsClass.Instance.General.BotWeightEffects)
             {
                 getSlots();
-                Person.Player.GClass2761_0.Inventory.TotalWeight = new FloatFunc(new Func<float>(this.getBotTotalWeight));
+                Person.Player.InventoryControllerClass.Inventory.TotalWeight = new FloatFunc(new Func<float>(this.getBotTotalWeight));
                 Person.Player.Physical.EncumberDisabled = false;
             }
         }
@@ -46,7 +41,7 @@ namespace SAIN.SAINComponent.Classes
 
         private float getBotTotalWeight()
         {
-            float result = Player.Equipment.method_11(_slots);
+            float result = Player.Equipment.method_10(_slots);
             _slots.Clear();
             // Logger.LogWarning(result);
             return result;

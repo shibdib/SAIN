@@ -244,8 +244,8 @@ namespace SAIN.Preset.GlobalSettings
         [JsonIgnore]
         private static readonly List<WildSpawnType> _PMCS = new List<WildSpawnType> 
         { 
-            EnumValues.WildSpawn.Usec, 
-            EnumValues.WildSpawn.Bear 
+            WildSpawnType.pmcUSEC,
+            WildSpawnType.pmcBEAR
         };
 
         [JsonIgnore]

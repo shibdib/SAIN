@@ -2,6 +2,8 @@
 using EFT;
 using EFT.Game.Spawning;
 using EFT.Interactive;
+using EFT.Weather;
+using HarmonyLib;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
@@ -36,7 +38,7 @@ namespace SAIN.Components
 
         private bool _doorsDisabledByHost;
 
-        public bool WinterActive => WinterStatus == EWinterStatus.Winter;
+        public bool WinterActive => Season == ESeason.Winter;
 
         public static GameWorldComponent Instance { get; set; }
         public ELocation Location { get; private set; }
@@ -66,15 +68,15 @@ namespace SAIN.Components
             }
             _nextCheckWeatherTime = Time.time + 0.5f;
 
-            var weather = GameWorld.Class420_0;
+            var weather = (AccessTools.Field(typeof(GameWorld), "ginterface26_0").GetValue(GameWorld) as GInterface26);
             if (weather == null)
             {
-                WinterStatus = EWinterStatus.Summer;
+                Season = ESeason.Summer;
             }
             else
             {
                 Logger.LogWarning($"Got Weather! {weather.Status}");
-                WinterStatus = weather.Status;
+                Season = weather.Season;
                 _weatherFound = true;
             }
         }
@@ -234,7 +236,7 @@ namespace SAIN.Components
             return Location;
         }
 
-        public EWinterStatus WinterStatus { get; private set; }
+        public ESeason Season { get; private set; }
 
         private void findSpawnPointMarkers()
         {

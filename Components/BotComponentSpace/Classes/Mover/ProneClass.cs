@@ -2,7 +2,6 @@
 using HarmonyLib;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Reflection;
 using UnityEngine;
 
@@ -157,7 +156,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             Vector3 from = vector2;
             from.y = vector.y;
             float num = Vector3.Angle(from, vector2);
-            float lay_DOWN_ANG_SHOOT = HelpersGClass.EFTCore.LAY_DOWN_ANG_SHOOT;
+            float lay_DOWN_ANG_SHOOT = HelpersGClass.LAY_DOWN_ANG_SHOOT;
             return num <= Mathf.Abs(lay_DOWN_ANG_SHOOT) && Vector.CanShootToTarget(new ShootPointClass(target, 1f), vector, BotOwner.LookSensor.Mask, true);
         }
 
