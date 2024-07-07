@@ -62,11 +62,11 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public bool SURGE_KIT_ONLY_SAFE_CONTAINER = true;
+        public bool SURGE_KIT_ONLY_SAFE_CONTAINER = false;
 
         [Hidden]
         [JsonIgnore]
-        public float FOOD_DRINK_DELAY_SEC = 120f;
+        public float FOOD_DRINK_DELAY_SEC = 240f;
 
         [Hidden]
         [JsonIgnore]

@@ -8,12 +8,12 @@ namespace SAIN.Preset.GlobalSettings
         public float SteerSpeed_MaxAngle = 150f;
 
         [MinMax(0, 150f, 1f)]
-        public float SteerSpeed_MinAngle = 1f;
+        public float SteerSpeed_MinAngle = 5f;
 
         [MinMax(200, 500, 1f)]
         public float SteerSpeed_MaxSpeed = 360f;
 
         [MinMax(50, 300, 1f)]
-        public float SteerSpeed_MinSpeed = 150f;
+        public float SteerSpeed_MinSpeed = 125f;
     }
 }

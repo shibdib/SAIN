@@ -10,23 +10,23 @@ namespace SAIN.Preset.GlobalSettings
         public float AimTurnSpeed = 300f;
 
         [Advanced]
-        public bool EditSprintSpeed = true;
+        public bool EditSprintSpeed = false;
 
         [Advanced]
         [MinMax(0.01f, 1.5f, 100f)]
-        public float BotSprintNotMovingThreshold = 0.1f;
+        public float BotSprintNotMovingThreshold = 0.5f;
 
         [Advanced]
         [MinMax(0.01f, 1.5f, 100f)]
-        public float BotSprintTryVaultTime = 0.1f;
+        public float BotSprintTryVaultTime = 0.25f;
 
         [Advanced]
         [MinMax(0.01f, 1.5f, 100f)]
-        public float BotSprintTryJumpTime = 0.45f;
+        public float BotSprintTryJumpTime = 0.66f;
 
         [Advanced]
         [MinMax(0.01f, 3f, 100f)]
-        public float BotSprintRecalcTime = 1f;
+        public float BotSprintRecalcTime = 1.5f;
 
         [Advanced]
         [MinMax(0.01f, 1.5f, 1000f)]
@@ -42,7 +42,7 @@ namespace SAIN.Preset.GlobalSettings
 
         [Advanced]
         [MinMax(0.01f, 2f, 100f)]
-        public float BotSprintDistanceToStopSprintDestination = 1f;
+        public float BotSprintDistanceToStopSprintDestination = 1.2f;
 
         [Advanced]
         [MinMax(0.01f, 1.5f, 100f)]
