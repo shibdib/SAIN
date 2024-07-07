@@ -15,6 +15,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 {
     public class CoverFinderComponent : BotComponentBase
     {
+        private const int COLLIDER_ARRAY_SIZE = 300;
+
         private const int TARGET_COVER_COUNT_AI = 4;
         private const int TARGET_COVER_COUNT_AI_PERF_MODE = 2;
         private const int TARGET_COVER_COUNT_HUMAN = 8;
@@ -31,6 +33,15 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private const float FIND_COVER_DISTANCE_THRESHOLD = 5f;
         private const float FIND_COVER_DISTANCE_THRESHOLD_SQR = FIND_COVER_DISTANCE_THRESHOLD * FIND_COVER_DISTANCE_THRESHOLD;
+
+        private const float FIND_COVER_WAIT_FREQ = 0.1f;
+        private const float RECHECK_COVER_WAIT_FREQ = 0.1f;
+        private const float RECHECK_COVER_WAIT_FOREACH_FREQ = 0.05f;
+        private const float CLEAR_SPOTTED_FREQ = 0.5f;
+
+        private const int COVERCOUNT_TO_START_DELAY = 1;
+        private const int COLLIDERS_TO_CHECK_PER_FRAME = 3;
+        private const int COLLIDERS_TO_CHECK_PER_FRAME_NO_COVER = 5;
 
         public CoverFinderStatus CurrentStatus { get; private set; }
 
@@ -111,7 +122,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         {
             base.Init(bot.Person);
             Bot = bot;
-            BotName = bot.name;
 
             ColliderFinder = new ColliderFinder(this);
             CoverAnalyzer = new CoverAnalyzer(bot, this);
@@ -390,10 +400,10 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private IEnumerator recheckCoverLoop()
         {
-            WaitForSeconds wait = new WaitForSeconds(0.1f);
+            WaitForSeconds wait = new WaitForSeconds(RECHECK_COVER_WAIT_FREQ);
             while (true)
             {
-                ClearSpotted();
+                clearSpotted();
 
                 if (TargetData != null)
                 {
@@ -443,7 +453,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private IEnumerator findCoverLoop()
         {
-            WaitForSeconds wait = new WaitForSeconds(0.1f);
+            WaitForSeconds wait = new WaitForSeconds(FIND_COVER_WAIT_FREQ);
             while (true)
             {
                 int coverCount = CoverPoints.Count;
@@ -459,7 +469,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     Collider[] colliders = _colliderArray;
                     yield return ColliderFinder.GetNewColliders(colliders);
                     ColliderFinder.SortArrayBotDist(colliders);
-                    yield return findCoverPoints(colliders, ColliderFinder.HitCount, max, findFirstPointStopWatch);
+                    yield return findNewCoverPoints(colliders, ColliderFinder.HitCount, max, findFirstPointStopWatch);
 
                     coverCount = CoverPoints.Count;
                     sort(coverCount, CoverPoints);
@@ -511,7 +521,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
         }
 
-        private IEnumerator findCoverPoints(Collider[] colliders, int hits, int max, Stopwatch debugStopWatch)
+        private IEnumerator findNewCoverPoints(Collider[] colliders, int hits, int max, Stopwatch debugStopWatch)
         {
             _totalChecked = 0;
             int waitCount = 0;
@@ -527,20 +537,20 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     continue;
 
                 // Main Optimization, scales with the amount of points a bot currently has, and slows down the rate as it grows.
-                if (coverCount > 2)
+                if (coverCount >= COVERCOUNT_TO_START_DELAY)
                     yield return null;
                 else if (coverCount > 0)
                 {
                     // How long did it take to find at least 1 point?
                     endStopWatch(debugStopWatch);
 
-                    if (waitCount >= 3 || shallLimitProcessing())
+                    if (waitCount >= COLLIDERS_TO_CHECK_PER_FRAME || shallLimitProcessing())
                     {
                         waitCount = 0;
                         yield return null;
                     }
                 }
-                else if (waitCount >= 5)
+                else if (waitCount >= COLLIDERS_TO_CHECK_PER_FRAME_NO_COVER)
                 {
                     waitCount = 0;
                     yield return null;
@@ -624,7 +634,6 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             return true;
         }
 
-
         private void subOrUnsub(bool value, Enemy enemy)
         {
             if (value)
@@ -635,11 +644,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             enemy.Events.OnPositionUpdated -= targetEnemyPosUpdated;
         }
 
-        private void ClearSpotted()
+        private void clearSpotted()
         {
             if (_nextClearSpottedTime < Time.time)
             {
-                _nextClearSpottedTime = Time.time + 0.5f;
+                _nextClearSpottedTime = Time.time + CLEAR_SPOTTED_FREQ;
                 SpottedCoverPoints.RemoveAll(x => x.IsValidAgain);
             }
         }
@@ -651,7 +660,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 return true;
             }
 
-            ClearSpotted();
+            clearSpotted();
 
             foreach (var spottedPoint in SpottedCoverPoints)
             {
@@ -679,33 +688,29 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             Dispose();
         }
 
-        private readonly WaitForSeconds _recheckWait = new WaitForSeconds(0.05f);
+        private readonly WaitForSeconds _recheckWait = new WaitForSeconds(RECHECK_COVER_WAIT_FOREACH_FREQ);
         private TargetData _targetData;
-        private float _sampleOriginTime;
         private float _updateTargetTime;
-        private readonly Collider[] _colliderArray = new Collider[300];
-        private int _targetCount;
-        private float _nextUpdateTargetTime;
+        private readonly Collider[] _colliderArray = new Collider[COLLIDER_ARRAY_SIZE];
         private Vector3 _lastPositionChecked = Vector3.zero;
         private Vector3 _lastRecheckTargetPosition;
         private Vector3 _lastRecheckBotPosition;
         private int _totalChecked;
-        private static float _debugTimer;
-        private static float _debugTimer2;
         private float _debugLogTimer = 0f;
         private float _nextClearSpottedTime;
-        private string BotName;
         private Coroutine _findCoverPointsCoroutine;
         private Coroutine _recheckCoverPointsCoroutine;
         private readonly List<CoverPoint> _tempRecheckList = new List<CoverPoint>();
 
-        private static bool AllCollidersAnalyzed;
-        private const int _maxOldPoints = 10;
         public static bool PerformanceMode { get; private set; } = false;
         public static float CoverMinHeight { get; private set; } = 0.5f;
         public static float CoverMinEnemyDist { get; private set; } = 5f;
         public static float CoverMinEnemyDistSqr { get; private set; } = 25f;
         public static bool DebugCoverFinder { get; private set; } = false;
+
+        private static bool AllCollidersAnalyzed;
+        private static float _debugTimer;
+        private static float _debugTimer2;
 
         private static readonly List<string> _excludedColliderNames = new List<string>
         {
