@@ -408,8 +408,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 if (TargetData != null)
                 {
                     _tempRecheckList.AddRange(CoverPoints);
-                    yield return recheckCoverPoints(_tempRecheckList, false);
-                    yield return clearAndSortPoints(_tempRecheckList);
+                    yield return StartCoroutine(recheckCoverPoints(_tempRecheckList, false));
+                    yield return StartCoroutine(clearAndSortPoints(_tempRecheckList));
                     _tempRecheckList.Clear();
                 }
                 yield return wait;
@@ -467,9 +467,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                     Stopwatch findFirstPointStopWatch = coverCount == 0 && debug ? Stopwatch.StartNew() : null;
 
                     Collider[] colliders = _colliderArray;
-                    yield return ColliderFinder.GetNewColliders(colliders);
+                    yield return StartCoroutine(ColliderFinder.GetNewColliders(colliders));
+                    yield return null;
                     ColliderFinder.SortArrayBotDist(colliders);
-                    yield return findNewCoverPoints(colliders, ColliderFinder.HitCount, max, findFirstPointStopWatch);
+                    yield return null;
+                    yield return StartCoroutine(findNewCoverPoints(colliders, ColliderFinder.HitCount, max, findFirstPointStopWatch));
 
                     coverCount = CoverPoints.Count;
                     sort(coverCount, CoverPoints);
