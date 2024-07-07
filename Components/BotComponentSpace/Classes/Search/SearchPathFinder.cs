@@ -205,7 +205,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public bool CalculatePath(Enemy enemy, out string failReason)
         {
-            Vector3? lastPathPoint = enemy.Path.PathToEnemy.LastCorner();
+            Vector3? lastPathPoint = enemy.Path.PathToEnemy.LastCorner() ?? enemy.KnownPlaces.LastKnownPlace?.Position;
             if (lastPathPoint == null)
             {
                 failReason = "lastPathPoint Null";
@@ -214,7 +214,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
             Vector3 point = lastPathPoint.Value;
             Vector3 start = Bot.Position;
-            if ((point - start).sqrMagnitude <= 0.5f)
+            if ((point - start).sqrMagnitude <= 0.25f)
             {
                 failReason = "tooClose";
                 return false;

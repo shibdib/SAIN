@@ -4,7 +4,7 @@
     {
         public WantSearchReasonsStruct WantSearchReasons;
         public ENotSearchReason NotSearchReason;
-        public EPathCalcFailReason PathCalcFailReason;
+        public string PathCalcFailReason;
 
         public enum ENotSearchReason
         {

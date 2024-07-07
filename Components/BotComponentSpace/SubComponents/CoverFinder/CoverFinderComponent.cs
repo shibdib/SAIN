@@ -416,9 +416,9 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
         }
 
-        private IEnumerator clearAndSortPoints(List<CoverPoint> list)
+        private IEnumerator clearAndSortPoints(List<CoverPoint> tempList)
         {
-            foreach (var point in list)
+            foreach (var point in tempList)
                 if (point == null || point.CoverData.IsBad)
                     CoverPoints.Remove(point);
 

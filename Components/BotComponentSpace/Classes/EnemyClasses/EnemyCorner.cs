@@ -32,6 +32,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private Vector3 _blindCornerLookPoint;
         private float _nextLookPointTime;
-        const float LOOK_POINT_FREQUENCY = 1f / 10f;
+        const float LOOK_POINT_FREQUENCY = 1f / 30f;
     }
 }

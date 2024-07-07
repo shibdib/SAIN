@@ -1,5 +1,4 @@
-﻿using SAIN.BotController.Classes;
-using SAIN.Helpers;
+﻿using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
 using static SAIN.SAINComponent.Classes.Search.SearchReasonsStruct;
@@ -12,14 +11,14 @@ namespace SAIN.SAINComponent.Classes.Search
         {
         }
 
-        public bool ShallStartSearch(Enemy enemy, out SearchReasonsStruct failReasons)
+        public bool ShallStartSearch(Enemy enemy, out SearchReasonsStruct reasons)
         {
             calcSearchTime();
-            failReasons = new SearchReasonsStruct();
+            reasons = new SearchReasonsStruct();
 
-            if (!WantToSearch(enemy, out failReasons.WantSearchReasons))
+            if (!WantToSearch(enemy, out reasons.WantSearchReasons))
             {
-                failReasons.NotSearchReason = ENotSearchReason.DontWantTo;
+                reasons.NotSearchReason = ENotSearchReason.DontWantTo;
                 return false;
             }
 
@@ -27,15 +26,16 @@ namespace SAIN.SAINComponent.Classes.Search
             {
                 if (BaseClass.PathFinder.TargetPlace == null)
                 {
-                    failReasons.NotSearchReason = ENotSearchReason.NullTargetPlace;
+                    reasons.NotSearchReason = ENotSearchReason.NullTargetPlace;
                     return false;
                 }
                 return true;
             }
 
-            if (!BaseClass.PathFinder.HasPathToSearchTarget(enemy, out string failreason))
+            if (!BaseClass.PathFinder.HasPathToSearchTarget(enemy, out string pathCalcFailReason))
             {
-                failReasons.NotSearchReason = ENotSearchReason.PathCalcFailed;
+                reasons.NotSearchReason = ENotSearchReason.PathCalcFailed;
+                reasons.PathCalcFailReason = pathCalcFailReason;
                 return false;
             }
             return true;
