@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Helpers;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -85,16 +86,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             Enemy activeEnemy = findActiveEnemy();
 
-            if (activeEnemy != null && (!activeEnemy.CheckValid() || !activeEnemy.EnemyPerson.Active))
+            if (activeEnemy != null && 
+                (!activeEnemy.CheckValid() || !activeEnemy.EnemyPerson.Active))
             {
                 Logger.LogWarning($"Tried to assign inactive or invalid player.");
                 activeEnemy = null;
             }
-
-            if (activeEnemy == null || (activeEnemy.CheckValid() && activeEnemy.EnemyPerson.Active))
-            {
-                setActiveEnemy(activeEnemy);
-            }
+            setActiveEnemy(activeEnemy);
         }
 
         private Enemy findActiveEnemy()
@@ -103,6 +101,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (dogFightTarget?.CheckValid() == true && dogFightTarget.EnemyPerson.Active)
             {
                 return dogFightTarget;
+            }
+
+            var targetEnemy = Bot.CurrentTarget.CurrentTargetEnemy;
+            if (targetEnemy != null && 
+                (ActiveEnemy == null || targetEnemy.IsDifferent(ActiveEnemy)))
+            {
+                return targetEnemy;
             }
 
             checkGoalEnemy(out Enemy goalEnemy);

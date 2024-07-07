@@ -233,13 +233,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void findCorners(Vector3 enemyPosition, NavMeshPathStatus status, Vector3[] corners)
         {
-            EnemyCorner? first = findFirstCorner(enemyPosition, corners);
+            EnemyCorner first = findFirstCorner(enemyPosition, corners);
             EnemyCorners.AddOrReplace(ECornerType.First, first);
 
-            EnemyCorner? last = findLastCorner(enemyPosition, status, corners);
+            EnemyCorner last = findLastCorner(enemyPosition, status, corners);
             EnemyCorners.AddOrReplace(ECornerType.Last, last);
 
-            EnemyCorner? lastKnown = createLastKnownCorner(enemyPosition);
+            EnemyCorner lastKnown = createLastKnownCorner(enemyPosition);
             EnemyCorners.AddOrReplace(ECornerType.LastKnown, lastKnown);
         }
 
@@ -362,7 +362,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return result;
         }
 
-        private EnemyCorner? findLastCorner(Vector3 enemyPosition, NavMeshPathStatus pathStatus, Vector3[] corners)
+        private EnemyCorner findLastCorner(Vector3 enemyPosition, NavMeshPathStatus pathStatus, Vector3[] corners)
         {
             int length = corners.Length;
             // find the last corner before arriving at an enemy position, and then check if we can see it.
@@ -381,7 +381,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return new EnemyCorner(lastCorner, signedAngle);
         }
 
-        private EnemyCorner? findFirstCorner(Vector3 enemyPosition, Vector3[] corners)
+        private EnemyCorner findFirstCorner(Vector3 enemyPosition, Vector3[] corners)
         {
             if (corners.Length < 2)
             {
@@ -393,7 +393,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return new EnemyCorner(firstCorner, signedAngle);
         }
 
-        private EnemyCorner? createLastKnownCorner(Vector3 enemyPosition)
+        private EnemyCorner createLastKnownCorner(Vector3 enemyPosition)
         {
             return new EnemyCorner(enemyPosition, 0f);
         }

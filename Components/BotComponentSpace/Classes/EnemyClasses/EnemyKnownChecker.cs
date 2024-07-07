@@ -47,28 +47,29 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
         private bool shallKnowEnemy()
         {
             if (!Enemy.CheckValid())
-            {
                 return false;
-            }
-            if (!EnemyPlayerComponent.IsActive)
-            {
-                return false;
-            }
-            if (Enemy.LastKnownPosition == null)
-            {
-                return false;
-            }
 
-            if (Enemy.KnownPlaces.TimeSinceLastKnownUpdated < Bot.Info.ForgetEnemyTime)
-            {
+            if (!EnemyPlayerComponent.IsActive)
+                return false;
+
+            if (Enemy.LastKnownPosition == null)
+                return false;
+
+            float timeSinceUpdate = Enemy.KnownPlaces.TimeSinceLastKnownUpdated;
+
+            if (timeSinceUpdate > LAST_KNOWN_TIME_UPDATE_UPPER_LIMIT)
+                return false;
+
+            if (timeSinceUpdate <= Bot.Info.ForgetEnemyTime)
                 return true;
-            }
+
             if (BotIsSearchingForMe())
-            {
                 return true;
-            }
+
             return false;
         }
+
+        private const float LAST_KNOWN_TIME_UPDATE_UPPER_LIMIT = 400f;
 
         public bool BotIsSearchingForMe()
         {

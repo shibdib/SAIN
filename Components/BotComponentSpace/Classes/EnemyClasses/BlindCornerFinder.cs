@@ -8,7 +8,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class BlindCornerFinder : EnemyBase
     {
-        public EnemyCorner? BlindCorner => Enemy.Path.EnemyCorners.GetCorner(ECornerType.Blind);
+        public EnemyCorner BlindCorner => Enemy.Path.EnemyCorners.GetCorner(ECornerType.Blind);
 
         public BlindCornerFinder(Enemy enemy) : base(enemy)
         {
@@ -42,6 +42,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             int raycasts = 0;
 
+            // Note: currently this only finds the first corner they can't see past,
+            // I should refactor and have it start from the last corner and descend until they CAN see a corner
             if (count > 2)
             {
                 _corners.Clear();
@@ -69,6 +71,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 }
                 _corners.Clear();
             }
+            // end Note
 
             lastVisibleCorner.y += heightOffset;
             notVisibleCorner.y += heightOffset;
@@ -156,14 +159,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             corner.y += addHeight;
             Vector3 cornerDir = corner - lookPoint;
-            Vector3 dirPastCorner = cornerDir.normalized * addDistance;
 
             Vector3 farPoint;
             if (Physics.Raycast(lookPoint, cornerDir, out var hit, addDistance, _mask)) {
                 farPoint = hit.point;
             }
             else {
-                farPoint = corner + dirPastCorner;
+                farPoint = corner + cornerDir.normalized * addDistance;
             }
             Vector3 midPoint = Vector3.Lerp(farPoint, corner, 0.5f);
             return midPoint;

@@ -2,7 +2,7 @@
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public struct EnemyCorner
+    public class EnemyCorner
     {
         public EnemyCorner(Vector3 groundPoint, float signedAngle)
         {

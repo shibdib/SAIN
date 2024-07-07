@@ -1,17 +1,9 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
-using EFT;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents;
-using SAIN.SAINComponent;
-using System.Text;
-using UnityEngine;
-using UnityEngine.AI;
-using SAIN.SAINComponent.SubComponents.CoverFinder;
-using SAIN.Layers.Combat.Solo;
+﻿using EFT;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using System.Collections;
+using SAIN.SAINComponent.SubComponents.CoverFinder;
+using System.Text;
+using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -84,10 +76,17 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 return;
             }
 
+            if (Bot.Decision.CurrentSelfDecision != SelfDecision.None)
+            {
+                Bot.Mover.FastLean(LeanSetting.None);
+                CurrentLean = LeanSetting.None;
+                return;
+            }
+
             if (CurrentLean != LeanSetting.None && ShallHoldLean())
             {
                 Bot.Mover.FastLean(CurrentLean);
-                ChangeLeanTimer = Time.time + 0.5f;
+                ChangeLeanTimer = Time.time + 0.66f;
                 return;
             }
 
@@ -105,12 +104,16 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 case LeanSetting.Left:
                 case LeanSetting.Right:
                     newLean = LeanSetting.None;
-                    ChangeLeanTimer = Time.time + 1f * Random.Range(0.66f, 1.33f);
+                    ChangeLeanTimer = Time.time + 1f * Random.Range(0.5f, 2f);
                     break;
 
                 default:
-                    newLean = EFTMath.RandomBool() ? LeanSetting.Left : LeanSetting.Right;
-                    ChangeLeanTimer = Time.time + 2f * Random.Range(0.66f, 1.33f);
+                    newLean = Bot.Mover.Lean.FindLeanFromBlindCornerAngle(Bot.Enemy);
+                    if (newLean == LeanSetting.None)
+                    {
+                        newLean = EFTMath.RandomBool() ? LeanSetting.Left : LeanSetting.Right;
+                    }
+                    ChangeLeanTimer = Time.time + 2f * Random.Range(0.5f, 1.33f);
                     break;
             }
 

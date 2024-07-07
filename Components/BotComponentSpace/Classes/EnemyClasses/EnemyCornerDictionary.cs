@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class EnemyCornerDictionary : Dictionary<ECornerType, EnemyCorner?>
+    public class EnemyCornerDictionary : Dictionary<ECornerType, EnemyCorner>
     {
         public EnemyCornerDictionary(PersonTransformClass transform, BifacialTransform weaponRoot)
         {
@@ -35,16 +35,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private PersonTransformClass _transform;
 
-        public EnemyCorner? GetCorner(ECornerType cornerType)
+        public EnemyCorner GetCorner(ECornerType cornerType)
         {
-            if (this.TryGetValue(cornerType, out EnemyCorner? corner))
+            if (this.TryGetValue(cornerType, out EnemyCorner corner))
             {
                 return corner;
             }
             return null;
         }
 
-        public void AddOrReplace(ECornerType type, EnemyCorner? corner)
+        public void AddOrReplace(ECornerType type, EnemyCorner corner)
         {
             if (corner == null)
             {

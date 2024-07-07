@@ -1,5 +1,6 @@
 using EFT;
 using SAIN.Preset.GlobalSettings;
+using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Linq;
 using UnityEngine;
@@ -8,10 +9,14 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class LeanClass : BotBase, IBotClass
     {
-        private const float LEAN_UPDATE_FOUND_FREQ = 0.5f;
-        private const float LEAN_UPDATE_NOT_FOUND_FREQ = 0.1f;
-        private const float LEAN_RAYCAST_OFFSET_DIST = 0.5f;
+        private const float LEAN_UPDATE_FOUND_FREQ = 0.75f;
+        private const float LEAN_UPDATE_NOT_FOUND_FREQ = 0.25f;
+        private const float LEAN_RAYCAST_OFFSET_DIST = 0.66f;
         private const float LEAN_MAX_RAYCAST_DIST = 16f;
+
+        public LeanSetting LeanDirection { get; private set; }
+        public LeanSetting LastLeanDirection { get; private set; }
+
         public LeanClass(BotComponent sain) : base(sain)
         {
         }
@@ -26,77 +31,132 @@ namespace SAIN.SAINComponent.Classes.Mover
             CombatDecision.Retreat,
             CombatDecision.RunToCover,
             CombatDecision.RunAway,
+            CombatDecision.MeleeAttack,
         };
 
         public void Update()
         {
-            if (!Bot.SAINLayersActive)
-            {
-                ResetLean();
-                return;
-            }
-            if (IsHoldingLean)
-            {
-                return;
-            }
-            var CurrentDecision = Bot.Decision.CurrentSoloDecision;
-            var enemy = Bot.CurrentTarget.CurrentTargetEnemy;
-            if (enemy == null || Player.IsSprintEnabled || DontLean.Contains(CurrentDecision) || Bot.Suppression.IsHeavySuppressed)
-            {
-                ResetLean();
-                return;
-            }
-            if (GlobalSettingsClass.Instance.AILimit.LimitAIvsAIGlobal 
-                && enemy.IsAI 
-                && Bot.CurrentAILimit != AILimitSetting.None)
-            {
-                ResetLean();
-                return;
-            }
-            if (CurrentDecision == CombatDecision.HoldInCover)
+            updateLean();
+        }
+
+        private void updateLean()
+        {
+            if (!checkShallLean())
             {
                 return;
             }
             if (LeanTimer < Time.time)
             {
+                var enemy = Bot.CurrentTarget.CurrentTargetEnemy;
                 findLean(enemy);
                 float timeAdd = LeanDirection == LeanSetting.None ? LEAN_UPDATE_NOT_FOUND_FREQ : LEAN_UPDATE_FOUND_FREQ;
                 LeanTimer = Time.time + timeAdd;
             }
         }
 
-        private void findLean(Enemy enemy)
+        private bool checkShallLean()
         {
-            var blindCornerLean = findLeanFromBlindCornerAngle(enemy);
-            if (blindCornerLean != LeanSetting.None)
+            if (!Bot.SAINLayersActive)
             {
-                LastLeanDirection = LeanDirection;
-                LeanDirection = blindCornerLean;
-                Bot.Mover.FastLean(blindCornerLean);
-                return;
+                ResetLean();
+                return false;
             }
-            var lastKnownPlace = enemy.KnownPlaces.LastKnownPlace;
-            if (lastKnownPlace != null)
+            if (Bot.Mover.SprintController.Running || Player.IsSprintEnabled)
             {
-                FindLeanDirectionRayCast(lastKnownPlace.Position);
+                ResetLean();
+                return false;
             }
+            if (Bot.Enemy?.IsVisible == true && Bot.Decision.CurrentSelfDecision != SelfDecision.None)
+            {
+                ResetLean();
+                return false;
+            }
+            if (IsHoldingLean)
+            {
+                return false;
+            }
+            var CurrentDecision = Bot.Decision.CurrentSoloDecision;
+            var enemy = Bot.CurrentTarget.CurrentTargetEnemy;
+            if (enemy == null || Player.IsSprintEnabled || DontLean.Contains(CurrentDecision) || Bot.Suppression.IsHeavySuppressed)
+            {
+                ResetLean();
+                return false;
+            }
+            if (GlobalSettingsClass.Instance.AILimit.LimitAIvsAIGlobal
+                && enemy.IsAI
+                && Bot.CurrentAILimit != AILimitSetting.None)
+            {
+                ResetLean();
+                return false;
+            }
+            if (CurrentDecision == CombatDecision.HoldInCover)
+            {
+                return false;
+            }
+            return true;
         }
 
-        private LeanSetting findLeanFromBlindCornerAngle(Enemy enemy)
+        private const float RESET_LEAN_AFTER_TIME = 1f;
+
+        private void findLean(Enemy enemy)
+        {
+            var lastKnownPlace = enemy.KnownPlaces.LastKnownPlace;
+            if (lastKnownPlace == null)
+            {
+                setLean(LeanSetting.None);
+                return;
+            }
+
+            DirectLineOfSight = CheckOffSetRay(lastKnownPlace.Position, 0f, 0f, out var direct);
+            if (DirectLineOfSight)
+            {
+                if (Time.time - _timeLastLeaned > RESET_LEAN_AFTER_TIME)
+                    setLean(LeanSetting.None);
+
+                return;
+            }
+
+            var blindCornerLean = FindLeanFromBlindCornerAngle(enemy, 20f);
+            if (blindCornerLean != LeanSetting.None)
+            {
+                setLean(blindCornerLean);
+                return;
+            }
+
+            var raycastLean = FindLeanDirectionRayCast(lastKnownPlace.Position);
+            if (raycastLean != LeanSetting.None || Time.time - _timeLastLeaned > RESET_LEAN_AFTER_TIME)
+                setLean(raycastLean);
+        }
+
+        public LeanSetting FindLeanFromBlindCornerAngle(Enemy enemy, float minAngle = -1f)
         {
             var blindCorner = enemy.Path.EnemyCorners.GetCorner(ECornerType.Blind);
             if (blindCorner == null)
             {
                 return LeanSetting.None;
             }
-            float signedAngle = blindCorner.Value.SignedAngleToTarget;
+            float signedAngle = blindCorner.SignedAngleToTarget;
             if (signedAngle == 0f)
             {
                 return LeanSetting.None;
             }
+            if (minAngle > 0f && signedAngle < minAngle)
+            {
+                return LeanSetting.None;
+            }
+
+            Vector3 direction = blindCorner.GroundPosition - Bot.Position;
+            if (direction.sqrMagnitude > MAX_CORNER_DISTANCE_LEAN_SQR)
+            {
+                return LeanSetting.None;
+            }
+
             LeanSetting result = signedAngle > 0 ? LeanSetting.Left : LeanSetting.Right;
             return result;
         }
+
+        private const float MAX_CORNER_DISTANCE_LEAN = 20f;
+        private const float MAX_CORNER_DISTANCE_LEAN_SQR = MAX_CORNER_DISTANCE_LEAN * MAX_CORNER_DISTANCE_LEAN;
 
         private float _stopHoldLeanTime;
 
@@ -114,22 +174,16 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
         }
 
-        public LeanSetting LeanDirection { get; private set; }
-        public LeanSetting LastLeanDirection { get; private set; }
 
         private float LeanTimer = 0f;
 
         public void ResetLean()
         {
-            LastLeanDirection = LeanDirection;
-            LeanDirection = LeanSetting.None;
-            Bot.Mover.FastLean(0f);
+            setLean(LeanSetting.None);
         }
 
-        public void FindLeanDirectionRayCast(Vector3 targetPos)
+        public LeanSetting FindLeanDirectionRayCast(Vector3 targetPos)
         {
-            DirectLineOfSight = CheckOffSetRay(targetPos, 0f, 0f, out var direct);
-
             RightLos = CheckOffSetRay(targetPos, 90f, LEAN_RAYCAST_OFFSET_DIST, out var rightOffset);
             if (!RightLos)
             {
@@ -166,11 +220,20 @@ namespace SAIN.SAINComponent.Classes.Mover
                 LeftLosPos = null;
                 LeftHalfLosPos = null;
             }
-            var setting = GetSettingFromResults();
-            LastLeanDirection = LeanDirection;
-            LeanDirection = setting;
-            Bot.Mover.FastLean(setting);
+            return GetSettingFromResults();
         }
+
+        private void setLean(LeanSetting leanSetting)
+        {
+            if (leanSetting != LeanSetting.None)
+                _timeLastLeaned = Time.time;
+
+            LastLeanDirection = LeanDirection;
+            LeanDirection = leanSetting;
+            Bot.Mover.FastLean(leanSetting);
+        }
+
+        private float _timeLastLeaned;
 
         public LeanSetting GetSettingFromResults()
         {
