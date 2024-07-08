@@ -67,7 +67,7 @@ namespace SAIN.Components.BotController
 
         private static float getModifier(float time, ETimeOfDay timeOfDay, out float percentage)
         {
-            var nightSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
+            var nightSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look.Time;
             float max = 1f;
             bool snowActive = GameWorldComponent.Instance.WinterActive;
             float min = snowActive ? nightSettings.NightTimeVisionModifierSnow : nightSettings.NightTimeVisionModifier;
@@ -103,7 +103,7 @@ namespace SAIN.Components.BotController
 
         private static ETimeOfDay getTimeEnum(float time)
         {
-            var nightSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
+            var nightSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look.Time;
             if (time <= nightSettings.HourDuskStart &&
                 time >= nightSettings.HourDawnEnd)
             {

@@ -58,7 +58,7 @@ namespace SAIN.Patches.Shoot.Aim
 
             if (person != null &&
                 !person.IsAI &&
-                SAINPlugin.LoadedPreset.GlobalSettings.Look.NotLookingToggle)
+                SAINPlugin.LoadedPreset.GlobalSettings.Look.NotLooking.NotLookingToggle)
             {
                 finalOffset += NotLookingOffset(person, ___botOwner_0);
             }

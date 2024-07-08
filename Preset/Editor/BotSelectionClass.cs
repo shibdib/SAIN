@@ -179,7 +179,7 @@ namespace SAIN.Editor
                                         object categoryValue = category.GetValue(SAINSettings);
                                         object value = fieldAtt.GetValue(categoryValue);
                                         Label($"{bot.Name} : {difficulty}", Height(entryConfig.EntryHeight), Width(200));
-                                        value = AttributesGUI.EditFloatBoolInt(ref value, categoryValue, fieldAtt, entryConfig, out bool newEdit, false, false);
+                                        value = AttributesGUI.EditFloatBoolInt(ref value, categoryValue, fieldAtt, entryConfig, 0, out bool newEdit, false, false);
                                         if (newEdit)
                                             ConfigEditingTracker.Add(fieldAtt.Name, value);
                                         fieldAtt.SetValue(categoryValue, value);

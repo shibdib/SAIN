@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private bool isEnemyAlwaysInVisibleDistance()
         {
-            if (Enemy.Vision.AngleToEnemy < 30f &&
+            if (Enemy.Vision.EnemyAngles.AngleToEnemy < 30f &&
                 Enemy.KnownPlaces.EnemyDistanceFromLastKnown < 3 &&
                 SAINBotController.Instance.TimeVision.VisibilityPercent > 50f)
             {
@@ -86,13 +86,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return result;
         }
 
-        private static float _sprintMod => SAINPlugin.LoadedPreset.GlobalSettings.Look.MovementDistanceModifier;
+        private static float _sprintMod => SAINPlugin.LoadedPreset.GlobalSettings.Look.VisionDistance.MovementDistanceModifier;
 
         private float calcAngleMod()
         {
             // Reduce Bot Periph Vision
-            float angleToEnemy = Enemy.Vision.AngleToEnemy;
-            float maxAngle = Enemy.Vision.MaxVisionAngle;
+            float angleToEnemy = Enemy.Vision.EnemyAngles.AngleToEnemy;
+            float maxAngle = Enemy.Vision.EnemyAngles.MaxVisionAngle;
             if (angleToEnemy > maxAngle)
             {
                 return 0f;

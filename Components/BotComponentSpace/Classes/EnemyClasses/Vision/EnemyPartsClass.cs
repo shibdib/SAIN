@@ -5,12 +5,12 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class SAINEnemyParts
+    public class EnemyPartsClass
     {
         public bool LineOfSight => TimeSinceInLineOfSight < 0.2f;
         public float TimeSinceInLineOfSight => Time.time - _timeLastInSight;
         public Vector3 LastSuccessPosition { get; private set; }
-        public Dictionary<EBodyPart, SAINEnemyPartData> Parts { get; } = new Dictionary<EBodyPart, SAINEnemyPartData>();
+        public Dictionary<EBodyPart, EnemyPartDataClass> Parts { get; } = new Dictionary<EBodyPart, EnemyPartDataClass>();
 
         public void Update()
         {
@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         }
 
 
-        private SAINEnemyPartData findPartInLOS()
+        private EnemyPartDataClass findPartInLOS()
         {
             foreach (var part in Parts.Values)
                 if (part.LineOfSight)
@@ -42,7 +42,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return true;
             }
 
-            SAINEnemyPartData checkingPart = Parts[EBodyPart.Chest];
+            EnemyPartDataClass checkingPart = Parts[EBodyPart.Chest];
             if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint))
             {
                 if (successPoint != null)
@@ -63,7 +63,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return true;
             }
 
-            SAINEnemyPartData checkingPart = Parts[EBodyPart.Head];
+            EnemyPartDataClass checkingPart = Parts[EBodyPart.Head];
             if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint))
             {
                 if (successPoint != null)
@@ -97,7 +97,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 _lastCheckSuccessPart = null;
             }
 
-            SAINEnemyPartData checkingPart = getNextPart();
+            EnemyPartDataClass checkingPart = getNextPart();
             if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint))
             {
                 if (successPoint != null)
@@ -113,16 +113,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return false;
         }
 
-        public SAINEnemyParts(PlayerBones bones, bool isYourPlayer)
+        public EnemyPartsClass(PlayerBones bones, bool isYourPlayer)
         {
             IsYourPlayer = isYourPlayer;
             createPartDatas(bones);
             _indexMax = Parts.Count;
         }
 
-        private SAINEnemyPartData getNextPart()
+        private EnemyPartDataClass getNextPart()
         {
-            SAINEnemyPartData result = null;
+            EnemyPartDataClass result = null;
             EBodyPart epart = (EBodyPart)_index;
             if (!Parts.TryGetValue(epart, out result))
             {
@@ -145,7 +145,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 List<BodyPartCollider> colliders = new List<BodyPartCollider>();
                 findParts(bodyPart, out BifacialTransform transform, colliders, bones);
-                Parts.Add(bodyPart, new SAINEnemyPartData(bodyPart, transform, colliders, IsYourPlayer));
+                Parts.Add(bodyPart, new EnemyPartDataClass(bodyPart, transform, colliders, IsYourPlayer));
             }
         }
 
@@ -207,6 +207,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private float _timeLastInSight;
         private int _index;
         private readonly int _indexMax;
-        private SAINEnemyPartData _lastCheckSuccessPart;
+        private EnemyPartDataClass _lastCheckSuccessPart;
     }
 }

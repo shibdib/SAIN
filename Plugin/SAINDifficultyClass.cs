@@ -110,8 +110,8 @@ namespace SAIN.Plugin
             global.Shoot.GlobalScatterMultiplier = 1.5f;
             global.Aiming.AccuracySpreadMultiGlobal = 2f;
             global.Aiming.FasterCQBReactionsGlobal = false;
-            global.Look.GlobalVisionDistanceMultiplier = 0.66f;
-            global.Look.GlobalVisionSpeedModifier = 1.75f;
+            global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 0.66f;
+            global.Look.VisionSpeed.GlobalVisionSpeedModifier = 1.75f;
 
             foreach (var bot in preset.BotSettings.SAINSettings)
             {
@@ -134,8 +134,8 @@ namespace SAIN.Plugin
             global.Shoot.GlobalScatterMultiplier = 1.2f;
             global.Aiming.AccuracySpreadMultiGlobal = 1.5f;
             global.Aiming.FasterCQBReactionsGlobal = false;
-            global.Look.GlobalVisionDistanceMultiplier = 0.85f;
-            global.Look.GlobalVisionSpeedModifier = 1.25f;
+            global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 0.85f;
+            global.Look.VisionSpeed.GlobalVisionSpeedModifier = 1.25f;
 
             foreach (var bot in preset.BotSettings.SAINSettings)
             {
@@ -227,8 +227,8 @@ namespace SAIN.Plugin
             global.Shoot.GlobalScatterMultiplier = 0.85f;
             global.Aiming.AccuracySpreadMultiGlobal = 0.8f;
             global.Aiming.AimCenterMassGlobal = false;
-            global.Look.GlobalVisionDistanceMultiplier = 1.33f;
-            global.Look.GlobalVisionSpeedModifier = 0.8f;
+            global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 1.33f;
+            global.Look.VisionSpeed.GlobalVisionSpeedModifier = 0.8f;
 
             foreach (var bot in preset.BotSettings.SAINSettings)
             {
@@ -251,10 +251,10 @@ namespace SAIN.Plugin
             global.Shoot.RecoilMultiplier = 0.25f;
             global.Shoot.GlobalScatterMultiplier = 0.01f;
             global.Aiming.AccuracySpreadMultiGlobal = 0.33f;
-            global.Look.GlobalVisionDistanceMultiplier = 2f;
-            global.Look.GlobalVisionSpeedModifier = 0.65f;
+            global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 2f;
+            global.Look.VisionSpeed.GlobalVisionSpeedModifier = 0.65f;
             global.Aiming.AimCenterMassGlobal = false;
-            global.Look.NotLookingToggle = false;
+            global.Look.NotLooking.NotLookingToggle = false;
 
             foreach (var bot in preset.BotSettings.SAINSettings)
             {

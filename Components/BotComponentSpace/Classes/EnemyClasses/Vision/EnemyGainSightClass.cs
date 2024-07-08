@@ -1,13 +1,27 @@
 ﻿using EFT;
 using SAIN.Components;
+using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class GainSightClass : EnemyBase
+    public class EnemyGainSightClass : EnemyBase
     {
-        public GainSightClass(Enemy enemy) : base(enemy)
+        private float _minSeenSpeedCoef = 0.01f;
+        private float _minDistRepeatSeen = 1f;
+        private float _maxDistRepeatSeen = 20f;
+
+        private float _minHeardSpeedCoef = 0.25f;
+        private float _minDistRepeatHeard = 1f;
+        private float _maxDistRepeatHeard = 10f;
+
+        private float _visionSpeed_Max_Dist = 200f;
+        private float _visionSpeed_Max_Dist_NVGS = 250f;
+        private float _visionSpeed_Min_Dist = 10f;
+        private float _visionSpeed_Min_Dist_NVGS = 65f;
+
+        public EnemyGainSightClass(Enemy enemy) : base(enemy)
         {
         }
 
@@ -69,13 +83,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return result;
         }
 
-        private float _minSeenSpeedCoef = 0.01f;
-        private float _minDistRepeatSeen = 1f;
-        private float _maxDistRepeatSeen = 20f;
-
-        private float _minHeardSpeedCoef = 0.25f;
-        private float _minDistRepeatHeard = 1f;
-        private float _maxDistRepeatHeard = 10f;
 
         private float _gainSightModifier;
         private float _nextCheckVisTime;
@@ -84,11 +91,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             return Enemy.EnemyPlayerComponent.AIData.AIGearModifier.StealthModifier(Enemy.RealDistance);
         }
-
-        private float _visionSpeed_Max_Dist = 200f;
-        private float _visionSpeed_Max_Dist_NVGS = 250f;
-        private float _visionSpeed_Min_Dist = 10f;
-        private float _visionSpeed_Min_Dist_NVGS = 65f;
 
         private float calcTimeModifier(bool flareEnabled)
         {
@@ -302,27 +304,61 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float calcMoveModifier()
         {
-            LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
-            return Mathf.Lerp(1, globalLookSettings.SprintingVisionModifier, Enemy.Vision.EnemyVelocity);
+            var look = SAINPlugin.LoadedPreset.GlobalSettings.Look.VisionSpeed;
+            return Mathf.Lerp(1, look.SprintingVisionModifier, Enemy.Vision.EnemyVelocity);
         }
+
+        private float findElevationAngle(Vector3 enemyDirection, Vector3 lookDirection)
+        {
+            Vector3 enemyElevDir = new Vector3(lookDirection.x, enemyDirection.y, lookDirection.z);
+            float signedAngle = Vector3.SignedAngle(lookDirection, enemyElevDir, Vector3.right);
+
+            Logger.LogDebug($"elevAngle {signedAngle} Y-Diff {(enemyElevDir.y - lookDirection.y).Round100()}");
+            return signedAngle;
+        }
+
+        private bool isLastKnownAtSameElev()
+        {
+            var lastKnown = Enemy.LastKnownPosition;
+            if (lastKnown != null)
+            {
+                Vector3 enemyPosition = EnemyCurrentPosition;
+                if (Mathf.Abs(enemyPosition.y - lastKnown.Value.y) < GAINSIGHT_ELEVATION_LASTKNOWN_MAX_DIST)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private const float GAINSIGHT_ELEVATION_LASTKNOWN_MAX_DIST = 1.5f;
+        private const float GAINSIGHT_ELEVATION_MIN_ANGLE = 5f;
 
         private float calcElevationModifier()
         {
-            LookSettings globalLookSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look;
+            if (isLastKnownAtSameElev())
+                return 1f;
 
-            Vector3 botEyeToPlayerBody = EnemyPlayer.MainParts[BodyPartType.body].Position - BotOwner.MainParts[BodyPartType.head].Position;
-            var visionAngleDeviation = Vector3.Angle(new Vector3(botEyeToPlayerBody.x, 0f, botEyeToPlayerBody.z), botEyeToPlayerBody);
+            var settings = SAINPlugin.LoadedPreset.GlobalSettings.Look.VisionSpeed.Elevation;
+            var angles = Enemy.Vision.EnemyAngles;
+            float min = GAINSIGHT_ELEVATION_MIN_ANGLE;
 
-            if (botEyeToPlayerBody.y >= 0)
-            {
-                float angleFactor = Mathf.InverseLerp(0, globalLookSettings.HighElevationMaxAngle, visionAngleDeviation);
-                return Mathf.Lerp(1f, globalLookSettings.HighElevationVisionModifier, angleFactor);
-            }
-            else
-            {
-                float angleFactor = Mathf.InverseLerp(0, globalLookSettings.LowElevationMaxAngle, visionAngleDeviation);
-                return Mathf.Lerp(1f, globalLookSettings.LowElevationVisionModifier, angleFactor);
-            }
+            float elevationAngle = angles.AngleToEnemyVertical;
+            if (elevationAngle < min)
+                return 1f;
+
+            bool enemyAbove = angles.AngleToEnemyVerticalSigned > 0;
+            float max = enemyAbove ? settings.HighElevationMaxAngle : settings.LowElevationMaxAngle;
+            float targetCoef = enemyAbove ? settings.HighElevationVisionModifier : settings.LowElevationVisionModifier;
+
+            if (elevationAngle > max)
+                return targetCoef;
+
+            float num = max - min;
+            float diff = elevationAngle - min;
+            float ratio = diff / num;
+            float result = Mathf.Lerp(1f, targetCoef, ratio);
+            return result;
         }
 
         private float calcThirdPartyMod()
@@ -341,7 +377,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                         float angle = Vector3.Angle(currentEnemyDir, myDir);
 
                         float minAngle = 20f;
-                        float maxAngle = Enemy.Vision.MaxVisionAngle;
+                        float maxAngle = Enemy.Vision.EnemyAngles.MaxVisionAngle;
                         if (angle > minAngle && 
                             angle < maxAngle)
                         {
@@ -375,14 +411,14 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return 1f;
             }
 
-            float angle = Enemy.Vision.AngleToEnemy;
+            float angle = Enemy.Vision.EnemyAngles.AngleToEnemy;
 
             float minAngle = _periphVisionStart;
             if (angle < minAngle)
             {
                 return 1f;
             }
-            float maxAngle = Enemy.Vision.MaxVisionAngle;
+            float maxAngle = Enemy.Vision.EnemyAngles.MaxVisionAngle;
             float maxRatio = _maxPeriphVisionSpeedReduction;
             if (angle > maxAngle)
             {

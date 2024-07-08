@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class SAINEnemyPartData
+    public class EnemyPartDataClass
     {
-        public SAINEnemyPartData(EBodyPart bodyPart, BifacialTransform transform, List<BodyPartCollider> colliders, bool isYourPlayer)
+        public EnemyPartDataClass(EBodyPart bodyPart, BifacialTransform transform, List<BodyPartCollider> colliders, bool isYourPlayer)
         {
             BodyPart = bodyPart;
             Transform = transform;

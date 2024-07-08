@@ -28,7 +28,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     continue;
 
                 enemy.Update();
-                enemy.Vision.EnemyVisionChecker.CheckVision(out _);
+                enemy.Vision.VisionChecker.CheckVision(out _);
             }
             removeInvalid();
         }

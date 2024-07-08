@@ -64,9 +64,9 @@ namespace SAIN.Helpers
         }
 
         public static float VisionSpeedMulti(SAINSettingsClass SAINSettings) 
-            => Round(SAINSettings.Look.VisionSpeedModifier * GlobalSettingsClass.Instance.Look.GlobalVisionSpeedModifier);
+            => Round(SAINSettings.Look.VisionSpeedModifier * GlobalSettingsClass.Instance.Look.VisionSpeed.GlobalVisionSpeedModifier);
 
-        public static float VisionDistanceMulti => GlobalSettingsClass.Instance.Look.GlobalVisionDistanceMultiplier;
+        public static float VisionDistanceMulti => GlobalSettingsClass.Instance.Look.VisionDistance.GlobalVisionDistanceMultiplier;
 
         private static float Round(float value)
         {

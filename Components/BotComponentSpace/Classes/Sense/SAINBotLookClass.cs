@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,12 @@ namespace SAIN.SAINComponent.Classes
 {
     public class SAINBotLookClass : BotBase
     {
+        private const float VISION_FREQ_INACTIVE_BOT_COEF = 5f;
+        private const float VISION_FREQ_ACTIVE_BOT_COEF = 2.5f;
+        private const float VISION_FREQ_CURRENT_ENEMY = 0.04f;
+        private const float VISION_FREQ_UNKNOWN_ENEMY = 0.1f;
+        private const float VISION_FREQ_KNOWN_ENEMY = 0.05f;
+
         public SAINBotLookClass(BotComponent component) : base(component)
         {
             LookData = new LookAllData();
@@ -83,38 +90,59 @@ namespace SAIN.SAINComponent.Classes
             if (enemy?.CheckValid() != true)
                 return false;
 
-            if (!enemy.InLineOfSight)
+            if (!enemy.InLineOfSight || 
+                !enemy.Vision.EnemyAngles.CanBeSeen)
             {
-                if (enemy.EnemyInfo.IsVisible)
-                    enemy.EnemyInfo.SetVisible(false);
+                setNotVis(enemy);
                 return false;
             }
             return true;
+        }
+
+        private void setNotVis(Enemy enemy)
+        {
+            if (enemy.EnemyInfo.IsVisible)
+                enemy.EnemyInfo.SetVisible(false);
         }
 
         private bool checkEnemy(Enemy enemy, LookAllData lookAll)
         {
             float delay = getDelay(enemy);
-            if (enemy.LastCheckLookTime + delay > Time.time)
+            var look = enemy.Vision.VisionChecker;
+            float timeSince = Time.time - look.LastCheckLookTime;
+            if (timeSince >= delay)
             {
-                return false;
+                Logger.LogDebug($"time since last look update {timeSince.Round100()} delay {delay.Round100()} difference {(timeSince - delay).Round100()}");
+                look.LastCheckLookTime = Time.time;
+                enemy.EnemyInfo.CheckLookEnemy(lookAll);
+                return true;
             }
-
-            enemy.LastCheckLookTime = Time.time;
-            enemy.EnemyInfo.CheckLookEnemy(lookAll);
-            return true;
+            return false;
         }
 
         private float getDelay(Enemy enemy)
         {
-            float delay;
-            if (enemy.EnemyPerson.Active) {
-                delay = enemy.IsAI ? 0.2f : 0.1f;
+            float updateFreqCoef = enemy.UpdateFrequencyCoefNormal + 1f;
+            float baseDelay = calcBaseDelay(enemy) * updateFreqCoef;
+            if (!enemy.IsAI)
+            {
+                return baseDelay;
             }
-            else {
-                delay = 0.5f;
+            var active = Bot.BotActivation;
+            if (!active.BotActive || active.BotInStandBy)
+            {
+                return baseDelay * VISION_FREQ_INACTIVE_BOT_COEF;
             }
-            return delay * UnityEngine.Random.Range(0.9f, 1.1f);
+            return baseDelay * VISION_FREQ_ACTIVE_BOT_COEF;
+        }
+
+        private float calcBaseDelay(Enemy enemy)
+        {
+            if (enemy.IsCurrentEnemy)
+                return VISION_FREQ_CURRENT_ENEMY;
+            if (enemy.EnemyKnown)
+                return VISION_FREQ_KNOWN_ENEMY;
+            return VISION_FREQ_UNKNOWN_ENEMY;
         }
 
     }

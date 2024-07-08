@@ -1,12 +1,12 @@
 ﻿using EFT;
 using EFT.UI;
-using Interpolation;
 using SAIN.Editor;
 using SAIN.Editor.Util;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.Preset.GearStealthValues;
+using SAIN.Preset.GlobalSettings;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.Classes;
 using System;
@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using static CW2.Animations.PhysicsSimulator.UnityValueDevice;
 using static SAIN.Editor.SAINLayout;
 
 namespace SAIN.Attributes
@@ -48,15 +47,20 @@ namespace SAIN.Attributes
             }
         }
 
-        public static object EditValue(ref object value, object settingsObject, AttributesInfoClass attributes, out bool wasEdited, GUIEntryConfig entryConfig = null)
+        public static object EditValue(ref object value, object settingsObject, AttributesInfoClass attributes, out bool wasEdited, int listDepth, GUIEntryConfig config = null, string search = null)
         {
             wasEdited = false;
             if (value != null && attributes != null && !attributes.DoNotShowGUI) {
-                entryConfig = entryConfig ?? _defaultEntryConfig;
+                config = config ?? _defaultEntryConfig;
                 if (_floatBoolIntTypes.Contains(attributes.ValueType))
-                    value = EditFloatBoolInt(ref value, settingsObject, attributes, entryConfig, out wasEdited);
-                else
-                    value = FindListTypeAndEdit(ref value, settingsObject, attributes, out wasEdited, entryConfig);
+                    value = EditFloatBoolInt(ref value, settingsObject, attributes, config, listDepth, out wasEdited);
+                else if (ExpandableList(attributes, config.EntryHeight + 3, listDepth++, config))
+                {
+                    if (value is ISAINSettings settings)
+                        EditAllValuesInObj(settings, out wasEdited, search, config, listDepth++);
+                    else
+                        value = FindListTypeAndEdit(ref value, settingsObject, attributes, listDepth, out wasEdited, config);
+                }
             }
 
             if (wasEdited)
@@ -65,12 +69,9 @@ namespace SAIN.Attributes
             return value;
         }
 
-        public static object FindListTypeAndEdit(ref object value, object settingsObject, AttributesInfoClass attributes, out bool wasEdited, GUIEntryConfig entryConfig = null)
+        public static object FindListTypeAndEdit(ref object value, object settingsObject, AttributesInfoClass attributes, int listDepth, out bool wasEdited, GUIEntryConfig entryConfig = null)
         {
             wasEdited = false;
-
-            if (!ExpandableList(attributes, entryConfig.EntryHeight + 5))
-                return value;
 
             if (value is Dictionary<ECaliber, float>)
                 EditFloatDictionary<ECaliber>(value, attributes, out wasEdited);
@@ -110,10 +111,11 @@ namespace SAIN.Attributes
             }
         }
 
-        public static object EditFloatBoolInt(ref object value, object settingsObject, AttributesInfoClass attributes, GUIEntryConfig entryConfig, out bool wasEdited, bool showLabel = true, bool beginHoriz = true)
+        public static object EditFloatBoolInt(ref object value, object settingsObject, AttributesInfoClass attributes, GUIEntryConfig entryConfig, int listDepth, out bool wasEdited, bool showLabel = true, bool beginHoriz = true)
         {
             if (beginHoriz)
             {
+                float horizDepth = listDepth * entryConfig.SubList_Indent_Horizontal;
                 if (attributes.Advanced)
                 {
                     BeginHorizontal(25f);
@@ -121,10 +123,11 @@ namespace SAIN.Attributes
                         _labelStyle,
                         Width(70f),
                         Height(entryConfig.EntryHeight));
+                    Space(horizDepth);
                 }
                 else
                 {
-                    BeginHorizontal(100f);
+                    BeginHorizontal(100f + horizDepth);
                 }
             }
 
@@ -204,7 +207,7 @@ namespace SAIN.Attributes
                 var type = possibleTypes[i];
                 if (values.TryGetValue(type, out var list))
                 {
-                    if (!ExpandableList(type.ToString(), string.Empty, _defaultEntryConfig.EntryHeight + 5))
+                    if (!ExpandableList(type.ToString(), string.Empty, _defaultEntryConfig.EntryHeight + 5, 0, _defaultEntryConfig))
                     {
                         continue;
                     }
@@ -265,14 +268,14 @@ namespace SAIN.Attributes
             EndHorizontal(150);
         }
 
-        private static bool ExpandableList(AttributesInfoClass attributes, float height)
+        private static bool ExpandableList(AttributesInfoClass attributes, float height, int listDepth, GUIEntryConfig config)
         {
-            return ExpandableList(attributes.Name, attributes.Description, height);
+            return ExpandableList(attributes.Name, attributes.Description, height, listDepth, config);
         }
 
-        private static bool ExpandableList(string name, string description, float height)
+        private static bool ExpandableList(string name, string description, float height, int listDepth, GUIEntryConfig config)
         {
-            BeginHorizontal(100f);
+            BeginHorizontal(100f + (listDepth * config.SubList_Indent_Horizontal));
 
             if (!_listOpen.ContainsKey(name))
             {
@@ -527,10 +530,13 @@ namespace SAIN.Attributes
             EndVertical(5f);
         }
 
-        public static void EditAllValuesInObj(object obj, out bool wasEdited, string search = null)
+        public static void EditAllValuesInObj(object obj, out bool wasEdited, string search = null, GUIEntryConfig entryConfig = null, int listDepth = 0)
         {
             wasEdited = false;
-            BeginVertical(5f);
+            if (entryConfig != null)
+                BeginVertical(entryConfig.SubList_Indent_Vertical);
+            else
+                BeginVertical(5f);
 
             var fields = obj.GetType().GetFields();
             foreach (var field in fields)
@@ -541,14 +547,14 @@ namespace SAIN.Attributes
                     continue;
                 }
                 object value = field.GetValue(obj);
-                object newValue = EditValue(ref value, obj, attributes, out bool newEdit);
+                object newValue = EditValue(ref value, obj, attributes, out bool newEdit, listDepth, entryConfig, search);
                 if (newEdit)
                 {
                     field.SetValue(obj, newValue);
                     wasEdited = true;
                 }
             }
-            foreach (var field in obj.GetType().GetFields())
+            foreach (var field in fields)
             {
                 var attributes = GetAttributeInfo(field);
                 if (SkipForSearch(attributes, search) || !attributes.Advanced)
@@ -556,7 +562,7 @@ namespace SAIN.Attributes
                     continue;
                 }
                 object value = field.GetValue(obj);
-                object newValue = EditValue(ref value, obj, attributes, out bool newEdit);
+                object newValue = EditValue(ref value, obj, attributes, out bool newEdit, listDepth, entryConfig, search);
                 if (newEdit)
                 {
                     field.SetValue(obj, newValue);
@@ -564,7 +570,10 @@ namespace SAIN.Attributes
                 }
             }
 
-            EndVertical(5f);
+            if (entryConfig != null)
+                EndVertical(entryConfig.SubList_Indent_Vertical);
+            else
+                EndVertical(5f);
         }
 
         public static void EditAllValuesInObj(Category category, object categoryObject, out bool wasEdited, string search = null)
@@ -579,7 +588,7 @@ namespace SAIN.Attributes
                     continue;
                 }
                 object value = fieldAtt.GetValue(categoryObject);
-                object newValue = EditValue(ref value, categoryObject, fieldAtt, out bool newEdit);
+                object newValue = EditValue(ref value, categoryObject, fieldAtt, out bool newEdit, 0, null, search);
                 if (newEdit)
                 {
                     fieldAtt.SetValue(categoryObject, newValue);
@@ -594,7 +603,7 @@ namespace SAIN.Attributes
                     continue;
                 }
                 object value = fieldAtt.GetValue(categoryObject);
-                object newValue = EditValue(ref value, categoryObject, fieldAtt, out bool newEdit);
+                object newValue = EditValue(ref value, categoryObject, fieldAtt, out bool newEdit, 0, null, search);
                 if (newEdit)
                 {
                     fieldAtt.SetValue(categoryObject, newValue);

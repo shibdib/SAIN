@@ -4,7 +4,7 @@ namespace SAIN.Attributes
 {
     public class GUIEntryConfig
     {
-        const float TargetWidthScale = 1920;
+        const float TARGT_WIDTH_SCALE = 1920;
 
         public GUIEntryConfig(float entryHeight = 25f)
         {
@@ -52,6 +52,9 @@ namespace SAIN.Attributes
         public float ResultWidth = 0.1f;
         public float ResetWidth = 0.05f;
 
+        public float SubList_Indent_Vertical = 3f;
+        public float SubList_Indent_Horizontal = 25f;
+
         public GUILayoutOption[] Info => Params(InfoWidth);
         public GUILayoutOption[] Label => Params(LabelWidth);
         public GUILayoutOption[] MinMax => Params(MinMaxWidth);
@@ -62,7 +65,7 @@ namespace SAIN.Attributes
 
         GUILayoutOption[] Params(float width0to1) => new GUILayoutOption[]
         {
-                GUILayout.Width(width0to1 * TargetWidthScale),
+                GUILayout.Width(width0to1 * TARGT_WIDTH_SCALE),
                 GUILayout.Height(EntryHeight)
         };
     }

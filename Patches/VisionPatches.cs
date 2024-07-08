@@ -1,5 +1,4 @@
-﻿using SPT.Reflection.Patching;
-using EFT;
+﻿using EFT;
 using HarmonyLib;
 using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
@@ -7,6 +6,7 @@ using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.EnemyClasses;
+using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
 using UnityEngine;
@@ -42,7 +42,7 @@ namespace SAIN.Patches.Vision
             ____curLightDist = curLightDist;
 
             float timeModifier = SAINBotController.Instance.TimeVision.TimeVisionDistanceModifier;
-            var lookSettings = GlobalSettingsClass.Instance.Look;
+            var lookSettings = GlobalSettingsClass.Instance.Look.Light;
             float turnOnRatio = lookSettings.LightOnRatio;
             float turnOffRatio = lookSettings.LightOffRatio;
 
@@ -121,7 +121,7 @@ namespace SAIN.Patches.Vision
                 return false;
             }
             float timeModifier = SAINBotController.Instance.TimeVision.TimeVisionDistanceModifier;
-            float turnOffRatio = GlobalSettingsClass.Instance.Look.LightOffRatio;
+            float turnOffRatio = GlobalSettingsClass.Instance.Look.Light.LightOffRatio;
             bool wantOff = timeModifier >= turnOffRatio;
             if (wantOff)
             {
@@ -147,7 +147,7 @@ namespace SAIN.Patches.Vision
             }
 
             float timeModifier = SAINBotController.Instance.TimeVision.TimeVisionDistanceModifier;
-            var lookSettings = GlobalSettingsClass.Instance.Look;
+            var lookSettings = GlobalSettingsClass.Instance.Look.Light;
             float turnOnRatio = lookSettings.NightVisionOnRatio;
             float turnOffRatio = lookSettings.NightVisionOffRatio;
 
@@ -397,7 +397,10 @@ namespace SAIN.Patches.Vision
                 Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId, true);
                 if (enemy != null)
                 {
-                    __result *= enemy.Vision.GainSightCoef;
+                    if (!enemy.Vision.EnemyAngles.CanBeSeen)
+                        __result = 696969;
+                    else
+                        __result *= enemy.Vision.GainSightCoef;
                     enemy.Vision.LastGainSightResult = __result;
                 }
 
@@ -421,11 +424,13 @@ namespace SAIN.Patches.Vision
         [PatchPrefix]
         public static void PatchPrefix(ref float addVisibility, EnemyInfo __instance)
         {
-            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain))
-            {
-                Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId, true);
-                if (enemy != null)
-                {
+            if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain)) {
+                Enemy enemy = sain.EnemyController.GetEnemy(__instance.ProfileId, true);
+                if (enemy != null) {
+                    if (!enemy.Vision.EnemyAngles.CanBeSeen) {
+                        addVisibility = float.MinValue;
+                        return;
+                    }
                     addVisibility += enemy.Vision.VisionDistance;
                 }
             }

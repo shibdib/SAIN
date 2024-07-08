@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public EnemyEvents Events { get; }
         public EnemyKnownPlaces KnownPlaces { get; private set; }
         public SAINEnemyStatus Status { get; }
-        public SAINEnemyVision Vision { get; }
+        public EnemyVisionClass Vision { get; }
         public SAINEnemyPath Path { get; }
         public EnemyInfo EnemyInfo { get; }
         public EnemyAim Aim { get; }
@@ -52,7 +52,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             _validChecker = new EnemyValidChecker(this);
             _knownChecker = new EnemyKnownChecker(this);
             Status = new SAINEnemyStatus(this);
-            Vision = new SAINEnemyVision(this);
+            Vision = new EnemyVisionClass(this);
             Path = new SAINEnemyPath(this);
             KnownPlaces = new EnemyKnownPlaces(this);
             Aim = new EnemyAim(this);
@@ -76,16 +76,14 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Update()
         {
-            IsCurrentEnemy = Bot.Enemy?.EnemyProfileId == EnemyProfileId;
+            IsCurrentEnemy = Bot.Enemy?.EnemyProfileId == EnemyProfileId; 
+            calcFrequencyCoef();
             updateDistAndDirection();
-
             Events.Update();
             _validChecker.Update();
             _knownChecker.Update();
             _activeThreatChecker.Update();
-
             updateActiveState();
-
             Vision.Update();
             KnownPlaces.Update();
             Path.Update();
@@ -114,6 +112,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             return _validChecker.CheckValid();
         }
+
         public bool WasValid => _validChecker.WasValid;
 
         public bool ActiveThreat => _activeThreatChecker.ActiveThreat;
@@ -295,38 +294,40 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return result;
         }
 
-        public float UpdateFrequencyCoef
+        public float UpdateFrequencyCoef { get; private set; }
+
+        private void calcFrequencyCoef()
         {
-            get
+            if (_nextUpdateCoefTime < Time.time)
             {
-                if (_nextUpdateCoefTime < Time.time)
-                {
-                    _nextUpdateCoefTime = Time.time + 0.1f;
-                    _updateCoef = calcUpdateFrequencyCoef();
-                }
-                return _updateCoef;
+                _nextUpdateCoefTime = Time.time + 0.1f;
+                UpdateFrequencyCoef = calcUpdateFrequencyCoef(out float normal);
+                UpdateFrequencyCoefNormal = normal;
             }
         }
 
+        public float UpdateFrequencyCoefNormal { get; private set; }
 
-        private float calcUpdateFrequencyCoef()
+        private float calcUpdateFrequencyCoef(out float normal)
         {
             float enemyDist = RealDistance;
             float min = ENEMY_UPDATEFREQUENCY_MIN_DIST;
             if (enemyDist <= min)
             {
+                normal = 0;
                 return 1f;
             }
             float max = ENEMY_UPDATEFREQUENCY_MAX_DIST;
             if (enemyDist >= max)
             {
+                normal = 1f;
                 return max;
             }
 
             float num = max - min;
             float num2 = enemyDist - min;
-            float ratio = num2 / num;
-            float result = Mathf.Lerp(1f, ENEMY_UPDATEFREQUENCY_MAX_SCALE, ratio);
+            normal = num2 / num;
+            float result = Mathf.Lerp(1f, ENEMY_UPDATEFREQUENCY_MAX_SCALE, normal);
             return result;
         }
 

@@ -9,13 +9,14 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyVisionChecker : EnemyBase, IBotClass
     {
+        public float LastCheckLookTime { get; set; }
         public Vector3 LastSeenPoint { get; private set; }
         public bool LineOfSight => EnemyParts.LineOfSight;
-        public SAINEnemyParts EnemyParts { get; }
+        public EnemyPartsClass EnemyParts { get; }
 
         public EnemyVisionChecker(Enemy enemy) : base(enemy)
         {
-            EnemyParts = new SAINEnemyParts(enemy.EnemyPlayer.PlayerBones, enemy.Player.IsYourPlayer);
+            EnemyParts = new EnemyPartsClass(enemy.EnemyPlayer.PlayerBones, enemy.Player.IsYourPlayer);
             _transform = enemy.Bot.Transform;
             _startVisionTime = Time.time + UnityEngine.Random.Range(0.0f, 0.33f);
         }

@@ -1,18 +1,27 @@
-﻿using Newtonsoft.Json;
-using SAIN.Attributes;
+﻿using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
     public class LookSettings : SAINSettingsBase<LookSettings>, ISAINSettings
     {
-        [Name("Global Vision Distance Multiplier")]
-        [Description(
-            "Multiplies whatever a bot's visible distance is set to. " +
-            "Higher is further visible distance, so 1.5 would result in bots seeing 1.5 times further. " +
-            "Or if their visible distance is set to 100 meters, they will see at 150 meters instead.")]
-        [MinMax(0.1f, 5f, 100f)]
-        public float GlobalVisionDistanceMultiplier = 1;
+        [Name("Vision Speed Settings")]
+        public VisionSpeedSettings VisionSpeed = new VisionSpeedSettings();
 
+        [Name("Vision Distance Settings")]
+        public VisionDistanceSettings VisionDistance = new VisionDistanceSettings();
+
+        [Name("Not Looking At Bot Settings")]
+        public NotLookingSettings NotLooking = new NotLookingSettings();
+
+        [Name("Time Settings")]
+        public TimeSettings Time = new TimeSettings();
+
+        [Name("Flashlights and NVGs Settings")]
+        public LightNVGSettings Light = new LightNVGSettings();
+    }
+
+    public class VisionSpeedSettings : SAINSettingsBase<VisionSpeedSettings>, ISAINSettings
+    {
         [Name("Global Vision Speed Multiplier")]
         [Description(
             "The Base vision speed multiplier, applies to all bots equally, affects all ranges to enemy. " +
@@ -28,6 +37,19 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0.01f, 1f, 100f)]
         public float SprintingVisionModifier = 0.5f;
 
+        public ElevationVisionSettings Elevation = new ElevationVisionSettings();
+    }
+
+    public class VisionDistanceSettings : SAINSettingsBase<VisionDistanceSettings>, ISAINSettings
+    {
+        [Name("Global Vision Distance Multiplier")]
+        [Description(
+            "Multiplies whatever a bot's visible distance is set to. " +
+            "Higher is further visible distance, so 1.5 would result in bots seeing 1.5 times further. " +
+            "Or if their visible distance is set to 100 meters, they will see at 150 meters instead.")]
+        [MinMax(0.1f, 5f, 100f)]
+        public float GlobalVisionDistanceMultiplier = 1;
+
         [Name("Movement Vision Distance Modifier")]
         [Description(
             "Bots will see moving players this much further. " +
@@ -35,7 +57,10 @@ namespace SAIN.Preset.GlobalSettings
             "Scales with player velocity.")]
         [MinMax(1f, 3f, 100f)]
         public float MovementDistanceModifier = 1.5f;
+    }
 
+    public class ElevationVisionSettings : SAINSettingsBase<ElevationVisionSettings>, ISAINSettings
+    {
         [Name("High Elevation Angle Range")]
         [Description(
             "The difference of angle from the bot's vision to the enemy to fully apply HighElevationVisionModifier. " +
@@ -48,7 +73,7 @@ namespace SAIN.Preset.GlobalSettings
             "Bots will see players this much slower when the enemy's altitude is higher than the bot when the vision angle difference is equal or greater than HighElevationMaxAngle. " +
             "Higher is slower speed, so 1.2 would result in bots taking 20% longer to spot an enemy")]
         [MinMax(1f, 5f, 100f)]
-        public float HighElevationVisionModifier = 1.5f;
+        public float HighElevationVisionModifier = 2.5f;
 
         [Name("Low Elevation Angle Range")]
         [Description(
@@ -63,7 +88,10 @@ namespace SAIN.Preset.GlobalSettings
             "Higher is slower speed, so 0.85 would result in bots taking 15% shorter to spot an enemy")]
         [MinMax(0.01f, 1f, 100f)]
         public float LowElevationVisionModifier = 0.75f;
+    }
 
+    public class NotLookingSettings : SAINSettingsBase<NotLookingSettings>, ISAINSettings
+    {
         [Name("Bot Reaction and Accuracy Changes Toggle - Experimental")]
         [Section("Unseen Bot")]
         [Experimental]
@@ -105,7 +133,10 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0.1f, 1.5f, 100f)]
         [Advanced]
         public float NotLookingAccuracyAmount = 0.33f;
+    }
 
+    public class LightNVGSettings : SAINSettingsBase<LightNVGSettings>, ISAINSettings
+    {
         [Advanced]
         [MinMax(0.01f, 0.99f, 100f)]
         public float LightOnRatio = 0.6f;
@@ -121,14 +152,16 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [MinMax(0.01f, 0.99f, 100f)]
         public float NightVisionOffRatio = 0.8f;
+    }
 
+    public class TimeSettings : SAINSettingsBase<TimeSettings>, ISAINSettings
+    {
         [Name("Nighttime Vision Modifier")]
         [Description(
             "By how much to lower visible distance at nighttime. " +
             "at the default value of 0.2, bots will see 0.2 times as far, or 20% of " +
             "their base vision distance at night-time.")]
         [MinMax(0.01f, 1f, 100f)]
-        [Advanced]
         public float NightTimeVisionModifier = 0.33f;
 
         [Name("Snow Nighttime Vision Modifier")]
@@ -137,7 +170,6 @@ namespace SAIN.Preset.GlobalSettings
             "at the default value of 0.2, bots will see 0.2 times as far, or 20% of " +
             "their base vision distance at night-time.")]
         [MinMax(0.01f, 1f, 100f)]
-        [Advanced]
         public float NightTimeVisionModifierSnow = 0.5f;
 
         [Name("Dawn Start Hour")]

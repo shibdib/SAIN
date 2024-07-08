@@ -18,6 +18,7 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
         public Vector3 BodyPosition { get; private set; }
         public Vector3 WeaponFirePort { get; private set; }
         public Vector3 WeaponPointDirection { get; private set; }
+        public Vector3 WeaponRoot { get; private set; }
 
         public float VelocityMagnitudeNormal { get; private set; }
         public float VelocityMagnitude { get; private set; }
@@ -58,6 +59,7 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
             HeadPosition = _myHead.position;
             BodyPosition = _bodyPart.position;
             LookDirection = Person.Player.MovementContext.LookDirection;
+            WeaponRoot = Person.Player.WeaponRoot.position;
 
             if (_nextUpdateHeadLookTime <= Time.time)
             {

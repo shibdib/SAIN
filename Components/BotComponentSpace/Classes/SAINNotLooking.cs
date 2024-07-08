@@ -1,14 +1,6 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using SAIN.Preset.GlobalSettings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -18,9 +10,9 @@ namespace SAIN.SAINComponent.Classes
 
         public static float GetSpreadIncrease(IPlayer person, BotOwner botOwner)
         {
-            if (Settings.NotLookingToggle && CheckIfPlayerNotLooking(person, botOwner))
+            if (Settings.NotLooking.NotLookingToggle && CheckIfPlayerNotLooking(person, botOwner))
             {
-                return Settings.NotLookingAccuracyAmount;
+                return Settings.NotLooking.NotLookingAccuracyAmount;
             }
             return 0f;
         }
@@ -29,7 +21,7 @@ namespace SAIN.SAINComponent.Classes
         {
             if (CheckIfPlayerNotLooking(enemyInfo))
             {
-                return Settings.NotLookingVisionSpeedModifier;
+                return Settings.NotLooking.NotLookingVisionSpeedModifier;
             }
             return 1f;
         }
@@ -60,7 +52,7 @@ namespace SAIN.SAINComponent.Classes
             }
 
             if (!enemyInfo.HaveSeenPersonal
-                || Time.time - enemyInfo.PersonalSeenTime <= Settings.NotLookingTimeLimit
+                || Time.time - enemyInfo.PersonalSeenTime <= Settings.NotLooking.NotLookingTimeLimit
                 || !enemyInfo.IsVisible)
             {
                 Vector3 lookDir = player.LookDirection.normalized;
@@ -68,7 +60,7 @@ namespace SAIN.SAINComponent.Classes
                 Vector3 botPos = enemyInfo.Owner.Position;
                 Vector3 botDir = (botPos - playerPos).normalized;
                 float angle = Vector3.Angle(botDir, lookDir);
-                return angle >= Settings.NotLookingAngle;
+                return angle >= Settings.NotLooking.NotLookingAngle;
             }
 
             return false;
