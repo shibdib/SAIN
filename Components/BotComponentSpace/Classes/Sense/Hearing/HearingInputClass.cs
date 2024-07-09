@@ -145,7 +145,7 @@ namespace SAIN.SAINComponent.Classes
             random.y = 0;
             random = random.normalized * dispersion;
             Vector3 estimatedPos = enemy.EnemyPosition + random;
-            enemy.Hearing.SetHeard(estimatedPos, SAINSoundType.BulletImpact, true);
+            enemy.Hearing.SetHeard(estimatedPos, SAINSoundType.BulletImpact, true, distance < 25f * 25f);
         }
 
         private bool _canHearSounds => Bot.BotActive && !Bot.GameEnding;

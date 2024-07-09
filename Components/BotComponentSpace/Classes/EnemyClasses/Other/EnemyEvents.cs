@@ -18,7 +18,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public event Action<Enemy> OnEnemyShot;
         public event Action<Enemy> OnBeingShotByEnemy;
         public event Action<Enemy, EnemyPlace> OnPositionUpdated;
-        public event Action<Enemy, SAINSoundType, bool> OnEnemyHeard;
+        public event Action<Enemy, SAINSoundType, bool, EnemyPlace> OnEnemyHeard;
         public event Action<Enemy, NavMeshPathStatus> OnPathUpdated;
         public event Action<Enemy, EEnemyAction> OnVulnerableStateChanged;
         public event Action<Enemy, ETagStatus> OnHealthStatusChanged;
@@ -89,9 +89,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             OnFirstSeen?.Invoke(Enemy);
         }
 
-        public void EnemyHeard(SAINSoundType type, bool gunFire)
+        public void EnemyHeard(SAINSoundType type, bool gunFire, EnemyPlace place)
         {
-            OnEnemyHeard?.Invoke(Enemy, type, gunFire);
+            OnEnemyHeard?.Invoke(Enemy, type, gunFire, place);
         }
 
         private void enemyHit(DamageInfo damage, EBodyPart _, float _2)

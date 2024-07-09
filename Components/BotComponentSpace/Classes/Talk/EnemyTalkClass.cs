@@ -464,7 +464,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 if (enemy.RealDistance <= painRange)
                 {
                     Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
-                    enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Pain, true);
+                    enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Pain, true, enemy.RealDistance < 25f || enemy.InLineOfSight);
                 }
                 return;
             }
@@ -473,7 +473,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 if (enemy.RealDistance <= breathRange)
                 {
                     Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
-                    enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Breathing, true);
+                    enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Breathing, true, enemy.RealDistance < 25f || enemy.InLineOfSight);
                 }
                 return;
             }
@@ -481,7 +481,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (enemy.RealDistance <= 65f)
             {
                 Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
-                enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Breathing, true);
+                enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Breathing, true, enemy.RealDistance < 25f || enemy.InLineOfSight);
             }
 
             if (Bot.Talk.IsSpeaking)

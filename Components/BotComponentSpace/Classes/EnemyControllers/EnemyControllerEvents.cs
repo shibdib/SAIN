@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public event Action<Enemy> OnEnemyAdded;
         public event Action<string, Enemy> OnEnemyRemoved;
         public event Action<Player> OnEnemyKilled;
-        public event Action<Enemy, SAINSoundType, bool> OnEnemyHeard;
+        public event Action<Enemy, SAINSoundType, bool, EnemyPlace> OnEnemyHeard;
         public event Action<bool, Enemy> OnEnemyKnownChanged;
         public event Action<Enemy, Enemy> OnEnemyChanged;
         public event Action<ETagStatus, Enemy> OnEnemyHealthChanged;
@@ -111,9 +111,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        private void enemyHeard(Enemy enemy, SAINSoundType soundType, bool wasGunFire)
+        private void enemyHeard(Enemy enemy, SAINSoundType soundType, bool isDanger, EnemyPlace place)
         {
-            OnEnemyHeard?.Invoke(enemy, soundType, wasGunFire);
+            OnEnemyHeard?.Invoke(enemy, soundType, isDanger, place);
         }
     }
 }

@@ -51,14 +51,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                     return true;
 
                 case SteerPriority.HeardThreat:
-                    PlaceForCheck lastHeardSound = _steerPriorityClass.LastHeardSound;
-                    if (lastHeardSound != null)
-                    {
-                        _hearSteering.LookToHeardPosition(lastHeardSound.Position);
-                        return true;
-                    }
-                    LookToRandomPosition();
-                    Logger.LogError("Cannot look toward null PlaceForCheck.");
+                    HeardSoundSteering.LookToHeardPosition();
                     return false;
 
                 case SteerPriority.Sprinting:
@@ -176,7 +169,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             _randomLook = new RandomLookClass(this);
             _steerPriorityClass = new SteerPriorityClass(this);
-            _hearSteering = new HeardSoundSteeringClass(this);
+            HeardSoundSteering = new HeardSoundSteeringClass(this);
         }
 
         public float AngleToPointFromLookDir(Vector3 point)
@@ -193,14 +186,17 @@ namespace SAIN.SAINComponent.Classes.Mover
         public void Init()
         {
             base.SubscribeToPreset(UpdatePresetSettings);
+            HeardSoundSteering.Init();
         }
 
         public void Update()
         {
+            HeardSoundSteering.Update();
         }
 
         public void Dispose()
         {
+            HeardSoundSteering.Dispose();
         }
 
         private Vector3 adjustLookPoint(Vector3 target)
@@ -305,7 +301,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             LookToRandomPosition();
         }
 
-        private readonly HeardSoundSteeringClass _hearSteering;
+        public HeardSoundSteeringClass HeardSoundSteering { get; }
         private readonly RandomLookClass _randomLook;
         private readonly SteerPriorityClass _steerPriorityClass;
 

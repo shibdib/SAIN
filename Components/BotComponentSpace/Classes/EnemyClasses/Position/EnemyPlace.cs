@@ -6,20 +6,38 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
+    public struct PlaceData
+    {
+        public Enemy Enemy;
+        public bool IsAI;
+        public BotComponent Owner;
+        public string OwnerID;
+    }
+
+    public enum EEnemyPlaceType
+    {
+        Vision,
+        Hearing,
+        Flashlight,
+        Injury,
+    }
+
     public class EnemyPlace
     {
         public event Action<EnemyPlace> OnPositionUpdated;
-        public BotComponent Owner { get; }
-        public string OwnerID { get; }
-        public Enemy Enemy { get; }
-        public bool IsDanger { get; }
-        public bool EnemyIsAI { get; }
+        public event Action<EnemyPlace> OnDispose;
+
+        public PlaceData PlaceData { get; }
+        public EEnemyPlaceType PlaceType { get; }
+
+        public bool VisibleSourceOnLastUpdate { get; private set; }
+        public bool IsDanger { get; set; }
 
         public bool ShallClear
         {
             get
             {
-                var person = Enemy?.EnemyPerson;
+                var person = PlaceData.Enemy?.EnemyPerson;
                 if (person == null)
                 {
                     return true;
@@ -46,7 +64,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     _nextCheckLeaveTime = Time.time + ENEMY_DIST_TO_PLACE_CHECK_FREQ;
                     // If the person this place was created for is AI and left the area, just forget it and move on.
                     float dist = DistanceToEnemyRealPosition;
-                    if (EnemyIsAI)
+                    if (PlaceData.IsAI)
                     {
                         return dist > ENEMY_DIST_TO_PLACE_FOR_LEAVE_AI;
                     }
@@ -61,22 +79,26 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private const float ENEMY_DIST_TO_PLACE_FOR_LEAVE_AI = 100f;
         private const float ENEMY_DIST_UPDATE_FREQ = 0.25f;
 
-        public EnemyPlace(BotComponent owner, Vector3 position, bool isDanger, Enemy enemy)
+        public EnemyPlace(PlaceData placeData, Vector3 position, bool isDanger, EEnemyPlaceType placeType)
         {
-            Owner = owner;
-            OwnerID = owner.ProfileId;
-            Enemy = enemy;
-            EnemyIsAI = enemy.IsAI;
+            PlaceData = placeData;
+            VisibleSourceOnLastUpdate = placeData.Enemy.InLineOfSight;
+            IsDanger = isDanger;
+            PlaceType = placeType;
 
             _position = position;
-            _nextCheckDistTime = 0f;
+            updateDistancesNow(position);
             _timeLastUpdated = Time.time;
-            IsDanger = isDanger;
         }
 
         public void Update()
         {
             checkUpdateDistance();
+        }
+
+        public void Dispose()
+        {
+            OnDispose?.Invoke(this);
         }
 
         public Vector3 GroundedPosition(float range = 2f)
@@ -101,6 +123,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 checkNewValue(value, _position);
                 _position = value;
                 _timeLastUpdated = Time.time;
+                VisibleSourceOnLastUpdate = PlaceData.Enemy.InLineOfSight;
                 OnPositionUpdated?.Invoke(this);
             }
         }
@@ -128,8 +151,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private void updateDistancesNow(Vector3 position)
         {
             _nextCheckDistTime = Time.time + ENEMY_DIST_UPDATE_FREQ;
-            DistanceToBot = (position - Owner.Position).magnitude;
-            DistanceToEnemyRealPosition = (position - Enemy.EnemyTransform.Position).magnitude;
+            DistanceToBot = (position - PlaceData.Owner.Position).magnitude;
+            DistanceToEnemyRealPosition = (position - PlaceData.Enemy.EnemyTransform.Position).magnitude;
         }
 
         public float Distance(Vector3 point)

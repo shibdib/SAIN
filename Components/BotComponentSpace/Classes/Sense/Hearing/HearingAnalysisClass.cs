@@ -57,7 +57,7 @@ namespace SAIN.SAINComponent.Classes
             var mods = sound.Range.Modifiers;
             mods.EnvironmentModifier = calcEnvironmentMod(sound);
             mods.ConditionModifier = calcConditionMod(sound);
-            mods.OcclusionModifier = calcOcclusionMod(sound);
+            mods.OcclusionModifier = calcOcclusionMod2(sound);
             mods.FinalModifier = mods.CalcFinalModifier(HEAR_MODIFIER_MIN_CLAMP, HEAR_MODIFIER_MAX_CLAMP);
             return mods.FinalModifier;
         }
@@ -150,6 +150,17 @@ namespace SAIN.SAINComponent.Classes
             chanceToHear = Mathf.Clamp(chanceToHear, minimumChance, 100f);
             sound.Results.ChanceToHear = chanceToHear;
             return EFTMath.RandomBool(chanceToHear);
+        }
+
+        private float calcOcclusionMod2(BotSound sound)
+        {
+            bool isGunshot = sound.Info.IsGunShot;
+            if (sound.Enemy.InLineOfSight)
+            {
+                sound.Results.VisibleSource = true;
+                return 1f;
+            }
+            return isGunshot ? GUNSHOT_OCCLUSION_MOD : FOOTSTEP_OCCLUSION_MOD;
         }
 
         private float calcOcclusionMod(BotSound sound)

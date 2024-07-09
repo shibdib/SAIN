@@ -52,7 +52,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
             }
         }
 
-        public EnemyPlace SetHeard(Vector3 pos, SAINSoundType soundType, bool shallReport)
+        public EnemyPlace SetHeard(Vector3 pos, SAINSoundType soundType, bool shallReport, bool isDanger)
         {
             if (Enemy.IsVisible)
             {
@@ -63,12 +63,12 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
             Enemy.Status.HeardRecently = true;
             _timeLastHeard = Time.time;
 
-            EnemyPlace place = UpdateHeardPosition(pos, wasGunfire, shallReport);
+            EnemyPlace place = UpdateHeardPosition(pos, isDanger, shallReport);
 
             if (!Bot.HasEnemy)
                 EnemyHeardFromPeace = true;
 
-            Enemy.Events.EnemyHeard(soundType, wasGunfire);
+            Enemy.Events.EnemyHeard(soundType, isDanger, place);
             if (wasGunfire || !shallReport)
             {
                 return place;
@@ -116,9 +116,9 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
             }
         }
 
-        public EnemyPlace UpdateHeardPosition(Vector3 position, bool wasGunfire, bool shallReport)
+        public EnemyPlace UpdateHeardPosition(Vector3 position, bool isDanger, bool shallReport)
         {
-            EnemyPlace place = Enemy.KnownPlaces.UpdatePersonalHeardPosition(position, wasGunfire);
+            EnemyPlace place = Enemy.KnownPlaces.UpdatePersonalHeardPosition(position, isDanger);
             if (shallReport &&
                 place != null &&
                 _nextReportHeardTime < Time.time)

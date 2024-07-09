@@ -53,8 +53,11 @@ namespace SAIN.Attributes
             wasEdited = false;
             if (value != null && attributes != null && !attributes.DoNotShowGUI) {
                 config = config ?? _defaultEntryConfig;
-                if (_floatBoolIntTypes.Contains(attributes.ValueType))
+                if (value is float || value is bool || value is int)
                     value = EditFloatBoolInt(ref value, settingsObject, attributes, config, listDepth, out wasEdited);
+                else if (value is EHeardFromPeaceBehavior peaceBehavior)
+                {
+                }
                 else if (ExpandableList(attributes, config.EntryHeight + 3, listDepth++, config))
                 {
                     if (value is ISAINSettings settings)

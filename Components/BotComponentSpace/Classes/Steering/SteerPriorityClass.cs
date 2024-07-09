@@ -22,7 +22,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         // How far a sound can be for them to react by looking toward it.
         private readonly float Steer_HeardSound_Dist = 50f;
         // How old a sound can be, in seconds, for them to react by looking toward it.
-        private readonly float Steer_HeardSound_Age = 2f;
+        private readonly float Steer_HeardSound_Age = 3f;
 
         public AimStatus AimStatus
         {
@@ -133,18 +133,18 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (lastKnownPlace != null && lastKnownPlace.TimeSincePositionUpdated < Steer_TimeSinceLocationKnown_Threshold)
                 return SteerPriority.EnemyLastKnown;
 
-            if (heardThreat(out PlaceForCheck placeForCheck))
-            {
-                LastHeardSound = placeForCheck;
+            if (heardThreat())
                 return SteerPriority.HeardThreat;
-            }
-
-            LastHeardSound = null;
 
             if (lastKnownPlace != null && lastKnownPlace.TimeSincePositionUpdated < Steer_TimeSinceSeen_Long)
                 return SteerPriority.EnemyLastKnownLong;
 
             return SteerPriority.None;
+        }
+
+        private bool heardThreat()
+        {
+            return BaseClass.HeardSoundSteering.HasDangerToLookAt;
         }
 
         private bool heardThreat(out PlaceForCheck placeForCheck)
