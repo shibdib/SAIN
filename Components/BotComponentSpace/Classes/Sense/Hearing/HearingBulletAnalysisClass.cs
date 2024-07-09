@@ -26,22 +26,22 @@ namespace SAIN.SAINComponent.Classes
         {
         }
 
-        public bool DoIFeelBullet(BotSoundStruct sound)
+        public bool DoIFeelBullet(BotSound sound)
         {
             if (!sound.Info.IsGunShot)
             {
                 return false;
             }
-            if (sound.Info.EnemyDistance > BULLET_FEEL_MAX_DIST)
+            if (sound.Distance > BULLET_FEEL_MAX_DIST)
             {
                 return false;
             }
-            Vector3 directionToBot = (Bot.Position - sound.Info.OriginalPosition).normalized;
-            float dot = Vector3.Dot(sound.Info.EnemyPlayer.LookDirection, directionToBot);
+            Vector3 directionToBot = (Bot.Position - sound.Info.Position).normalized;
+            float dot = Vector3.Dot(sound.Info.SourcePlayer.LookDirection, directionToBot);
             return dot >= BULLET_FEEL_DOT_THRESHOLD;
         }
 
-        public bool DidShotFlyByMe(BotSoundStruct sound)
+        public bool DidShotFlyByMe(BotSound sound)
         {
             if (!sound.BulletData.BulletFelt)
             {
@@ -52,8 +52,8 @@ namespace SAIN.SAINComponent.Classes
                 return false;
             }
 
-            var player = sound.Info.EnemyPlayer;
-            Vector3 projectionPoint = calcProjectionPoint(player, sound.Info.EnemyDistance);
+            var player = sound.Info.SourcePlayer;
+            Vector3 projectionPoint = calcProjectionPoint(player, sound.Distance);
             float pointDistanceSqr = (projectionPoint - Bot.Position).sqrMagnitude;
 
             sound.BulletData.ProjectionPoint = projectionPoint;

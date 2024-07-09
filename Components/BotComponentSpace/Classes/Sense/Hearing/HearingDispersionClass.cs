@@ -22,11 +22,11 @@ namespace SAIN.SAINComponent.Classes
         {
         }
 
-        public Vector3 CalcRandomizedPosition(BotSoundStruct sound, float addDispersion)
+        public Vector3 CalcRandomizedPosition(BotSound sound, float addDispersion)
         {
-            float distance = sound.Info.EnemyDistance;
+            float distance = sound.Distance;
             float baseDispersion = getBaseDispersion(distance, sound.Info.SoundType);
-            float dispersionMod = getDispersionModifier(sound.Info.OriginalPosition) * addDispersion;
+            float dispersionMod = getDispersionModifier(sound.Info.Position) * addDispersion;
             float finalDispersion = baseDispersion * dispersionMod;
             sound.Dispersion.Dispersion = finalDispersion;
             float min = distance < 10 ? 0f : 0.5f;
@@ -35,7 +35,7 @@ namespace SAIN.SAINComponent.Classes
             if (SAINPlugin.DebugSettings.DebugHearing)
                 Logger.LogDebug($"Dispersion: [{randomdirection.magnitude}] Distance: [{distance}] Base Dispersion: [{baseDispersion}] DispersionModifier [{dispersionMod}] Final Dispersion: [{finalDispersion}] : SoundType: [{sound.Info.SoundType}]");
 
-            return sound.Info.OriginalPosition + randomdirection;
+            return sound.Info.Position + randomdirection;
         }
 
         private float getBaseDispersion(float shooterDistance, SAINSoundType soundType)

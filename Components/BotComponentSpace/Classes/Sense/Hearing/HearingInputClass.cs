@@ -9,7 +9,6 @@ namespace SAIN.SAINComponent.Classes
 {
     public class HearingInputClass : BotSubClass<SAINHearingSensorClass>, IBotClass
     {
-        public BotSoundStruct? LastHeardSound { get; private set; }
         public bool IgnoreUnderFire { get; private set; }
         public bool IgnoreHearing { get; private set; }
 
@@ -31,12 +30,29 @@ namespace SAIN.SAINComponent.Classes
 
         public void Update()
         {
-            if (IgnoreHearing &&
-                _ignoreUntilTime > 0 &&
+            checkResetHearing();
+        }
+
+        private void checkResetHearing()
+        {
+            if (!IgnoreHearing)
+            {
+                if (IgnoreUnderFire)
+                    IgnoreUnderFire = false;
+                return;
+            }
+            if (_ignoreUntilTime > 0 &&
                 _ignoreUntilTime < Time.time)
             {
                 IgnoreHearing = false;
                 IgnoreUnderFire = false;
+                return;
+            }
+            if (Bot.EnemyController.EnemyLists.GetEnemyList(EEnemyListType.Visible)?.Count > 0)
+            {
+                IgnoreHearing = false;
+                IgnoreUnderFire = false;
+                return;
             }
         }
 
@@ -76,17 +92,15 @@ namespace SAIN.SAINComponent.Classes
 
             var info = new SoundInfoData
             {
-                EnemyPlayer = playerComponent,
+                SourcePlayer = playerComponent,
                 IsAI = playerComponent.IsAI,
-                OriginalPosition = soundPosition,
+                Position = soundPosition,
                 Power = power,
                 Volume = volume,
                 SoundType = soundType,
-                IsGunShot = isGunshot,
-                Enemy = enemy,
-                EnemyDistance = enemy.RealDistance,
+                IsGunShot = isGunshot
             };
-            BotSoundStruct sound = new BotSoundStruct(info, baseRange);
+            BotSound sound = new BotSound(info, enemy, baseRange);
             BaseClass.ReactToHeardSound(sound);
         }
 

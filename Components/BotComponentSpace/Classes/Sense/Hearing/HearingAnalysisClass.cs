@@ -25,7 +25,7 @@ namespace SAIN.SAINComponent.Classes
         {
         }
 
-        public bool CheckIfSoundHeard(BotSoundStruct sound)
+        public bool CheckIfSoundHeard(BotSound sound)
         {
             if (shallLimitAI(sound))
             {
@@ -44,15 +44,15 @@ namespace SAIN.SAINComponent.Classes
                 return false;
             }
 
-            sound.Range.FinalRange = sound.Info.EnemyDistance * calcModifiers(sound);
-            if (sound.Info.EnemyDistance > sound.Range.FinalRange)
+            sound.Range.FinalRange = sound.Range.BaseRange * calcModifiers(sound);
+            if (sound.Distance > sound.Range.FinalRange)
             {
                 return false;
             }
             return true;
         }
 
-        private float calcModifiers(BotSoundStruct sound)
+        private float calcModifiers(BotSound sound)
         {
             var mods = sound.Range.Modifiers;
             mods.EnvironmentModifier = calcEnvironmentMod(sound);
@@ -62,16 +62,16 @@ namespace SAIN.SAINComponent.Classes
             return mods.FinalModifier;
         }
 
-        private bool checkDistToPlayer(BotSoundStruct sound)
+        private bool checkDistToPlayer(BotSound sound)
         {
             // The sound originated from somewhere far from the player's position, typically from a grenade explosion, which is handled elsewhere
-            return (sound.Info.OriginalPosition - sound.Info.EnemyPlayer.Position).sqrMagnitude > 5f * 5f;
+            return (sound.Info.Position - sound.Info.SourcePlayer.Position).sqrMagnitude > 5f * 5f;
         }
 
-        private float calcBunkerVolumeReduction(BotSoundStruct sound)
+        private float calcBunkerVolumeReduction(BotSound sound)
         {
             var botLocation = Bot.PlayerComponent.AIData.PlayerLocation;
-            var enemyLocation = sound.Info.EnemyPlayer.AIData.PlayerLocation;
+            var enemyLocation = sound.Info.SourcePlayer.AIData.PlayerLocation;
 
             bool botinBunker = botLocation.InBunker;
             bool playerinBunker = enemyLocation.InBunker;
@@ -93,7 +93,7 @@ namespace SAIN.SAINComponent.Classes
         private const float BUNKER_REDUCTION_COEF = 0.2f;
         private const float BUNKER_ELEV_DIFF_COEF = 0.66f;
 
-        private bool doIDetectFootsteps(BotSoundStruct sound)
+        private bool doIDetectFootsteps(BotSound sound)
         {
             if (sound.Info.IsGunShot)
             {
@@ -102,7 +102,7 @@ namespace SAIN.SAINComponent.Classes
 
             bool hasheadPhones = Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece;
             float closehearing = hasheadPhones ? 1f : 0.25f;
-            float distance = sound.Info.EnemyDistance;
+            float distance = sound.Distance;
             if (distance <= closehearing)
             {
                 return true;
@@ -137,7 +137,7 @@ namespace SAIN.SAINComponent.Classes
             }
 
             if (Bot.HasEnemy &&
-                Bot.Enemy.EnemyProfileId == sound.Info.EnemyPlayer.ProfileId)
+                Bot.Enemy.EnemyProfileId == sound.Info.SourcePlayer.ProfileId)
             {
                 minimumChance += hasheadPhones ? 10f : 5f;
             }
@@ -152,13 +152,13 @@ namespace SAIN.SAINComponent.Classes
             return EFTMath.RandomBool(chanceToHear);
         }
 
-        private float calcOcclusionMod(BotSoundStruct sound)
+        private float calcOcclusionMod(BotSound sound)
         {
             var info = sound.Info;
             if (info.IsAI)
                 return 1f;
 
-            Vector3 position = info.OriginalPosition;
+            Vector3 position = info.Position;
             bool isFootStep = info.SoundType == SAINSoundType.FootStep;
             bool isGunshot = info.IsGunShot;
             if (!isFootStep && !isGunshot)
@@ -178,9 +178,9 @@ namespace SAIN.SAINComponent.Classes
             return isGunshot ? GUNSHOT_OCCLUSION_MOD : FOOTSTEP_OCCLUSION_MOD;
         }
 
-        private float calcEnvironmentMod(BotSoundStruct sound)
+        private float calcEnvironmentMod(BotSound sound)
         {
-            if (Player.AIData.EnvironmentId == sound.Info.EnemyPlayer.Player.AIData.EnvironmentId)
+            if (Player.AIData.EnvironmentId == sound.Info.SourcePlayer.Player.AIData.EnvironmentId)
             {
                 return 1f;
             }
@@ -191,7 +191,7 @@ namespace SAIN.SAINComponent.Classes
             return result;
         }
 
-        private bool shallLimitAI(BotSoundStruct sound)
+        private bool shallLimitAI(BotSound sound)
         {
             if (!sound.Info.IsAI)
                 return false;
@@ -203,7 +203,7 @@ namespace SAIN.SAINComponent.Classes
             if (!aiLimit.LimitAIvsAIHearing)
                 return false;
 
-            var enemyPlayer = sound.Info.EnemyPlayer;
+            var enemyPlayer = sound.Info.SourcePlayer;
             if (Bot.Enemy?.EnemyProfileId == enemyPlayer.ProfileId)
                 return false;
 
@@ -226,7 +226,7 @@ namespace SAIN.SAINComponent.Classes
                 maxRange = getMaxRange(enemyBot.CurrentAILimit);
             }
 
-            if (sound.Info.Enemy.RealDistance <= maxRange)
+            if (sound.Distance <= maxRange)
             {
                 return false;
             }
@@ -251,11 +251,11 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private float calcConditionMod(BotSoundStruct sound)
+        private float calcConditionMod(BotSound sound)
         {
             // this is clumsy, not sure how to extract a modifier that would be clamped to be below the max affect distance, so im just returning 1f.
             var mods = sound.Range.Modifiers;
-            float dist = sound.Info.EnemyDistance * mods.EnvironmentModifier;
+            float dist = sound.Distance * mods.EnvironmentModifier;
             float maxAffectDist = HEAR_MODIFIER_MAX_AFFECT_DIST;
             if (dist <= maxAffectDist)
             {
@@ -276,7 +276,7 @@ namespace SAIN.SAINComponent.Classes
             if (dist * modifier < maxAffectDist)
                 return 1f;
 
-            if (!sound.Info.IsGunShot && sound.Info.EnemyDistance > HEAR_MODIFIER_MAX_AFFECT_DIST)
+            if (!sound.Info.IsGunShot && sound.Distance > HEAR_MODIFIER_MAX_AFFECT_DIST)
             {
                 if (!Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece)
                 {

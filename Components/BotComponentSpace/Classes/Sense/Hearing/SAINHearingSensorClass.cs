@@ -3,7 +3,6 @@ using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -11,8 +10,8 @@ namespace SAIN.SAINComponent.Classes
     {
         private const float SPEED_OF_SOUND = 343;
 
-        public BotSoundStruct? LastHeardSound { get; private set; }
-        public BotSoundStruct? LastFailedSound { get; private set; }
+        public BotSound LastHeardSound { get; private set; }
+        public BotSound LastFailedSound { get; private set; }
 
         public HearingInputClass SoundInput { get; }
         public HearingAnalysisClass Analysis { get; }
@@ -52,7 +51,7 @@ namespace SAIN.SAINComponent.Classes
             Dispersion.Dispose();
         }
 
-        public void ReactToHeardSound(BotSoundStruct sound)
+        public void ReactToHeardSound(BotSound sound)
         {
             sound.Results.Heard = Analysis.CheckIfSoundHeard(sound);
             sound.BulletData.BulletFelt = BulletAnalysis.DoIFeelBullet(sound);
@@ -67,7 +66,7 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        private bool checkReact(BotSoundStruct sound)
+        private bool checkReact(BotSound sound)
         {
             bool heard = sound.Results.Heard;
             bool bulletFelt = sound.BulletData.BulletFelt;
@@ -101,14 +100,14 @@ namespace SAIN.SAINComponent.Classes
             return true;
         }
 
-        private bool shallChaseGunshot(BotSoundStruct sound)
+        private bool shallChaseGunshot(BotSound sound)
         {
             var searchSettings = Bot.Info.PersonalitySettings.Search;
             if (searchSettings.WillChaseDistantGunshots)
             {
                 return true;
             }
-            if (sound.Info.EnemyDistance > searchSettings.AudioStraightDistanceToIgnore)
+            if (sound.Distance > searchSettings.AudioStraightDistanceToIgnore)
             {
                 return false;
             }
@@ -133,16 +132,16 @@ namespace SAIN.SAINComponent.Classes
             yield return new WaitForSeconds(delay);
         }
 
-        private IEnumerator delayReact(BotSoundStruct sound)
+        private IEnumerator delayReact(BotSound sound)
         {
-            var weapon = sound.Info.EnemyPlayer.Equipment.CurrentWeapon;
+            var weapon = sound.Info.SourcePlayer.Equipment.CurrentWeapon;
             float speed = weapon != null ? weapon.BulletSpeed : -1f;
 
-            yield return baseHearDelay(sound.Info.EnemyDistance, speed);
+            yield return baseHearDelay(sound.Distance, speed);
 
-            Enemy enemy = sound.Info.Enemy;
+            Enemy enemy = sound.Enemy;
             if (Bot != null && 
-                sound.Info.EnemyPlayer != null &&
+                sound.Info.SourcePlayer != null &&
                 enemy?.CheckValid() == true)
             {
                 float projDist = sound.BulletData.ProjectionPointDistance;
@@ -154,29 +153,29 @@ namespace SAIN.SAINComponent.Classes
 
                 if (underFire)
                 {
-                    BotOwner?.HearingSensor?.OnEnemySounHearded?.Invoke(sound.Results.EstimatedPosition, sound.Info.EnemyDistance, sound.Info.SoundType.Convert());
+                    BotOwner?.HearingSensor?.OnEnemySounHearded?.Invoke(sound.Results.EstimatedPosition, sound.Distance, sound.Info.SoundType.Convert());
                     Bot.Memory.SetUnderFire(enemy, sound.Results.EstimatedPosition);
                 }
                 Bot.Suppression.AddSuppression(enemy, projDist);
-                enemy.SetEnemyAsSniper(sound.Info.EnemyDistance > 100f);
+                enemy.SetEnemyAsSniper(sound.Distance > 100f);
                 enemy.Status.ShotAtMeRecently = true;
                 addPointToSearch(sound);
             }
         }
 
-        private IEnumerator delayAddSearch(BotSoundStruct sound)
+        private IEnumerator delayAddSearch(BotSound sound)
         {
-            yield return baseHearDelay(sound.Info.EnemyDistance);
+            yield return baseHearDelay(sound.Distance);
 
             if (Bot != null &&
-                sound.Info.EnemyPlayer != null &&
-                sound.Info.Enemy?.CheckValid() == true)
+                sound.Info.SourcePlayer != null &&
+                sound.Enemy?.CheckValid() == true)
             {
                 addPointToSearch(sound);
             }
         }
 
-        private void addPointToSearch(BotSoundStruct sound)
+        private void addPointToSearch(BotSound sound)
         {
             Bot.Squad.SquadInfo?.AddPointToSearch(sound, Bot);
             CheckCalcGoal();

@@ -147,9 +147,9 @@ namespace SAIN.BotController.Classes
             Flashlight,
         }
 
-        public void AddPointToSearch(BotSoundStruct sound, BotComponent sain)
+        public void AddPointToSearch(BotSound sound, BotComponent sain)
         {
-            Enemy enemy = sound.Info.Enemy;
+            Enemy enemy = sound.Enemy;
             if (enemy == null)
             {
                 Logger.LogError($"Could not find enemy!");

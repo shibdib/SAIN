@@ -10,7 +10,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
         public bool Heard { get; private set; }
         public bool EnemyHeardFromPeace { get; set; }
         public float TimeSinceHeard => Time.time - _timeLastHeard;
-        public BotSoundStruct? LastSoundHeard { get; set; }
+        public BotSound LastSoundHeard { get; set; }
         public Vector3? LastHeardPosition { get; private set; }
 
         private const float REPORT_HEARD_FREQUENCY = 1f;
