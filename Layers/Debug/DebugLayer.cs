@@ -25,6 +25,11 @@ namespace SAIN.Layers.Combat.Run
             if (SAINPlugin.DebugSettings.ForceBotsToTryCrawl)
                 return new Action(typeof(CrawlAction), $"CRAWL");
 
+            if (SAINPlugin.DebugSettings.TestGrenadeThrow && BotOwner.WeaponManager.Grenades.HaveGrenade)
+            {
+                //return new Action(typeof(GrenadeThrowTestAction), "testGrenade");
+            }
+
             return new Action(typeof(RunningAction), $"RUNNING");
         }
 

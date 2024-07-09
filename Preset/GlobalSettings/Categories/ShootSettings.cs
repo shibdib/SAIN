@@ -343,5 +343,10 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [Percentage01to99]
         public float DifficultyScaling = 0.3f;
+
+        public override void Init(List<ISAINSettings> list)
+        {
+            list.Add(this);
+        }
     }
 }

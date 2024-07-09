@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SAIN.Attributes;
 using SAIN.Helpers;
+using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings.Categories
 {
@@ -12,6 +13,20 @@ namespace SAIN.Preset.GlobalSettings.Categories
             MaxSuppressionDistance_SQR = MaxSuppressionDistance.Sqr();
             MaxUnderFireDistance_SQR = MaxUnderFireDistance.Sqr();
         }
+
+        [Name("Force Single Personality For All Bots")]
+        [Description("All Spawned SAIN bots will be assigned the selected Personality, if any are set to true, no matter what.")]
+        public Dictionary<EPersonality, bool> ForcePersonality = new Dictionary<EPersonality, bool>()
+        {
+            { EPersonality.Wreckless, false},
+            { EPersonality.GigaChad, false },
+            { EPersonality.Chad, false },
+            { EPersonality.SnappingTurtle, false},
+            { EPersonality.Rat, false },
+            { EPersonality.Coward, false },
+            { EPersonality.Timmy, false},
+            { EPersonality.Normal, false},
+        };
 
         [MinMax(0.1f, 5f, 100f)]
         public float GlobalAggression = 1f;
@@ -50,5 +65,10 @@ namespace SAIN.Preset.GlobalSettings.Categories
         [JsonIgnore]
         [Hidden]
         public float MaxUnderFireDistance_SQR;
+
+        public override void Init(List<ISAINSettings> list)
+        {
+            list.Add(this);
+        }
     }
 }

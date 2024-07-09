@@ -1,4 +1,6 @@
-﻿namespace SAIN.Preset.GlobalSettings
+﻿using System.Collections.Generic;
+
+namespace SAIN.Preset.GlobalSettings
 {
     public interface ISAINSettings
     {
@@ -6,5 +8,6 @@
         object GetDefaults();
         void CreateDefault();
         void UpdateDefaults(object values);
+        void Init(List<ISAINSettings> list);
     }
 }

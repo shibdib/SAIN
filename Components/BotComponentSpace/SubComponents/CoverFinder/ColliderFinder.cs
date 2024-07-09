@@ -146,7 +146,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         public void UpdateDebugColliders(Collider[] array)
         {
             if (SAINPlugin.DebugMode 
-                && SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder 
+                && SAINPlugin.LoadedPreset.GlobalSettings.General.Cover.DebugCoverFinder 
                 && CoverFinderComponent.Bot.Cover.CurrentCoverFinderState == Classes.CoverFinderState.on)
             {
                 foreach (Collider collider in array)

@@ -82,7 +82,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 ResetLean();
                 return false;
             }
-            if (GlobalSettingsClass.Instance.AILimit.LimitAIvsAIGlobal
+            if (GlobalSettingsClass.Instance.General.AILimit.LimitAIvsAIGlobal
                 && enemy.IsAI
                 && Bot.CurrentAILimit != AILimitSetting.None)
             {
@@ -116,7 +116,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return;
             }
 
-            var blindCornerLean = FindLeanFromBlindCornerAngle(enemy, 20f);
+            var blindCornerLean = FindLeanFromBlindCornerAngle(enemy, 1f);
             if (blindCornerLean != LeanSetting.None)
             {
                 setLean(blindCornerLean);
@@ -140,7 +140,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return LeanSetting.None;
             }
-            if (minAngle > 0f && signedAngle < minAngle)
+            if (minAngle > 0f && Mathf.Abs(signedAngle) < minAngle)
             {
                 return LeanSetting.None;
             }

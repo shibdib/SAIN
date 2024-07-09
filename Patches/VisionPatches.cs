@@ -339,7 +339,7 @@ namespace SAIN.Patches.Vision
         public static bool PatchPrefix(BotOwner ___botOwner_0, ref bool ____isInDarkPlace)
         {
             if (____isInDarkPlace
-                && !SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.AllowLightOnForDarkBuildings)
+                && !SAINPlugin.LoadedPreset.GlobalSettings.General.Flashlight.AllowLightOnForDarkBuildings)
             {
                 ____isInDarkPlace = false;
             }
@@ -357,7 +357,7 @@ namespace SAIN.Patches.Vision
 
         private static bool shallTurnLightOff(WildSpawnType wildSpawnType)
         {
-            FlashlightSettings settings = SAINPlugin.LoadedPreset.GlobalSettings.Flashlight;
+            FlashlightSettings settings = SAINPlugin.LoadedPreset.GlobalSettings.General.Flashlight;
             if (EnumValues.WildSpawn.IsScav(wildSpawnType))
             {
                 return settings.TurnLightOffNoEnemySCAV;
@@ -397,7 +397,7 @@ namespace SAIN.Patches.Vision
                 Enemy enemy = sain.EnemyController.GetEnemy(__instance.Person.ProfileId, true);
                 if (enemy != null)
                 {
-                    if (!enemy.Vision.EnemyAngles.CanBeSeen)
+                    if (!enemy.Vision.Angles.CanBeSeen)
                         __result = 696969;
                     else
                         __result *= enemy.Vision.GainSightCoef;
@@ -427,7 +427,7 @@ namespace SAIN.Patches.Vision
             if (SAINEnableClass.GetSAIN(__instance?.Owner, out var sain)) {
                 Enemy enemy = sain.EnemyController.GetEnemy(__instance.ProfileId, true);
                 if (enemy != null) {
-                    if (!enemy.Vision.EnemyAngles.CanBeSeen) {
+                    if (!enemy.Vision.Angles.CanBeSeen) {
                         addVisibility = float.MinValue;
                         return;
                     }

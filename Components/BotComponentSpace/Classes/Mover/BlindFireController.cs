@@ -42,7 +42,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return false;
             }
 
-            if (GlobalSettingsClass.Instance.AILimit.LimitAIvsAIGlobal
+            if (GlobalSettingsClass.Instance.General.AILimit.LimitAIvsAIGlobal
                 && enemy.IsAI
                 && Bot.CurrentAILimit != AILimitSetting.None)
             {

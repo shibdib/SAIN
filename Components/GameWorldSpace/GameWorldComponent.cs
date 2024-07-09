@@ -86,7 +86,7 @@ namespace SAIN.Components
         {
             if (Singleton<IBotGame>.Instance == null) { return; }
 
-            bool shallDisable = _doorsDisabledByHost || GlobalSettingsClass.Instance.General.DisableAllDoors;
+            bool shallDisable = _doorsDisabledByHost || GlobalSettingsClass.Instance.General.Doors.DisableAllDoors;
 
             if (!_doorsDisabled &&
                 shallDisable)

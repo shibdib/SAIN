@@ -50,11 +50,11 @@ namespace SAIN.Preset.Personalities
         public bool InverseScale = false;
 
         [NameAndDescription("Power Level Minimum", "Minimum Power level for a bot to use this personality." + PowerLevelDescription)]
-        [MinMax(0, 800, 1)]
+        [MinMax(0, 1000, 1)]
         public float PowerLevelMin = 0;
 
         [NameAndDescription("Power Level Maximum", "Maximum Power level for a bot to use this personality." + PowerLevelDescription)]
-        [MinMax(0, 800, 1)]
+        [MinMax(0, 1000, 1)]
         public float PowerLevelMax = 800;
 
         [Name("Maximum Chance If Meets Requirements")]

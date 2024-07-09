@@ -10,6 +10,56 @@ using PathFinderClass = GClass422;
 
 namespace SAIN.Patches.Movement
 {
+    public class GlobalShootSettingsPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotGlobalShootData), "Update");
+        }
+
+        [PatchPostfix]
+        public static void PatchPrefix(BotGlobalShootData __instance)
+        {
+            __instance.CAN_STOP_SHOOT_CAUSE_ANIMATOR = false;
+        }
+    }
+
+    public class PoseStaminaPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(PlayerPhysicalClass), "ConsumePoseLevelChange");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(Player ___player_0)
+        {
+            if (___player_0.IsAI)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    public class AimStaminaPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(PlayerPhysicalClass), "Aim");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(Player ___player_0)
+        {
+            if (___player_0.IsAI)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
     public class CrawlPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -92,8 +142,7 @@ namespace SAIN.Patches.Movement
                 return true;
             }
 
-            bool isAI = player?.IsAI == true;
-            if (!isAI)
+            if (!player.IsAI)
             {
                 return true;
             }
@@ -103,7 +152,7 @@ namespace SAIN.Patches.Movement
                 return true;
             }
 
-            BackendConfigSettingsClass.GClass1376 stamina = Singleton<BackendConfigSettingsClass>.Instance.Stamina;
+            var stamina = Singleton<BackendConfigSettingsClass>.Instance.Stamina;
 
             float carryWeightModifier = ___iobserverToPlayerBridge_0.Skills.CarryingWeightRelativeModifier;
             float d = carryWeightModifier * carryWeightModifier;
@@ -111,26 +160,15 @@ namespace SAIN.Patches.Movement
             float absoluteWeightModifier = ___iobserverToPlayerBridge_0.iPlayer.HealthController.CarryingWeightAbsoluteModifier;
             Vector2 b = new Vector2(absoluteWeightModifier, absoluteWeightModifier);
 
-            BackendConfigSettingsClass.InertiaSettings inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
+            var inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
             float strength = (float)___iobserverToPlayerBridge_0.Skills.Strength.SummaryLevel;
             Vector3 b2 = new Vector3(inertia.InertiaLimitsStep * strength, inertia.InertiaLimitsStep * strength, 0f);
-
-            //Logger.LogDebug($"Strength {strength}");
-            //Logger.LogDebug($"carryWeightModifier {carryWeightModifier}");
-            //Logger.LogDebug($"absoluteWeightModifier {absoluteWeightModifier}");
-            //Logger.LogDebug($"d {d} : b {b.magnitude} : b2 {b2.magnitude}");
 
             __instance.BaseInertiaLimits = inertia.InertiaLimits + b2;
             __instance.WalkOverweightLimits = stamina.WalkOverweightLimits * d + b;
             __instance.BaseOverweightLimits = stamina.BaseOverweightLimits * d + b;
             __instance.SprintOverweightLimits = stamina.SprintOverweightLimits * d + b;
             __instance.WalkSpeedOverweightLimits = stamina.WalkSpeedOverweightLimits * d + b;
-
-            //Logger.LogDebug($"BaseInertiaLimits {__instance.BaseInertiaLimits.magnitude}");
-            //Logger.LogDebug($"WalkOverweightLimits {__instance.WalkOverweightLimits.magnitude}");
-            //Logger.LogDebug($"BaseOverweightLimits {__instance.BaseOverweightLimits.magnitude}");
-            //Logger.LogDebug($"SprintOverweightLimits {__instance.SprintOverweightLimits.magnitude}");
-            //Logger.LogDebug($"WalkSpeedOverweightLimits {__instance.WalkSpeedOverweightLimits.magnitude}");
 
             return false;
         }
@@ -146,7 +184,7 @@ namespace SAIN.Patches.Movement
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ____owner, ref bool __result)
         {
-            var settings = GlobalSettingsClass.Instance.General;
+            var settings = GlobalSettingsClass.Instance.General.Doors;
             if (settings.DisableAllDoors)
             {
                 __result = false;

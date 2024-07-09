@@ -196,7 +196,7 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
             }
 
             float pathLength = path.CalculatePathLength();
-            if (pathLength > SAINPlugin.LoadedPreset.GlobalSettings.Cover.MaxCoverPathLength)
+            if (pathLength > SAINPlugin.LoadedPreset.GlobalSettings.General.Cover.MaxCoverPathLength)
             {
                 return false;
             }

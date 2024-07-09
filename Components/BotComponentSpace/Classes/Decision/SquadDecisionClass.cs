@@ -200,6 +200,12 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallGroupSearch()
         {
+            if (Bot.Info.Profile.IsBoss && 
+                Bot.Info.Profile.WildSpawnType != WildSpawnType.bossKnight)
+            {
+                //return false;
+            }
+
             foreach (var member in Bot.Squad.Members.Values)
             {
                 if (member.Decision.CurrentCombatDecision == ECombatDecision.Search)

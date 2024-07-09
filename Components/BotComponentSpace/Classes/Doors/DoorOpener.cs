@@ -75,7 +75,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public bool CheckUseSAINOpener()
         {
-            if (!SAINPlugin.LoadedPreset.GlobalSettings.General.NewDoorOpening)
+            if (!SAINPlugin.LoadedPreset.GlobalSettings.General.Doors.NewDoorOpening)
             {
                 return BotOwner.DoorOpener.Update();
             }
@@ -150,12 +150,12 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             if (checkIfDoorLast(link))
             {
-                Logger.LogDebug($"Link {link.Id} is last!");
+                //Logger.LogDebug($"Link {link.Id} is last!");
                 return false;
             }
             if (!link.Door.Operatable || !link.Door.enabled)
             {
-                Logger.LogDebug($"Link {link.Id} door not operable!");
+                //Logger.LogDebug($"Link {link.Id} door not operable!");
                 return false;
             }
             return true;
@@ -193,20 +193,20 @@ namespace SAIN.SAINComponent.Classes.Mover
             NavMeshDoorLink link = data.Link;
             Door door = link.Door;
 
-            Logger.LogDebug($"Found Door to interact for {BotOwner.name}! ID: {link.Id}");
+            //Logger.LogDebug($"Found Door to interact for {BotOwner.name}! ID: {link.Id}");
 
             switch (door.DoorState)
             {
                 case EDoorState.Shut:
                     data.LastOpenTime = Time.time;
-                    Logger.LogDebug($"{BotOwner.name} opening door...");
+                    //Logger.LogDebug($"{BotOwner.name} opening door...");
                     _nextPosibleDoorInteractTime = Time.time + 1f;
                     Interact(data, EInteractionType.Open);
                     return true;
 
                 case EDoorState.Open:
                     data.LastCloseTime = Time.time;
-                    Logger.LogDebug($"{BotOwner.name} closing door...");
+                    //Logger.LogDebug($"{BotOwner.name} closing door...");
                     _nextPosibleDoorInteractTime = Time.time + 1f;
                     Interact(data, EInteractionType.Close);
                     return true;
@@ -386,7 +386,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             var gstruct = Door.Interact(Player, type);
             if (gstruct.Succeeded)
             {
-                Logger.LogDebug("Success");
+                //Logger.LogDebug("Success");
                 switch (type)
                 {
                     case EInteractionType.Breach:
@@ -399,7 +399,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
                 return;
             }
-            Logger.LogDebug("Fail");
+            //Logger.LogDebug("Fail");
         }
 
         private void endDoorInteraction()
@@ -421,7 +421,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return false;
             }
 
-            var general = GlobalSettingsClass.Instance.General;
+            var general = GlobalSettingsClass.Instance.General.Doors;
             return
                 general.NoDoorAnimations == false ||
                 BreachingDoor == true ||
@@ -478,7 +478,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             EDoorState snap = door.Snap;
             if (shallKickOpen(door, Etype) || Etype == EInteractionType.Breach)
             {
-                Logger.LogDebug($"{BotOwner.name} Breaching Door {doorInfo.Link.Id}!");
+                //Logger.LogDebug($"{BotOwner.name} Breaching Door {doorInfo.Link.Id}!");
                 BreachingDoor = true;
                 Etype = EInteractionType.Breach;
             }
@@ -491,9 +491,9 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             if (Etype == EInteractionType.Breach ||
                 ModDetection.ProjectFikaLoaded ||
-                !GlobalSettingsClass.Instance.General.NoDoorAnimations)
+                !GlobalSettingsClass.Instance.General.Doors.NoDoorAnimations)
             {
-                Logger.LogDebug($"{BotOwner.name} Executing [{Etype}] door interaction on {doorInfo.Link.Id}");
+                //Logger.LogDebug($"{BotOwner.name} Executing [{Etype}] door interaction on {doorInfo.Link.Id}");
                 this.BotOwner.Mover.SprintPause(2f);
                 this.BotOwner.Mover.MovementPause(2f);
                 Interacting = true;
@@ -504,7 +504,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return;
             }
 
-            Logger.LogDebug($"{BotOwner.name} Auto Opening Door on {doorInfo.Link.Id}");
+            //Logger.LogDebug($"{BotOwner.name} Auto Opening Door on {doorInfo.Link.Id}");
 
             EDoorState state = EDoorState.None;
             switch (Etype)
@@ -529,7 +529,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool ShallInvertDoorAngle(Door door)
         {
-            if (!GlobalSettingsClass.Instance.General.InvertDoors)
+            if (!GlobalSettingsClass.Instance.General.Doors.InvertDoors)
             {
                 return false;
             }

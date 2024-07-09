@@ -21,11 +21,11 @@ namespace SAIN.Preset.Personalities
         public float HoldGroundBaseTime = 1f;
 
         [Advanced]
-        [MinMax(0.1f, 2f, 10)]
+        [MinMax(0f, 5f, 100)]
         public float HoldGroundMinRandom = 0.66f;
 
         [Advanced]
-        [MinMax(0.1f, 2f, 10)]
+        [MinMax(0f, 5f, 100)]
         public float HoldGroundMaxRandom = 1.5f;
     }
 }

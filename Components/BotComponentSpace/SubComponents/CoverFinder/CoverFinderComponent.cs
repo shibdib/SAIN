@@ -741,11 +741,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private static void updateSettings(SAINPresetClass preset)
         {
-            PerformanceMode = SAINPlugin.LoadedPreset.GlobalSettings.Performance.PerformanceMode;
-            CoverMinHeight = SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverMinHeight;
-            CoverMinEnemyDist = SAINPlugin.LoadedPreset.GlobalSettings.Cover.CoverMinEnemyDistance;
+            PerformanceMode = SAINPlugin.LoadedPreset.GlobalSettings.General.Performance.PerformanceMode;
+            CoverMinHeight = SAINPlugin.LoadedPreset.GlobalSettings.General.Cover.CoverMinHeight;
+            CoverMinEnemyDist = SAINPlugin.LoadedPreset.GlobalSettings.General.Cover.CoverMinEnemyDistance;
             CoverMinEnemyDistSqr = CoverMinEnemyDist * CoverMinEnemyDist;
-            DebugCoverFinder = SAINPlugin.LoadedPreset.GlobalSettings.Cover.DebugCoverFinder;
+            DebugCoverFinder = SAINPlugin.LoadedPreset.GlobalSettings.General.Cover.DebugCoverFinder;
         }
 
         private static void AnalyzeAllColliders()

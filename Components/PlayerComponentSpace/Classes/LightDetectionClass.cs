@@ -45,7 +45,7 @@ namespace SAIN.Components.PlayerComponentSpace
             LightPoints.Add(new FlashLightPoint(point));
 
             // Debug is off, return
-            if (!SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.DebugFlash)
+            if (!SAINPlugin.LoadedPreset.GlobalSettings.General.Flashlight.DebugFlash)
             {
                 return;
             }

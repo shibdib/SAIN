@@ -47,6 +47,11 @@ namespace SAIN.Preset.GlobalSettings
         //public float ATTACHMENT_POWER = 5f;
         public float EARPRO_POWER = 30f;
 
+        public override void Init(List<ISAINSettings> list)
+        {
+            list.Add(this);
+        }
+
         public bool CalcPower(PlayerComponent playerComponent, out float power)
         {
             power = 0f;

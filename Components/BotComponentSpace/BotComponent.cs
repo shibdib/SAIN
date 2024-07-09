@@ -228,7 +228,7 @@ namespace SAIN.SAINComponent
                     return false;
                 }
 
-                var settings = GlobalSettingsClass.Instance.General;
+                var settings = GlobalSettingsClass.Instance.General.Jokes;
                 if (settings.RandomCheaters &&
                     EFTMath.RandomBool(settings.RandomCheaterChance))
                 {

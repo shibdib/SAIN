@@ -73,7 +73,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 Crawling = false;
             }
-            updateStamina();
+            //updateStamina();
             Pose.Update();
             Lean.Update();
             Prone.Update();

@@ -41,7 +41,7 @@ namespace SAIN
 
             private static void handlePMCandRaiders()
             {
-                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General.Layers;
                 List<string> pmcBrain = new List<string>();
                 pmcBrain.Add(Brain.PMC.ToString());
 
@@ -78,7 +78,7 @@ namespace SAIN
                 }
 
                 List<string> brainList = getBrainList(AIBrains.Scavs);
-                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General.Layers;
 
                 //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
                 BrainManager.AddCustomLayer(typeof(DebugLayer), brainList, 99);
@@ -107,7 +107,7 @@ namespace SAIN
             {
                 List<string> brainList = getBrainList(AIBrains.Others);
 
-                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General.Layers;
                 //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
                 BrainManager.AddCustomLayer(typeof(DebugLayer), brainList, 99);
                 BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), brainList, 80);
@@ -144,7 +144,7 @@ namespace SAIN
                 List<string> brainList = new List<string>();
                 brainList.Add(Brain.ExUsec.ToString());
 
-                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General.Layers;
                 //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
                 BrainManager.AddCustomLayer(typeof(DebugLayer), brainList, 99);
                 BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), brainList, 80);
@@ -181,7 +181,7 @@ namespace SAIN
                 List<string> brainList = new List<string>();
                 brainList.Add(Brain.ArenaFighter.ToString());
 
-                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General;
+                var settings = SAINPlugin.LoadedPreset.GlobalSettings.General.Layers;
                 //BrainManager.AddCustomLayer(typeof(BotUnstuckLayer), stringList, 98);
                 BrainManager.AddCustomLayer(typeof(DebugLayer), brainList, 99);
                 BrainManager.AddCustomLayer(typeof(SAINAvoidThreatLayer), brainList, 80);
@@ -315,7 +315,7 @@ namespace SAIN
                 return brainList;
             }
 
-            private static VanillaBotSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.VanillaBots;
+            private static VanillaBotSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaBots;
         }
     }
 }

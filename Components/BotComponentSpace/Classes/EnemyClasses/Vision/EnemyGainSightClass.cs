@@ -340,7 +340,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return 1f;
 
             var settings = SAINPlugin.LoadedPreset.GlobalSettings.Look.VisionSpeed.Elevation;
-            var angles = Enemy.Vision.EnemyAngles;
+            var angles = Enemy.Vision.Angles;
             float min = GAINSIGHT_ELEVATION_MIN_ANGLE;
 
             float elevationAngle = angles.AngleToEnemyVertical;
@@ -377,7 +377,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                         float angle = Vector3.Angle(currentEnemyDir, myDir);
 
                         float minAngle = 20f;
-                        float maxAngle = Enemy.Vision.EnemyAngles.MaxVisionAngle;
+                        float maxAngle = Enemy.Vision.Angles.MaxVisionAngle;
                         if (angle > minAngle && 
                             angle < maxAngle)
                         {
@@ -411,14 +411,14 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return 1f;
             }
 
-            float angle = Enemy.Vision.EnemyAngles.AngleToEnemy;
+            float angle = Enemy.Vision.Angles.AngleToEnemy;
 
             float minAngle = _periphVisionStart;
             if (angle < minAngle)
             {
                 return 1f;
             }
-            float maxAngle = Enemy.Vision.EnemyAngles.MaxVisionAngle;
+            float maxAngle = Enemy.Vision.Angles.MaxVisionAngle;
             float maxRatio = _maxPeriphVisionSpeedReduction;
             if (angle > maxAngle)
             {

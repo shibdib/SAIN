@@ -253,7 +253,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float calcDelayOnDistance()
         {
-            bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.Performance.PerformanceMode;
+            bool performanceMode = SAINPlugin.LoadedPreset.GlobalSettings.General.Performance.PerformanceMode;
             bool currentEnemy = Enemy.IsCurrentEnemy;
             bool isAI = Enemy.IsAI;
             bool searchingForEnemy = Enemy.Events.OnSearch.Value;

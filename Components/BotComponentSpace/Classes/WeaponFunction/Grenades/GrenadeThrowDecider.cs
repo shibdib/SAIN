@@ -253,6 +253,14 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             }
             if (grenades.DoThrow())
             {
+                //if (Player.HandsAnimator is FirearmsAnimator firearmAnimator)
+                //{
+                //    firearmAnimator.SetGrenadeFire(FirearmsAnimator.EGrenadeFire.Throw);
+                //}
+                //else
+                //{
+                //    Logger.LogWarning("fail");
+                //}
                 Bot.Talk.GroupSay(EPhraseTrigger.OnGrenade, null, false, _announceThrowingNadeChance);
                 return true;
             }
@@ -278,6 +286,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             AIGreanageThrowData aigreanageThrowData = GrenadeThrowChecker.CanThrowGrenade2(from, trg, _maxPower, angle, -1f, _minThrowDistPercent);
             if (aigreanageThrowData.CanThrow)
             {
+                if (Physics.Raycast(from, aigreanageThrowData.Direction, 1.5f, LayerMaskClass.HighPolyWithTerrainMask))
+                {
+                    Logger.LogDebug($"blocked by object, cant throw");
+                    return false;
+                }
                 BotOwner.WeaponManager.Grenades.SetThrowData(aigreanageThrowData);
                 return true;
             }

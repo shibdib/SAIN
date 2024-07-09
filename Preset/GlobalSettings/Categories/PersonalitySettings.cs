@@ -48,5 +48,10 @@ namespace SAIN.Preset.GlobalSettings
             personality = EPersonality.Normal;
             return false;
         }
+
+        public override void Init(List<ISAINSettings> list)
+        {
+            list.Add(this);
+        }
     }
 }

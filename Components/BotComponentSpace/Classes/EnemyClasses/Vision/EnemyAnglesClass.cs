@@ -55,9 +55,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 AngleToEnemy = Vector3.Angle(enemyDirNormal, lookDir);
                 CanBeSeen = AngleToEnemy <= MaxVisionAngle;
 
-                float verticalSigned = calcVerticalAngle(enemyDirNormal, lookDir);
-                AngleToEnemyVerticalSigned = verticalSigned;
-                AngleToEnemyVertical = Mathf.Abs(verticalSigned);
+                float verticalAngle = calcVerticalAngle(enemyDirNormal, lookDir, out float yDiff);
+                AngleToEnemyVertical = verticalAngle;
+                AngleToEnemyVerticalSigned = yDiff >= 0 ? verticalAngle : -verticalAngle;
 
                 float horizSigned = calcHorizontalAngle(enemyDirNormal, lookDir);
                 AngleToEnemyHorizontalSigned = horizSigned;
@@ -65,15 +65,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        private float calcVerticalAngle(Vector3 enemyDirNormal, Vector3 lookDirection)
+        private float calcVerticalAngle(Vector3 enemyDirNormal, Vector3 lookDirection, out float yDiff)
         {
             Vector3 enemyElevDir = new Vector3(lookDirection.x, enemyDirNormal.y, lookDirection.z);
-            float signedAngle = Vector3.SignedAngle(lookDirection, enemyElevDir, Vector3.right);
-
-            if (!EnemyPlayer.IsAI)
-                Logger.LogDebug($"elevAngle {signedAngle} Y-Diff {(enemyElevDir.y - lookDirection.y).Round100()}");
-
-            return signedAngle;
+            yDiff = (enemyElevDir.y - lookDirection.y).Round100();
+            if (yDiff == 0)
+            {
+                return 0;
+            }
+            float angle = Vector3.Angle(lookDirection, enemyElevDir);
+            return angle;
         }
 
         private float calcHorizontalAngle(Vector3 enemyDirNormal, Vector3 lookDirection)
@@ -81,10 +82,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             enemyDirNormal.y = 0;
             lookDirection.y = 0;
             float signedAngle = Vector3.SignedAngle(lookDirection, enemyDirNormal, Vector3.up);
-
-            if (!EnemyPlayer.IsAI)
-                Logger.LogDebug($"horizAngle {signedAngle}");
-
             return signedAngle;
         }
 

@@ -93,7 +93,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 return float.MaxValue;
             }
-            var aiLimit = GlobalSettingsClass.Instance.AILimit;
+            var aiLimit = GlobalSettingsClass.Instance.General.AILimit;
             if (!aiLimit.LimitAIvsAIGlobal)
             {
                 return float.MaxValue;
@@ -142,7 +142,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void UpdatePresetSettings(SAINPresetClass preset)
         {
-            var aiLimit = preset.GlobalSettings.AILimit;
+            var aiLimit = preset.GlobalSettings.General.AILimit;
             _farDistance = aiLimit.MaxVisionRanges[AILimitSetting.Far];
             _veryFarDistance = aiLimit.MaxVisionRanges[AILimitSetting.VeryFar];
             _narniaDistance = aiLimit.MaxVisionRanges[AILimitSetting.Narnia];

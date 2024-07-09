@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SAIN.Attributes;
+using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
@@ -114,5 +115,10 @@ namespace SAIN.Preset.GlobalSettings
 
         [Percentage]
         public float PMCAimForHeadChance = 33f;
+
+        public override void Init(List<ISAINSettings> list)
+        {
+            list.Add(this);
+        }
     }
 }

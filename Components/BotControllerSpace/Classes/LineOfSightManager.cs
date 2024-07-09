@@ -26,7 +26,7 @@ namespace SAIN.Components
                 {
                     if (bot == null) continue;
 
-                    float frequency = bot.BotActive ? 0.1f : 0.5f;
+                    float frequency = bot.BotActive ? 0.01f : 0.25f;
                     if (bot.LastCheckVisibleTime + frequency > Time.time)
                         continue;
 
@@ -60,7 +60,7 @@ namespace SAIN.Components
 
         private static void updateSettings(SAINPresetClass preset)
         {
-            maxBotsPerFrame = Mathf.RoundToInt(preset.GlobalSettings.Performance.MaxBotsToCheckVisionPerFrame);
+            maxBotsPerFrame = Mathf.RoundToInt(preset.GlobalSettings.General.Performance.MaxBotsToCheckVisionPerFrame);
         }
     }
 }

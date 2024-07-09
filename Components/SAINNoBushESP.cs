@@ -59,7 +59,7 @@ namespace SAIN.Components
             SAIN = sain;
         }
 
-        private static NoBushESPSettings Settings => SAINPlugin.LoadedPreset.GlobalSettings.NoBushESP;
+        private static NoBushESPSettings Settings => SAINPlugin.LoadedPreset.GlobalSettings.Look.NoBushESP;
         private static bool UserToggle => Settings.NoBushESPToggle;
         private static bool EnhancedChecks => Settings.NoBushESPEnhanced;
         private static float EnhancedRatio => Settings.NoBushESPEnhancedRatio;

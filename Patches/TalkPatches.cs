@@ -112,28 +112,38 @@ namespace SAIN.Patches.Talk
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ___botOwner_0, EPhraseTrigger type, ETagStatus? additionalMask = null)
         {
-            bool skipCheck = false;
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
+            {
+                return true;
+            }
+            if (___botOwner_0?.HealthController?.IsAlive == false)
+            {
+                return true;
+            }
             switch (type)
             {
                 case EPhraseTrigger.OnDeath:
                 case EPhraseTrigger.OnBeingHurt:
                 case EPhraseTrigger.OnAgony:
                 case EPhraseTrigger.OnBreath:
-                    skipCheck = true;
-                    break;
+                    return true;
 
                 default:
                     break;
             }
-
-            // If handling of bots talking is disabled, let the original method run
-            if (skipCheck || 
-                SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching || 
-                ___botOwner_0?.HealthController?.IsAlive == false || 
-                SAINPlugin.IsBotExluded(___botOwner_0))
+            if (!SAINEnableClass.GetSAIN(___botOwner_0, out BotComponent bot))
             {
-                SAINBotController.Instance?.BotHearing.PlayerTalked(type, additionalMask ?? ETagStatus.Combat, ___botOwner_0.GetPlayer);
                 return true;
+            }
+            switch (type)
+            {
+                case EPhraseTrigger.HandBroken:
+                case EPhraseTrigger.LegBroken:
+                    bot.Talk.GroupSay(type, null, false, 60);
+                    break;
+
+                default:
+                    break;
             }
             return false;
         }

@@ -89,8 +89,8 @@ namespace SAIN.SAINComponent.Classes.Sense
             return false;
         }
 
-        private static float MaxDazzleRange => SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.MaxDazzleRange;
-        private static float Effectiveness => SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.DazzleEffectiveness;
+        private static float MaxDazzleRange => SAINPlugin.LoadedPreset.GlobalSettings.General.Flashlight.MaxDazzleRange;
+        private static float Effectiveness => SAINPlugin.LoadedPreset.GlobalSettings.General.Flashlight.DazzleEffectiveness;
 
         public void ApplyDazzle(float dazzleModif, float gainSightModif)
         {

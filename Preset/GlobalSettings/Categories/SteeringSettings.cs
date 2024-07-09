@@ -1,4 +1,5 @@
 ﻿using SAIN.Attributes;
+using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
@@ -15,5 +16,10 @@ namespace SAIN.Preset.GlobalSettings
 
         [MinMax(50, 300, 1f)]
         public float SteerSpeed_MinSpeed = 125f;
+
+        public override void Init(List<ISAINSettings> list)
+        {
+            list.Add(this);
+        }
     }
 }

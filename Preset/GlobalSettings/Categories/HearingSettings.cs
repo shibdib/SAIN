@@ -211,5 +211,10 @@ namespace SAIN.Preset.GlobalSettings
             { ECaliber.Caliber68x51, 200f },
             { ECaliber.Default, 125 },
         };
+
+        public override void Init(List<ISAINSettings> list)
+        {
+            list.Add(this);
+        }
     }
 }

@@ -67,7 +67,16 @@ namespace SAIN.Attributes
             }
 
             if (wasEdited)
-                ConfigEditingTracker.Add(attributes.Name, value);
+            {
+                if (value is ISAINSettings || value is ISettingsGroup)
+                {
+                    // is not
+                }
+                else
+                {
+                    ConfigEditingTracker.Add(attributes.Name, value);
+                }
+            }
 
             return value;
         }
@@ -84,6 +93,9 @@ namespace SAIN.Attributes
 
             if (value is Dictionary<ESoundDispersionType, DispersionValues>)
                 EditDispersionDictionary(value as Dictionary<ESoundDispersionType, DispersionValues>, settingsObject, attributes, out wasEdited);
+
+            if (value is Dictionary<AILimitSetting, float>)
+                EditAILimitDictionary(value as Dictionary<AILimitSetting, float>, settingsObject, attributes, out wasEdited);
 
             if (value is Dictionary<EPersonality, bool>)
                 EditBoolDictionary<EPersonality>( value, attributes, out wasEdited);
@@ -181,7 +193,10 @@ namespace SAIN.Attributes
                 if (defaultValue != null)
                 {
                     if (Button("Reset", "Reset To Default Value", EUISoundType.ButtonClick, entryConfig.Reset))
+                    {
                         value = defaultValue;
+                        ConfigEditingTracker.Remove(attributes);
+                    }
                 }
                 else
                 {
@@ -368,6 +383,46 @@ namespace SAIN.Attributes
                 editDispStruct(values, soundType, defaultDictionary, out bool newEdit);
                 if (newEdit)
                     wasEdited = true;
+            }
+            EndVertical(5f);
+        }
+
+        public static void EditAILimitDictionary(Dictionary<AILimitSetting, float> dictionary, object settingsObject, AttributesInfoClass attributes, out bool wasEdited)
+        {
+            BeginVertical(5f);
+
+            var defaultDictionary = attributes.GetDefault(settingsObject) as Dictionary<AILimitSetting, float>;
+            AILimitSetting[] array = EnumValues.GetEnum<AILimitSetting>();
+            wasEdited = false;
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                var limitSetting = array[i];
+                if (!dictionary.TryGetValue(limitSetting, out float originalValue))
+                {
+                    continue;
+                }
+                BeginHorizontal(200f);
+
+                string name = limitSetting.ToString();
+                string description = "";
+                float min = 5f;
+                float max = 800f;
+
+                float newValue = slider(name, description, originalValue, min, max).Round(10f);
+                if (resetButton())
+                {
+                    newValue = defaultDictionary[limitSetting];
+                    dictionary[limitSetting] = newValue;
+                    //ConfigEditingTracker.Remove(attributes);
+                }
+
+                if (dictionary[limitSetting] != newValue)
+                {
+                    dictionary[limitSetting] = newValue;
+                    wasEdited = true;
+                }
+                EndHorizontal(200f);
             }
             EndVertical(5f);
         }
@@ -620,7 +675,7 @@ namespace SAIN.Attributes
         public static bool SkipForSearch(AttributesInfoClass attributes, string search)
         {
             return !string.IsNullOrEmpty(search) &&
-                (attributes.Name.ToLower().Contains(search) == false &&
+                (attributes.Name?.ToLower().Contains(search) == false &&
                 attributes.Description?.ToLower().Contains(search) == false);
         }
 

@@ -50,7 +50,7 @@ namespace SAIN.Preset.Personalities
 
         private bool checkForcePersonality(out EPersonality personality)
         {
-            foreach (var item in SAINPlugin.LoadedPreset.GlobalSettings.Personality.ForcePersonality)
+            foreach (var item in SAINPlugin.LoadedPreset.GlobalSettings.Mind.ForcePersonality)
             {
                 if (item.Value == true)
                 {

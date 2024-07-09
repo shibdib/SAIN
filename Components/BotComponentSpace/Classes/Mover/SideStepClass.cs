@@ -35,7 +35,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 ResetSideStep(currentSideStep);
                 return;
             }
-            if (GlobalSettingsClass.Instance.AILimit.LimitAIvsAIGlobal && 
+            if (GlobalSettingsClass.Instance.General.AILimit.LimitAIvsAIGlobal && 
                 enemy.IsAI && 
                 Bot.CurrentAILimit != AILimitSetting.None)
             {

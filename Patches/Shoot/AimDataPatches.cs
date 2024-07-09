@@ -65,7 +65,7 @@ namespace SAIN.Patches.Shoot.Aim
 
             Vector3 result = realTargetPoint + finalOffset;
 
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Debug.DebugDrawAimGizmos &&
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.DebugDrawAimGizmos &&
                 person?.IsYourPlayer == true)
             {
                 Vector3 weaponRoot = ___botOwner_0.WeaponRoot.position;
@@ -216,7 +216,7 @@ namespace SAIN.Patches.Shoot.Aim
         private static float calculateAim(BotComponent botComponent, float distance, float angle, bool moving, bool panicing, float aimDelay)
         {
             BotOwner botOwner = botComponent.BotOwner;
-            StringBuilder stringBuilder = SAINPlugin.LoadedPreset.GlobalSettings.Debug.DebugAimCalculations ? new StringBuilder() : null;
+            StringBuilder stringBuilder = SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.DebugAimCalculations ? new StringBuilder() : null;
             stringBuilder?.AppendLine($"Aim Time Calculation for [{botOwner?.name} : {botOwner?.Profile?.Info?.Settings?.Role} : {botOwner?.Profile?.Info?.Settings?.BotDifficulty}]");
 
             SAINAimingSettings sainAimSettings = botComponent.Info.FileSettings.Aiming;

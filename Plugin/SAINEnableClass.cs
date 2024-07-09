@@ -202,6 +202,6 @@ namespace SAIN
             return GetSAIN(player?.AIData?.BotOwner, out sain);
         }
 
-        private static VanillaBotSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.VanillaBots;
+        private static VanillaBotSettings SAINEnabled => SAINPlugin.LoadedPreset.GlobalSettings.General.VanillaBots;
     }
 }

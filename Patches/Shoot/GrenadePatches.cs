@@ -2,8 +2,10 @@
 using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
+using System;
 using System.Reflection;
 using UnityEngine;
+using static EFT.Player;
 using GrenadeFinishResult = GInterface145;
 
 namespace SAIN.Patches.Shoot.Grenades
@@ -21,15 +23,6 @@ namespace SAIN.Patches.Shoot.Grenades
             if (SAINPlugin.IsBotExluded(___botOwner_0))
             {
                 return true;
-            }
-
-            if (___botOwner_0.WeaponManager != null && ___botOwner_0.WeaponManager.Selector.IsChanging)
-            {
-                return false;
-            }
-            if (___botOwner_0.WeaponManager.Reload.Reloading)
-            {
-                return false;
             }
             if (__instance.AIGreanageThrowData == null)
             {
@@ -67,6 +60,15 @@ namespace SAIN.Patches.Shoot.Grenades
                     }
             }
             return false;
+        }
+
+        private static void ThrowGrenade(GrenadeClass throwWeap, Player player, Callback<GInterface145> callback)
+        {
+            Player.Class1109 @class = new Player.Class1109();
+            @class.player_0 = player;
+            @class.throwWeap = throwWeap;
+            Func<Player.QuickGrenadeThrowController> controllerFactory = new Func<Player.QuickGrenadeThrowController>(@class.method_0);
+            new Player.Process<Player.QuickGrenadeThrowController, GInterface145>(player, controllerFactory, @class.throwWeap, true, Player.AbstractProcess.Completion.Sync, Player.AbstractProcess.Confirmation.Succeed, false).method_0(null, callback, true);
         }
     }
 }

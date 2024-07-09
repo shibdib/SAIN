@@ -78,7 +78,7 @@ namespace SAIN.SAINComponent.Classes
 
         protected void UpdatePresetSettings(SAINPresetClass preset)
         {
-            var aiLimit = GlobalSettingsClass.Instance.AILimit;
+            var aiLimit = GlobalSettingsClass.Instance.General.AILimit;
             _frequency = aiLimit.AILimitUpdateFrequency;
             _farDistance = aiLimit.AILimitRanges[AILimitSetting.Far].Sqr();
             _veryFarDistance = aiLimit.AILimitRanges[AILimitSetting.VeryFar].Sqr();

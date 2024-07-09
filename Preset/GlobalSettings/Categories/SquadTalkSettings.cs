@@ -1,4 +1,5 @@
 ﻿using SAIN.Attributes;
+using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
@@ -102,5 +103,10 @@ namespace SAIN.Preset.GlobalSettings
 
         [MinMax(1f, 90f, 1f)]
         public float _enemyLocationFrontAngle = 90f;
+
+        public override void Init(List<ISAINSettings> list)
+        {
+            list.Add(this);
+        }
     }
 }

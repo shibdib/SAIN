@@ -26,6 +26,7 @@ namespace SAIN.Plugin
         public static void Remove(AttributesInfoClass info)
         {
             EditedConfigValues.Remove(info.Name);
+            clearAndCreateStringBuilder();
         }
 
         public static bool WasEdited(AttributesInfoClass info)
@@ -47,11 +48,6 @@ namespace SAIN.Plugin
 
         private static readonly Type _float = typeof(float);
         private static readonly Type _bool = typeof(bool);
-
-        private static void handleStringBuilder(string name, object value)
-        {
-            clearAndCreateStringBuilder();
-        }
 
         private static void addToStringBuilder(string name, object value)
         {

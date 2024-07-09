@@ -30,7 +30,7 @@ namespace SAIN.Layers
         {
             return 
                 Bot.Info.FileSettings.Mind.EnableExtracts &&
-                GlobalSettingsClass.Instance.Extract.EnableExtractsGlobal &&
+                GlobalSettingsClass.Instance.General.Extract.EnableExtractsGlobal &&
                 Components.BotController.BotExtractManager.IsBotAllowedToExfil(Bot);
         }
 
@@ -126,7 +126,7 @@ namespace SAIN.Layers
         private bool ExtractFromLoot()
         {
             // If extract from loot is disabled, or no Looting Bots interop, not active
-            if (SAINPlugin.LoadedPreset.GlobalSettings.LootingBots.ExtractFromLoot == false  || !LootingBots.LootingBotsInterop.Init())
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.LootingBots.ExtractFromLoot == false  || !LootingBots.LootingBotsInterop.Init())
             {
                 return false;
             }

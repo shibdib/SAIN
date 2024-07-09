@@ -339,6 +339,7 @@
     <Compile Include="Helpers\PerformanceHelpers.cs" />
     <Compile Include="Layers\Combat\Solo\MeleeAttackAction.cs" />
     <Compile Include="Layers\Debug\CrawlAction.cs" />
+    <Compile Include="Layers\Debug\GrenadeThrowTestAction.cs" />
     <Compile Include="Layers\ISAINAction.cs" />
     <Compile Include="Patches\FixPatches.cs" />
     <Compile Include="Patches\Shoot\AimDataPatches.cs" />
@@ -408,10 +409,19 @@
     <Compile Include="Preset\GearStealthValues\EEquipmentType.cs" />
     <Compile Include="Preset\GearStealthValues\GearStealthValuesClass.cs" />
     <Compile Include="Preset\GearStealthValues\ItemStealthValue.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\AILimitSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\AILimitSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\CloneSettingsClass.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\DoorSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\JokeSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\LayerSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\GlobalMoveSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\ISAINSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\Look\ElevationVisionSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\Look\LightNVGSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\Look\NotLookingSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\Look\TimeSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\Look\VisionDistanceSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\Look\VisionSpeedSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\SAINSettingsBase.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\SquadTalkSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\SteeringSettings.cs" />
@@ -423,11 +433,11 @@
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\DefaultBrainsClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\Layer.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\LayerInfoClass.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\DebugSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\NoBushESPSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\LootingBotsSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\VanillaBotSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\PerformanceSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\DebugSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\Look\NoBushESPSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\LootingBotsSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\VanillaBotSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\PerformanceSettings.cs" />
     <Compile Include="Preset\ISettingsGroup.cs" />
     <Compile Include="Preset\Personalities\Categories\PersonalityAssignmentSettings.cs" />
     <Compile Include="Preset\Personalities\Categories\PersonalityBehaviorSettings.cs" />
@@ -502,10 +512,10 @@
     <Compile Include="Preset\BotSettings\SAINSettings\SAINSettingsClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\AimSettings.cs" />
     <Compile Include="Preset\Editor\Attributes\ConfigAttributes.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\CoverSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\ExtractSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\FlashlightSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\GeneralSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\CoverSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\ExtractSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\FlashlightSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\General\GeneralSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\HearingSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\MindSettings.cs" />
     <Compile Include="Preset\GlobalSettings\GlobalSettingsClass.cs" />
@@ -643,7 +653,7 @@
     <Compile Include="Components\BotComponentSpace\BotBase.cs" />
     <Compile Include="Plugin\VersionChecker\VersionChecker.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\ShootSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\LookSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\Look\LookSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

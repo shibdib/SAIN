@@ -196,7 +196,7 @@ namespace SAIN.SAINComponent.Classes
             if (!sound.Info.IsAI)
                 return false;
 
-            var aiLimit = GlobalSettingsClass.Instance.AILimit;
+            var aiLimit = GlobalSettingsClass.Instance.General.AILimit;
             if (!aiLimit.LimitAIvsAIGlobal)
                 return false;
 
@@ -315,7 +315,7 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
             _lastCalcFrame = frame;
-            var maxHeadRanges = preset.GlobalSettings.AILimit.MaxHearingRanges;
+            var maxHeadRanges = preset.GlobalSettings.General.AILimit.MaxHearingRanges;
             _farDistance = maxHeadRanges[AILimitSetting.Far];
             _veryFarDistance = maxHeadRanges[AILimitSetting.VeryFar];
             _narniaDistance = maxHeadRanges[AILimitSetting.Narnia];

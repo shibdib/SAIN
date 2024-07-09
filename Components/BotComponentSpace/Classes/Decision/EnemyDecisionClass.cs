@@ -645,7 +645,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-        private CoverSettings CoverSettings => SAINPlugin.LoadedPreset.GlobalSettings.Cover;
+        private CoverSettings CoverSettings => SAINPlugin.LoadedPreset.GlobalSettings.General.Cover;
         private float ShiftCoverChangeDecisionTime => CoverSettings.ShiftCoverChangeDecisionTime;
         private float ShiftCoverTimeSinceSeen => CoverSettings.ShiftCoverTimeSinceSeen;
         private float ShiftCoverTimeSinceEnemyCreated => CoverSettings.ShiftCoverTimeSinceEnemyCreated;

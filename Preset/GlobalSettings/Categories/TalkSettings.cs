@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SAIN.Attributes;
+using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
@@ -49,5 +51,10 @@ namespace SAIN.Preset.GlobalSettings
         [Name("Vanilla Bot Talking")]
         [Description("Disable all SAIN based handling of bot talking. No more squad chatter, no more quiet bots, completely disables SAIN's handling of bot voices")]
         public bool DisableBotTalkPatching = false;
+
+        public override void Init(List<ISAINSettings> list)
+        {
+            list.Add(this);
+        }
     }
 }

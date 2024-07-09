@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using SAIN.Attributes;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace SAIN.Preset.GlobalSettings
 {
@@ -29,5 +31,9 @@ namespace SAIN.Preset.GlobalSettings
         [Hidden]
         [JsonIgnore]
         public T Defaults;
+
+        public virtual void Init(List<ISAINSettings> list)
+        {
+        }
     }
 }

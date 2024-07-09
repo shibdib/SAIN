@@ -69,10 +69,10 @@ namespace SAIN.Layers
         private float UpdateInfoTimer;
 
         private float randomizationFactor = 0;
-        private float MinLootValPMC => SAINPlugin.LoadedPreset.GlobalSettings.LootingBots.MinLootValPMC;
-        private float MinLootValSCAV => SAINPlugin.LoadedPreset.GlobalSettings.LootingBots.MinLootValSCAV;
-        private float MinLootValOther => SAINPlugin.LoadedPreset.GlobalSettings.LootingBots.MinLootValOther;
-        private float MinLootValException => SAINPlugin.LoadedPreset.GlobalSettings.LootingBots.MinLootValException;
+        private float MinLootValPMC => SAINPlugin.LoadedPreset.GlobalSettings.General.LootingBots.MinLootValPMC;
+        private float MinLootValSCAV => SAINPlugin.LoadedPreset.GlobalSettings.General.LootingBots.MinLootValSCAV;
+        private float MinLootValOther => SAINPlugin.LoadedPreset.GlobalSettings.General.LootingBots.MinLootValOther;
+        private float MinLootValException => SAINPlugin.LoadedPreset.GlobalSettings.General.LootingBots.MinLootValException;
 
         private float GetMinNetLootValue()
         {

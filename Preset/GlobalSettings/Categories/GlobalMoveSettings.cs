@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SAIN.Attributes;
+using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
@@ -63,5 +64,10 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [MinMax(1f, 500f, 1f)]
         public float BotSprintTurningSpeed = 400f;
+
+        public override void Init(List<ISAINSettings> list)
+        {
+            list.Add(this);
+        }
     }
 }

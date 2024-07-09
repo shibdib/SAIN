@@ -312,6 +312,30 @@ namespace SAIN.Patches.Hearing
         }
     }
 
+    public class SoundClipNameCheckerPatch2 : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BaseSoundPlayer), "SoundAtPointEventHandler");
+        }
+
+        [PatchPrefix]
+        public static void PatchPrefix(string soundName, BaseSoundPlayer __instance)
+        {
+            if (soundName == FUSE)
+            {
+                BaseSoundPlayer.SoundElement soundElement = __instance.AdditionalSounds.Find((BaseSoundPlayer.SoundElement elem) => elem.EventName == FUSE || elem.EventName == "Snd" + FUSE);
+                if (soundElement != null)
+                {
+                    soundElement.RollOff = 60;
+                    soundElement.Volume = 1;
+                }
+            }
+        }
+
+        private const string FUSE = "SndFuse";
+    }
+
     public class ToggleSoundPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

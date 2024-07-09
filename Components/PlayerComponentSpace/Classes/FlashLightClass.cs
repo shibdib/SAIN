@@ -215,7 +215,7 @@ namespace SAIN.Components
 
         private float _nextPointCheckTime;
         private float _nextPointCreateTime;
-        static bool _debugMode => SAINPlugin.LoadedPreset.GlobalSettings.Flashlight.DebugFlash;
+        static bool _debugMode => SAINPlugin.LoadedPreset.GlobalSettings.General.Flashlight.DebugFlash;
 
         static FlashLightClass()
         {

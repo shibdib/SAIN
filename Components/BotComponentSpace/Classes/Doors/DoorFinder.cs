@@ -120,7 +120,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return false;
             }
-            if (GlobalSettings.General.DisableAllDoors && 
+            if (GlobalSettings.General.Doors.DisableAllDoors && 
                 GameWorldComponent.Instance.DisableDoor(door))
             {
                 return false;

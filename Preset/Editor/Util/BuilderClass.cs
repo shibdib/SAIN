@@ -291,16 +291,6 @@ namespace SAIN.Editor
             return currentValue;
         }
 
-        public static object Reset(object value, object defaultValue, params GUILayoutOption[] options)
-        {
-            if (Button("Reset", "Reset To Default Value", null, options))
-            {
-                value = defaultValue;
-            }
-            return value;
-        }
-
-
         public static T SelectionGrid<T>(T value, float height, int optionsPerLine, params T[] valueOptions)
         {
             if (valueOptions.Length == 0)

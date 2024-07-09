@@ -25,12 +25,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public float GainSightCoef => _gainSight.Value;
         public float VisionDistance => _visionDistance.Value;
 
-        public EnemyAnglesClass EnemyAngles { get; }
+        public EnemyAnglesClass Angles { get; }
         public EnemyVisionChecker VisionChecker { get; }
 
         public EnemyVisionClass(Enemy enemy) : base(enemy)
         {
-            EnemyAngles = new EnemyAnglesClass(enemy);
+            Angles = new EnemyAnglesClass(enemy);
             _gainSight = new EnemyGainSightClass(enemy);
             _visionDistance = new EnemyVisionDistanceClass(enemy);
             VisionChecker = new EnemyVisionChecker(enemy);
@@ -39,21 +39,21 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Init()
         {
             Enemy.Events.OnEnemyKnownChanged.OnToggle += OnEnemyKnownChanged;
-            EnemyAngles.Init();
+            Angles.Init();
             VisionChecker.Init();
         }
 
         public void Update()
         {
             VisionChecker.Update();
-            EnemyAngles.Update(); 
+            Angles.Update(); 
             updateVision();
         }
 
         public void Dispose()
         {
             Enemy.Events.OnEnemyKnownChanged.OnToggle -= OnEnemyKnownChanged;
-            EnemyAngles.Dispose();
+            Angles.Dispose();
             VisionChecker.Dispose();
         }
 
@@ -79,7 +79,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (forceOff)
                 IsVisible = false;
             else
-                IsVisible = EnemyInfo.IsVisible && EnemyAngles.CanBeSeen;
+                IsVisible = EnemyInfo.IsVisible && Angles.CanBeSeen;
 
             if (IsVisible)
             {

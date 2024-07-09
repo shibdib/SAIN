@@ -18,6 +18,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using static SAIN.AssemblyInfoClass;
+using SAIN.Patches.Shoot.Grenades;
+using SAIN.Patches.Hearing;
 
 namespace SAIN
 {
@@ -30,7 +32,7 @@ namespace SAIN
     [BepInIncompatibility("com.dvize.NoGrenadeESP")]
     public class SAINPlugin : BaseUnityPlugin
     {
-        public static DebugSettings DebugSettings => LoadedPreset.GlobalSettings.Debug;
+        public static DebugSettings DebugSettings => LoadedPreset.GlobalSettings.General.Debug;
         public static bool DebugMode => DebugSettings.GlobalDebugMode;
         public static bool DrawDebugGizmos => DebugSettings.DrawDebugGizmos;
         public static PresetEditorDefaults EditorDefaults => PresetHandler.EditorDefaults;
@@ -100,6 +102,9 @@ namespace SAIN
                 typeof(Patches.Movement.DoorDisabledPatch),
                 typeof(Patches.Movement.CrawlPatch),
                 typeof(Patches.Movement.CrawlPatch2),
+                typeof(Patches.Movement.PoseStaminaPatch),
+                typeof(Patches.Movement.AimStaminaPatch),
+                typeof(Patches.Movement.GlobalShootSettingsPatch),
 
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
                 typeof(Patches.Hearing.OnMakingShotPatch),
@@ -119,6 +124,7 @@ namespace SAIN
                 typeof(Patches.Hearing.DryShotPatch),
                 typeof(Patches.Hearing.ProneSoundPatch),
                 typeof(Patches.Hearing.SoundClipNameCheckerPatch),
+                typeof(Patches.Hearing.SoundClipNameCheckerPatch2),
                 typeof(Patches.Hearing.AimSoundPatch),
                 typeof(Patches.Hearing.LootingSoundPatch),
                 typeof(Patches.Hearing.SetInHandsGrenadePatch),
@@ -150,6 +156,8 @@ namespace SAIN
                 //typeof(Patches.Shoot.Aim.WeaponPresetPatch),
                 typeof(Patches.Shoot.Aim.ForceNoHeadAimPatch),
                 typeof(Patches.Shoot.Aim.AimRotateSpeedPatch),
+
+                typeof(Patches.Shoot.Grenades.DoThrowPatch),
 
                 typeof(Patches.Shoot.RateOfFire.FullAutoPatch),
                 typeof(Patches.Shoot.RateOfFire.SemiAutoPatch),

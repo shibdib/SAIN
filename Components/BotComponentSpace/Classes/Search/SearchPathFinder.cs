@@ -70,7 +70,7 @@ namespace SAIN.SAINComponent.Classes.Search
                 _nextCheckPosTime = Time.time + 4f;
                 if (!CalculatePath(enemy, out string failReason))
                 {
-                    Logger.LogDebug($"Failed to calc path during search for reason: [{failReason}]");
+                    //Logger.LogDebug($"Failed to calc path during search for reason: [{failReason}]");
                 }
             }
         }

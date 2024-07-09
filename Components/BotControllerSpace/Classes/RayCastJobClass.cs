@@ -15,8 +15,8 @@ namespace SAIN.Components
 
         private void updateSettings()
         {
-            MinJobSize = Mathf.RoundToInt(SAINPlugin.LoadedPreset.GlobalSettings.Performance.MinJobSize);
-            SpherecastRadius = SAINPlugin.LoadedPreset.GlobalSettings.Performance.SpherecastRadius;
+            MinJobSize = Mathf.RoundToInt(SAINPlugin.LoadedPreset.GlobalSettings.General.Performance.MinJobSize);
+            SpherecastRadius = SAINPlugin.LoadedPreset.GlobalSettings.General.Performance.SpherecastRadius;
         }
 
         private List<Player> Players => GameWorldInfo.AlivePlayers;

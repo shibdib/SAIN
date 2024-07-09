@@ -14,6 +14,9 @@ namespace SAIN.Preset.GlobalSettings
         [Name("Test Bot Crawling")]
         public bool ForceBotsToTryCrawl;
 
+        [Name("Test Grenade Throw")]
+        public bool TestGrenadeThrow;
+
         [Name("Draw Debug Gizmos")]
         public bool DrawDebugGizmos;
 

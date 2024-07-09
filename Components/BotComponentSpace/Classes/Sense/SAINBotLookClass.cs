@@ -91,7 +91,7 @@ namespace SAIN.SAINComponent.Classes
                 return false;
 
             if (!enemy.InLineOfSight || 
-                !enemy.Vision.EnemyAngles.CanBeSeen)
+                !enemy.Vision.Angles.CanBeSeen)
             {
                 setNotVis(enemy);
                 return false;
@@ -112,7 +112,6 @@ namespace SAIN.SAINComponent.Classes
             float timeSince = Time.time - look.LastCheckLookTime;
             if (timeSince >= delay)
             {
-                Logger.LogDebug($"time since last look update {timeSince.Round100()} delay {delay.Round100()} difference {(timeSince - delay).Round100()}");
                 look.LastCheckLookTime = Time.time;
                 enemy.EnemyInfo.CheckLookEnemy(lookAll);
                 return true;
