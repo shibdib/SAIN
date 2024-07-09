@@ -43,7 +43,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
         private void calcSearchTime()
         {
-            if (Bot.Decision.CurrentSoloDecision != CombatDecision.Search
+            if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Search
                 && _nextRecalcSearchTime < Time.time)
             {
                 _nextRecalcSearchTime = Time.time + 120f;

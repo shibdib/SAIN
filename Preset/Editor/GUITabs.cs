@@ -114,13 +114,13 @@ namespace SAIN.Editor
                     Space(spacing / 2f);
 
                     if (Button("Reset"))
-                        SAINPlugin.ForceSoloDecision = CombatDecision.None;
+                        SAINPlugin.ForceSoloDecision = ECombatDecision.None;
 
                     Space(spacing / 2f);
 
                     SAINPlugin.ForceSoloDecision = BuilderClass.SelectionGrid(
                         SAINPlugin.ForceSoloDecision,
-                        EnumValues.GetEnum<CombatDecision>());
+                        EnumValues.GetEnum<ECombatDecision>());
                 }
 
                 Space(spacing);
@@ -131,13 +131,13 @@ namespace SAIN.Editor
                     Space(spacing / 2f);
 
                     if (Button("Reset"))
-                        SAINPlugin.ForceSquadDecision = SquadDecision.None;
+                        SAINPlugin.ForceSquadDecision = ESquadDecision.None;
 
                     Space(spacing / 2f);
 
                     SAINPlugin.ForceSquadDecision =
                         BuilderClass.SelectionGrid(SAINPlugin.ForceSquadDecision,
-                        EnumValues.GetEnum<SquadDecision>());
+                        EnumValues.GetEnum<ESquadDecision>());
                 }
 
                 Space(spacing);
@@ -148,13 +148,13 @@ namespace SAIN.Editor
                     Space(spacing / 2f);
 
                     if (Button("Reset"))
-                        SAINPlugin.ForceSelfDecision = SelfDecision.None;
+                        SAINPlugin.ForceSelfDecision = ESelfDecision.None;
 
                     Space(spacing / 2f);
 
                     SAINPlugin.ForceSelfDecision = BuilderClass.SelectionGrid(
                         SAINPlugin.ForceSelfDecision,
-                        EnumValues.GetEnum<SelfDecision>());
+                        EnumValues.GetEnum<ESelfDecision>());
                 }
             }
         }

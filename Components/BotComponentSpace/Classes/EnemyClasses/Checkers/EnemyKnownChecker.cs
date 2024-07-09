@@ -86,13 +86,13 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         private bool isBotSearching()
         {
-            if (Bot.Decision.CurrentSoloDecision == CombatDecision.Search)
+            if (Bot.Decision.CurrentCombatDecision == ECombatDecision.Search)
             {
                 return true;
             }
             var squadDecision = Bot.Decision.CurrentSquadDecision;
-            if (squadDecision == SquadDecision.Search ||
-                squadDecision == SquadDecision.GroupSearch)
+            if (squadDecision == ESquadDecision.Search ||
+                squadDecision == ESquadDecision.GroupSearch)
             {
                 return true;
             }

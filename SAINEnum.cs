@@ -3,7 +3,7 @@ using SAIN.Attributes;
 
 namespace SAIN
 {
-    public enum CombatDecision
+    public enum ECombatDecision
     {
         None,
         Retreat,
@@ -26,7 +26,7 @@ namespace SAIN
         DebugNoDecision
     }
 
-    public enum SelfDecision
+    public enum ESelfDecision
     {
         None = 0,
         Reload = 1,
@@ -122,6 +122,7 @@ namespace SAIN
 
     public enum EPersonality
     {
+        None,
         Wreckless,
         SnappingTurtle,
         GigaChad,
@@ -152,7 +153,7 @@ namespace SAIN
         Far
     }
 
-    public enum SquadDecision
+    public enum ESquadDecision
     {
         None,
         Surround,

@@ -98,7 +98,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
         }
 
-        private void onDecisionMade(CombatDecision solo, SquadDecision squad, SelfDecision self, BotComponent me)
+        private void onDecisionMade(ECombatDecision solo, ESquadDecision squad, ESelfDecision self, BotComponent me)
         {
             if (!Bot.Talk.CanTalk)
             {
@@ -125,7 +125,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
         }
 
-        private void onMemberMadeDecision(CombatDecision solo, SquadDecision squad, SelfDecision self, BotComponent member)
+        private void onMemberMadeDecision(ECombatDecision solo, ESquadDecision squad, ESelfDecision self, BotComponent member)
         {
             if (!Bot.Squad.IAmLeader)
             {
@@ -152,15 +152,15 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             switch (solo)
             {
-                case CombatDecision.Retreat:
-                case CombatDecision.RunAway:
-                case CombatDecision.RunToCover:
+                case ECombatDecision.Retreat:
+                case ECombatDecision.RunAway:
+                case ECombatDecision.RunToCover:
                     gesture = EGesture.ComeToMe;
                     commandTrigger = EFTMath.RandomBool() ? EPhraseTrigger.GetInCover : EPhraseTrigger.GetBack;
                     memberTrigger = EPhraseTrigger.Roger;
                     break;
 
-                case CombatDecision.RushEnemy:
+                case ECombatDecision.RushEnemy:
                     gesture = EGesture.ThatDirection;
                     commandTrigger = EPhraseTrigger.Gogogo;
                     memberTrigger = EPhraseTrigger.OnFight;
@@ -173,19 +173,19 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 switch (squad)
                 {
-                    case SquadDecision.Suppress:
+                    case ESquadDecision.Suppress:
                         gesture = EGesture.ThatDirection;
                         commandTrigger = EPhraseTrigger.Suppress;
                         memberTrigger = EPhraseTrigger.Covering;
                         break;
 
-                    case SquadDecision.PushSuppressedEnemy:
+                    case ESquadDecision.PushSuppressedEnemy:
                         gesture = EGesture.ThatDirection;
                         commandTrigger = EPhraseTrigger.Gogogo;
                         memberTrigger = EPhraseTrigger.Going;
                         break;
 
-                    case SquadDecision.Regroup:
+                    case ESquadDecision.Regroup:
                         gesture = EGesture.ComeToMe;
                         commandTrigger = EPhraseTrigger.Regroup;
                         memberTrigger = EPhraseTrigger.Roger;
@@ -207,11 +207,11 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
         }
 
-        private bool talkSelfDecision(SelfDecision self)
+        private bool talkSelfDecision(ESelfDecision self)
         {
             switch (self)
             {
-                case SelfDecision.Reload:
+                case ESelfDecision.Reload:
                     if (_nextReportReloadTime < Time.time &&
                         Bot.Talk.GroupSay(reloadPhrases.PickRandom(), null, false, _reportReloadingChance))
                     {
@@ -220,9 +220,9 @@ namespace SAIN.SAINComponent.Classes.Talk
                     }
                     break;
 
-                case SelfDecision.FirstAid:
-                case SelfDecision.Stims:
-                case SelfDecision.Surgery:
+                case ESelfDecision.FirstAid:
+                case ESelfDecision.Stims:
+                case ESelfDecision.Surgery:
                     if (Bot.Talk.Say(EPhraseTrigger.CoverMe, null, false))
                     {
                         return true;
@@ -234,13 +234,13 @@ namespace SAIN.SAINComponent.Classes.Talk
             return false;
         }
 
-        private bool talkSoloDecision(CombatDecision solo)
+        private bool talkSoloDecision(ECombatDecision solo)
         {
             switch (solo)
             {
-                case CombatDecision.Retreat:
-                case CombatDecision.RunToCover:
-                case CombatDecision.RunAway:
+                case ECombatDecision.Retreat:
+                case ECombatDecision.RunToCover:
+                case ECombatDecision.RunAway:
                     if (_nextCheckTalkRetreatTime < Time.time
                         && Bot.HasEnemy
                         && (Bot.Enemy.IsVisible == true || Bot.Enemy.InLineOfSight) &&
@@ -256,7 +256,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             return false;
         }
 
-        private bool leaderMadeDecision(CombatDecision solo, SquadDecision squad)
+        private bool leaderMadeDecision(ECombatDecision solo, ESquadDecision squad)
         {
             var commandTrigger = EPhraseTrigger.PhraseNone;
             var trigger = EPhraseTrigger.PhraseNone;
@@ -264,21 +264,21 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             switch (squad)
             {
-                case SquadDecision.Search:
-                case SquadDecision.GroupSearch:
+                case ESquadDecision.Search:
+                case ESquadDecision.GroupSearch:
                     gesture = EGesture.ThatDirection;
                     commandTrigger = EPhraseTrigger.FollowMe;
                     trigger = EPhraseTrigger.Going;
                     break;
 
-                case SquadDecision.Help:
+                case ESquadDecision.Help:
                     gesture = EGesture.ThatDirection;
                     commandTrigger = EPhraseTrigger.Gogogo;
                     trigger = EPhraseTrigger.Going;
                     break;
 
-                case SquadDecision.Suppress:
-                case SquadDecision.PushSuppressedEnemy:
+                case ESquadDecision.Suppress:
+                case ESquadDecision.PushSuppressedEnemy:
                     gesture = EGesture.ThatDirection;
                     commandTrigger = EPhraseTrigger.Suppress;
                     trigger = EPhraseTrigger.Covering;
@@ -289,18 +289,18 @@ namespace SAIN.SAINComponent.Classes.Talk
 
             switch (solo)
             {
-                case CombatDecision.HoldInCover:
+                case ECombatDecision.HoldInCover:
                     gesture = EGesture.Stop;
                     commandTrigger = EPhraseTrigger.HoldPosition;
                     trigger = EPhraseTrigger.Roger;
                     break;
 
-                case CombatDecision.Retreat:
+                case ECombatDecision.Retreat:
                     commandTrigger = EPhraseTrigger.OnYourOwn;
                     trigger = EFTMath.RandomBool() ? EPhraseTrigger.Repeat : EPhraseTrigger.Stop;
                     break;
 
-                case CombatDecision.RushEnemy:
+                case ECombatDecision.RushEnemy:
                     gesture = EGesture.ThatDirection;
                     commandTrigger = EPhraseTrigger.Gogogo;
                     trigger = EPhraseTrigger.OnFight;
@@ -401,7 +401,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     Bot.EnemyController.Events.OnEnemyHealthChanged -= onEnemyHealthChanged;
                 }
 
-                Bot.Decision.OnDecisionMade -= onDecisionMade;
+                Bot.Decision.DecisionManager.OnDecisionMade -= onDecisionMade;
                 Bot.Memory.Health.HealthStatusChanged -= myHealthChanged;
             }
         }
@@ -421,7 +421,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 BotOwner.DeadBodyWork.OnStartLookToBody += OnLootBody;
                 Bot.EnemyController.Events.OnEnemyKilled += OnEnemyDown;
                 Bot.EnemyController.Events.OnEnemyHealthChanged += onEnemyHealthChanged;
-                Bot.Decision.OnDecisionMade += onDecisionMade;
+                Bot.Decision.DecisionManager.OnDecisionMade += onDecisionMade;
                 Bot.Memory.Health.HealthStatusChanged += myHealthChanged;
             }
         }
@@ -621,22 +621,22 @@ namespace SAIN.SAINComponent.Classes.Talk
                     {
                         case EPhraseTrigger.GetBack:
                         case EPhraseTrigger.HoldPosition:
-                            if (member.Decision.CurrentSquadDecision == SquadDecision.GroupSearch)
+                            if (member.Decision.CurrentSquadDecision == ESquadDecision.GroupSearch)
                             {
                                 myTrigger = EPhraseTrigger.Negative;
                                 break;
                             }
-                            switch (member.Decision.CurrentSoloDecision)
+                            switch (member.Decision.CurrentCombatDecision)
                             {
-                                case CombatDecision.Search:
+                                case ECombatDecision.Search:
                                     myTrigger = EPhraseTrigger.Negative;
                                     break;
 
-                                case CombatDecision.HoldInCover:
+                                case ECombatDecision.HoldInCover:
                                     myTrigger = EFTMath.RandomBool() ? EPhraseTrigger.Roger : EPhraseTrigger.OnPosition;
                                     break;
 
-                                case CombatDecision.RushEnemy:
+                                case ECombatDecision.RushEnemy:
                                     myTrigger = EPhraseTrigger.Negative;
                                     break;
 
@@ -647,22 +647,22 @@ namespace SAIN.SAINComponent.Classes.Talk
 
                         case EPhraseTrigger.Gogogo:
                         case EPhraseTrigger.FollowMe:
-                            if (member.Decision.CurrentSquadDecision == SquadDecision.GroupSearch)
+                            if (member.Decision.CurrentSquadDecision == ESquadDecision.GroupSearch)
                             {
                                 myTrigger = EFTMath.RandomBool() ? EPhraseTrigger.Ready : EPhraseTrigger.Going;
                                 break;
                             }
-                            switch (member.Decision.CurrentSoloDecision)
+                            switch (member.Decision.CurrentCombatDecision)
                             {
-                                case CombatDecision.Search:
+                                case ECombatDecision.Search:
                                     myTrigger = EFTMath.RandomBool() ? EPhraseTrigger.Ready : EPhraseTrigger.Going;
                                     break;
 
-                                case CombatDecision.HoldInCover:
+                                case ECombatDecision.HoldInCover:
                                     myTrigger = EFTMath.RandomBool() ? EPhraseTrigger.Negative : EPhraseTrigger.Covering;
                                     break;
 
-                                case CombatDecision.RushEnemy:
+                                case ECombatDecision.RushEnemy:
                                     myTrigger = EPhraseTrigger.OnFight;
                                     break;
 

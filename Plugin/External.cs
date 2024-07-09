@@ -249,7 +249,7 @@ namespace SAIN.Plugin
 
         private static bool IsBotSearching(BotComponent component)
         {
-            if (component.Decision.CurrentSoloDecision == CombatDecision.Search || component.Decision.CurrentSquadDecision == SquadDecision.Search)
+            if (component.Decision.CurrentCombatDecision == ECombatDecision.Search || component.Decision.CurrentSquadDecision == ESquadDecision.Search)
             {
                 return !component.Search.PathFinder.SearchedTargetPosition;
             }

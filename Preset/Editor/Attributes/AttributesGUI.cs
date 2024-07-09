@@ -8,6 +8,7 @@ using SAIN.Preset;
 using SAIN.Preset.GearStealthValues;
 using SAIN.Preset.GlobalSettings;
 using SAIN.Preset.GlobalSettings.Categories;
+using SAIN.Preset.Personalities;
 using SAIN.SAINComponent.Classes;
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,8 @@ namespace SAIN.Attributes
                 {
                     if (value is ISAINSettings settings)
                         EditAllValuesInObj(settings, out wasEdited, search, config, listDepth++);
+                    else if (value is ISettingsGroup group)
+                        EditAllValuesInObj(group, out wasEdited, search, config, listDepth++);
                     else
                         value = FindListTypeAndEdit(ref value, settingsObject, attributes, listDepth, out wasEdited, config);
                 }

@@ -1,5 +1,4 @@
-﻿using SPT.Reflection.Patching;
-using EFT;
+﻿using EFT;
 using HarmonyLib;
 using SAIN.Components;
 using SAIN.Helpers;
@@ -11,6 +10,7 @@ using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
+using SPT.Reflection.Patching;
 using System.Reflection;
 using System.Text;
 using UnityEngine;

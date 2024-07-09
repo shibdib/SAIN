@@ -26,6 +26,8 @@ namespace SAIN.Components
         public Action<EftBulletClass> BulletImpact { get; set; }
 
         public event Action<Grenade, float> OnGrenadeCollision;
+        public event Action<Grenade, Vector3, string> OnGrenadeThrown;
+        public event Action<Vector3, string, bool, float, float> OnGrenadeExploded;
 
         public Dictionary<string, BotComponent> Bots => BotSpawnController.Bots;
         public GameWorld GameWorld => SAINGameWorld.GameWorld;
@@ -268,15 +270,9 @@ namespace SAIN.Components
                     Vector3 position = player.Position;
 
                     if (DefaultController != null)
-                    {
                         foreach (var keyValuePair in DefaultController.Groups())
-                        {
                             foreach (BotsGroup botGroupClass in keyValuePair.Value.GetGroups(true))
-                            {
                                 botGroupClass.AddSmokePlace(explosionPosition, smokeLifeTime, radius, position);
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -327,17 +323,8 @@ namespace SAIN.Components
             }
 
             Vector3 dangerPoint = Vector.DangerPoint(position, force, mass);
-            Singleton<BotEventHandler>.Instance?.PlaySound(player, grenade.transform.position, 30f, AISoundType.gun);
-
-            foreach (var bot in Bots.Values)
-            {
-                if (bot?.BotActive == true &&
-                    bot.EnemyController.IsPlayerAnEnemy(player.ProfileId) &&
-                    (dangerPoint - bot.Position).sqrMagnitude < 100f * 100f)
-                {
-                    bot.Grenade.EnemyGrenadeThrown(grenade, dangerPoint);
-                }
-            }
+            Singleton<BotEventHandler>.Instance?.PlaySound(player, grenade.transform.position, 20f, AISoundType.gun);
+            OnGrenadeThrown?.Invoke(grenade, dangerPoint, grenade.ProfileId);
         }
 
         public List<string> Groups = new List<string>();

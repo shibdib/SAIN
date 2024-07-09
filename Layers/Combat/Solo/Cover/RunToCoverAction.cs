@@ -132,7 +132,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             }
 
             //CoverPoint fallback = Bot.Cover.FallBackPoint;
-            CombatDecision currentDecision = Bot.Decision.CurrentSoloDecision;
+            ECombatDecision currentDecision = Bot.Decision.CurrentCombatDecision;
 
             //if (currentDecision == CombatDecision.Retreat &&
             //    fallback != null &&
@@ -233,7 +233,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
             if (tryWalk)
             {
-                bool shallCrawl = Bot.Player.IsInPronePose || (Bot.Decision.CurrentSelfDecision != SelfDecision.None
+                bool shallCrawl = Bot.Player.IsInPronePose || (Bot.Decision.CurrentSelfDecision != ESelfDecision.None
                     && coverPoint.StraightDistanceStatus == CoverStatus.FarFromCover
                     && Bot.Mover.Prone.ShallProneHide());
 
@@ -247,7 +247,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             bool isUrgent =
                 BotOwner.Memory.IsUnderFire ||
                 Bot.Suppression.IsSuppressed ||
-                Bot.Decision.CurrentSelfDecision != SelfDecision.None;
+                Bot.Decision.CurrentSelfDecision != ESelfDecision.None;
 
             return isUrgent ? ESprintUrgency.High : ESprintUrgency.Middle;
         }

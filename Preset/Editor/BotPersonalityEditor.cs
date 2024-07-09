@@ -2,8 +2,6 @@
 using SAIN.Plugin;
 using SAIN.Preset;
 using System.Collections.Generic;
-using UnityEngine;
-using static HBAO_Core;
 using static SAIN.Attributes.AttributesGUI;
 using static SAIN.Editor.SAINLayout;
 
@@ -26,6 +24,24 @@ namespace SAIN.Editor.GUISections
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
 
+            var personalities = SAINPresetClass.Instance.PersonalityManager.PersonalityDictionary;
+            if (_options.Count == 0)
+            {
+                _options.AddRange(personalities.Keys);
+            }
+
+            _selected = BuilderClass.SelectionGrid(_selected, 35f, 4, _options);
+            if (_selected == EPersonality.None)
+            {
+                return;
+            }
+
+            if (personalities.TryGetValue(_selected, out var settings))
+            {
+                EditAllValuesInObj(settings, out bool newEdit, null, null, 1);
+            }
+            return;
+
             foreach (var personality in SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary.Values)
             {
                 string name = personality.Name;
@@ -40,17 +56,15 @@ namespace SAIN.Editor.GUISections
 
                 if (OpenPersMenus[name])
                 {
-                    EditAllValuesInObj(personality.Assignment, out bool newEdit);
-                    EditAllValuesInObj(personality.Behavior.General, out newEdit);
-                    EditAllValuesInObj(personality.Behavior.Rush, out newEdit);
-                    EditAllValuesInObj(personality.Behavior.Search, out newEdit);
-                    EditAllValuesInObj(personality.Behavior.Talk, out newEdit);
-                    EditAllValuesInObj(personality.StatModifiers, out newEdit);
+                    EditAllValuesInObj(personality, out bool newEdit,null ,null , 1);
                 }
             }
         }
 
+        private static EPersonality _selected = EPersonality.None;
         public static bool PersonalitiesWereEdited => ConfigEditingTracker.UnsavedChanges;
+
+        private static List<EPersonality> _options = new List<EPersonality>();
 
         private static readonly Dictionary<string, bool> OpenPersMenus = new Dictionary<string, bool>();
     }

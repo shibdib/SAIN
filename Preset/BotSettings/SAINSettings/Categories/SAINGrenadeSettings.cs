@@ -1,14 +1,17 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 using SAIN.Preset.GlobalSettings;
 
 namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINGrenadeSettings : SAINSettingsBase<SAINGrenadeSettings>, ISAINSettings
     {
+        public bool CanThrowWhileSprinting = false;
+
         [NameAndDescription(
             "Can Throw at Visible Enemies",
             "Toggles bots throwing grenades directly at enemies they can see.")]
-        public bool CAN_THROW_STRAIGHT_CONTACT = false;
+        public bool ThrowAtVisibleEnemies = false;
 
         [NameAndDescription(
             "Since Since Enemy Seen before Throw",
@@ -19,15 +22,20 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [NameAndDescription(
             "Time Before Next Throw",
             "How much time to wait before a bot is allowed to throw another grenade.")]
-        [MinMax(0.01f, 30f, 100f)]
-        public float DELTA_NEXT_ATTEMPT = 2f;
+        [MinMax(0f, 30f, 100f)]
+        public float ThrowGrenadeFrequency = 3f;
 
         [NameAndDescription(
-            "Minimum Friendly Distance to Target",
+            "Minimum Friendly Distance to Throw Target",
             "How close a friendly bot can be in Meters to a bot's grenade target before it stops them from throwing it.")]
         [MinMax(0.01f, 30f, 100f)]
-        [CopyValue]
-        public float MIN_DIST_NOT_TO_THROW = 8f;
+        public float MinFriendlyDistance = 8f;
+
+        [NameAndDescription(
+            "Minimum Enemy Distance to Bot",
+            "How close a enemy can be in Meters before a bot doesn't try throwing grenades.")]
+        [MinMax(0.01f, 30f, 100f)]
+        public float MinEnemyDistance = 8f;
 
         [NameAndDescription(
             "Grenade Spread",
@@ -36,19 +44,21 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [CopyValue]
         public float GrenadePrecision = 0.5f;
 
-        [NameAndDescription(
-            "Minimum Target Distance",
-            "Minimum distance an enemy can be for them to consider throwing a grenade.")]
-        [MinMax(0.0f, 40f, 10f)]
-        public float MIN_THROW_GRENADE_DIST = 8f;
+        [Percentage0to1]
+        [Advanced]
+        [CopyValue]
+        public float MIN_THROW_DIST_PERCENT_0_1 = 0.25f;
 
         [Hidden]
+        [JsonIgnore]
         public float CHANCE_TO_NOTIFY_ENEMY_GR_100 = 100f;
 
         [Hidden]
+        [JsonIgnore]
         public float DELTA_GRENADE_START_TIME = 0.0f;
 
         [Hidden]
+        [JsonIgnore]
         public int BEWARE_TYPE = 3;
     }
 }

@@ -14,7 +14,7 @@ namespace SAIN.BotController.Classes
 {
     public class Squad
     {
-        public event Action<CombatDecision, SquadDecision, SelfDecision, BotComponent> OnMemberDecisionMade;
+        public event Action<ECombatDecision, ESquadDecision, ESelfDecision, BotComponent> OnMemberDecisionMade;
         public event Action<EnemyPlace, Enemy, SAINSoundType> OnMemberHeardEnemy;
         public event Action<Squad> OnSquadEmpty;
         public event Action<IPlayer, DamageInfo, float> LeaderKilled;
@@ -41,7 +41,7 @@ namespace SAIN.BotController.Classes
         {
             get
             {
-                return MemberHasDecision(CombatDecision.Retreat, CombatDecision.RunAway, CombatDecision.RunToCover);
+                return MemberHasDecision(ECombatDecision.Retreat, ECombatDecision.RunAway, ECombatDecision.RunToCover);
             }
         }
 
@@ -49,7 +49,7 @@ namespace SAIN.BotController.Classes
         {
             get
             {
-                return MemberHasDecision(SquadDecision.Regroup);
+                return MemberHasDecision(ESquadDecision.Regroup);
             }
         }
 
@@ -312,7 +312,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        public bool MemberHasDecision(params CombatDecision[] decisionsToCheck)
+        public bool MemberHasDecision(params ECombatDecision[] decisionsToCheck)
         {
             foreach (var member in MemberInfos.Values)
             {
@@ -331,7 +331,7 @@ namespace SAIN.BotController.Classes
             return false;
         }
 
-        public bool MemberHasDecision(params SquadDecision[] decisionsToCheck)
+        public bool MemberHasDecision(params ESquadDecision[] decisionsToCheck)
         {
             foreach (var member in MemberInfos.Values)
             {
@@ -350,7 +350,7 @@ namespace SAIN.BotController.Classes
             return false;
         }
 
-        public bool MemberHasDecision(params SelfDecision[] decisionsToCheck)
+        public bool MemberHasDecision(params ESelfDecision[] decisionsToCheck)
         {
             foreach (var member in MemberInfos.Values)
             {
@@ -599,7 +599,7 @@ namespace SAIN.BotController.Classes
                         Id = bot.Player.Profile.Side.ToString() + "_" + GUID;
                     }
 
-                    bot.Decision.OnDecisionMade += memberMadeDecision;
+                    bot.Decision.DecisionManager.OnDecisionMade += memberMadeDecision;
 
                     var memberInfo = new MemberInfo(bot, this);
                     MemberInfos.Add(bot.ProfileId, memberInfo);
@@ -626,7 +626,7 @@ namespace SAIN.BotController.Classes
             }
         }
 
-        private void memberMadeDecision(CombatDecision solo, SquadDecision squad, SelfDecision self, BotComponent member)
+        private void memberMadeDecision(ECombatDecision solo, ESquadDecision squad, ESelfDecision self, BotComponent member)
         {
             OnMemberDecisionMade?.Invoke(solo, squad, self, member);
         }
@@ -649,7 +649,7 @@ namespace SAIN.BotController.Classes
                 {
                     player.OnPlayerDead -= memberWasKilled;
                 }
-                memberInfo.Bot.Decision.OnDecisionMade -= memberMadeDecision;
+                memberInfo.Bot.Decision.DecisionManager.OnDecisionMade -= memberMadeDecision;
                 memberInfo.Dispose();
                 MemberInfos.Remove(id);
             }

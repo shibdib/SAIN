@@ -8,12 +8,14 @@ using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
 using SAIN.Helpers;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
     public class SAINBotSuppressClass : BotBase, IBotClass
     {
         public ESuppressionStatus SuppressionStatus { get; private set; }
+        public Enemy LastSuppressByEnemy { get; private set; }
 
         public SAINBotSuppressClass(BotComponent sain) : base(sain)
         {
@@ -22,12 +24,21 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         public void Init()
         {
             base.SubscribeToPreset(null);
+            Bot.EnemyController.Events.OnEnemyRemoved += clearLastSuppEnemy;
         }
 
         public void Update()
         {
             UpdateSuppressedStatus();
             applySuppressionStatModifiers();
+        }
+
+        private void clearLastSuppEnemy(string profileId, Enemy enemy)
+        {
+            if (LastSuppressByEnemy != null && LastSuppressByEnemy.IsSame(enemy))
+            {
+                LastSuppressByEnemy = null;
+            }
         }
 
         private void applySuppressionStatModifiers()
@@ -53,6 +64,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
+            Bot.EnemyController.Events.OnEnemyRemoved -= clearLastSuppEnemy;
         }
 
         public float SuppressionNumber { get; private set; }
@@ -61,16 +73,10 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         public bool IsSuppressed => SuppressionNumber > SuppressionThreshold;
         public bool IsHeavySuppressed => SuppressionNumber > SuppressionHeavyThreshold;
 
-        public readonly float SuppressionSpreadMultiPerPoint = 0.15f;
-        private readonly float SuppressionThreshold = 5f;
-        private readonly float SuppressionHeavyThreshold = 10f;
-        private readonly float SuppressionDecayAmount = 0.25f;
-        private readonly float SuppressionDecayUpdateFreq = 0.25f;
-        private readonly float SuppressionAddDefault = 2f;
-        private float SuppressionDecayTimer;
-
-        public void AddSuppression(float distance, float num = -1)
+        public void AddSuppression(Enemy enemy, float distance, float num = -1)
         {
+            LastSuppressByEnemy = enemy;
+
             if (num < 0)
             {
                 num = SuppressionAddDefault;
@@ -94,5 +100,13 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 }
             }
         }
+
+        public readonly float SuppressionSpreadMultiPerPoint = 0.15f;
+        private readonly float SuppressionThreshold = 5f;
+        private readonly float SuppressionHeavyThreshold = 10f;
+        private readonly float SuppressionDecayAmount = 0.25f;
+        private readonly float SuppressionDecayUpdateFreq = 0.25f;
+        private readonly float SuppressionAddDefault = 2f;
+        private float SuppressionDecayTimer;
     }
 }

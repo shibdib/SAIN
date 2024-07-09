@@ -42,6 +42,6 @@ namespace SAIN.Layers.Combat.Run
             return false;
         }
 
-        public CombatDecision CurrentDecision => Bot.Decision.CurrentSoloDecision;
+        public ECombatDecision CurrentDecision => Bot.Decision.CurrentCombatDecision;
     }
 }

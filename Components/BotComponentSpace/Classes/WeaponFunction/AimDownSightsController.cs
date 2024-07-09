@@ -130,7 +130,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 result = EAimDownSightsStatus.Sprinting;
             }
-            else if (Bot.Decision.CurrentSoloDecision == CombatDecision.ShootDistantEnemy)
+            else if (Bot.Decision.CurrentCombatDecision == ECombatDecision.ShootDistantEnemy)
             {
                 result = EAimDownSightsStatus.StandAndShoot;
             }
@@ -146,32 +146,32 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 result = EAimDownSightsStatus.EnemyHeardRecent;
             }
-            else if (Bot.Decision.CurrentSquadDecision == SquadDecision.Suppress && Bot.ManualShoot.Reason == EShootReason.SquadSuppressing)
+            else if (Bot.Decision.CurrentSquadDecision == ESquadDecision.Suppress && Bot.ManualShoot.Reason == EShootReason.SquadSuppressing)
             {
                 result = EAimDownSightsStatus.Suppressing;
             }
             else
             {
-                switch (Bot.Decision.CurrentSoloDecision)
+                switch (Bot.Decision.CurrentCombatDecision)
                 {
-                    case CombatDecision.RunToCover:
-                    case CombatDecision.MoveToCover:
+                    case ECombatDecision.RunToCover:
+                    case ECombatDecision.MoveToCover:
                         result = EAimDownSightsStatus.MovingToCover;
                         break;
 
-                    case CombatDecision.HoldInCover:
+                    case ECombatDecision.HoldInCover:
                         result = EAimDownSightsStatus.HoldInCover;
                         break;
 
-                    case CombatDecision.StandAndShoot:
+                    case ECombatDecision.StandAndShoot:
                         result = EAimDownSightsStatus.StandAndShoot;
                         break;
 
-                    case CombatDecision.DogFight:
+                    case ECombatDecision.DogFight:
                         result = EAimDownSightsStatus.DogFight;
                         break;
 
-                    case CombatDecision.Search:
+                    case ECombatDecision.Search:
                         result = Bot.Search.CurrentState != ESearchMove.DirectMove ? EAimDownSightsStatus.SearchPeekWait : EAimDownSightsStatus.None;
                         break;
 

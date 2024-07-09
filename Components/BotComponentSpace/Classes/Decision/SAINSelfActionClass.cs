@@ -28,7 +28,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return;
             }
             var decision = Bot.Decision.CurrentSelfDecision;
-            if (decision == SelfDecision.None)
+            if (decision == ESelfDecision.None)
             {
                 return;
             }
@@ -38,7 +38,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             _nextCheckTime = Time.time + 0.1f;
 
-            if (decision == SelfDecision.Reload)
+            if (decision == ESelfDecision.Reload)
             {
                 Bot.Info.WeaponInfo.Reload.TryReload();
                 return;
@@ -62,11 +62,11 @@ namespace SAIN.SAINComponent.Classes.Decision
             bool didAction = false;
             switch (decision)
             {
-                case SelfDecision.FirstAid:
+                case ESelfDecision.FirstAid:
                     didAction = DoFirstAid();
                     break;
 
-                case SelfDecision.Stims:
+                case ESelfDecision.Stims:
                     didAction = DoStims();
                     break;
 

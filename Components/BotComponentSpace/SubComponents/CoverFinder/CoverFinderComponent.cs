@@ -356,23 +356,23 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
         {
             ProcessingLimited =
                 Bot.Enemy?.IsAI == true ||
-                limitProcessingFromDecision(Bot.Decision.CurrentSoloDecision);
+                limitProcessingFromDecision(Bot.Decision.CurrentCombatDecision);
 
             return ProcessingLimited;
         }
 
-        private static bool limitProcessingFromDecision(CombatDecision decision)
+        private static bool limitProcessingFromDecision(ECombatDecision decision)
         {
             switch (decision)
             {
-                case CombatDecision.MoveToCover:
-                case CombatDecision.RunToCover:
-                case CombatDecision.Retreat:
-                case CombatDecision.RunAway:
+                case ECombatDecision.MoveToCover:
+                case ECombatDecision.RunToCover:
+                case ECombatDecision.Retreat:
+                case ECombatDecision.RunAway:
                     return false;
 
-                case CombatDecision.HoldInCover:
-                case CombatDecision.Search:
+                case ECombatDecision.HoldInCover:
+                case ECombatDecision.Search:
                     return true;
 
                 default:

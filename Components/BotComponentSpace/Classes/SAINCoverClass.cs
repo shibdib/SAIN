@@ -198,7 +198,7 @@ namespace SAIN.SAINComponent.Classes
                 CoverInUse.GetHit(damageInfo, bodyPart, Bot.Enemy);
                 if (CoverInUse.Spotted && !wasSpotted)
                 {
-                    _spottedTime = Time.time;
+                    _spottedTime = Time.time + SpottedCoverPoint.SPOTTED_PERIOD;
                     OnSpottedInCover?.Invoke();
                 }
             }
@@ -227,12 +227,12 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
 
-            CombatDecision decision = Bot.Decision.CurrentSoloDecision;
-            if (decision != CombatDecision.MoveToCover
-                && decision != CombatDecision.RunToCover
-                && decision != CombatDecision.Retreat
-                && decision != CombatDecision.HoldInCover 
-                && decision != CombatDecision.ShiftCover)
+            ECombatDecision decision = Bot.Decision.CurrentCombatDecision;
+            if (decision != ECombatDecision.MoveToCover
+                && decision != ECombatDecision.RunToCover
+                && decision != ECombatDecision.Retreat
+                && decision != ECombatDecision.HoldInCover 
+                && decision != ECombatDecision.ShiftCover)
             {
                 Bot.Cover.CoverInUse = null;
             }
@@ -253,7 +253,7 @@ namespace SAIN.SAINComponent.Classes
                 bool shallProne = prone.ShallProneHide();
 
                 if (shallProne && 
-                    (Bot.Decision.CurrentSelfDecision != SelfDecision.None || Bot.Suppression.IsHeavySuppressed))
+                    (Bot.Decision.CurrentSelfDecision != ESelfDecision.None || Bot.Suppression.IsHeavySuppressed))
                 {
                     prone.SetProne(true);
                     return true;

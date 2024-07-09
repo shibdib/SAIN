@@ -1,8 +1,8 @@
-﻿using SPT.Reflection.Patching;
-using EFT;
+﻿using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
 using SAIN.Components;
+using SPT.Reflection.Patching;
 using System.Reflection;
 using UnityEngine;
 using static SAIN.Helpers.Shoot;

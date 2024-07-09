@@ -26,12 +26,12 @@ namespace SAIN.SAINComponent.Classes.Mover
             base.SubscribeToPreset(null);
         }
 
-        private static readonly CombatDecision[] DontLean =
+        private static readonly ECombatDecision[] DontLean =
         {
-            CombatDecision.Retreat,
-            CombatDecision.RunToCover,
-            CombatDecision.RunAway,
-            CombatDecision.MeleeAttack,
+            ECombatDecision.Retreat,
+            ECombatDecision.RunToCover,
+            ECombatDecision.RunAway,
+            ECombatDecision.MeleeAttack,
         };
 
         public void Update()
@@ -66,7 +66,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 ResetLean();
                 return false;
             }
-            if (Bot.Enemy?.IsVisible == true && Bot.Decision.CurrentSelfDecision != SelfDecision.None)
+            if (Bot.Enemy?.IsVisible == true && Bot.Decision.CurrentSelfDecision != ESelfDecision.None)
             {
                 ResetLean();
                 return false;
@@ -75,7 +75,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return false;
             }
-            var CurrentDecision = Bot.Decision.CurrentSoloDecision;
+            var CurrentDecision = Bot.Decision.CurrentCombatDecision;
             var enemy = Bot.CurrentTarget.CurrentTargetEnemy;
             if (enemy == null || Player.IsSprintEnabled || DontLean.Contains(CurrentDecision) || Bot.Suppression.IsHeavySuppressed)
             {
@@ -89,7 +89,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 ResetLean();
                 return false;
             }
-            if (CurrentDecision == CombatDecision.HoldInCover)
+            if (CurrentDecision == ECombatDecision.HoldInCover)
             {
                 return false;
             }

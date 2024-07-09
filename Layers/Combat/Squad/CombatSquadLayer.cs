@@ -18,26 +18,26 @@ namespace SAIN.Layers.Combat.Squad
             LastActionDecision = Decision;
             switch (Decision)
             {
-                case SquadDecision.Regroup:
+                case ESquadDecision.Regroup:
                     return new Action(typeof(RegroupAction), $"{Decision}");
 
-                case SquadDecision.Suppress:
+                case ESquadDecision.Suppress:
                     return new Action(typeof(SuppressAction), $"{Decision}");
 
-                case SquadDecision.Search:
+                case ESquadDecision.Search:
                     return new Action(typeof(SearchAction), $"{Decision}");
 
-                case SquadDecision.GroupSearch:
+                case ESquadDecision.GroupSearch:
                     if (Bot.Squad.IAmLeader)
                     {
                         return new Action(typeof(SearchAction), $"{Decision} : Lead Search Party");
                     }
                     return new Action(typeof(FollowSearchParty), $"{Decision} : Follow Squad Leader");
 
-                case SquadDecision.Help:
+                case ESquadDecision.Help:
                     return new Action(typeof(SearchAction), $"{Decision}");
 
-                case SquadDecision.PushSuppressedEnemy:
+                case ESquadDecision.PushSuppressedEnemy:
                     return new Action(typeof(RushEnemyAction), $"{Decision}");
 
                 default:
@@ -49,8 +49,8 @@ namespace SAIN.Layers.Combat.Squad
         {
             bool active =
                 Bot?.BotActive == true &&
-                SquadDecision != SquadDecision.None &&
-                Bot.Decision.CurrentSelfDecision == SelfDecision.None;
+                SquadDecision != ESquadDecision.None &&
+                Bot.Decision.CurrentSelfDecision == ESelfDecision.None;
 
             if (active && Bot.Cover.CoverInUse != null)
             {
@@ -68,7 +68,7 @@ namespace SAIN.Layers.Combat.Squad
                 SquadDecision != LastActionDecision;
         }
 
-        private SquadDecision LastActionDecision = SquadDecision.None;
-        public SquadDecision SquadDecision => Bot.Decision.CurrentSquadDecision;
+        private ESquadDecision LastActionDecision = ESquadDecision.None;
+        public ESquadDecision SquadDecision => Bot.Decision.CurrentSquadDecision;
     }
 }

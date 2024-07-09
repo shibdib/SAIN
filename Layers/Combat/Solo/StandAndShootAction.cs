@@ -38,7 +38,7 @@ namespace SAIN.Layers.Combat.Solo
             {
                 Bot.Mover.StopMove();
                 BotOwner.Mover.SprintPause(0.5f);
-                shallResume = Bot.Decision.CurrentSoloDecision == CombatDecision.ShootDistantEnemy;
+                shallResume = Bot.Decision.CurrentCombatDecision == ECombatDecision.ShootDistantEnemy;
             }
 
             Bot.Mover.Lean.HoldLean(0.75f);

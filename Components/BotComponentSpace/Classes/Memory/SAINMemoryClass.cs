@@ -1,7 +1,6 @@
 ﻿using EFT;
 using HarmonyLib;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using System;
 using System.Reflection;
 using UnityEngine;
 
@@ -41,24 +40,17 @@ namespace SAIN.SAINComponent.Classes.Memory
             Bot.EnemyController.Events.OnEnemyRemoved -= clearEnemy;
         }
 
-        public void SetUnderFire(IPlayer source, Vector3 position)
+        public void SetUnderFire(Enemy enemy, Vector3 position)
         {
-            if (source != null)
+            try
             {
-                try
-                {
-                    BotOwner.Memory.SetUnderFire(source);
-                }
-                catch { }
-
-                LastUnderFireSource = source;
-                UnderFireFromPosition = position;
-
-                var enemy = Bot.EnemyController.GetEnemy(source.ProfileId, true);
-
-                if (enemy != null)
-                    LastUnderFireEnemy = enemy;
+                BotOwner.Memory.SetUnderFire(enemy.EnemyIPlayer);
             }
+            catch { }
+
+            LastUnderFireSource = enemy.EnemyIPlayer;
+            UnderFireFromPosition = position;
+            LastUnderFireEnemy = enemy;
         }
 
         private void clearEnemy(string profileId, Enemy enemy)
@@ -74,7 +66,7 @@ namespace SAIN.SAINComponent.Classes.Memory
         {
             if (_nextCheckDeadTime < Time.time)
             {
-                _nextCheckDeadTime = Time.time + 0.5f; 
+                _nextCheckDeadTime = Time.time + 0.5f;
                 resetUnderFire();
             }
         }

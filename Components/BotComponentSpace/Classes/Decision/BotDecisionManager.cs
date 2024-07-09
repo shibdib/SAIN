@@ -1,0 +1,303 @@
+﻿using EFT;
+using SAIN.Helpers.Events;
+using SAIN.SAINComponent.Classes.Decision.Reasons;
+using SAIN.SAINComponent.SubComponents.CoverFinder;
+using System;
+using UnityEngine;
+
+namespace SAIN.SAINComponent.Classes.Decision
+{
+    public class BotDecisionManager : BotSubClass<SAINDecisionClass>, IBotClass
+    {
+        const float DECISION_FREQUENCY = 1f / 30;
+        const float DECISION_FREQUENCY_PEACE = 1f / 10;
+
+        public event Action<ECombatDecision, ESquadDecision, ESelfDecision, BotComponent> OnDecisionMade;
+        public ToggleEvent HasDecisionToggle { get; } = new ToggleEvent();
+
+        public ECombatDecision CurrentCombatDecision { get; private set; }
+        public ECombatDecision PreviousCombatDecision { get; private set; }
+        public ESquadDecision CurrentSquadDecision { get; private set; }
+        public ESquadDecision PreviousSquadDecision { get; private set; }
+        public ESelfDecision CurrentSelfDecision { get; private set; }
+        public ESelfDecision PreviousSelfDecision { get; private set; }
+        public bool HasDecision => HasDecisionToggle.Value;
+        public float ChangeDecisionTime { get; private set; }
+        public float TimeSinceChangeDecision => Time.time - ChangeDecisionTime;
+
+        public int TotalDecisionsMade { get; private set; }
+        public int DecisionsMadeThisFight { get; private set; }
+
+
+        public BotDecisionManager(SAINDecisionClass decisionClass) : base(decisionClass) { }
+
+        public void Init()
+        {
+            Bot.BotActivation.BotActiveToggle.OnToggle += resetDecisions;
+        }
+
+        public void Update()
+        {
+            updateDecision();
+        }
+
+
+        public void Dispose()
+        {
+            Bot.BotActivation.BotActiveToggle.OnToggle -= resetDecisions;
+        }
+
+        private void updateDecision()
+        {
+            if (_nextGetDecisionTime < Time.time)
+            {
+                getDecision();
+                float delay = HasDecision ? DECISION_FREQUENCY : DECISION_FREQUENCY_PEACE;
+                _nextGetDecisionTime = Time.time + delay;
+            }
+        }
+
+        private void getDecision()
+        {
+            BaseClass.EnemyDecisions.DebugShallSearch = null;
+            if (BaseClass.DogFightDecision.ShallDogFight())
+            {
+                SetDecisions(ECombatDecision.DogFight, ESquadDecision.None, ESelfDecision.None);
+                return;
+            }
+            if (BotOwner.WeaponManager.IsMelee)
+            {
+                SetDecisions(ECombatDecision.MeleeAttack, ESquadDecision.None, ESelfDecision.None);
+                return;
+            }
+            if (BaseClass.SelfActionDecisions.GetDecision(out ESelfDecision selfDecision))
+            {
+                var selfCombat = Bot.Cover.InCover ? ECombatDecision.HoldInCover : ECombatDecision.Retreat;
+                SetDecisions(selfCombat, ESquadDecision.None, selfDecision);
+                return;
+            }
+            if (CheckContinueRetreat())
+            {
+                SetDecisions(ECombatDecision.Retreat, ESquadDecision.None, ESelfDecision.None);
+                return;
+            }
+            if (BaseClass.SquadDecisions.GetDecision(out ESquadDecision squadDecision))
+            {
+                SetDecisions(ECombatDecision.None, squadDecision, ESelfDecision.None);
+                return;
+            }
+            if (BaseClass.EnemyDecisions.GetDecision(out ECombatDecision combatDecision))
+            {
+                SetDecisions(combatDecision, ESquadDecision.None, ESelfDecision.None);
+                return;
+            }
+            SetDecisions(ECombatDecision.None, ESquadDecision.None, ESelfDecision.None);
+        }
+
+        private BotDecision<ESelfDecision>? _self;
+        private BotDecision<ECombatDecision>? _combat;
+        private BotDecision<ESquadDecision>? _squad;
+
+        private void setSelf(BotDecision<ESelfDecision>? decision)
+        {
+
+        }
+
+        private void setCombat(BotDecision<ECombatDecision>? decision)
+        {
+
+        }
+
+        private void setSquad(BotDecision<ESquadDecision>? decision)
+        {
+
+        }
+
+        private void getDecisionStructs()
+        {
+            BaseClass.EnemyDecisions.DebugShallSearch = null;
+
+            if (Bot.EnemyController.EnemyLists.KnownEnemies.Count == 0)
+            {
+                setCombat(null);
+                setSelf(null);
+                setSquad(null);
+                return;
+            }
+
+            if (BaseClass.DogFightDecision.ShallDogFight())
+            {
+                setSelf(null);
+                setSquad(null);
+                setCombat(new BotDecision<ECombatDecision>(ECombatDecision.DogFight, "dogFight"));
+                return;
+            }
+
+            if (BotOwner.WeaponManager.IsMelee)
+            {
+                setSelf(null);
+                setSquad(null);
+                setCombat(new BotDecision<ECombatDecision>(ECombatDecision.MeleeAttack, "meleeAttack"));
+                return;
+            }
+
+            if (BaseClass.SelfActionDecisions.GetDecision(out ESelfDecision selfDecision))
+            {
+                setSquad(null);
+                setCombat(new BotDecision<ECombatDecision>(ECombatDecision.Retreat, "selfCare"));
+                setSelf(new BotDecision<ESelfDecision>(selfDecision, "selfCare"));
+                return;
+            }
+
+            if (CheckContinueRetreat())
+            {
+                return;
+            }
+
+            if (BaseClass.SquadDecisions.GetDecision(out ESquadDecision squadDecision))
+            {
+                setSelf(null);
+                setCombat(null);
+                setSquad(new BotDecision<ESquadDecision>(squadDecision, "squadAction"));
+                return;
+            }
+
+            setSelf(null);
+            setSquad(null);
+
+            if (!Bot.HasEnemy)
+            {
+                setCombat(null);
+                return;
+            }
+            var combat = BaseClass.EnemyDecisions.GetDecision();
+            setCombat(combat);
+        }
+
+        private void SetDecisions(ECombatDecision solo, ESquadDecision squad, ESelfDecision self)
+        {
+            if (SAINPlugin.DebugMode)
+            {
+                if (SAINPlugin.ForceSoloDecision != ECombatDecision.None)
+                {
+                    solo = SAINPlugin.ForceSoloDecision;
+                }
+                if (SAINPlugin.ForceSquadDecision != ESquadDecision.None)
+                {
+                    squad = SAINPlugin.ForceSquadDecision;
+                }
+                if (SAINPlugin.ForceSelfDecision != ESelfDecision.None)
+                {
+                    self = SAINPlugin.ForceSelfDecision;
+                }
+            }
+
+            if (checkForNewDecision(solo, squad, self))
+            {
+                bool hasDecision =
+                    solo != ECombatDecision.None ||
+                    self != ESelfDecision.None ||
+                    squad != ESquadDecision.None;
+
+                HasDecisionToggle.CheckToggle(hasDecision);
+
+                TotalDecisionsMade++;
+                ChangeDecisionTime = Time.time;
+                OnDecisionMade?.Invoke(solo, squad, self, Bot);
+            }
+        }
+
+        private bool checkForNewDecision(ECombatDecision newSoloDecision, ESquadDecision newSquadDecision, ESelfDecision newSelfDecision)
+        {
+            bool newDecision = false;
+
+            if (newSoloDecision != CurrentCombatDecision)
+            {
+                PreviousCombatDecision = CurrentCombatDecision;
+                CurrentCombatDecision = newSoloDecision;
+                newDecision = true;
+            }
+
+            if (newSquadDecision != CurrentSquadDecision)
+            {
+                PreviousSquadDecision = CurrentSquadDecision;
+                CurrentSquadDecision = newSquadDecision;
+                newDecision = true;
+            }
+
+            if (newSelfDecision != CurrentSelfDecision)
+            {
+                PreviousSelfDecision = CurrentSelfDecision;
+                CurrentSelfDecision = newSelfDecision;
+                newDecision = true;
+            }
+
+            return newDecision;
+        }
+
+        public void ResetDecisions(bool active)
+        {
+            bool hasDecision = HasDecision;
+            resetDecisions(false);
+            if (active && hasDecision)
+            {
+                BotOwner.CalcGoal();
+            }
+        }
+
+        private void resetDecisions(bool value)
+        {
+            if (!value)
+            {
+                SetDecisions(ECombatDecision.None, ESquadDecision.None, ESelfDecision.None);
+            }
+        }
+
+        private bool CheckContinueRetreat()
+        {
+            bool runningToCover = CurrentCombatDecision == ECombatDecision.Retreat || CurrentCombatDecision == ECombatDecision.RunToCover;
+            if (!runningToCover)
+            {
+                return false;
+            }
+            if (!Bot.Mover.SprintController.Running)
+            {
+                return false;
+            }
+            if (Bot.Cover.InCover)
+            {
+                return false;
+            }
+
+            float timeChangeDec = Bot.Decision.TimeSinceChangeDecision;
+            if (timeChangeDec < 0.5f)
+            {
+                return true;
+            }
+
+            if (timeChangeDec > 3 &&
+                !Bot.BotStuck.BotHasChangedPosition)
+            {
+                return false;
+            }
+
+            CoverPoint coverInUse = Bot.Cover.CoverInUse;
+            if (coverInUse == null)
+            {
+                return false;
+            }
+
+            switch (coverInUse.PathDistanceStatus)
+            {
+                case CoverStatus.InCover:
+                    return false;
+                case CoverStatus.CloseToCover:
+                    return true;
+                default:
+                    return !coverInUse.CoverData.IsBad;
+            }
+        }
+
+        private float _nextGetDecisionTime;
+    }
+}

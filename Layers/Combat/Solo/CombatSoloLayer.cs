@@ -25,49 +25,49 @@ namespace SAIN.Layers.Combat.Solo
 
             switch (_lastDecision)
             {
-                case CombatDecision.MoveToEngage:
+                case ECombatDecision.MoveToEngage:
                     return new Action(typeof(MoveToEngageAction), $"{_lastDecision}");
 
-                case CombatDecision.MeleeAttack:
+                case ECombatDecision.MeleeAttack:
                     return new Action(typeof(MeleeAttackAction), $"{_lastDecision}");
 
-                case CombatDecision.RushEnemy:
+                case ECombatDecision.RushEnemy:
                     return new Action(typeof(RushEnemyAction), $"{_lastDecision}");
 
-                case CombatDecision.ThrowGrenade:
+                case ECombatDecision.ThrowGrenade:
                     return new Action(typeof(ThrowGrenadeAction), $"{_lastDecision}");
 
-                case CombatDecision.ShiftCover:
+                case ECombatDecision.ShiftCover:
                     return new Action(typeof(ShiftCoverAction), $"{_lastDecision}");
 
-                case CombatDecision.RunToCover:
+                case ECombatDecision.RunToCover:
                     return new Action(typeof(RunToCoverAction), $"{_lastDecision}");
 
-                case CombatDecision.Retreat:
+                case ECombatDecision.Retreat:
                     return new Action(typeof(RunToCoverAction), $"{_lastDecision} + {_lastSelfDecision}");
 
-                case CombatDecision.MoveToCover:
+                case ECombatDecision.MoveToCover:
                     return new Action(typeof(WalkToCoverAction), $"{_lastDecision}");
 
-                case CombatDecision.DogFight:
+                case ECombatDecision.DogFight:
                     return new Action(typeof(DogFightAction), $"{_lastDecision}");
 
-                case CombatDecision.ShootDistantEnemy:
-                case CombatDecision.StandAndShoot:
+                case ECombatDecision.ShootDistantEnemy:
+                case ECombatDecision.StandAndShoot:
                     return new Action(typeof(StandAndShootAction), $"{_lastDecision}");
 
-                case CombatDecision.HoldInCover:
+                case ECombatDecision.HoldInCover:
                     string label;
-                    if (_lastSelfDecision != SelfDecision.None)
+                    if (_lastSelfDecision != ESelfDecision.None)
                         label = $"{_lastDecision} + {_lastSelfDecision}";
                     else
                         label = $"{_lastDecision}";
                     return new Action(typeof(HoldinCoverAction), label);
 
-                case CombatDecision.Search:
+                case ECombatDecision.Search:
                     return new Action(typeof(SearchAction), $"{_lastDecision}");
 
-                case CombatDecision.Freeze:
+                case ECombatDecision.Freeze:
                     return new Action(typeof(FreezeAction), $"{_lastDecision}");
 
                 default:
@@ -81,7 +81,7 @@ namespace SAIN.Layers.Combat.Solo
             {
                 return false;
             }
-            bool active = _currentDecision != CombatDecision.None;
+            bool active = _currentDecision != ECombatDecision.None;
             setLayer(active);
             return active;
         }
@@ -90,15 +90,15 @@ namespace SAIN.Layers.Combat.Solo
         {
             // this is dumb im sorry
             if (!_doSurgeryAction
-                && _currentSelfDecision == SelfDecision.Surgery
+                && _currentSelfDecision == ESelfDecision.Surgery
                 && Bot.Cover.BotIsAtCoverInUse())
             {
                 _doSurgeryAction = true;
                 return true;
             }
 
-            if (_lastSelfDecision == SelfDecision.Surgery && 
-                _currentSelfDecision != SelfDecision.Surgery )
+            if (_lastSelfDecision == ESelfDecision.Surgery && 
+                _currentSelfDecision != ESelfDecision.Surgery )
             {
                 return true;
             }
@@ -108,9 +108,9 @@ namespace SAIN.Layers.Combat.Solo
 
         private bool _doSurgeryAction;
 
-        private CombatDecision _lastDecision = CombatDecision.None;
-        private SelfDecision _lastSelfDecision = SelfDecision.None;
-        public CombatDecision _currentDecision => Bot.Decision.CurrentSoloDecision;
-        public SelfDecision _currentSelfDecision => Bot.Decision.CurrentSelfDecision;
+        private ECombatDecision _lastDecision = ECombatDecision.None;
+        private ESelfDecision _lastSelfDecision = ESelfDecision.None;
+        public ECombatDecision _currentDecision => Bot.Decision.CurrentCombatDecision;
+        public ESelfDecision _currentSelfDecision => Bot.Decision.CurrentSelfDecision;
     }
 }

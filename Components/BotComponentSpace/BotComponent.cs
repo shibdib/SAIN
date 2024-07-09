@@ -68,7 +68,7 @@ namespace SAIN.SAINComponent
         public SAINBotInfoClass Info { get; private set; }
         public SAINSquadClass Squad { get; private set; }
         public SAINSelfActionClass SelfActions { get; private set; }
-        public SAINBotGrenadeClass Grenade { get; private set; }
+        public BotGrenadeManager Grenade { get; private set; }
         public SAINSteeringClass Steering { get; private set; }
         public AimClass Aim { get; private set; }
         public CoroutineManager<BotComponent> CoroutineManager { get; private set; }
@@ -149,7 +149,7 @@ namespace SAIN.SAINComponent
                 Cover = new SAINCoverClass(this);
                 SelfActions = new SAINSelfActionClass(this);
                 Steering = new SAINSteeringClass(this);
-                Grenade = new SAINBotGrenadeClass(this);
+                Grenade = new BotGrenadeManager(this);
                 Mover = new SAINMoverClass(this);
                 EnemyController = new SAINEnemyController(this);
                 FriendlyFire = new SAINFriendlyFireClass(this);

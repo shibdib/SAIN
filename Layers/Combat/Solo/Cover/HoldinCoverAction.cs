@@ -76,7 +76,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 return;
             }
 
-            if (Bot.Decision.CurrentSelfDecision != SelfDecision.None)
+            if (Bot.Decision.CurrentSelfDecision != ESelfDecision.None)
             {
                 Bot.Mover.FastLean(LeanSetting.None);
                 CurrentLean = LeanSetting.None;

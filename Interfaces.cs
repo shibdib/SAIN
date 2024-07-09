@@ -1,28 +1,31 @@
-﻿using BepInEx.Logging;
-using EFT;
-using SAIN.Attributes;
-using SAIN.Components.PlayerComponentSpace;
+﻿using SAIN.Preset;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using System.Collections.Generic;
 
 namespace SAIN
 {
-    public interface IBotClass
+    public interface IBot
     {
         BotComponent Bot { get; }
-
         void Init();
-        void Update();
         void Dispose();
     }
 
-    public interface ISAINEnemyClass
+    public interface IBotClass : IBot
+    {
+        void Update();
+    }
+
+    public interface IBotDecisionClass : IBot
+    {
+        bool GetDecision(Enemy enemy, out string reason);
+
+        void UpdatePresetSettings(SAINPresetClass preset);
+    }
+
+
+    public interface ISAINEnemyClass : IBotClass
     {
         void OnEnemyKnownChanged(bool known, Enemy enemy);
-
-        void Init();
-        void Update();
-        void Dispose();
     }
 }

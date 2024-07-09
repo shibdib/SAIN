@@ -79,7 +79,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private bool shallFallback()
         {
-            return Bot.Decision.CurrentSelfDecision != SelfDecision.None &&
+            return Bot.Decision.CurrentSelfDecision != ESelfDecision.None &&
                 checkMoveToCover(Bot.Cover.FallBackPoint);
         }
 

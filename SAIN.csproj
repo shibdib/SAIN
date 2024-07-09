@@ -252,6 +252,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\BotComponentSpace\BotComponentBase.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Decision\BotDecision.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Decision\BotDecisionManager.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Doors\DoorData.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Doors\DoorFinder.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Path\ECornerType.cs" />
@@ -271,6 +273,8 @@
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingBulletAnalysisClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingDispersionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingInputClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Grenades\GrenadeReactionClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Grenades\GrenadeThrowDecider.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\ColliderData.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverData.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverHitCounts.cs" />
@@ -338,6 +342,7 @@
     <Compile Include="Layers\ISAINAction.cs" />
     <Compile Include="Patches\FixPatches.cs" />
     <Compile Include="Patches\Shoot\AimDataPatches.cs" />
+    <Compile Include="Patches\Shoot\GrenadePatches.cs" />
     <Compile Include="Plugin\ConfigEditingTracker.cs" />
     <Compile Include="Plugin\SAINDifficulty.cs" />
     <Compile Include="Plugin\SAINDifficultyClass.cs" />
@@ -624,7 +629,7 @@
     <Compile Include="Layers\Combat\Solo\SearchAction.cs" />
     <Compile Include="Layers\Combat\Solo\Cover\HoldinCoverAction.cs" />
     <Compile Include="Layers\Combat\Squad\SuppressAction.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\SAINBotGrenadeClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Grenades\BotGrenadeManager.cs" />
     <Compile Include="Components\BotComponentSpace\BotComponent.cs" />
     <Compile Include="Layers\Combat\Solo\CombatSoloLayer.cs" />
     <Compile Include="Layers\Combat\Solo\ShootAction.cs" />

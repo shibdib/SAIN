@@ -127,7 +127,7 @@ namespace SAIN.Layers
 
                     if (debug.Overlay_Decisions)
                     {
-                        stringBuilder.AppendLabeledValue("Main Decision", $"Current: {sain.Decision.CurrentSoloDecision} Last: {sain.Decision.PreviousSoloDecision}", Color.white, Color.yellow, true);
+                        stringBuilder.AppendLabeledValue("Main Decision", $"Current: {sain.Decision.CurrentCombatDecision} Last: {sain.Decision.PreviousCombatDecision}", Color.white, Color.yellow, true);
                         stringBuilder.AppendLabeledValue("Squad Decision", $"Current: {sain.Decision.CurrentSquadDecision} Last: {sain.Decision.PreviousSquadDecision}", Color.white, Color.yellow, true);
                         stringBuilder.AppendLabeledValue("Self Decision", $"Current: {sain.Decision.CurrentSelfDecision} Last: {sain.Decision.PreviousSelfDecision}", Color.white, Color.yellow, true);
                         stringBuilder.AppendLine();

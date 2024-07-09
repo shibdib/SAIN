@@ -35,11 +35,11 @@ namespace SAIN
         public static bool DrawDebugGizmos => DebugSettings.DrawDebugGizmos;
         public static PresetEditorDefaults EditorDefaults => PresetHandler.EditorDefaults;
 
-        public static CombatDecision ForceSoloDecision = CombatDecision.None;
+        public static ECombatDecision ForceSoloDecision = ECombatDecision.None;
 
-        public static SquadDecision ForceSquadDecision = SquadDecision.None;
+        public static ESquadDecision ForceSquadDecision = ESquadDecision.None;
 
-        public static SelfDecision ForceSelfDecision = SelfDecision.None;
+        public static ESelfDecision ForceSelfDecision = ESelfDecision.None;
 
         private void Awake()
         {

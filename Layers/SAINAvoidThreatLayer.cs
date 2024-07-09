@@ -22,7 +22,7 @@ namespace SAIN.Layers
             _lastActionDecision = CurrentDecision;
             switch (_lastActionDecision)
             {
-                case CombatDecision.DogFight:
+                case ECombatDecision.DogFight:
                     if (Bot.Decision.DogFightDecision.DogFightTarget != null)
                     {
                         return new Action(typeof(DogFightAction), $"Dog Fight - Enemy Close!");
@@ -31,7 +31,7 @@ namespace SAIN.Layers
                     {
                         return new Action(typeof(DogFightAction), $"Dog Fight - My Cover is Spotted!");
                     }
-                    else if (Bot.Decision.EnemyDecisions.ShotInCover)
+                    else if (Bot.Cover.SpottedInCover)
                     {
                         return new Action(typeof(DogFightAction), $"Dog Fight - Shot while in cover!");
                     }
@@ -40,7 +40,7 @@ namespace SAIN.Layers
                         return new Action(typeof(DogFightAction), $"Dog Fight - No Reason");
                     }
 
-                case CombatDecision.AvoidGrenade:
+                case ECombatDecision.AvoidGrenade:
                     return new Action(typeof(RunToCoverAction), $"Avoid Grenade");
 
                 default:
@@ -52,8 +52,8 @@ namespace SAIN.Layers
         {
             bool active = 
                 Bot?.BotActive == true &&
-                (CurrentDecision == CombatDecision.DogFight ||
-                CurrentDecision == CombatDecision.AvoidGrenade);
+                (CurrentDecision == ECombatDecision.DogFight ||
+                CurrentDecision == ECombatDecision.AvoidGrenade);
 
             setLayer(active);
             return active;
@@ -64,7 +64,7 @@ namespace SAIN.Layers
             return Bot?.BotActive == true && _lastActionDecision != CurrentDecision;
         }
 
-        private CombatDecision _lastActionDecision;
-        public CombatDecision CurrentDecision => Bot.Decision.CurrentSoloDecision;
+        private ECombatDecision _lastActionDecision;
+        public ECombatDecision CurrentDecision => Bot.Decision.CurrentCombatDecision;
     }
 }

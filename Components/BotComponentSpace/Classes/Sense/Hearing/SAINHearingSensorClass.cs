@@ -115,32 +115,6 @@ namespace SAIN.SAINComponent.Classes
             return true;
         }
 
-        private bool isPathTooFar(Vector3 soundPosition, float maxPathLength)
-        {
-            NavMeshPath path = new NavMeshPath();
-            Vector3 sampledPos = samplePos(soundPosition);
-            if (NavMesh.CalculatePath(samplePos(Bot.Position), sampledPos, -1, path))
-            {
-                float pathLength = path.CalculatePathLength();
-                if (path.status == NavMeshPathStatus.PathPartial)
-                {
-                    Vector3 directionFromEndOfPath = path.corners[path.corners.Length - 1] - sampledPos;
-                    pathLength += directionFromEndOfPath.magnitude;
-                }
-                return pathLength >= maxPathLength;
-            }
-            return false;
-        }
-
-        private Vector3 samplePos(Vector3 pos)
-        {
-            if (NavMesh.SamplePosition(pos, out var hit, 1f, -1))
-            {
-                return hit.position;
-            }
-            return pos;
-        }
-
         private IEnumerator baseHearDelay(float distance, float soundSpeed = -1f)
         {
             if (soundSpeed == -1f)
@@ -166,9 +140,10 @@ namespace SAIN.SAINComponent.Classes
 
             yield return baseHearDelay(sound.Info.EnemyDistance, speed);
 
+            Enemy enemy = sound.Info.Enemy;
             if (Bot != null && 
-                sound.Info.EnemyPlayer != null && 
-                sound.Info.Enemy?.CheckValid() == true)
+                sound.Info.EnemyPlayer != null &&
+                enemy?.CheckValid() == true)
             {
                 float projDist = sound.BulletData.ProjectionPointDistance;
                 bool underFire = projDist <= SAINPlugin.LoadedPreset.GlobalSettings.Mind.MaxUnderFireDistance;
@@ -180,15 +155,11 @@ namespace SAIN.SAINComponent.Classes
                 if (underFire)
                 {
                     BotOwner?.HearingSensor?.OnEnemySounHearded?.Invoke(sound.Results.EstimatedPosition, sound.Info.EnemyDistance, sound.Info.SoundType.Convert());
-                    Bot.Memory.SetUnderFire(sound.Info.EnemyPlayer.IPlayer, sound.Results.EstimatedPosition);
+                    Bot.Memory.SetUnderFire(enemy, sound.Results.EstimatedPosition);
                 }
-                Bot.Suppression.AddSuppression(projDist);
-                Enemy enemy = sound.Info.Enemy;
-                if (enemy != null)
-                {
-                    enemy.SetEnemyAsSniper(sound.Info.EnemyDistance > 100f);
-                    enemy.Status.ShotAtMeRecently = true;
-                }
+                Bot.Suppression.AddSuppression(enemy, projDist);
+                enemy.SetEnemyAsSniper(sound.Info.EnemyDistance > 100f);
+                enemy.Status.ShotAtMeRecently = true;
                 addPointToSearch(sound);
             }
         }

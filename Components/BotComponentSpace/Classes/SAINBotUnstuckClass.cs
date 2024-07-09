@@ -398,7 +398,7 @@ namespace SAIN.SAINComponent.Classes.Debug
                     Logger.LogWarning($"[{BotOwner.name}] has been stuck for [{TimeSinceStuck}] seconds " +
                         $"on [{StuckHit.transform?.name}] object " +
                         $"at [{StuckHit.transform?.position}] " +
-                        $"with Current Decision as [{Bot.Decision.CurrentSoloDecision}]");
+                        $"with Current Decision as [{Bot.Decision.CurrentCombatDecision}]");
                 }
 
                 if (HasTriedJumpOrVault
@@ -626,14 +626,14 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         public bool BotIsStuck { get; private set; }
 
-        private bool CanBeStuckDecisions(CombatDecision decision)
+        private bool CanBeStuckDecisions(ECombatDecision decision)
         {
-            return decision == CombatDecision.Search || decision == CombatDecision.MoveToCover || decision == CombatDecision.DogFight || decision == CombatDecision.RunToCover || decision == CombatDecision.RunAway;
+            return decision == ECombatDecision.Search || decision == ECombatDecision.MoveToCover || decision == ECombatDecision.DogFight || decision == ECombatDecision.RunToCover || decision == ECombatDecision.RunAway;
         }
 
         public bool BotStuckOnPlayer()
         {
-            if (!BotHasChangedPosition && CanBeStuckDecisions(Bot.Decision.CurrentSoloDecision))
+            if (!BotHasChangedPosition && CanBeStuckDecisions(Bot.Decision.CurrentCombatDecision))
             {
                 if (BotOwner.Mover == null)
                 {
@@ -682,7 +682,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         public bool BotStuckOnObject()
         {
-            if (CanBeStuckDecisions(Bot.Decision.CurrentSoloDecision) && 
+            if (CanBeStuckDecisions(Bot.Decision.CurrentCombatDecision) && 
                 !BotHasChangedPosition && 
                 !BotOwner.DoorOpener.Interacting && 
                 Bot.Decision.TimeSinceChangeDecision > 1f)

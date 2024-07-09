@@ -139,7 +139,7 @@ namespace SAIN.Layers.Combat.Solo
                 return;
             }
 
-            if (Bot.Decision.CurrentSquadDecision == SquadDecision.Help)
+            if (Bot.Decision.CurrentSquadDecision == ESquadDecision.Help)
             {
                 _sprintEnabled = true;
                 return;

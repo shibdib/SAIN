@@ -1,6 +1,8 @@
-﻿namespace SAIN.Preset.Personalities
+﻿using SAIN.Preset.GlobalSettings;
+
+namespace SAIN.Preset.Personalities
 {
-    public class PersonalityBehaviorSettings : SettingsGroupBase<PersonalityBehaviorSettings>
+    public class PersonalityBehaviorSettings : SettingsGroupBase<PersonalityBehaviorSettings>, ISettingsGroup
     {
         public PersonalityGeneralSettings General = new PersonalityGeneralSettings();
         public PersonalitySearchSettings Search = new PersonalitySearchSettings();

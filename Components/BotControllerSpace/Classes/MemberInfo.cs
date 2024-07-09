@@ -16,7 +16,7 @@ namespace SAIN.BotController.Classes
 
             HealthStatus = sain.Memory.Health.HealthStatus;
 
-            sain.Decision.OnDecisionMade += UpdateDecisions;
+            sain.Decision.DecisionManager.OnDecisionMade += UpdateDecisions;
             sain.Memory.Health.HealthStatusChanged += UpdateHealth;
             sain.OnDispose += removeMe;
 
@@ -28,7 +28,7 @@ namespace SAIN.BotController.Classes
             _squad?.RemoveMember(ProfileId);
         }
 
-        private void UpdateDecisions(CombatDecision solo, SquadDecision squad, SelfDecision self, BotComponent member)
+        private void UpdateDecisions(ECombatDecision solo, ESquadDecision squad, ESelfDecision self, BotComponent member)
         {
             SoloDecision = solo;
             SquadDecision = squad;
@@ -61,9 +61,9 @@ namespace SAIN.BotController.Classes
 
         public ETagStatus HealthStatus;
 
-        public CombatDecision SoloDecision { get; private set; }
-        public SquadDecision SquadDecision { get; private set; }
-        public SelfDecision SelfDecision { get; private set; }
+        public ECombatDecision SoloDecision { get; private set; }
+        public ESquadDecision SquadDecision { get; private set; }
+        public ESelfDecision SelfDecision { get; private set; }
         public float PowerLevel { get; private set; }
 
         public void Dispose()
@@ -71,7 +71,7 @@ namespace SAIN.BotController.Classes
             if (Bot != null)
             {
                 Bot.OnDispose -= removeMe;
-                Bot.Decision.OnDecisionMade -= UpdateDecisions;
+                Bot.Decision.DecisionManager.OnDecisionMade -= UpdateDecisions;
                 Bot.Memory.Health.HealthStatusChanged -= UpdateHealth;
             }
         }
