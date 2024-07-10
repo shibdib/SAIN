@@ -258,11 +258,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         public void LookForCover()
         {
-            if (TargetData == null)
-            {
-                Logger.LogError($"Cant start cover finder when target data is null!");
-                return;
-            }
+            //if (TargetData == null)
+            //{
+            //    Logger.LogError($"Cant start cover finder when target data is null!");
+            //    return;
+            //}
             if (_findCoverPointsCoroutine == null)
             {
                 _findCoverPointsCoroutine = StartCoroutine(findCoverLoop());

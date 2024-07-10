@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SAIN.Components.PlayerComponentSpace.PersonClasses
 {
-    public class PersonActiveClass
+    public class PersonActiveClass : PersonSubClass
     {
         public void CheckActive()
         {
@@ -67,22 +67,20 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
         {
             if (state == EBotState.Disposed)
             {
-                if (_person.BotOwner != null)
-                    _person.BotOwner.OnBotStateChange -= botStateChanged;
+                var botOwner = Person.AIInfo.BotOwner;
+                if (botOwner != null)
+                    botOwner.OnBotStateChange -= botStateChanged;
 
                 IsAlive = false;
                 playerKilledOrNull();
             }
         }
 
-        public PersonActiveClass(PersonClass person)
+        public PersonActiveClass(PersonClass person, PlayerData playerData) : base(person, playerData)
         {
-            _person = person;
             person.Player.OnPlayerDeadOrUnspawn += playerDeadOrUnspawn;
             IsAlive = true;
         }
-
-        private readonly PersonClass _person;
 
         public event Action<bool> OnGameObjectActiveChanged;
 
@@ -92,7 +90,7 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
 
         public event Action<PersonClass> OnPersonDeadOrDespawned;
 
-        public bool Active => PlayerActive && (!_person.IsAI || BotActive);
+        public bool Active => PlayerActive && (!Person.AIInfo.IsAI || BotActive);
         public bool PlayerActive { get; private set; }
         public bool BotActive { get; private set; }
         public bool GameObjectActive { get; private set; }
@@ -100,7 +98,7 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
 
         private bool checkAlive()
         {
-            IPlayer iPlayer = _person.IPlayer;
+            IPlayer iPlayer = IPlayer;
             if (iPlayer == null)
             {
                 return false;
@@ -110,9 +108,9 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
                 return false;
             }
 
-            if (_person.IsAI)
+            if (Person.AIInfo.IsAI)
             {
-                BotOwner botOwner = _person.BotOwner;
+                BotOwner botOwner = Person.AIInfo.BotOwner;
                 if (botOwner == null ||
                     botOwner.gameObject == null ||
                     botOwner.Transform?.Original == null)
@@ -125,12 +123,12 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
 
         private bool checkGameObjectActive()
         {
-            GameObject gameObject = _person.GameObject;
+            GameObject gameObject = Player?.gameObject;
             if (gameObject == null)
             {
                 return false;
             }
-            if (!_person.Player.isActiveAndEnabled)
+            if (!Player.isActiveAndEnabled)
             {
                 return false;
             }
@@ -144,13 +142,13 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
                 //Logger.LogDebug($"Person {_person.Nickname} Dead");
                 _playerNullOrDead = true;
 
-                var player = _person.Player;
+                var player = Player;
                 if (player != null)
                 {
                     player.OnPlayerDeadOrUnspawn -= playerDeadOrUnspawn;
                 }
 
-                OnPersonDeadOrDespawned?.Invoke(_person);
+                OnPersonDeadOrDespawned?.Invoke(Person);
             }
         }
 
@@ -166,9 +164,9 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
             {
                 return false;
             }
-            if (_person.IsAI)
+            if (Person.AIInfo.IsAI)
             {
-                BotOwner botOwner = _person.BotOwner;
+                BotOwner botOwner = Person.AIInfo.BotOwner;
                 if (botOwner == null)
                 {
                     return false;
@@ -177,21 +175,17 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
                 {
                     return false;
                 }
-                if (botOwner.StandBy?.StandByType != BotStandByType.active)
-                {
-                    //return false;
-                }
             }
             return true;
         }
 
         private bool checkPlayerExists()
         {
-            Player player = _person.Player;
+            Player player = Player;
             return player != null && player.gameObject != null && player.Transform?.Original != null;
         }
 
-        public void InitBotOwner(BotOwner botOwner)
+        public void InitBot(BotOwner botOwner)
         {
             botOwner.OnBotStateChange += botStateChanged;
         }

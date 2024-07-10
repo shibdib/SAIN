@@ -42,7 +42,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 {
                     return true;
                 }
-                var activeClass = person.ActiveClass;
+                var activeClass = person.ActivationClass;
                 if (!activeClass.Active || !activeClass.IsAlive)
                 {
                     return true;

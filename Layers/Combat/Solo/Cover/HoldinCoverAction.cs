@@ -130,7 +130,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private bool checkLeanIntoObject(LeanSetting lean)
         {
             Vector3 headPos = Bot.Transform.HeadPosition;
-            Vector3 rayEnd = lean == LeanSetting.Right ? Bot.Transform.Right() : Bot.Transform.Left();
+            Vector3 rayEnd = lean == LeanSetting.Right ? Bot.Transform.DirectionData.Right() : Bot.Transform.DirectionData.Left();
             switch (lean)
             {
                 case LeanSetting.Right:

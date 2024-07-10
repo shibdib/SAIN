@@ -102,11 +102,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 return float.MaxValue;
             }
-            var enemyBot = Enemy.EnemyPerson.BotComponent;
+            var enemyBot = Enemy.EnemyPerson.AIInfo.BotComponent;
             if (enemyBot == null)
             {
                 // if an enemy bot is not a sain bot, but has this bot as an enemy, dont limit at all.
-                if (Enemy.EnemyPerson.BotOwner?.Memory.GoalEnemy?.ProfileId == Bot.ProfileId)
+                if (Enemy.EnemyPerson.AIInfo.BotOwner?.Memory.GoalEnemy?.ProfileId == Bot.ProfileId)
                 {
                     return float.MaxValue;
                 }

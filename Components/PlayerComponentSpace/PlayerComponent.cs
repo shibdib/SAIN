@@ -17,12 +17,12 @@ namespace SAIN.Components.PlayerComponentSpace
         {
             Person.Update();
 
-            if (!Person.ActiveClass.PlayerActive)
+            if (!Person.ActivationClass.PlayerActive)
             {
                 return;
             }
 
-            if (!IsAI || Person.ActiveClass.BotActive)
+            if (!IsAI || Person.ActivationClass.BotActive)
             {
                 drawTransformGizmos();
                 Flashlight.Update();
@@ -129,10 +129,10 @@ namespace SAIN.Components.PlayerComponentSpace
         public Player Player => Person.Player;
         public IPlayer IPlayer => Person.IPlayer;
         public string Name => Person.Name;
-        public BotOwner BotOwner => Person.BotOwner;
-        public BotComponent BotComponent => Person.BotComponent;
-        public bool IsAI => Person.IsAI;
-        public bool IsSAINBot => Person.IsSAINBot;
+        public BotOwner BotOwner => Person.AIInfo.BotOwner;
+        public BotComponent BotComponent => Person.AIInfo.BotComponent;
+        public bool IsAI => Person.AIInfo.IsAI;
+        public bool IsSAINBot => Person.AIInfo.IsSAINBot;
 
         public bool Init(IPlayer iPlayer, Player player)
         {
@@ -140,12 +140,13 @@ namespace SAIN.Components.PlayerComponentSpace
 
             try
             {
-                Person = new PersonClass(iPlayer, player, this);
+                var playerData = new PlayerData(this, player, iPlayer);
+                Person = new PersonClass(playerData);
                 Flashlight = new FlashLightClass(this);
                 Equipment = new SAINEquipmentClass(this);
                 AIData = new SAINAIData(Equipment.GearInfo, this);
 
-                Person.ActiveClass.OnPlayerActiveChanged += handleCoroutines;
+                Person.ActivationClass.OnPlayerActiveChanged += handleCoroutines;
                 handleCoroutines(true);
             }
             catch (Exception ex)
@@ -174,29 +175,29 @@ namespace SAIN.Components.PlayerComponentSpace
 
         public void InitBotOwner(BotOwner botOwner)
         {
-            Person.ActiveClass.OnPlayerActiveChanged -= handleCoroutines;
-            Person.ActiveClass.OnBotActiveChanged += handleCoroutines;
-            Person.InitBotOwner(botOwner);
+            Person.ActivationClass.OnPlayerActiveChanged -= handleCoroutines;
+            Person.ActivationClass.OnBotActiveChanged += handleCoroutines;
+            Person.InitBot(botOwner);
         }
 
         public void InitBotComponent(BotComponent bot)
         {
-            Person.InitBotComponent(bot);
+            Person.InitBot(bot);
         }
 
         private void OnDisable()
         {
-            Person.ActiveClass.Disable();
+            Person.ActivationClass.Disable();
             stopCoroutines();
         }
 
         public void Dispose()
         {
-            Logger.LogDebug($"Destroying Playing Component for [Name: {Person?.Name} : Nickname: {Person?.Nickname}, ProfileID: {Person?.ProfileId}, at time: {Time.time}]");
+            Logger.LogDebug($"Destroying Playing Component for [Name: {Person?.Name} : Nickname: {Person?.Nickname}, ProfileID: {Person?.Profile.ProfileId}, at time: {Time.time}]");
             OnComponentDestroyed?.Invoke(ProfileId);
             stopCoroutines();
-            Person.ActiveClass.OnBotActiveChanged -= handleCoroutines;
-            Person.ActiveClass.OnPlayerActiveChanged -= handleCoroutines;
+            Person.ActivationClass.OnBotActiveChanged -= handleCoroutines;
+            Person.ActivationClass.OnPlayerActiveChanged -= handleCoroutines;
             Equipment?.Dispose();
             Destroy(this);
         }

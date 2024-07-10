@@ -63,7 +63,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void removeEnemy(PersonClass person)
         {
-            RemoveEnemy(person.ProfileId);
+            RemoveEnemy(person.Profile.ProfileId);
         }
 
         public void RemoveEnemy(string profileId)
@@ -87,7 +87,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (enemy.EnemyPlayerComponent != null)
                 enemy.EnemyPlayerComponent.OnComponentDestroyed -= RemoveEnemy;
             if (enemy.EnemyPerson != null)
-                enemy.EnemyPerson.ActiveClass.OnPersonDeadOrDespawned -= removeEnemy;
+                enemy.EnemyPerson.ActivationClass.OnPersonDeadOrDespawned -= removeEnemy;
         }
 
         public Enemy CheckAddEnemy(IPlayer IPlayer)
@@ -210,7 +210,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             Enemy enemy = new Enemy(Bot, enemyPlayerComponent, enemyInfo);
             enemy.Init();
-            enemyPlayerComponent.Person.ActiveClass.OnPersonDeadOrDespawned += removeEnemy;
+            enemyPlayerComponent.Person.ActivationClass.OnPersonDeadOrDespawned += removeEnemy;
             enemyPlayerComponent.OnComponentDestroyed += RemoveEnemy;
             Enemies.Add(enemy.EnemyProfileId, enemy);
             BaseClass.Events.EnemyAdded(enemy);

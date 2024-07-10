@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -33,7 +34,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             const int MAX_CASTS_PER_FRAME = 4;
             const int MAX_ITERATIONS_REAL_CORNER = 15;
 
-            Vector3 lookPoint = Bot.Transform.EyePosition;
+            var transform = Bot.Transform;
+            Vector3 lookPoint = transform.EyePosition;
             Vector3 lookOffset = lookPoint - Bot.Position;
             float heightOffset = lookOffset.y;
 
@@ -136,6 +138,69 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 //Logger.LogDebug($"Total Raycasts: [{totalRaycasts}] Time To Complete: [{time}] seconds");
             }
         }
+
+        //private Vector3 findDispersionPositionAtNavMesh(Vector3 enemyPosition, float dispersion)
+        //{
+        //    const int iterations = 50;
+        //    const float navSampleRange = 0.5f;
+        //    for (int i = 0; i < iterations; i++)
+        //    {
+        //        Vector3 random = UnityEngine.Random.onUnitSphere * dispersion;
+        //        random.y = 0;
+        //        Vector3 point = enemyPosition + random;
+        //        if (NavMesh.SamplePosition(point, out var hit, navSampleRange, -1))
+        //        {
+        //            return hit.position;
+        //        }
+        //    }
+        //}
+
+        //private void findBlockedPoint(Vector3[] corners, float segmentLength, Vector3 lastKnownPosition)
+        //{
+        //    const float reduceOffset = 0.66f;
+        //
+        //    Vector3? result = null;
+        //    var transform = Bot.Transform;
+        //    float lengthSqr = segmentLength * segmentLength;
+        //    int count = corners.Length;
+        //    for (int i = count - 1; i > 0; i--)
+        //    {
+        //        Vector3 start = corners[i];
+        //        Vector3 lookSensor = transform.EyePosition;
+        //        Vector3 botPosition = transform.Position;
+        //        Vector3 offset = (lookSensor - botPosition);
+        //        const int PointsToCheck = 5;
+        //        Vector3 pointDir = offset / PointsToCheck;
+        //
+        //        Vector3 rayCastTarget = start;
+        //        rayCastTarget.y += offset.y;
+        //        result.Add(start);
+        //
+        //        Vector3 end = corners[i - 1];
+        //        Vector3 direction = end - start;
+        //        float sqrMagnitude = direction.sqrMagnitude;
+        //
+        //        if (sqrMagnitude <= lengthSqr)
+        //            continue;
+        //
+        //        if (sqrMagnitude <= lengthSqr / 2f)
+        //        {
+        //            Vector3 midPoint = Vector3.Lerp(start, end, 0.5f);
+        //            result.Add(midPoint);
+        //            continue;
+        //        }
+        //
+        //        Vector3 directionNormal = direction.normalized;
+        //        Vector3 segment = directionNormal * segmentLength;
+        //        float currentLength = 0f;
+        //        while (currentLength < lengthSqr)
+        //        {
+        //
+        //        }
+        //
+        //
+        //    }
+        //}
 
         private float _nextLogTime;
 

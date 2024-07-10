@@ -73,7 +73,7 @@ namespace SAIN.SAINComponent
         public AimClass Aim { get; private set; }
         public CoroutineManager<BotComponent> CoroutineManager { get; private set; }
 
-        public bool IsDead => !Person.ActiveClass.IsAlive;
+        public bool IsDead => !Person.ActivationClass.IsAlive;
         public bool GameEnding => BotActivation.GameEnding;
         public bool SAINLayersActive => BotActivation.SAINLayersActive;
 
@@ -183,7 +183,7 @@ namespace SAIN.SAINComponent
             {
                 Info.Init();
                 BotActivation.Init();
-                NoBushESP.Init(Person.BotOwner, this);
+                NoBushESP.Init(Person.AIInfo.BotOwner, this);
                 WeightManagement.Init();
                 Search.Init();
                 Memory.Init();
@@ -246,9 +246,9 @@ namespace SAIN.SAINComponent
         private bool verifyBrain(PersonClass person)
         {
             if (Info.Profile.IsPMC &&
-                person.BotOwner.Brain.BaseBrain.ShortName() != Brain.PMC.ToString())
+                person.AIInfo.BotOwner.Brain.BaseBrain.ShortName() != Brain.PMC.ToString())
             {
-                Logger.LogAndNotifyError($"{BotOwner.name} is a PMC but does not have [PMC] Base Brain! Current Brain Assignment: [{person.BotOwner.Brain.BaseBrain.ShortName()}] : SAIN Server mod is either missing or another mod is overwriting it. Destroying SAIN for this bot...");
+                Logger.LogAndNotifyError($"{BotOwner.name} is a PMC but does not have [PMC] Base Brain! Current Brain Assignment: [{person.AIInfo.BotOwner.Brain.BaseBrain.ShortName()}] : SAIN Server mod is either missing or another mod is overwriting it. Destroying SAIN for this bot...");
                 return false;
             }
             return true;

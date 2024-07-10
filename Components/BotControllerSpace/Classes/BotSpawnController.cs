@@ -112,7 +112,7 @@ namespace SAIN.Components.BotController
                 BotDictionary.Add(botOwner.name, botComponent);
                 playerComponent.InitBotComponent(botComponent);
                 botOwner.LeaveData.OnLeave += removeBot;
-                playerComponent.Person.ActiveClass.OnPersonDeadOrDespawned += removePerson;
+                playerComponent.Person.ActivationClass.OnPersonDeadOrDespawned += removePerson;
             }
             else
             {
@@ -168,8 +168,8 @@ namespace SAIN.Components.BotController
 
         private void removePerson(PersonClass person)
         {
-            person.ActiveClass.OnPersonDeadOrDespawned -= removePerson;
-            removeBot(person.BotOwner);
+            person.ActivationClass.OnPersonDeadOrDespawned -= removePerson;
+            removeBot(person.AIInfo.BotOwner);
         }
 
         private void checkExisting(BotOwner botOwner)
@@ -203,7 +203,7 @@ namespace SAIN.Components.BotController
                 BotDictionary.Add(botOwner.name, botComponent);
                 playerComponent.InitBotComponent(botComponent);
                 botOwner.LeaveData.OnLeave += removeBot;
-                playerComponent.Person.ActiveClass.OnPersonDeadOrDespawned += removePerson;
+                playerComponent.Person.ActivationClass.OnPersonDeadOrDespawned += removePerson;
             }
             else
             {

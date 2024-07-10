@@ -91,7 +91,7 @@ namespace SAIN.Components.PlayerComponentSpace
             PlayerComponent component = player.gameObject.AddComponent<PlayerComponent>();
             if (component?.Init(iPlayer, player) == true)
             {
-                component.Person.ActiveClass.OnPersonDeadOrDespawned += removePerson;
+                component.Person.ActivationClass.OnPersonDeadOrDespawned += removePerson;
                 AlivePlayers.Add(profileId, component);
             }
             else
@@ -103,9 +103,9 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private void removePerson(PersonClass person)
         {
-            person.ActiveClass.OnPersonDeadOrDespawned -= removePerson;
-            AlivePlayers.TryRemove(person.ProfileId, out _);
-            if (!person.ActiveClass.IsAlive && 
+            person.ActivationClass.OnPersonDeadOrDespawned -= removePerson;
+            AlivePlayers.TryRemove(person.Profile.ProfileId, out _);
+            if (!person.ActivationClass.IsAlive && 
                 person.Player != null)
             {
                 //SAINGameWorld.StartCoroutine(addDeadPlayer(person.Player));

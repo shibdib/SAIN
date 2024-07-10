@@ -4,79 +4,53 @@ using UnityEngine;
 
 namespace SAIN.Components.PlayerComponentSpace.PersonClasses
 {
-    public class PersonClass
+    public class PersonClass : PersonBase
     {
+        public string Name { get; private set; }
+        public ProfileData Profile { get; }
+        public PlayerData PlayerObjects { get; }
+        public PersonAIInfo AIInfo { get; } = new PersonAIInfo();
+        public PersonTransformClass Transform { get; }
+        public PersonActiveClass ActivationClass { get; }
+
         public void Update()
         {
-            ActiveClass.CheckActive();
-            if (ActiveClass.PlayerActive)
+            ActivationClass.CheckActive();
+            if (ActivationClass.PlayerActive)
             {
-                Transform.UpdatePositions();
+                Transform.Update();
             }
         }
 
         public void LateUpdate()
         {
-            ActiveClass.CheckActive();
+            ActivationClass.CheckActive();
         }
 
-        public bool Active => ActiveClass.Active;
+        public bool Active => ActivationClass.Active;
 
-        public IPlayer IPlayer { get; private set; }
-
-        public Player Player { get; private set; }
-
-        public GameObject GameObject { get; private set; }
-
-        public bool IsAI { get; private set; }
-
-        public bool IsSAINBot { get; private set; }
-
-        public BotOwner BotOwner { get; private set; }
-
-        public BotComponent BotComponent { get; private set; }
-
-        public PlayerComponent PlayerComponent { get; private set; }
-
-        public PersonTransformClass Transform { get; private set; }
-
-        public PersonActiveClass ActiveClass { get; private set; }
-
-        public string Name { get; private set; }
-
-        public readonly string ProfileId;
-
-        public readonly string Nickname;
-
-        public PersonClass(IPlayer iPlayer, Player player, PlayerComponent playerComponent)
+        public PersonClass(PlayerData objects) : base(objects)
         {
-            PlayerComponent = playerComponent;
-            GameObject = playerComponent.gameObject;
-            Player = player;
-            IPlayer = iPlayer;
-            Name = player?.name;
-            ProfileId = player.ProfileId;
-            Nickname = player.Profile?.Nickname;
-            Transform = new PersonTransformClass(this);
-            ActiveClass = new PersonActiveClass(this);
+            Transform = new PersonTransformClass(this, objects);
+            ActivationClass = new PersonActiveClass(this, objects);
+            Name = objects.Player.name;
         }
 
-        public void InitBotOwner(BotOwner botOwner)
+        public void InitBot(BotOwner botOwner)
         {
-            if (botOwner != null)
+            if (botOwner == null)
             {
-                Name = botOwner.name;
-                BotOwner = botOwner;
-                IsAI = true;
-                ActiveClass.InitBotOwner(botOwner);
+                Logger.LogWarning($"{Name} : Null BotOwner, cannot Initialize!");
+                return;
             }
+            AIInfo.InitBot(botOwner);
+            Name = botOwner.name;
+            ActivationClass.InitBot(botOwner);
         }
 
-        public void InitBotComponent(BotComponent bot)
+        public void InitBot(BotComponent bot)
         {
-            BotComponent = bot;
-            IsSAINBot = bot != null;
+            AIInfo.InitBot(bot);
         }
-
     }
 }

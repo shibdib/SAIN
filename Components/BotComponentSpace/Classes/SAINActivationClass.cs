@@ -78,7 +78,7 @@ namespace SAIN.SAINComponent.Classes
 
             if (!GameEnding &&
                 !BotActive &&
-                Bot.Person.ActiveClass.BotActive)
+                Bot.Person.ActivationClass.BotActive)
             {
                 Logger.LogWarning($"Bot not active but should be!");
                 SetActive(true);
@@ -135,7 +135,7 @@ namespace SAIN.SAINComponent.Classes
         public void Init()
         {
             SetActive(true);
-            Bot.Person.ActiveClass.OnBotActiveChanged += SetActive;
+            Bot.Person.ActivationClass.OnBotActiveChanged += SetActive;
         }
 
         public void Dispose()

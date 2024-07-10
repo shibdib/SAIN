@@ -52,14 +52,14 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
                 //Logger.LogDebug("Enemy Person is Null");
                 return false;
             }
-            if (!person.ActiveClass.IsAlive)
+            if (!person.ActivationClass.IsAlive)
             {
                 //Logger.LogDebug("Enemy Player Is Dead");
                 return false;
             }
             // Checks specific to bots
             BotOwner botOwner = EnemyPlayer?.AIData?.BotOwner;
-            if (EnemyPerson?.IsAI == true && botOwner == null)
+            if (EnemyPerson?.AIInfo.IsAI == true && botOwner == null)
             {
                 //Logger.LogDebug("Enemy is AI, but BotOwner is null. Removing...");
                 return false;
