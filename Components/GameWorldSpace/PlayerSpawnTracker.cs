@@ -104,7 +104,7 @@ namespace SAIN.Components.PlayerComponentSpace
         private void removePerson(PersonClass person)
         {
             person.ActivationClass.OnPersonDeadOrDespawned -= removePerson;
-            AlivePlayers.TryRemove(person.Profile.ProfileId, out _);
+            AlivePlayers.TryRemove(person.ProfileId, out _);
             if (!person.ActivationClass.IsAlive && 
                 person.Player != null)
             {

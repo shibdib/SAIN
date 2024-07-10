@@ -28,7 +28,7 @@ namespace SAIN.Components
                 return false;
             }
             Person = person;
-            ProfileId = person.Profile.ProfileId;
+            ProfileId = person.ProfileId;
             person.Player.ActiveHealthController.SetDamageCoeff(1f);
             return true;
         }

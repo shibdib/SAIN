@@ -24,6 +24,10 @@ namespace SAIN.Layers
 
         protected void setLayer(bool active)
         {
+            if (Bot == null)
+            {
+                return;
+            }
             if (active)
             {
                 Bot.ActiveLayer = ELayer;

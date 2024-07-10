@@ -63,7 +63,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void removeEnemy(PersonClass person)
         {
-            RemoveEnemy(person.Profile.ProfileId);
+            RemoveEnemy(person.ProfileId);
         }
 
         public void RemoveEnemy(string profileId)

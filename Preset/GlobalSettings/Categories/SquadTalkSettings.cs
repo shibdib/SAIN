@@ -80,8 +80,8 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(1f, 120f, 1f)]
         public float _hearNoiseMaxDist = 60f;
 
-        [MinMax(0.1f, 10f, 100f)]
-        public float _hearNoiseFreq = 1f;
+        [MinMax(1f, 60f, 100f)]
+        public float _hearNoiseFreq = 30f;
 
         [Percentage]
         public float _enemyLocationTalkChance = 60f;

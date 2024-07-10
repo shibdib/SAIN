@@ -273,9 +273,9 @@ namespace SAIN.SAINComponent
                 return;
             }
 
-            EnemyController.Update();
             AILimit.Update();
             CurrentTarget.Update();
+            EnemyController.Update();
             BotStuck.Update();
             Decision.Update();
 

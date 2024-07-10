@@ -800,24 +800,18 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
             float time = Time.time;
             if (!Bot.BotActive ||
-                _hearNoiseTime > time ||
-                !EFTMath.RandomBool(_hearNoiseChance))
+                _hearNoiseTime > time)
             {
                 return;
             }
-
             if (Bot.HasEnemy && Bot.Enemy.TimeSinceSeen < 120f)
             {
                 return;
             }
-
             if (!Bot.Talk.GroupTalk.FriendIsClose)
             {
                 return;
             }
-
-            _hearNoiseTime = time + _hearNoiseFreq;
-
             if (place == null || soundType.IsGunShot())
             {
                 return;
@@ -826,7 +820,11 @@ namespace SAIN.SAINComponent.Classes.Talk
             {
                 return;
             }
-
+            if (!EFTMath.RandomBool(_hearNoiseChance))
+            {
+                return;
+            }
+            _hearNoiseTime = time + _hearNoiseFreq;
             EPhraseTrigger trigger = soundType == SAINSoundType.Conversation ? EPhraseTrigger.OnEnemyConversation : EPhraseTrigger.NoisePhrase;
             Bot.Talk.TalkAfterDelay(trigger, ETagStatus.Aware, 0.33f);
         }

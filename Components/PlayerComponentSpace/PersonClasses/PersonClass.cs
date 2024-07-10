@@ -7,8 +7,7 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
     public class PersonClass : PersonBase
     {
         public string Name { get; private set; }
-        public ProfileData Profile { get; }
-        public PlayerData PlayerObjects { get; }
+        public bool Active => ActivationClass.Active;
         public PersonAIInfo AIInfo { get; } = new PersonAIInfo();
         public PersonTransformClass Transform { get; }
         public PersonActiveClass ActivationClass { get; }
@@ -27,15 +26,6 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
             ActivationClass.CheckActive();
         }
 
-        public bool Active => ActivationClass.Active;
-
-        public PersonClass(PlayerData objects) : base(objects)
-        {
-            Transform = new PersonTransformClass(this, objects);
-            ActivationClass = new PersonActiveClass(this, objects);
-            Name = objects.Player.name;
-        }
-
         public void InitBot(BotOwner botOwner)
         {
             if (botOwner == null)
@@ -43,14 +33,21 @@ namespace SAIN.Components.PlayerComponentSpace.PersonClasses
                 Logger.LogWarning($"{Name} : Null BotOwner, cannot Initialize!");
                 return;
             }
-            AIInfo.InitBot(botOwner);
             Name = botOwner.name;
+            AIInfo.InitBot(botOwner);
             ActivationClass.InitBot(botOwner);
         }
 
         public void InitBot(BotComponent bot)
         {
             AIInfo.InitBot(bot);
+        }
+
+        public PersonClass(PlayerData playerData) : base(playerData)
+        {
+            Transform = new PersonTransformClass(this, playerData);
+            ActivationClass = new PersonActiveClass(this, playerData);
+            Name = playerData.Player.name;
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace SAIN.Components.PlayerComponentSpace.PersonClasses
 {
-    public struct ProfileData
+    public class ProfileData
     {
         public string ProfileId { get; }
         public string Nickname { get; } 
