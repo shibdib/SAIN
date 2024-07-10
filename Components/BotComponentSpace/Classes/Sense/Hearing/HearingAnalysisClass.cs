@@ -57,7 +57,7 @@ namespace SAIN.SAINComponent.Classes
             var mods = sound.Range.Modifiers;
             mods.EnvironmentModifier = calcEnvironmentMod(sound);
             mods.ConditionModifier = calcConditionMod(sound);
-            mods.OcclusionModifier = calcOcclusionMod2(sound);
+            mods.OcclusionModifier = calcOcclusionMod(sound);
             mods.FinalModifier = mods.CalcFinalModifier(HEAR_MODIFIER_MIN_CLAMP, HEAR_MODIFIER_MAX_CLAMP);
             return mods.FinalModifier;
         }
@@ -152,7 +152,7 @@ namespace SAIN.SAINComponent.Classes
             return EFTMath.RandomBool(chanceToHear);
         }
 
-        private float calcOcclusionMod2(BotSound sound)
+        private float calcOcclusionMod(BotSound sound)
         {
             bool isGunshot = sound.Info.IsGunShot;
             if (sound.Enemy.InLineOfSight)
@@ -160,32 +160,6 @@ namespace SAIN.SAINComponent.Classes
                 sound.Results.VisibleSource = true;
                 return 1f;
             }
-            return isGunshot ? GUNSHOT_OCCLUSION_MOD : FOOTSTEP_OCCLUSION_MOD;
-        }
-
-        private float calcOcclusionMod(BotSound sound)
-        {
-            var info = sound.Info;
-            if (info.IsAI)
-                return 1f;
-
-            Vector3 position = info.Position;
-            bool isFootStep = info.SoundType == SAINSoundType.FootStep;
-            bool isGunshot = info.IsGunShot;
-            if (!isFootStep && !isGunshot)
-                return 1f;
-
-            if (isFootStep)
-                position.y += 0.5f;
-
-            Vector3 botheadpos = BotOwner.MyHead.position;
-            float rayDist = sound.Range.BaseRange * sound.Range.Modifiers.ConditionModifier * sound.Range.Modifiers.EnvironmentModifier;
-            if (!Physics.Raycast(botheadpos, position - botheadpos, rayDist, LayerMaskClass.HighPolyWithTerrainNoGrassMask))
-            {
-                sound.Results.VisibleSource = true;
-                return 1f;
-            }
-
             return isGunshot ? GUNSHOT_OCCLUSION_MOD : FOOTSTEP_OCCLUSION_MOD;
         }
 
