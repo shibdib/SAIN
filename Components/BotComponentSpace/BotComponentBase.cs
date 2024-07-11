@@ -14,12 +14,12 @@ namespace SAIN.Components
         public PersonClass Person { get; private set; }
 
         public PlayerComponent PlayerComponent => Person.PlayerComponent;
-        public BotOwner BotOwner => PlayerComponent.BotOwner;
-        public Player Player => PlayerComponent.Player;
-        public PersonTransformClass Transform => PlayerComponent.Transform;
+        public BotOwner BotOwner => Person.AIInfo.BotOwner;
+        public Player Player => Person.Player;
+        public PersonTransformClass Transform => Person.Transform;
 
-        public Vector3 Position => PlayerComponent.Position;
-        public Vector3 LookDirection => PlayerComponent.LookDirection;
+        public Vector3 Position => Person.Transform.Position;
+        public Vector3 LookDirection => Person.Transform.LookDirection;
 
         public virtual bool Init(PersonClass person)
         {

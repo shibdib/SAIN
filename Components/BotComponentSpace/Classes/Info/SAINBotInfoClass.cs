@@ -38,11 +38,13 @@ namespace SAIN.SAINComponent.Classes.Info
         {
             Profile = new BotProfile(sain);
             WeaponInfo = new WeaponInfoClass(sain);
-            base.SubscribeToPreset(UpdatePresetSettings);
+            Personality = GetPersonality(out var settings);
+            PersonalitySettingsClass = settings;
         }
 
         public void Init()
         {
+            base.SubscribeToPreset(UpdatePresetSettings);
             WeaponInfo.Init();
         }
 

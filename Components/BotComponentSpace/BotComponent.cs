@@ -321,7 +321,7 @@ namespace SAIN.SAINComponent
         public override void Dispose()
         {
             base.Dispose();
-            BotActivation.SetActive(false);
+            BotActivation?.SetActive(false);
             StopAllCoroutines();
 
             foreach (var botClass in _botClasses) {
@@ -332,9 +332,11 @@ namespace SAIN.SAINComponent
                 }
             }
 
-            GameObject.Destroy(NoBushESP);
+            if (NoBushESP != null)
+                GameObject.Destroy(NoBushESP);
             if (BotOwner != null)
                 BotOwner.OnBotStateChange -= resetBot;
+
             Destroy(this);
         }
 
