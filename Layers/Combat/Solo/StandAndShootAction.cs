@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    public class StandAndShootAction : SAINAction, ISAINAction
+    public class StandAndShootAction : CombatAction, ISAINAction
     {
         public StandAndShootAction(BotOwner bot) : base(bot, nameof(StandAndShootAction))
         {
@@ -24,7 +24,7 @@ namespace SAIN.Layers.Combat.Solo
             {
                 Bot.Mover.Pose.SetPoseToCover();
             }
-            Shoot.Update();
+            Shoot.CheckAimAndFire();
         }
 
         bool shallMoveShoot = false;

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    internal class DogFightAction : SAINAction, ISAINAction
+    internal class DogFightAction : CombatAction, ISAINAction
     {
         public DogFightAction(BotOwner bot) : base(bot, "Dog Fight")
         {
@@ -16,7 +16,7 @@ namespace SAIN.Layers.Combat.Solo
             Bot.Mover.SetTargetMoveSpeed(1f);
             Bot.Steering.SteerByPriority();
             Bot.Mover.DogFight.DogFightMove(true);
-            Shoot.Update();
+            Shoot.CheckAimAndFire();
         }
 
         public override void Start()

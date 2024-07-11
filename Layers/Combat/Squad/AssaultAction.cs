@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Squad
 {
-    internal class AssaultAction : SAINAction
+    internal class AssaultAction : CombatAction
     {
         public AssaultAction(BotOwner bot) : base(bot, nameof(AssaultAction))
         {
@@ -16,7 +16,7 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Update()
         {
-            Shoot.Update();
+            Shoot.CheckAimAndFire();
 
             Enemy enemy = Bot.Enemy;
             if (!Bot.Steering.SteerByPriority(false) && enemy != null)

@@ -49,6 +49,22 @@ namespace SAIN.Layers
             return false;
         }
 
+        private float GetMinNetLootValue()
+        {
+            if (SAIN.Info.Profile.IsPMC)
+            {
+                return MinLootValPMC * randomizationFactor;
+            }
+            else if (SAIN.Info.Profile.IsScav)
+            {
+                return MinLootValSCAV * randomizationFactor;
+            }
+            else
+            {
+                return MinLootValOther * randomizationFactor;
+            }
+        }
+
         private void UpdateLootingBotsInfo()
         {
             if (UpdateInfoTimer < Time.time)
@@ -74,21 +90,6 @@ namespace SAIN.Layers
         private float MinLootValOther => SAINPlugin.LoadedPreset.GlobalSettings.General.LootingBots.MinLootValOther;
         private float MinLootValException => SAINPlugin.LoadedPreset.GlobalSettings.General.LootingBots.MinLootValException;
 
-        private float GetMinNetLootValue()
-        {
-            if (SAIN.Info.Profile.IsPMC)
-            {
-                return MinLootValPMC * randomizationFactor;
-            }
-            else if (SAIN.Info.Profile.IsScav)
-            {
-                return MinLootValSCAV * randomizationFactor;
-            }
-            else
-            {
-                return MinLootValOther * randomizationFactor;
-            }
-        }
 
         private int GetItemPrice(LootItem item)
         {

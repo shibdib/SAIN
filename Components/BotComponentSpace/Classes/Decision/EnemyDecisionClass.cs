@@ -229,23 +229,27 @@ namespace SAIN.SAINComponent.Classes.Decision
                 reason = "outside";
                 return false;
             }
-            if (!Bot.Memory.Location.IsIndoors)
-            {
-                reason = "outside";
-                return false;
-            }
-            if (enemy.Seen && enemy.TimeSinceSeen < 240f)
+            if (enemy.Seen && enemy.TimeSinceSeen < FREEZE_MIN_TIMESINCESEEN)
             {
                 reason = "seenRecent";
                 return false;
             }
-            if (enemy.TimeSinceLastKnownUpdated > 90f)
+            if (enemy.TimeSinceLastKnownUpdated > FREEZE_MAX_TIMESINCEHEARD)
             {
                 reason = "haventHeard";
                 return false;
             }
+            if (enemy.KnownPlaces.BotDistanceFromLastKnown > FREEZE_MAX_DISTANCE)
+            {
+                reason = "tooFar";
+                return false;
+            }
 
-            checkFreezeTime();
+            if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Freeze)
+            {
+                FreezeFor = UnityEngine.Random.Range(10f, 120f);
+                UnFreezeTime = Time.time + FreezeFor;
+            }
 
             if (UnFreezeTime < Time.time)
             {
@@ -255,6 +259,10 @@ namespace SAIN.SAINComponent.Classes.Decision
             reason = "timeForFreeze";
             return true;
         }
+
+        const float FREEZE_MAX_DISTANCE = 70;
+        const float FREEZE_MIN_TIMESINCESEEN = 240f;
+        const float FREEZE_MAX_TIMESINCEHEARD = 80f;
 
         private bool shallThrowGrenade(Enemy enemy, out string reason)
         {

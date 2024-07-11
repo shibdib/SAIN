@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Squad
 {
-    internal class SuppressAction : SAINAction, ISAINAction
+    internal class SuppressAction : CombatAction, ISAINAction
     {
         public SuppressAction(BotOwner bot) : base(bot, nameof(SuppressAction))
         {
@@ -29,7 +29,7 @@ namespace SAIN.Layers.Combat.Squad
                 if (enemy.IsVisible && enemy.CanShoot)
                 {
                     Bot.Mover.StopMove();
-                    Shoot.Update();
+                    Shoot.CheckAimAndFire();
                     return;
                 }
 

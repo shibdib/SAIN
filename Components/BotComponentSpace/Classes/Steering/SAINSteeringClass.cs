@@ -216,7 +216,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             {
                 return null;
             }
-            visible = lastKnownPlace.PersonalClearLineOfSight(Bot.Transform.EyePosition, LayerMaskClass.HighPolyWithTerrainMask);
+            visible = lastKnownPlace.CheckLineOfSight(Bot.Transform.EyePosition, LayerMaskClass.HighPolyWithTerrainMask);
             return lastKnownPlace.GroundedPosition();
         }
 

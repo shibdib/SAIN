@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    internal class FreezeAction : SAINAction
+    internal class FreezeAction : CombatAction
     {
         public FreezeAction(BotOwner bot) : base(bot, nameof(FreezeAction))
         {
@@ -20,7 +20,7 @@ namespace SAIN.Layers.Combat.Solo
             {
                 Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
             }
-            Shoot.Update();
+            Shoot.CheckAimAndFire();
         }
 
         public override void Start()

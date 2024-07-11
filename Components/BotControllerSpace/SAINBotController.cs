@@ -2,7 +2,9 @@ using Comfort.Common;
 using EFT;
 using EFT.EnvironmentEffect;
 using SAIN.BotController.Classes;
+using SAIN.Components.BotComponentSpace.Classes.EnemyClasses;
 using SAIN.Components.BotController;
+using SAIN.Components.BotController.PeacefulActions;
 using SAIN.Components.BotControllerSpace.Classes;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
@@ -29,7 +31,7 @@ namespace SAIN.Components
         public event Action<Grenade, Vector3, string> OnGrenadeThrown;
         public event Action<Vector3, string, bool, float, float> OnGrenadeExploded;
 
-        public Dictionary<string, BotComponent> Bots => BotSpawnController.Bots;
+        public BotDictionary Bots => BotSpawnController.Bots;
         public GameWorld GameWorld => SAINGameWorld.GameWorld;
         public IBotGame BotGame => Singleton<IBotGame>.Instance;
 
@@ -69,7 +71,6 @@ namespace SAIN.Components
         }
 
         private BotSpawner _spawner;
-        public CoverManager CoverManager { get; private set; }
         public LineOfSightManager LineOfSightManager { get; private set; }
         public BotExtractManager BotExtractManager { get; private set; }
         public TimeClass TimeVision { get; private set; }
@@ -77,6 +78,7 @@ namespace SAIN.Components
         public BotSpawnController BotSpawnController { get; private set; }
         public BotSquads BotSquads { get; private set; }
         public BotHearingClass BotHearing { get; private set; }
+        public BotPeacefulActionController PeacefulActions { get; private set; }
 
         public Action<string, IFirearmHandsController> OnBotWeaponChange { get; set; }
 
@@ -102,21 +104,26 @@ namespace SAIN.Components
         {
             Instance = this;
             SAINGameWorld = this.GetComponent<GameWorldComponent>();
-            CoverManager = new CoverManager(this);
             LineOfSightManager = new LineOfSightManager(this);
             BotExtractManager = new BotExtractManager(this);
             TimeVision = new TimeClass(this);
             WeatherVision = new BotController.SAINWeatherClass(this);
             BotSpawnController = new BotSpawnController(this);
             BotSquads = new BotSquads(this);
-            PathManager = new PathManager(this);
             BotHearing = new BotHearingClass(this);
+            PeacefulActions = new BotPeacefulActionController(this);
             GameWorld.OnDispose += Dispose;
+        }
+
+        private void Start()
+        {
+            PeacefulActions.Init();
         }
 
         private void Update()
         {
-            if (BotGame == null)
+            if (BotGame == null || 
+                BotGame.Status == GameStatus.Stopping)
             {
                 return;
             }
@@ -127,6 +134,7 @@ namespace SAIN.Components
             TimeVision.Update();
             WeatherVision.Update();
             LineOfSightManager.Update();
+            PeacefulActions.Update();
 
             //showBotInfoDebug();
             //CoverManager.Update();
@@ -297,7 +305,16 @@ namespace SAIN.Components
                             Vector3 random = UnityEngine.Random.onUnitSphere * dispersion;
                             random.y = 0;
                             Vector3 estimatedThrowPosition = enemy.EnemyPosition + random;
-                            enemy.Hearing.SetHeard(estimatedThrowPosition, SAINSoundType.GrenadeExplosion, true, distance < 100f || enemy.InLineOfSight);
+
+                            HearingReport report = new HearingReport
+                            {
+                                position = estimatedThrowPosition,
+                                soundType = SAINSoundType.GrenadeExplosion,
+                                placeType = EEnemyPlaceType.Hearing,
+                                isDanger = distance < 100f || enemy.InLineOfSight,
+                                shallReportToSquad = true,
+                            };
+                            enemy.Hearing.SetHeard(report);
                         }
                     }
                 }
@@ -329,11 +346,8 @@ namespace SAIN.Components
 
         public List<string> Groups = new List<string>();
 
-        public PathManager PathManager { get; private set; }
-
         private void OnDestroy()
         {
-            Dispose();
         }
 
         public void Dispose()
@@ -342,8 +356,9 @@ namespace SAIN.Components
             {
                 GameWorld.OnDispose -= Dispose;
                 StopAllCoroutines();
-                LineOfSightManager?.Dispose();
-                BotSpawnController?.UnSubscribe();
+                LineOfSightManager.Dispose();
+                BotSpawnController.UnSubscribe();
+                PeacefulActions.Dispose();
 
                 if (BotEventHandler != null)
                 {

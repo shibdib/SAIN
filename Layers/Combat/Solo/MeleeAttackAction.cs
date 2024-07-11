@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    internal class MeleeAttackAction : SAINAction, ISAINAction
+    internal class MeleeAttackAction : CombatAction, ISAINAction
     {
         public MeleeAttackAction(BotOwner bot) : base(bot, "Melee Attack")
         {

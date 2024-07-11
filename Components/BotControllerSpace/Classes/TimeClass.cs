@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.Components.BotController
 {
-    public class TimeClass : SAINControl
+    public class TimeClass : SAINControllerBase
     {
         public TimeClass(SAINBotController botController) : base(botController)
         {

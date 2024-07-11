@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Components.BotComponentSpace.Classes.EnemyClasses;
 using SAIN.Helpers;
 using System.Collections.Generic;
 using System.Text;
@@ -8,15 +9,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyKnownPlaces : EnemyBase, ISAINEnemyClass
     {
+        public EnemyPlace LastKnownPlace { get; private set; }
         public EnemyPlace LastSeenPlace { get; private set; }
         public EnemyPlace LastHeardPlace { get; private set; }
         public EnemyPlace LastSquadSeenPlace { get; private set; }
         public EnemyPlace LastSquadHeardPlace { get; private set; }
         public float TimeSinceLastKnownUpdated => Time.time - TimeLastKnownUpdated;
-        public EnemyPlace LastKnownPlace { get; private set; }
-        public Vector3? LastKnownPosition { get; private set; }
-        public Vector3? LastSeenPosition { get; private set; }
-        public Vector3? LastHeardPosition { get; private set; }
+
+        public Vector3? LastKnownPosition => LastKnownPlace?.Position;
+        public Vector3? LastSeenPosition => LastSeenPlace?.Position;
+        public Vector3? LastHeardPosition => LastHeardPlace?.Position;
 
         public float EnemyDistanceFromLastKnown
         {
@@ -154,7 +156,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             LastHeardPlace = null;
             LastSquadSeenPlace = null;
             LastSquadHeardPlace = null;
-            LastKnownPosition = null;
             LastKnownPlace = null;
             TimeLastKnownUpdated = -1000f;
         }
@@ -183,43 +184,24 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void checkIfSeen()
         {
-            if (_nextCheckSeenTime < Time.time)
+            if (!Enemy.IsCurrentEnemy)
             {
-                _nextCheckSeenTime = Time.time + _checkSeenFreq;
-
-                Vector3 lookSensor = Bot.PlayerComponent.LookSensorPosition;
-                string myProfileId = Bot.ProfileId;
-
-                foreach (EnemyPlace place in AllEnemyPlaces)
-                {
-                    if (place == null)
-                    {
-                        continue;
-                    }
-
-                    bool ismyPlace = place.PlaceData.OwnerID == myProfileId;
-                    if (ismyPlace &&
-                        !place.HasSeenPersonal &&
-                        place.PersonalClearLineOfSight(lookSensor, LayerMaskClass.HighPolyWithTerrainMaskAI))
-                    {
-                        //tryTalk();
-                    }
-                    else if (!ismyPlace &&
-                        !place.HasSeenSquad &&
-                        place.SquadClearLineOfSight(lookSensor, LayerMaskClass.HighPolyWithTerrainMaskAI))
-                    {
-                        //tryTalk();
-                    }
-                }
+                return;
             }
+            EnemyPlace lastKnown = LastKnownPlace;
+            if (lastKnown == null)
+            {
+                return;
+            }
+            lastKnown.CheckLineOfSight(Bot.Transform.EyePosition, LayerMaskClass.HighPolyWithTerrainMaskAI);
         }
 
         private void tryTalk()
         {
             if (_nextTalkClearTime < Time.time 
-                && Bot.Talk.GroupSay(EFTMath.RandomBool(66) ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 75))
+                && Bot.Talk.GroupSay(EFTMath.RandomBool(75) ? EPhraseTrigger.Clear : EPhraseTrigger.LostVisual, null, true, 75))
             {
-                _nextTalkClearTime = Time.time + 5f;
+                _nextTalkClearTime = Time.time + 10f;
             }
         }
 
@@ -234,64 +216,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 place.HasArrivedSquad = true;
             }
-        }
-
-        private void checkIfArrived()
-        {
-            float time = Time.time;
-            if (_checkArrivedTime < time)
-            {
-                _checkArrivedTime = time + _checkArriveFreq;
-                Vector3 myPosition = Bot.Position;
-                string myProfileID = Bot.ProfileId;
-
-                foreach (EnemyPlace place in AllEnemyPlaces)
-                {
-                    if (place != null)
-                    {
-                        bool ismyPlace = place.PlaceData.OwnerID == myProfileID;
-                        if (ismyPlace && checkPersonalArrived(place, myPosition))
-                        {
-                            if (LastKnownPlace == place)
-                                tryTalk();
-                        }
-                        else if (!ismyPlace && checkSquadArrived(place, myPosition))
-                        {
-                            if (LastKnownPlace == place)
-                                tryTalk();
-                        }
-                    }
-                }
-            }
-        }
-
-        private bool checkPersonalArrived(EnemyPlace place, Vector3 myPosition)
-        {
-            if (place != null
-                && !place.HasArrivedPersonal
-                && checkArrived(place, myPosition))
-            {
-                place.HasArrivedPersonal = true;
-                return true;
-            }
-            return false;
-        }
-
-        private bool checkSquadArrived(EnemyPlace place, Vector3 myPosition)
-        {
-            if (place != null
-                && !place.HasArrivedSquad
-                && checkArrived(place, myPosition))
-            {
-                place.HasArrivedSquad = true;
-                return true;
-            }
-            return false;
-        }
-
-        private bool checkArrived(EnemyPlace place, Vector3 myPosition)
-        {
-            return (myPosition - place.Position).sqrMagnitude < arrivedReachDistanceSqr;
         }
 
         private void updateDebugString(EnemyPlace place, GUIObject obj)
@@ -322,7 +246,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             if (LastSeenPlace == null)
             {
-                LastSeenPlace = new EnemyPlace(_placeData, position, true, EEnemyPlaceType.Vision);
+                LastSeenPlace = new EnemyPlace(_placeData, position, true, EEnemyPlaceType.Vision, null);
                 LastSeenPlace.HasSeenPersonal = true;
                 addPlace(LastSeenPlace);
             }
@@ -359,7 +283,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             addPlace(place);
         }
 
-        public EnemyPlace UpdatePersonalHeardPosition(Vector3 position, bool isDanger)
+        public EnemyPlace UpdatePersonalHeardPosition(HearingReport report)
         {
             if (Enemy.IsVisible)
             {
@@ -369,8 +293,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             var lastHeard = LastHeardPlace;
             if (lastHeard != null)
             {
-                lastHeard.Position = position;
-                lastHeard.IsDanger = isDanger;
+                lastHeard.Position = report.position;
+                lastHeard.IsDanger = report.isDanger;
+                lastHeard.SoundType = report.soundType;
                 lastHeard.HasArrivedPersonal = false;
                 lastHeard.HasArrivedSquad = false;
                 lastHeard.HasSeenPersonal = false;
@@ -378,7 +303,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return lastHeard;
             }
 
-            LastHeardPlace = new EnemyPlace(_placeData, position, isDanger, EEnemyPlaceType.Hearing);
+            LastHeardPlace = new EnemyPlace(_placeData, report);
             addPlace(LastHeardPlace);
             return LastHeardPlace;
         }
@@ -456,37 +381,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             SearchedAllKnownLocations = false;
             TimeLastKnownUpdated = Time.time;
             LastKnownPlace = place;
-            Vector3 pos = place.Position;
-            LastKnownPosition = pos;
             Enemy.Events.LastKnownUpdated(place);
         }
 
         public float TimeLastKnownUpdated { get; private set; } = -1000f;
-
-        private EnemyPlace findMostRecentPlace(out float timeUpdated)
-        {
-            EnemyPlace result = null;
-            timeUpdated = float.MaxValue;
-            if (LastSeenPlace != null)
-            {
-                result = LastSeenPlace;
-                timeUpdated = LastSeenPlace.TimeSincePositionUpdated;
-            }
-            if (Enemy.IsVisible)
-            {
-                return result;
-            }
-            foreach (var place in AllEnemyPlaces)
-            {
-                if (place != null &&
-                    place.TimeSincePositionUpdated < timeUpdated)
-                {
-                    timeUpdated = place.TimeSincePositionUpdated;
-                    result = place;
-                }
-            }
-            return result;
-        }
 
         private readonly PlaceData _placeData;
         private float _nextTalkClearTime;

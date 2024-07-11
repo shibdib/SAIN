@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    internal class MoveToEngageAction : SAINAction, ISAINAction
+    internal class MoveToEngageAction : CombatAction, ISAINAction
     {
         public MoveToEngageAction(BotOwner bot) : base(bot, nameof(MoveToEngageAction))
         {
@@ -33,7 +33,7 @@ namespace SAIN.Layers.Combat.Solo
             if (CheckShoot(enemy))
             {
                 Bot.Steering.SteerByPriority();
-                Shoot.Update();
+                Shoot.CheckAimAndFire();
                 return;
             }
 
@@ -55,7 +55,7 @@ namespace SAIN.Layers.Combat.Solo
             else
             {
                 Bot.Steering.SteerByPriority();
-                Shoot.Update();
+                Shoot.CheckAimAndFire();
                 return;
             }
 

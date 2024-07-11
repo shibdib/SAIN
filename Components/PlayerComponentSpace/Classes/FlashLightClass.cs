@@ -3,21 +3,35 @@ using EFT.Visual;
 using HarmonyLib;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.SAINComponent;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 
 namespace SAIN.Components
 {
     public class FlashLightClass : PlayerComponentBase
     {
+        public event Action<bool> OnLightToggle;
+
+        public event Action<bool> OnLaserToggle;
+
+        public bool UsingLight { get; private set; }
+        public bool UsingLaser { get; private set; }
+
+        public bool IRLaser => ActiveModes.Contains(DeviceMode.IRLaser);
+        public bool IRLight => ActiveModes.Contains(DeviceMode.IRLight);
+        public bool Laser => ActiveModes.Contains(DeviceMode.VisibleLaser);
+        public bool WhiteLight => ActiveModes.Contains(DeviceMode.WhiteLight);
+        public LightDetectionClass LightDetection { get; }
+
+        public readonly List<DeviceMode> ActiveModes = new List<DeviceMode>();
+
         public FlashLightClass(PlayerComponent component) : base(component)
         {
             LightDetection = new LightDetectionClass(component);
         }
-
-        public bool UsingLight => Player.AIData?.UsingLight == true;
-        public LightDetectionClass LightDetection { get; private set; }
 
         public void Update()
         {
@@ -39,7 +53,6 @@ namespace SAIN.Components
         {
             if (!PlayerComponent.IsAI &&
                 _nextPointCreateTime < Time.time && 
-                UsingLight &&
                 ActiveModes.Count > 0)
             {
                 _nextPointCreateTime = Time.time + 0.15f;
@@ -59,17 +72,29 @@ namespace SAIN.Components
             }
         }
 
-        public readonly List<DeviceMode> ActiveModes = new List<DeviceMode>();
-
-        public bool IRLaser => ActiveModes.Contains(DeviceMode.IRLaser);
-        public bool IRLight => ActiveModes.Contains(DeviceMode.IRLight);
-        public bool Laser => ActiveModes.Contains(DeviceMode.VisibleLaser);
-        public bool WhiteLight => ActiveModes.Contains(DeviceMode.WhiteLight);
-
         public void CheckDevice()
         {
-            Player player = Player;
+            ActiveModes.Clear();
+            checkUsingLightModes();
 
+            bool wasUsingLight = UsingLight;
+            UsingLight = ActiveModes.Contains(DeviceMode.WhiteLight) || ActiveModes.Contains(DeviceMode.IRLight);
+            if (wasUsingLight != UsingLight)
+            {
+                OnLightToggle?.Invoke(UsingLight);
+            }
+
+            bool wasUsingLaser = UsingLaser;
+            UsingLaser = ActiveModes.Contains(DeviceMode.VisibleLaser) || ActiveModes.Contains(DeviceMode.IRLaser);
+            if (wasUsingLaser != UsingLaser)
+            {
+                OnLaserToggle?.Invoke(UsingLaser);
+            }
+        }
+
+        private void checkUsingLightModes()
+        {
+            Player player = Player;
             if (player == null) return;
 
             if (_tacticalModesField == null)
@@ -95,48 +120,53 @@ namespace SAIN.Components
                 return;
             }
 
-            bool WhiteLight = false;
-            bool Laser = false;
-            bool IRLight = false;
-            bool IRLaser = false;
-
-            ActiveModes.Clear();
+            bool foundWhiteLight = false;
+            bool foundVisibleLaser = false;
+            bool foundIRLight = false;
+            bool FoundIRLaser = false;
 
             // Loop through all of the tacticalComboVisualControllers, then its modes, then that modes children, and look for a light
             foreach (TacticalComboVisualController tacticalComboVisualController in tacticalComboVisualControllers)
             {
                 List<Transform> tacticalModes = _tacticalModesField.GetValue(tacticalComboVisualController) as List<Transform>;
-
-                if (!WhiteLight && 
-                    CheckWhiteLight(tacticalModes))
+                foreach (var mode in tacticalModes)
                 {
-                    if (_debugMode) Logger.LogDebug("Found Light!");
-                    WhiteLight = true;
-                    ActiveModes.Add(DeviceMode.WhiteLight);
-                }
+                    // Skip disabled modes
+                    if (!mode.gameObject.activeInHierarchy) 
+                        continue;
 
-                if (!Laser && 
-                    CheckVisibleLaser(tacticalModes))
-                {
-                    if (_debugMode) Logger.LogDebug("Found Visible Laser!");
-                    Laser = true;
-                    ActiveModes.Add(DeviceMode.VisibleLaser);
-                }
-
-                if (!IRLight && 
-                    CheckIRLight(tacticalModes))
-                {
-                    if (_debugMode) Logger.LogDebug("Found IR Light!");
-                    IRLight = true;
-                    ActiveModes.Add(DeviceMode.IRLight);
-                }
-
-                if (!IRLaser && 
-                    CheckIRLaser(tacticalModes))
-                {
-                    if (_debugMode) Logger.LogDebug("Found IR Laser!");
-                    IRLaser = true;
-                    ActiveModes.Add(DeviceMode.IRLaser);
+                    foreach (var child in mode.GetChildren())
+                    {
+                        // Try to find a "VolumetricLight", hopefully only visible flashlights have these
+                        if (!foundWhiteLight &&
+                            child.GetComponent<VolumetricLight>() != null)
+                        {
+                            foundWhiteLight = true;
+                            if (_debugMode) Logger.LogDebug("Found Light!");
+                            ActiveModes.Add(DeviceMode.WhiteLight);
+                        }
+                        if (!foundVisibleLaser && 
+                            child.name.StartsWith("VIS_"))
+                        {
+                            foundVisibleLaser = true;
+                            if (_debugMode) Logger.LogDebug("Found Visible Laser!");
+                            ActiveModes.Add(DeviceMode.VisibleLaser);
+                        }
+                        if (!foundIRLight &&
+                            child.GetComponent<IkLight>() != null)
+                        {
+                            foundIRLight = true;
+                            if (_debugMode) Logger.LogDebug("Found IR Light!");
+                            ActiveModes.Add(DeviceMode.IRLight);
+                        }
+                        if (!FoundIRLaser && 
+                            child.name.StartsWith("IR_"))
+                        {
+                            if (_debugMode) Logger.LogDebug("Found IR Laser!");
+                            FoundIRLaser = true;
+                            ActiveModes.Add(DeviceMode.IRLaser);
+                        }
+                    }
                 }
             }
         }
@@ -184,9 +214,18 @@ namespace SAIN.Components
                 // Skip disabled modes
                 if (!tacticalMode.gameObject.activeInHierarchy) continue;
 
+                if (SAINPlugin.DebugMode)
+                {
+                    Logger.LogInfo(tacticalMode.name);
+                }
+
                 // Try to find a "light" under the mode, here's hoping BSG stay consistent
                 foreach (Transform child in tacticalMode.GetChildren())
                 {
+                    if (SAINPlugin.DebugMode)
+                    {
+                        Logger.LogInfo(child.name);
+                    }
                     if (child.name.StartsWith("IR_"))
                     {
                         return true;

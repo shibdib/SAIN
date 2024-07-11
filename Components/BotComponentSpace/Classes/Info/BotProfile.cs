@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.Info
 {
-    public class ProfileClass : BotBase
+    public class BotProfile : BotBase
     {
-        public ProfileClass(BotComponent sain) : base(sain)
+        public BotProfile(BotComponent sain) : base(sain)
         {
             Name = sain.BotOwner.name;
 
             var profile = sain.BotOwner.Profile;
-            Faction = profile.Side;
+            Side = profile.Side;
             NickName = profile.Nickname;
             WildSpawnType = profile.Info.Settings.Role;
             BotDifficulty = profile.Info.Settings.BotDifficulty;
@@ -38,7 +38,7 @@ namespace SAIN.SAINComponent.Classes.Info
         public readonly bool IsPlayerScav;
         public readonly BotDifficulty BotDifficulty;
         public readonly WildSpawnType WildSpawnType;
-        public readonly EPlayerSide Faction;
+        public readonly EPlayerSide Side;
         public readonly int PlayerLevel;
 
         private void SetDiffModifier(BotDifficulty difficulty)

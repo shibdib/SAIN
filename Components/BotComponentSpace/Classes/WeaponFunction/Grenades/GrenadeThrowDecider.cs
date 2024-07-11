@@ -129,6 +129,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                     return false;
                 }
             }
+            if (Player.HandsController.IsInInteractionStrictCheck())
+            {
+                reason = "handsController Busy";
+                return false;
+            }
             reason = string.Empty;
             return true;
         }

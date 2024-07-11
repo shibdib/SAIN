@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Components.BotComponentSpace.Classes.EnemyClasses;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,6 +30,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public PlaceData PlaceData { get; }
         public EEnemyPlaceType PlaceType { get; }
+        public SAINSoundType? SoundType { get; set; }
 
         public bool VisibleSourceOnLastUpdate { get; private set; }
         public bool IsDanger { get; set; }
@@ -79,15 +81,29 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private const float ENEMY_DIST_TO_PLACE_FOR_LEAVE_AI = 100f;
         private const float ENEMY_DIST_UPDATE_FREQ = 0.25f;
 
-        public EnemyPlace(PlaceData placeData, Vector3 position, bool isDanger, EEnemyPlaceType placeType)
+        public EnemyPlace(PlaceData placeData, Vector3 position, bool isDanger, EEnemyPlaceType placeType, SAINSoundType? soundType)
         {
             PlaceData = placeData;
             VisibleSourceOnLastUpdate = placeData.Enemy.InLineOfSight;
             IsDanger = isDanger;
             PlaceType = placeType;
+            SoundType = soundType;
 
             _position = position;
             updateDistancesNow(position);
+            _timeLastUpdated = Time.time;
+        }
+
+        public EnemyPlace(PlaceData placeData, HearingReport report)
+        {
+            PlaceData = placeData;
+            VisibleSourceOnLastUpdate = placeData.Enemy.InLineOfSight;
+            IsDanger = report.isDanger;
+            PlaceType = report.placeType;
+            SoundType = report.soundType;
+
+            _position = report.position;
+            updateDistancesNow(report.position);
             _timeLastUpdated = Time.time;
         }
 
@@ -150,6 +166,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void updateDistancesNow(Vector3 position)
         {
+            _nextCheckSightTime = 0f;
             _nextCheckDistTime = Time.time + ENEMY_DIST_UPDATE_FREQ;
             DistanceToBot = (position - PlaceData.Owner.Position).magnitude;
             DistanceToEnemyRealPosition = (position - PlaceData.Enemy.EnemyTransform.Position).magnitude;
@@ -243,41 +260,25 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private bool _hasSquadSeen;
         public float _timeSquadSeen;
 
-        public bool PersonalClearLineOfSight(Vector3 origin, LayerMask mask)
+        public bool CheckLineOfSight(Vector3 origin, LayerMask mask)
         {
             if (_nextCheckSightTime < Time.time)
             {
                 _nextCheckSightTime = Time.time + 0.33f;
                 Vector3 pos = Position + Vector3.up;
                 Vector3 direction = pos - origin;
-                _inSightNow = !Physics.Raycast(pos, direction, direction.magnitude, mask);
-                if (!HasSeenPersonal && _inSightNow)
-                {
-                    HasSeenPersonal = true;
-                }
+                _inSightNow = !Physics.Raycast(pos, direction, out var hit, direction.magnitude, mask);
+                if (!_inSightNow)
+                    BlockedHit = hit;
+                else
+                    BlockedHit = null;
             }
             return _inSightNow;
         }
 
-        public bool SquadClearLineOfSight(Vector3 origin, LayerMask mask)
-        {
-            if (_nextCheckSquadSightTime < Time.time)
-            {
-                _nextCheckSquadSightTime = Time.time + 0.5f;
-                Vector3 pos = Position + Vector3.up;
-                Vector3 direction = pos - origin;
-                _inSightSquadNow = !Physics.Raycast(pos, direction, direction.magnitude, mask);
-                if (!HasSeenSquad && _inSightSquadNow)
-                {
-                    HasSeenSquad = true;
-                }
-            }
-            return _inSightSquadNow;
-        }
+        public RaycastHit? BlockedHit { get; private set; }
 
         private bool _inSightNow;
-        private bool _inSightSquadNow;
         private float _nextCheckSightTime;
-        private float _nextCheckSquadSightTime;
     }
 }

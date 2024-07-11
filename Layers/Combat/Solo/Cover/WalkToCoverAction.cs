@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
-    internal class WalkToCoverAction : SAINAction, ISAINAction
+    internal class WalkToCoverAction : CombatAction, ISAINAction
     {
         public WalkToCoverAction(BotOwner bot) : base(bot, nameof(WalkToCoverAction))
         {
@@ -137,7 +137,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (!Bot.Steering.SteerByPriority(false))
                 Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
 
-            Shoot.Update();
+            Shoot.CheckAimAndFire();
         }
 
         private bool suppressing;

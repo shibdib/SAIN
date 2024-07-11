@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Components.PlayerComponentSpace.PersonClasses;
+using SAIN.Layers.Peace;
 using SAIN.SAINComponent;
 using System;
 using System.Collections;
@@ -10,8 +11,11 @@ using UnityEngine;
 
 namespace SAIN.Components.BotController
 {
-    public class BotSpawnController : SAINControl
+    public class BotSpawnController : SAINControllerBase
     {
+        public event Action<BotComponent> OnBotAdded;
+        public event Action<BotComponent> OnBotRemoved;
+
         public BotSpawnController(SAINBotController botController) : base(botController)
         {
             Instance = this;
@@ -19,7 +23,7 @@ namespace SAIN.Components.BotController
 
         public static BotSpawnController Instance;
 
-        public Dictionary<string, BotComponent> BotDictionary = new Dictionary<string, BotComponent>();
+        public BotDictionary BotDictionary = new BotDictionary();
 
         public static readonly List<WildSpawnType> StrictExclusionList = new List<WildSpawnType>
         {
@@ -113,6 +117,7 @@ namespace SAIN.Components.BotController
                 playerComponent.InitBotComponent(botComponent);
                 botOwner.LeaveData.OnLeave += removeBot;
                 playerComponent.Person.ActivationClass.OnPersonDeadOrDespawned += removePerson;
+                OnBotAdded?.Invoke(botComponent);
             }
             else
             {
@@ -217,9 +222,15 @@ namespace SAIN.Components.BotController
             {
                 if (botOwner != null)
                 {
+                    if (BotDictionary.TryGetValue(botOwner.name, out BotComponent botComponent))
+                    {
+                        OnBotRemoved?.Invoke(botComponent);
+                        botComponent.Dispose();
+                    }
                     BotDictionary.Remove(botOwner.name);
                     if (botOwner.TryGetComponent(out BotComponent component))
                     {
+                        OnBotRemoved?.Invoke(botComponent);
                         component.Dispose();
                     }
                     if (botOwner.TryGetComponent(out SAINNoBushESP noBush))

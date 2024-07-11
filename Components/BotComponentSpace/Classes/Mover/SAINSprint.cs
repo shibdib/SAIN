@@ -268,7 +268,6 @@ namespace SAIN.SAINComponent.Classes.Mover
                 float distToCurrent = float.MaxValue;
                 while (distToCurrent > _moveSettings.BotSprintCornerReachDist)
                 {
-                    updateVoxel();
                     distToCurrent = distanceToCurrentCornerSqr();
                     DistanceToCurrentCorner = distToCurrent;
 
@@ -523,17 +522,6 @@ namespace SAIN.SAINComponent.Classes.Mover
         private float nextCheckPosTime;
         private float timeSinceNotMoving => positionMoving ? 0f : Time.time - _timeNotMoving;
         private float _timeNotMoving;
-
-        private void updateVoxel()
-        {
-            if (this._nextCheckVoxel < Time.time)
-            {
-                this._nextCheckVoxel = Time.time + 0.5f;
-                BotOwner.AIData.SetPosToVoxel(Bot.Position);
-            }
-        }
-
-        private float _nextCheckVoxel;
 
         private Vector3 BotPosition
         {

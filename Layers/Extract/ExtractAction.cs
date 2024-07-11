@@ -12,7 +12,7 @@ using UnityEngine.AI;
 
 namespace SAIN.Layers
 {
-    internal class ExtractAction : SAINAction, ISAINAction
+    internal class ExtractAction : CombatAction, ISAINAction
     {
         public void Toggle(bool value)
         {
@@ -108,7 +108,7 @@ namespace SAIN.Layers
             }
 
             Bot.Steering.SteerByPriority();
-            Shoot.Update();
+            Shoot.CheckAimAndFire();
 
         }
 

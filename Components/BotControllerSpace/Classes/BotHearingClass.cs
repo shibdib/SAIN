@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.Components.BotControllerSpace.Classes
 {
-    public class BotHearingClass : SAINControl
+    public class BotHearingClass : SAINControllerBase
     {
         public BotHearingClass(SAINBotController botController) : base(botController)
         {

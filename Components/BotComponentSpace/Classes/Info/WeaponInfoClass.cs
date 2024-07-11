@@ -1,13 +1,9 @@
-using EFT;
 using EFT.InventoryLogic;
-using SAIN.Components;
 using SAIN.Components.BotComponentSpace.Classes;
 using SAIN.Helpers;
-using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.WeaponFunction;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static EFT.InventoryLogic.Weapon;
@@ -16,6 +12,7 @@ namespace SAIN.SAINComponent.Classes.Info
 {
     public class WeaponInfoClass : BotBase, IBotClass
     {
+        const float MACHINEGUN_SWAPDIST_MULTI = 1.5f;
         public float FinalModifier { get; private set; }
         public EWeaponClass EWeaponClass { get; private set; }
         public ECaliber ECaliber { get; private set; }
@@ -111,13 +108,14 @@ namespace SAIN.SAINComponent.Classes.Info
             return 0.5f;
         }
 
+
         private static float getWeaponSwapToSemiDist(ECaliber caliber, EWeaponClass weaponClass)
         {
             if (_shootSettings.AmmoCaliberFullAutoMaxDistances.TryGetValue(caliber, out var caliberDist))
             {
                 if (weaponClass == EWeaponClass.machinegun)
                 {
-                    return caliberDist * 1.5f;
+                    return caliberDist * MACHINEGUN_SWAPDIST_MULTI;
                 }
                 return caliberDist;
             }

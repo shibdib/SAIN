@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace SAIN.Components
 {
-    public class RayCastJobClass : SAINControl
+    public class RayCastJobClass : SAINControllerBase
     {
         public RayCastJobClass(SAINBotController botController) : base(botController)
         {

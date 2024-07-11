@@ -3,19 +3,22 @@ using SAIN.BotController.Classes;
 using SAIN.Components;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
+using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent.Classes.Info
 {
     public class SAINSquadClass : BotBase, IBotClass
     {
-        public SAINSquadClass(BotComponent sain) : base(sain)
+        public SAINSquadClass(BotComponent bot) : base(bot)
         {
+            SquadInfo = SAINBotController.Instance.BotSquads.GetSquad(bot.Person.AIInfo.BotOwner);
         }
 
         public void Init()
         {
             base.SubscribeToPreset(null);
-            SquadInfo = SAINBotController.Instance.BotSquads.GetSquad(Bot);
+            SquadInfo.AddMember(Bot);
         }
 
         public Squad SquadInfo { get; private set; }

@@ -22,7 +22,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private const float DOORS_FIND_INTERACTION_FREQ = 1f;
         private const float DOORS_UPDATE_VOXEL_FREQ = 0.5f;
 
-        public event Action<NavGraphVoxelSimple> OnNewVoxel;
+        public event Action<NavGraphVoxelSimple, NavGraphVoxelSimple> OnNewVoxel;
         public event Action<List<DoorData>> OnNewCloseDoorsFound;
         public event Action<List<DoorData>> OnNewInteractionDoorsFound;
 
@@ -91,6 +91,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 if (lastVoxel != CurrentVoxel)
                 {
                     findAllDoors(CurrentVoxel);
+                    OnNewVoxel?.Invoke(CurrentVoxel, lastVoxel);
                 }
             }
         }
@@ -108,7 +109,6 @@ namespace SAIN.SAINComponent.Classes.Mover
                         AllDoors.Add(new DoorData(link));
 
                 updateAllDoors(true);
-                OnNewVoxel?.Invoke(CurrentVoxel);
             }
         }
 

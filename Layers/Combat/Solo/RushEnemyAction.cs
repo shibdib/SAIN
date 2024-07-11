@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    internal class RushEnemyAction : SAINAction, ISAINAction
+    internal class RushEnemyAction : CombatAction, ISAINAction
     {
         public RushEnemyAction(BotOwner bot) : base(bot, nameof(RushEnemyAction))
         {
@@ -61,7 +61,7 @@ namespace SAIN.Layers.Combat.Solo
             _pathUpdated = true;
             checkJumpEnemyInSight();
 
-            Shoot.Update();
+            Shoot.CheckAimAndFire();
             Bot.Mover.Sprint(false);
             Bot.Mover.DogFight.DogFightMove(true);
 

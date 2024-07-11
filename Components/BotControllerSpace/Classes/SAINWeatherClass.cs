@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SAIN.Components.BotController
 {
-    public class SAINWeatherClass : SAINControl
+    public class SAINWeatherClass : SAINControllerBase
     {
         public static SAINWeatherClass Instance { get; private set; }
 

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
-    internal class HoldinCoverAction : SAINAction, ISAINAction
+    internal class HoldinCoverAction : CombatAction, ISAINAction
     {
         public HoldinCoverAction(BotOwner bot) : base(bot, nameof(HoldinCoverAction))
         {
@@ -21,7 +21,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         public override void Update()
         {
             Bot.Steering.SteerByPriority();
-            Shoot.Update();
+            Shoot.CheckAimAndFire();
 
             CoverPoint coverInUse = CoverInUse;
             if (coverInUse == null)

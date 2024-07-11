@@ -2,7 +2,7 @@
 
 namespace SAIN.Components.PlayerComponentSpace
 {
-    public class FlashLightPoint
+    public struct FlashLightPoint
     {
         public FlashLightPoint(Vector3 point, float expireTime = 0.25f)
         {

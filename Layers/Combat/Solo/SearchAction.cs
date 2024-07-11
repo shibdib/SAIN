@@ -8,7 +8,7 @@ using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    internal class SearchAction : SAINAction, ISAINAction
+    internal class SearchAction : CombatAction, ISAINAction
     {
         public SearchAction(BotOwner bot) : base(bot, "Search")
         {
@@ -50,7 +50,7 @@ namespace SAIN.Layers.Combat.Solo
 
             if (!_sprintEnabled)
             {
-                Shoot.Update();
+                Shoot.CheckAimAndFire();
                 if (!isBeingStealthy)
                     checkWeapon();
             }

@@ -17,7 +17,7 @@ using System.Collections;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    internal class FlankAction : SAINAction
+    internal class FlankAction : CombatAction
     {
         public FlankAction(BotOwner bot) : base(bot, nameof(FlankAction))
         {

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
-    internal class DoSurgeryAction : SAINAction, ISAINAction
+    internal class DoSurgeryAction : CombatAction, ISAINAction
     {
         public DoSurgeryAction(BotOwner bot) : base(bot, "Surgery")
         {

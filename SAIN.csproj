@@ -252,15 +252,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\BotComponentSpace\BotComponentBase.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\BotBackpackDropClass - Copy.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\BotGlobalEventsClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\BotDecision.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\BotDecisionManager.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Doors\DoorData.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Doors\DoorFinder.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Other\HearingReport.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Path\ECornerType.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Checkers\EnemyActiveThreatChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Path\EnemyCornerDictionary.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Other\EnemyEvents.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Checkers\EnemyValidChecker.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Position\EnemyPositionTracker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyAnglesClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyVisionChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyPartDataClass.cs" />
@@ -282,6 +286,14 @@
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\HardCoverData.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\PathData.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\TargetData.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\BotGatheringController.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\IPeacefulActionExecutor.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\PeacefulActionHelpers.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\EPeacefulAction.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\IPeacefulActionController.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulActionSet.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\Transform\NavMeshChecker.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonAIInfo.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonBase.cs" />
@@ -348,10 +360,17 @@
     <Compile Include="Components\PlayerComponentSpace\Classes\ShootPlayerClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonActiveClass.cs" />
     <Compile Include="Helpers\PerformanceHelpers.cs" />
+    <Compile Include="Layers\BotAction.cs" />
     <Compile Include="Layers\Combat\Solo\MeleeAttackAction.cs" />
     <Compile Include="Layers\Debug\CrawlAction.cs" />
     <Compile Include="Layers\Debug\GrenadeThrowTestAction.cs" />
     <Compile Include="Layers\ISAINAction.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\BotConversationController.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\BotDictionary.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotPeacefulActionController.cs" />
+    <Compile Include="Layers\Peace\Actions\ConversationAction.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\IBotControllerClass.cs" />
+    <Compile Include="Layers\Peace\PeacefulLayer.cs" />
     <Compile Include="Patches\FixPatches.cs" />
     <Compile Include="Patches\Shoot\AimDataPatches.cs" />
     <Compile Include="Patches\Shoot\GrenadePatches.cs" />
@@ -370,7 +389,6 @@
     <Compile Include="Components\BotControllerSpace\Classes\ESquadPersonality.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\ESquadRole.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\MemberInfo.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\PersonalityController.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Squad.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\SquadPersonalityManager.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\SquadPersonalitySettings.cs" />
@@ -406,7 +424,7 @@
     <Compile Include="Layers\Extract\SAINLootingBotsIntegration.cs" />
     <Compile Include="Layers\Debug\DebugLayer.cs" />
     <Compile Include="Layers\Debug\RunningAction.cs" />
-    <Compile Include="Layers\SAINAction.cs" />
+    <Compile Include="Layers\CombatAction.cs" />
     <Compile Include="Layers\SAINLayer.cs" />
     <Compile Include="Layers\Unstuck\BotUnstuckLayer.cs" />
     <Compile Include="Layers\Unstuck\GetUnstuckAction.cs" />
@@ -515,7 +533,7 @@
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\Transform\PersonTransformClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Memory\SAINMemoryClass.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Info\ProfileClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Info\BotProfile.cs" />
     <Compile Include="Preset\BotSettings\SAINSettings\SAINSettingsGroupClass.cs" />
     <Compile Include="Preset\BotTypeDefinitions.cs" />
     <Compile Include="Helpers\EnumValues.cs" />
@@ -554,7 +572,6 @@
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\SAINBotSuppressClass.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\ColliderFinder.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverAnalyzer.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\SquadCoverFinder.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\SpottedCoverPoint.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\SAINEnemyController.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Firerate.cs" />
@@ -589,14 +606,12 @@
     <Compile Include="Logger.cs" />
     <Compile Include="Plugin\BigBrainHandler.cs" />
     <Compile Include="Plugin\GameWorldHandler.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\ShootClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\ShootDeciderClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\SAINWeatherClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\TimeClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINVisionClass.cs" />
     <Compile Include="Components\BotControllerSpace\BotControllerAbstract.cs" />
     <Compile Include="Components\BotControllerSpace\SAINBotController.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\DecisionManager.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\PathManager.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\LineOfSightManager.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\SAINCoverClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\EnemyDecisionClass.cs" />
@@ -610,7 +625,6 @@
     <Compile Include="Components\BotComponentSpace\Classes\Search\BotPeekPlan.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\SquadDecisionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Talk\SquadLeaderClass.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\CoverManager.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverFinderComponent.cs" />
     <Compile Include="Preset\Editor\Util\BuilderClass.cs" />
     <Compile Include="Preset\Editor\Util\RectLayout.cs" />

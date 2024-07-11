@@ -1,18 +1,13 @@
-﻿using SAIN.Components;
-using SAIN.Preset.GlobalSettings.Categories;
+﻿using EFT;
+using SAIN.Components;
 using SAIN.SAINComponent;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents.CoverFinder;
+using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace SAIN.BotController.Classes
 {
-    public class BotSquads : SAINControl
+    public class BotSquads : SAINControllerBase
     {
         public BotSquads(SAINBotController botController) : base(botController)
         {
@@ -53,35 +48,34 @@ namespace SAIN.BotController.Classes
 
         public readonly Dictionary<string, Squad> Squads = new Dictionary<string, Squad>();
 
-        public SquadCoverFinder SquadCoverFinder { get; private set; }
-
-        public Squad GetSquad(BotComponent sain)
+        public Squad GetSquad(BotOwner botOwner)
         {
             Squad result = null;
-            var group = sain?.BotOwner?.BotsGroup;
+            var group = botOwner.BotsGroup;
             if (group != null)
             {
-                int max = group.MembersCount;
+                int groupCount = group.MembersCount;
 
                 if (SAINPlugin.DebugMode)
-                {
-                    Logger.LogDebug($"Member Count: {max} Checking for existing squad object");
-                }
-                for (int i = 0; i < max; i++)
+                    Logger.LogDebug($"Member Count: {groupCount} Checking for existing squad object");
+
+                for (int i = 0; i < groupCount; i++)
                 {
                     var defaultMember = group.Member(i);
-                    if (defaultMember != null)
+                    if (defaultMember != null && 
+                        defaultMember.ProfileId != botOwner.ProfileId)
                     {
                         if (BotController.GetSAIN(defaultMember, out var sainComponent))
                         {
                             if (SAINPlugin.DebugMode)
                                 Logger.LogInfo($"Found SAIN Bot for squad");
 
-                            if (sainComponent?.Squad.SquadInfo != null)
+                            result = sainComponent.Squad.SquadInfo;
+                            if (result != null)
                             {
-                                result = sainComponent.Squad.SquadInfo;
                                 if (SAINPlugin.DebugMode)
                                     Logger.LogInfo($"Adding bot to squad [{result.GUID}]");
+
                                 break;
                             }
                         }
@@ -101,9 +95,6 @@ namespace SAIN.BotController.Classes
                     Squads.Add(result.GUID, result);
                 }
             }
-
-            result.AddMember(sain);
-
             return result;
         }
 

@@ -7,6 +7,7 @@
         Squad,
         Extract,
         Run,
+        Peace,
         AvoidThreat,
         Unstuck,
     }

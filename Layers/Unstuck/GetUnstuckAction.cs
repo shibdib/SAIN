@@ -13,7 +13,7 @@ using SAIN.Helpers;
 
 namespace SAIN.Layers.Combat.Run
 {
-    internal class GetUnstuckAction : SAINAction
+    internal class GetUnstuckAction : CombatAction
     {
         public GetUnstuckAction(BotOwner bot) : base(bot, nameof(GetUnstuckAction))
         {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    public class ThrowGrenadeAction : SAINAction, ISAINAction
+    public class ThrowGrenadeAction : CombatAction, ISAINAction
     {
         public ThrowGrenadeAction(BotOwner bot) : base(bot, nameof(ThrowGrenadeAction))
         {

@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Run
 {
-    internal class CrawlAction : SAINAction, ISAINAction
+    internal class CrawlAction : CombatAction, ISAINAction
     {
         public CrawlAction(BotOwner bot) : base(bot, nameof(CrawlAction))
         {

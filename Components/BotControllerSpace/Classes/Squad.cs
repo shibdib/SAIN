@@ -1,10 +1,12 @@
 ﻿using EFT;
+using SAIN.Components.BotComponentSpace.Classes.EnemyClasses;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
+using SAIN.SAINComponent.Classes.Info;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,6 +27,8 @@ namespace SAIN.BotController.Classes
         public event Action<IPlayer, DamageInfo, float> OnMemberKilled;
 
         public event Action<BotComponent, float> NewLeaderFound;
+
+        public event Action<SquadPersonalitySettings> OnSquadPersonalityFound;
 
         public Dictionary<string, BotComponent> Members { get; } = new Dictionary<string, BotComponent>();
         public Dictionary<string, MemberInfo> MemberInfos { get; } = new Dictionary<string, MemberInfo>();
@@ -199,8 +203,18 @@ namespace SAIN.BotController.Classes
             PlaceForCheckType checkType = isDanger ? PlaceForCheckType.danger : PlaceForCheckType.simple;
             PlaceForCheck newPlace = addNewPlaceForCheck(bot.BotOwner, position, checkType, enemy.EnemyIPlayer);
             Vector3 pos = newPlace?.Position ?? position;
-            EnemyPlace place = enemy.Hearing.SetHeard(pos, soundType, true, isDanger);
-            if (heard)
+
+            HearingReport report = new HearingReport
+            {
+                position = position,
+                soundType = soundType,
+                placeType = EEnemyPlaceType.Hearing,
+                isDanger = isDanger,
+                shallReportToSquad = true,
+            };
+            EnemyPlace place = enemy.Hearing.SetHeard(report);
+
+            if (heard && place != null)
                 OnMemberHeardEnemy?.Invoke(place, enemy, soundType);
         }
 
@@ -504,7 +518,16 @@ namespace SAIN.BotController.Classes
                     continue;
                 }
 
-                memberEnemy.Hearing.SetHeard(position, soundType, false, memberEnemy.InLineOfSight);
+                HearingReport report = new HearingReport
+                {
+                    position = position,
+                    soundType = soundType,
+                    placeType = EEnemyPlaceType.Hearing,
+                    isDanger = memberEnemy.InLineOfSight,
+                    shallReportToSquad = false,
+                };
+
+                memberEnemy.Hearing.SetHeard(report);
                 if (action != EEnemyAction.None)
                 {
                     memberEnemy.Status.SetVulnerableAction(action);
@@ -616,13 +639,13 @@ namespace SAIN.BotController.Classes
             if (bot?.Player != null && bot.BotOwner != null)
             {
                 // Make sure this profile ID doesn't already exist for whatever reason
-                if (!Members.ContainsKey(bot.ProfileId))
+                if (!Members.ContainsKey(bot.Person.ProfileId))
                 {
                     // If this is the first member, add their side to the start of their ID for easier identifcation during debug
                     if (Members.Count == 0)
                     {
                         _botsGroup = bot.BotOwner.BotsGroup;
-                        Id = bot.Player.Profile.Side.ToString() + "_" + GUID;
+                        Id = bot.Info.Profile.Side.ToString() + "_" + GUID;
                     }
 
                     bot.Decision.DecisionManager.OnDecisionMade += memberMadeDecision;

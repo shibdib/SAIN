@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
-    internal class RunToCoverAction : SAINAction, ISAINAction
+    internal class RunToCoverAction : CombatAction, ISAINAction
     {
         public RunToCoverAction(BotOwner bot) : base(bot, "Run To Cover")
         {
@@ -80,7 +80,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 {
                     Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
                 }
-                Shoot.Update();
+                Shoot.CheckAimAndFire();
                 return;
             }
 
@@ -91,7 +91,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 {
                     Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
                 }
-                Shoot.Update();
+                Shoot.CheckAimAndFire();
                 return;
             }
         }

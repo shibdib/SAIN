@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Run
 {
-    internal class RunningAction : SAINAction, ISAINAction
+    internal class RunningAction : CombatAction, ISAINAction
     {
         public RunningAction(BotOwner bot) : base(bot, nameof(RunningAction))
         {

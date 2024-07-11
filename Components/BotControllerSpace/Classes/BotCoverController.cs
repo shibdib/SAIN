@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SAIN.BotController.Classes
 {
-    public class BotCoverController : SAINControl
+    public class BotCoverController : SAINControllerBase
     {
         public BotCoverController(SAINBotController botController) : base(botController) { }
 

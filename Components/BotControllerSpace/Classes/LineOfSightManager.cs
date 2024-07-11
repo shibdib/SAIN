@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SAIN.Components
 {
-    public class LineOfSightManager : SAINControl
+    public class LineOfSightManager : SAINControllerBase
     {
         public LineOfSightManager(SAINBotController botController) : base(botController)
         {

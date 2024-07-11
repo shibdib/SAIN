@@ -15,7 +15,7 @@ using UnityEngine.Profiling;
 
 namespace SAIN.Components.BotController
 {
-    public class BotExtractManager : SAINControl
+    public class BotExtractManager : SAINControllerBase
     {
         public BotExtractManager(SAINBotController botController) : base(botController) { }
 

@@ -8,6 +8,36 @@ namespace SAIN.SAINComponent.Classes
 {
     public class HearingAnalysisClass : BotSubClass<SAINHearingSensorClass>, IBotClass
     {
+        private const float BUNKER_REDUCTION_COEF = 0.2f;
+        private const float BUNKER_ELEV_DIFF_COEF = 0.66f;
+        private const float GUNSHOT_OCCLUSION_MOD = 0.8f;
+        private const float FOOTSTEP_OCCLUSION_MOD = 0.8f;
+        private const float GUNSHOT_ENVIR_MOD = 0.65f;
+        private const float FOOTSTEP_ENVIR_MOD = 0.8f;
+        private const float MIN_ENVIRONMENT_MOD = 0.1f;
+
+        private const float HEAR_MODIFIER_NO_EARS = 0.65f;
+        private const float HEAR_MODIFIER_HEAVY_HELMET = 0.8f;
+        private const float HEAR_MODIFIER_DYING = 0.8f;
+        private const float HEAR_MODIFIER_SPRINT = 0.85f;
+        private const float HEAR_MODIFIER_HEAVYBREATH = 0.65f;
+
+        private const float HEAR_MODIFIER_MIN_CLAMP = 0.1f;
+        private const float HEAR_MODIFIER_MAX_CLAMP = 5f;
+        private const float HEAR_MODIFIER_MAX_AFFECT_DIST = 10f;
+
+        private const float HEAR_CHANCE_MIN_DIST = 0.25f;
+        private const float HEAR_CHANCE_MIN_DIST_HEADPHONES = 1;
+        private const float HEAR_CHANCE_MIDRANGE_COEF = 0.66f;
+        private const float HEAR_CHANCE_MIDRANGE_MINCHANCE_HEADPHONES = 10;
+        private const float HEAR_CHANCE_LONGRANGE_MINCHANCE_HEADPHONES = 5;
+        private const float HEAR_CHANCE_NOTMOVING_VELOCITY = 0.1f;
+        private const float HEAR_CHANCE_NOTMOVING_MINCHANCE = 3;
+        private const float HEAR_CHANCE_NOTMOVING_MINCHANCE_HEADPHONES = 5;
+        private const float HEAR_CHANCE_HEADPHONES_GUNFIRE = 10;
+        private const float HEAR_CHANCE_CURRENTENEMY_MINCHANCE = 5;
+        private const float HEAR_CHANCE_CURRENTENEMY_MINCHANCE_HEADPHONES = 10;
+
         public HearingAnalysisClass(SAINHearingSensorClass hearing) : base(hearing)
         {
         }
@@ -90,9 +120,6 @@ namespace SAIN.SAINComponent.Classes
             return 1f;
         }
 
-        private const float BUNKER_REDUCTION_COEF = 0.2f;
-        private const float BUNKER_ELEV_DIFF_COEF = 0.66f;
-
         private bool doIDetectFootsteps(BotSound sound)
         {
             if (sound.Info.IsGunShot)
@@ -101,7 +128,7 @@ namespace SAIN.SAINComponent.Classes
             }
 
             bool hasheadPhones = Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece;
-            float closehearing = hasheadPhones ? 1f : 0.25f;
+            float closehearing = hasheadPhones ? HEAR_CHANCE_MIN_DIST_HEADPHONES : HEAR_CHANCE_MIN_DIST;
             float distance = sound.Distance;
             if (distance <= closehearing)
             {
@@ -117,29 +144,29 @@ namespace SAIN.SAINComponent.Classes
             float minimumChance = 0f;
             if (hasheadPhones)
             {
-                if (distance < farhearing * 0.66f)
+                if (distance < farhearing * HEAR_CHANCE_MIDRANGE_COEF)
                 {
-                    minimumChance += 10f;
+                    minimumChance += HEAR_CHANCE_MIDRANGE_MINCHANCE_HEADPHONES;
                 }
                 else
                 {
-                    minimumChance += 5f;
+                    minimumChance += HEAR_CHANCE_LONGRANGE_MINCHANCE_HEADPHONES;
                 }
                 if (sound.Info.SoundType != SAINSoundType.FootStep)
                 {
-                    minimumChance += 10f;
+                    minimumChance += HEAR_CHANCE_HEADPHONES_GUNFIRE;
                 }
             }
 
-            if (Bot.PlayerComponent.Transform.VelocityMagnitudeNormal < 0.1f)
+            if (Bot.PlayerComponent.Transform.VelocityMagnitudeNormal < HEAR_CHANCE_NOTMOVING_VELOCITY)
             {
-                minimumChance += hasheadPhones ? 5f : 3f;
+                minimumChance += hasheadPhones ? HEAR_CHANCE_NOTMOVING_MINCHANCE_HEADPHONES : HEAR_CHANCE_NOTMOVING_MINCHANCE;
             }
 
             if (Bot.HasEnemy &&
                 Bot.Enemy.EnemyProfileId == sound.Info.SourcePlayer.ProfileId)
             {
-                minimumChance += hasheadPhones ? 10f : 5f;
+                minimumChance += hasheadPhones ? HEAR_CHANCE_CURRENTENEMY_MINCHANCE_HEADPHONES : HEAR_CHANCE_CURRENTENEMY_MINCHANCE;
             }
 
             float num = farhearing - closehearing;
@@ -172,9 +199,10 @@ namespace SAIN.SAINComponent.Classes
             float envMod = sound.Info.IsGunShot ? GUNSHOT_ENVIR_MOD : FOOTSTEP_ENVIR_MOD;
             float bunkerMod = calcBunkerVolumeReduction(sound);
             float result = envMod * bunkerMod;
-            result = Mathf.Clamp(result, 0.1f, 1f);
+            result = Mathf.Clamp(result, MIN_ENVIRONMENT_MOD, 1f);
             return result;
         }
+
 
         private bool shallLimitAI(BotSound sound)
         {
@@ -311,19 +339,5 @@ namespace SAIN.SAINComponent.Classes
         private static float _veryFarDistance;
         private static float _narniaDistance;
 
-        private const float GUNSHOT_OCCLUSION_MOD = 0.8f;
-        private const float FOOTSTEP_OCCLUSION_MOD = 0.8f;
-        private const float GUNSHOT_ENVIR_MOD = 0.65f;
-        private const float FOOTSTEP_ENVIR_MOD = 0.8f;
-
-        private const float HEAR_MODIFIER_NO_EARS = 0.65f;
-        private const float HEAR_MODIFIER_HEAVY_HELMET = 0.8f;
-        private const float HEAR_MODIFIER_DYING = 0.8f;
-        private const float HEAR_MODIFIER_SPRINT = 0.85f;
-        private const float HEAR_MODIFIER_HEAVYBREATH = 0.65f;
-
-        private const float HEAR_MODIFIER_MIN_CLAMP = 0.1f;
-        private const float HEAR_MODIFIER_MAX_CLAMP = 5f;
-        private const float HEAR_MODIFIER_MAX_AFFECT_DIST = 10f;
     }
 }

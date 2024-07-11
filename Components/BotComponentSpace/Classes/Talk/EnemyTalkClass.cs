@@ -1,6 +1,8 @@
 using Comfort.Common;
 using EFT;
+using Interpolation;
 using SAIN.Components;
+using SAIN.Components.BotComponentSpace.Classes.EnemyClasses;
 using SAIN.Helpers;
 using SAIN.Plugin;
 using SAIN.Preset;
@@ -9,6 +11,7 @@ using SAIN.Preset.Personalities;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
@@ -464,7 +467,15 @@ namespace SAIN.SAINComponent.Classes.Talk
                 if (enemy.RealDistance <= painRange)
                 {
                     Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
-                    enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Pain, true, enemy.RealDistance < 25f || enemy.InLineOfSight);
+                    HearingReport report = new HearingReport
+                    {
+                        position = randomizedPos,
+                        soundType = SAINSoundType.Pain,
+                        placeType = EEnemyPlaceType.Hearing,
+                        isDanger = enemy.RealDistance < 25f || enemy.InLineOfSight,
+                        shallReportToSquad = true,
+                    };
+                    enemy.Hearing.SetHeard(report);
                 }
                 return;
             }
@@ -473,7 +484,15 @@ namespace SAIN.SAINComponent.Classes.Talk
                 if (enemy.RealDistance <= breathRange)
                 {
                     Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
-                    enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Breathing, true, enemy.RealDistance < 25f || enemy.InLineOfSight);
+                    HearingReport report = new HearingReport
+                    {
+                        position = randomizedPos,
+                        soundType = SAINSoundType.Breathing,
+                        placeType = EEnemyPlaceType.Hearing,
+                        isDanger = enemy.RealDistance < 25f || enemy.InLineOfSight,
+                        shallReportToSquad = true,
+                    };
+                    enemy.Hearing.SetHeard(report);
                 }
                 return;
             }
@@ -481,7 +500,15 @@ namespace SAIN.SAINComponent.Classes.Talk
             if (enemy.RealDistance <= 65f)
             {
                 Vector3 randomizedPos = randomizePos(player.Position, enemy.RealDistance, 20f);
-                enemy.Hearing.SetHeard(randomizedPos, SAINSoundType.Breathing, true, enemy.RealDistance < 25f || enemy.InLineOfSight);
+                HearingReport report = new HearingReport
+                {
+                    position = randomizedPos,
+                    soundType = SAINSoundType.Conversation,
+                    placeType = EEnemyPlaceType.Hearing,
+                    isDanger = enemy.RealDistance < 25f || enemy.InLineOfSight,
+                    shallReportToSquad = true,
+                };
+                enemy.Hearing.SetHeard(report);
             }
 
             if (Bot.Talk.IsSpeaking)

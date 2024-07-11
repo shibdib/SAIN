@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes.Info
             }
         }
 
-        public ProfileClass Profile { get; private set; }
+        public BotProfile Profile { get; private set; }
         public WeaponInfoClass WeaponInfo { get; private set; }
         public EPersonality Personality { get; private set; }
         public PersonalityBehaviorSettings PersonalitySettings => PersonalitySettingsClass?.Behavior;
@@ -36,7 +36,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public SAINBotInfoClass(BotComponent sain) : base(sain)
         {
-            Profile = new ProfileClass(sain);
+            Profile = new BotProfile(sain);
             WeaponInfo = new WeaponInfoClass(sain);
             base.SubscribeToPreset(UpdatePresetSettings);
         }

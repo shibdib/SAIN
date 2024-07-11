@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 namespace SAIN.Layers.Combat.Squad
 {
-    internal class FollowSearchParty : SAINAction, ISAINAction
+    internal class FollowSearchParty : CombatAction, ISAINAction
     {
         public FollowSearchParty(BotOwner bot) : base(bot, nameof(FollowSearchParty))
         {
@@ -22,7 +22,7 @@ namespace SAIN.Layers.Combat.Squad
         {
             if (!Bot.Mover.SprintController.Running)
             {
-                Shoot.Update();
+                Shoot.CheckAimAndFire();
                 Bot.Steering.SteerByPriority();
             }
 

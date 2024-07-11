@@ -8,7 +8,7 @@ using System.Collections;
 
 namespace SAIN.Layers.Combat.Solo
 {
-    internal class ShootAction : SAINAction, ISAINAction
+    internal class ShootAction : CombatAction, ISAINAction
     {
         public ShootAction(BotOwner bot) : base(bot, nameof(ShootAction))
         {
@@ -32,7 +32,7 @@ namespace SAIN.Layers.Combat.Solo
         public override void Update()
         {
             Bot.Steering.SteerByPriority();
-            Shoot.Update();
+            Shoot.CheckAimAndFire();
         }
     }
 }

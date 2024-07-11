@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
-    internal class ShiftCoverAction : SAINAction, ISAINAction
+    internal class ShiftCoverAction : CombatAction, ISAINAction
     {
         public ShiftCoverAction(BotOwner bot) : base(bot, nameof(ShiftCoverAction))
         {
@@ -22,7 +22,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         public override void Update()
         {
             Bot.Steering.SteerByPriority();
-            Shoot.Update();
+            Shoot.CheckAimAndFire();
             if (NewPoint == null
                 && FindPointToGo())
             {

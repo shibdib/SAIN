@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
 {
-    public class CurrentTargetClass : BotBase
+    public class CurrentTargetClass : BotBase, IBotClass
     {
         public event Action<Enemy, Vector3> OnNewTargetEnemy;
 
@@ -22,10 +22,18 @@ namespace SAIN.SAINComponent.Classes
         {
         }
 
+        public void Init()
+        {
+        }
+
         public void Update()
         {
             updateCurrentTarget();
             updateGoalTarget();
+        }
+
+        public void Dispose()
+        {
         }
 
         private void updateCurrentTarget()

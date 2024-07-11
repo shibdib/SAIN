@@ -4,11 +4,26 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
-    public class ManualShootClass : BotBase
+    public class ManualShootClass : BotBase, IBotClass
     {
         public ManualShootClass(BotComponent bot) : base(bot) { }
 
+        public void Init()
+        {
+
+        }
+
         public void Update()
+        {
+            checkReset();
+        }
+
+        public void Dispose()
+        {
+
+        }
+
+        private void checkReset()
         {
             if (Reason != EShootReason.None)
             {

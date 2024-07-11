@@ -23,16 +23,10 @@ namespace SAIN.Components.PlayerComponentSpace
                 return;
             }
 
-            if (Player.Fireport == null || Player.Fireport.Original == null)
-            {
-                return;
-            }
-
-            Vector3 lightDirection = getLightPointToCheck(onlyLaser);
+            Vector3 lightDirection = getLightDirection(onlyLaser);
             LayerMask mask = LayerMaskClass.HighPolyWithTerrainMask;
             float detectionDistance = 100f;
             Vector3 firePort = Transform.WeaponFirePort;
-            Vector3 weaponPointDir = Transform.WeaponPointDirection;
 
             // Our flashlight did not hit an object, return
             if (!Physics.Raycast(firePort, lightDirection, out RaycastHit hit, detectionDistance, mask))
@@ -40,7 +34,9 @@ namespace SAIN.Components.PlayerComponentSpace
                 return;
             }
 
-            // our flashlight hit an object, create a light point
+            // our flashlight hit an object,
+            // create a light point which is slightly away from the object,
+            // so it can be clearly detected by a raycast from a bot
             Vector3 point = hit.point + (hit.normal * 0.1f);
             LightPoints.Add(new FlashLightPoint(point));
 
@@ -53,7 +49,7 @@ namespace SAIN.Components.PlayerComponentSpace
             if (visibleLight)
             {
                 DebugGizmos.Sphere(point, 0.1f, Color.red, true, 0.25f);
-                DebugGizmos.Line(point, firePort, Color.red, 0.05f, true, 0.25f);
+                DebugGizmos.Line(point, firePort, Color.red, 0.015f, true, 0.25f);
                 return;
             }
 
@@ -61,30 +57,26 @@ namespace SAIN.Components.PlayerComponentSpace
             DebugGizmos.Line(point, firePort, Color.blue, 0.05f, true, 0.25f);
         }
 
-        private Vector3 getLightPointToCheck(bool onlyLaser)
+        private Vector3 getLightDirection(bool onlyLaser)
         {
+            if (onlyLaser)
+            {
+                return Transform.WeaponPointDirection;
+            }
             if (_nextUpdatebeamtime < Time.time)
             {
                 _nextUpdatebeamtime = Time.time + 0.5f;
-                _LightBeamPoints.Clear();
-                if (!onlyLaser)
-                {
-                    createFlashlightBeam(_LightBeamPoints);
-                }
-                else
-                {
-                    _LightBeamPoints.Add(Transform.WeaponPointDirection);
-                }
+                createFlashlightBeam(_lightBeamDirections);
             }
-            return _LightBeamPoints.GetRandomItem();
+            return _lightBeamDirections.GetRandomItem();
         }
 
-        private void createFlashlightBeam(List<Vector3> beamPoints)
+        private void createFlashlightBeam(List<Vector3> beamDirections)
         {
             // Define the cone angle (in degrees)
             float coneAngle = 10f;
 
-            beamPoints.Clear();
+            beamDirections.Clear();
             Vector3 weaponPointDir = Transform.WeaponPointDirection;
             for (int i = 0; i < 10; i++)
             {
@@ -100,14 +92,7 @@ namespace SAIN.Components.PlayerComponentSpace
                 // Rotate the player's look direction by the Quaternion rotation
                 Vector3 randomBeamDirection = randomRotation * weaponPointDir;
 
-                beamPoints.Add(randomBeamDirection);
-            }
-            if (SAINPlugin.DebugMode)
-            {
-                foreach (var point in beamPoints)
-                {
-                    DebugGizmos.Line(point, Transform.WeaponFirePort, 0.05f, 0.25f);
-                }
+                beamDirections.Add(randomBeamDirection);
             }
         }
 
@@ -293,6 +278,6 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private float _searchTime;
         private float _nextUpdatebeamtime;
-        private readonly List<Vector3> _LightBeamPoints = new List<Vector3>();
+        private readonly List<Vector3> _lightBeamDirections = new List<Vector3>();
     }
 }

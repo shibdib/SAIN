@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SAIN.Layers.Combat.Squad
 {
-    internal class RegroupAction : SAINAction, ISAINAction
+    internal class RegroupAction : CombatAction, ISAINAction
     {
         public RegroupAction(BotOwner bot) : base(bot, nameof(RegroupAction))
         {
@@ -32,7 +32,7 @@ namespace SAIN.Layers.Combat.Squad
 
             if (!Bot.Mover.SprintController.Running)
             {
-                Shoot.Update();
+                Shoot.CheckAimAndFire();
                 Bot.Steering.SteerByPriority();
             }
         }

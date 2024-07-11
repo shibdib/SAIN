@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Components;
+using SAIN.Components.BotComponentSpace.Classes.EnemyClasses;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
@@ -145,7 +146,16 @@ namespace SAIN.SAINComponent.Classes
             random.y = 0;
             random = random.normalized * dispersion;
             Vector3 estimatedPos = enemy.EnemyPosition + random;
-            enemy.Hearing.SetHeard(estimatedPos, SAINSoundType.BulletImpact, true, distance < 25f * 25f);
+
+            HearingReport report = new HearingReport
+            {
+                position = estimatedPos,
+                soundType = SAINSoundType.BulletImpact,
+                placeType = EEnemyPlaceType.Hearing,
+                isDanger = distance < 25f * 25f,
+                shallReportToSquad = true,
+            };
+            enemy.Hearing.SetHeard(report);
         }
 
         private bool _canHearSounds => Bot.BotActive && !Bot.GameEnding;
