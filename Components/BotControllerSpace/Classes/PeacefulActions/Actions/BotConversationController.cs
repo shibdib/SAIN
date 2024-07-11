@@ -8,7 +8,7 @@ namespace SAIN.Components.BotController.PeacefulActions
 {
     public class BotConversationController : SAINControllerBase, IPeacefulActionController
     {
-        private const float FIND_COVERSATION_FREQ = 10f;
+        private const float FIND_COVERSATION_FREQ = 5f;
         private const float MAX_START_CONVO_RANGE = 40f;
         private const float MAX_START_CONVO_RANGE_SQR = MAX_START_CONVO_RANGE * MAX_START_CONVO_RANGE;
 
@@ -36,7 +36,6 @@ namespace SAIN.Components.BotController.PeacefulActions
             _selectedBots.Clear();
             if (PeacefulActionHelpers.findBotsForPeacefulAction(data, _localList, _selectedBots, MAX_START_CONVO_RANGE_SQR)) {
                 logConvoStart(data);
-                return;
             }
         }
 
@@ -67,7 +66,7 @@ namespace SAIN.Components.BotController.PeacefulActions
 
         private void logConvoStart(BotZoneData data)
         {
-            if (SAINPlugin.DebugMode)
+            if (SAINPlugin.DebugMode || true)
             {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.AppendLine($"Conversation [{_conversations++}]");

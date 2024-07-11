@@ -31,9 +31,9 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(10f, 200f, 1f)]
         public Dictionary<AILimitSetting, float> MaxVisionRanges = new Dictionary<AILimitSetting, float>
         {
-            { AILimitSetting.Far, 150f },
-            { AILimitSetting.VeryFar, 75f },
-            { AILimitSetting.Narnia, 25f },
+            { AILimitSetting.Far, 200f },
+            { AILimitSetting.VeryFar, 100f },
+            { AILimitSetting.Narnia, 50f },
         };
 
         [Name("Limit AI vs AI Hearing")]

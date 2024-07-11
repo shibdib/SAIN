@@ -1,6 +1,8 @@
 ﻿using GPUInstancer;
 using SAIN.Components;
 using SAIN.Layers.Peace;
+using System.Text;
+using UnityEngine;
 
 namespace SAIN.Components.BotController.PeacefulActions
 {
@@ -11,13 +13,13 @@ namespace SAIN.Components.BotController.PeacefulActions
 
         public BotPeacefulActionController(SAINBotController controller) : base(controller)
         {
-            PeacefulBotFinder = new PeacefulBotFinder(controller);
+            //PeacefulBotFinder = new PeacefulBotFinder(controller);
         }
 
         public void Init()
         {
-            PeacefulBotFinder.Init();
-            initActions();
+            //PeacefulBotFinder.Init();
+            //initActions();
         }
 
         private void initActions()
@@ -28,13 +30,28 @@ namespace SAIN.Components.BotController.PeacefulActions
 
         public void Update()
         {
-            PeacefulBotFinder.Update();
-            Actions.CheckExecute(PeacefulBotFinder.ZoneDatas);
+            //PeacefulBotFinder.Update();
+            //Actions.CheckExecute(PeacefulBotFinder.ZoneDatas);
+            //logDatas();
         }
 
         public void Dispose()
         {
-            PeacefulBotFinder.Dispose();
+            //PeacefulBotFinder.Dispose();
         }
+
+        private void logDatas()
+        {
+            if (_nextLogTime < Time.time) {
+                _nextLogTime = Time.time + 10;
+                StringBuilder stringBuilder = new StringBuilder();
+                foreach (var datas in PeacefulBotFinder.ZoneDatas) {
+                    stringBuilder.AppendLine($"{datas.Key} : [{datas.Value.AllContainedBots.Count.ToString()}] : [{datas.Value.AllPeacefulBots.Count.ToString()}]");
+                }
+                Logger.LogDebug(stringBuilder.ToString());
+            }
+        }
+
+        private float _nextLogTime;
     }
 }

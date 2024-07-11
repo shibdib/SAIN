@@ -12,8 +12,8 @@ namespace SAIN.SAINComponent.Classes
     public class BotBusyHandsDetector : BotBase, IBotClass
     {
         private const float CHECK_FREQ = 0.1f;
-        private const float TIME_TO_RESET_GENERIC = 3f;
-        private const float TIME_TO_RESET_HEAL_FIRSTAID = 5f;
+        private const float TIME_TO_RESET_GENERIC = 5f;
+        private const float TIME_TO_RESET_HEAL_FIRSTAID = 10f;
         private const float TIME_TO_RESET_HEAL_STIMS = 3f;
         private const float TIME_TO_RESET_HEAL_SURGERY = 40f;
         private const float TIME_TO_RESET_WEAPONS_RELOAD = 10f;

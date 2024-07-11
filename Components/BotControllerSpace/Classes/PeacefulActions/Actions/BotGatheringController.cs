@@ -35,7 +35,6 @@ namespace SAIN.Components.BotController.PeacefulActions
             _selectedBots.Clear();
             if (PeacefulActionHelpers.findBotsForPeacefulAction(data, _localList, _selectedBots, MAX_GATHER_ENTER_DIST_SQR)) {
                 logConvoStart(data);
-                return;
             }
         }
 

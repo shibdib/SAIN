@@ -252,7 +252,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\BotComponentSpace\BotComponentBase.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\BotBackpackDropClass - Copy.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\BotBusyHandsDetector.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\BotGlobalEventsClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\BotDecision.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\BotDecisionManager.cs" />
@@ -290,7 +290,7 @@
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\IPeacefulActionExecutor.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\PeacefulActionHelpers.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\EPeacefulAction.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\IPeacefulActionController.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\IPeacefulActionController.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulActionSet.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />

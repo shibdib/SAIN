@@ -17,6 +17,10 @@ namespace SAIN.SAINComponent.Classes.Decision
         private static readonly float RunToCoverTime = 1.5f;
         private static readonly float RunToCoverTimeRandomMin = 0.66f;
         private static readonly float RunToCoverTimeRandomMax = 1.33f;
+        private const float FREEZE_MAX_DISTANCE = 70;
+        private const float FREEZE_MIN_TIMESINCESEEN = 240f;
+        private const float FREEZE_MAX_TIMESINCEHEARD = 80f;
+
         public SearchReasonsStruct DebugSearchReasons { get; private set; }
         public float FreezeFor { get; private set; }
         public float UnFreezeTime { get; private set; }
@@ -48,19 +52,16 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             FailedDecisionReasons.Clear();
             Enemy enemy = Bot.Enemy;
-            if (enemy == null)
-            {
+            if (enemy == null) {
                 return null;
             }
             string reason = string.Empty;
-            if (shallDogFight(enemy, out reason))
-            {
+            if (shallDogFight(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.DogFight, reason);
             }
             FailedDecisionReasons.AppendLine($"{ECombatDecision.DogFight} {reason}");
 
-            if (shallStandAndShoot(enemy, out reason))
-            {
+            if (shallStandAndShoot(enemy, out reason)) {
                 if (Bot.Decision.CurrentCombatDecision != ECombatDecision.StandAndShoot)
                     Bot.Info.CalcHoldGroundDelay();
 
@@ -68,50 +69,41 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             FailedDecisionReasons.AppendLine($"{ECombatDecision.StandAndShoot} {reason}");
 
-            if (shallShootDistantEnemy(enemy, out reason))
-            {
+            if (shallShootDistantEnemy(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.ShootDistantEnemy, reason);
             }
             FailedDecisionReasons.AppendLine($"{ECombatDecision.ShootDistantEnemy} {reason}");
 
-            if (shallRushEnemy(enemy, out reason))
-            {
+            if (shallRushEnemy(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.RushEnemy, reason);
             }
             FailedDecisionReasons.AppendLine($"{ECombatDecision.RushEnemy} {reason}");
 
-            if (shallThrowGrenade(enemy, out reason))
-            {
+            if (shallThrowGrenade(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.ThrowGrenade, reason);
             }
             FailedDecisionReasons.AppendLine($"{ECombatDecision.ThrowGrenade} {reason}");
 
-            if (shallSearch(enemy, out reason))
-            {
-                if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Search)
-                {
+            if (shallSearch(enemy, out reason)) {
+                if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Search) {
                     enemy.Status.NumberOfSearchesStarted++;
                 }
                 return new BotDecision<ECombatDecision>(ECombatDecision.Search, reason);
             }
             FailedDecisionReasons.AppendLine($"{ECombatDecision.Search} {reason}");
 
-            if (shallFreezeAndWait(enemy, out reason))
-            {
+            if (shallFreezeAndWait(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.Freeze, reason);
             }
             FailedDecisionReasons.AppendLine($"{ECombatDecision.Freeze} {reason}");
 
-            if (shallShiftCover(enemy, out reason))
-            {
+            if (shallShiftCover(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.ShiftCover, reason);
             }
             FailedDecisionReasons.AppendLine($"{ECombatDecision.ShiftCover} {reason}");
 
-            if (shallMoveToCover(out reason))
-            {
-                if (shallRunForCover(enemy, out reason))
-                {
+            if (shallMoveToCover(out reason)) {
+                if (shallRunForCover(enemy, out reason)) {
                     return new BotDecision<ECombatDecision>(ECombatDecision.RunToCover, reason);
                 }
                 FailedDecisionReasons.AppendLine($"{ECombatDecision.RunToCover} {reason}");
@@ -126,77 +118,61 @@ namespace SAIN.SAINComponent.Classes.Decision
         public bool GetDecision(out ECombatDecision Decision)
         {
             Enemy enemy = Bot.Enemy;
-            if (enemy == null)
-            {
+            if (enemy == null) {
                 Decision = ECombatDecision.None;
                 return false;
             }
 
-            if (shallDogFight(enemy, out _))
-            {
+            if (shallDogFight(enemy, out _)) {
                 Decision = ECombatDecision.DogFight;
             }
-            else if (shallStandAndShoot(enemy, out _))
-            {
-                if (Bot.Decision.CurrentCombatDecision != ECombatDecision.StandAndShoot)
-                {
+            else if (shallStandAndShoot(enemy, out _)) {
+                if (Bot.Decision.CurrentCombatDecision != ECombatDecision.StandAndShoot) {
                     Bot.Info.CalcHoldGroundDelay();
                 }
                 Decision = ECombatDecision.StandAndShoot;
             }
-            else if (shallShootDistantEnemy(enemy, out _))
-            {
+            else if (shallShootDistantEnemy(enemy, out _)) {
                 Decision = ECombatDecision.ShootDistantEnemy;
             }
-            else if (shallRushEnemy(enemy, out _))
-            {
+            else if (shallRushEnemy(enemy, out _)) {
                 Decision = ECombatDecision.RushEnemy;
             }
-            else if (shallThrowGrenade(enemy, out _))
-            {
+            else if (shallThrowGrenade(enemy, out _)) {
                 Decision = ECombatDecision.ThrowGrenade;
             }
-            else if (shallSearch(enemy, out _))
-            {
-                if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Search)
-                {
+            else if (shallSearch(enemy, out _)) {
+                if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Search) {
                     enemy.Status.NumberOfSearchesStarted++;
                 }
                 Decision = ECombatDecision.Search;
             }
-            else if (shallFreezeAndWait(enemy, out _))
-            {
+            else if (shallFreezeAndWait(enemy, out _)) {
                 Decision = ECombatDecision.Freeze;
             }
             //else if (shallMoveToEngage(enemy))
             //{
             //    Decision = SoloDecision.MoveToEngage;
             //}
-            else if (shallShiftCover(enemy, out _))
-            {
+            else if (shallShiftCover(enemy, out _)) {
                 Decision = ECombatDecision.ShiftCover;
             }
-            else if (shallMoveToCover(out _))
-            {
+            else if (shallMoveToCover(out _)) {
                 Decision = ECombatDecision.MoveToCover;
 
-                if (shallRunForCover(enemy, out _))
-                {
+                if (shallRunForCover(enemy, out _)) {
                     Decision = ECombatDecision.RunToCover;
                 }
             }
-            else if (shallHoldInCover(out _))
-            {
+            else if (shallHoldInCover(out _)) {
                 Decision = ECombatDecision.HoldInCover;
             }
-            else
-            {
+            else {
                 Decision = ECombatDecision.DebugNoDecision;
             }
 
             if (Decision != ECombatDecision.MoveToCover &&
-                Decision != ECombatDecision.RunToCover)
-            {
+                Decision != ECombatDecision.RunToCover) {
                 StartRunCoverTimer = 0f;
             }
 
@@ -205,8 +181,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private void checkFreezeTime()
         {
-            if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Freeze)
-            {
+            if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Freeze) {
                 FreezeFor = UnityEngine.Random.Range(10f, 120f);
                 UnFreezeTime = Time.time + FreezeFor;
             }
@@ -214,55 +189,43 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallFreezeAndWait(Enemy enemy, out string reason)
         {
-            if (Bot.Info.PersonalitySettings.Search.HeardFromPeaceBehavior != EHeardFromPeaceBehavior.Freeze)
-            {
+            if (Bot.Info.PersonalitySettings.Search.HeardFromPeaceBehavior != EHeardFromPeaceBehavior.Freeze) {
                 reason = "wontFreeze";
                 return false;
             }
-            if (!enemy.Hearing.EnemyHeardFromPeace)
-            {
+            if (!enemy.Hearing.EnemyHeardFromPeace) {
                 reason = "notHeardFromPeace";
                 return false;
             }
-            if (!Bot.Memory.Location.IsIndoors)
-            {
+            if (!Bot.Memory.Location.IsIndoors) {
                 reason = "outside";
                 return false;
             }
-            if (enemy.Seen && enemy.TimeSinceSeen < FREEZE_MIN_TIMESINCESEEN)
-            {
+            if (enemy.Seen && enemy.TimeSinceSeen < FREEZE_MIN_TIMESINCESEEN) {
                 reason = "seenRecent";
                 return false;
             }
-            if (enemy.TimeSinceLastKnownUpdated > FREEZE_MAX_TIMESINCEHEARD)
-            {
+            if (enemy.TimeSinceLastKnownUpdated > FREEZE_MAX_TIMESINCEHEARD) {
                 reason = "haventHeard";
                 return false;
             }
-            if (enemy.KnownPlaces.BotDistanceFromLastKnown > FREEZE_MAX_DISTANCE)
-            {
+            if (enemy.KnownPlaces.BotDistanceFromLastKnown > FREEZE_MAX_DISTANCE) {
                 reason = "tooFar";
                 return false;
             }
 
-            if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Freeze)
-            {
+            if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Freeze) {
                 FreezeFor = UnityEngine.Random.Range(10f, 120f);
                 UnFreezeTime = Time.time + FreezeFor;
             }
 
-            if (UnFreezeTime < Time.time)
-            {
+            if (UnFreezeTime < Time.time) {
                 reason = "frozenTooLong";
                 return false;
             }
             reason = "timeForFreeze";
             return true;
         }
-
-        const float FREEZE_MAX_DISTANCE = 70;
-        const float FREEZE_MIN_TIMESINCESEEN = 240f;
-        const float FREEZE_MAX_TIMESINCEHEARD = 80f;
 
         private bool shallThrowGrenade(Enemy enemy, out string reason)
         {
@@ -272,47 +235,39 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool shallRushEnemy(Enemy enemy, out string reason)
         {
             var health = Bot.Memory.Health.HealthStatus;
-            if (health == ETagStatus.Dying)
-            {
+            if (health == ETagStatus.Dying) {
                 reason = "imDying";
                 return false;
             }
             if (enemy.Hearing.EnemyHeardFromPeace &&
-                Bot.Info.PersonalitySettings.Search.HeardFromPeaceBehavior == EHeardFromPeaceBehavior.Charge)
-            {
+                Bot.Info.PersonalitySettings.Search.HeardFromPeaceBehavior == EHeardFromPeaceBehavior.Charge) {
                 reason = "heardFromPeaceCharge";
                 return true;
             }
-            if (!Bot.Info.PersonalitySettings.Rush.CanRushEnemyReloadHeal)
-            {
+            if (!Bot.Info.PersonalitySettings.Rush.CanRushEnemyReloadHeal) {
                 reason = "cantRush";
                 return false;
             }
-            if (Bot.Decision.SelfActionDecisions.LowOnAmmo(RushEnemyLowAmmoRatio))
-            {
+            if (Bot.Decision.SelfActionDecisions.LowOnAmmo(RushEnemyLowAmmoRatio)) {
                 reason = "lowAmmo";
                 return false;
             }
 
-            if (!checkInRangeForRush(enemy))
-            {
+            if (!checkInRangeForRush(enemy)) {
                 reason = "outOfRange";
                 return false;
             }
-            if (enemy.Status.VulnerableAction != EEnemyAction.None)
-            {
+            if (enemy.Status.VulnerableAction != EEnemyAction.None) {
                 reason = "enemyVulnerable";
                 return true;
             }
             ETagStatus enemyHealth = enemy.EnemyPlayer.HealthStatus;
-            if (enemyHealth == ETagStatus.Dying)
-            {
+            if (enemyHealth == ETagStatus.Dying) {
                 reason = "enemyHurtBad";
                 return true;
             }
-            if (enemyHealth == ETagStatus.BadlyInjured && 
-                enemy.EnemyPlayer.IsInPronePose)
-            {
+            if (enemyHealth == ETagStatus.BadlyInjured &&
+                enemy.EnemyPlayer.IsInPronePose) {
                 reason = "enemyHurtAndProne";
                 return true;
             }
@@ -324,63 +279,51 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             EEnemyAction vulnerableAction = enemy.Status.VulnerableAction;
             float modifier = vulnerableAction == EEnemyAction.UsingSurgery ? 2f : 1f;
-            if (enemy.Path.PathDistance < RushEnemyMaxPathDistance * modifier)
-            {
+            if (enemy.Path.PathDistance < RushEnemyMaxPathDistance * modifier) {
                 return true;
             }
-            if (enemy.Path.PathDistance < RushEnemyMaxPathDistanceSprint * modifier && 
-                BotOwner.CanSprintPlayer)
-            {
+            if (enemy.Path.PathDistance < RushEnemyMaxPathDistanceSprint * modifier &&
+                BotOwner.CanSprintPlayer) {
                 return true;
             }
             return false;
         }
 
-
         private bool shallShiftCover(Enemy enemy, out string reason)
         {
-            if (Bot.Info.PersonalitySettings.Cover.CanShiftCoverPosition == false)
-            {
+            if (Bot.Info.PersonalitySettings.Cover.CanShiftCoverPosition == false) {
                 reason = "cantShift";
                 return false;
             }
-            if (Bot.Suppression.IsSuppressed)
-            {
+            if (Bot.Suppression.IsSuppressed) {
                 reason = "suppressed";
                 return false;
             }
 
-            if (ContinueShiftCover())
-            {
+            if (ContinueShiftCover()) {
                 reason = "continueShift";
                 return true;
             }
 
             var CurrentDecision = Bot.Decision.CurrentCombatDecision;
 
-            if (CurrentDecision == ECombatDecision.HoldInCover && Bot.Info.PersonalitySettings.Cover.CanShiftCoverPosition)
-            {
-                if (Bot.Decision.TimeSinceChangeDecision > ShiftCoverChangeDecisionTime && TimeForNewShift < Time.time)
-                {
-                    if (enemy != null)
-                    {
-                        if (enemy.Seen && !enemy.IsVisible && enemy.TimeSinceSeen > ShiftCoverTimeSinceSeen)
-                        {
+            if (CurrentDecision == ECombatDecision.HoldInCover && Bot.Info.PersonalitySettings.Cover.CanShiftCoverPosition) {
+                if (Bot.Decision.TimeSinceChangeDecision > ShiftCoverChangeDecisionTime && TimeForNewShift < Time.time) {
+                    if (enemy != null) {
+                        if (enemy.Seen && !enemy.IsVisible && enemy.TimeSinceSeen > ShiftCoverTimeSinceSeen) {
                             TimeForNewShift = Time.time + ShiftCoverNewCoverTime;
                             ShiftResetTimer = Time.time + ShiftCoverResetTime;
                             reason = "enemyNotSeen";
                             return true;
                         }
-                        if (!enemy.Seen && enemy.KnownPlaces.TimeSinceLastKnownUpdated > ShiftCoverTimeSinceEnemyCreated)
-                        {
+                        if (!enemy.Seen && enemy.KnownPlaces.TimeSinceLastKnownUpdated > ShiftCoverTimeSinceEnemyCreated) {
                             TimeForNewShift = Time.time + ShiftCoverNewCoverTime;
                             ShiftResetTimer = Time.time + ShiftCoverResetTime;
                             reason = "lastKnownNotUpdated";
                             return true;
                         }
                     }
-                    if (enemy == null && Bot.Decision.TimeSinceChangeDecision > ShiftCoverNoEnemyResetTime)
-                    {
+                    if (enemy == null && Bot.Decision.TimeSinceChangeDecision > ShiftCoverNoEnemyResetTime) {
                         TimeForNewShift = Time.time + ShiftCoverNewCoverTime;
                         ShiftResetTimer = Time.time + ShiftCoverResetTime;
                         reason = "timeDecisionMade";
@@ -397,36 +340,29 @@ namespace SAIN.SAINComponent.Classes.Decision
         private bool ContinueShiftCover()
         {
             var CurrentDecision = Bot.Decision.CurrentCombatDecision;
-            if (CurrentDecision == ECombatDecision.ShiftCover)
-            {
-                if (ShiftResetTimer > 0f && ShiftResetTimer < Time.time)
-                {
+            if (CurrentDecision == ECombatDecision.ShiftCover) {
+                if (ShiftResetTimer > 0f && ShiftResetTimer < Time.time) {
                     ShiftResetTimer = -1f;
                     return false;
                 }
-                if (!BotOwner.Mover.IsMoving && !Bot.Mover.SprintController.Running)
-                {
+                if (!BotOwner.Mover.IsMoving && !Bot.Mover.SprintController.Running) {
                     return false;
                 }
-                if (!ShiftCoverComplete)
-                {
+                if (!ShiftCoverComplete) {
                     return true;
                 }
             }
             return false;
         }
 
-
         private bool shallDogFight(Enemy enemy, out string reason)
         {
-            if (Bot.Decision.CurrentSelfDecision != ESelfDecision.None || BotOwner.WeaponManager.Reload.Reloading)
-            {
+            if (Bot.Decision.CurrentSelfDecision != ESelfDecision.None || BotOwner.WeaponManager.Reload.Reloading) {
                 reason = "selfDecisionOrReloading";
                 return false;
             }
 
-            if (Bot.Decision.CurrentCombatDecision == ECombatDecision.RushEnemy)
-            {
+            if (Bot.Decision.CurrentCombatDecision == ECombatDecision.RushEnemy) {
                 reason = "rushingEnemy";
                 return false;
             }
@@ -443,13 +379,11 @@ namespace SAIN.SAINComponent.Classes.Decision
             //    return true;
             //}
 
-            if (Bot.Cover.SpottedInCover == true)
-            {
+            if (Bot.Cover.SpottedInCover == true) {
                 reason = "coverSpotted";
                 return true;
             }
-            if ((enemy.EPathDistance == EPathDistance.VeryClose && Bot.Enemy.IsVisible))
-            {
+            if ((enemy.EPathDistance == EPathDistance.VeryClose && Bot.Enemy.IsVisible)) {
                 reason = "enemyClose";
                 return true;
             }
@@ -458,38 +392,30 @@ namespace SAIN.SAINComponent.Classes.Decision
             return false;
         }
 
-
         private bool shallMoveToEngage(Enemy enemy)
         {
-            if (Bot.Suppression.IsSuppressed)
-            {
+            if (Bot.Suppression.IsSuppressed) {
                 return false;
             }
-            if (!enemy.Seen || enemy.TimeSinceSeen < 8f)
-            {
+            if (!enemy.Seen || enemy.TimeSinceSeen < 8f) {
                 return false;
             }
-            if (enemy.IsVisible && enemy.EnemyLookingAtMe)
-            {
+            if (enemy.IsVisible && enemy.EnemyLookingAtMe) {
                 return false;
             }
             var decision = Bot.Decision.CurrentCombatDecision;
-            if (BotOwner.Memory.IsUnderFire && decision != ECombatDecision.MoveToEngage)
-            {
+            if (BotOwner.Memory.IsUnderFire && decision != ECombatDecision.MoveToEngage) {
                 return false;
             }
-            if (decision == ECombatDecision.Retreat || decision == ECombatDecision.MoveToCover || decision == ECombatDecision.RunToCover)
-            {
+            if (decision == ECombatDecision.Retreat || decision == ECombatDecision.MoveToCover || decision == ECombatDecision.RunToCover) {
                 return false;
             }
             if (enemy.RealDistance > Bot.Info.WeaponInfo.EffectiveWeaponDistance
-                && decision != ECombatDecision.MoveToEngage)
-            {
+                && decision != ECombatDecision.MoveToEngage) {
                 return true;
             }
             if (enemy.RealDistance > Bot.Info.WeaponInfo.EffectiveWeaponDistance * 0.66f
-                && decision == ECombatDecision.MoveToEngage)
-            {
+                && decision == ECombatDecision.MoveToEngage) {
                 return true;
             }
             return false;
@@ -499,8 +425,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         {
             if (_endShootDistTargetTime > Time.time
                 && Bot.Decision.CurrentCombatDecision == ECombatDecision.ShootDistantEnemy
-                && Bot.Memory.Health.HealthStatus != ETagStatus.Dying)
-            {
+                && Bot.Memory.Health.HealthStatus != ETagStatus.Dying) {
                 reason = "shootingDistantEnemy";
                 return true;
             }
@@ -508,8 +433,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 && enemy.RealDistance > Bot.Info.FileSettings.Shoot.MaxPointFireDistance
                 && enemy.IsVisible
                 && enemy.CanShoot
-                && (Bot.Memory.Health.HealthStatus == ETagStatus.Healthy || Bot.Memory.Health.HealthStatus == ETagStatus.Injured))
-            {
+                && (Bot.Memory.Health.HealthStatus == ETagStatus.Healthy || Bot.Memory.Health.HealthStatus == ETagStatus.Injured)) {
                 float timeAdd = 6f * UnityEngine.Random.Range(0.75f, 1.25f);
                 _nextShootDistTargetTime = Time.time + timeAdd;
                 _endShootDistTargetTime = Time.time + timeAdd / 3f;
@@ -522,27 +446,23 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallRunForCover(Enemy enemy, out string reason)
         {
-            if (!BotOwner.CanSprintPlayer)
-            {
+            if (!BotOwner.CanSprintPlayer) {
                 reason = "cantSprint";
                 return false;
             }
 
-            if (Bot.Cover.CoverPoints.Count == 0)
-            {
+            if (Bot.Cover.CoverPoints.Count == 0) {
                 reason = "noCoverPoints";
                 return false;
             }
 
             if (!enemy.IsVisible &&
-                (!enemy.Seen || enemy.TimeSinceSeen > 3f))
-            {
+                (!enemy.Seen || enemy.TimeSinceSeen > 3f)) {
                 reason = "runNow cantSeeEnemy";
                 return true;
             }
 
-            if (StartRunCoverTimer < Time.time)
-            {
+            if (StartRunCoverTimer < Time.time) {
                 reason = "timeToRun";
                 return true;
             }
@@ -553,15 +473,13 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallMoveToCover(out string reason)
         {
-            if (Bot.Cover.InCover)
-            {
+            if (Bot.Cover.InCover) {
                 reason = "inCover";
                 return false;
             }
 
             var CurrentDecision = Bot.Decision.CurrentCombatDecision;
-            if (CurrentDecision != ECombatDecision.MoveToCover && CurrentDecision != ECombatDecision.RunToCover)
-            {
+            if (CurrentDecision != ECombatDecision.MoveToCover && CurrentDecision != ECombatDecision.RunToCover) {
                 StartRunCoverTimer = Time.time + RunToCoverTime * UnityEngine.Random.Range(RunToCoverTimeRandomMin, RunToCoverTimeRandomMax);
             }
 
@@ -574,12 +492,10 @@ namespace SAIN.SAINComponent.Classes.Decision
             bool shallSearch = Bot.Search.SearchDecider.ShallStartSearch(enemy, out SearchReasonsStruct reasons);
             DebugSearchReasons = reasons;
             DebugShallSearch = shallSearch;
-            if (shallSearch)
-            {
+            if (shallSearch) {
                 reason = "wantToSearch";
             }
-            else
-            {
+            else {
                 reason = "cantSearch";
             }
             return shallSearch;
@@ -587,8 +503,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public bool shallHoldInCover(out string reason)
         {
-            if (Bot.Cover.InCover)
-            {
+            if (Bot.Cover.InCover) {
                 reason = "inCover";
                 return true;
             }
@@ -598,54 +513,45 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallStandAndShoot(Enemy enemy, out string reason)
         {
-            if (!enemy.IsVisible)
-            {
+            if (!enemy.IsVisible) {
                 reason = "cantSeeEnemy";
                 return false;
             }
-            if (!enemy.CanShoot)
-            {
+            if (!enemy.CanShoot) {
                 reason = "cantShootEnemy";
                 return false;
             }
-            if (BotOwner.WeaponManager?.HaveBullets == false)
-            {
+            if (BotOwner.WeaponManager?.HaveBullets == false) {
                 reason = "noBullets";
                 return false;
             }
-            if (enemy.RealDistance > Bot.Info.WeaponInfo.EffectiveWeaponDistance * 1.25f)
-            {
+            if (enemy.RealDistance > Bot.Info.WeaponInfo.EffectiveWeaponDistance * 1.25f) {
                 reason = "outOfRange";
                 return false;
             }
 
             float holdGround = Bot.Info.HoldGroundDelay;
-            if (holdGround <= 0f)
-            {
+            if (holdGround <= 0f) {
                 reason = "wontHoldGround";
                 return false;
             }
 
-            if (!enemy.EnemyLookingAtMe)
-            {
+            if (!enemy.EnemyLookingAtMe) {
                 reason = "enemyNotLooking";
                 return true;
             }
 
             float visibleFor = Time.time - enemy.Vision.VisibleStartTime;
-            if (visibleFor > holdGround)
-            {
+            if (visibleFor > holdGround) {
                 reason = "visibleTooLong";
                 return false;
             }
 
-            if (visibleFor < holdGround / 1.5f)
-            {
+            if (visibleFor < holdGround / 1.5f) {
                 reason = "holdingFromTime";
                 return true;
             }
-            else if (Bot.Cover.CheckLimbsForCover())
-            {
+            else if (Bot.Cover.CheckLimbsForCover()) {
                 reason = "holdingHaveSomeCover";
                 return true;
             }

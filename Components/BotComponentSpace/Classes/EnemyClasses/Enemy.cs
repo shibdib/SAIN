@@ -76,7 +76,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Update()
         {
-            IsCurrentEnemy = Bot.Enemy?.EnemyProfileId == EnemyProfileId; 
+            IsCurrentEnemy = Bot.Enemy?.EnemyProfileId == EnemyProfileId;
             calcFrequencyCoef();
             updateDistAndDirection();
             Events.Update();
@@ -118,19 +118,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public bool ActiveThreat => _activeThreatChecker.ActiveThreat;
         public float TimeSinceCurrentEnemy => _hasBeenActive ? Time.time - _timeLastActive : float.MaxValue;
 
-        public Collider HidingBehindObject
-        {
+        public Collider HidingBehindObject {
             get
             {
                 float time = Time.time;
-                if (_nextCheckHidingTime < time)
-                {
+                if (_nextCheckHidingTime < time) {
                     _nextCheckHidingTime = time + _checkHidingFreq;
                     _hidingBehindObject = null;
                     Vector3? lastKnown = LastKnownPosition;
                     if (lastKnown != null
-                        && Physics.Raycast(lastKnown.Value + Vector3.up, Bot.Position + Vector3.up, out RaycastHit hit, _checkHidingRayDist, LayerMaskClass.HighPolyCollider))
-                    {
+                        && Physics.Raycast(lastKnown.Value + Vector3.up, Bot.Position + Vector3.up, out RaycastHit hit, _checkHidingRayDist, LayerMaskClass.HighPolyCollider)) {
                         _hidingBehindObject = hit.collider;
                     }
                 }
@@ -138,13 +135,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        public Vector3? SuppressionTarget
-        {
+        public Vector3? SuppressionTarget {
             get
             {
                 Vector3? enemyLastKnown = KnownPlaces.LastKnownPosition;
-                if (enemyLastKnown == null)
-                {
+                if (enemyLastKnown == null) {
                     return null;
                 }
 
@@ -152,24 +147,20 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
                 Vector3? blindCorner = corners.EyeLevelPosition(ECornerType.Blind);
                 if (blindCorner != null &&
-                    isTargetInSuppRange(enemyLastKnown.Value, blindCorner.Value))
-                {
+                    isTargetInSuppRange(enemyLastKnown.Value, blindCorner.Value)) {
                     return blindCorner;
                 }
 
                 Vector3? lastCorner = corners.EyeLevelPosition(ECornerType.Last);
                 if (lastCorner != null &&
                     Path.CanSeeLastCornerToEnemy &&
-                    isTargetInSuppRange(enemyLastKnown.Value, lastCorner.Value))
-                {
+                    isTargetInSuppRange(enemyLastKnown.Value, lastCorner.Value)) {
                     return lastCorner;
                 }
 
-                if (HidingBehindObject != null)
-                {
+                if (HidingBehindObject != null) {
                     Vector3 pos = HidingBehindObject.transform.position + HidingBehindObject.bounds.size.z * Vector3.up;
-                    if (isTargetInSuppRange(enemyLastKnown.Value, pos))
-                    {
+                    if (isTargetInSuppRange(enemyLastKnown.Value, pos)) {
                         return pos;
                     }
                 }
@@ -179,15 +170,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private bool isTargetInSuppRange(Vector3 target, Vector3 suppressPoint)
         {
-            if ((target - suppressPoint).sqrMagnitude <= MAX_TARGET_SUPPRESS_DIST)
-            {
+            if ((target - suppressPoint).sqrMagnitude <= MAX_TARGET_SUPPRESS_DIST) {
                 return true;
             }
             Vector3 directionToSuppPoint = suppressPoint - Bot.Position;
             Vector3 directionToTarget = target - Bot.Position;
             float angle = Vector3.Angle(directionToSuppPoint.normalized, directionToTarget.normalized);
-            if (angle < MAX_TARGET_SUPPRESS_ANGLE)
-            {
+            if (angle < MAX_TARGET_SUPPRESS_ANGLE) {
                 return true;
             }
             return false;
@@ -196,16 +185,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private const float MAX_TARGET_SUPPRESS_DIST = 5f * 5f;
         private const float MAX_TARGET_SUPPRESS_ANGLE = 20f;
 
-        public Vector3? CenterMass
-        {
+        public Vector3? CenterMass {
             get
             {
-                if (EnemyIPlayer == null)
-                {
+                if (EnemyIPlayer == null) {
                     return null;
                 }
-                if (_nextGetCenterTime < Time.time)
-                {
+                if (_nextGetCenterTime < Time.time) {
                     _nextGetCenterTime = Time.time + 0.05f;
                     _centerMass = new Vector3?(findCenterMass());
                 }
@@ -223,20 +209,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public Vector3? LastKnownPosition => KnownPlaces.LastKnownPosition;
 
-        public Vector3 EnemyMoveDirection
-        {
+        public Vector3 EnemyMoveDirection {
             get
             {
-                if (_nextCalcMoveDirTime < Time.time)
-                {
+                if (_nextCalcMoveDirTime < Time.time) {
                     _nextCalcMoveDirTime = Time.time + 0.1f;
                     Vector2 moveDirV2 = EnemyPlayer.MovementContext.MovementDirection;
                     Vector3 moveDirection = new Vector3(moveDirV2.x, 0, moveDirV2.y);
-                    if (EnemyTransform.VelocityMagnitudeNormal > 0.01f)
-                    {
+                    if (EnemyTransform.VelocityMagnitudeNormal > 0.01f) {
                         LastMoveDirection = moveDirection;
-                        if (EnemyPlayer.IsSprintEnabled)
-                        {
+                        if (EnemyPlayer.IsSprintEnabled) {
                             LastSprintDirection = moveDirection;
                         }
                     }
@@ -270,13 +252,15 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private void updateDistAndDirection()
         {
             float timeAdd = calcMagnitudeDelay();
-            if (_lastUpdateDistanceTime + timeAdd < Time.time)
-            {
+            if (_lastUpdateDistanceTime + timeAdd < Time.time) {
                 _lastUpdateDistanceTime = Time.time;
                 Vector3 dir = EnemyPosition - Bot.Position;
                 EnemyDirection = dir;
                 EnemyDirectionNormal = dir.normalized;
                 RealDistance = dir.magnitude;
+
+                EnemyInfo.Direction = dir;
+                EnemyInfo.Distance = RealDistance;
             }
         }
 
@@ -298,8 +282,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void calcFrequencyCoef()
         {
-            if (_nextUpdateCoefTime < Time.time)
-            {
+            if (_nextUpdateCoefTime < Time.time) {
                 _nextUpdateCoefTime = Time.time + 0.1f;
                 UpdateFrequencyCoef = calcUpdateFrequencyCoef(out float normal);
                 UpdateFrequencyCoefNormal = normal;
@@ -312,14 +295,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             float enemyDist = RealDistance;
             float min = ENEMY_UPDATEFREQUENCY_MIN_DIST;
-            if (enemyDist <= min)
-            {
+            if (enemyDist <= min) {
                 normal = 0;
                 return 1f;
             }
             float max = ENEMY_UPDATEFREQUENCY_MAX_DIST;
-            if (enemyDist >= max)
-            {
+            if (enemyDist >= max) {
                 normal = 1f;
                 return max;
             }
@@ -341,17 +322,14 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private const float ENEMY_UPDATEFREQUENCY_MAX_DIST = 500f;
         private const float ENEMY_UPDATEFREQUENCY_MIN_DIST = 50f;
 
-
         private void updateActiveState()
         {
             if (IsCurrentEnemy &&
-                !_hasBeenActive)
-            {
+                !_hasBeenActive) {
                 _hasBeenActive = true;
             }
 
-            if (IsCurrentEnemy || IsVisible || Status.HeardRecently)
-            {
+            if (IsCurrentEnemy || IsVisible || Status.HeardRecently) {
                 _timeLastActive = Time.time;
             }
         }
@@ -363,8 +341,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Vector3 floorPos = enemy.Position;
             Vector3 centerMass = Vector3.Lerp(headPos, floorPos, SAINPlugin.LoadedPreset.GlobalSettings.Aiming.CenterMassVal);
 
-            if (enemy.Player.IsYourPlayer && SAINPlugin.DebugMode && _debugCenterMassTime < Time.time)
-            {
+            if (enemy.Player.IsYourPlayer && SAINPlugin.DebugMode && _debugCenterMassTime < Time.time) {
                 _debugCenterMassTime = Time.time + 1f;
                 DebugGizmos.Sphere(centerMass, 0.1f, 5f);
             }
@@ -381,8 +358,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void UpdateCurrentEnemyPos(Vector3 position)
         {
             var place = KnownPlaces.UpdateSeenPlace(position);
-            if (_nextReportSightTime < Time.time)
-            {
+            if (_nextReportSightTime < Time.time) {
                 _nextReportSightTime = Time.time + _reportSightFreq;
                 Bot.Squad.SquadInfo?.ReportEnemyPosition(this, place, true);
             }
@@ -390,12 +366,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void EnemyPositionReported(EnemyPlace place, bool seen)
         {
-            if (seen)
-            {
+            if (seen) {
                 KnownPlaces.UpdateSquadSeenPlace(place);
             }
-            else
-            {
+            else {
                 KnownPlaces.UpdateSquadHeardPlace(place);
             }
         }
@@ -403,15 +377,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void SetEnemyAsSniper(bool isSniper)
         {
             IsSniper = isSniper;
-            if (isSniper && Bot.Squad.BotInGroup && Bot.Talk.GroupTalk.FriendIsClose)
-            {
+            if (isSniper && Bot.Squad.BotInGroup && Bot.Talk.GroupTalk.FriendIsClose) {
                 Bot.Talk.TalkAfterDelay(EPhraseTrigger.SniperPhrase, ETagStatus.Combat, UnityEngine.Random.Range(0.33f, 0.66f));
             }
         }
 
         private void updatePresetSettings(SAINPresetClass preset)
         {
-
         }
 
         public float NextCheckFlashLightTime;

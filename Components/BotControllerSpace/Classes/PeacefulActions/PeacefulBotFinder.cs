@@ -45,6 +45,18 @@ namespace SAIN.Components.BotController.PeacefulActions
 
         private void botRemoved(BotComponent bot)
         {
+            if (bot == null) {
+                Logger.LogWarning($"Null BotComponent");
+                return;
+            }
+            if (bot.BotOwner == null) {
+                Logger.LogWarning($"Null BotOwner [{bot.Info.Profile.Name}]");
+                return;
+            }
+            if (bot.BotOwner.BotsGroup == null) {
+                Logger.LogWarning($"Null BotGroup [{bot.Info.Profile.Name}]");
+                return;
+            }
             BotZone botZone = bot.BotOwner.BotsGroup.BotZone;
             if (botZone == null) {
                 Logger.LogWarning($"Null BotZone for [{bot.BotOwner.name}]");
