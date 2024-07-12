@@ -25,7 +25,7 @@ namespace SAIN
     }
 
 
-    public interface ISAINEnemyClass : IBotClass
+    public interface IBotEnemyClass : IBotClass
     {
         void OnEnemyKnownChanged(bool known, Enemy enemy);
     }

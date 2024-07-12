@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class EnemyAnglesClass : EnemyBase, ISAINEnemyClass
+    public class EnemyAnglesClass : EnemyBase, IBotEnemyClass
     {
         private const float CALC_ANGLE_FREQ = 1f / 15f;
         private const float CALC_ANGLE_FREQ_AI = 1f / 4f;

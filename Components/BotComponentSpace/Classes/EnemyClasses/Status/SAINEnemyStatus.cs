@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class SAINEnemyStatus : EnemyBase, ISAINEnemyClass
+    public class SAINEnemyStatus : EnemyBase, IBotEnemyClass
     {
         public ETagStatus EnemyHealthStatus { get; private set; }
         public EEnemyAction VulnerableAction { get; private set; }

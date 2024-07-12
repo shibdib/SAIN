@@ -13,6 +13,8 @@ namespace SAIN.Components.PlayerComponentSpace
 {
     public class PlayerComponent : MonoBehaviour
     {
+        public BodyPartsClass BodyParts {  get; private set; }
+
         private void Update()
         {
             Person.Update();
@@ -142,6 +144,8 @@ namespace SAIN.Components.PlayerComponentSpace
             {
                 var playerData = new PlayerData(this, player, iPlayer);
                 Person = new PersonClass(playerData);
+
+                BodyParts = new BodyPartsClass(this);
                 Flashlight = new FlashLightClass(this);
                 Equipment = new SAINEquipmentClass(this);
                 AIData = new SAINAIData(Equipment.GearInfo, this);
@@ -154,7 +158,7 @@ namespace SAIN.Components.PlayerComponentSpace
                 Logger.LogError(ex);
                 return false;
             }
-            Logger.LogDebug($"{Person.Nickname} Player Component Created");
+            //Logger.LogDebug($"{Person.Nickname} Player Component Created");
             StartCoroutine(delayInit());
             return true;
         }

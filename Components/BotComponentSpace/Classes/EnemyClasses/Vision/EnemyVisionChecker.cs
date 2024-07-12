@@ -1,8 +1,6 @@
 ﻿using SAIN.Components.PlayerComponentSpace.PersonClasses;
-using SAIN.Helpers;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
-using System;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
@@ -16,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public EnemyVisionChecker(Enemy enemy) : base(enemy)
         {
-            EnemyParts = new EnemyPartsClass(enemy.EnemyPlayer.PlayerBones, enemy.Player.IsYourPlayer);
+            EnemyParts = new EnemyPartsClass(enemy);
             _transform = enemy.Bot.Transform;
             _startVisionTime = Time.time + UnityEngine.Random.Range(0.0f, 0.33f);
         }
@@ -28,7 +26,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Update()
         {
-            EnemyParts.Update(); 
+            EnemyParts.Update();
             Enemy.Events.OnEnemyLineOfSightChanged.CheckToggle(LineOfSight);
         }
 
@@ -38,50 +36,65 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void CheckVision(out bool didCheck)
         {
-            if (!_visionStarted)
-            {
-                if (_startVisionTime > Time.time)
-                {
-                    didCheck = false;
-                    return;
-                }
-                _visionStarted = true;
+            // staggers ai vision over a few quarters of a second
+            if (!shallStart()) {
+                didCheck = false;
+                return;
             }
 
             didCheck = true;
             checkLOS(out Vector3? successPoint);
             Enemy.Events.OnEnemyLineOfSightChanged.CheckToggle(LineOfSight);
-            if (successPoint != null)
-            {
+            if (successPoint != null) {
                 LastSeenPoint = successPoint.Value;
             }
         }
+
+        private bool shallStart()
+        {
+            if (_visionStarted) {
+                return true;
+            }
+            if (_startVisionTime < Time.time) {
+                _visionStarted = true;
+                return true;
+            }
+            return false;
+        }
+
+        private const float MAX_LOS_RANGE_HEAD_HUMAN = 125f;
+        private const float MAX_LOS_RANGE_LIMBS_AI = 200f;
 
         private bool checkLOS(out Vector3? seenPosition)
         {
             Vector3 lookPoint = _transform.EyePosition;
             float maxRange = AIVisionRangeLimit();
-            if (EnemyParts.CheckBodyLineOfSight(lookPoint, maxRange, out seenPosition))
-            {
-                return true;
+
+            if (Enemy.RealDistance > maxRange) {
+                seenPosition = null;
+                return false;
             }
 
-            float headMaxRange = Mathf.Clamp(maxRange, 0f, 100f);
+            bool isAI = Enemy.IsAI;
+            if (EnemyParts.CheckBodyLineOfSight(lookPoint, maxRange, out seenPosition)) {
+                return true;
+            }
+            if (isAI && Enemy.RealDistance > MAX_LOS_RANGE_LIMBS_AI) {
+                return false;
+            }
+            if (EnemyParts.CheckRandomPartLineOfSight(lookPoint, maxRange, out seenPosition)) {
+                return true;
+            }
+            if (isAI) {
+                return false;
+            }
 
-            if (!Enemy.IsAI && 
-                EnemyParts.CheckHeadLineOfSight(lookPoint, headMaxRange, out seenPosition))
-            {
-                return true;
-            }
-            if (EnemyParts.CheckRandomPartLineOfSight(lookPoint, maxRange, out seenPosition))
-            {
-                return true;
-            }
             // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
-            if (Enemy.IsCurrentEnemy && 
-                !Enemy.IsAI &&
-                EnemyParts.CheckRandomPartLineOfSight(lookPoint, maxRange, out seenPosition))
-            {
+            if (Enemy.IsCurrentEnemy &&
+                EnemyParts.CheckRandomPartLineOfSight(lookPoint, maxRange, out seenPosition)) {
+                return true;
+            }
+            if (EnemyParts.CheckHeadLineOfSight(lookPoint, MAX_LOS_RANGE_HEAD_HUMAN, out seenPosition)) {
                 return true;
             }
             return false;
@@ -89,33 +102,26 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public float AIVisionRangeLimit()
         {
-            if (!Enemy.IsAI)
-            {
+            if (!Enemy.IsAI) {
                 return float.MaxValue;
             }
             var aiLimit = GlobalSettingsClass.Instance.General.AILimit;
-            if (!aiLimit.LimitAIvsAIGlobal)
-            {
+            if (!aiLimit.LimitAIvsAIGlobal) {
                 return float.MaxValue;
             }
-            if (!aiLimit.LimitAIvsAIVision)
-            {
+            if (!aiLimit.LimitAIvsAIVision) {
                 return float.MaxValue;
             }
             var enemyBot = Enemy.EnemyPerson.AIInfo.BotComponent;
-            if (enemyBot == null)
-            {
+            if (enemyBot == null) {
                 // if an enemy bot is not a sain bot, but has this bot as an enemy, dont limit at all.
-                if (Enemy.EnemyPerson.AIInfo.BotOwner?.Memory.GoalEnemy?.ProfileId == Bot.ProfileId)
-                {
+                if (Enemy.EnemyPerson.AIInfo.BotOwner?.Memory.GoalEnemy?.ProfileId == Bot.ProfileId) {
                     return float.MaxValue;
                 }
                 return getMaxVisionRange(Bot.CurrentAILimit);
             }
-            else
-            {
-                if (enemyBot.Enemy?.EnemyProfileId == Bot.ProfileId)
-                {
+            else {
+                if (enemyBot.Enemy?.EnemyProfileId == Bot.ProfileId) {
                     return float.MaxValue;
                 }
                 return getMaxVisionRange(enemyBot.CurrentAILimit);
@@ -124,8 +130,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private static float getMaxVisionRange(AILimitSetting aiLimit)
         {
-            switch (aiLimit)
-            {
+            switch (aiLimit) {
                 default:
                     return float.MaxValue;
 
@@ -147,8 +152,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             _veryFarDistance = aiLimit.MaxVisionRanges[AILimitSetting.VeryFar];
             _narniaDistance = aiLimit.MaxVisionRanges[AILimitSetting.Narnia];
 
-            if (SAINPlugin.DebugMode)
-            {
+            if (SAINPlugin.DebugMode) {
                 Logger.LogDebug($"Updated AI Vision Limit Settings: [{_farDistance}, {_veryFarDistance}, {_narniaDistance}]");
             }
         }

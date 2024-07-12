@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class EnemyPositionTracker : EnemyBase, ISAINEnemyClass
+    public class EnemyPositionTracker : EnemyBase, IBotEnemyClass
     {
         private const float CHECK_MOVE_DIR_FREQ = 1f;
         public Vector3? EnemyWalkDirection { get; private set; }

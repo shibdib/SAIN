@@ -103,7 +103,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             if (coverPoint != null &&
                 !coverPoint.Spotted &&
                 !coverPoint.CoverData.IsBad &&
-                Bot.Mover.GoToPoint(coverPoint.Position, out _, 0.2f, false, true, true))
+                Bot.Mover.GoToPoint(coverPoint.Position, out _, -1, false, true, true))
             {
                 Bot.Cover.CoverInUse = coverPoint;
                 _coverDestination = coverPoint;

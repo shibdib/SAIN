@@ -9,9 +9,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private const float DIST_SEEN_MIN_COEF = 0.01f;
         private const float DIST_SEEN_MIN_DIST = 1f;
         private const float DIST_SEEN_MAX_DIST = 25f;
-        private const float DIST_HEARD_MAX_COEF = 0.2f;
+
+        private const float DIST_HEARD_MIN_COEF = 0.2f;
         private const float DIST_HEARD_MIN_DIST = 1f;
-        private const float DIST_HEARD_MAX_DIST = 30f;
+        private const float DIST_HEARD_MAX_DIST = 20f;
 
         private const float TIME_MAX_DIST_CLAMP = 200f;
         private const float TIME_MAX_DIST_CLAMP_NVGS = 250f;
@@ -68,20 +69,25 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float calcRepeatSeenCoef()
         {
-            float result = calcVisionSpeedPositional(
-                Enemy.KnownPlaces.EnemyDistanceFromLastSeen,
-                DIST_SEEN_MIN_COEF,
-                DIST_SEEN_MIN_DIST,
-                DIST_SEEN_MAX_DIST,
-                SeenSpeedCheck.Vision);
-
-            result *= calcVisionSpeedPositional(
-                Enemy.KnownPlaces.EnemyDistanceFromLastHeard,
-                DIST_HEARD_MAX_COEF,
-                DIST_HEARD_MIN_DIST,
-                DIST_HEARD_MAX_DIST,
-                SeenSpeedCheck.Audio);
-
+            EnemyPlace lastSeen = Enemy.KnownPlaces.LastSeenPlace;
+            float result = 1f;
+            if (lastSeen != null) {
+                result *= calcVisionSpeedPositional(
+                    lastSeen.DistanceToEnemyRealPosition,
+                    DIST_SEEN_MIN_COEF,
+                    DIST_SEEN_MIN_DIST,
+                    DIST_SEEN_MAX_DIST,
+                    SeenSpeedCheck.Vision);
+            }
+            EnemyPlace lastHeard = Enemy.KnownPlaces.LastHeardPlace;
+            if (lastHeard != null) {
+                result *= calcVisionSpeedPositional(
+                    lastHeard.DistanceToEnemyRealPosition,
+                    DIST_HEARD_MIN_COEF,
+                    DIST_HEARD_MIN_DIST,
+                    DIST_HEARD_MAX_DIST,
+                    SeenSpeedCheck.Audio);
+            }
             return result;
         }
 
@@ -181,7 +187,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return false;
         }
 
-
         private bool enemyInRangeOfLight(float enemyDist, bool usingNVGS)
         {
             var settings = Bot.Info.FileSettings.Look;
@@ -263,6 +268,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             float result = 1f * partMod * gearMod * weatherMod * timeMod * moveMod * elevMod * thirdPartyMod * angleMod * notLookMod;
 
+            if (Player.IsInPronePose) {
+                result *= PRONE_VISION_SPEED_COEF;
+            }
+            else if (Player.Pose == EPlayerPose.Duck) {
+                result *= DUCK_VISION_SPEED_COEF;
+            }
+
             //if (EnemyPlayer.IsYourPlayer && result != 1f)
             //{
             //    Logger.LogWarning($"GainSight Time Result: [{result}] : partMod {partMod} : gearMod {gearMod} : flareMod {flareMod} : moveMod {moveMod} : elevMod {elevMod} : posFlareMod {posFlareMod} : thirdPartyMod {thirdPartyMod} : angleMod {angleMod} : notLookMod {notLookMod} ");
@@ -270,6 +282,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             return result;
         }
+
+        private const float PRONE_VISION_SPEED_COEF = 1.5f;
+        private const float DUCK_VISION_SPEED_COEF = 1.2f;
 
         // private static float _nextLogTime;
 
@@ -304,7 +319,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             int partCount = 0;
             visibleCount = 0;
             var parts = Enemy.Vision.VisionChecker.EnemyParts.Parts.Values;
-            foreach ( EnemyPartDataClass part in parts ) {
+            foreach (EnemyPartDataClass part in parts) {
                 if (part.TimeSinceLastCheck > PARTS_VISIBLE_MAX_TIME_SINCE_CHECKED)
                     continue;
                 partCount++;

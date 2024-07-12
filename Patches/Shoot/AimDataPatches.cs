@@ -209,6 +209,7 @@ namespace SAIN.Patches.Shoot.Aim
             bool panicing = (bool)_PanicingProp.GetValue(___botOwner_0.AimingData);
 
             __result = calculateAim(bot, dist, ang, moving, panicing, aimDelay);
+            bot.Aim.LastAimTime = __result;
 
             return false;
         }
@@ -224,16 +225,10 @@ namespace SAIN.Patches.Shoot.Aim
 
             float baseAimTime = fileSettings.Aiming.BOTTOM_COEF;
             stringBuilder?.AppendLine($"baseAimTime [{baseAimTime}]");
-
             baseAimTime = calcCoverMod(baseAimTime, botOwner, botComponent, fileSettings, stringBuilder);
-
             BotCurvSettings curve = botOwner.Settings.Curv;
-            float modifier = sainAimSettings != null ? sainAimSettings.AngleAimTimeMultiplier : 1f;
-            float angleTime = calcCurveOutput(curve.AimAngCoef, angle, modifier, stringBuilder, "Angle");
-
-            modifier = sainAimSettings != null ? sainAimSettings.DistanceAimTimeMultiplier : 1f;
-            float distanceTime = calcCurveOutput(curve.AimTime2Dist, distance, modifier, stringBuilder, "Distance");
-
+            float angleTime = calcCurveOutput(curve.AimAngCoef, angle, sainAimSettings.AngleAimTimeMultiplier, stringBuilder, "Angle");
+            float distanceTime = calcCurveOutput(curve.AimTime2Dist, distance, sainAimSettings.DistanceAimTimeMultiplier, stringBuilder, "Distance");
             float calculatedAimTime = calcAimTime(angleTime, distanceTime, botOwner, stringBuilder);
             calculatedAimTime = calcPanic(panicing, calculatedAimTime, fileSettings, stringBuilder);
 
@@ -251,12 +246,6 @@ namespace SAIN.Patches.Shoot.Aim
             {
                 Logger.LogDebug(stringBuilder.ToString());
             }
-
-            if (botComponent != null)
-            {
-                botComponent.LastAimTime = timeToAimResult;
-            }
-
             return timeToAimResult;
         }
 
@@ -273,7 +262,7 @@ namespace SAIN.Patches.Shoot.Aim
         private static float calcCoverMod(float baseAimTime, BotOwner botOwner, BotComponent botComponent, BotSettingsComponents fileSettings, StringBuilder stringBuilder)
         {
             CoverPoint coverInUse = botComponent?.Cover.CoverInUse;
-            bool inCover = botOwner.Memory.IsInCover || (coverInUse != null && coverInUse.StraightDistanceStatus == CoverStatus.InCover);
+            bool inCover = botOwner.Memory.IsInCover || coverInUse?.BotInThisCover == true;
             if (inCover)
             {
                 baseAimTime *= fileSettings.Aiming.COEF_FROM_COVER;
@@ -282,9 +271,9 @@ namespace SAIN.Patches.Shoot.Aim
             return baseAimTime;
         }
 
-        private static float calcCurveOutput(AnimationCurve curve, float input, float modifier, StringBuilder stringBuilder, string curveType)
+        private static float calcCurveOutput(AnimationCurve aimCurve, float input, float modifier, StringBuilder stringBuilder, string curveType)
         {
-            float result = curve.Evaluate(input);
+            float result = aimCurve.Evaluate(input);
             result *= modifier;
             stringBuilder?.AppendLine($"{curveType} Curve Output [{result}] : input [{input}] : Multiplier: [{modifier}]");
             return result;

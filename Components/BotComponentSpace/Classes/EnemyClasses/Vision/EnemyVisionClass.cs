@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class EnemyVisionClass : EnemyBase, ISAINEnemyClass
+    public class EnemyVisionClass : EnemyBase, IBotEnemyClass
     {
         private const float _repeatContactMinSeenTime = 12f;
         private const float _lostContactMinSeenTime = 12f;

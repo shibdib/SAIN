@@ -7,13 +7,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyPartDataClass
     {
-        public EnemyPartDataClass(EBodyPart bodyPart, BifacialTransform transform, List<BodyPartCollider> colliders, bool isYourPlayer)
+        public EnemyPartDataClass(EBodyPart bodyPart, BifacialTransform transform, List<BodyPartCollider> colliders)
         {
             BodyPart = bodyPart;
             Transform = transform;
             Colliders = colliders;
             _indexMax = colliders.Count - 1;
-            IsYourPlayer = isYourPlayer;
         }
 
         public Vector3 Position
@@ -33,20 +32,15 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public Vector3? LastSuccessPoint => _lastSuccessCastPoint;
 
-        private bool IsYourPlayer;
         private Vector3 _position;
-
         private int _posCachedForFrame;
-
         public readonly EBodyPart BodyPart;
         public readonly List<BodyPartCollider> Colliders;
         public readonly BifacialTransform Transform;
 
         public float TimeSinceLastCheck => Time.time - _lastCheckTime;
         public float TimeSinceLastSuccess => Time.time - _lastSuccessTime;
-        public bool LineOfSight => TimeSinceLastSuccess + 0.25f > 0f;
-
-        private float _nextCheckTime;
+        public bool LineOfSight => _lastSuccessTime + 0.25f > Time.time;
 
         private BodyPartCollider getCollider()
         {
@@ -75,13 +69,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return true;
             }
 
-            //if (_nextCheckTime > Time.time)
-            //{
-            //    successPoint = null;
-            //    return false;
-            //}
-            //_nextCheckTime = Time.time + 0.1f;
-
             _lastCheckTime = Time.time;
             BodyPartCollider collider = getCollider();
             Vector3 castPoint = getCastPoint(origin, collider);
@@ -89,8 +76,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             Vector3 direction = castPoint - origin;
 
-            float maxRayDistance = Mathf.Clamp(direction.magnitude, 0f, maxRange);
-            bool lineOfSight = !Physics.Raycast(origin, direction, maxRayDistance, LayerMaskClass.HighPolyWithTerrainMask);
+            float maxRayDistance = direction.magnitude;
+            bool lineOfSight = !Physics.Raycast(origin, direction, out var hit, maxRayDistance, LayerMaskClass.HighPolyWithTerrainMask);
 
             if (lineOfSight)
             {
@@ -100,7 +87,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
             else
             {
-                _lastSuccessTime = 0f;
                 _lastSuccessPart = null;
                 _lastSuccessCastPoint = null;
             }
@@ -108,7 +94,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             successPoint = _lastSuccessCastPoint;
 
             if (SAINPlugin.DebugMode &&
-                IsYourPlayer &&
                 _nextdrawTime < Time.time)
             {
                 _nextdrawTime = Time.time + 0.1f;
@@ -117,16 +102,15 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     DebugGizmos.Sphere(castPoint, 0.025f, Color.red, true, 10f);
                     DebugGizmos.Sphere(origin, 0.025f, Color.red, true, 1f);
                     DebugGizmos.Line(castPoint, origin, Color.red, 0.005f, true, 0.5f);
-                    Logger.LogDebug($"{BodyPart} : {direction.magnitude} : {castPoint} : Is Sphere? {_isSphereCollider}");
+                    Logger.LogDebug($"{BodyPart} : {maxRayDistance} : {castPoint}");
                 }
                 else
                 {
                     DebugGizmos.Sphere(castPoint, 0.025f, Color.white, true, 10f);
                     DebugGizmos.Sphere(origin, 0.025f, Color.white, true, 1f);
-                    DebugGizmos.Line(castPoint, origin, Color.white, 0.005f, true, 0.5f);
+                    DebugGizmos.Line(castPoint, hit.point, Color.white, 0.005f, true, 0.5f);
                 }
             }
-
             return lineOfSight;
         }
 
@@ -136,20 +120,30 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private Vector3 getCastPoint(Vector3 origin, BodyPartCollider collider)
         {
-            SphereCollider sphere;
-            _isSphereCollider = collider.Collider != null && 
-                (sphere = collider.Collider as SphereCollider) != null;
-
-            if (_isSphereCollider)
-            {
-                return collider.GetRandomPointToCastLocal(origin);
-            }
-            return Position;
+            float size = getColliderMinSize(collider);
+            //Logger.LogInfo(size);
+            Vector3 random = UnityEngine.Random.insideUnitSphere * size;
+            Vector3 result = collider.Collider.ClosestPoint(collider.transform.position + random);
+            return result;
         }
 
-        private bool _isSphereCollider;
-        private float _lastCheckTime;
+        private float getColliderMinSize(BodyPartCollider collider)
+        {
+            if (collider.Collider == null) {
+                return 0f;
+            }
+            Vector3 bounds = collider.Collider.bounds.size;
+            float lowest = bounds.x;
+            if (bounds.y < lowest) {
+                lowest = bounds.y;
+            }
+            if (bounds.z < lowest) {
+                lowest = bounds.z;
+            }
+            return lowest;
+        }
 
+        private float _lastCheckTime;
         private BodyPartCollider _lastSuccessPart;
         private Vector3? _lastSuccessCastPoint;
     }

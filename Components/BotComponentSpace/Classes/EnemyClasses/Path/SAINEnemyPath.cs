@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class SAINEnemyPath : EnemyBase, ISAINEnemyClass
+    public class SAINEnemyPath : EnemyBase, IBotEnemyClass
     {
         public EPathDistance EPathDistance
         {

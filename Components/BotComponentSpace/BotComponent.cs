@@ -22,7 +22,6 @@ namespace SAIN.SAINComponent
 {
     public class BotComponent : BotComponentBase
     {
-        public float LastAimTime { get; set; }
         public bool IsCheater { get; private set; }
 
         public bool BotActive => BotActivation.BotActive;

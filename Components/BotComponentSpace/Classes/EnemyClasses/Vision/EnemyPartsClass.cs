@@ -1,13 +1,23 @@
 ﻿using EFT;
+using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class EnemyPartsClass
+    public class EnemyPartsClass : EnemyBase
     {
-        public bool LineOfSight => TimeSinceInLineOfSight < 0.2f;
+        private const float LINEOFSIGHT_TIME = 0.25f;
+
+        public EnemyPartsClass(Enemy enemy) : base(enemy)
+        {
+            IsYourPlayer = enemy.Player.IsYourPlayer;
+            createPartDatas(enemy.Player.PlayerBones);
+            _indexMax = Parts.Count;
+        }
+
+        public bool LineOfSight => TimeSinceInLineOfSight < LINEOFSIGHT_TIME;
         public float TimeSinceInLineOfSight => Time.time - _timeLastInSight;
         public Vector3 LastSuccessPosition { get; private set; }
         public Dictionary<EBodyPart, EnemyPartDataClass> Parts { get; } = new Dictionary<EBodyPart, EnemyPartDataClass>();
@@ -15,8 +25,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Update()
         {
             var visiblePart = findPartInLOS();
-            if (visiblePart != null)
-            {
+            if (visiblePart != null) {
                 _timeLastInSight = Time.time;
                 if (visiblePart.LastSuccessPoint != null)
                     LastSuccessPosition = visiblePart.LastSuccessPoint.Value;
@@ -24,7 +33,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return;
             }
         }
-
 
         private EnemyPartDataClass findPartInLOS()
         {
@@ -36,15 +44,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public bool CheckBodyLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)
         {
-            if (LineOfSight)
-            {
-                successPoint = LastSuccessPosition;
-                return true;
-            }
-
             EnemyPartDataClass checkingPart = Parts[EBodyPart.Chest];
-            if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint))
-            {
+            if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint)) {
                 if (successPoint != null)
                     LastSuccessPosition = successPoint.Value;
 
@@ -57,15 +58,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public bool CheckHeadLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)
         {
-            if (LineOfSight)
-            {
-                successPoint = LastSuccessPosition;
-                return true;
-            }
-
             EnemyPartDataClass checkingPart = Parts[EBodyPart.Head];
-            if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint))
-            {
+            if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint)) {
                 if (successPoint != null)
                     LastSuccessPosition = successPoint.Value;
 
@@ -78,16 +72,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public bool CheckRandomPartLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)
         {
-            if (LineOfSight)
-            {
-                successPoint = LastSuccessPosition;
-                return true;
-            }
-
-            if (_lastCheckSuccessPart != null)
-            {
-                if (_lastCheckSuccessPart.CheckLineOfSight(origin, maxRange, out successPoint))
-                {
+            if (_lastCheckSuccessPart != null) {
+                if (_lastCheckSuccessPart.CheckLineOfSight(origin, maxRange, out successPoint)) {
                     if (successPoint != null)
                         LastSuccessPosition = successPoint.Value;
 
@@ -98,8 +84,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             EnemyPartDataClass checkingPart = getNextPart();
-            if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint))
-            {
+            if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint)) {
                 if (successPoint != null)
                     LastSuccessPosition = successPoint.Value;
 
@@ -113,26 +98,17 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return false;
         }
 
-        public EnemyPartsClass(PlayerBones bones, bool isYourPlayer)
-        {
-            IsYourPlayer = isYourPlayer;
-            createPartDatas(bones);
-            _indexMax = Parts.Count;
-        }
-
         private EnemyPartDataClass getNextPart()
         {
             EnemyPartDataClass result = null;
             EBodyPart epart = (EBodyPart)_index;
-            if (!Parts.TryGetValue(epart, out result))
-            {
+            if (!Parts.TryGetValue(epart, out result)) {
                 _index = 0;
                 result = Parts[EBodyPart.Chest];
             }
 
             _index++;
-            if (_index > _indexMax)
-            {
+            if (_index > _indexMax) {
                 _index = 0;
             }
 
@@ -141,26 +117,21 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void createPartDatas(PlayerBones bones)
         {
-            foreach (EBodyPart bodyPart in EnumValues.GetEnum<EBodyPart>())
-            {
-                List<BodyPartCollider> colliders = new List<BodyPartCollider>();
-                findParts(bodyPart, out BifacialTransform transform, colliders, bones);
-                Parts.Add(bodyPart, new EnemyPartDataClass(bodyPart, transform, colliders, IsYourPlayer));
+            var parts = Enemy.EnemyPlayerComponent.BodyParts.Parts;
+            foreach (var bodyPart in parts) {
+                Parts.Add(bodyPart.Key, new EnemyPartDataClass(bodyPart.Key, bodyPart.Value.Transform, bodyPart.Value.Colliders));
             }
         }
 
         private void findParts(EBodyPart bodyPart, out BifacialTransform transform, List<BodyPartCollider> partColliders, PlayerBones bones)
         {
-            switch (bodyPart)
-            {
+            switch (bodyPart) {
                 default:
                     transform = bones.BifacialTransforms[PlayerBoneType.Spine];
-                    if (transform == null)
-                    {
+                    if (transform == null) {
                         Logger.LogError($"Transform Null {PlayerBoneType.Spine}");
                         transform = bones.BifacialTransforms[PlayerBoneType.Body];
-                        if (transform == null)
-                        {
+                        if (transform == null) {
                             Logger.LogError($"Transform Null {PlayerBoneType.Body}");
                         }
                     }
@@ -202,6 +173,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     break;
             }
         }
+
         private bool IsYourPlayer;
         private float _lastSuccessTime;
         private float _timeLastInSight;

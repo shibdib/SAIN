@@ -32,13 +32,15 @@ namespace SAIN.Preset.GlobalSettings
         public bool DrawDoorLinks;
 
         public bool Overlay_Info = true;
-        public bool Overlay_Info_Expanded = false;
-        public bool Overlay_Search = false;
+        public bool Overlay_Info_Expanded = true;
+        public bool Overlay_Search = true;
         public bool Overlay_EnemyLists = true;
         public bool Overlay_EnemyInfo = true;
         public bool Overlay_EnemyInfo_Expanded = true;
-        public bool Overlay_Decisions = false;
-        public bool OverLay_AimInfo = false;
+        public bool Overlay_Decisions = true;
+        public bool OverLay_AimInfo = true;
+        public bool OverLay_AlwaysShowClosestHumanInfo = false;
+        public bool OverLay_AlwaysShowMainPlayerInfo = false;
 
         [Name("Log Recoil Calculations")]
         public bool DebugRecoilCalculations = false;

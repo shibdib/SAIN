@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 {
-    public class EnemyHearing : EnemyBase, ISAINEnemyClass
+    public class EnemyHearing : EnemyBase, IBotEnemyClass
     {
         public bool Heard { get; private set; }
         public bool EnemyHeardFromPeace { get; set; }
@@ -59,6 +59,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
                 report.position = Enemy.EnemyPosition;
             }
 
+            Heard = true;
             bool wasGunfire = report.soundType.IsGunShot();
             Enemy.Status.HeardRecently = true;
             _timeLastHeard = Time.time;

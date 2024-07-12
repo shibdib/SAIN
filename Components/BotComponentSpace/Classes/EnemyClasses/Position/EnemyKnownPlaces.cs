@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public class EnemyKnownPlaces : EnemyBase, ISAINEnemyClass
+    public class EnemyKnownPlaces : EnemyBase, IBotEnemyClass
     {
         public EnemyPlace LastKnownPlace { get; private set; }
         public EnemyPlace LastSeenPlace { get; private set; }
@@ -287,7 +287,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             if (Enemy.IsVisible)
             {
-                return null;
+                //return null;
             }
 
             var lastHeard = LastHeardPlace;

@@ -22,6 +22,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (Player.IsSprintEnabled)
             {
                 _stopSprintPoseTime = Time.time + 1f;
+                BotOwner.SetPose(1f);
             }
         }
 

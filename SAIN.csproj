@@ -294,6 +294,9 @@
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulActionSet.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />
+    <Compile Include="Components\PlayerComponentSpace\Classes\BodyPart.cs" />
+    <Compile Include="Components\PlayerComponentSpace\Classes\BodyPartsClass.cs" />
+    <Compile Include="Components\PlayerComponentSpace\Classes\PartDictionary.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\Transform\NavMeshChecker.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonAIInfo.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonBase.cs" />
