@@ -326,7 +326,6 @@
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\DispersionDictionary.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\DispersionValues.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\ESoundDispersionType.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\SoundDispersionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Steering\EEnemySteerDir.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Steering\HeardSoundSteeringClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Steering\RandomLookClass.cs" />

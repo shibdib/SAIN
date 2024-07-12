@@ -137,7 +137,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 BotOwner botOwner = enemyPlayer.AIData?.BotOwner;
                 if (botOwner == null)
                 {
-                    Logger.LogDebug("Cannot add ai as enemy with null Botowner");
+                    //Logger.LogDebug("Cannot add ai as enemy with null Botowner");
                     return null;
                 }
                 if (IsBotInBotsGroup(botOwner))
@@ -149,7 +149,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             PlayerComponent enemyPlayerComponent = getEnemyPlayerComponent(enemyPlayer);
             if (enemyPlayerComponent == null)
             {
-                Logger.LogWarning("Cannot add enemy with null Player Component.");
+                //Logger.LogWarning("Cannot add enemy with null Player Component.");
                 return null;
             }
 
@@ -175,7 +175,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             PlayerComponent enemyPlayerComponent = playerTracker.GetPlayerComponent(enemyPlayer.ProfileId);
             if (enemyPlayerComponent == null)
             {
-                Logger.LogDebug("Cannot add enemy with null Player Component");
+                //Logger.LogDebug("Cannot add enemy with null Player Component");
                 if (Enemies.TryGetValue(enemyPlayer.ProfileId, out Enemy oldEnemy))
                 {
                     destroyEnemy(oldEnemy);
@@ -185,7 +185,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 enemyPlayerComponent = playerTracker.AddPlayerManual(enemyPlayer);
                 if (enemyPlayerComponent == null)
                 {
-                    Logger.LogError("Failed to recreate component!");
+                    //Logger.LogError("Failed to recreate component!");
                 }
             }
             return enemyPlayerComponent;

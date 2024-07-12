@@ -52,7 +52,7 @@ namespace SAIN.Components.PlayerComponentSpace
             {
                 return null;
             }
-            Logger.LogDebug($"Manually trying to recreate Player Component for [{player.Profile?.Nickname} : {player.ProfileId}]");
+            //Logger.LogDebug($"Manually trying to recreate Player Component for [{player.Profile?.Nickname} : {player.ProfileId}]");
             addPlayer(player);
             if (AlivePlayers.TryGetValue(player.ProfileId, out var component))
             {

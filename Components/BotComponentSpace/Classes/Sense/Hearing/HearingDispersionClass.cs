@@ -26,8 +26,10 @@ namespace SAIN.SAINComponent.Classes
         {
             float distance = sound.Distance;
             float baseDispersion = getBaseDispersion(distance, sound.Info.SoundType);
-            float dispersionMod = getDispersionModifier(sound.Info.Position) * addDispersion;
+            float dispersionMod = getDispersionModifier(sound) * addDispersion;
             float finalDispersion = baseDispersion * dispersionMod;
+
+            finalDispersion = Mathf.Clamp(finalDispersion, 0f, 50f);
             sound.Dispersion.Dispersion = finalDispersion;
             float min = distance < 10 ? 0f : 0.5f;
             Vector3 randomdirection = getRandomizedDirection(finalDispersion, min);
@@ -35,28 +37,31 @@ namespace SAIN.SAINComponent.Classes
             if (SAINPlugin.DebugSettings.DebugHearing)
                 Logger.LogDebug($"Dispersion: [{randomdirection.magnitude}] Distance: [{distance}] Base Dispersion: [{baseDispersion}] DispersionModifier [{dispersionMod}] Final Dispersion: [{finalDispersion}] : SoundType: [{sound.Info.SoundType}]");
 
-            return sound.Info.Position + randomdirection;
+            Vector3 estimatedEnemyPos = sound.Info.Position + randomdirection;
+            Vector3 dirToRandomPos = estimatedEnemyPos - Bot.Position;
+            Vector3 result = Bot.Position + (dirToRandomPos.normalized * distance);
+            return result;
         }
 
-        private float getBaseDispersion(float shooterDistance, SAINSoundType soundType)
+        private float getBaseDispersion(float enemyDistance, SAINSoundType soundType)
         {
-            const float dispSuppGun = 12.5f;
+            const float dispSuppGun = 13.5f;
             const float dispGun = 17.5f;
-            const float dispStep = 10f;
+            const float dispStep = 12.5f;
 
             float dispersion;
             switch (soundType)
             {
                 case SAINSoundType.Shot:
-                    dispersion = shooterDistance / dispGun;
+                    dispersion = enemyDistance / dispGun;
                     break;
 
                 case SAINSoundType.SuppressedShot:
-                    dispersion = shooterDistance / dispSuppGun;
+                    dispersion = enemyDistance / dispSuppGun;
                     break;
 
                 default:
-                    dispersion = shooterDistance / dispStep;
+                    dispersion = enemyDistance / dispStep;
                     break;
             }
 
@@ -75,20 +80,12 @@ namespace SAIN.SAINComponent.Classes
         {
         }
 
-        private float getDispersionModifier(Vector3 soundPosition)
+        private float getDispersionModifier(BotSound sound)
         {
-            float dispersionModifier = 1f;
-            float dotProduct = Vector3.Dot(Bot.LookDirection.normalized, (soundPosition - Bot.Position).normalized);
-            // The sound originated from behind us
-            if (dotProduct <= 0f)
-            {
-                dispersionModifier = Mathf.Lerp(1.5f, 0f, dotProduct + 1f);
-            }
-            // The sound originated from infront of me.
-            if (dotProduct > 0)
-            {
-                dispersionModifier = Mathf.Lerp(1f, 0.5f, dotProduct);
-            }
+            float dotProduct = Vector3.Dot(Bot.LookDirection.normalized, sound.Enemy.EnemyDirectionNormal);
+            float scaled = (dotProduct + 1) / 2;
+
+            float dispersionModifier = Mathf.Lerp(1.5f, 0.5f, scaled);
             //Logger.LogInfo($"Dispersion Modifier for Sound [{dispersionModifier}] Dot Product [{dotProduct}]");
             return dispersionModifier;
         }
