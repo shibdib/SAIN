@@ -171,51 +171,84 @@ namespace SAIN.SAINComponent
         {
             try {
                 // Must be first, other classes use it
-                Info = addIBotClass<SAINBotInfoClass>();
+                Info = initBotClass<SAINBotInfoClass>();
 
                 CoroutineManager = new CoroutineManager<BotComponent>(this);
                 NoBushESP = this.gameObject.AddComponent<SAINNoBushESP>();
 
-                Squad = addIBotClass<SAINSquadClass>();
-                BusyHandsDetector = addIBotClass<BotBusyHandsDetector>();
-                GlobalEvents = addIBotClass<BotGlobalEventsClass>();
-                Shoot = addIBotClass<ShootDeciderClass>();
-                WeightManagement = addIBotClass<BotWeightManagement>();
-                Memory = addIBotClass<SAINMemoryClass>();
-                BotStuck = addIBotClass<SAINBotUnstuckClass>();
-                Hearing = addIBotClass<SAINHearingSensorClass>();
-                Talk = addIBotClass<SAINBotTalkClass>();
-                Decision = addIBotClass<SAINDecisionClass>();
-                Cover = addIBotClass<SAINCoverClass>();
-                SelfActions = addIBotClass<SAINSelfActionClass>();
-                Steering = addIBotClass<SAINSteeringClass>();
-                Grenade = addIBotClass<BotGrenadeManager>();
-                Mover = addIBotClass<SAINMoverClass>();
-                EnemyController = addIBotClass<SAINEnemyController>();
-                FriendlyFire = addIBotClass<SAINFriendlyFireClass>();
-                Vision = addIBotClass<SAINVisionClass>();
-                Search = addIBotClass<SAINSearchClass>();
-                Vault = addIBotClass<SAINVaultClass>();
-                Suppression = addIBotClass<SAINBotSuppressClass>();
-                AILimit = addIBotClass<SAINAILimit>();
-                AimDownSightsController = addIBotClass<AimDownSightsController>();
-                SpaceAwareness = addIBotClass<SAINBotSpaceAwareness>();
-                DoorOpener = addIBotClass<DoorOpener>();
-                Medical = addIBotClass<SAINBotMedicalClass>();
-                BotLight = addIBotClass<BotLightController>();
-                BackpackDropper = addIBotClass<BotBackpackDropClass>();
-                CurrentTarget = addIBotClass<CurrentTargetClass>();
-                ManualShoot = addIBotClass<ManualShootClass>();
-                BotActivation = addIBotClass<SAINActivationClass>();
-                Aim = addIBotClass<AimClass>();
-            } catch (Exception ex) {
+                Squad = 
+                    initBotClass<SAINSquadClass>();
+                BusyHandsDetector = 
+                    initBotClass<BotBusyHandsDetector>();
+                GlobalEvents = 
+                    initBotClass<BotGlobalEventsClass>();
+                Shoot = 
+                    initBotClass<ShootDeciderClass>();
+                WeightManagement = 
+                    initBotClass<BotWeightManagement>();
+                Memory = 
+                    initBotClass<SAINMemoryClass>();
+                BotStuck = 
+                    initBotClass<SAINBotUnstuckClass>();
+                Hearing = 
+                    initBotClass<SAINHearingSensorClass>();
+                Talk = 
+                    initBotClass<SAINBotTalkClass>();
+                Decision = 
+                    initBotClass<SAINDecisionClass>();
+                Cover = 
+                    initBotClass<SAINCoverClass>();
+                SelfActions = 
+                    initBotClass<SAINSelfActionClass>();
+                Steering = 
+                    initBotClass<SAINSteeringClass>();
+                Grenade = 
+                    initBotClass<BotGrenadeManager>();
+                Mover = 
+                    initBotClass<SAINMoverClass>();
+                EnemyController = 
+                    initBotClass<SAINEnemyController>();
+                FriendlyFire = 
+                    initBotClass<SAINFriendlyFireClass>();
+                Vision = 
+                    initBotClass<SAINVisionClass>();
+                Search = 
+                    initBotClass<SAINSearchClass>();
+                Vault = 
+                    initBotClass<SAINVaultClass>();
+                Suppression = 
+                    initBotClass<SAINBotSuppressClass>();
+                AILimit = 
+                    initBotClass<SAINAILimit>();
+                AimDownSightsController = 
+                    initBotClass<AimDownSightsController>();
+                SpaceAwareness = 
+                    initBotClass<SAINBotSpaceAwareness>();
+                DoorOpener = 
+                    initBotClass<DoorOpener>();
+                Medical = 
+                    initBotClass<SAINBotMedicalClass>();
+                BotLight = 
+                    initBotClass<BotLightController>();
+                BackpackDropper = 
+                    initBotClass<BotBackpackDropClass>();
+                CurrentTarget = 
+                    initBotClass<CurrentTargetClass>();
+                ManualShoot = 
+                    initBotClass<ManualShootClass>();
+                BotActivation = 
+                    initBotClass<SAINActivationClass>();
+                Aim = 
+                    initBotClass<AimClass>();
+            }
+            catch (Exception ex) {
                 Logger.LogError($"Error When Creating Classes, Disposing... : {ex}");
                 return false;
             }
             return true;
         }
 
-        private T addIBotClass<T>() where T : BotBase
+        private T initBotClass<T>() where T : BotBase
         {
             T botClass = (T)Activator.CreateInstance(typeof(T), new object[] { this });
             _botClasses.Add(typeof(T), botClass as IBotClass);
@@ -226,7 +259,8 @@ namespace SAIN.SAINComponent
         {
             try {
                 Squad.SquadInfo.AddMember(this);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 Logger.LogError($"Error adding member to squad!: {ex}");
                 return false;
             }
@@ -237,21 +271,22 @@ namespace SAIN.SAINComponent
         {
             try {
                 NoBushESP.Init(Person.AIInfo.BotOwner, this);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 Logger.LogError($"Error When Initializing Components, Disposing... : {ex}");
                 return false;
             }
             foreach (var botClass in _botClasses) {
                 try {
                     botClass.Value.Init();
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     Logger.LogError($"Error When Initializing Class [{botClass.Key.ToString()}], Disposing... : {ex}");
                     return false;
                 }
             }
             return true;
         }
-
 
         private bool finishInit()
         {
@@ -261,12 +296,20 @@ namespace SAIN.SAINComponent
                     return false;
                 }
 
+                try {
+                    BotOwner.LookSensor.MaxShootDist = float.MaxValue;
+                }
+                catch (Exception ex) {
+                    Logger.LogError($"Error setting MaxShootDist during init, but continuing with initialization...: {ex}");
+                }
+
                 var settings = GlobalSettingsClass.Instance.General.Jokes;
                 if (settings.RandomCheaters &&
                     EFTMath.RandomBool(settings.RandomCheaterChance)) {
                     IsCheater = true;
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 Logger.LogError($"Error When Finishing Bot Initialization, Disposing... : {ex}");
                 return false;
             }
@@ -289,7 +332,6 @@ namespace SAIN.SAINComponent
             StopAllCoroutines();
         }
 
-
         private void LateUpdate()
         {
             BotActivation.LateUpdate();
@@ -310,7 +352,8 @@ namespace SAIN.SAINComponent
                     Player.UpdateSpeedLimit(100f, Player.ESpeedLimit.SurfaceNormal);
                     Player.MovementContext.ChangeSpeedLimit(100f, Player.ESpeedLimit.SurfaceNormal);
                     BotOwner.SetTargetMoveSpeed(100f);
-                } else {
+                }
+                else {
                     Player.MovementContext.SetCharacterMovementSpeed(defaultMoveSpeed, false);
                     Player.MovementContext.SprintSpeed = defaultSprintSpeed;
                 }
@@ -326,7 +369,8 @@ namespace SAIN.SAINComponent
             foreach (var botClass in _botClasses) {
                 try {
                     botClass.Value.Dispose();
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     Logger.LogError($"Dispose Class [{botClass.Key.ToString()}] Error: {ex}");
                 }
             }

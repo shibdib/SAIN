@@ -1,4 +1,6 @@
-﻿using SAIN.Helpers;
+﻿using Comfort.Common;
+using EFT;
+using SAIN.Helpers;
 using SAIN.SAINComponent.Classes;
 using System.Drawing.Drawing2D;
 using UnityEngine;
@@ -28,9 +30,23 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 return false;
             }
 
-            if (!CheckPosition(coverPosition, targetData, colliderData, hardData))
-            {
-                reason = "badPosition";
+            if (!checkPositionVsOtherBots(coverPosition)) {
+                reason = "tooCloseToAnotherBot";
+                return false;
+            }
+
+            if (isPositionSpotted(coverPosition)) {
+                reason = "tooCloseToSpottedPoint";
+                return false;
+            }
+
+            if (!checkDistToTarget(coverPosition, targetData)) {
+                reason = "tooCloseToTarget";
+                return false;
+            }
+
+            if (!visibilityCheck(coverPosition, targetData, colliderData, hardData)) {
+                reason = "pointVisibleToTarget";
                 return false;
             }
 
@@ -57,17 +73,30 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 return false;
             }
 
-            coverPoint.Position = coverPosition;
+            if (!checkPositionVsOtherBots(coverPosition)) {
+                reason = "tooCloseToAnotherBot";
+                return false;
+            }
 
             if (coverPoint.StraightDistanceStatus == CoverStatus.InCover)
             {
+                coverPoint.Position = coverPosition;
                 reason = "inCover";
                 return true;
             }
 
-            if (!CheckPosition(coverPosition, targetData, colliderData, hardData))
-            {
-                reason = "badPosition";
+            if (isPositionSpotted(coverPosition)) {
+                reason = "tooCloseToSpottedPoint";
+                return false;
+            }
+
+            if (!checkDistToTarget(coverPosition, targetData)) {
+                reason = "tooCloseToTarget";
+                return false;
+            }
+
+            if (!visibilityCheck(coverPosition, targetData, colliderData, hardData)) {
+                reason = "pointVisibleToTarget";
                 return false;
             }
 
@@ -76,7 +105,8 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 reason = "badPath";
                 return false;
             }
-
+            
+            coverPoint.Position = coverPosition;
             reason = string.Empty;
             return true;
         }
@@ -168,6 +198,11 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
                 !isPositionSpotted(coverPosition) &&
                 checkPositionVsOtherBots(coverPosition) &&
                 visibilityCheck(coverPosition, targetData, colliderData, hardData);
+        }
+
+        private bool checkDistToTarget(Vector3 coverPosition, TargetData data)
+        {
+            return (coverPosition - data.TargetPosition).sqrMagnitude > CoverMinEnemyDistSqr;
         }
 
         private bool isPositionSpotted(Vector3 position)
@@ -262,35 +297,75 @@ namespace SAIN.SAINComponent.SubComponents.CoverFinder
 
         private bool checkPositionVsOtherBots(Vector3 position)
         {
-            if (Bot.Squad.Members == null || Bot.Squad.Members.Count < 2)
-            {
-                return true;
+            string profileID = Bot.ProfileId;
+
+            if (checkIfPlayerCollidersNear(position, profileID, 0.5f)) {
+                return false;
             }
 
-            string profileID = Bot.ProfileId;
-            foreach (var member in Bot.Squad.Members.Values)
-            {
-                if (member == null || member.ProfileId == profileID)
-                    continue;
+            var members = Bot.Squad.Members;
 
-                if (isDistanceToClose(member.Cover.CoverInUse, position))
-                    return false;
+            if (members != null) {
+                foreach (var member in Bot.Squad.Members.Values) {
+                    if (member == null || member.ProfileId == profileID) continue;
+                    var coverPoints = member.Cover.CoverPoints;
+                    foreach (var point in coverPoints) {
+                        if (isDistanceTooClose(point, position))
+                            return false;
+
+                    }
+                }
             }
 
             return true;
         }
 
-        private bool isDistanceToClose(CoverPoint point, Vector3 position)
+        private static bool checkIfPlayerCollidersNear(Vector3 point, string botProfileId, float radius)
         {
-            const float DistanceToBotCoverThresh = 1f;
-            return point != null && (position - point.Position).sqrMagnitude < DistanceToBotCoverThresh;
+            for (int i = 0; i < _playerColliderArray.Length; i++) {
+                _playerColliderArray[i] = null;
+            }
+
+            Physics.OverlapSphereNonAlloc(point, radius, _playerColliderArray, LayerMaskClass.PlayerMask);
+
+            int count = 0;
+            Collider foundCollider = null;
+            foreach (var collider in _playerColliderArray) {
+                if (collider == null) continue;
+                count++;
+                if (count > 1) {
+                    return true;
+                }
+                foundCollider = collider;
+            }
+            if (count == 0) {
+                return false;
+            }
+
+            var player = Singleton<GameWorld>.Instance?.GetPlayerByCollider(foundCollider);
+            if (player == null) {
+                return false;
+            }
+            if (player.ProfileId == botProfileId) {
+                return false;
+            }
+            return true;
         }
 
-        private static bool visibilityCheck(Vector3 position, TargetData targetData, ColliderData colliderData, HardColliderData hardData)
+        private static Collider[] _playerColliderArray = new Collider[5];
+
+        private bool isDistanceTooClose(CoverPoint point, Vector3 position)
+        {
+            const float DistanceToBotCoverThresh = 0.5f;
+            const float distSqr = DistanceToBotCoverThresh * DistanceToBotCoverThresh;
+            return point != null && (position - point.Position).sqrMagnitude < distSqr;
+        }
+
+        private static bool visibilityCheck(Vector3 position, TargetData targetData, ColliderData colliderData, HardColliderData hardColliderData)
         {
             const float offset = 0.1f;
 
-            float distanceToCollider = (hardData.Position - position).magnitude * 1.25f;
+            float distanceToCollider = (hardColliderData.Position - position).magnitude * 1.25f;
             //Logger.LogDebug($"visCheck: Dist To Collider: {distanceToCollider}");
 
             Vector3 target = targetData.TargetPosition;

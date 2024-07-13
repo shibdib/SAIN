@@ -177,6 +177,14 @@ namespace SAIN.Helpers
             }
         }
 
+        public static void DeletePreset(SAINPresetDefinition preset)
+        {
+            var path = getPath("Presets", preset.Name);
+            if (Directory.Exists(path)) {
+                Directory.Delete(path, true);
+            }
+        }
+
         private static void CheckCreateFolder(string path)
         {
             if (!Directory.Exists(path))

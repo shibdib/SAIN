@@ -2,6 +2,7 @@
 using SAIN.Helpers;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.UI.Image;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -29,8 +30,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return this._position;
             }
         }
-
-        public Vector3? LastSuccessPoint => _lastSuccessCastPoint;
+        
+        public Vector3? LastSuccessShootPoint { get; private set; }
+        public Vector3? LastSuccessPoint { get; private set; }
 
         private Vector3 _position;
         private int _posCachedForFrame;
@@ -38,9 +40,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public readonly List<BodyPartCollider> Colliders;
         public readonly BifacialTransform Transform;
 
-        public float TimeSinceLastCheck => Time.time - _lastCheckTime;
-        public float TimeSinceLastSuccess => Time.time - _lastSuccessTime;
-        public bool LineOfSight => _lastSuccessTime + 0.25f > Time.time;
+        public float TimeSinceLastVisionCheck => Time.time - _lastCheckTime;
+        public float TimeSinceLastVisionSuccess => Time.time - _lastVisionSuccessTime;
+        public bool LineOfSight => _lastVisionSuccessTime + 0.25f > Time.time;
+        public bool CanShoot => _lastShootSucessTime + 0.25f > Time.time;
 
         private BodyPartCollider getCollider()
         {
@@ -65,7 +68,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             if (LineOfSight)
             {
-                successPoint = _lastSuccessCastPoint;
+                successPoint = LastSuccessPoint;
                 return true;
             }
 
@@ -81,17 +84,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             if (lineOfSight)
             {
-                _lastSuccessTime = Time.time;
+                _lastVisionSuccessTime = Time.time;
                 _lastSuccessPart = collider;
-                _lastSuccessCastPoint = castPoint;
+                LastSuccessPoint = castPoint;
             }
             else
             {
                 _lastSuccessPart = null;
-                _lastSuccessCastPoint = null;
             }
 
-            successPoint = _lastSuccessCastPoint;
+            successPoint = LastSuccessPoint;
 
             if (SAINPlugin.DebugMode &&
                 _nextdrawTime < Time.time)
@@ -114,9 +116,53 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return lineOfSight;
         }
 
+        private const float CHECK_SHOOT_FREQ = 0.1f;
+        private const float CHECK_SHOOT_FREQ_AI = 0.2f;
+
+        public bool CheckCanShoot(Vector3 firePort, bool isAI)
+        {
+            if (!LineOfSight) {
+                return false;
+            }
+            if (LastSuccessPoint == null) {
+                return false;
+            }
+            if (_nextCheckShootTime > Time.time) {
+                return CanShoot;
+            }
+            _nextCheckShootTime = Time.time + (isAI ? CHECK_SHOOT_FREQ_AI : CHECK_SHOOT_FREQ);
+
+            Vector3 point = LastSuccessPoint.Value;
+            bool canShoot = canShootToTarget(point, firePort);
+
+            if (!canShoot && 
+                !isAI) {
+                BodyPartCollider part = getCollider();
+                point = getCastPoint(firePort, part);
+                canShoot = canShootToTarget(point, firePort);
+            }
+
+            if (canShoot) {
+                _lastShootSucessTime = Time.time;
+                LastSuccessShootPoint = point;
+            }
+            return canShoot;
+
+        }
+
+        private bool canShootToTarget(Vector3 pointToCheck, Vector3 firePort)
+        {
+            Vector3 direction = pointToCheck - firePort;
+            float distance = direction.magnitude;
+            bool canShoot = !Physics.Raycast(firePort, direction, distance, LayerMaskClass.HighPolyWithTerrainMask);
+            return canShoot;
+        }
+
+        private float _nextCheckShootTime;
+
         private float _nextdrawTime;
 
-        private float _lastSuccessTime;
+        private float _lastVisionSuccessTime;
 
         private Vector3 getCastPoint(Vector3 origin, BodyPartCollider collider)
         {
@@ -143,8 +189,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return lowest;
         }
 
+        private float _lastShootSucessTime;
         private float _lastCheckTime;
         private BodyPartCollider _lastSuccessPart;
-        private Vector3? _lastSuccessCastPoint;
     }
 }

@@ -16,8 +16,7 @@ namespace SAIN.Components.BotController
 
         public void Update()
         {
-            if (_getModifierTime < Time.time)
-            {
+            if (_getModifierTime < Time.time) {
                 _getModifierTime = Time.time + UpdateWeatherVisibilitySec;
                 VisionDistanceModifier = CalcWeatherVisibility();
                 GainSightModifier = 2f - VisionDistanceModifier;
@@ -30,15 +29,13 @@ namespace SAIN.Components.BotController
 
         private float _getModifierTime = 0f;
 
-        public float RainSoundModifier
-        {
+        public float RainSoundModifier {
             get
             {
                 if (WeatherController.Instance?.WeatherCurve == null)
                     return 1f;
 
-                if (_rainCheckTime < Time.time)
-                {
+                if (_rainCheckTime < Time.time) {
                     _rainCheckTime = Time.time + 5f;
                     // Grabs the current rain Rounding
                     float Rain = WeatherController.Instance.WeatherCurve.Rain;
@@ -60,12 +57,10 @@ namespace SAIN.Components.BotController
 
         private static float CalcWeatherVisibility()
         {
-            if (WeatherController.Instance?.WeatherCurve == null)
-            {
+            IWeatherCurve weatherCurve = WeatherController.Instance?.WeatherCurve;
+            if (weatherCurve == null) {
                 return 1f;
             }
-
-            IWeatherCurve weatherCurve = WeatherController.Instance.WeatherCurve;
 
             float fogmod = FogModifier(weatherCurve.Fog);
             float rainmod = RainModifier(weatherCurve.Rain);
@@ -75,8 +70,7 @@ namespace SAIN.Components.BotController
             float weathermodifier = 1f * fogmod * rainmod * cloudsmod;
             weathermodifier = Mathf.Clamp(weathermodifier, 0.2f, 1f);
 
-            if (GameWorldComponent.Instance.WinterActive)
-            {
+            if (GameWorldComponent.Instance.Location.WinterActive) {
                 weathermodifier = Mathf.Clamp(weathermodifier, 0.35f, 1f);
                 //Logger.LogWarning("Snow Active");
             }
@@ -144,34 +138,26 @@ namespace SAIN.Components.BotController
             // Rain Tiers
             float rainScaleMin;
             // Sprinkling
-            if (Rain <= 0.1f)
-            {
+            if (Rain <= 0.1f) {
                 rainScaleMin = 0.95f;
             }
-            else
-            {
+            else {
                 // Light Rain
-                if (Rain < 0.35f)
-                {
+                if (Rain < 0.35f) {
                     rainScaleMin = 0.65f;
                 }
-                else
-                {
+                else {
                     // Normal Rain
-                    if (Rain < 0.5f)
-                    {
+                    if (Rain < 0.5f) {
                         rainScaleMin = 0.5f;
                     }
-                    else
-                    {
+                    else {
                         // Heavy Rain
-                        if (Rain < 0.75f)
-                        {
+                        if (Rain < 0.75f) {
                             rainScaleMin = 0.45f;
                         }
                         // Downpour
-                        else
-                        {
+                        else {
                             rainScaleMin = 0.4f;
                         }
                     }
@@ -192,20 +178,16 @@ namespace SAIN.Components.BotController
             // Cloudiness Tiers
             float minScaledClouds;
             // Scattered Clouds
-            if (cloudsScaled <= 0.33f)
-            {
+            if (cloudsScaled <= 0.33f) {
                 minScaledClouds = 1f;
             }
-            else
-            {
+            else {
                 // Cloudy
-                if (cloudsScaled <= 0.66)
-                {
+                if (cloudsScaled <= 0.66) {
                     minScaledClouds = 0.8f;
                 }
                 // Heavy Overcast
-                else
-                {
+                else {
                     minScaledClouds = 0.66f;
                 }
             }

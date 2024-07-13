@@ -6,11 +6,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyEvents : EnemyBase, IBotClass
     {
-        public EnemyToggleEvent OnEnemyLineOfSightChanged { get; }
-        public EnemyToggleEvent OnEnemyKnownChanged { get; }
-        public EnemyToggleEvent OnActiveThreatChanged { get; }
-        public EnemyToggleEvent OnVisionChange { get; }
+        public EnemyToggleEventTimeTracked OnEnemyLineOfSightChanged { get; }
+        public EnemyToggleEventTimeTracked OnEnemyKnownChanged { get; }
+        public EnemyToggleEventTimeTracked OnActiveThreatChanged { get; }
+        public EnemyToggleEventTimeTracked OnVisionChange { get; }
         public EnemyToggleEventTimeTracked OnSearch { get; }
+        public EnemyToggleEventTimeTracked OnEnemyCanShootChanged { get; }
 
         public event Action<Enemy> OnEnemyInvalid;
         public event Action<Enemy> OnEnemyLocationsSearched;
@@ -25,11 +26,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public EnemyEvents(Enemy enemy) : base (enemy)
         {
-            OnEnemyLineOfSightChanged = new EnemyToggleEvent(enemy, false);
-            OnEnemyKnownChanged = new EnemyToggleEvent(enemy, false);
-            OnActiveThreatChanged = new EnemyToggleEvent(enemy, false);
-            OnVisionChange = new EnemyToggleEvent(enemy, false);
+            OnEnemyLineOfSightChanged = new EnemyToggleEventTimeTracked(enemy, false);
+            OnEnemyKnownChanged = new EnemyToggleEventTimeTracked(enemy, false);
+            OnActiveThreatChanged = new EnemyToggleEventTimeTracked(enemy, false);
+            OnVisionChange = new EnemyToggleEventTimeTracked(enemy, false);
             OnSearch = new EnemyToggleEventTimeTracked(enemy, false);
+            OnEnemyCanShootChanged = new EnemyToggleEventTimeTracked(enemy, false);
         }
 
         public void Init()

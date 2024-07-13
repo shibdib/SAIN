@@ -23,6 +23,7 @@ namespace SAIN.Components.BotComponentSpace.Classes.EnemyClasses
 
         public void Init()
         {
+            SubscribeToDispose(Dispose);
         }
 
         public void Update()

@@ -1,9 +1,12 @@
-﻿using EFT.UI;
+﻿using EFT;
+using EFT.UI;
 using JetBrains.Annotations;
 using SAIN.Editor;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,10 +14,24 @@ namespace SAIN.Helpers
 {
     public static class Extensions
     {
-        public static bool IsSame([NotNull]this Enemy enemy, [NotNull]Enemy other)
+        // Code used from https://stackoverflow.com/questions/273313/randomize-a-listt
+        public static void Shuffle<T>(this IList<T> list)
+        {
+            int n = list.Count;
+            while (n > 1) {
+                n--;
+                int k = ThreadSafeRandom.ThisThreadsRandom.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
+
+        public static bool IsSame([NotNull] this Enemy enemy, [NotNull] Enemy other)
         {
             return enemy.EnemyProfileId == other.EnemyProfileId;
         }
+
         public static bool IsDifferent([NotNull] this Enemy enemy, [NotNull] Enemy other)
         {
             return !enemy.IsSame(other);
@@ -28,8 +45,7 @@ namespace SAIN.Helpers
 
         public static bool isLegs(this EBodyPart part)
         {
-            switch (part)
-            {
+            switch (part) {
                 case EBodyPart.LeftLeg:
                 case EBodyPart.RightLeg:
                     return true;
@@ -39,10 +55,104 @@ namespace SAIN.Helpers
             }
         }
 
+        public static bool isPMC(this WildSpawnType type)
+        {
+            switch (type) {
+                case WildSpawnType.pmcBEAR:
+                case WildSpawnType.pmcUSEC:
+                    return true;
+
+                    default:
+                    return false;
+            }
+        }
+
+        public static bool isBoss(this WildSpawnType type)
+        {
+            switch (type) {
+                case WildSpawnType.bossBoar:
+                case WildSpawnType.bossBoarSniper:
+                case WildSpawnType.bossTagilla:
+                case WildSpawnType.bossKilla:
+                case WildSpawnType.bossBully:
+                case WildSpawnType.bossGluhar:
+                case WildSpawnType.bossKnight:
+                case WildSpawnType.bossKojaniy:
+                case WildSpawnType.bossKolontay:
+                case WildSpawnType.bossZryachiy:
+                    return true;
+
+                    default:
+                    return false;
+            }
+        }
+
+        public static bool isOther(this WildSpawnType type)
+        {
+            switch (type) {
+                case WildSpawnType.pmcBot:
+                case WildSpawnType.exUsec:
+                case WildSpawnType.arenaFighter:
+                case WildSpawnType.arenaFighterEvent:
+                    return true;
+                    default:
+                    return false;
+            }
+        }
+
+        public static bool isFollower(this WildSpawnType type)
+        {
+            switch (type) {
+                case WildSpawnType.followerBigPipe:
+                case WildSpawnType.followerTagilla:
+                case WildSpawnType.followerBirdEye:
+                case WildSpawnType.followerBoar:
+                case WildSpawnType.followerBoarClose1:
+                case WildSpawnType.followerBoarClose2:
+                case WildSpawnType.followerBully:
+                case WildSpawnType.followerGluharAssault:
+                case WildSpawnType.followerGluharScout:
+                case WildSpawnType.followerGluharSecurity:
+                case WildSpawnType.followerGluharSnipe:
+                case WildSpawnType.followerKojaniy:
+                case WildSpawnType.followerSanitar:
+                case WildSpawnType.followerZryachiy:
+                    return true;
+
+                    default:
+                    return false;
+            }
+        }
+
+        public static bool isScav(this WildSpawnType type)
+        {
+            switch (type) {
+                case WildSpawnType.assault:
+                case WildSpawnType.assaultGroup:
+                case WildSpawnType.marksman:
+                case WildSpawnType.crazyAssaultEvent:
+                case WildSpawnType.cursedAssault:
+                    return true;
+                    default:
+                    return false;
+            }
+        }
+
+        public static bool isGoons(this WildSpawnType type)
+        {
+            switch (type) {
+                case WildSpawnType.bossKnight:
+                case WildSpawnType.followerBirdEye:
+                case WildSpawnType.followerBigPipe:
+                    return true;
+                    default:
+                    return false;
+            }
+        }
+
         public static bool isArms(this EBodyPart part)
         {
-            switch (part)
-            {
+            switch (part) {
                 case EBodyPart.LeftArm:
                 case EBodyPart.RightArm:
                     return true;
@@ -63,8 +173,7 @@ namespace SAIN.Helpers
 
         public static SAINSoundType Convert(this AISoundType aiSoundType)
         {
-            switch (aiSoundType)
-            {
+            switch (aiSoundType) {
                 case AISoundType.silencedGun:
                     return SAINSoundType.SuppressedShot;
 
@@ -78,8 +187,7 @@ namespace SAIN.Helpers
 
         public static AISoundType Convert(this SAINSoundType sainSoundType)
         {
-            switch (sainSoundType)
-            {
+            switch (sainSoundType) {
                 case SAINSoundType.SuppressedShot:
                     return AISoundType.silencedGun;
 
@@ -93,8 +201,7 @@ namespace SAIN.Helpers
 
         public static bool IsGunShot(this SAINSoundType sainSoundType)
         {
-            switch (sainSoundType)
-            {
+            switch (sainSoundType) {
                 case SAINSoundType.SuppressedShot:
                 case SAINSoundType.Shot:
                     return true;
@@ -108,8 +215,7 @@ namespace SAIN.Helpers
         {
             magnitude = value.magnitude;
 
-            if (magnitude > 1E-05f)
-            {
+            if (magnitude > 1E-05f) {
                 return value / magnitude;
             }
             return Vector3.zero;
@@ -117,13 +223,11 @@ namespace SAIN.Helpers
 
         public static Vector3? LastElement(this Vector3[] array)
         {
-            if (array == null)
-            {
+            if (array == null) {
                 return null;
             }
             int length = array.Length;
-            if (length == 0)
-            {
+            if (length == 0) {
                 return null;
             }
             return array[length - 1];
@@ -131,14 +235,12 @@ namespace SAIN.Helpers
 
         public static Vector3? LastElement(this Vector3[] array, out int length)
         {
-            if (array == null)
-            {
+            if (array == null) {
                 length = 0;
                 return null;
             }
             length = array.Length;
-            if (length == 0)
-            {
+            if (length == 0) {
                 return null;
             }
             return array[length - 1];
@@ -166,7 +268,6 @@ namespace SAIN.Helpers
             return value.Scale(0, 1f, 1f - scalingFactor, 1f + scalingFactor);
         }
 
-
         public static float Scale(this float value, float inputMin, float inputMax, float outputMin, float outputMax)
         {
             return outputMin + (outputMax - outputMin) * ((value - inputMin) / (inputMax - inputMin));
@@ -178,10 +279,12 @@ namespace SAIN.Helpers
             CompareValuePlaySound(value, newvalue, sound);
             return newvalue;
         }
+
         public static bool GUIToggle(this bool value, string name, string toolTip, EUISoundType? sound = null, params GUILayoutOption[] options)
         {
             return GUIToggle(value, new GUIContent(name, toolTip), sound, options);
         }
+
         public static bool GUIToggle(this bool value, string name, EUISoundType? sound = null, params GUILayoutOption[] options)
         {
             return GUIToggle(value, new GUIContent(name), sound, options);
@@ -194,9 +297,8 @@ namespace SAIN.Helpers
 
         private static bool CompareValuePlaySound(object oldValue, object newValue, EUISoundType? sound = null)
         {
-            if (oldValue.ToString() != newValue.ToString() && sound != null)
-            {
-                Sounds.PlaySound(sound.Value);
+            if (oldValue.ToString() != newValue.ToString() && sound != null) {
+                SAIN.Editor.Sounds.PlaySound(sound.Value);
                 return true;
             }
             return false;
@@ -210,8 +312,7 @@ namespace SAIN.Helpers
         public static float RandomizeSum(this float value, float a = -1, float b = 1, float min = 0.001f)
         {
             float randomValue = value + Random(a, b);
-            if (randomValue < min)
-            {
+            if (randomValue < min) {
                 randomValue = min;
             }
             return randomValue.Round100();
@@ -245,6 +346,16 @@ namespace SAIN.Helpers
         public static float Round1000(this float value)
         {
             return value.Round(1000);
+        }
+    }
+
+    // Code used from https://stackoverflow.com/questions/273313/randomize-a-listt
+    public static class ThreadSafeRandom
+    {
+        [ThreadStatic] private static System.Random Local;
+
+        public static System.Random ThisThreadsRandom {
+            get { return Local ?? (Local = new System.Random(unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId))); }
         }
     }
 }

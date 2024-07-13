@@ -17,6 +17,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             _indexMax = Parts.Count;
         }
 
+        public bool CanShoot => Enemy.Events.OnEnemyCanShootChanged.Value;
         public bool LineOfSight => TimeSinceInLineOfSight < LINEOFSIGHT_TIME;
         public float TimeSinceInLineOfSight => Time.time - _timeLastInSight;
         public Vector3 LastSuccessPosition { get; private set; }
@@ -40,6 +41,22 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 if (part.LineOfSight)
                     return part;
             return null;
+        }
+
+        public bool CheckCanShoot(bool canShootHead)
+        {
+            bool canShoot = false;
+            bool isAI = Enemy.IsAI;
+            Vector3 firePort = Enemy.Bot.Transform.WeaponData.FirePort;
+
+            foreach (var part in Parts.Values) {
+                if (!canShootHead && part.BodyPart == EBodyPart.Head) {
+                    continue;
+                }
+                if (part.CheckCanShoot(firePort, isAI))
+                    canShoot = true;
+            }
+            return canShoot;
         }
 
         public bool CheckBodyLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)

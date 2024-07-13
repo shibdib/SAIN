@@ -245,7 +245,7 @@ namespace SAIN.Layers
                 int partCount = 0;
                 int notChecked = 0;
                 foreach (var part in parts) {
-                    if (part.TimeSinceLastCheck > 2f) {
+                    if (part.TimeSinceLastVisionCheck > 2f) {
                         notChecked++;
                         continue;
                     }

@@ -258,6 +258,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Decision\BotDecisionManager.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Doors\DoorData.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Doors\DoorFinder.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EBackpackStatus.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Other\HearingReport.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Path\ECornerType.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Checkers\EnemyActiveThreatChecker.cs" />
@@ -265,6 +266,8 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Other\EnemyEvents.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Checkers\EnemyValidChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Position\EnemyPositionTracker.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Shoot\EnemyShootClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Shoot\EnemyShootTargets.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyAnglesClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyVisionChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyPartDataClass.cs" />
@@ -294,6 +297,11 @@
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulActionSet.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />
+    <Compile Include="Components\GameWorldSpace\BotDoorTrigger.cs" />
+    <Compile Include="Components\GameWorldSpace\DoorHandler.cs" />
+    <Compile Include="Components\GameWorldSpace\GameWorldBase.cs" />
+    <Compile Include="Components\GameWorldSpace\IGameWorldClass.cs" />
+    <Compile Include="Components\GameWorldSpace\LocationClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\BodyPart.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\BodyPartsClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\PartDictionary.cs" />
@@ -362,6 +370,7 @@
     <Compile Include="Components\PlayerComponentSpace\Classes\ShootPlayerClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonActiveClass.cs" />
     <Compile Include="Helpers\PerformanceHelpers.cs" />
+    <Compile Include="Helpers\WeightedRandomSelector.cs" />
     <Compile Include="Layers\BotAction.cs" />
     <Compile Include="Layers\Combat\Solo\MeleeAttackAction.cs" />
     <Compile Include="Layers\Debug\CrawlAction.cs" />
@@ -608,7 +617,7 @@
     <Compile Include="Logger.cs" />
     <Compile Include="Plugin\BigBrainHandler.cs" />
     <Compile Include="Plugin\GameWorldHandler.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\ShootDeciderClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\ShootDeciderClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\SAINWeatherClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\TimeClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINVisionClass.cs" />

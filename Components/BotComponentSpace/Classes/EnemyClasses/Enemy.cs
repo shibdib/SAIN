@@ -31,6 +31,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public EnemyInfo EnemyInfo { get; }
         public EnemyAim Aim { get; }
         public EnemyHearing Hearing { get; }
+        public EnemyShootClass Shoot { get; }
 
         private EnemyKnownChecker _knownChecker { get; }
         private EnemyActiveThreatChecker _activeThreatChecker { get; }
@@ -57,6 +58,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             KnownPlaces = new EnemyKnownPlaces(this);
             Aim = new EnemyAim(this);
             Hearing = new EnemyHearing(this);
+            Shoot = new EnemyShootClass(this);
         }
 
         public void Init()
@@ -72,6 +74,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Path.Init();
             Hearing.Init();
             Status.Init();
+            Shoot.Init();
         }
 
         public void Update()
@@ -88,21 +91,22 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             KnownPlaces.Update();
             Path.Update();
             Status.Update();
+            Shoot.Update();
         }
 
         public void Dispose()
         {
             OnEnemyDisposed?.Invoke();
-
-            Events?.Dispose();
-            _validChecker?.Dispose();
-            _knownChecker?.Dispose();
-            _activeThreatChecker?.Dispose();
-            KnownPlaces?.Dispose();
-            Vision?.Dispose();
-            Path?.Dispose();
-            Hearing?.Dispose();
-            Status?.Dispose();
+            Events.Dispose();
+            _validChecker.Dispose();
+            _knownChecker.Dispose();
+            _activeThreatChecker.Dispose();
+            KnownPlaces.Dispose();
+            Vision.Dispose();
+            Path.Dispose();
+            Hearing.Dispose();
+            Status.Dispose();
+            Shoot.Dispose();
         }
 
         public bool EnemyKnown => Events.OnEnemyKnownChanged.Value;

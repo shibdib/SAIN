@@ -23,7 +23,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
             "Time Before Next Throw",
             "How much time to wait before a bot is allowed to throw another grenade.")]
         [MinMax(0f, 30f, 100f)]
-        public float ThrowGrenadeFrequency = 3f;
+        public float ThrowGrenadeFrequency = 4f;
 
         [NameAndDescription(
             "Minimum Friendly Distance to Throw Target",

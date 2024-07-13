@@ -48,6 +48,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (successPoint != null) {
                 LastSeenPoint = successPoint.Value;
             }
+
+            bool canShoot = EnemyParts.CheckCanShoot(Enemy.Shoot.Targets.CanShootHead);
+            Enemy.Events.OnEnemyCanShootChanged.CheckToggle(canShoot);
         }
 
         private bool shallStart()

@@ -105,8 +105,10 @@ namespace SAIN.SAINComponent.Classes.Mover
                 _nextCheckDistanceTime = Time.time + DOORS_FIND_CLOSE_FREQ;
 
                 foreach (var link in voxel.DoorLinks)
-                    if (isDoorOpenable(link.Door))
+                    if (isDoorOpenable(link.Door)) {
                         AllDoors.Add(new DoorData(link));
+                        GameWorldComponent.Instance.Doors.CheckAddDoorTrigger(link);
+                    }
 
                 updateAllDoors(true);
             }
@@ -121,7 +123,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return false;
             }
             if (GlobalSettings.General.Doors.DisableAllDoors && 
-                GameWorldComponent.Instance.DisableDoor(door))
+                GameWorldComponent.Instance.Doors.DisableDoor(door))
             {
                 return false;
             }

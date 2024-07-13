@@ -69,7 +69,7 @@ namespace SAIN.Components.BotController
         {
             var nightSettings = SAINPlugin.LoadedPreset.GlobalSettings.Look.Time;
             float max = 1f;
-            bool snowActive = GameWorldComponent.Instance.WinterActive;
+            bool snowActive = GameWorldComponent.Instance.Location.WinterActive;
             float min = snowActive ? nightSettings.NightTimeVisionModifierSnow : nightSettings.NightTimeVisionModifier;
             float ratio;
             float difference;

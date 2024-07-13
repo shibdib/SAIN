@@ -83,7 +83,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private float _timeWithinDistanceSearch;
 
-        public void HandleLightForEnemy()
+        public void HandleLightForEnemy(Enemy enemy)
         {
             if (Bot.Decision.CurrentCombatDecision == ECombatDecision.Search)
             {
@@ -93,8 +93,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             {
                 return;
             }
-
-            Enemy enemy = Bot.Enemy;
             if (enemy != null)
             {
                 if (!enemy.Seen)

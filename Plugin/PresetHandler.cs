@@ -81,7 +81,7 @@ namespace SAIN.Plugin
             SaveObjectToJson(definition, "Info", PresetsFolder, definition.Name);
         }
 
-        private static void loadDefault()
+        public static void loadDefault()
         {
             LoadedPreset = SAINDifficultyClass.GetDefaultPreset(EditorDefaults.SelectedDefaultPreset) ?? SAINDifficultyClass.GetDefaultPreset(SAINDifficulty.hard);
             LoadedPreset.Init();

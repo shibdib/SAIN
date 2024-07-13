@@ -523,7 +523,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
 
             bool shallInvert = ShallInvertDoorAngle(door);
-            GameWorldComponent.Instance.ChangeDoorState(door, state, shallInvert);
+            GameWorldComponent.Instance.Doors.ChangeDoorState(door, state, shallInvert);
             SAINBotController.Instance.BotHearing.PlayAISound(PlayerComponent, SAINSoundType.Door, door.transform.position, 30f, 1f, true);
         }
 
