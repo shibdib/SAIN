@@ -182,60 +182,28 @@ namespace SAIN.Editor
             return newvalue;
         }
 
-        private static bool CompareValuePlaySound(object oldValue, object newValue, EUISoundType? sound = null)
+        private static bool CompareValuePlaySound(object oldValue, object newValue, EUISoundType? sound = null, float volume = 1f)
         {
             if (oldValue.ToString() != newValue.ToString() && sound != null)
             {
-                Sounds.PlaySound(sound.Value);
+                Sounds.PlaySound(sound.Value, volume);
                 return true;
             }
             return false;
         }
 
-        public static float HorizontalSlider(float value, float min, float max, EUISoundType? sound = null)
-        {
-            return HorizontalSlider(value, min, max, sound, StandardHeight);
-        }
-
-        public static float HorizontalSlider(float value, float min, float max, float width, EUISoundType? sound = null)
-        {
-            return HorizontalSlider(value, min, max, sound, StandardHeight, Width(width));
-        }
-
-        public static float HorizontalSlider(float value, float min, float max, float width, float height, EUISoundType? sound = null)
-        {
-            return HorizontalSlider(value, min, max, sound, Height(height), Width(width));
-        }
-
         public static float HorizontalSlider(float value, float min, float max, EUISoundType? sound = null, params GUILayoutOption[] options)
         {
             float newvalue = GUILayout.HorizontalSlider(value, min, max, GetStyle(Style.horizontalSlider), GetStyle(Style.horizontalSliderThumb), options);
-            sound = sound ?? EUISoundType.MenuEscape;
-            bool soundPlayed = CompareValuePlaySound(value, newvalue, sound);
+            float progress = (newvalue - min) / (max - min);
+            sound = sound ?? EUISoundType.ButtonOver;
+            progress = Mathf.Clamp(progress, 0.33f, 1f);
+            bool soundPlayed = CompareValuePlaySound(value, newvalue, sound, progress);
             if (soundPlayed && SAINPlugin.DebugMode)
             {
-                Logger.LogDebug($"Toggle {sound.Value}");
+                //Logger.LogDebug($"Toggle {sound.Value}");
             }
             return newvalue;
-        }
-
-        public static float HorizontalSlider(Rect rect, float value, float min, float max, EUISoundType? sound = null)
-        {
-            return GUI.HorizontalSlider(rect, value, min, max, GetStyle(Style.horizontalSlider), GetStyle(Style.horizontalSliderThumb));
-        }
-
-        public static float HorizontalSliderNoStyle(string label, float value, float min, float max, float LabelWidth = 150f, float ValueWidth = 100f, EUISoundType? sound = null)
-        {
-            GUILayout.BeginHorizontal();
-
-            Label(label, Width(LabelWidth), StandardHeight);
-
-            value = HorizontalSlider(value, min, max, sound, StandardHeight);
-
-            Box(value.ToString(), Width(ValueWidth), StandardHeight);
-
-            GUILayout.EndHorizontal();
-            return value;
         }
 
         public static void BeginHorizontalSpace(float space = 10)

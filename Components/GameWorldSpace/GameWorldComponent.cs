@@ -2,7 +2,6 @@
 using EFT;
 using EFT.Game.Spawning;
 using EFT.Interactive;
-using EFT.Weather;
 using HarmonyLib;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
@@ -11,11 +10,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using WeatherInterface = GInterface26;
 
 namespace SAIN.Components
 {
     public class GameWorldComponent : MonoBehaviour
     {
+        private const string WEATHER_INTERFACE = "ginterface26_0";
+
         public event Action<Door, EDoorState, bool> OnDoorStateChanged;
         public event Action<bool> OnDoorsDisabled;
 
@@ -68,14 +70,14 @@ namespace SAIN.Components
             }
             _nextCheckWeatherTime = Time.time + 0.5f;
 
-            var weather = (AccessTools.Field(typeof(GameWorld), "ginterface26_0").GetValue(GameWorld) as GInterface26);
+            var weather = (AccessTools.Field(typeof(GameWorld), WEATHER_INTERFACE).GetValue(GameWorld) as WeatherInterface);
             if (weather == null)
             {
                 Season = ESeason.Summer;
             }
             else
             {
-                Logger.LogWarning($"Got Weather! {weather.Status}");
+                Logger.LogDebug($"Got Weather {weather.Status}");
                 Season = weather.Season;
                 _weatherFound = true;
             }
@@ -294,7 +296,7 @@ namespace SAIN.Components
             ExtractFinder = this.GetOrAddComponent<Extract.ExtractFinderComponent>();
             GameWorld.OnDispose += Dispose;
 
-            Logger.LogWarning("SAIN GameWorld Created.");
+            //Logger.LogDebug("SAIN GameWorld Created.");
         }
 
         private IEnumerator getGameWorld()
@@ -361,7 +363,7 @@ namespace SAIN.Components
             Instance = null;
             GameWorld.OnDispose -= Dispose;
             Destroy(this);
-            Logger.LogWarning("SAIN GameWorld Destroyed.");
+            //Logger.LogDebug("SAIN GameWorld Destroyed.");
         }
 
         private bool _foundLocation = false;

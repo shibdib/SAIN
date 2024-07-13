@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             {
                 return;
             }
-            if (UsingMeds)
+            if (_nextHealTime > Time.time)
             {
                 return;
             }
@@ -34,6 +34,11 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
             if (_nextCheckTime > Time.time)
             {
+                return;
+            }
+            if (UsingMeds)
+            {
+                _nextCheckTime = Time.time + 1f;
                 return;
             }
             _nextCheckTime = Time.time + 0.1f;
@@ -54,10 +59,6 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return;
             }
 
-            if (_healTime > Time.time)
-            {
-                return;
-            }
 
             bool didAction = false;
             switch (decision)
@@ -76,7 +77,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             if (didAction)
             {
-                _healTime = Time.time + 1f;
+                _nextHealTime = Time.time + 5f;
             }
         }
 
@@ -157,6 +158,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
         }
 
-        private float _healTime = 0f;
+        private float _nextHealTime = 0f;
     }
 }

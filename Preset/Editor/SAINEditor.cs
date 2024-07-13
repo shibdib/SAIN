@@ -1,12 +1,11 @@
 ﻿using BepInEx;
-using Comfort.Common;
-using EFT;
 using EFT.Console.Core;
 using EFT.UI;
-using SAIN.Attributes;
+using SAIN.Editor.Util;
 using SAIN.Plugin;
 using SAIN.Preset;
 using System;
+using System.Text;
 using UnityEngine;
 using static SAIN.Editor.RectLayout;
 using static SAIN.Editor.SAINLayout;
@@ -43,8 +42,7 @@ namespace SAIN.Editor
 
         private static void CheckKeys()
         {
-            if (CheckKeyLimiter < Time.time)
-            {
+            if (CheckKeyLimiter < Time.time) {
                 CheckKeyLimiter = Time.time + 0.1f;
                 ShiftKeyPressed = Input.GetKey(KeyCode.LeftShift);
                 CtrlKeyPressed = Input.GetKey(KeyCode.LeftControl);
@@ -55,19 +53,16 @@ namespace SAIN.Editor
 
         public static void Update()
         {
-            if (DisplayingWindow)
-            {
+            if (DisplayingWindow) {
                 CursorSettings.SetUnlockCursor(0, true);
+                MouseFunctions.Update();
             }
-            else
-            {
+            else {
                 CheckKeys();
             }
 
-            if ((SAINPlugin.OpenEditorConfigEntry.Value.IsDown() && !DisplayingWindow) || SAINPlugin.OpenEditorButton.Value)
-            {
-                if (SAINPlugin.OpenEditorButton.Value)
-                {
+            if ((SAINPlugin.OpenEditorConfigEntry.Value.IsDown() && !DisplayingWindow) || SAINPlugin.OpenEditorButton.Value) {
+                if (SAINPlugin.OpenEditorButton.Value) {
                     SAINPlugin.OpenEditorButton.BoxedValue = false;
                     SAINPlugin.OpenEditorButton.Value = false;
                 }
@@ -82,20 +77,20 @@ namespace SAIN.Editor
 
         public static void OnGUI()
         {
-            if (DisplayingWindow)
-            {
-                if (!CacheCreated)
-                {
+            if (DisplayingWindow) {
+                if (!CacheCreated) {
                     CacheCreated = true;
                     ColorsClass.CreateCache();
                     TexturesClass.CreateCache();
                     StylesClass.CreateCache();
                 }
-
+                
+                MouseFunctions.OnGUI();
                 CursorSettings.SetUnlockCursor(0, true);
                 GUIUtility.ScaleAroundPivot(ScaledPivot, Vector2.zero);
                 MainWindow = GUI.Window(0, MainWindow, MainWindowFunc, "SAIN AI Settings Editor", GetStyle(Style.window));
                 UnityInput.Current.ResetInputAxes();
+                ConfigEditingTracker.Update();
             }
         }
 
@@ -105,8 +100,7 @@ namespace SAIN.Editor
         {
             GUI.FocusWindow(TWCWindowID);
             CheckKeys();
-            if (ToggleKeyPressed || EscapeKeyPressed)
-            {
+            if (ToggleKeyPressed || EscapeKeyPressed) {
                 ToggleGUI();
                 return;
             }
@@ -116,6 +110,7 @@ namespace SAIN.Editor
             float space = DragRect.height + EditTabsClass.TabMenuRect.height;
             Space(space);
             GUITabs.CreateTabs(selectedTab);
+            MouseFunctions.OnGUI();
             DrawTooltip();
         }
 
@@ -135,14 +130,12 @@ namespace SAIN.Editor
         {
             var style = GetStyle(Style.toggle);
             SaveContent.tooltip = ConfigEditingTracker.GetUnsavedValuesString();
-            if (GUI.Button(SaveAllRect, SaveContent, GetStyle(Style.button)))
-            {
+            if (GUI.Button(SaveAllRect, SaveContent, GetStyle(Style.button))) {
                 PlaySound(EUISoundType.InsuranceInsured);
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
 
-            if (GUI.Button(ExitRect, "X", style))
-            {
+            if (GUI.Button(ExitRect, "X", style)) {
                 PlaySound(EUISoundType.MenuEscape);
                 ToggleGUI();
             }
@@ -150,30 +143,29 @@ namespace SAIN.Editor
 
         private static void DrawTooltip()
         {
-            if (!string.IsNullOrEmpty(GUI.tooltip))
-            {
-                const int width = 250;
-                var x = Event.current.mousePosition.x;
-                var y = Event.current.mousePosition.y + 15;
-                if (x > Screen.width / 3)
-                {
-                    x -= width;
-                }
-
-                var ToolTipStyle = GetStyle(Style.tooltip);
-                var height = ToolTipStyle.CalcHeight(new GUIContent(GUI.tooltip), width) + 10;
-                GUI.Box(new Rect(x, y, width, height), GUI.tooltip, ToolTipStyle);
+            if (string.IsNullOrEmpty(GUI.tooltip)) {
+                return;
             }
+
+            const int width = 250;
+            var x = Event.current.mousePosition.x;
+            var y = Event.current.mousePosition.y + 15;
+            if (x > Screen.width / 3) {
+                x -= width;
+            }
+
+            var ToolTipStyle = GetStyle(Style.tooltip);
+            var height = ToolTipStyle.CalcHeight(new GUIContent(GUI.tooltip), width) + 10;
+            GUI.Box(new Rect(x, y, width, height), GUI.tooltip, ToolTipStyle);
         }
 
-        public static bool DisplayingWindow
-        {
+        public static bool DisplayingWindow {
             get => CursorSettings.DisplayingWindow;
             set { CursorSettings.DisplayingWindow = value; }
         }
 
         public static Rect OpenTabRect = new Rect(0, 0, MainWindow.width, 1000f);
 
-        private static Texture2D DragBackgroundTexture => TexturesClass.GetTexture(ColorNames.MidGray);
+        private static Texture2D DragBackgroundTexture => TexturesClass.GetTexture(EGraynessLevel.Mid);
     }
 }

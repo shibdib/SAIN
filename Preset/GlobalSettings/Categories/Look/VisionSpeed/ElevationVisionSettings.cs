@@ -4,6 +4,8 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class ElevationVisionSettings : SAINSettingsBase<ElevationVisionSettings>, ISAINSettings
     {
+        public bool Enabled = true;
+
         [Name("High Elevation Angle Range")]
         [Description(
             "The difference of angle from the bot's vision to the enemy to fully apply HighElevationVisionModifier. " +

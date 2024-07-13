@@ -13,7 +13,7 @@ namespace SAIN.Editor
             Name = name ?? settingsType.Name;
             foreach (FieldInfo field in settingsType.GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
-                AttributesInfoClass attributes = new AttributesInfoClass(field);
+                ConfigInfoClass attributes = new ConfigInfoClass(field);
                 if (!attributes.Hidden)
                 {
                     var category = new Category(attributes);

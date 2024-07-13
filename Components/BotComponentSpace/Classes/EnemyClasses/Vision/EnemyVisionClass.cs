@@ -22,7 +22,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public float TimeLastSeen { get; private set; }
         public float LastChangeVisionTime { get; private set; }
         public float LastGainSightResult { get; set; }
-        public float GainSightCoef => _gainSight.Value;
+        public float GainSightCoef => _gainSight.GainSightModifier;
         public float VisionDistance => _visionDistance.Value;
 
         public EnemyAnglesClass Angles { get; }

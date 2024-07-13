@@ -22,8 +22,8 @@ namespace SAIN.SAINComponent.Classes.Decision
         private const float FREEZE_MAX_TIMESINCEHEARD = 80f;
 
         public SearchReasonsStruct DebugSearchReasons { get; private set; }
-        public float FreezeFor { get; private set; }
-        public float UnFreezeTime { get; private set; }
+        public float FrozenDuration { get; private set; }
+        public float TimeToUnfreeze { get; private set; }
         public StringBuilder FailedDecisionReasons { get; } = new StringBuilder();
         public bool ShiftCoverComplete { get; set; }
         public bool? DebugShallSearch { get; set; }
@@ -123,7 +123,10 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
 
-            if (shallDogFight(enemy, out _)) {
+            //if (BotOwner.WeaponManager?.HaveBullets == false) {
+            //    Decision = ECombatDecision.Retreat;
+            //}
+            else if (shallDogFight(enemy, out _)) {
                 Decision = ECombatDecision.DogFight;
             }
             else if (shallStandAndShoot(enemy, out _)) {
@@ -182,8 +185,8 @@ namespace SAIN.SAINComponent.Classes.Decision
         private void checkFreezeTime()
         {
             if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Freeze) {
-                FreezeFor = UnityEngine.Random.Range(10f, 120f);
-                UnFreezeTime = Time.time + FreezeFor;
+                FrozenDuration = UnityEngine.Random.Range(10f, 120f);
+                TimeToUnfreeze = Time.time + FrozenDuration;
             }
         }
 
@@ -215,11 +218,12 @@ namespace SAIN.SAINComponent.Classes.Decision
             }
 
             if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Freeze) {
-                FreezeFor = UnityEngine.Random.Range(10f, 120f);
-                UnFreezeTime = Time.time + FreezeFor;
+                float timeToFreeze = UnityEngine.Random.Range(10f, 120f) / Bot.Info.AggressionMultiplier;
+                FrozenDuration = timeToFreeze;
+                TimeToUnfreeze = Time.time + timeToFreeze;
             }
 
-            if (UnFreezeTime < Time.time) {
+            if (TimeToUnfreeze < Time.time) {
                 reason = "frozenTooLong";
                 return false;
             }

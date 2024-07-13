@@ -163,7 +163,6 @@ namespace SAIN.Editor
                                     {
                                         EntryHeight = 30,
                                         SliderWidth = 0.45f,
-                                        MinMaxWidth = 0f,
                                         ResultWidth = 0.065f,
                                         ResetWidth = 0.05f
                                     };

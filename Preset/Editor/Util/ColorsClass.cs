@@ -4,6 +4,19 @@ using UnityEngine;
 
 namespace SAIN.Editor.Util
 {
+    public enum EGraynessLevel
+    {
+        VeryLight,
+        Light,
+        BrightMid,
+        Mid,
+        DarkMid,
+        Dark,
+        Darker,
+        VeryDark,
+        AlmostBlack,
+    }
+
     public static class ColorsClass
     {
         public static void CreateCache()
@@ -14,20 +27,26 @@ namespace SAIN.Editor.Util
                 AddColor(ColorNames.Black, Color.black);
                 AddColor(ColorNames.Clear, Color.clear);
 
-                AddColor(ColorNames.LightRed, new Color(0.8f, 0.35f, 0.35f));
-                AddColor(ColorNames.MidRed, new Color(0.7f, 0.25f, 0.25f));
-                AddColor(ColorNames.DarkRed, new Color(0.6f, 0.15f, 0.15f));
-                AddColor(ColorNames.VeryDarkRed, new Color(0.8f, 0.35f, 0.35f));
-                AddColor(ColorNames.LightGray, Gray(0.3f));
-                AddColor(ColorNames.MidGray, Gray(0.2f));
-                AddColor(ColorNames.DarkGray, Gray(0.1f));
-                AddColor(ColorNames.VeryDarkGray, Gray(0.05f));
-                AddColor(ColorNames.VeryVeryDarkGray, Gray(0.025f));
+                AddColor(ColorNames.LightRed, new Color(0.8f, 0.35f, 0.35f, 0.85f));
+                AddColor(ColorNames.MidRed, new Color(0.7f, 0.25f, 0.25f, 0.85f));
+                AddColor(ColorNames.DarkRed, new Color(0.6f, 0.15f, 0.15f, 0.85f));
+                AddColor(ColorNames.VeryDarkRed, new Color(0.8f, 0.35f, 0.35f, 0.85f));
+
                 AddColor(ColorNames.LightBlue, new Color(0.4f, 0.4f, 0.9f));
                 AddColor(ColorNames.MidBlue, new Color(0.3f, 0.3f, 0.8f));
                 AddColor(ColorNames.DarkBlue, new Color(0.2f, 0.2f, 0.6f));
                 AddColor(ColorNames.VeryDarkBlue, new Color(0.1f, 0.1f, 0.5f));
-                AddColor(ColorNames.Gold, new Color(1f, 0.85f, 0f));
+                AddColor(ColorNames.Gold, new Color(0.9f, 0.8f, 0f, 0.9f));
+
+                AddColor(EGraynessLevel.VeryLight, Gray(0.35f));
+                AddColor(EGraynessLevel.Light, Gray(0.275f));
+                AddColor(EGraynessLevel.BrightMid, Gray(0.225f));
+                AddColor(EGraynessLevel.Mid, Gray(0.175f));
+                AddColor(EGraynessLevel.DarkMid, Gray(0.125f));
+                AddColor(EGraynessLevel.Dark, Gray(0.1f));
+                AddColor(EGraynessLevel.Darker, Gray(0.055f));
+                AddColor(EGraynessLevel.VeryDark, Gray(0.04f));
+                AddColor(EGraynessLevel.AlmostBlack, Gray(0.02f));
             }
         }
 
@@ -53,6 +72,7 @@ namespace SAIN.Editor.Util
         public static readonly string SchemeName;
 
         public static readonly Dictionary<ColorNames, Color> ColorSchemeDictionary = new Dictionary<ColorNames, Color>();
+        public static readonly Dictionary<EGraynessLevel, Color> GrayColorScheme = new Dictionary<EGraynessLevel, Color>();
 
         public static Color GetColor(ColorNames name)
         {
@@ -61,6 +81,27 @@ namespace SAIN.Editor.Util
                 return ColorSchemeDictionary[name];
             }
             return Color.green;
+        }
+
+        public static Color GetColor(EGraynessLevel level)
+        {
+            if (GrayColorScheme.ContainsKey(level))
+            {
+                return GrayColorScheme[level];
+            }
+            return Color.green;
+        }
+
+        public static void AddColor(EGraynessLevel name, Color color)
+        {
+            if (!GrayColorScheme.ContainsKey(name))
+            {
+                GrayColorScheme.Add(name, color);
+            }
+            else
+            {
+                GrayColorScheme[name] = color;
+            }
         }
 
         public static void AddColor(ColorNames name, Color color)

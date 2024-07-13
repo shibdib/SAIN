@@ -11,8 +11,7 @@ namespace SAIN.Editor
     {
         public static void CreateCache()
         {
-            if (Styles.Count == 0)
-            {
+            if (Styles.Count == 0) {
                 CreateStyles();
             }
         }
@@ -21,8 +20,7 @@ namespace SAIN.Editor
 
         public static GUIStyle GetStyle(Style key)
         {
-            if (!Styles.ContainsKey(key))
-            {
+            if (!Styles.ContainsKey(key)) {
                 Styles.Add(key, new GUIStyle(GUI.skin.box));
             }
             return Styles[key];
@@ -30,16 +28,13 @@ namespace SAIN.Editor
 
         public static GUIStyle GetFontStyleDynamic(Style key, bool active)
         {
-            if (!DynamicStyles.ContainsKey(key))
-            {
+            if (!DynamicStyles.ContainsKey(key)) {
                 var originalStyle = GetStyle(key);
-                var normalStyle = new GUIStyle(originalStyle)
-                {
+                var normalStyle = new GUIStyle(originalStyle) {
                     fontStyle = FontStyle.Normal,
                     alignment = TextAnchor.MiddleCenter
                 };
-                var activeStyle = new GUIStyle(originalStyle)
-                {
+                var activeStyle = new GUIStyle(originalStyle) {
                     fontStyle = FontStyle.Bold,
                     alignment = TextAnchor.MiddleCenter
                 };
@@ -49,8 +44,7 @@ namespace SAIN.Editor
                 TextColorAllStates(gold, activeStyle);
 
                 DynamicStyles.Add(key,
-                    new DynamicStyle
-                    {
+                    new DynamicStyle {
                         Normal = normalStyle,
                         Active = activeStyle
                     }
@@ -61,14 +55,12 @@ namespace SAIN.Editor
             return active ? dynamicStyle.Active : dynamicStyle.Normal;
         }
 
-
         private static readonly Dictionary<Style, DynamicStyle> DynamicStyles = new Dictionary<Style, DynamicStyle>();
 
         private static void CreateStyles()
         {
             GUIStyle LabelStyle =
-                new GUIStyle(GUI.skin.label)
-                {
+                new GUIStyle(GUI.skin.label) {
                     padding = new RectOffset(5, 5, 0, 0),
                     margin = new RectOffset(5, 5, 5, 5),
                     border = new RectOffset(5, 5, 0, 0),
@@ -77,8 +69,7 @@ namespace SAIN.Editor
                 };
 
             GUIStyle ButtonStyle =
-                new GUIStyle(GUI.skin.button)
-                {
+                new GUIStyle(GUI.skin.button) {
                     padding = LabelStyle.padding,
                     margin = LabelStyle.margin,
                     border = LabelStyle.border,
@@ -89,8 +80,7 @@ namespace SAIN.Editor
                 };
 
             GUIStyle BoxStyle =
-                new GUIStyle(GUI.skin.box)
-                {
+                new GUIStyle(GUI.skin.box) {
                     padding = LabelStyle.padding,
                     margin = LabelStyle.margin,
                     border = LabelStyle.border,
@@ -101,8 +91,7 @@ namespace SAIN.Editor
                 };
 
             GUIStyle ToggleStyle =
-                new GUIStyle(GUI.skin.toggle)
-                {
+                new GUIStyle(GUI.skin.toggle) {
                     padding = LabelStyle.padding,
                     margin = LabelStyle.margin,
                     border = LabelStyle.border,
@@ -112,10 +101,8 @@ namespace SAIN.Editor
                     fontStyle = FontStyle.Normal,
                 };
 
-
             GUIStyle TextAreaStyle =
-                new GUIStyle(GUI.skin.textArea)
-                {
+                new GUIStyle(GUI.skin.textArea) {
                     padding = LabelStyle.padding,
                     margin = LabelStyle.margin,
                     border = LabelStyle.border,
@@ -126,8 +113,7 @@ namespace SAIN.Editor
                 };
 
             GUIStyle TextFieldStyle =
-                new GUIStyle(GUI.skin.textField)
-                {
+                new GUIStyle(GUI.skin.textField) {
                     padding = LabelStyle.padding,
                     margin = LabelStyle.margin,
                     border = LabelStyle.border,
@@ -138,8 +124,7 @@ namespace SAIN.Editor
                 };
 
             GUIStyle ScrollViewStyle =
-                new GUIStyle(GUI.skin.scrollView)
-                {
+                new GUIStyle(GUI.skin.scrollView) {
                     padding = LabelStyle.padding,
                     margin = LabelStyle.margin,
                     border = LabelStyle.border,
@@ -163,10 +148,26 @@ namespace SAIN.Editor
                 new GUIStyle(GUI.skin.verticalScrollbarUpButton);
 
             GUIStyle HorizontalSliderStyle =
-                new GUIStyle(GUI.skin.horizontalSlider);
+                new GUIStyle(GUI.skin.horizontalSlider) {
+                    padding = LabelStyle.padding,
+                    margin = LabelStyle.margin,
+                    border = LabelStyle.border,
+                    overflow = LabelStyle.overflow,
+                    contentOffset = LabelStyle.contentOffset,
+                    alignment = TextAnchor.MiddleLeft,
+                    fontStyle = FontStyle.Normal
+                };
 
             GUIStyle HorizontalSliderThumbStyle =
-                new GUIStyle(GUI.skin.horizontalSliderThumb);
+                new GUIStyle(GUI.skin.horizontalSliderThumb) {
+                    padding = LabelStyle.padding,
+                    margin = LabelStyle.margin,
+                    border = LabelStyle.border,
+                    overflow = LabelStyle.overflow,
+                    contentOffset = LabelStyle.contentOffset,
+                    alignment = TextAnchor.MiddleLeft,
+                    fontStyle = FontStyle.Normal
+                };
 
             GUIStyle VerticalSliderStyle =
                 new GUIStyle(GUI.skin.verticalSlider);
@@ -175,8 +176,7 @@ namespace SAIN.Editor
                 new GUIStyle(GUI.skin.verticalSliderThumb);
 
             GUIStyle ListStyle =
-                new GUIStyle(GUI.skin.toggle)
-                {
+                new GUIStyle(GUI.skin.toggle) {
                     padding = LabelStyle.padding,
                     margin = LabelStyle.margin,
                     border = LabelStyle.border,
@@ -187,8 +187,7 @@ namespace SAIN.Editor
                 };
 
             GUIStyle ToolTipStyle =
-                new GUIStyle(GUI.skin.box)
-                {
+                new GUIStyle(GUI.skin.box) {
                     padding = new RectOffset(8, 8, 8, 8),
                     border = new RectOffset(5, 5, 5, 5),
                     wordWrap = true,
@@ -198,15 +197,13 @@ namespace SAIN.Editor
                 };
 
             GUIStyle BlankBackgroundStyle =
-                new GUIStyle(LabelStyle)
-                {
+                new GUIStyle(LabelStyle) {
                     alignment = TextAnchor.MiddleLeft,
                     fontStyle = FontStyle.Normal
                 };
 
             GUIStyle AlertStyle =
-                new GUIStyle(GUI.skin.box)
-                {
+                new GUIStyle(GUI.skin.box) {
                     padding = LabelStyle.padding,
                     margin = LabelStyle.margin,
                     border = LabelStyle.border,
@@ -217,19 +214,30 @@ namespace SAIN.Editor
                 };
 
             Texture2D TexMidGray = TexturesClass.GetTexture(
-                ColorNames.MidGray);
+                EGraynessLevel.Mid);
             Texture2D TexDarkGray = TexturesClass.GetTexture(
-                ColorNames.DarkGray);
+                EGraynessLevel.Dark);
             Texture2D TexVeryDarkGray = TexturesClass.GetTexture(
-                ColorNames.VeryDarkGray);
+                EGraynessLevel.VeryDark);
             Texture2D TexMidRed = TexturesClass.GetTexture(
                 ColorNames.MidRed);
             Texture2D TexDarkRed = TexturesClass.GetTexture(
                 ColorNames.DarkRed);
 
             Color ColorGold = ColorsClass.GetColor(ColorNames.Gold);
+            Color fadedWhite = new Color(0.9f, 0.9f, 0.9f, 0.9f);
 
-            TextColorAllStates(Color.white, ColorGold,
+            TextColorAllStates(fadedWhite, ColorGold,
+                WindowStyle,
+                ListStyle,
+                ButtonStyle,
+                ToggleStyle,
+                TextFieldStyle,
+                TextAreaStyle,
+                AlertStyle
+                );
+
+            TextColorHover(Color.white,
                 WindowStyle,
                 ListStyle,
                 ButtonStyle,
@@ -242,8 +250,15 @@ namespace SAIN.Editor
             BackgroundAllStates(null, BlankBackgroundStyle);
 
             TextColorAllStates(
-                Color.white,
+                fadedWhite,
+                BlankBackgroundStyle,
+                ToolTipStyle,
+                BoxStyle,
+                LabelStyle
+                );
 
+            TextColorHover(
+                Color.white,
                 BlankBackgroundStyle,
                 ToolTipStyle,
                 BoxStyle,
@@ -314,14 +329,21 @@ namespace SAIN.Editor
                 ToolTipStyle
                 );
 
+            BackgroundHover(TexturesClass.GetTexture(EGraynessLevel.DarkMid),
+                VerticalScrollbarStyle,
+                VerticalScrollbarUpButtonStyle,
+                VerticalScrollbarDownButtonStyle,
+                BoxStyle,
+                LabelStyle,
+                ToolTipStyle);
+
             BackgroundAllStates(
                 TexDarkRed,
                 VerticalScrollbarThumbStyle
                 );
 
             GUIStyle selectGridStyle =
-                new GUIStyle(ToggleStyle)
-                {
+                new GUIStyle(ToggleStyle) {
                     alignment = TextAnchor.MiddleCenter,
                     fontStyle = FontStyle.Normal,
                 };
@@ -330,28 +352,24 @@ namespace SAIN.Editor
             LabelStyle.padding = BoxStyle.margin;
 
             GUIStyle dragBarStyle =
-                new GUIStyle(BlankBackgroundStyle)
-                {
+                new GUIStyle(BlankBackgroundStyle) {
                     alignment = TextAnchor.MiddleLeft,
                     padding = new RectOffset(10, 10, 3, 3)
                 };
 
             GUIStyle botTypeGridStyle =
-                new GUIStyle(ToggleStyle)
-                {
+                new GUIStyle(ToggleStyle) {
                     fontStyle = FontStyle.Normal,
                     alignment = TextAnchor.MiddleLeft
                 };
 
             GUIStyle SelectionListStyle =
-                new GUIStyle(ToggleStyle)
-                {
+                new GUIStyle(ToggleStyle) {
                     fontStyle = FontStyle.Normal,
                     alignment = TextAnchor.MiddleLeft
                 };
 
-            GUIStyle botTypeSectionStyle = new GUIStyle(ToggleStyle)
-            {
+            GUIStyle botTypeSectionStyle = new GUIStyle(ToggleStyle) {
                 alignment = TextAnchor.MiddleLeft,
                 fontStyle = FontStyle.Normal
             };
@@ -382,10 +400,8 @@ namespace SAIN.Editor
             Styles.Add(Style.blankbox, BlankBackgroundStyle);
             Styles.Add(Style.tooltip, ToolTipStyle);
 
-            foreach (var style in EnumValues.GetEnum<Style>())
-            {
-                if (!Styles.ContainsKey(style))
-                {
+            foreach (var style in EnumValues.GetEnum<Style>()) {
+                if (!Styles.ContainsKey(style)) {
                     //Logger.LogWarning(style);
                 }
             }

@@ -1,34 +1,52 @@
 ﻿using Comfort.Common;
 using EFT.UI;
-using System.Diagnostics;
+using HarmonyLib;
 using UnityEngine;
 
 namespace SAIN.Editor
 {
     internal class Sounds
     {
-        public static void ButtonClick()
+        private static GUISounds GUISounds => Singleton<GUISounds>.Instance;
+        private static UISoundsWrapper _soundsWrapper;
+        private static AudioSource _audioSource;
+
+        private static void getWrapper()
         {
-            PlaySound(EUISoundType.ButtonClick);
+            _soundsWrapper = AccessTools.Field(typeof(GUISounds), "uisoundsWrapper_0").GetValue(GUISounds) as UISoundsWrapper;
+            _audioSource = AccessTools.Field(typeof(GUISounds), "audioSource_0").GetValue(GUISounds) as AudioSource;
         }
 
-        public static void ResetClickSound()
+        public static void PlaySound(EUISoundType soundType, float volume = 1f)
         {
-            PlaySound(EUISoundType.InsuranceInsured);
-        }
-
-        public static void PlaySound(EUISoundType soundType)
-        {
-            if (SoundLimiter < Time.time)
-            {
-                SoundLimiter = Time.time + 0.1f;
-                Singleton<GUISounds>.Instance.PlayUISound(soundType);
-                if (SAINPlugin.DebugMode)
-                {
-                    Logger.LogDebug(soundType);
-                }
+            volume = Mathf.Clamp(volume, 0f, 1f);
+            if (_soundsWrapper == null) {
+                getWrapper();
+            }
+            if (SoundLimiter < Time.time) {
+                SoundLimiter = Time.time + 0.05f;
+                playSound(soundType, volume);
             }
         }
+
+        private static void playSound(EUISoundType soundType, float volume)
+        {
+            if (_soundsWrapper == null || _audioSource == null) {
+                Logger.LogWarning($"null");
+                Singleton<GUISounds>.Instance.PlayUISound(soundType);
+            }
+            else {
+                var clip = _soundsWrapper.GetUIClip(soundType);
+                if (clip == null) {
+                    return;
+                }
+                _audioSource.PlayOneShot(clip, volume);
+            }
+            if (SAINPlugin.DebugMode) {
+                Logger.LogDebug(soundType);
+            }
+        }
+
         private static float SoundLimiter;
     }
 }

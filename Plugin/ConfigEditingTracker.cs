@@ -7,10 +7,18 @@ namespace SAIN.Plugin
 {
     internal static class ConfigEditingTracker
     {
+        public static void Update()
+        {
+            SettingChangedThisFrame = false;
+        }
+
+        public static bool SettingChangedThisFrame { get; private set; }
+
         public static void Add(string name, object value)
         {
             addConfigValue(name, value);
             clearAndCreateStringBuilder();
+            SettingChangedThisFrame = true;
         }
 
         private static void addConfigValue(string name, object value)
@@ -23,13 +31,13 @@ namespace SAIN.Plugin
             EditedConfigValues.Add(name, value);
         }
 
-        public static void Remove(AttributesInfoClass info)
+        public static void Remove(ConfigInfoClass info)
         {
             EditedConfigValues.Remove(info.Name);
             clearAndCreateStringBuilder();
         }
 
-        public static bool WasEdited(AttributesInfoClass info)
+        public static bool WasEdited(ConfigInfoClass info)
         {
             return EditedConfigValues.ContainsKey(info.Name);
         }

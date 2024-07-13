@@ -1,9 +1,13 @@
 ﻿using EFT.UI;
+using RootMotion.FinalIK;
+using SAIN.Attributes;
 using SAIN.Editor.Util;
+using SAIN.Helpers;
 using SAIN.Plugin;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static RootMotion.FinalIK.GenericPoser;
 using static SAIN.Editor.SAINLayout;
 
 namespace SAIN.Editor
@@ -429,7 +433,7 @@ namespace SAIN.Editor
             }
             else
             {
-                texture = TexturesClass.GetTexture(ColorNames.MidGray);
+                texture = TexturesClass.GetTexture(EGraynessLevel.Mid);
             }
             ApplyToStyle.BackgroundAllStates(texture, style);
             return style;
@@ -568,17 +572,26 @@ namespace SAIN.Editor
             return Toggle(value, new GUIContent(name, description), EUISoundType.MenuDropdown, Height(height));
         }
 
-        public static int CreateSlider(int value, int min, int max, params GUILayoutOption[] options)
+        public static float CreateSlider(float value, float min, float max, float rounding, params GUILayoutOption[] options)
         {
-            value = Mathf.RoundToInt(HorizontalSlider(value, min, max, null, options));
+            float oldValue = value;
+            value = HorizontalSlider(oldValue, min, max, null, options);
             Backgrounds(value, min, max);
+            if (!MouseFunctions.MouseIsMoving) {
+                value = value.Round(rounding);
+            }
             return value;
         }
 
-        public static float CreateSlider(float value, float min, float max, params GUILayoutOption[] options)
+        public static float CreateSlider(float value, ConfigInfoClass info, GUIEntryConfig config)
         {
-            value = HorizontalSlider(value, min, max, null, options);
-            Backgrounds(value, min, max);
+            float oldValue = value;
+            value = HorizontalSlider(value, info.Min, info.Max, null, config.Toggle);
+            Backgrounds(value, info.Min, info.Max);
+            Box(value.Round(info.Rounding).ToString(), config.Result);
+            if (!MouseFunctions.MouseIsMoving) {
+                value = value.Round(info.Rounding);
+            }
             return value;
         }
 

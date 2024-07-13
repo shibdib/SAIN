@@ -33,6 +33,7 @@ namespace SAIN.SAINComponent.Classes.Info
         public float PercentageBeforeExtract { get; set; } = -1f;
         public bool ForceExtract { get; set; } = false;
         public float ForgetEnemyTime { get; private set; }
+        public float AggressionMultiplier { get; private set; }
 
         public SAINBotInfoClass(BotComponent sain) : base(sain)
         {
@@ -63,7 +64,7 @@ namespace SAIN.SAINComponent.Classes.Info
             Personality = GetPersonality(out var settings);
             PersonalitySettingsClass = settings;
 
-            _aggressionMulti = (FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.General.AggressionMultiplier).Round100();
+            AggressionMultiplier = (FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.General.AggressionMultiplier).Round100();
 
             CalcTimeBeforeSearch();
             CalcHoldGroundDelay();
@@ -74,7 +75,7 @@ namespace SAIN.SAINComponent.Classes.Info
         public void CalcHoldGroundDelay()
         {
             var settings = PersonalitySettings;
-            float baseTime = settings.General.HoldGroundBaseTime * _aggressionMulti;
+            float baseTime = settings.General.HoldGroundBaseTime * AggressionMultiplier;
 
             float min = settings.General.HoldGroundMinRandom;
             float max = settings.General.HoldGroundMaxRandom;
@@ -97,7 +98,7 @@ namespace SAIN.SAINComponent.Classes.Info
                 searchTime = PersonalitySettings.Search.SearchBaseTime;
             }
 
-            searchTime = (searchTime.Randomize(0.66f, 1.33f) / _aggressionMulti).Round100();
+            searchTime = (searchTime.Randomize(0.66f, 1.33f) / AggressionMultiplier).Round100();
             if (searchTime < 0.1f)
             {
                 searchTime = 0.1f;
@@ -207,7 +208,6 @@ namespace SAIN.SAINComponent.Classes.Info
             UpdateSettingClass.ManualSettingsUpdate(Profile.WildSpawnType, Profile.BotDifficulty, BotOwner, FileSettings);
         }
 
-        private float _aggressionMulti;
         private SAINSettingsClass _fileSettings;
 
         private static FieldInfo[] EFTSettingsCategories;

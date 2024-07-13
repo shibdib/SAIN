@@ -98,7 +98,7 @@ namespace SAIN.SAINComponent.Classes.Search
                 return true;
             }
             if (ShallBeStealthyDuringSearch(enemy) &&
-                Bot.Decision.EnemyDecisions.UnFreezeTime > Time.time &&
+                Bot.Decision.EnemyDecisions.TimeToUnfreeze > Time.time &&
                 enemy.TimeSinceLastKnownUpdated > 10f)
             {
                 reason = EWantToSearchReason.BeingStealthy;

@@ -7,7 +7,7 @@ namespace SAIN.Editor
 {
     public sealed class Category
     {
-        public Category(AttributesInfoClass attributes)
+        public Category(ConfigInfoClass attributes)
         {
             CategoryInfo = attributes;
             foreach (FieldInfo field in attributes.ValueType.GetFields(BindingFlags.Public | BindingFlags.Instance))
@@ -30,10 +30,10 @@ namespace SAIN.Editor
             CategoryInfo.SetValue(obj, value);
         }
 
-        public readonly AttributesInfoClass CategoryInfo;
+        public readonly ConfigInfoClass CategoryInfo;
 
-        public readonly List<AttributesInfoClass> FieldAttributesList = new List<AttributesInfoClass>();
-        public readonly List<AttributesInfoClass> SelectedList = new List<AttributesInfoClass>();
+        public readonly List<ConfigInfoClass> FieldAttributesList = new List<ConfigInfoClass>();
+        public readonly List<ConfigInfoClass> SelectedList = new List<ConfigInfoClass>();
 
         public bool Open = false;
         public Vector2 Scroll = Vector2.zero;

@@ -10,15 +10,15 @@ using System.Reflection;
 
 namespace SAIN.Attributes
 {
-    public sealed class AttributesInfoClass
+    public sealed class ConfigInfoClass
     {
-        public AttributesInfoClass(MemberInfo member)
+        public ConfigInfoClass(MemberInfo member)
         {
             MemberInfo = member;
             GetInfo(member);
         }
 
-        public AttributesInfoClass(string name)
+        public ConfigInfoClass(string name)
         {
             Name = name;
         }

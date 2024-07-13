@@ -30,7 +30,7 @@ namespace SAIN.Preset.GlobalSettings
 
         public override void Init(List<ISAINSettings> list)
         {
-            list.Add(VisionSpeed);
+            VisionSpeed.Init(list);
             list.Add(VisionDistance);
             list.Add(NotLooking);
             list.Add(NoBushESP);

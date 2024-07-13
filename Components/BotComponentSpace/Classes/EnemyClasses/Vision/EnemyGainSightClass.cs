@@ -1,11 +1,24 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using SAIN.Components;
+using SAIN.Preset.GlobalSettings;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyGainSightClass : EnemyBase
     {
+        public float GainSightModifier {
+            get
+            {
+                if (_nextCheckVisTime < Time.time) {
+                    _nextCheckVisTime = Time.time + 0.05f;
+                    _gainSightModifier = calcModifier() * calcRepeatSeenCoef();
+                }
+                return _gainSightModifier;
+            }
+        }
+
         private const float DIST_SEEN_MIN_COEF = 0.01f;
         private const float DIST_SEEN_MIN_DIST = 1f;
         private const float DIST_SEEN_MAX_DIST = 25f;
@@ -24,25 +37,27 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private const float ENEMYLIGHT_NVGS_IR_LASER_MOD = 0.7f;
         private const float ENEMYLIGHT_NVGS_IR_LIGHT_MOD = 0.85f;
 
-        private const float PARTS_VISIBLE_MIN_DIST = 20f;
-        private const float PARTS_VISIBLE_MAX_PARTS = 5;
+        private const float PARTS_VISIBLE_MIN_DIST = 12.5f;
+        private const float PARTS_VISIBLE_MAX_PARTS = 6;
         private const float PARTS_VISIBLE_MIN_PARTS = 1;
-        private const float PARTS_VISIBLE_MAX_COEF = 1.75f;
-        private const float PARTS_VISIBLE_MIN_COEF = 0.9f;
+
+        private float PARTS_VISIBLE_MAX_COEF => _settings.PartsVisibility.PARTS_VISIBLE_MAX_COEF;
+        private float PARTS_VISIBLE_MIN_COEF => _settings.PartsVisibility.PARTS_VISIBLE_MIN_COEF;
+
         private const float PARTS_VISIBLE_MAX_TIME_SINCE_CHECKED = 2f;
         private const float PARTS_VISIBLE_MAX_TIME_SINCE_VISIBLE = 1f;
 
         private const float ELEVATION_LASTKNOWN_MAX_DIST = 1.5f;
         private const float ELEVATION_MIN_ANGLE = 5f;
 
-        private const bool THIRDPARTY_VISION_ENABLED = true;
-        private const float THIRDPARTY_VISION_START_ANGLE = 30;
-        private const float THIRDPARTY_VISION_MAX_COEF = 1.5f;
+        private float THIRDPARTY_VISION_START_ANGLE => _settings.ThirdParty.THIRDPARTY_VISION_START_ANGLE;
+        private float THIRDPARTY_VISION_MAX_COEF => _settings.ThirdParty.THIRDPARTY_VISION_MAX_COEF;
+
         private const float THIRDPARTY_VISION_MAX_DIST_LASTKNOWN = 50f;
 
-        private const bool PERIPHERAL_VISION_ENABLED = true;
-        private const float PERIPHERAL_VISION_START_ANGLE = 30;
-        private const float PERIPHERAL_VISION_MAX_REDUCTION_COEF = 2f;
+        private float PERIPHERAL_VISION_START_ANGLE => _settings.Peripheral.PERIPHERAL_VISION_START_ANGLE;
+        private float PERIPHERAL_VISION_MAX_REDUCTION_COEF => _settings.Peripheral.PERIPHERAL_VISION_MAX_REDUCTION_COEF;
+
         private const float PERIPHERAL_VISION_SPEED_DIRECT_FRONT_ANGLE = 1f;
         private const float PERIPHERAL_VISION_SPEED_DIRECT_FRONT_MOD = 0.75f;
         private const float PERIPHERAL_VISION_SPEED_CLOSE_FRONT_ANGLE = 5f;
@@ -52,19 +67,73 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private const float PERIPHERAL_VISION_SPEED_ENEMY_VERYCLOSE_DIST = 5;
         private const float PERIPHERAL_VISION_SPEED_ENEMY_VERYCLOSE_MOD = 0.8f;
 
-        public EnemyGainSightClass(Enemy enemy) : base(enemy)
+        private float PRONE_VISION_SPEED_COEF => _settings.Pose.PRONE_VISION_SPEED_COEF;
+        private float DUCK_VISION_SPEED_COEF => _settings.Pose.DUCK_VISION_SPEED_COEF;
+
+        private float calcModifier()
         {
+            float partMod = calcPartsMod();
+            float gearMod = calcGearMod();
+
+            bool flareEnabled = EnemyPlayer.AIData?.GetFlare == true &&
+                Enemy.EnemyPlayerComponent?.Equipment.CurrentWeapon?.HasSuppressor == false;
+            float weatherMod = calcWeatherMod(flareEnabled);
+            float timeMod = calcTimeModifier(flareEnabled);
+            float moveMod = calcMoveModifier();
+            float elevMod = calcElevationModifier();
+            float thirdPartyMod = calcThirdPartyMod();
+            float angleMod = calcAngleMod();
+            float poseMod = poseModifier();
+
+            float notLookMod = 1f;
+            if (!Enemy.IsAI)
+                notLookMod = SAINNotLooking.GetVisionSpeedDecrease(Enemy.EnemyInfo);
+
+            float result =
+                1f *
+                partMod *
+                gearMod *
+                weatherMod *
+                timeMod *
+                moveMod *
+                elevMod *
+                thirdPartyMod *
+                angleMod *
+                notLookMod *
+                poseMod;
+
+            if (Player.IsInPronePose) {
+                result *= PRONE_VISION_SPEED_COEF;
+            }
+            else if (Player.Pose == EPlayerPose.Duck) {
+                result *= DUCK_VISION_SPEED_COEF;
+            }
+
+            //if (EnemyPlayer.IsYourPlayer && result != 1f)
+            //{
+            //    Logger.LogWarning($"GainSight Time Result: [{result}] : partMod {partMod} : gearMod {gearMod} : flareMod {flareMod} : moveMod {moveMod} : elevMod {elevMod} : posFlareMod {posFlareMod} : thirdPartyMod {thirdPartyMod} : angleMod {angleMod} : notLookMod {notLookMod} ");
+            //}
+
+            return result;
         }
 
-        public float Value {
-            get
-            {
-                if (_nextCheckVisTime < Time.time) {
-                    _nextCheckVisTime = Time.time + 0.05f;
-                    _gainSightModifier = GetGainSightModifier() * calcRepeatSeenCoef();
-                }
-                return _gainSightModifier;
+        private float poseModifier()
+        {
+            if (_settings.Pose.Enabled == false) {
+                return 1f;
             }
+            float result = 1f;
+            if (Player.IsInPronePose) {
+                result *= PRONE_VISION_SPEED_COEF;
+            }
+            else if (Player.Pose == EPlayerPose.Duck) {
+                result *= DUCK_VISION_SPEED_COEF;
+            }
+            return result;
+        }
+
+        public EnemyGainSightClass(Enemy enemy) : base(enemy)
+        {
         }
 
         private float calcRepeatSeenCoef()
@@ -247,49 +316,15 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return SAINBotController.Instance.TimeVision.TimeGainSightModifier;
         }
 
-        private float GetGainSightModifier()
-        {
-            float partMod = calcPartsMod();
-            float gearMod = calcGearMod();
-
-            bool flareEnabled = EnemyPlayer.AIData?.GetFlare == true &&
-                Enemy.EnemyPlayerComponent?.Equipment.CurrentWeapon?.HasSuppressor == false;
-            float weatherMod = calcWeatherMod(flareEnabled);
-            float timeMod = calcTimeModifier(flareEnabled);
-
-            float moveMod = calcMoveModifier();
-            float elevMod = calcElevationModifier();
-            float thirdPartyMod = calcThirdPartyMod();
-            float angleMod = calcAngleMod();
-
-            float notLookMod = 1f;
-            if (!Enemy.IsAI)
-                notLookMod = SAINNotLooking.GetVisionSpeedDecrease(Enemy.EnemyInfo);
-
-            float result = 1f * partMod * gearMod * weatherMod * timeMod * moveMod * elevMod * thirdPartyMod * angleMod * notLookMod;
-
-            if (Player.IsInPronePose) {
-                result *= PRONE_VISION_SPEED_COEF;
-            }
-            else if (Player.Pose == EPlayerPose.Duck) {
-                result *= DUCK_VISION_SPEED_COEF;
-            }
-
-            //if (EnemyPlayer.IsYourPlayer && result != 1f)
-            //{
-            //    Logger.LogWarning($"GainSight Time Result: [{result}] : partMod {partMod} : gearMod {gearMod} : flareMod {flareMod} : moveMod {moveMod} : elevMod {elevMod} : posFlareMod {posFlareMod} : thirdPartyMod {thirdPartyMod} : angleMod {angleMod} : notLookMod {notLookMod} ");
-            //}
-
-            return result;
-        }
-
-        private const float PRONE_VISION_SPEED_COEF = 1.5f;
-        private const float DUCK_VISION_SPEED_COEF = 1.2f;
-
         // private static float _nextLogTime;
+
+        private static VisionSpeedSettings _settings => GlobalSettingsClass.Instance.Look.VisionSpeed;
 
         private float calcPartsMod()
         {
+            if (_settings.PartsVisibility.Enabled == false) {
+                return 1f;
+            }
             if (Enemy.IsAI) {
                 return 1f;
             }
@@ -331,8 +366,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float calcMoveModifier()
         {
+            if (_settings.Movement.Enabled == false) {
+                return 1f;
+            }
             var look = SAINPlugin.LoadedPreset.GlobalSettings.Look.VisionSpeed;
-            return Mathf.Lerp(1, look.SprintingVisionModifier, Enemy.Vision.EnemyVelocity);
+            return Mathf.Lerp(1, _settings.Movement.MOVEMENT_VISION_MULTIPLIER, Enemy.Vision.EnemyVelocity);
         }
 
         private bool isLastKnownAtSameElev()
@@ -349,6 +387,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float calcElevationModifier()
         {
+            if (_settings.Elevation.Enabled == false) {
+                return 1f;
+            }
             if (isLastKnownAtSameElev())
                 return 1f;
 
@@ -376,7 +417,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float calcThirdPartyMod()
         {
-            if (!THIRDPARTY_VISION_ENABLED) {
+            if (_settings.ThirdParty.Enabled == false) {
                 return 1f;
             }
             if (Enemy.IsCurrentEnemy) {
@@ -421,7 +462,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float calcAngleMod()
         {
-            if (!PERIPHERAL_VISION_ENABLED) {
+            if (_settings.Peripheral.Enabled == false) {
                 return 1f;
             }
             float angle = Enemy.Vision.Angles.AngleToEnemyHorizontal;
