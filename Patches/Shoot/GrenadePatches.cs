@@ -38,7 +38,7 @@ namespace SAIN.Patches.Shoot.Grenades
                 case GrenadeActionType.ready:
                     {
                         ____checkStop = true;
-                        ____clearTime = Time.time + 3f;
+                        ____clearTime = Time.time + 4f;
                         ___GrenadeActionType = GrenadeActionType.change2grenade;
                         if (___grenade == null)
                         {
@@ -60,15 +60,6 @@ namespace SAIN.Patches.Shoot.Grenades
                     }
             }
             return false;
-        }
-
-        private static void ThrowGrenade(GrenadeClass throwWeap, Player player, Callback<GInterface145> callback)
-        {
-            Player.Class1109 @class = new Player.Class1109();
-            @class.player_0 = player;
-            @class.throwWeap = throwWeap;
-            Func<Player.QuickGrenadeThrowController> controllerFactory = new Func<Player.QuickGrenadeThrowController>(@class.method_0);
-            new Player.Process<Player.QuickGrenadeThrowController, GInterface145>(player, controllerFactory, @class.throwWeap, true, Player.AbstractProcess.Completion.Sync, Player.AbstractProcess.Confirmation.Succeed, false).method_0(null, callback, true);
         }
     }
 }

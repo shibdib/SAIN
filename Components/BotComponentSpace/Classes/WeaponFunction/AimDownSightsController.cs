@@ -28,9 +28,10 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             Enemy targetEnemy = Bot.CurrentTarget.CurrentTargetEnemy;
 
             // If a bot is sneaky, don't change ADS if their enemy is close to avoid alerting them.
-            if (Bot.Info.PersonalitySettings.Search.Sneaky && targetEnemy != null
-                && Bot.Enemy?.IsVisible != true
-                && targetEnemy.KnownPlaces.EnemyDistanceFromLastKnown < 40f)
+            if (Bot.Info.PersonalitySettings.Search.Sneaky && 
+                targetEnemy != null && 
+                !targetEnemy.IsVisible && 
+                targetEnemy.KnownPlaces.EnemyDistanceFromLastKnown < 40f)
             {
                 return;
             }

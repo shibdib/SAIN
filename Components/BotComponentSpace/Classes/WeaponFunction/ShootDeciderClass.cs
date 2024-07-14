@@ -1,6 +1,7 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
 using SAIN.Layers;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Info;
 using System;
@@ -355,6 +356,9 @@ namespace SAIN.SAINComponent.Classes
                 return null;
             }
             if (!Bot.Info.FileSettings.Aiming.AimCenterMass) {
+                return null;
+            }
+            if (Bot.Info.Profile.IsPMC && GlobalSettingsClass.Instance.Aiming.PMCSAimForHead) {
                 return null;
             }
             return enemy.CenterMass;

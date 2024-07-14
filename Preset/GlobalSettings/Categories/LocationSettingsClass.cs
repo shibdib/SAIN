@@ -11,7 +11,6 @@ namespace SAIN.Preset.GlobalSettings
         [JsonConstructor]
         public LocationSettingsClass()
         {
-
         }
 
         public LocationSettingsClass(float baseMod)
@@ -22,7 +21,6 @@ namespace SAIN.Preset.GlobalSettings
         private void addNewLocations(float baseMod)
         {
             foreach (var type in EnumValues.GetEnum<ELocation>()) {
-
                 if (Settings.ContainsKey(type))
                     continue;
 

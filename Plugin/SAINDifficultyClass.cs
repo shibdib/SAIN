@@ -108,10 +108,9 @@ namespace SAIN.Plugin
             var global = preset.GlobalSettings;
             global.Shoot.RecoilMultiplier = 2.0f;
             global.Shoot.GlobalScatterMultiplier = 1.5f;
-            global.Aiming.AccuracySpreadMultiGlobal = 2f;
             global.Aiming.FasterCQBReactionsGlobal = false;
             global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 0.66f;
-            global.Look.VisionSpeed.GlobalVisionSpeedModifier = 1.75f;
+            global.Look.VisionSpeed.GlobalVisionSpeedModifier = 2.5f;
 
             foreach (var bot in preset.BotSettings.SAINSettings)
             {
@@ -120,6 +119,7 @@ namespace SAIN.Plugin
                 {
                     setting.Value.Core.VisibleAngle = 120f;
                     setting.Value.Shoot.FireratMulti *= 0.6f;
+                    setting.Value.Look.MinimumVisionSpeed = 0.33f;
                 }
             }
             return preset;
@@ -132,7 +132,6 @@ namespace SAIN.Plugin
             var global = preset.GlobalSettings;
             global.Shoot.RecoilMultiplier = 1.6f;
             global.Shoot.GlobalScatterMultiplier = 1.2f;
-            global.Aiming.AccuracySpreadMultiGlobal = 1.5f;
             global.Aiming.FasterCQBReactionsGlobal = false;
             global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 0.85f;
             global.Look.VisionSpeed.GlobalVisionSpeedModifier = 1.25f;
@@ -144,6 +143,7 @@ namespace SAIN.Plugin
                 {
                     setting.Value.Core.VisibleAngle = 150f;
                     setting.Value.Shoot.FireratMulti *= 0.8f;
+                    setting.Value.Look.MinimumVisionSpeed = 0.1f;
                 }
             }
             return preset;
@@ -176,11 +176,11 @@ namespace SAIN.Plugin
                     {
                         diff.Aiming.BASE_HIT_AFFECTION_MIN_ANG = 1f;
                         diff.Aiming.BASE_HIT_AFFECTION_MAX_ANG = 3f;
-                        diff.Core.ScatteringPerMeter = 0.035f;
-                        diff.Core.ScatteringClosePerMeter = 0.125f;
+                        diff.Core.ScatteringPerMeter = 0.03f;
+                        diff.Core.ScatteringClosePerMeter = 0.080f;
                         diff.Core.GainSightCoef -= 0.005f;
-                        diff.Mind.WeaponProficiency = 0.7f;
-                        diff.Scattering.ScatterMultiplier = 0.85f;
+                        diff.Mind.WeaponProficiency = 0.75f;
+                        diff.Scattering.ScatterMultiplier = 0.8f;
                     }
 
                     var easy = pmcSettings[BotDifficulty.easy];
@@ -225,7 +225,6 @@ namespace SAIN.Plugin
             var global = preset.GlobalSettings;
             global.Shoot.RecoilMultiplier = 0.66f;
             global.Shoot.GlobalScatterMultiplier = 0.85f;
-            global.Aiming.AccuracySpreadMultiGlobal = 0.8f;
             global.Aiming.AimCenterMassGlobal = false;
             global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 1.33f;
             global.Look.VisionSpeed.GlobalVisionSpeedModifier = 0.8f;
@@ -236,8 +235,9 @@ namespace SAIN.Plugin
                 foreach (var setting in bot.Value.Settings)
                 {
                     setting.Value.Core.VisibleAngle = 170f;
-                    setting.Value.Shoot.FireratMulti *= 1.2f;
-                    //setting.Value.Core.VisibleDistance *= 1.25f;
+                    setting.Value.Shoot.FireratMulti = 1.5f;
+                    setting.Value.Shoot.BurstMulti = 2f;
+                    setting.Value.Aiming.AimCenterMass = false;
                 }
             }
             return preset;
@@ -250,11 +250,11 @@ namespace SAIN.Plugin
             var global = preset.GlobalSettings;
             global.Shoot.RecoilMultiplier = 0.25f;
             global.Shoot.GlobalScatterMultiplier = 0.01f;
-            global.Aiming.AccuracySpreadMultiGlobal = 0.33f;
-            global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 2f;
+            global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 3f;
             global.Look.VisionSpeed.GlobalVisionSpeedModifier = 0.65f;
             global.Aiming.AimCenterMassGlobal = false;
             global.Look.NotLooking.NotLookingToggle = false;
+            global.Aiming.PMCSAimForHead = true;
 
             foreach (var bot in preset.BotSettings.SAINSettings)
             {
@@ -262,7 +262,11 @@ namespace SAIN.Plugin
                 foreach (var setting in bot.Value.Settings)
                 {
                     setting.Value.Core.VisibleAngle = 180f;
-                    setting.Value.Shoot.FireratMulti *= 2f;
+                    setting.Value.Shoot.FireratMulti = 3f;
+                    setting.Value.Shoot.BurstMulti = 3f;
+                    setting.Value.Aiming.AimCenterMass = false;
+                    setting.Value.Core.VisibleAngle = 180;
+                    setting.Value.Core.GainSightCoef *= 0.66f;
                     //setting.Value.Core.VisibleDistance *= 1.25f;
                 }
             }

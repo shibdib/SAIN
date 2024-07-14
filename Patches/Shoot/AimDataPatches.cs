@@ -126,33 +126,12 @@ namespace SAIN.Patches.Shoot.Aim
         [PatchPrefix]
         public static void PatchPrefix(BotOwner ___botOwner_0, ref float additionCoef)
         {
-            additionCoef = 1f;
-            additionCoef *= SAINPlugin.LoadedPreset.GlobalSettings.Shoot.GlobalScatterMultiplier;
-            if (!SAINEnableClass.GetSAIN(___botOwner_0, out var bot))
+            if (SAINEnableClass.GetSAIN(___botOwner_0, out var bot))
             {
-                return;
+                additionCoef = 1f;
+                additionCoef *= SAINPlugin.LoadedPreset.GlobalSettings.Shoot.GlobalScatterMultiplier;
+                additionCoef *= bot.Info.FileSettings.Scattering.ScatterMultiplier;
             }
-            additionCoef *= bot.Info.FileSettings.Scattering.ScatterMultiplier;
-            Enemy enemy = bot.EnemyController.CheckAddEnemy(___botOwner_0?.Memory?.GoalEnemy?.Person);
-            if (enemy == null)
-            {
-                return;
-            }
-            var weapon = ___botOwner_0.WeaponManager.CurrentWeapon;
-            if (weapon != null)
-            {
-                switch (weapon.FireMode.FireMode)
-                {
-                    case EFT.InventoryLogic.Weapon.EFireMode.fullauto:
-                    case EFT.InventoryLogic.Weapon.EFireMode.burst:
-                        additionCoef *= ___botOwner_0.Settings.FileSettings.Shoot.AUTOMATIC_FIRE_SCATTERING_COEF;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-            additionCoef /= enemy.Aim.AimAndScatterMultiplier;
         }
     }
 

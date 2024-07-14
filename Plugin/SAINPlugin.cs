@@ -109,6 +109,9 @@ namespace SAIN
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
                 typeof(Patches.Hearing.OnMakingShotPatch),
                 typeof(Patches.Hearing.HearingSensorPatch),
+                
+                typeof(Patches.Hearing.GrenadeCollisionPatch),
+                typeof(Patches.Hearing.GrenadeCollisionPatch2),
 
                 typeof(Patches.Hearing.ToggleSoundPatch),
                 typeof(Patches.Hearing.SpawnInHandsSoundPatch),
@@ -152,7 +155,7 @@ namespace SAIN
 
                 typeof(Patches.Shoot.Aim.AimOffsetPatch),
                 typeof(Patches.Shoot.Aim.AimTimePatch),
-                //typeof(Patches.Shoot.Aim.ScatterPatch),
+                typeof(Patches.Shoot.Aim.ScatterPatch),
                 //typeof(Patches.Shoot.Aim.WeaponPresetPatch),
                 typeof(Patches.Shoot.Aim.ForceNoHeadAimPatch),
                 typeof(Patches.Shoot.Aim.AimRotateSpeedPatch),

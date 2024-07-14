@@ -92,6 +92,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return false;
         }
 
+        private GrenadeClass _currentGrenade;
+
         private bool canCheckThrow(out string reason)
         {
             if (!_grenadesEnabled)
@@ -229,17 +231,17 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             var weaponRoot = Bot.Transform.WeaponRoot;
             if (canThrowAGrenade(weaponRoot, pos))
             {
-                Logger.LogDebug($"{posString} Can Throw to pos");
+                //Logger.LogDebug($"{posString} Can Throw to pos");
                 return true;
             }
             if (canThrowAGrenade(weaponRoot, pos + (pos - Bot.Position).normalized))
             {
-                Logger.LogDebug($"{posString} Can Throw to pos + dir");
+                //Logger.LogDebug($"{posString} Can Throw to pos + dir");
                 return true;
             }
             if (canThrowAGrenade(weaponRoot, pos + Vector3.up * 0.5f))
             {
-                Logger.LogDebug($"{posString} Can Throw to pos + vector3.up * 0.5f");
+                //Logger.LogDebug($"{posString} Can Throw to pos + vector3.up * 0.5f");
                 return true;
             }
             return false;
@@ -345,9 +347,22 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             AIGreandeAng.ang5,
             AIGreandeAng.ang15,
             AIGreandeAng.ang25,
-            AIGreandeAng.ang35,
+            //AIGreandeAng.ang35,
         };
 
-        private static AIGreandeAng[] _outdoorAngles = EnumValues.GetEnum<AIGreandeAng>();
+        private static AIGreandeAng[] _outdoorAngles =
+        {
+            AIGreandeAng.ang15,
+            AIGreandeAng.ang25,
+            AIGreandeAng.ang35,
+            AIGreandeAng.ang45,
+            //AIGreandeAng.ang55,
+            //AIGreandeAng.ang65,
+        };
+
+        static GrenadeThrowDecider()
+        {
+
+        }
     }
 }

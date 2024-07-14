@@ -1,9 +1,5 @@
-﻿using Newtonsoft.Json;
-using SAIN.Attributes;
-using SAIN.Preset.BotSettings.SAINSettings.Categories;
-using SAIN.Preset.GlobalSettings;
+﻿using SAIN.Preset.BotSettings.SAINSettings.Categories;
 using SAIN.Preset.Personalities;
-using System.Collections.Generic;
 
 namespace SAIN.Preset.BotSettings.SAINSettings
 {

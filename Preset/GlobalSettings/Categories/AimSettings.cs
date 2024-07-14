@@ -102,11 +102,6 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0f, 1f, 10000f)]
         public float CenterMassVal = 0.3125f;
 
-        [Name("Global Accuracy Spread Multiplier")]
-        [Description("Higher = less accurate. Modifies all bots base accuracy and spread. 1.5 = 1.5x higher accuracy spread")]
-        [MinMax(0.1f, 10f, 100f)]
-        public float AccuracySpreadMultiGlobal = 1f;
-
         [Name("Global Faster CQB Reactions")]
         [Description("if this toggle is disabled, all bots will have Faster CQB Reactions turned OFF, so their individual settings will be ignored.")]
         public bool FasterCQBReactionsGlobal = true;

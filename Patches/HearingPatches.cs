@@ -24,8 +24,25 @@ namespace SAIN.Patches.Hearing
         [PatchPostfix]
         public static void Patch(Grenade __instance, SoundBank ___soundBank_0)
         {
-            float range = ___soundBank_0 != null ? ___soundBank_0.Rolloff : 20f;
-            SAINBotController.Instance?.GrenadeCollided(__instance, range);
+            ___soundBank_0.Rolloff = _defaultRolloff * ROLLOFF_MULTI;
+            //Logger.LogDebug($"Rolloff {_defaultRolloff} after {___soundBank_0.Rolloff}");
+            SAINBotController.Instance?.GrenadeCollided(__instance, 35);
+        }
+        private static float _defaultRolloff = 40;
+        private const float ROLLOFF_MULTI = 1.75f;
+    }
+
+    public class GrenadeCollisionPatch2 : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Throwable), "OnCollisionHandler");
+        }
+
+        [PatchPostfix]
+        public static void Patch(ref float ___IgnoreCollisionTrackingTimer, Throwable __instance)
+        {
+            ___IgnoreCollisionTrackingTimer = Time.time + 0.35f;
         }
     }
 
