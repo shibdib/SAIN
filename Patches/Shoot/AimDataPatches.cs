@@ -11,9 +11,11 @@ using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SPT.Reflection.Patching;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using AimDataClass = GClass518;
 
 namespace SAIN.Patches.Shoot.Aim
 {
@@ -27,8 +29,6 @@ namespace SAIN.Patches.Shoot.Aim
 
         private static PropertyInfo _endTargetPointProp;
 
-        private static float DebugTimer;
-
         [PatchPrefix]
         public static bool PatchPrefix(ref BotOwner ___botOwner_0, ref Vector3 ___vector3_5, ref Vector3 ___vector3_4, ref float ___float_13)
         {
@@ -38,35 +38,51 @@ namespace SAIN.Patches.Shoot.Aim
             }
 
             Vector3 realTargetPoint = ___botOwner_0.AimingData.RealTargetPoint;
+
             if (bot.IsCheater)
             {
                 _endTargetPointProp.SetValue(___botOwner_0.AimingData, realTargetPoint);
                 return false;
             }
 
+            Enemy enemy = bot.Shoot.LastShotEnemy ?? bot.Enemy ?? bot.LastEnemy;
+            if (enemy == null) {
+                return true;
+            }
+
             float aimUpgradeByTime = ___float_13;
-
             Vector3 badShootOffset = ___vector3_5;
-            Vector3 aimOffset = ___vector3_4;
             Vector3 recoilOffset = bot.Info.WeaponInfo.Recoil.CurrentRecoilOffset;
-
-            IPlayer person = ___botOwner_0?.Memory?.GoalEnemy?.Person;
 
             // Applies aiming offset, recoil offset, and scatter offsets
             // Default Setup :: Vector3 finalTarget = __instance.RealTargetPoint + badShootOffset + (AimUpgradeByTime * (AimOffset + ___botOwner_0.RecoilData.RecoilOffset));
-            Vector3 finalOffset = badShootOffset + (aimUpgradeByTime * aimOffset) + recoilOffset;
 
-            if (person != null &&
-                !person.IsAI &&
+            Vector3 aimOffset;
+		    if (___botOwner_0.Settings.FileSettings.Aiming.DIST_TO_SHOOT_NO_OFFSET > enemy.RealDistance)
+		    {
+		    	aimOffset = Vector3.zero;
+		    }
+            else {
+                float spread = aimUpgradeByTime / enemy.Aim.AimAndScatterMultiplier;
+                spread = Mathf.Clamp(spread, 0f, 3f);
+                aimOffset = ___vector3_4 * spread; 
+            }
+
+            if (bot.Info.Profile.IsPMC || bot.Info.Profile.WildSpawnType.isGoons()) {
+                badShootOffset = Vector3.zero;
+            }
+
+            Vector3 finalOffset = badShootOffset + aimOffset + recoilOffset;
+            if (!enemy.IsAI &&
                 SAINPlugin.LoadedPreset.GlobalSettings.Look.NotLooking.NotLookingToggle)
             {
-                finalOffset += NotLookingOffset(person, ___botOwner_0);
+                finalOffset += NotLookingOffset(enemy.EnemyPerson.IPlayer, ___botOwner_0);
             }
 
             Vector3 result = realTargetPoint + finalOffset;
 
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.DebugDrawAimGizmos &&
-                person?.IsYourPlayer == true)
+                enemy.EnemyPerson.IPlayer.IsYourPlayer == true)
             {
                 Vector3 weaponRoot = ___botOwner_0.WeaponRoot.position;
                 DebugGizmos.Line(weaponRoot, result, Color.red, 0.02f, true, 0.25f, true);
@@ -76,7 +92,8 @@ namespace SAIN.Patches.Shoot.Aim
                 DebugGizmos.Sphere(realTargetPoint, 0.025f, Color.white, true, 10f);
             }
             if (SAINPlugin.DebugSettings.DebugDrawRecoilGizmos &&
-                person?.IsYourPlayer == true)
+                enemy.EnemyPerson.IPlayer.IsYourPlayer  == true && 
+                ___botOwner_0.ShootData.Shooting)
             {
                 DebugGizmos.Sphere(recoilOffset + realTargetPoint, 0.035f, Color.red, true, 10f);
                 DebugGizmos.Line(recoilOffset + realTargetPoint, realTargetPoint, Color.red, 0.02f, true, 10f, true);
@@ -93,11 +110,6 @@ namespace SAIN.Patches.Shoot.Aim
             {
                 Vector3 vectorSpread = UnityEngine.Random.insideUnitSphere * ExtraSpread;
                 vectorSpread.y = 0;
-                if (SAINPlugin.DebugMode && DebugTimer < Time.time)
-                {
-                    DebugTimer = Time.time + 10f;
-                    Logger.LogDebug($"Increasing Spread because Player isn't looking. Magnitude: [{vectorSpread.magnitude}]");
-                }
                 return vectorSpread;
             }
             return Vector3.zero;
@@ -139,10 +151,6 @@ namespace SAIN.Patches.Shoot.Aim
                     default:
                         break;
                 }
-            }
-            if (___botOwner_0.WeaponManager.ShootController?.IsAiming == true)
-            {
-                additionCoef *= 0.8f;
             }
             additionCoef /= enemy.Aim.AimAndScatterMultiplier;
         }

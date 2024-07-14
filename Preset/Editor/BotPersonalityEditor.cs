@@ -40,25 +40,6 @@ namespace SAIN.Editor.GUISections
             {
                 EditAllValuesInObj(settings, out bool newEdit, null, null, 1);
             }
-            return;
-
-            foreach (var personality in SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary.Values)
-            {
-                string name = personality.Name;
-                if (!OpenPersMenus.ContainsKey(name))
-                {
-                    OpenPersMenus.Add(name, false);
-                }
-
-                BeginHorizontal(80f);
-                OpenPersMenus[name] = BuilderClass.ExpandableMenu(name, OpenPersMenus[name], personality.Description);
-                EndHorizontal(80f);
-
-                if (OpenPersMenus[name])
-                {
-                    EditAllValuesInObj(personality, out bool newEdit,null ,null , 1);
-                }
-            }
         }
 
         private static EPersonality _selected = EPersonality.None;

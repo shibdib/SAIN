@@ -12,13 +12,23 @@ namespace SAIN.SAINComponent.Classes.Info
     {
         public SAINSquadClass(BotComponent bot) : base(bot)
         {
-            SquadInfo = SAINBotController.Instance.BotSquads.GetSquad(bot.Person.AIInfo.BotOwner);
+            getSquad();
         }
 
         public void Init()
         {
             base.SubscribeToPreset(null);
-            SquadInfo.AddMember(Bot);
+        }
+
+        public void RemoveFromSquad()
+        {
+            SquadInfo = null;
+            getSquad();
+        }
+
+        private void getSquad()
+        {
+            SquadInfo = SAINBotController.Instance.BotSquads.GetSquad(Bot.Person.AIInfo.BotOwner);
         }
 
         public Squad SquadInfo { get; private set; }

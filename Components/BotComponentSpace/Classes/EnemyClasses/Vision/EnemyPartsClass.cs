@@ -89,30 +89,42 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public bool CheckRandomPartLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)
         {
+            bool inSight = false;
+
             if (_lastCheckSuccessPart != null) {
                 if (_lastCheckSuccessPart.CheckLineOfSight(origin, maxRange, out successPoint)) {
                     if (successPoint != null)
                         LastSuccessPosition = successPoint.Value;
 
                     _lastSuccessTime = Time.time;
-                    return true;
+                    inSight = true;
                 }
-                _lastCheckSuccessPart = null;
+                else {
+                    _lastCheckSuccessPart = null;
+                }
             }
 
             EnemyPartDataClass checkingPart = getNextPart();
+
+            if (checkingPart == _lastCheckSuccessPart) {
+                successPoint = LastSuccessPosition;
+                return inSight;
+            }
+
             if (checkingPart.CheckLineOfSight(origin, maxRange, out successPoint)) {
                 if (successPoint != null)
                     LastSuccessPosition = successPoint.Value;
 
                 _lastCheckSuccessPart = checkingPart;
                 _lastSuccessTime = Time.time;
-                return true;
+                inSight = true;
+            }
+            else {
+                successPoint = null;
+                _lastSuccessTime = 0f;
             }
 
-            successPoint = null;
-            _lastSuccessTime = 0f;
-            return false;
+            return inSight;
         }
 
         private EnemyPartDataClass getNextPart()

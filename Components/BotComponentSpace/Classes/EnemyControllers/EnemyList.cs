@@ -101,6 +101,13 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 Bots--;
             }
 
+            if (Bots < 0) {
+                Bots = 0;
+            }
+            if (Humans < 0) {
+                Humans = 0;
+            }
+
             if (this.Count == 0) {
                 OnListEmptyOrGetFirst?.Invoke(false);
             }

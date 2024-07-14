@@ -69,11 +69,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             _blindCornerFinder = new BlindCornerFinder(enemy);
         }
 
-        private string CoroutineName;
-
         public void Init()
         {
-            CoroutineName = $"{nameof(calcPathLoop)}:{Enemy.EnemyProfileId}";
             Enemy.Events.OnEnemyKnownChanged.OnToggle += OnEnemyKnownChanged;
         }
 

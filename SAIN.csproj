@@ -466,7 +466,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\SquadTalkSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\SteeringSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\TalkSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\LocationSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\PowerCalcSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\BotBrains.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\Brain.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\BigBrain\BrainInfoClass.cs" />
@@ -478,6 +478,8 @@
     <Compile Include="Preset\GlobalSettings\Categories\General\LootingBotsSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\General\VanillaBotSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\General\PerformanceSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\LocationSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\LocationSettingsClass.cs" />
     <Compile Include="Preset\ISettingsGroup.cs" />
     <Compile Include="Preset\Personalities\Categories\PersonalityAssignmentSettings.cs" />
     <Compile Include="Preset\Personalities\Categories\PersonalityBehaviorSettings.cs" />
@@ -493,7 +495,7 @@
     <Compile Include="Preset\SettingsGroupBase.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\CurrentTargetClass.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Other\EnemyAim.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Shoot\EnemyAim.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyVisionDistanceClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyGainSightClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\BotBackpackDropClass.cs" />
@@ -700,6 +702,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Components\PlayerComponentSpace\SubComponents\" />
+    <Folder Include="Preset\BotLevelSettings\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

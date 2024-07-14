@@ -152,7 +152,7 @@ namespace SAIN
 
                 typeof(Patches.Shoot.Aim.AimOffsetPatch),
                 typeof(Patches.Shoot.Aim.AimTimePatch),
-                typeof(Patches.Shoot.Aim.ScatterPatch),
+                //typeof(Patches.Shoot.Aim.ScatterPatch),
                 //typeof(Patches.Shoot.Aim.WeaponPresetPatch),
                 typeof(Patches.Shoot.Aim.ForceNoHeadAimPatch),
                 typeof(Patches.Shoot.Aim.AimRotateSpeedPatch),

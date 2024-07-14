@@ -257,18 +257,18 @@ namespace SAIN.Layers
                 $"Power [{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}]");
             stringBuilder.AppendLine();
 
-            addPlaceInfo(stringBuilder, enemy.KnownPlaces.LastKnownPlace, "Last Known Position");
-
+            stringBuilder.AppendLine($"Visible Now [{enemy.IsVisible}] Seen [{enemy.Seen}]");
+            stringBuilder.AppendLine($"Aim/Scatter Multi [{enemy.Aim.AimAndScatterMultiplier}]");
             stringBuilder.AppendLabeledValue("Time To Spot", $"{enemy.Vision.LastGainSightResult.Round100()}", Color.white, Color.yellow, true);
-
             float highestPercent = getPercentSpotted(enemy, out var partType);
             if (highestPercent > 0)
                 stringBuilder.AppendLabeledValue("Percent Spotted", $"{partType} : {highestPercent}", Color.white, Color.yellow, true);
 
-            stringBuilder.AppendLine($"VisibleNow [{enemy.IsVisible}] Seen [{enemy.Seen}]");
+            addPlaceInfo(stringBuilder, enemy.KnownPlaces.LastKnownPlace, "Last Known Position");
             if (enemy.Seen && _expandedEnemyInfo) {
                 addPlaceInfo(stringBuilder, enemy.KnownPlaces.LastSeenPlace, "Last Seen");
             }
+
             if (_expandedEnemyInfo) {
                 stringBuilder.AppendLine($"HorizAngle [{enemy.Vision.Angles.AngleToEnemyHorizontalSigned.Round100()}] VertiAngle [{enemy.Vision.Angles.AngleToEnemyVerticalSigned.Round100()}]");
                 stringBuilder.AppendLine($"GainSightMod [{enemy.Vision.GainSightCoef.Round100()}] VisionDistance [{(enemy.Bot.BotOwner.Settings.FileSettings.Core.VisibleDistance + enemy.Vision.VisionDistance).Round100()}]");

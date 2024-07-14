@@ -31,11 +31,20 @@ namespace SAIN.Preset.GlobalSettings
             return result;
         }
 
+        public override void Init()
+        {
+            InitList();
+            CreateDefaults();
+            Update();
+        }
+
         public GeneralSettings General = new GeneralSettings();
 
         public AimSettings Aiming = new AimSettings();
 
         public HearingSettings Hearing = new HearingSettings();
+
+        public LocationSettingsClass Location = new LocationSettingsClass(1f);
 
         public LookSettings Look = new LookSettings();
 
@@ -64,6 +73,7 @@ namespace SAIN.Preset.GlobalSettings
             General.Init(SettingsList);
             Aiming.Init(SettingsList);
             Hearing.Init(SettingsList);
+            Location.Init(SettingsList);
             Look.Init(SettingsList);
             Mind.Init(SettingsList);
             Move.Init(SettingsList);

@@ -13,7 +13,6 @@ namespace SAIN.Preset
     public class SAINPresetClass
     {
         public static SAINPresetClass Instance { get; private set; }
-
         public SAINPresetDefinition Info { get; private set; }
         public GlobalSettingsClass GlobalSettings { get; private set; }
         public SAINBotSettingsClass BotSettings { get; private set; }
@@ -24,8 +23,7 @@ namespace SAIN.Preset
         {
             Instance = this;
             SAINPlugin.EditorDefaults.SelectedDefaultPreset = SAINDifficulty.none;
-            if (isCopy)
-            {
+            if (isCopy) {
                 copyPreset(preset);
             }
             createSettings(preset, preset.BaseSAINDifficulty);
@@ -33,15 +31,13 @@ namespace SAIN.Preset
 
         private void copyPreset(SAINPresetDefinition preset)
         {
-            if (Instance != null)
-            {
+            if (Instance != null) {
                 SAINPresetDefinition oldDefinition = SAINPlugin.LoadedPreset.Info;
                 SAINPlugin.LoadedPreset.Info = preset;
                 ExportAll(SAINPlugin.LoadedPreset);
                 SAINPlugin.LoadedPreset.Info = oldDefinition;
             }
         }
-
 
         public SAINPresetClass(SAINDifficulty sainDifficulty)
         {
@@ -55,16 +51,15 @@ namespace SAIN.Preset
 
         private void createSettings(SAINPresetDefinition preset, SAINDifficulty difficulty)
         {
-            if (preset == null)
-            {
+            if (preset == null) {
                 Info = SAINDifficultyClass.DefaultPresetDefinitions[difficulty];
                 GlobalSettings = new GlobalSettingsClass();
             }
-            else
-            {
+            else {
                 Info = preset;
                 GlobalSettings = GlobalSettingsClass.ImportGlobalSettings(preset);
             }
+
             BotSettings = new BotSettings.SAINBotSettingsClass(this);
             PersonalityManager = new PersonalityManagerClass(this);
             GearStealthValuesClass = new GearStealthValuesClass(Info);
@@ -88,8 +83,7 @@ namespace SAIN.Preset
         {
             ConfigEditingTracker.Clear();
 
-            if (preset.Info.IsCustom == false)
-            {
+            if (preset.Info.IsCustom == false) {
                 SAINPresetDefinition newPreset = preset.Info.Clone();
 
                 newPreset.Name += " [Modified]";
@@ -113,16 +107,13 @@ namespace SAIN.Preset
 
         private static void ExportDefinition(SAINPresetDefinition info)
         {
-            if (info.IsCustom == false)
-            {
+            if (info.IsCustom == false) {
                 return;
             }
-            try
-            {
+            try {
                 Export(info, info.Name, "Info");
             }
-            catch (Exception updateEx)
-            {
+            catch (Exception updateEx) {
                 LogExportError(updateEx);
             }
         }
@@ -130,13 +121,11 @@ namespace SAIN.Preset
         private static bool ExportGlobalSettings(GlobalSettingsClass globalSettings, string presetName)
         {
             bool success = false;
-            try
-            {
+            try {
                 Export(globalSettings, presetName, "GlobalSettings");
                 success = true;
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 LogExportError(ex);
             }
             return success;
@@ -145,27 +134,21 @@ namespace SAIN.Preset
         private static bool ExportPersonalities(PersonalityManagerClass personClass, string presetName)
         {
             bool success = false;
-            try
-            {
-                foreach (var pers in personClass.PersonalityDictionary)
-                {
-                    if (pers.Value != null && Export(pers.Value, presetName, pers.Key.ToString(), nameof(Personalities)))
-                    {
+            try {
+                foreach (var pers in personClass.PersonalityDictionary) {
+                    if (pers.Value != null && Export(pers.Value, presetName, pers.Key.ToString(), nameof(Personalities))) {
                         continue;
                     }
-                    else if (pers.Value == null)
-                    {
+                    else if (pers.Value == null) {
                         Logger.LogError("Personality Settings Are Null");
                     }
-                    else
-                    {
+                    else {
                         Logger.LogError($"Failed to Export {pers.Key}");
                     }
                 }
                 success = true;
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 LogExportError(ex);
             }
             return success;
@@ -174,16 +157,13 @@ namespace SAIN.Preset
         private static bool ExportBotSettings(SAINBotSettingsClass botSettings, string presetName)
         {
             bool success = false;
-            try
-            {
-                foreach (SAINSettingsGroupClass settings in botSettings.SAINSettings.Values)
-                {
+            try {
+                foreach (SAINSettingsGroupClass settings in botSettings.SAINSettings.Values) {
                     Export(settings, presetName, settings.Name, "BotSettings");
                 }
                 success = true;
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 LogExportError(ex);
             }
             return success;
@@ -192,21 +172,18 @@ namespace SAIN.Preset
         public static bool Export(object obj, string presetName, string fileName, string subFolder = null)
         {
             bool success = false;
-            try
-            {
+            try {
                 string[] folders = Folders(presetName, subFolder);
                 SaveObjectToJson(obj, fileName, folders);
                 success = true;
 
                 string debugFolders = string.Empty;
-                for (int i = 0; i < folders.Length; i++)
-                {
+                for (int i = 0; i < folders.Length; i++) {
                     debugFolders += $"/{folders[i]}";
                 }
                 Logger.LogDebug($"Successfully Exported [{obj.GetType().Name}] : Name: [{fileName}] To: [{debugFolders}]");
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Logger.LogError($"Failed Export of Type [{obj.GetType().Name}] Name: [{fileName}]");
                 LogExportError(ex);
             }
@@ -216,22 +193,18 @@ namespace SAIN.Preset
         public static bool Import<T>(out T result, string presetName, string fileName, string subFolder = null)
         {
             string[] folders = Folders(presetName, subFolder);
-            if (Load.LoadJsonFile(out string json, fileName, folders))
-            {
-                try
-                {
+            if (Load.LoadJsonFile(out string json, fileName, folders)) {
+                try {
                     result = Load.DeserializeObject<T>(json);
 
                     string debugFolders = string.Empty;
-                    for (int i = 0; i < folders.Length; i++)
-                    {
+                    for (int i = 0; i < folders.Length; i++) {
                         debugFolders += $"/{folders[i]}";
                     }
                     Logger.LogDebug($"Successfully Imported [{typeof(T).Name}] File Name: [{fileName}] To Path: [{debugFolders}]");
                     return true;
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     Logger.LogError($"Failed import Item of Type {typeof(T)}");
                     LogExportError(ex);
                 }
@@ -244,16 +217,14 @@ namespace SAIN.Preset
         {
             string presets = "Presets";
             string[] result;
-            if (subFolder == null)
-            {
+            if (subFolder == null) {
                 result = new string[]
                 {
                     presets,
                     presetName
                 };
             }
-            else
-            {
+            else {
                 result = new string[]
                 {
                     presets,
@@ -263,7 +234,6 @@ namespace SAIN.Preset
             }
             return result;
         }
-
 
         private static void LogExportError(Exception ex)
         {

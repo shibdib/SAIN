@@ -72,35 +72,36 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             Vector3 lookPoint = _transform.EyePosition;
             float maxRange = AIVisionRangeLimit();
+            bool inSight = false;
 
             if (Enemy.RealDistance > maxRange) {
                 seenPosition = null;
-                return false;
+                return inSight;
             }
 
             bool isAI = Enemy.IsAI;
             if (EnemyParts.CheckBodyLineOfSight(lookPoint, maxRange, out seenPosition)) {
-                return true;
+                inSight = true;
             }
             if (isAI && Enemy.RealDistance > MAX_LOS_RANGE_LIMBS_AI) {
-                return false;
+                return inSight;
             }
             if (EnemyParts.CheckRandomPartLineOfSight(lookPoint, maxRange, out seenPosition)) {
-                return true;
+                inSight = true;
             }
             if (isAI) {
-                return false;
+                return inSight;
             }
 
             // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
             if (Enemy.IsCurrentEnemy &&
                 EnemyParts.CheckRandomPartLineOfSight(lookPoint, maxRange, out seenPosition)) {
-                return true;
+                inSight = true;
             }
             if (EnemyParts.CheckHeadLineOfSight(lookPoint, MAX_LOS_RANGE_HEAD_HUMAN, out seenPosition)) {
-                return true;
+                inSight = true;
             }
-            return false;
+            return inSight;
         }
 
         public float AIVisionRangeLimit()

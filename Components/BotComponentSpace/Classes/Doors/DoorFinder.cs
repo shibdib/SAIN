@@ -16,9 +16,9 @@ namespace SAIN.SAINComponent.Classes.Mover
         }
 
         private const float DOORS_UPDATE_FREQ = 0.5f;
-        private const float DOORS_FIND_CLOSE_FREQ = 3f;
-        private const float DOORS_CLOSE_DISTANCE = 20f;
-        private const float DOORS_INTERACTION_DISTANCE = 10f;
+        private const float DOORS_FIND_CLOSE_FREQ = 2f;
+        private const float DOORS_CLOSE_DISTANCE = 400f;
+        private const float DOORS_INTERACTION_DISTANCE = 64f;
         private const float DOORS_FIND_INTERACTION_FREQ = 1f;
         private const float DOORS_UPDATE_VOXEL_FREQ = 0.5f;
 

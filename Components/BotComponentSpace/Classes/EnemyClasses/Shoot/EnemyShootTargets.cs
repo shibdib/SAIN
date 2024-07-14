@@ -82,8 +82,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                         LastPart = SelectedPart;
                     }
 
-                    if (!Enemy.IsAI)
-                        Logger.LogDebug($"Selected [{randomPart}] body part to shoot after [{i}] iterations through random selector.");
+                    //if (!Enemy.IsAI)
+                    //    Logger.LogDebug($"Selected [{randomPart}] body part to shoot after [{i}] iterations through random selector.");
 
                     SelectedPart = enemyPartData;
                     return enemyPartData;
@@ -129,7 +129,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             _selector.AddOption(EBodyPart.LeftLeg, _leftLegWeight);
             _selector.AddOption(EBodyPart.RightLeg, _rightLegWeight);
 
-            _selector.Test();
+            //_selector.Test();
         }
 
         private int _headWeight = 0;

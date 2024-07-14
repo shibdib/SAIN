@@ -16,13 +16,11 @@ namespace SAIN.Preset.Personalities
             Description = PersonalityDescriptionsClass.PersonalityDescriptions[personality];
         }
 
-        [Hidden]
         public string Name;
-        [Hidden]
         public string Description;
+
         public PersonalityAssignmentSettings Assignment = new PersonalityAssignmentSettings();
         public PersonalityBehaviorSettings Behavior = new PersonalityBehaviorSettings();
-        [Hidden]
         public PersonalityStatModifierSettings StatModifiers = new PersonalityStatModifierSettings();
 
         public override void Init()

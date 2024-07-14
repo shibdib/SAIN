@@ -125,7 +125,7 @@ namespace SAIN.Editor.GUISections
                         $"{preset.Name}",
                         preset.Description,
                         EUISoundType.MenuCheckBox,
-                        Height(PRESET_OPTION_WIDTH), Width(PRESET_OPTION_WIDTH)
+                        Height(PRESET_OPTION_HEIGHT), Width(PRESET_OPTION_WIDTH)
                         )) {
                         if (!selected) {
                             selectedPreset = preset;
@@ -188,11 +188,11 @@ namespace SAIN.Editor.GUISections
         {
             if (SAINPresetClass.Instance.Info.IsCustom) {
                 BeginVertical();
-                _deletePresetConfirmation1 = Toggle(_deletePresetConfirmation1, "Delete Selected Preset", null, Height(30), Width(100f));
+                _deletePresetConfirmation1 = Toggle(_deletePresetConfirmation1, "Delete Selected Preset", null, Height(30), Width(250f));
                 if (_deletePresetConfirmation1) {
-                    _deletePresetConfirmation2 = Toggle(_deletePresetConfirmation2, "Are you Sure?", null, Height(30), Width(100f));
+                    _deletePresetConfirmation2 = Toggle(_deletePresetConfirmation2, "Are you Sure?", null, Height(30), Width(250f));
                     if (_deletePresetConfirmation2) {
-                        if (Button($"CONFIRM DELETE OF {SAINPresetClass.Instance.Info.Name} ?", Height(30), Width(100f))) {
+                        if (Button($"CONFIRM DELETE OF {SAINPresetClass.Instance.Info.Name} ?", Height(60), Width(250f))) {
                             var deletedInfo = SAINPresetClass.Instance.Info;
                             PresetHandler.loadDefault();
                             JsonUtility.DeletePreset(deletedInfo);

@@ -59,8 +59,7 @@ namespace SAIN.Attributes
         }
 
         private static object checkEditValue(ref object value, object settingsObject, ConfigInfoClass info, out bool wasEdited, int listDepth, GUIEntryConfig config = null, string search = null)
-        {
-            wasEdited = false;
+        {           wasEdited = false;
             if (value != null && info != null && !info.DoNotShowGUI) {
                 config = config ?? _defaultEntryConfig;
 
@@ -77,10 +76,10 @@ namespace SAIN.Attributes
                 if (value is EHeardFromPeaceBehavior peaceBehavior) {
                     return value;
                 }
+
                 if (!ExpandableList(info, config.EntryHeight + 3, listDepth++, config)) {
                     return value;
                 }
-
                 if (value is ISAINSettings settings) {
                     EditAllValuesInObj(settings, out wasEdited, search, config, listDepth++);
                     return value;
@@ -104,33 +103,55 @@ namespace SAIN.Attributes
             EndHorizontal(100f);
         }
 
-        public static object FindListTypeAndEdit(ref object value, object settingsObject, ConfigInfoClass info, int listDepth, out bool wasEdited, GUIEntryConfig entryConfig = null)
+        public static object FindListTypeAndEdit(ref object value, object settingsObject, ConfigInfoClass info, int listDepth, out bool wasEdited, GUIEntryConfig config = null)
         {
             wasEdited = false;
+            CreateLabelStyle();
 
-            if (value is Dictionary<ECaliber, float>)
+            if (value is Dictionary<ELocation, LocationSettings> locationDict) {
+                editLocationDict(locationDict, settingsObject, info, listDepth, config, out wasEdited);
+                return value;
+            }
+
+            if (value is Dictionary<ECaliber, float>) {
                 EditFloatDictionary<ECaliber>(value, info, out wasEdited);
+                return value;
+            }
 
-            if (value is Dictionary<EWeaponClass, float>)
+            if (value is Dictionary<EWeaponClass, float>) {
                 EditFloatDictionary<EWeaponClass>(value, info, out wasEdited);
+                return value;
+            }
 
-            if (value is Dictionary<ESoundDispersionType, DispersionValues>)
-                EditDispersionDictionary(value as Dictionary<ESoundDispersionType, DispersionValues>, settingsObject, info, out wasEdited);
+            if (value is Dictionary<ESoundDispersionType, DispersionValues> dispDict) {
+                EditDispersionDictionary(dispDict, settingsObject, info, out wasEdited);
+                return value;
+            }
 
-            if (value is Dictionary<AILimitSetting, float>)
-                EditAILimitDictionary(value as Dictionary<AILimitSetting, float>, settingsObject, info, out wasEdited);
+            if (value is Dictionary<AILimitSetting, float> aiLimitDict) {
+                EditAILimitDictionary(aiLimitDict, settingsObject, info, out wasEdited);
+                return value;
+            }
 
-            if (value is Dictionary<EPersonality, bool>)
-                EditBoolDictionary<EPersonality>(value, info, out wasEdited);
+            if (value is Dictionary<EPersonality, bool> boolDict) {
+                EditBoolDictionary<EPersonality>(boolDict, info, out wasEdited);
+                return value;
+            }
 
-            if (value is List<WildSpawnType>)
-                ModifyLists.AddOrRemove(value as List<WildSpawnType>, out wasEdited);
+            if (value is List<WildSpawnType> wildList) {
+                ModifyLists.AddOrRemove(wildList, out wasEdited);
+                return value;
+            }
 
-            if (value is List<BotType>)
-                ModifyLists.AddOrRemove(value as List<BotType>, out wasEdited);
+            if (value is List<BotType> botList) {
+                ModifyLists.AddOrRemove(botList, out wasEdited);
+                return value;
+            }
 
-            if (value is List<Brain>)
-                ModifyLists.AddOrRemove(value as List<Brain>, out wasEdited);
+            if (value is List<Brain> brainList) {
+                ModifyLists.AddOrRemove(brainList, out wasEdited);
+                return value;
+            }
 
             return value;
         }
@@ -389,6 +410,69 @@ namespace SAIN.Attributes
             EndVertical(5f);
         }
 
+        private static void editLocationDict(Dictionary<ELocation, LocationSettings> dictionary, object settingsObject, ConfigInfoClass info, int listDepth, GUIEntryConfig config, out bool wasEdited)
+        {
+            BeginVertical(5f);
+
+            var defaultDictionary = info.GetDefault(settingsObject) as Dictionary<ELocation, LocationSettings>;
+            ELocation[] array = EnumValues.GetEnum<ELocation>();
+            wasEdited = false;
+
+            for (int i = 0; i < array.Length; i++) {
+                var location = array[i];
+                if (!dictionary.TryGetValue(location, out LocationSettings originalValue)) {
+                    continue;
+                }
+                string name = location.ToString();
+                
+                BeginHorizontal(100f + (listDepth * config.SubList_Indent_Horizontal));
+                Label(name, Height(config.EntryHeight));
+                EndHorizontal(100f);
+
+                int subListDepth = listDepth + 1;
+
+                BeginHorizontal(100f + (subListDepth * config.SubList_Indent_Horizontal));
+                float scatter = slider(originalValue.ScatterMultiplier, "Scatter Multiplier", info, config);
+                if (resetButton()) {
+                    scatter = defaultDictionary[location].ScatterMultiplier;
+                    dictionary[location].ScatterMultiplier = scatter;
+                    //ConfigEditingTracker.Remove(attributes);
+                }
+                if (dictionary[location].ScatterMultiplier != scatter) {
+                    dictionary[location].ScatterMultiplier = scatter;
+                    wasEdited = true;
+                }
+                EndHorizontal(100f);
+                
+                BeginHorizontal(100f + (subListDepth * config.SubList_Indent_Horizontal));
+                float visionSpeed = slider(originalValue.VisionSpeedModifier, "Vision Speed Multiplier", info, config);
+                if (resetButton()) {
+                    visionSpeed = defaultDictionary[location].VisionSpeedModifier;
+                    dictionary[location].VisionSpeedModifier = visionSpeed;
+                    //ConfigEditingTracker.Remove(attributes);
+                }
+                if (dictionary[location].VisionSpeedModifier != visionSpeed) {
+                    dictionary[location].VisionSpeedModifier = visionSpeed;
+                    wasEdited = true;
+                }
+                EndHorizontal(100f);
+                
+                BeginHorizontal(100f + (subListDepth * config.SubList_Indent_Horizontal));
+                float aggression = slider(originalValue.AggressionMultiplier, "Aggression Multiplier", info, config);
+                if (resetButton()) {
+                    aggression = defaultDictionary[location].AggressionMultiplier;
+                    dictionary[location].AggressionMultiplier = aggression;
+                    //ConfigEditingTracker.Remove(attributes);
+                }
+                if (dictionary[location].AggressionMultiplier != aggression) {
+                    dictionary[location].AggressionMultiplier = aggression;
+                    wasEdited = true;
+                }
+                EndHorizontal(100f);
+            }
+            EndVertical(5f);
+        }
+
         public static void EditAILimitDictionary(Dictionary<AILimitSetting, float> dictionary, object settingsObject, ConfigInfoClass info, out bool wasEdited)
         {
             BeginVertical(5f);
@@ -478,7 +562,7 @@ namespace SAIN.Attributes
             fvalue = values.MaxAngle;
             min = 0f;
             max = 180;
-            
+
             fvalue = slider(name, description, fvalue, min, max, 100f);
             if (resetButton())
                 fvalue = defaultDictionary[soundType].MaxAngle;
@@ -496,7 +580,7 @@ namespace SAIN.Attributes
             fvalue = values.VerticalModifier;
             min = 0f;
             max = 0.5f;
-            
+
             fvalue = slider(name, description, fvalue, min, max, 100f);
             if (resetButton())
                 fvalue = defaultDictionary[soundType].VerticalModifier;
@@ -524,11 +608,10 @@ namespace SAIN.Attributes
             return value;
         }
 
-        private static float slider(float value, ConfigInfoClass info, GUIEntryConfig config)
+        private static float slider(float value, string name, ConfigInfoClass info, GUIEntryConfig config)
         {
-            Box(new GUIContent(info.Name, info.Description), _labelStyle, Height(_defaultEntryConfig.EntryHeight));
-            value = BuilderClass.CreateSlider(value, info, config).Round(info.Rounding);
-            Box(value.ToString(), _defaultEntryConfig.Result);
+            Box(name, _labelStyle, Height(config.EntryHeight));
+            value = BuilderClass.CreateSlider(value, info, config);
             return value;
         }
 

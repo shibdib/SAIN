@@ -14,7 +14,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public EnemyPlace LastHeardPlace { get; private set; }
         public EnemyPlace LastSquadSeenPlace { get; private set; }
         public EnemyPlace LastSquadHeardPlace { get; private set; }
-        public float TimeSinceLastKnownUpdated => Time.time - TimeLastKnownUpdated;
+        public float TimeSinceLastKnownUpdated => LastKnownPlace == null ? float.MaxValue : Time.time - TimeLastKnownUpdated;
 
         public Vector3? LastKnownPosition => LastKnownPlace?.Position;
         public Vector3? LastSeenPosition => LastSeenPlace?.Position;
@@ -341,6 +341,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 place.OnPositionUpdated -= lastKnownPosUpdated;
                 AllEnemyPlaces.Remove(place);
+                if (LastKnownPlace != null && LastKnownPlace == place) {
+                    LastKnownPlace = null;
+                }
             }
         }
 

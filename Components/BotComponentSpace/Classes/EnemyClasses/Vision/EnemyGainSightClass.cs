@@ -13,11 +13,15 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 if (_nextCheckVisTime < Time.time) {
                     _nextCheckVisTime = Time.time + 0.05f;
-                    _gainSightModifier = calcModifier() * calcRepeatSeenCoef();
+                    _gainSightModifier = calcModifier() * calcRepeatSeenCoef() * _personalityModifier;
                 }
                 return _gainSightModifier;
             }
         }
+
+        private float _personalityModifier => Bot.Info.PersonalitySettingsClass.StatModifiers.VisionSpeedMultiplier;
+
+        private const float UNDER_FIRE_FROM_ME_COEF = 0.4f;
 
         private const float DIST_SEEN_MIN_COEF = 0.01f;
         private const float DIST_SEEN_MIN_DIST = 1f;
@@ -58,10 +62,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private float PERIPHERAL_VISION_START_ANGLE => _settings.Peripheral.PERIPHERAL_VISION_START_ANGLE;
         private float PERIPHERAL_VISION_MAX_REDUCTION_COEF => _settings.Peripheral.PERIPHERAL_VISION_MAX_REDUCTION_COEF;
 
-        private const float PERIPHERAL_VISION_SPEED_DIRECT_FRONT_ANGLE = 1f;
-        private const float PERIPHERAL_VISION_SPEED_DIRECT_FRONT_MOD = 0.75f;
-        private const float PERIPHERAL_VISION_SPEED_CLOSE_FRONT_ANGLE = 5f;
-        private const float PERIPHERAL_VISION_SPEED_CLOSE_FRONT_MOD = 0.85f;
+        private const float PERIPHERAL_VISION_SPEED_DIRECT_FRONT_ANGLE = 3f;
+        private const float PERIPHERAL_VISION_SPEED_DIRECT_FRONT_MOD = 0.66f;
+        private const float PERIPHERAL_VISION_SPEED_CLOSE_FRONT_ANGLE = 6f;
+        private const float PERIPHERAL_VISION_SPEED_CLOSE_FRONT_MOD = 0.8f;
         private const float PERIPHERAL_VISION_SPEED_ENEMY_CLOSE_DIST = 10;
         private const float PERIPHERAL_VISION_SPEED_ENEMY_CLOSE_MOD = 0.9f;
         private const float PERIPHERAL_VISION_SPEED_ENEMY_VERYCLOSE_DIST = 5;
@@ -77,6 +81,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             bool flareEnabled = EnemyPlayer.AIData?.GetFlare == true &&
                 Enemy.EnemyPlayerComponent?.Equipment.CurrentWeapon?.HasSuppressor == false;
+
+            bool underFire = Bot.BotOwner.Memory.IsUnderFire && Bot.Memory.LastUnderFireEnemy == Enemy;
+
+            float underFireMod = underFire ? UNDER_FIRE_FROM_ME_COEF : 1f;
             float weatherMod = calcWeatherMod(flareEnabled);
             float timeMod = calcTimeModifier(flareEnabled);
             float moveMod = calcMoveModifier();
@@ -84,13 +92,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             float thirdPartyMod = calcThirdPartyMod();
             float angleMod = calcAngleMod();
             float poseMod = poseModifier();
+            float locationMod = Bot.Info.LocationSettings != null ? Bot.Info.LocationSettings.VisionSpeedModifier : 1f;
 
             float notLookMod = 1f;
             if (!Enemy.IsAI)
                 notLookMod = SAINNotLooking.GetVisionSpeedDecrease(Enemy.EnemyInfo);
 
             float result =
-                1f *
+                1f * 
+                locationMod *
+                underFireMod *
                 partMod *
                 gearMod *
                 weatherMod *

@@ -1,15 +1,12 @@
 ﻿using SAIN.Preset.GlobalSettings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyAim : EnemyBase
     {
+        private const float CALC_SCATTER_FREQ = 0.025f;
+        private const float CALC_SCATTER_FREQ_AI = 0.1f;
         public EnemyAim(Enemy enemy) : base(enemy)
         {
         }
@@ -20,8 +17,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 if (_getModTime < Time.time)
                 {
-                    _getModTime = Time.time + 0.05f;
-                    _modifier = _poseFactor * _visibilityFactor * _opticFactor * _injuryFactor * _velocityFactor;
+                    _getModTime = Time.time + (Enemy.IsAI ? CALC_SCATTER_FREQ_AI : CALC_SCATTER_FREQ);
+                    _modifier = _poseFactor * _visibilityFactor * _opticFactor * _injuryFactor * _velocityFactor * _personalityModifier * _locationModifier;
                 }
                 return _modifier;
             }
@@ -33,6 +30,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private float _injuryFactor => Bot.Info.WeaponInfo.Recoil.ArmInjuryModifier;
 
         private static AimSettings _aimSettings => SAINPlugin.LoadedPreset.GlobalSettings.Aiming;
+
+        private float _personalityModifier => Bot.Info.PersonalitySettingsClass.StatModifiers.ScatterMultiplier;
+
+        private float _locationModifier => Bot.Info.LocationSettings != null ? Bot.Info.LocationSettings.ScatterMultiplier : 1f;
 
         private float _opticFactor
         {

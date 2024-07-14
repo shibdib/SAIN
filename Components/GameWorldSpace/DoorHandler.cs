@@ -57,6 +57,7 @@ namespace SAIN.Components
 
         public void CheckAddDoorTrigger(NavMeshDoorLink link)
         {
+            return;
             if (_doorsWithTriggers.ContainsKey(link.Id)) {
                 return;
             }

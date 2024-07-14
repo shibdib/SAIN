@@ -23,7 +23,7 @@ namespace SAIN.Components
 
         private void Update()
         {
-            Doors.Update();
+            Doors?.Update();
             findSpawnPointMarkers();
         }
 

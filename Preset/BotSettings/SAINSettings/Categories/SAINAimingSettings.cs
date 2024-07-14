@@ -133,6 +133,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Hidden]
         [JsonIgnore]
         public float FIRST_CONTACT_ADD_CHANCE_100 = 100f;
+        
+        [Hidden]
+        [JsonIgnore]
+        public float OFFSET_RECAL_ANYWAY_TIME = 30f;
 
         //[Hidden]
         //[JsonIgnore]

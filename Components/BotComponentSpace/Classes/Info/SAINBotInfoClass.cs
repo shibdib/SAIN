@@ -2,6 +2,7 @@
 using SAIN.Helpers;
 using SAIN.Preset;
 using SAIN.Preset.BotSettings.SAINSettings;
+using SAIN.Preset.GlobalSettings;
 using SAIN.Preset.Personalities;
 using System.Collections.Generic;
 using System.Reflection;
@@ -23,6 +24,7 @@ namespace SAIN.SAINComponent.Classes.Info
             }
         }
 
+        public LocationSettings LocationSettings { get; }
         public BotProfile Profile { get; private set; }
         public WeaponInfoClass WeaponInfo { get; private set; }
         public EPersonality Personality { get; private set; }
@@ -37,6 +39,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public SAINBotInfoClass(BotComponent sain) : base(sain)
         {
+            LocationSettings = GlobalSettingsClass.Instance.Location.Current();
             Profile = new BotProfile(sain);
             WeaponInfo = new WeaponInfoClass(sain);
             Personality = GetPersonality(out var settings);
@@ -64,7 +67,11 @@ namespace SAIN.SAINComponent.Classes.Info
             Personality = GetPersonality(out var settings);
             PersonalitySettingsClass = settings;
 
-            AggressionMultiplier = (FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.General.AggressionMultiplier).Round100();
+            float aggroMod = FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.General.AggressionMultiplier;
+            if (LocationSettings != null) {
+                aggroMod *= LocationSettings.AggressionMultiplier;
+            }
+            AggressionMultiplier = aggroMod.Round100();
 
             CalcTimeBeforeSearch();
             CalcHoldGroundDelay();

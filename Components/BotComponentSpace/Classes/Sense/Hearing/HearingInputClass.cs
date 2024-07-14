@@ -74,6 +74,9 @@ namespace SAIN.SAINComponent.Classes
             {
                 return;
             }
+            if (playerComponent.ProfileId == Bot.ProfileId) {
+                return;
+            }
             bool isGunshot = soundType.IsGunShot();
             if (IgnoreHearing && !isGunshot)
             {
@@ -82,7 +85,12 @@ namespace SAIN.SAINComponent.Classes
             Enemy enemy = Bot.EnemyController.GetEnemy(playerComponent.ProfileId, true);
             if (enemy == null)
             {
-                return;
+                if (BotOwner.BotsGroup.IsEnemy(playerComponent.IPlayer)) {
+                    enemy = Bot.EnemyController.CheckAddEnemy(playerComponent.IPlayer);
+                }
+                if (enemy == null) {
+                    return;
+                }
             }
             float baseRange = power * volume;
             if (!isGunshot &&

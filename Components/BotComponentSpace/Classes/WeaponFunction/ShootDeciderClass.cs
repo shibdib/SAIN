@@ -316,10 +316,10 @@ namespace SAIN.SAINComponent.Classes
                 enemy.IsVisible &&
                 enemy.CanShoot) {
 
-                Vector3? test = enemy.Shoot.Targets.GetPointToShoot();
-                if (test == null) {
-                    Logger.LogWarning($"cant get point to shoot with new system! oh no!");
-                }
+                //Vector3? test = enemy.Shoot.Targets.GetPointToShoot();
+                //if (test == null) {
+                //    Logger.LogWarning($"cant get point to shoot with new system! oh no!");
+                //}
 
                 Vector3? centerMass = findCenterMassPoint(enemy);
                 Vector3? partToShoot = getEnemyPartToShoot(enemy.EnemyInfo);

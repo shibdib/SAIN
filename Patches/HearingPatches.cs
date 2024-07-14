@@ -1,5 +1,4 @@
-﻿using SPT.Reflection.Patching;
-using Audio.Data;
+﻿using Audio.Data;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
@@ -8,6 +7,7 @@ using EFT.UI;
 using HarmonyLib;
 using SAIN.Components;
 using SAIN.Components.Helpers;
+using SPT.Reflection.Patching;
 using System.Reflection;
 using Systems.Effects;
 using UnityEngine;
