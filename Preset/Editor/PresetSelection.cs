@@ -4,7 +4,6 @@ using SAIN.Plugin;
 using SAIN.Preset;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -16,21 +15,23 @@ namespace SAIN.Editor.GUISections
     {
         private static readonly List<SAINPresetDefinition> defaultPresets = SAINDifficultyClass.DefaultPresetDefinitions.Values.ToList();
 
-        public static void Menu()
-        {
-            const float LabelHeight = 55f;
-            const float optionHeight = 25f;
-            const float presetWidth = 500;
+        private const float PRESET_LABEL_HEIGHT = 55f;
+        private const float PRESET_OPTION_HEIGHT = 25f;
+        private const float PRESET_OPTION_WIDTH = 500;
+        private const float PRESET_BASE_OPTION_WIDTH = 150f;
+        private const float PRESET_ALERT_HEIGHT = 30f;
 
+        public static void PresetSelectionMenu()
+        {
             SAINPresetDefinition selectedPreset = SAINPlugin.LoadedPreset.Info;
             checkCreateWarning(selectedPreset);
 
             /////
             BeginHorizontal();
 
-            baseSelectionOptions(LabelHeight);
-            selectedPreset = selectDefault(selectedPreset, presetWidth, optionHeight);
-            selectedPreset = selectCustom(selectedPreset, presetWidth, optionHeight);
+            baseSelectionOptions();
+            selectedPreset = selectDefault(selectedPreset);
+            selectedPreset = selectCustom(selectedPreset);
             checkCreateNew();
             if (checkDeletePreset()) {
                 selectedPreset = SAINPresetClass.Instance.Info;
@@ -39,7 +40,7 @@ namespace SAIN.Editor.GUISections
 
             EndHorizontal();
             /////
-            
+
             if (selectedPreset.Name != SAINPlugin.LoadedPreset.Info.Name) {
                 PresetHandler.InitPresetFromDefinition(selectedPreset);
             }
@@ -55,7 +56,7 @@ namespace SAIN.Editor.GUISections
                         $"Warning: The selected preset version is: [{sainPresetV}], " +
                         $"but current SAIN preset version is: [{AssemblyInfoClass.SAINPresetVersion}] (SAIN version [{AssemblyInfoClass.SAINVersion}]), default bot config values may be set incorrectly due to updates to SAIN. THIS DOESN'T MEAN YOUR GAME IS BROKEN, just be aware bots might not act as intended.");
 
-            Rect rect = GUILayoutUtility.GetRect(content, GetStyle(Style.alert), Height(30));
+            Rect rect = GUILayoutUtility.GetRect(content, GetStyle(Style.alert), Height(PRESET_ALERT_HEIGHT));
             if (selectedPreset.IsCustom && sainPresetV != AssemblyInfoClass.SAINPresetVersion) {
                 GUI.Box(rect, content, GetStyle(Style.alert));
             }
@@ -64,21 +65,27 @@ namespace SAIN.Editor.GUISections
             }
         }
 
-        private static void baseSelectionOptions(float LabelHeight)
+        private static void baseSelectionOptions()
         {
             BeginVertical();
-            Box("Presets", "Select an Installed preset for SAIN Settings", Height(LabelHeight), Width(150));
-            if (Button("Refresh", "Refresh installed Presets", EUISoundType.ButtonClick, Height(LabelHeight), Width(150))) {
+            Box("Presets", "Select an Installed preset for SAIN Settings", Height(PRESET_LABEL_HEIGHT), Width(PRESET_BASE_OPTION_WIDTH));
+            if (Button("Refresh", "Refresh installed Presets", EUISoundType.ButtonClick, Height(PRESET_LABEL_HEIGHT), Width(PRESET_BASE_OPTION_WIDTH))) {
                 PresetHandler.LoadCustomPresetOptions();
             }
-            _makeNewPresetMenuToggle = Toggle(_makeNewPresetMenuToggle, new GUIContent("Create New Preset"), EUISoundType.ButtonClick, Height(LabelHeight), Width(150));
+
+            _makeNewPresetMenuToggle = Toggle(
+                _makeNewPresetMenuToggle,
+                new GUIContent("Create New Preset"),
+                EUISoundType.ButtonClick,
+                Height(PRESET_LABEL_HEIGHT), Width(PRESET_BASE_OPTION_WIDTH));
+
             EndVertical();
         }
 
-        private static SAINPresetDefinition selectDefault(SAINPresetDefinition selectedPreset, float presetWidth, float optionHeight)
+        private static SAINPresetDefinition selectDefault(SAINPresetDefinition selectedPreset)
         {
             BeginVertical();
-            Label("Default Presets", Width(presetWidth));
+            Label("Default Presets", Width(PRESET_OPTION_WIDTH));
 
             for (int i = 0; i < defaultPresets.Count; i++) {
                 var preset = defaultPresets[i];
@@ -90,7 +97,7 @@ namespace SAIN.Editor.GUISections
                         $"{preset.Name}",
                         preset.Description,
                         EUISoundType.MenuCheckBox,
-                        Height(optionHeight), Width(presetWidth)
+                        Height(PRESET_OPTION_HEIGHT), Width(PRESET_OPTION_WIDTH)
                         )) {
                         if (!selected) {
                             SAINPlugin.EditorDefaults.SelectedDefaultPreset = sainDifficulty;
@@ -103,10 +110,10 @@ namespace SAIN.Editor.GUISections
             return selectedPreset;
         }
 
-        private static SAINPresetDefinition selectCustom(SAINPresetDefinition selectedPreset, float presetWidth, float optionHeight)
+        private static SAINPresetDefinition selectCustom(SAINPresetDefinition selectedPreset)
         {
             BeginVertical();
-            Label("Custom Presets", Width(presetWidth));
+            Label("Custom Presets", Width(PRESET_OPTION_WIDTH));
             for (int i = 0; i < PresetHandler.CustomPresetOptions.Count; i++) {
                 var preset = PresetHandler.CustomPresetOptions[i];
                 if (preset.IsCustom == true) {
@@ -118,7 +125,7 @@ namespace SAIN.Editor.GUISections
                         $"{preset.Name}",
                         preset.Description,
                         EUISoundType.MenuCheckBox,
-                        Height(optionHeight), Width(presetWidth)
+                        Height(PRESET_OPTION_WIDTH), Width(PRESET_OPTION_WIDTH)
                         )) {
                         if (!selected) {
                             selectedPreset = preset;
@@ -146,7 +153,7 @@ namespace SAIN.Editor.GUISections
                     newInfo.Description = NewDescription;
                     newInfo.Creator = NewCreator;
 
-                    DeletePreset(info);
+                    JsonUtility.DeletePreset(info);
 
                     PresetHandler.SavePresetDefinition(newInfo);
                     PresetHandler.InitPresetFromDefinition(newInfo, true);
@@ -204,21 +211,6 @@ namespace SAIN.Editor.GUISections
 
         private static bool _deletePresetConfirmation1 = false;
         private static bool _deletePresetConfirmation2 = false;
-
-        private static void DeletePreset(SAINPresetDefinition preset)
-        {
-            if (JsonUtility.GetFoldersPath(out string foldersPath, "Presets", preset.Name)) {
-                string filePath = Path.Combine(foldersPath, "Info");
-                filePath += ".json";
-
-                Logger.NotifyDebug($"Trying to delete: {foldersPath}");
-                if (Directory.Exists(foldersPath)) {
-                    Directory.Delete(foldersPath, true);
-                    Logger.NotifyDebug($"Deleted: {foldersPath}");
-                }
-            }
-            PresetHandler.CustomPresetOptions.Remove(preset);
-        }
 
         private static string LabeledTextField(string value, string label)
         {

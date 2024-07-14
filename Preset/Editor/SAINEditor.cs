@@ -84,7 +84,7 @@ namespace SAIN.Editor
                     TexturesClass.CreateCache();
                     StylesClass.CreateCache();
                 }
-                
+
                 MouseFunctions.OnGUI();
                 CursorSettings.SetUnlockCursor(0, true);
                 GUIUtility.ScaleAroundPivot(ScaledPivot, Vector2.zero);
@@ -144,6 +144,13 @@ namespace SAIN.Editor
         private static void DrawTooltip()
         {
             if (string.IsNullOrEmpty(GUI.tooltip)) {
+                //var sb = new StringBuilder();
+                //
+                //sb.AppendLine(Event.current.rawType.ToString());
+                //sb.AppendLine(Event.current.type.ToString());
+                //sb.AppendLine(Event.current.control.ToString());
+                //sb.AppendLine(Event.current.commandName.ToString());
+                //GUI.tooltip = sb.ToString();
                 return;
             }
 

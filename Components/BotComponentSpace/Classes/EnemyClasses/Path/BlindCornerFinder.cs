@@ -41,6 +41,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             Vector3 notVisibleCorner = enemyPosition;
             Vector3 lastVisibleCorner = corners[1];
+            int index = 1;
 
             int raycasts = 0;
 
@@ -60,6 +61,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     Vector3 checkingCorner = _corners[i];
                     if (rayCastToCorner(checkingCorner, lookPoint, heightOffset))
                     {
+                        index = i - 1;
                         lastVisibleCorner = _corners[i - 1];
                         notVisibleCorner = checkingCorner;
                         break;
@@ -122,7 +124,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             blindCorner.y -= heightOffset;
-            Enemy.Path.EnemyCorners.AddOrReplace(ECornerType.Blind, new EnemyCorner(blindCorner, angle));
+            Enemy.Path.EnemyCorners.AddOrReplace(ECornerType.Blind, new EnemyCorner(blindCorner, angle, index));
 
             if (raycasts > 0)
             {

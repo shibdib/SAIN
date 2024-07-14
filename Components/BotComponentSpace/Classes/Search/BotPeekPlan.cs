@@ -9,12 +9,11 @@ namespace SAIN.SAINComponent.Classes.Search
 {
     public struct BotPeekPlan
     {
-        public BotPeekPlan(Vector3 start, Vector3 end, Vector3 dangerPoint, Vector3 corner)
+        public BotPeekPlan(Vector3 start, Vector3 end, Vector3 dangerPoint)
         {
             PeekStart = new PeekPosition(start, dangerPoint);
             PeekEnd = new PeekPosition(end, dangerPoint);
             DangerPoint = dangerPoint;
-            Corner = corner;
             DebugVectorList = null;
             DebugGameObjectList = null;
         }
@@ -22,7 +21,6 @@ namespace SAIN.SAINComponent.Classes.Search
         public PeekPosition PeekStart { get; private set; }
         public PeekPosition PeekEnd { get; private set; }
         public Vector3 DangerPoint { get; private set; }
-        public Vector3 Corner { get; private set; }
 
         private Vector3 MidPoint(Vector3 A, Vector3 B)
         {

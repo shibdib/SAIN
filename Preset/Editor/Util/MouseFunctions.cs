@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-using SAIN.Plugin;
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace SAIN.Editor.Util
@@ -42,6 +40,9 @@ namespace SAIN.Editor.Util
                 _mouseMoveTime = Time.time + MOUSE_FUNC_TIME;
             }
             _lastMousePos = mousePos;
+            if (Event.current.type == EventType.MouseDown && Event.current.button == 1) {
+                Sounds.PlaySound(EFT.UI.EUISoundType.ButtonBottomBarClick);
+            }
         }
 
         public static bool MouseIsMoving => _mouseMoveTime > Time.time;
@@ -116,49 +117,6 @@ namespace SAIN.Editor.Util
             GUI.DrawTexture(lineArea, texture);
             lineArea.x = area.xMax - frameWidth;//Right
             GUI.DrawTexture(lineArea, texture);
-        }
-
-        private static void Reset()
-        {
-            drawRect = false;
-            mousePositions[0] = new Vector3();
-            mousePositions[1] = new Vector3();
-            DragRectangle = Rect.zero;
-        }
-
-        public static void Update()
-        {
-            if (Event.current.isMouse && Event.current.type == EventType.MouseDrag) {
-                if (!drawRect) {
-                    mousePositions[0] = Input.mousePosition;
-                }
-
-                mousePositions[1] = Input.mousePosition;
-
-                float width = Math.Abs(mousePositions[1].x - mousePositions[0].x);
-                float height = Math.Abs(mousePositions[1].y - mousePositions[0].y);
-                float x = mousePositions[0].x;
-                float y = Screen.height - mousePositions[0].y;
-
-                if (mousePositions[0].x < mousePositions[1].x && mousePositions[0].y < mousePositions[1].y) {
-                    DrawPosition = new Rect(x, y, width, -height);
-                }
-                else if (mousePositions[0].x > mousePositions[1].x && mousePositions[0].y < mousePositions[1].y) {
-                    DrawPosition = new Rect(x, y, -width, -height);
-                }
-                else if (mousePositions[0].x < mousePositions[1].x && mousePositions[0].y > mousePositions[1].y) {
-                    DrawPosition = new Rect(x, y, width, height);
-                }
-                else {
-                    DrawPosition = new Rect(x, y, -width, height);
-                }
-
-                DragRectangle = DrawPosition;
-                drawRect = true;
-            }
-            else if (Event.current.isMouse && Event.current.type != EventType.MouseDrag) {
-                Reset();
-            }
         }
     }
 }

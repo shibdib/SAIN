@@ -39,7 +39,7 @@ namespace SAIN.Editor
 
         public static void Home()
         {
-            PresetSelection.Menu();
+            PresetSelection.PresetSelectionMenu();
             Space(20f);
 
             BotSettingsEditor.ShowAllSettingsGUI(

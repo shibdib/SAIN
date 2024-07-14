@@ -4,14 +4,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyCorner
     {
-        public EnemyCorner(Vector3 groundPoint, float signedAngle)
+        public EnemyCorner(Vector3 groundPoint, float signedAngle, int pathIndex)
         {
             GroundPosition = groundPoint;
             SignedAngleToTarget = signedAngle;
             _nextLookPointTime = 0f;
             _blindCornerLookPoint = groundPoint;
+            PathIndex = pathIndex;
         }
 
+        public int PathIndex { get; }
         public Vector3 GroundPosition { get; }
         public float SignedAngleToTarget { get; }
 

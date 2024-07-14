@@ -235,7 +235,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
             BaseClass.Reset();
             FinalDestination = lastCorner.Value;
-            PeekPoints = findPeekPosition(start, enemy.Path.PathToEnemy);
+            PeekPoints = findPeekPosition(enemy);
             TargetPlace = enemy.KnownPlaces.LastKnownPlace;
             failReason = string.Empty;
             return true;
@@ -287,27 +287,48 @@ namespace SAIN.SAINComponent.Classes.Search
             return true;
         }
 
-        private BotPeekPlan? findPeekPosition(Vector3 start, NavMeshPath path)
+        private BotPeekPlan? findPeekPosition(Enemy enemy)
         {
-            findNewCorners(path);
-            int count = newCorners.Count;
-
-            for (int i = 0; i < count - 1; i++)
-            {
-                Vector3 A = newCorners[i];
-                Vector3 ADirection = A - start;
-                Vector3 B = newCorners[i + 1];
-                Vector3 BDirection = B - start;
-
-                Vector3 startPeekPos = GetPeekStartAndEnd(A, B, ADirection, BDirection, out var endPeekPos);
-                if (NavMesh.SamplePosition(startPeekPos, out var hit3, 5f, -1))
-                {
-                    newCorners.Clear();
-                    return new BotPeekPlan(hit3.position, endPeekPos, B, A);
-                }
+            const float MIN_ANGLE_TO_PEEK = 5f;
+            const float CORNER_PEEK_DIST = 3f;
+            if (!enemy.Path.EnemyCorners.TryGetValue(ECornerType.Blind, out EnemyCorner blindCorner)) {
+                return null;
             }
-            newCorners.Clear();
+
+            Vector3[] pathCorners = enemy.Path.PathToEnemy.corners;
+            int count = pathCorners.Length;
+            int blindCornerIndex = blindCorner.PathIndex;
+            Vector3 blindCornerPosition = blindCorner.GroundPosition;
+            Vector3 botPosition = Bot.Position;
+            Vector3 blindCornerDir = blindCornerPosition - botPosition;
+            Vector3 blindCornerDirNormal = blindCornerDir.normalized;
+
+            Vector3 startPeekPosition = blindCornerPosition - (blindCornerDirNormal * CORNER_PEEK_DIST);
+
+            for (int i = blindCornerIndex; i < count; i++) {
+                Vector3 corner = pathCorners[i];
+                Vector3 dir = corner - blindCornerPosition;
+                Vector3 dirNormal = dir.normalized;
+                float signedAngle = findHorizSignedAngle(blindCornerDirNormal, dirNormal);
+                if (Mathf.Abs(signedAngle) < MIN_ANGLE_TO_PEEK) {
+                    continue;
+                }
+                Vector3 oppositePoint = blindCornerPosition - (dirNormal * CORNER_PEEK_DIST);
+                if (NavMesh.Raycast(blindCornerPosition, oppositePoint, out NavMeshHit hit, -1)) {
+                    oppositePoint = hit.position;
+                }
+
+                return new BotPeekPlan(startPeekPosition, oppositePoint, corner);
+            }
             return null;
+        }
+
+        private float findHorizSignedAngle(Vector3 dirA, Vector3 dirB)
+        {
+            dirA.y = 0;
+            dirB.y = 0;
+            float signedAngle = Vector3.SignedAngle(dirA, dirB, Vector3.up);
+            return signedAngle;
         }
 
         private void findNewCorners(NavMeshPath path)
@@ -332,10 +353,17 @@ namespace SAIN.SAINComponent.Classes.Search
 
         private readonly List<Vector3> newCorners = new List<Vector3>();
 
+        private struct peekPositions
+        {
+            public Vector3 Start;
+            public Vector3 End;
+            public Vector3 DangerPoint;
+        }
+
         private Vector3 GetPeekStartAndEnd(Vector3 blindCorner, Vector3 dangerPoint, Vector3 dirToBlindCorner, Vector3 dirToBlindDest, out Vector3 peekEnd)
         {
-            const float maxMagnitude = 6f;
-            const float minMagnitude = 1f;
+            const float maxMagnitude = 4f;
+            const float minMagnitude = 2f;
             const float OppositePointMagnitude = 3f;
 
             Vector3 directionToStart = BotOwner.Position - blindCorner;

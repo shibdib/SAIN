@@ -24,7 +24,7 @@ namespace SAIN.SAINComponent.Classes.Decision
         public SearchReasonsStruct DebugSearchReasons { get; private set; }
         public float FrozenDuration { get; private set; }
         public float TimeToUnfreeze { get; private set; }
-        public StringBuilder FailedDecisionReasons { get; } = new StringBuilder();
+        public StringBuilder DecisionReasons { get; } = new StringBuilder();
         public bool ShiftCoverComplete { get; set; }
         public bool? DebugShallSearch { get; set; }
         public bool ShotInCover { get; set; }
@@ -50,7 +50,7 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public BotDecision<ECombatDecision>? GetDecision()
         {
-            FailedDecisionReasons.Clear();
+            DecisionReasons.Clear();
             Enemy enemy = Bot.Enemy;
             if (enemy == null) {
                 return null;
@@ -59,7 +59,7 @@ namespace SAIN.SAINComponent.Classes.Decision
             if (shallDogFight(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.DogFight, reason);
             }
-            FailedDecisionReasons.AppendLine($"{ECombatDecision.DogFight} {reason}");
+            DecisionReasons.AppendLine($"{ECombatDecision.DogFight} {reason}");
 
             if (shallStandAndShoot(enemy, out reason)) {
                 if (Bot.Decision.CurrentCombatDecision != ECombatDecision.StandAndShoot)
@@ -67,22 +67,22 @@ namespace SAIN.SAINComponent.Classes.Decision
 
                 return new BotDecision<ECombatDecision>(ECombatDecision.StandAndShoot, reason);
             }
-            FailedDecisionReasons.AppendLine($"{ECombatDecision.StandAndShoot} {reason}");
+            DecisionReasons.AppendLine($"{ECombatDecision.StandAndShoot} {reason}");
 
             if (shallShootDistantEnemy(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.ShootDistantEnemy, reason);
             }
-            FailedDecisionReasons.AppendLine($"{ECombatDecision.ShootDistantEnemy} {reason}");
+            DecisionReasons.AppendLine($"{ECombatDecision.ShootDistantEnemy} {reason}");
 
             if (shallRushEnemy(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.RushEnemy, reason);
             }
-            FailedDecisionReasons.AppendLine($"{ECombatDecision.RushEnemy} {reason}");
+            DecisionReasons.AppendLine($"{ECombatDecision.RushEnemy} {reason}");
 
             if (shallThrowGrenade(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.ThrowGrenade, reason);
             }
-            FailedDecisionReasons.AppendLine($"{ECombatDecision.ThrowGrenade} {reason}");
+            DecisionReasons.AppendLine($"{ECombatDecision.ThrowGrenade} {reason}");
 
             if (shallSearch(enemy, out reason)) {
                 if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Search) {
@@ -90,96 +90,133 @@ namespace SAIN.SAINComponent.Classes.Decision
                 }
                 return new BotDecision<ECombatDecision>(ECombatDecision.Search, reason);
             }
-            FailedDecisionReasons.AppendLine($"{ECombatDecision.Search} {reason}");
+            DecisionReasons.AppendLine($"{ECombatDecision.Search} {reason}");
 
             if (shallFreezeAndWait(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.Freeze, reason);
             }
-            FailedDecisionReasons.AppendLine($"{ECombatDecision.Freeze} {reason}");
+            DecisionReasons.AppendLine($"{ECombatDecision.Freeze} {reason}");
 
             if (shallShiftCover(enemy, out reason)) {
                 return new BotDecision<ECombatDecision>(ECombatDecision.ShiftCover, reason);
             }
-            FailedDecisionReasons.AppendLine($"{ECombatDecision.ShiftCover} {reason}");
+            DecisionReasons.AppendLine($"{ECombatDecision.ShiftCover} {reason}");
 
             if (shallMoveToCover(out reason)) {
                 if (shallRunForCover(enemy, out reason)) {
                     return new BotDecision<ECombatDecision>(ECombatDecision.RunToCover, reason);
                 }
-                FailedDecisionReasons.AppendLine($"{ECombatDecision.RunToCover} {reason}");
+                DecisionReasons.AppendLine($"{ECombatDecision.RunToCover} {reason}");
 
                 return new BotDecision<ECombatDecision>(ECombatDecision.MoveToCover, reason);
             }
-            FailedDecisionReasons.AppendLine($"{ECombatDecision.MoveToCover} {reason}");
+            DecisionReasons.AppendLine($"{ECombatDecision.MoveToCover} {reason}");
 
             return new BotDecision<ECombatDecision>(ECombatDecision.HoldInCover, reason);
         }
 
-        public bool GetDecision(out ECombatDecision Decision)
+        public bool GetDecision(out ECombatDecision result)
         {
             Enemy enemy = Bot.Enemy;
             if (enemy == null) {
-                Decision = ECombatDecision.None;
+                result = ECombatDecision.None;
                 return false;
             }
 
-            //if (BotOwner.WeaponManager?.HaveBullets == false) {
-            //    Decision = ECombatDecision.Retreat;
-            //}
-            else if (shallDogFight(enemy, out _)) {
-                Decision = ECombatDecision.DogFight;
+            DecisionReasons.Clear();
+
+            if (BotOwner.WeaponManager?.HaveBullets == false) {
+                result = ECombatDecision.Retreat;
+                return true;
             }
-            else if (shallStandAndShoot(enemy, out _)) {
+
+            string reason = string.Empty;
+            DecisionReasons.AppendLine($"1. I've Got Bullets.");
+
+            if (shallDogFight(enemy, out reason)) {
+                result = ECombatDecision.DogFight;
+                return true;
+            }
+
+            bool shallShoot = shallStandAndShoot(enemy, out reason);
+            DecisionReasons.AppendLine($"2. Shall Shoot: [{shallShoot}, {reason}]");
+            if (shallShoot) {
                 if (Bot.Decision.CurrentCombatDecision != ECombatDecision.StandAndShoot) {
                     Bot.Info.CalcHoldGroundDelay();
                 }
-                Decision = ECombatDecision.StandAndShoot;
+                result = ECombatDecision.StandAndShoot;
+                return true;
             }
-            else if (shallShootDistantEnemy(enemy, out _)) {
-                Decision = ECombatDecision.ShootDistantEnemy;
+
+            bool shallShootDistant = shallShootDistantEnemy(enemy, out reason);
+            DecisionReasons.AppendLine($"3. Shall Shoot Distant: [{shallShootDistant}, {reason}]");
+            if (shallShootDistant) {
+                result = ECombatDecision.ShootDistantEnemy;
+                return true;
             }
-            else if (shallRushEnemy(enemy, out _)) {
-                Decision = ECombatDecision.RushEnemy;
+
+            bool shallRush = shallRushEnemy(enemy, out reason);
+            DecisionReasons.AppendLine($"4. Shall Rush: [{shallRush}, {reason}]");
+            if (shallRush) {
+                result = ECombatDecision.RushEnemy;
+                return true;
             }
-            else if (shallThrowGrenade(enemy, out _)) {
-                Decision = ECombatDecision.ThrowGrenade;
+
+            bool shallThrowNade = shallThrowGrenade(enemy, out reason);
+            DecisionReasons.AppendLine($"5. Shall Throw Nade: [{shallThrowNade}, {reason}]");
+            if (shallThrowNade) {
+                result = ECombatDecision.ThrowGrenade;
+                return true;
             }
-            else if (shallSearch(enemy, out _)) {
+
+            bool search = shallSearch(enemy, out reason);
+            DecisionReasons.AppendLine($"6. Shall Search: [{search}, {reason}]");
+            if (search) {
                 if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Search) {
                     enemy.Status.NumberOfSearchesStarted++;
                 }
-                Decision = ECombatDecision.Search;
+                result = ECombatDecision.Search;
+                return true;
             }
-            else if (shallFreezeAndWait(enemy, out _)) {
-                Decision = ECombatDecision.Freeze;
-            }
-            //else if (shallMoveToEngage(enemy))
-            //{
-            //    Decision = SoloDecision.MoveToEngage;
-            //}
-            else if (shallShiftCover(enemy, out _)) {
-                Decision = ECombatDecision.ShiftCover;
-            }
-            else if (shallMoveToCover(out _)) {
-                Decision = ECombatDecision.MoveToCover;
 
-                if (shallRunForCover(enemy, out _)) {
-                    Decision = ECombatDecision.RunToCover;
+            bool freeze = shallFreezeAndWait(enemy, out reason);
+            DecisionReasons.AppendLine($"7. Shall Freeze: [{freeze}, {reason}]");
+            if (freeze) {
+                result = ECombatDecision.Freeze;
+                return true;
+            }
+
+            bool shift = shallShiftCover(enemy, out reason);
+            DecisionReasons.AppendLine($"8. Shall Shift Cover: [{shift}, {reason}]");
+            if (shift) {
+                result = ECombatDecision.ShiftCover;
+                return true;
+            }
+
+            bool move = shallMoveToCover(out reason);
+            DecisionReasons.AppendLine($"8. Shall MoveToCover: [{move}, {reason}]");
+            if (move) {
+                result = ECombatDecision.MoveToCover;
+                bool run = shallRunForCover(enemy, out reason);
+                DecisionReasons.AppendLine($"8-1. Shall RunToCover: [{run}, {reason}]");
+
+                if (run) {
+                    result = ECombatDecision.RunToCover;
+                    return true;
                 }
+                return true;
             }
-            else if (shallHoldInCover(out _)) {
-                Decision = ECombatDecision.HoldInCover;
-            }
-            else {
-                Decision = ECombatDecision.DebugNoDecision;
-            }
-
-            if (Decision != ECombatDecision.MoveToCover &&
-                Decision != ECombatDecision.RunToCover) {
-                StartRunCoverTimer = 0f;
+            StartRunCoverTimer = 0f;
+            bool hold = shallHoldInCover(out reason);
+            DecisionReasons.AppendLine($"9. Shall HoldinCover: [{hold}, {reason}]");
+            if (hold) {
+                result = ECombatDecision.HoldInCover;
+                return true;
             }
 
-            return true;
+            DecisionReasons.AppendLine($"10. No Decision?");
+            result = ECombatDecision.DebugNoDecision;
+            return false;
         }
 
         private void checkFreezeTime()

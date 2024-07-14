@@ -1,6 +1,8 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.UI;
 using JetBrains.Annotations;
+using Newtonsoft.Json.Linq;
 using SAIN.Editor;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
@@ -209,6 +211,53 @@ namespace SAIN.Helpers
                 default:
                     return false;
             }
+        }
+
+        public static Vector3? GetCornerAtIndex(this NavMeshPath path, int index)
+        {
+            Vector3[] corners = path.corners;
+            if (corners == null) {
+                return null;
+            }
+            return GetVector3AtIndex(corners, index);
+        }
+
+        public static Vector3? GetVector3AtIndex(this List<Vector3> list, int index)
+        {
+            if (GetItemAtIndex(list, index, out Vector3 result)) {
+                return result;
+            }
+            return null;
+        }
+
+        public static Vector3? GetVector3AtIndex(this Vector3[] array, int index)
+        {
+            if (GetItemAtIndex(array, index, out Vector3 result)) {
+                return result;
+            }
+            return null;
+        }
+
+        public static bool GetItemAtIndex<T>(this T[] array, int i, out T result)
+        {
+            int count = array.Length;
+            if (i >= count) {
+                result = default(T);
+                return false;
+            }
+            result = array[i];
+            return true;
+        }
+
+        public static bool GetItemAtIndex<T>(this List<T> list, int i, out T result)
+        {
+            int count = list.Count;
+            if (i >= count) {
+                result = default(T);
+                return false;
+            }
+            result = list[i];
+            return true;
         }
 
         public static Vector3 Normalize(this Vector3 value, out float magnitude)
