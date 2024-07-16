@@ -9,6 +9,31 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
+    public class EnemyEquipmentInfo : EnemyBase, IBotEnemyClass
+    {
+        public EnemyEquipmentInfo(Enemy enemy) : base(enemy) { }
+
+        public void Init()
+        {
+
+        }
+
+        public void Update()
+        {
+
+        }
+
+        public void Dispose()
+        {
+
+        }
+
+        public void OnEnemyKnownChanged(bool value, Enemy enemy)
+        {
+
+        }
+    }
+
     public class Enemy : BotBase, IBotClass
     {
         public string EnemyName { get; }
@@ -59,6 +84,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Aim = new EnemyAim(this);
             Hearing = new EnemyHearing(this);
             Shoot = new EnemyShootClass(this);
+            
+            updateDistAndDirection(true);
         }
 
         public void Init()
@@ -253,18 +280,24 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public float TimeSinceSeen => Vision.TimeSinceSeen;
         public float TimeSinceHeard => Hearing.TimeSinceHeard;
 
-        private void updateDistAndDirection()
+        private void updateDistAndDirection(bool force = false)
         {
             float timeAdd = calcMagnitudeDelay();
-            if (_lastUpdateDistanceTime + timeAdd < Time.time) {
+            if (force || _lastUpdateDistanceTime + timeAdd < Time.time) {
                 _lastUpdateDistanceTime = Time.time;
                 Vector3 dir = EnemyPosition - Bot.Position;
                 EnemyDirection = dir;
                 EnemyDirectionNormal = dir.normalized;
                 RealDistance = dir.magnitude;
 
-                EnemyInfo.Direction = dir;
-                EnemyInfo.Distance = RealDistance;
+                // EFT code throwing random errors as usual.
+                try {
+                    EnemyInfo.Direction = dir;
+                    EnemyInfo.Distance = RealDistance;
+                }
+                catch {
+
+                }
             }
         }
 
