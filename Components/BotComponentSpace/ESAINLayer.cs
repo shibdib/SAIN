@@ -9,6 +9,7 @@
         Run,
         Peace,
         AvoidThreat,
+        Flashbanged,
         Unstuck,
     }
 }

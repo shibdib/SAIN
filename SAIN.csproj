@@ -280,6 +280,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingBulletAnalysisClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingDispersionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingInputClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Grenades\BotFlashbangedClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Grenades\GrenadeReactionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Grenades\GrenadeThrowDecider.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\ColliderData.cs" />
@@ -375,6 +376,8 @@
     <Compile Include="Layers\Combat\Solo\MeleeAttackAction.cs" />
     <Compile Include="Layers\Debug\CrawlAction.cs" />
     <Compile Include="Layers\Debug\GrenadeThrowTestAction.cs" />
+    <Compile Include="Layers\Flashbanged\ExtractAction.cs" />
+    <Compile Include="Layers\Flashbanged\PeacefulLayer.cs" />
     <Compile Include="Layers\ISAINAction.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\BotConversationController.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\BotDictionary.cs" />

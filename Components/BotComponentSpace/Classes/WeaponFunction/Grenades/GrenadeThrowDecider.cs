@@ -66,7 +66,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public bool GetDecision(Enemy enemy, out string reason)
         {
-            if (!canCheckThrow(out reason)) {
+            if (BotOwner.WeaponManager?.Grenades.ThrowindNow == true) {
+                reason = "throwingNow";
+                return true;
+            }
+            if (!checkCanThrow(out reason)) {
                 return false;
             }
             if (!canThrowAtEnemy(enemy, out reason)) {
@@ -81,7 +85,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             }
             if (tryThrowGrenade() || (findThrowTarget(enemy) && tryThrowGrenade())) {
                 _nextPosibleAttempt = Time.time + UnityEngine.Random.Range(_throwGrenadeFreq, _throwGrenadeFreq * THROW_FREQUENCY_RANDOMIZATION_FACTOR);
-                reason = "throwingNow";
+                reason = "startThrow";
                 return true;
             }
             reason = "noGoodTarget";
@@ -90,7 +94,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private GrenadeClass _currentGrenade;
 
-        private bool canCheckThrow(out string reason)
+        private bool checkCanThrow(out string reason)
         {
             if (!_grenadesEnabled) {
                 reason = "grenadesDisabledGlobal";
@@ -110,10 +114,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                     reason = "reloading";
                     return false;
                 }
-                if (weaponManager.Grenades.ThrowindNow) {
-                    reason = "throwingNow";
-                    return true;
-                }
             }
 
             if (this._nextPosibleAttempt > Time.time) {
@@ -129,14 +129,14 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 reason = "handsController Busy";
                 return false;
             }
-            reason = string.Empty;
+            reason = "canThrow";
             return true;
         }
 
         private bool canThrowAtEnemy(Enemy enemy, out string reason)
         {
             if (!_canThrowAtVisEnemies) {
-                if (enemy.IsVisible) {
+                if (enemy.IsVisible || enemy.InLineOfSight) {
                     reason = "enemyVisible";
                     return false;
                 }
@@ -316,7 +316,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 return true;
 
             foreach (var member in members.Values)
-                if (member != null && 
+                if (member != null &&
                     (member.Position - trg).sqrMagnitude < _minFriendlyDistToThrow_SQR) {
                     return false;
                 }

@@ -382,6 +382,24 @@ namespace SAIN.Patches.Vision
         }
     }
 
+    public class FlashbangedPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotFlashGrenade), "AddBlindEffect");
+        }
+
+        [PatchPrefix]
+        public static bool Patch(float time, Vector3 position, BotOwner ___botOwner_0)
+        {
+            if (SAINEnableClass.GetSAIN(___botOwner_0, out var sain)) {
+                sain.Grenade.BotFlash.BotFlashed(time, position);
+                return false;
+            }
+            return true;
+        }
+    }
+
     public class VisionSpeedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
