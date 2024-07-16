@@ -40,7 +40,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             }
             if (Shooting && !isEnemyVisibleForShoot(Bot.Enemy) && !isEnemyVisibleForShoot(Bot.LastEnemy))
             {
-                BotOwner.ShootData.EndShoot();
+                //BotOwner.ShootData.EndShoot();
             }
         }
 
@@ -96,8 +96,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             if (checkFF && !Bot.FriendlyFire.ClearShot)
             {
-                BotOwner.ShootData.EndShoot();
-                return false;
+                //BotOwner.ShootData.EndShoot();
+                //return false;
             }
             BotWeaponManager weaponManager = BotOwner.WeaponManager;
             if (weaponManager.IsMelee)

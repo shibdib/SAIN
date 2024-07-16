@@ -1,17 +1,6 @@
-﻿using Comfort.Common;
-using EFT;
-using SAIN.Components;
-using SAIN.Helpers;
-using SAIN.Layers.Combat.Solo;
-using SAIN.SAINComponent;
+﻿using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using SAIN.SAINComponent.SubComponents.CoverFinder;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 

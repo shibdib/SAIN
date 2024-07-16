@@ -109,7 +109,8 @@ namespace SAIN
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
                 typeof(Patches.Hearing.OnMakingShotPatch),
                 typeof(Patches.Hearing.HearingSensorPatch),
-                
+
+                typeof(Patches.Hearing.VoicePatch),
                 typeof(Patches.Hearing.GrenadeCollisionPatch),
                 typeof(Patches.Hearing.GrenadeCollisionPatch2),
 

@@ -98,19 +98,19 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (SAINPlugin.DebugMode &&
                 _nextdrawTime < Time.time)
             {
-                _nextdrawTime = Time.time + 0.1f;
+                //_nextdrawTime = Time.time + 0.1f;
                 if (lineOfSight)
                 {
                     DebugGizmos.Sphere(castPoint, 0.025f, Color.red, true, 10f);
                     DebugGizmos.Sphere(origin, 0.025f, Color.red, true, 1f);
                     DebugGizmos.Line(castPoint, origin, Color.red, 0.005f, true, 0.5f);
-                    Logger.LogDebug($"{BodyPart} : {maxRayDistance} : {castPoint}");
+                    //Logger.LogDebug($"{BodyPart} : {maxRayDistance} : {castPoint}");
                 }
                 else
                 {
-                    DebugGizmos.Sphere(castPoint, 0.025f, Color.white, true, 10f);
-                    DebugGizmos.Sphere(origin, 0.025f, Color.white, true, 1f);
-                    DebugGizmos.Line(castPoint, hit.point, Color.white, 0.005f, true, 0.5f);
+                    //DebugGizmos.Sphere(castPoint, 0.025f, Color.white, true, 10f);
+                    //DebugGizmos.Sphere(origin, 0.025f, Color.white, true, 1f);
+                    //DebugGizmos.Line(castPoint, hit.point, Color.white, 0.005f, true, 0.5f);
                 }
             }
             return lineOfSight;

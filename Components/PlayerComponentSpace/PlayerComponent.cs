@@ -6,6 +6,7 @@ using SAIN.Helpers;
 using SAIN.SAINComponent;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -13,22 +14,78 @@ namespace SAIN.Components.PlayerComponentSpace
 {
     public class PlayerComponent : MonoBehaviour
     {
-        public BodyPartsClass BodyParts {  get; private set; }
+        public BodyPartsClass BodyParts { get; private set; }
 
         private void Update()
         {
             Person.Update();
 
-            if (!Person.ActivationClass.PlayerActive)
-            {
+            if (!Person.ActivationClass.PlayerActive) {
                 return;
             }
 
-            if (!IsAI || Person.ActivationClass.BotActive)
-            {
+            if (!IsAI || Person.ActivationClass.BotActive) {
                 drawTransformGizmos();
                 Flashlight.Update();
                 Equipment.Update();
+            }
+        }
+
+        private IEnumerator voiceTest()
+        {
+            while (true) {
+                yield return playPhrases(EPhraseTrigger.LostVisual);
+                yield return playPhrases(EPhraseTrigger.OnLostVisual);
+                yield return null;
+            }
+        }
+
+        public bool PlayVoiceLine(EPhraseTrigger phrase, ETagStatus mask, bool aggressive)
+        {
+            var speaker = Player.Speaker;
+            if (speaker.Speaking || speaker.Busy) {
+                return false;
+            }
+
+            //if (aggressive && 
+            //    speaker.PhrasesBanks.TryGetValue(phrase, out var phrasesBank)) {
+            //    _aggroIndexes.Clear();
+            //    int count = phrasesBank.Clips.Length;
+            //    for (int i = 0; i < count; i++) {
+            //        if (phrasesBank.Clips[i].Clip.name.EndsWith("_bl")) {
+            //            _aggroIndexes.Add(i);
+            //        }
+            //    }
+            //
+            //    if (_aggroIndexes.Count > 0) {
+            //        int index = _aggroIndexes.PickRandom();
+            //        speaker.PlayDirect(phrase, index);
+            //        //Logger.LogInfo($"{phrase} :: {phrasesBank.Clips[index].Clip.name} :: {index}");
+            //        return true;
+            //    }
+            //}
+
+            return speaker.Play(phrase, mask, true, null) != null;
+        }
+
+        private readonly List<int> _aggroIndexes = new List<int>();
+
+        private IEnumerator playPhrases(EPhraseTrigger trigger)
+        {
+            var speaker = Player.Speaker;
+            if (speaker.PhrasesBanks.TryGetValue(trigger, out var phrasesBank)) {
+                int count = phrasesBank.Clips.Length;
+                for (int i = 0; i < count; i++) {
+                    bool said = false;
+                    while (!said) {
+                        if (!speaker.Speaking && !speaker.Busy) {
+                            speaker.PlayDirect(trigger, i);
+                            Logger.LogInfo($"{trigger} :: {phrasesBank.Clips[i].Clip.name} :: {i}");
+                            said = true;
+                        }
+                        yield return null;
+                    }
+                }
             }
         }
 
@@ -41,8 +98,7 @@ namespace SAIN.Components.PlayerComponentSpace
         {
             if (SAINPlugin.DebugMode &&
                 SAINPlugin.DrawDebugGizmos &&
-                SAINPlugin.DebugSettings.DrawTransformGizmos)
-            {
+                SAINPlugin.DebugSettings.DrawTransformGizmos) {
                 DebugGizmos.Sphere(Transform.EyePosition, 0.05f, Color.white, true, 0.1f);
                 DebugGizmos.Ray(Transform.EyePosition, Transform.HeadLookDirection, Color.white, Transform.HeadLookDirection.magnitude, 0.025f, true, 0.1f);
 
@@ -59,16 +115,14 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private void startCoroutines()
         {
-            if (_gearCoroutine == null)
-            {
+            if (_gearCoroutine == null) {
                 _gearCoroutine = StartCoroutine(Equipment.GearInfo.GearUpdateLoop());
             }
         }
 
         private void stopCoroutines()
         {
-            if (_gearCoroutine != null)
-            {
+            if (_gearCoroutine != null) {
                 StopCoroutine(_gearCoroutine);
                 _gearCoroutine = null;
             }
@@ -77,8 +131,7 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private Coroutine _gearCoroutine;
 
-        public float DistanceToClosestHuman
-        {
+        public float DistanceToClosestHuman {
             get
             {
                 return 0f;
@@ -89,27 +142,23 @@ namespace SAIN.Components.PlayerComponentSpace
         {
             if (!SAINPlugin.DebugMode ||
                 !SAINPlugin.DrawDebugGizmos ||
-                !Player.IsYourPlayer)
-            {
+                !Player.IsYourPlayer) {
                 return;
             }
 
             Vector3 origin = Position;
-            if (NavMesh.SamplePosition(origin, out var hit, 1f, -1))
-            {
+            if (NavMesh.SamplePosition(origin, out var hit, 1f, -1)) {
                 origin = hit.position;
             }
 
             Vector3 direction;
             int max = 5;
-            for (int i = 0; i < max; i++)
-            {
+            for (int i = 0; i < max; i++) {
                 direction = UnityEngine.Random.onUnitSphere;
                 direction.y = 0;
                 direction = direction.normalized * 30f;
                 Vector3 target = origin + direction;
-                if (NavMesh.Raycast(origin, target, out var hit2, -1))
-                {
+                if (NavMesh.Raycast(origin, target, out var hit2, -1)) {
                     target = hit2.position;
                 }
                 DebugGizmos.Line(origin, target, 0.05f, 0.25f, true);
@@ -140,8 +189,7 @@ namespace SAIN.Components.PlayerComponentSpace
         {
             ProfileId = iPlayer.ProfileId;
 
-            try
-            {
+            try {
                 var playerData = new PlayerData(this, player, iPlayer);
                 Person = new PersonClass(playerData);
 
@@ -150,11 +198,21 @@ namespace SAIN.Components.PlayerComponentSpace
                 Equipment = new SAINEquipmentClass(this);
                 AIData = new SAINAIData(Equipment.GearInfo, this);
 
+                //StringBuilder sb = new StringBuilder();
+                //foreach (var phrase in Player.Speaker.PhrasesBanks) {
+                //    sb.AppendLine($"{phrase.Key} : {phrase.Value.Clips.Length}...");
+                //    foreach (var clip in phrase.Value.Clips) {
+                //        sb.AppendLine($"{clip.Clip.name} : {(ETagStatus)clip.Mask}");
+                //    }
+                //    sb.AppendLine();
+                //}
+                //Logger.LogInfo(sb.ToString());
+
                 Person.ActivationClass.OnPlayerActiveChanged += handleCoroutines;
                 handleCoroutines(true);
+                //StartCoroutine(voiceTest());
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Logger.LogError(ex);
                 return false;
             }

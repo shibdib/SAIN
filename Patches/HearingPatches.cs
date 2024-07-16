@@ -14,6 +14,22 @@ using UnityEngine;
 
 namespace SAIN.Patches.Hearing
 {
+    public class VoicePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(PhraseSpeakerClass), "Init");
+        }
+
+        [PatchPrefix]
+        public static void Patch(PhraseSpeakerClass __instance, ref EPlayerSide side, ref int id, string playerVoice)
+        {
+            //side = EPlayerSide.Usec;
+            //playerVoice = "Usec_3";
+            //Logger.LogInfo($"{playerVoice}");
+        }
+    }
+
     public class GrenadeCollisionPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -28,6 +44,7 @@ namespace SAIN.Patches.Hearing
             //Logger.LogDebug($"Rolloff {_defaultRolloff} after {___soundBank_0.Rolloff}");
             SAINBotController.Instance?.GrenadeCollided(__instance, 35);
         }
+
         private static float _defaultRolloff = 40;
         private const float ROLLOFF_MULTI = 1.75f;
     }

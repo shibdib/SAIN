@@ -52,7 +52,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private float _timeSinceSeenBeforeThrow = 3f;
         private float _maxTimeSinceUpdatedCanThrow = 120f;
         private float _minEnemyDistToThrow = 8f;
-        private float _throwGrenadeFreq = 3f;
+        private float _throwGrenadeFreq = 5f;
         private float _minFriendlyDistToThrow = 8f;
         private float _minFriendlyDistToThrow_SQR = 64;
         private float _blindCornerDistToThrow = 5f;
@@ -229,17 +229,18 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             pos += Vector3.up * _checkThrowPos_HeightOffset;
             var weaponRoot = Bot.Transform.WeaponRoot;
-            if (canThrowAGrenade(weaponRoot, pos))
+            Vector3 throwDir = (pos - Bot.Position).normalized;
+            if (canThrowAGrenade(weaponRoot, pos + (throwDir * UnityEngine.Random.Range(-2f, 2f))))
             {
                 //Logger.LogDebug($"{posString} Can Throw to pos");
                 return true;
             }
-            if (canThrowAGrenade(weaponRoot, pos + (pos - Bot.Position).normalized))
+            if (canThrowAGrenade(weaponRoot, pos + (throwDir * UnityEngine.Random.Range(-2f, 4f))))
             {
                 //Logger.LogDebug($"{posString} Can Throw to pos + dir");
                 return true;
             }
-            if (canThrowAGrenade(weaponRoot, pos + Vector3.up * 0.5f))
+            if (canThrowAGrenade(weaponRoot, pos + Vector3.up * 0.5f + (throwDir * UnityEngine.Random.Range(-2f, 4f))))
             {
                 //Logger.LogDebug($"{posString} Can Throw to pos + vector3.up * 0.5f");
                 return true;

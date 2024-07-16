@@ -17,13 +17,13 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
             "Since Since Enemy Seen before Throw",
             "How long it has been since a bot's enemy has been visible before a bot can consider throwing a grenade.")]
         [MinMax(0.0f, 30f, 100f)]
-        public float TimeSinceSeenBeforeThrow = 3f;
+        public float TimeSinceSeenBeforeThrow = 4f;
 
         [NameAndDescription(
             "Time Before Next Throw",
             "How much time to wait before a bot is allowed to throw another grenade.")]
         [MinMax(0f, 30f, 100f)]
-        public float ThrowGrenadeFrequency = 4f;
+        public float ThrowGrenadeFrequency = 6f;
 
         [NameAndDescription(
             "Minimum Friendly Distance to Throw Target",
@@ -41,13 +41,17 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
             "Grenade Spread",
             "How much distance, in meters, to randomize a bot's throw target position.")]
         [MinMax(0f, 5f, 100f)]
-        [CopyValue]
-        public float GrenadePrecision = 0.5f;
+        //[CopyValue]
+        [Hidden]
+        [JsonIgnore]
+        public float GrenadePrecision = 0.1f;
 
         [Percentage0to1]
         [Advanced]
-        [CopyValue]
-        public float MIN_THROW_DIST_PERCENT_0_1 = 0.25f;
+        [Hidden]
+        [JsonIgnore]
+        //[CopyValue]
+        public float MIN_THROW_DIST_PERCENT_0_1 = 0.1f;
 
         [Hidden]
         [JsonIgnore]

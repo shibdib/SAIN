@@ -93,12 +93,17 @@ namespace SAIN.SAINComponent.Classes.Search
                 return;
             }
 
+            var pathToEnemy = enemy.Path.PathToEnemy;
+            if (pathToEnemy.corners.Length > 2) {
+                return;
+            }
+
             if ((FinalDestination - Bot.Position).sqrMagnitude > 0.75)
             {
                 return;
             }
 
-            var lastCorner = enemy.Path.PathToEnemy.LastCorner();
+            var lastCorner = pathToEnemy.LastCorner();
             if (lastCorner == null)
             {
                 Reset();

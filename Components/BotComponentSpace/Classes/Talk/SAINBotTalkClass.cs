@@ -1,10 +1,8 @@
 using EFT;
-using EFT.Ballistics;
 using SAIN.Components;
 using SAIN.Helpers;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace SAIN.SAINComponent.Classes.Talk
 {
@@ -32,15 +30,13 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
-            if (Player == null || BotOwner == null || Bot == null)
-            {
+            if (Player == null || BotOwner == null || Bot == null) {
                 return;
             }
 
-            if (EFTMath.RandomBool(25) && 
-                _nextGetHitTime < Time.time && 
-                GroupTalk.FriendIsClose)
-            {
+            if (EFTMath.RandomBool(25) &&
+                _nextGetHitTime < Time.time &&
+                GroupTalk.FriendIsClose) {
                 _nextGetHitTime = Time.time + 1f;
                 EPhraseTrigger trigger = EPhraseTrigger.OnBeingHurt;
                 ETagStatus mask = ETagStatus.Combat | ETagStatus.Aware;
@@ -48,27 +44,22 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
         }
 
-
         public void Update()
         {
             GroupTalk.Update();
 
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
-            {
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching) {
                 return;
             }
 
-            if (IsSpeaking)
-            {
+            if (IsSpeaking) {
                 return;
             }
 
             if (CanTalk
-                && _timeCanTalk < Time.time)
-            {
+                && _timeCanTalk < Time.time) {
                 EnemyTalk.Update();
-                if (_allTalkDelay < Time.time)
-                {
+                if (_allTalkDelay < Time.time) {
                     checkTalk();
                 }
             }
@@ -78,32 +69,25 @@ namespace SAIN.SAINComponent.Classes.Talk
         {
             BotTalkPackage? TalkPack = null;
 
-            if (_talkCacheTimer < Time.time && _botTalkPackage != null)
-            {
+            if (_talkCacheTimer < Time.time && _botTalkPackage != null) {
                 TalkPack = _botTalkPackage;
                 _botTalkPackage = null;
                 _talkCacheActive = false;
             }
-            else if (_talkDelayTimer < Time.time && _talkDelayPackage != null)
-            {
+            else if (_talkDelayTimer < Time.time && _talkDelayPackage != null) {
                 TalkPack = _talkDelayPackage;
                 _talkDelayPackage = null;
             }
 
-            if (TalkPack != null)
-            {
+            if (TalkPack != null) {
                 _allTalkDelay = Time.time + Bot.Info.FileSettings.Mind.TalkFrequency;
 
-                if (TalkPack.Value.phraseInfo.Phrase == EPhraseTrigger.Roger || TalkPack.Value.phraseInfo.Phrase == EPhraseTrigger.Negative)
-                {
-                    if (Bot.Squad.VisibleMembers != null && Bot.Squad.LeaderComponent != null && Bot.Squad.VisibleMembers.Contains(Bot.Squad.LeaderComponent) && Bot.Enemy?.IsVisible == false)
-                    {
-                        if (TalkPack.Value.phraseInfo.Phrase == EPhraseTrigger.Roger)
-                        {
+                if (TalkPack.Value.phraseInfo.Phrase == EPhraseTrigger.Roger || TalkPack.Value.phraseInfo.Phrase == EPhraseTrigger.Negative) {
+                    if (Bot.Squad.VisibleMembers != null && Bot.Squad.LeaderComponent != null && Bot.Squad.VisibleMembers.Contains(Bot.Squad.LeaderComponent) && Bot.Enemy?.IsVisible == false) {
+                        if (TalkPack.Value.phraseInfo.Phrase == EPhraseTrigger.Roger) {
                             Player.HandsController.ShowGesture(EGesture.Good);
                         }
-                        else
-                        {
+                        else {
                             Player.HandsController.ShowGesture(EGesture.Bad);
                         }
                         return;
@@ -115,8 +99,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Dispose()
         {
-            if (Player != null)
-            {
+            if (Player != null) {
                 Player.BeingHitAction -= GetHit;
             }
             _phraseDictionary.Clear();
@@ -127,38 +110,31 @@ namespace SAIN.SAINComponent.Classes.Talk
         public bool CanSay(EPhraseTrigger trigger, bool withGroupDelay, bool skipCheck)
         {
             var speaker = Player?.Speaker;
-            if (speaker == null)
-            {
+            if (speaker == null) {
                 return false;
             }
 
-            if (trigger == EPhraseTrigger.OnDeath || 
-                trigger == EPhraseTrigger.OnAgony)
-            {
+            if (trigger == EPhraseTrigger.OnDeath ||
+                trigger == EPhraseTrigger.OnAgony) {
                 return true;
             }
 
-            if (speaker.Speaking)
-            {
+            if (speaker.Speaking) {
                 return false;
             }
-            if (!CanTalk)
-            {
+            if (!CanTalk) {
                 return false;
             }
 
-            if (skipCheck)
-            {
+            if (skipCheck) {
                 return true;
             }
 
-            if (!checkDictionaryDelay(trigger))
-            {
+            if (!checkDictionaryDelay(trigger)) {
                 return false;
             }
-            if (withGroupDelay && 
-                !BotOwner.BotsGroup.GroupTalk.CanSay(BotOwner, trigger))
-            {
+            if (withGroupDelay &&
+                !BotOwner.BotsGroup.GroupTalk.CanSay(BotOwner, trigger)) {
                 return false;
             }
             return true;
@@ -166,25 +142,21 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public bool Say(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false, bool skipCheck = false)
         {
-            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching)
-            {
+            if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching) {
                 return false;
             }
-            if (!CanSay(phrase, withGroupDelay, skipCheck))
-            {
+            if (!CanSay(phrase, withGroupDelay, skipCheck)) {
                 return false;
             }
 
             var mask = SetETagMask(additionalMask);
 
-            if (skipCheck)
-            {
+            if (skipCheck) {
                 tellSpeakerToSay(phrase, mask);
                 return true;
             }
 
-            if (!_phraseDictionary.ContainsKey(phrase))
-            {
+            if (!_phraseDictionary.ContainsKey(phrase)) {
                 tellSpeakerToSay(phrase, mask);
                 return true;
             }
@@ -192,8 +164,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             var phraseInfo = _phraseDictionary[phrase];
             var data = new BotTalkPackage(phraseInfo, mask);
             _botTalkPackage = CheckPriority(data, _botTalkPackage);
-            if (!_talkCacheActive)
-            {
+            if (!_talkCacheActive) {
                 _talkCacheActive = true;
                 _talkCacheTimer = Time.time + 0.25f;
             }
@@ -203,8 +174,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         public bool GroupSay(EPhraseTrigger phrase, ETagStatus? additionalMask = null, bool withGroupDelay = false, float chance = 60)
         {
             var squadSettings = Bot.Squad.SquadInfo?.SquadPersonalitySettings;
-            if (squadSettings != null)
-            {
+            if (squadSettings != null) {
                 float vocalization = squadSettings.VocalizationLevel * 10f - 25f;
                 chance += vocalization;
             }
@@ -213,25 +183,20 @@ namespace SAIN.SAINComponent.Classes.Talk
                 && Say(phrase, additionalMask, withGroupDelay);
         }
 
-
         public void TalkAfterDelay(EPhraseTrigger phrase, ETagStatus? mask = null, float delay = 0.5f)
         {
-            if (CanTalk && _timeCanTalk < Time.time)
-            {
-                if (!_phraseDictionary.ContainsKey(phrase))
-                {
+            if (CanTalk && _timeCanTalk < Time.time) {
+                if (!_phraseDictionary.ContainsKey(phrase)) {
                     Logger.LogWarning($"Phrase: [{phrase}] Not in Dictionary, adding it manually.");
                     _phraseDictionary.Add(phrase, new PhraseInfo(phrase, 10, 5f));
                 }
                 var talk = new BotTalkPackage(_phraseDictionary[phrase], SetETagMask(mask));
                 _talkDelayPackage = CheckPriority(talk, _talkDelayPackage, out bool changeTalk);
-                if (changeTalk)
-                {
+                if (changeTalk) {
                     _talkDelayTimer = Time.time + delay;
                 }
             }
         }
-
 
         private void tellSpeakerToSay(EPhraseTrigger phrase, ETagStatus mask)
         {
@@ -240,52 +205,46 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private void tellSpeakerToSay(EPhraseTrigger trigger, ETagStatus mask = (ETagStatus)0, bool aggressive = false)
         {
-            if (trigger == EPhraseTrigger.MumblePhrase)
-            {
+            if (trigger == EPhraseTrigger.MumblePhrase) {
                 trigger = ((aggressive || Time.time < Player.Awareness) ? EPhraseTrigger.OnFight : EPhraseTrigger.OnMutter);
             }
             ETagStatus etagStatus = (aggressive || Player.Awareness > Time.time) ? ETagStatus.Combat : ETagStatus.Unaware;
-            SAINBotController.Instance?.BotHearing.PlayerTalked(trigger, etagStatus, Player);
-            BotOwner.BotsGroup.GroupTalk.PhraseSad(BotOwner, trigger);
-            if (_phraseDictionary.TryGetValue(trigger, out var phrase))
-            {
-                phrase.TimeLastSaid = Time.time;
-            }
-            Player.Speaker.Play(trigger, Bot.Memory.Health.HealthStatus | mask | etagStatus, true, null);
-        }
+            if (PlayerComponent.PlayVoiceLine(trigger, Bot.Memory.Health.HealthStatus | mask | etagStatus, aggressive)) {
 
+                SAINBotController.Instance?.BotHearing.PlayerTalked(trigger, etagStatus, Player);
+                BotOwner.BotsGroup.GroupTalk.PhraseSad(BotOwner, trigger);
+
+                if (_phraseDictionary.TryGetValue(trigger, out var phrase)) {
+                    phrase.TimeLastSaid = Time.time;
+                }
+            }
+            //Player.Speaker.Play(trigger, Bot.Memory.Health.HealthStatus | mask | etagStatus, true, null);
+        }
 
         private ETagStatus SetETagMask(ETagStatus? additionaMask = null)
         {
             ETagStatus etagStatus;
-            if (BotOwner.BotsGroup.MembersCount > 1)
-            {
+            if (BotOwner.BotsGroup.MembersCount > 1) {
                 etagStatus = ETagStatus.Coop;
             }
-            else
-            {
+            else {
                 etagStatus = ETagStatus.Solo;
             }
 
             if (BotOwner.Memory.IsUnderFire ||
                 Bot.Suppression.IsSuppressed ||
-                Bot.Suppression.IsHeavySuppressed)
-            {
+                Bot.Suppression.IsHeavySuppressed) {
                 etagStatus |= ETagStatus.Combat;
             }
-            else if (Bot.Enemy != null)
-            {
-                if (Bot.Enemy.Seen && Bot.Enemy.TimeSinceSeen < 30f)
-                {
+            else if (Bot.Enemy != null) {
+                if (Bot.Enemy.Seen && Bot.Enemy.TimeSinceSeen < 30f) {
                     etagStatus |= ETagStatus.Combat;
                 }
-                else
-                {
+                else {
                     etagStatus |= ETagStatus.Aware;
                 }
 
-                switch (Bot.Enemy.EnemyIPlayer.Side)
-                {
+                switch (Bot.Enemy.EnemyIPlayer.Side) {
                     case EPlayerSide.Usec:
                         etagStatus |= ETagStatus.Usec;
                         break;
@@ -299,17 +258,14 @@ namespace SAIN.SAINComponent.Classes.Talk
                         break;
                 }
             }
-            else if (!Bot.EnemyController.AtPeace)
-            {
+            else if (!Bot.EnemyController.AtPeace) {
                 etagStatus |= ETagStatus.Aware;
             }
-            else
-            {
+            else {
                 etagStatus |= ETagStatus.Unaware;
             }
 
-            if (additionaMask != null)
-            {
+            if (additionaMask != null) {
                 etagStatus |= additionaMask.Value;
             }
 
@@ -318,16 +274,13 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private bool checkDictionaryDelay(EPhraseTrigger trigger)
         {
-            if (!_phraseDictionary.ContainsKey(trigger))
-            {
+            if (!_phraseDictionary.ContainsKey(trigger)) {
                 _phraseDictionary.Add(trigger, new PhraseInfo(trigger, 10, 5f));
             }
 
-            if (_phraseDictionary.ContainsKey(trigger))
-            {
+            if (_phraseDictionary.ContainsKey(trigger)) {
                 var phraseInfo = _phraseDictionary[trigger];
-                if (phraseInfo.TimeLastSaid + phraseInfo.TimeDelay < Time.time)
-                {
+                if (phraseInfo.TimeLastSaid + phraseInfo.TimeDelay < Time.time) {
                     return true;
                 }
             }
@@ -336,12 +289,10 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private BotTalkPackage? CheckPriority(BotTalkPackage? newTalk, BotTalkPackage? oldTalk)
         {
-            if (oldTalk == null)
-            {
+            if (oldTalk == null) {
                 return newTalk;
             }
-            if (newTalk == null)
-            {
+            if (newTalk == null) {
                 return oldTalk;
             }
 
@@ -355,13 +306,11 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private BotTalkPackage? CheckPriority(BotTalkPackage? newTalk, BotTalkPackage? oldTalk, out bool ChangeTalk)
         {
-            if (oldTalk == null)
-            {
+            if (oldTalk == null) {
                 ChangeTalk = true;
                 return newTalk;
             }
-            if (newTalk == null)
-            {
+            if (newTalk == null) {
                 ChangeTalk = false;
                 return oldTalk;
             }
@@ -442,16 +391,14 @@ namespace SAIN.SAINComponent.Classes.Talk
             AddPhrase(EPhraseTrigger.LootWeapon, 5, 30f, dictionary);
             AddPhrase(EPhraseTrigger.OnLoot, 5, 30f, dictionary);
 
-            foreach (EPhraseTrigger value in System.Enum.GetValues(typeof(EPhraseTrigger)))
-            {
+            foreach (EPhraseTrigger value in System.Enum.GetValues(typeof(EPhraseTrigger))) {
                 AddPhrase(value, 25, 5f, dictionary);
             }
         }
 
         private static void AddPhrase(EPhraseTrigger phrase, int priority, float timeDelay, Dictionary<EPhraseTrigger, PhraseInfo> dictionary)
         {
-            if (!dictionary.ContainsKey(phrase))
-            {
+            if (!dictionary.ContainsKey(phrase)) {
                 dictionary.Add(phrase, new PhraseInfo(phrase, priority, timeDelay));
             }
         }
@@ -476,6 +423,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             phraseInfo = phrase;
             Mask = mask;
         }
+
         public PhraseInfo phraseInfo;
         public ETagStatus Mask;
     }

@@ -232,6 +232,12 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return adjustLookPoint(enemy.EnemyPosition);
             }
 
+            var lastKnown = enemy.KnownPlaces.LastKnownPlace;
+            if (lastKnown != null && lastKnown.CheckLineOfSight(Bot.Transform.EyePosition, LayerMaskClass.HighPolyWithTerrainMask)) {
+                EnemySteerDir = EEnemySteerDir.VisibleLastKnown;
+                return lastKnown.Position + WeaponRootOffset;
+            }
+
             //Vector3? lastKnown = EnemyLastKnown(enemy, out bool visible);
             //if (lastKnown != null &&
             //    visible)
@@ -241,6 +247,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             //}
 
             EnemyCornerDictionary corners = enemy.Path.EnemyCorners;
+
             Vector3? blindCorner = corners.PointPastCorner(ECornerType.Blind);
             if (blindCorner != null)
             {
@@ -258,12 +265,12 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
             }
 
-            Vector3? first = corners.PointPastCorner(ECornerType.First);
-            if (first != null)
-            {
-                EnemySteerDir = EEnemySteerDir.Path;
-                return first;
-            }
+            //Vector3? first = corners.PointPastCorner(ECornerType.First);
+            //if (first != null)
+            //{
+            //    EnemySteerDir = EEnemySteerDir.Path;
+            //    return first;
+            //}
 
             Vector3? lastKnownCorner = corners.PointPastCorner(ECornerType.LastKnown);
             if (lastKnownCorner != null)

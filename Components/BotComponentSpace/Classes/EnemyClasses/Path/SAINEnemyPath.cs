@@ -160,7 +160,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     case NavMeshPathStatus.PathComplete:
                         findCorners(enemyPosition, PathToEnemyStatus, corners);
                         if (isCurrentEnemy)
-                            yield return Bot.StartCoroutine(_blindCornerFinder.FindBlindCorner(corners, enemyPosition));
+                            yield return _blindCornerFinder.FindBlindCorner2(corners, enemyPosition);
                         else
                             EnemyCorners.Remove(ECornerType.Blind);
 

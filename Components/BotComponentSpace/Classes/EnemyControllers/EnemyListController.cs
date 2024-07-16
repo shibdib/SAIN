@@ -147,7 +147,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             EnemyInfo enemyInfo = getEnemyInfo(enemyPlayer);
             if (enemyInfo == null) {
-                Logger.LogWarning("Cannot add enemy that doesn't have an enemyInfo");
+                //Logger.LogWarning("Cannot add enemy that doesn't have an enemyInfo");
                 return null;
             }
 
@@ -177,10 +177,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             if (!BotOwner.EnemiesController.EnemyInfos.TryGetValue(enemyPlayer, out EnemyInfo enemyInfo) &&
                 BotOwner.BotsGroup.Enemies.TryGetValue(enemyPlayer, out BotSettingsClass value)) {
-                Logger.LogDebug($"Got EnemyInfo from Bot's Group Enemies.");
+                //Logger.LogDebug($"Got EnemyInfo from Bot's Group Enemies.");
                 enemyInfo = BotOwner.EnemiesController.AddNew(BotOwner.BotsGroup, enemyPlayer, value);
                 if (enemyInfo != null) {
-                    Logger.LogDebug($"Successfully Added new EnemyInfo.");
+                    //Logger.LogDebug($"Successfully Added new EnemyInfo.");
                 }
             }
             return enemyInfo;
@@ -299,7 +299,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 }
 
                 if (failedMyAdds > 0 || failedGroupAdds > 0) {
-                    Logger.LogDebug($"Failed to add [{failedGroupAdds}] enemies from botsgroup and [{failedMyAdds}] enemies from enemyInfos");
+                    //Logger.LogDebug($"Failed to add [{failedGroupAdds}] enemies from botsgroup and [{failedMyAdds}] enemies from enemyInfos");
                 }
             }
         }
