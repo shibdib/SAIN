@@ -12,7 +12,7 @@ using SAIN.Components;
 
 namespace SAIN.Patches.Components
 {
-    internal class AddComponentPatch : ModulePatch
+    internal class AddBotComponentPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -37,6 +37,20 @@ namespace SAIN.Patches.Components
             {
                 Logger.LogError($" SAIN Add Bot Error: {ex}");
             }
+        }
+    }
+
+    internal class AddLightComponentPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(VolumetricLight), "Awake");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(VolumetricLight __instance)
+        {
+            SAIN.Components.LightManager.AddLight(__instance);
         }
     }
 

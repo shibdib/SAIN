@@ -6,6 +6,7 @@ using HarmonyLib;
 using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
+using SAIN.Patches.Components;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
@@ -37,8 +38,8 @@ namespace SAIN
     public class SAINPlugin : BaseUnityPlugin
     {
         public static DebugSettings DebugSettings => LoadedPreset.GlobalSettings.General.Debug;
-        public static bool DebugMode => DebugSettings.GlobalDebugMode;
-        public static bool DrawDebugGizmos => DebugSettings.DrawDebugGizmos;
+        public static bool DebugMode => DebugSettings.Logs.GlobalDebugMode;
+        public static bool DrawDebugGizmos => DebugSettings.Gizmos.DrawDebugGizmos;
         public static PresetEditorDefaults EditorDefaults => PresetHandler.EditorDefaults;
 
         public static ECombatDecision ForceSoloDecision = ECombatDecision.None;
@@ -172,8 +173,9 @@ namespace SAIN
                 typeof(Patches.Shoot.RateOfFire.SemiAutoPatch2),
                 typeof(Patches.Shoot.RateOfFire.SemiAutoPatch3),
 
-                typeof(Patches.Components.AddComponentPatch),
+                typeof(Patches.Components.AddBotComponentPatch),
                 typeof(Patches.Components.AddGameWorldPatch),
+                typeof(Patches.Components.AddLightComponentPatch),
                 typeof(Patches.Components.GetBotController),
                 typeof(Patches.Components.GetBotSpawner),
             };

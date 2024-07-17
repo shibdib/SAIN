@@ -90,7 +90,7 @@ namespace SAIN.Layers
             UpdateSelectedOverlay();
 
             try {
-                var debug = SAINPlugin.DebugSettings;
+                var debug = SAINPlugin.DebugSettings.Overlay;
 
                 var info = bot.Info;
                 if (debug.Overlay_Info) {
@@ -193,7 +193,7 @@ namespace SAIN.Layers
 
         private static Enemy getEnemy2Show(BotComponent bot)
         {
-            var debug = SAINPlugin.DebugSettings;
+                var debug = SAINPlugin.DebugSettings.Overlay;
             Enemy mainPlayer = null;
             if (debug.OverLay_AlwaysShowMainPlayerInfo)
                 foreach (var enemy in bot.EnemyController.Enemies.Values)
@@ -243,7 +243,7 @@ namespace SAIN.Layers
             return decisionInfo;
         }
 
-        private static bool _expandedEnemyInfo => SAINPlugin.DebugSettings.Overlay_EnemyInfo_Expanded;
+        private static bool _expandedEnemyInfo => SAINPlugin.DebugSettings.Overlay.Overlay_EnemyInfo_Expanded;
 
         private static void CreateEnemyInfo(StringBuilder stringBuilder, Enemy enemy)
         {

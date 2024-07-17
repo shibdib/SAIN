@@ -54,8 +54,8 @@ namespace SAIN.Preset.GlobalSettings
             list.Add(Flashlight);
             list.Add(LootingBots);
             list.Add(Jokes);
-            list.Add(Debug);
             list.Add(Layers);
+            Debug.Init(list);
         }
 
         [JsonIgnore]

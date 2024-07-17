@@ -115,7 +115,7 @@ namespace SAIN.Plugin
             return true;
         }
 
-        private static bool DebugExternal => SAINPlugin.DebugSettings.DebugExternal;
+        private static bool DebugExternal => SAINPlugin.DebugSettings.Logs.DebugExternal;
 
         public static bool ResetDecisionsForBot(BotOwner bot)
         {

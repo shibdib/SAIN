@@ -688,7 +688,7 @@
     <Compile Include="Layers\Combat\Solo\ShootAction.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Steering\SAINSteeringClass.cs" />
     <Compile Include="Layers\Combat\Solo\DogFightAction.cs" />
-    <Compile Include="Patches\AddComponentPatch.cs" />
+    <Compile Include="Patches\AddBotComponentPatch.cs" />
     <Compile Include="Properties\ConfigurationManagerAttributes.cs" />
     <Compile Include="Patches\GenericPatches.cs" />
     <Compile Include="Plugin\SAINPlugin.cs" />

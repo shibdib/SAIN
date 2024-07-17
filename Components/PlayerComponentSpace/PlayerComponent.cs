@@ -98,7 +98,7 @@ namespace SAIN.Components.PlayerComponentSpace
         {
             if (SAINPlugin.DebugMode &&
                 SAINPlugin.DrawDebugGizmos &&
-                SAINPlugin.DebugSettings.DrawTransformGizmos) {
+                SAINPlugin.DebugSettings.Gizmos.DrawTransformGizmos) {
                 DebugGizmos.Sphere(Transform.EyePosition, 0.05f, Color.white, true, 0.1f);
                 DebugGizmos.Ray(Transform.EyePosition, Transform.HeadLookDirection, Color.white, Transform.HeadLookDirection.magnitude, 0.025f, true, 0.1f);
 

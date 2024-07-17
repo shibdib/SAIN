@@ -34,7 +34,7 @@ namespace SAIN.SAINComponent.Classes
             float min = distance < 10 ? 0f : 0.5f;
             Vector3 randomdirection = getRandomizedDirection(finalDispersion, min);
 
-            if (SAINPlugin.DebugSettings.DebugHearing)
+            if (SAINPlugin.DebugSettings.Logs.DebugHearing)
                 Logger.LogDebug($"Dispersion: [{randomdirection.magnitude}] Distance: [{distance}] Base Dispersion: [{baseDispersion}] DispersionModifier [{dispersionMod}] Final Dispersion: [{finalDispersion}] : SoundType: [{sound.Info.SoundType}]");
 
             Vector3 estimatedEnemyPos = sound.Info.Position + randomdirection;

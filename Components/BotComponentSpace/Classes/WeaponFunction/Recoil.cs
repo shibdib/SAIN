@@ -62,7 +62,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private bool _recoilActive;
 
-        private static bool _debugRecoilLogs => SAINPlugin.DebugSettings.DebugRecoilCalculations;
+        private static bool _debugRecoilLogs => SAINPlugin.DebugSettings.Logs.DebugRecoilCalculations;
 
         private IEnumerator RecoilLoop()
         {

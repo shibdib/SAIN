@@ -46,7 +46,7 @@ namespace SAIN.SAINComponent.Classes.Search
 
         public void DrawDebug()
         {
-            if (SAINPlugin.DebugMode == false || !SAINPlugin.DebugSettings.DebugSearchGizmos)
+            if (SAINPlugin.DebugMode == false || !SAINPlugin.DebugSettings.Gizmos.DebugSearchGizmos)
             {
                 DisposeDebug();
                 return;

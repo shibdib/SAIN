@@ -55,7 +55,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private float calculateAim(float distance, float angle, bool moving, bool panicing, float aimDelay)
         {
-            StringBuilder stringBuilder = SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.DebugAimCalculations ? new StringBuilder() : null;
+            StringBuilder stringBuilder = SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.Logs.DebugAimCalculations ? new StringBuilder() : null;
             stringBuilder?.AppendLine($"Aim Time Calculation for [{BotOwner?.name} : {BotOwner?.Profile?.Info?.Settings?.Role} : {BotOwner?.Profile?.Info?.Settings?.BotDifficulty}]");
 
             SAINAimingSettings sainAimSettings = Bot.Info.FileSettings.Aiming;

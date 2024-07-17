@@ -74,7 +74,7 @@ namespace SAIN.SAINComponent.Classes
                 return false;
             }
 
-            if (SAINPlugin.DebugSettings.DebugHearing)
+            if (SAINPlugin.DebugSettings.Logs.DebugHearing)
             {
                 DebugGizmos.Sphere(projectionPoint, 0.25f, Color.red, true, 60f);
                 DebugGizmos.Line(projectionPoint, firePort, Color.red, 0.1f, true, 60f, true);

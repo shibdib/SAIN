@@ -1,6 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Game.Spawning;
+using EFT.Interactive;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using System;
@@ -10,6 +11,89 @@ using UnityEngine;
 
 namespace SAIN.Components
 {
+    public class LightRangeTracker : MonoBehaviour
+    {
+        private void Awake()
+        {
+            _sphereCollider = this.gameObject.AddComponent<SphereCollider>();
+            _sphereCollider.enabled = true;
+            _sphereCollider.isTrigger = true;
+        }
+
+        public void Init(VolumetricLight light)
+        {
+            _light = light;
+            _sphereCollider.radius = light.Light.range;
+            _lightAngle = light.Light.spotAngle;
+            _lightType = light.Light.type;
+            this.transform.position = light.transform.position;
+            this.transform.rotation = light.transform.rotation;
+            this.transform.localScale = light.transform.localScale;
+        }
+
+        private void Update()
+        {
+            DebugGizmos.Ray(this.transform.position, this.transform.forward, Color.white, _sphereCollider.radius, 0.05f, true, 0.1f);
+            DebugGizmos.Ray(this.transform.position, this.transform.up, Color.yellow, _sphereCollider.radius, 0.05f, true, 0.1f);
+            DebugGizmos.Ray(this.transform.position, this.transform.rotation * this.transform.forward, Color.green, _sphereCollider.radius, 0.05f, true, 0.1f);
+        }
+
+        public void OnTriggerEnter(Collider other)
+        {
+            Logger.LogDebug($"Enter Light: {other.gameObject?.name}");
+        }
+
+        public void OnTriggerStay(Collider other)
+        {
+            Logger.LogDebug($"Staying in Light: {other.gameObject?.name}");
+            DebugGizmos.Line(other.transform.position + Vector3.up, this.transform.position, Color.red, 0.05f, true, 0.1f);
+        }
+
+        public void OnTriggerExit(Collider other)
+        {
+            Logger.LogDebug($"Exit Light: {other.gameObject?.name}");
+        }
+
+        private void OnDestroy()
+        {
+            Destroy(_sphereCollider);
+        }
+
+        private LightType _lightType;
+        private float _lightAngle;
+        private VolumetricLight _light;
+        private SphereCollider _sphereCollider;
+    }
+
+    public class LightManager
+    {
+        static LightManager()
+        {
+            GameWorld.OnDispose += dispose;
+        }
+        public static void AddLight(VolumetricLight light)
+        {
+            if (_trackedLights.ContainsKey(light)) {
+                Logger.LogWarning($"{light.GetInstanceID()} is already in light dictionary.");
+                return;
+            }
+            GameObject gameObject = new GameObject();
+            gameObject.AddComponent<LightRangeTracker>().Init(light);
+            _trackedLights.Add(light, gameObject);
+        }
+
+        private static void dispose()
+        {
+            foreach (var light in _trackedLights) {
+                GameObject.Destroy(light.Value);
+            }
+            _trackedLights.Clear();
+        }
+
+        private static readonly Dictionary<VolumetricLight, GameObject> _trackedLights = new Dictionary<VolumetricLight, GameObject>();
+    }
+
+
     public class GameWorldComponent : MonoBehaviour
     {
         public static GameWorldComponent Instance { get; private set; }

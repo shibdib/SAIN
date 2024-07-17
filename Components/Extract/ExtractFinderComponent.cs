@@ -56,7 +56,7 @@ namespace SAIN.Components.Extract
 
         public void OnGUI()
         {
-            if (!DebugMode || !SAINPlugin.DebugSettings.DrawDebugLabels)
+            if (!DebugMode || !SAINPlugin.DebugSettings.Logs.DrawDebugLabels)
             {
                 return;
             }
@@ -208,6 +208,6 @@ namespace SAIN.Components.Extract
             return job;
         }
 
-        public static bool DebugMode => SAINPlugin.DebugSettings.DebugExtract;
+        public static bool DebugMode => SAINPlugin.DebugSettings.Logs.DebugExtract;
     }
 }

@@ -81,7 +81,7 @@ namespace SAIN.Patches.Shoot.Aim
 
             Vector3 result = realTargetPoint + finalOffset;
 
-            if (SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.DebugDrawAimGizmos &&
+            if (SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.Gizmos.DebugDrawAimGizmos &&
                 enemy.EnemyPerson.IPlayer.IsYourPlayer == true)
             {
                 Vector3 weaponRoot = ___botOwner_0.WeaponRoot.position;
@@ -91,7 +91,7 @@ namespace SAIN.Patches.Shoot.Aim
                 DebugGizmos.Line(weaponRoot, realTargetPoint, Color.white, 0.02f, true, 0.25f, true);
                 DebugGizmos.Sphere(realTargetPoint, 0.025f, Color.white, true, 10f);
             }
-            if (SAINPlugin.DebugSettings.DebugDrawRecoilGizmos &&
+            if (SAINPlugin.DebugSettings.Gizmos.DebugDrawRecoilGizmos &&
                 enemy.EnemyPerson.IPlayer.IsYourPlayer  == true && 
                 ___botOwner_0.ShootData.Shooting)
             {
@@ -204,7 +204,7 @@ namespace SAIN.Patches.Shoot.Aim
         private static float calculateAim(BotComponent botComponent, float distance, float angle, bool moving, bool panicing, float aimDelay)
         {
             BotOwner botOwner = botComponent.BotOwner;
-            StringBuilder stringBuilder = SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.DebugAimCalculations ? new StringBuilder() : null;
+            StringBuilder stringBuilder = SAINPlugin.LoadedPreset.GlobalSettings.General.Debug.Logs.DebugAimCalculations ? new StringBuilder() : null;
             stringBuilder?.AppendLine($"Aim Time Calculation for [{botOwner?.name} : {botOwner?.Profile?.Info?.Settings?.Role} : {botOwner?.Profile?.Info?.Settings?.BotDifficulty}]");
 
             SAINAimingSettings sainAimSettings = botComponent.Info.FileSettings.Aiming;

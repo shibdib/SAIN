@@ -116,7 +116,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private void drawLink(NavMeshDoorLink link)
         {
             if (_debugMode &&
-                SAINPlugin.DebugSettings.DrawDebugGizmos &&
+                SAINPlugin.DebugSettings.Gizmos.DrawDebugGizmos &&
                 !_debugObjects.ContainsKey(link))
             {
                 Vector3 linkPosition = link.transform.position + Vector3.down;
@@ -599,7 +599,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             return crossPoint != null;
         }
 
-        private static bool _debugMode => SAINPlugin.DebugSettings.DrawDoorLinks;
+        private static bool _debugMode => SAINPlugin.DebugSettings.Gizmos.DrawDoorLinks;
         private readonly List<NavMeshDoorLink> _doorsOnPath = new List<NavMeshDoorLink>();
         private DoorData _lastInteractedInfo;
         private static readonly Dictionary<NavMeshDoorLink, linkObjects> _debugObjects = new Dictionary<NavMeshDoorLink, linkObjects>();

@@ -19,13 +19,13 @@ namespace SAIN.Layers.Combat.Run
 
         public override Action GetNextAction()
         {
-            if (SAINPlugin.DebugSettings.ForceBotsToRunAround)
+            if (SAINPlugin.DebugSettings.Logs.ForceBotsToRunAround)
                 return new Action(typeof(RunningAction), $"RUNNING");
 
-            if (SAINPlugin.DebugSettings.ForceBotsToTryCrawl)
+            if (SAINPlugin.DebugSettings.Logs.ForceBotsToTryCrawl)
                 return new Action(typeof(CrawlAction), $"CRAWL");
 
-            if (SAINPlugin.DebugSettings.TestGrenadeThrow && BotOwner.WeaponManager.Grenades.HaveGrenade)
+            if (SAINPlugin.DebugSettings.Logs.TestGrenadeThrow && BotOwner.WeaponManager.Grenades.HaveGrenade)
             {
                 //return new Action(typeof(GrenadeThrowTestAction), "testGrenade");
             }
@@ -35,7 +35,7 @@ namespace SAIN.Layers.Combat.Run
 
         public override bool IsActive()
         {
-            bool active = SAINPlugin.DebugSettings.ForceBotsToRunAround || SAINPlugin.DebugSettings.ForceBotsToTryCrawl;
+            bool active = SAINPlugin.DebugSettings.Logs.ForceBotsToRunAround || SAINPlugin.DebugSettings.Logs.ForceBotsToTryCrawl;
             setLayer(active);
             return active;
         }

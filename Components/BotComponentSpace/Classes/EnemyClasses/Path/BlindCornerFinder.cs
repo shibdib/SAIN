@@ -308,7 +308,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void drawDebug(Vector3 corner, Vector3 lookPoint, bool hit)
         {
-            if (SAINPlugin.DebugMode && SAINPlugin.DebugSettings.DebugDrawBlindCorner) {
+            if (SAINPlugin.DebugMode && SAINPlugin.DebugSettings.Gizmos.DebugDrawBlindCorner) {
                 Color color = hit ? Color.red : Color.green;
                 float lineWidth = 0.01f;
                 float expireTime = 30f;
