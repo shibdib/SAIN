@@ -144,7 +144,10 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool heardThreat()
         {
-            return BaseClass.HeardSoundSteering.HasDangerToLookAt;
+            if (BaseClass.HeardSoundSteering.LastHeardVisibleDanger != null) {
+
+            }
+            return BaseClass.HeardSoundSteering.LastHeardVisibleDanger != null || (!Bot.Search.SearchActive && BaseClass.HeardSoundSteering.LastHeardDanger != null);
         }
 
         private bool heardThreat(out PlaceForCheck placeForCheck)

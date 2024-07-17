@@ -37,9 +37,9 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             _minFriendlyDistToThrow = sainSettings.Grenade.MinFriendlyDistance;
             _minFriendlyDistToThrow_SQR = _minFriendlyDistToThrow * _minFriendlyDistToThrow;
             _throwGrenadeFreq = sainSettings.Grenade.ThrowGrenadeFrequency;
-            _minThrowDistPercent = sainSettings.Grenade.MIN_THROW_DIST_PERCENT_0_1;
+            _minThrowDistPercent = 0.66f;
 
-            _blindCornerDistToThrow = 8f;
+            _blindCornerDistToThrow = 10f;
             _blindCornerDistToLastKnown_Max_SQR = _blindCornerDistToThrow * _blindCornerDistToThrow;
             _checkThrowPos_HeightOffset = 0.25f;
         }
@@ -174,7 +174,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 if (!checkFriendlyDistances(lastKnownPos)) {
                     return false;
                 }
-                if (tryThrowToPos(lastKnownPos, "LastKnownPosition", lastKnown.DistanceToBot)) {
+                var angles = Bot.Memory.Location.IsIndoors ? _indoorAngles : _outdoorAngles;
+                if (tryThrowToPos(lastKnownPos, "LastKnownPosition", lastKnown.DistanceToBot, angles)) {
                     return true;
                 }
                 if (checkCanThrowBlindCorner(enemy, lastKnownPos)) {
@@ -198,27 +199,27 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             if (!checkFriendlyDistances(blindCornerPos)) {
                 return false;
             }
-            if (tryThrowToPos(blindCornerPos, "BlindCornerToEnemy", Mathf.Sqrt(sqrMag))) {
+            if (tryThrowToPos(blindCornerPos, "BlindCornerToEnemy", Mathf.Sqrt(sqrMag), AIGreandeAng.ang5)) {
                 return true;
             }
             return false;
         }
 
-        private bool tryThrowToPos(Vector3 pos, string posString, float distance)
+        private bool tryThrowToPos(Vector3 pos, string posString, float distance, params AIGreandeAng[] possibleAngles)
         {
             pos += Vector3.up * _checkThrowPos_HeightOffset;
             var weaponRoot = Bot.Transform.WeaponRoot;
             Vector3 throwDir = (pos - Bot.Position).normalized;
             float dispersion = getThrowDispersion(pos, throwDir, distance);
-            if (canThrowAGrenade(weaponRoot, randomize(pos, throwDir, dispersion))) {
+            if (canThrowAGrenade(weaponRoot, randomize(pos, throwDir, dispersion), possibleAngles)) {
                 //Logger.LogDebug($"{posString} Can Throw to pos");
                 return true;
             }
-            if (canThrowAGrenade(weaponRoot, randomize(pos, throwDir, dispersion))) {
+            if (canThrowAGrenade(weaponRoot, randomize(pos, throwDir, dispersion), possibleAngles)) {
                 //Logger.LogDebug($"{posString} Can Throw to pos + dir");
                 return true;
             }
-            if (canThrowAGrenade(weaponRoot, randomize(pos, throwDir, dispersion) + Vector3.up * 0.5f)) {
+            if (canThrowAGrenade(weaponRoot, randomize(pos, throwDir, dispersion) + Vector3.up * 0.5f, possibleAngles)) {
                 //Logger.LogDebug($"{posString} Can Throw to pos + vector3.up * 0.5f");
                 return true;
             }
@@ -277,7 +278,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return false;
         }
 
-        private bool canThrowAGrenade(Vector3 from, Vector3 trg)
+        private bool canThrowAGrenade(Vector3 from, Vector3 trg, params AIGreandeAng[] possibleAngles)
         {
             if (_nextPosibleAttempt > Time.time) {
                 return false;
@@ -289,14 +290,16 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 _nextPosibleAttempt = Time.time + _friendlyCloseRecheckTime;
                 return false;
             }
-            AIGreandeAng angle = getAngleToThrow();
-            AIGreanageThrowData aigreanageThrowData = GrenadeThrowChecker.CanThrowGrenade2(from, trg, _maxPower, angle, -1f, _minThrowDistPercent);
-            if (aigreanageThrowData.CanThrow) {
-                if (Physics.Raycast(from, aigreanageThrowData.Direction, 1.5f, LayerMaskClass.HighPolyWithTerrainMask)) {
+
+            AIGreandeAng angle = possibleAngles.PickRandom();
+            AIGreanageThrowData throwData = GrenadeThrowChecker.CanThrowGrenade2(from, trg, _maxPower, angle, -1f, _minThrowDistPercent);
+
+            if (throwData.CanThrow) {
+                if (Physics.Raycast(from, throwData.Direction, 1.5f, LayerMaskClass.HighPolyWithTerrainMask)) {
                     Logger.LogDebug($"blocked by object, cant throw");
                     return false;
                 }
-                BotOwner.WeaponManager.Grenades.SetThrowData(aigreanageThrowData);
+                BotOwner.WeaponManager.Grenades.SetThrowData(throwData);
                 return true;
             }
             return false;
@@ -342,7 +345,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             AIGreandeAng.ang5,
             AIGreandeAng.ang15,
-            AIGreandeAng.ang25,
+            //AIGreandeAng.ang25,
             //AIGreandeAng.ang35,
         };
 

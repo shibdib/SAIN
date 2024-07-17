@@ -161,7 +161,10 @@ namespace SAIN.SAINComponent.Classes.Mover
                 LastHeardVisibleDanger = new SoundStruct(enemy, place);
                 return;
             }
-            LastHeardDanger = new SoundStruct(enemy, place);
+            var activeEnemy = Bot.Enemy;
+            if (activeEnemy == null || enemy.IsDifferent(activeEnemy)) {
+                LastHeardDanger = new SoundStruct(enemy, place);
+            }
         }
 
         public void LookToHeardPosition(Vector3 soundPos, bool visionCheck = false)

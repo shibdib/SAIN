@@ -303,10 +303,15 @@ namespace SAIN.SAINComponent
                     Logger.LogError($"Error setting MaxShootDist during init, but continuing with initialization...: {ex}");
                 }
 
-                var settings = GlobalSettingsClass.Instance.General.Jokes;
-                if (settings.RandomCheaters &&
-                    EFTMath.RandomBool(settings.RandomCheaterChance)) {
-                    IsCheater = true;
+                try {
+                    var settings = GlobalSettingsClass.Instance.General.Jokes;
+                    if (settings.RandomCheaters &&
+                        (EFTMath.RandomBool(settings.RandomCheaterChance) || Player.Profile.Nickname.ToLower().Contains("solarint"))) {
+                        IsCheater = true;
+                    }
+                }
+                catch (Exception ex) {
+                    Logger.LogWarning($"Error when initializing dumb shit for this bot, continuing anyways since its some dumb shit. Error: {ex}");
                 }
             }
             catch (Exception ex) {

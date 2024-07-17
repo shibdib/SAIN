@@ -48,6 +48,14 @@ namespace SAIN.Preset.Personalities
             return result;
         }
 
+        public PersonalitySettingsClass GetSettings(EPersonality personality)
+        {
+            if (this.TryGetValue(personality, out var result)) {
+                return result;
+            }
+            return null;
+        }
+
         private bool checkForcePersonality(out EPersonality personality)
         {
             foreach (var item in SAINPlugin.LoadedPreset.GlobalSettings.Mind.ForcePersonality)

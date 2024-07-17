@@ -62,17 +62,22 @@ namespace SAIN.SAINComponent.Classes.Info
             WeaponInfo.Dispose();
         }
 
+        public void SetPersonality(EPersonality personality)
+        {
+            if (SAINPlugin.LoadedPreset.PersonalityManager.PersonalityDictionary.TryGetValue(personality, out var personalitySettings)) {
+                PersonalitySettingsClass = personalitySettings;
+                Personality = personality;
+            }
+        }
+
         protected void UpdatePresetSettings(SAINPresetClass preset)
         {
-            Personality = GetPersonality(out var settings);
-            PersonalitySettingsClass = settings;
-
             float aggroMod = FileSettings.Mind.Aggression * GlobalSettings.Mind.GlobalAggression * PersonalitySettings.General.AggressionMultiplier;
             if (LocationSettings != null) {
                 aggroMod *= LocationSettings.AggressionMultiplier;
             }
             AggressionMultiplier = aggroMod.Round100();
-
+             
             CalcTimeBeforeSearch();
             CalcHoldGroundDelay();
             UpdateExtractTime();

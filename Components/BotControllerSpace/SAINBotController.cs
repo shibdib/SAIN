@@ -11,6 +11,7 @@ using SAIN.Helpers;
 using SAIN.Layers;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.EnemyClasses;
+using SAIN.SAINComponent.Classes.WeaponFunction;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -341,6 +342,7 @@ namespace SAIN.Components
 
             Vector3 dangerPoint = Vector.DangerPoint(position, force, mass);
             Singleton<BotEventHandler>.Instance?.PlaySound(player, grenade.transform.position, 20f, AISoundType.gun);
+            grenade.gameObject.AddComponent<GrenadeVelocityTracker>();
             OnGrenadeThrown?.Invoke(grenade, dangerPoint, grenade.ProfileId);
         }
 
