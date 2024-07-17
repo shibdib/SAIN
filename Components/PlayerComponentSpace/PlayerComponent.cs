@@ -240,6 +240,7 @@ namespace SAIN.Components.PlayerComponentSpace
             Person.ActivationClass.OnPlayerActiveChanged -= handleCoroutines;
             Person.ActivationClass.OnBotActiveChanged += handleCoroutines;
             Person.InitBot(botOwner);
+            AIData.AISoundPlayer.InitAI();
         }
 
         public void InitBotComponent(BotComponent bot)

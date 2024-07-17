@@ -290,6 +290,7 @@
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\HardCoverData.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\PathData.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\TargetData.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\BotVolumetricLightController.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\BotGatheringController.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\IPeacefulActionExecutor.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\PeacefulActionHelpers.cs" />
@@ -374,6 +375,7 @@
     <Compile Include="Helpers\WeightedRandomSelector.cs" />
     <Compile Include="Layers\BotAction.cs" />
     <Compile Include="Layers\Combat\Solo\MeleeAttackAction.cs" />
+    <Compile Include="Layers\Combat\Squad\FollowSearchParty - Copy.cs" />
     <Compile Include="Layers\Debug\CrawlAction.cs" />
     <Compile Include="Layers\Debug\GrenadeThrowTestAction.cs" />
     <Compile Include="Layers\Flashbanged\ExtractAction.cs" />

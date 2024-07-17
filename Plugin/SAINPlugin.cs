@@ -1,4 +1,3 @@
-using SPT.Reflection.Patching;
 using BepInEx;
 using BepInEx.Configuration;
 using DrakiaXYZ.VersionChecker;
@@ -7,19 +6,24 @@ using HarmonyLib;
 using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
-using SAIN.Patches.Generic;
-using SAIN.Patches.Movement;
-using SAIN.Patches.Vision;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
+using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using static SAIN.AssemblyInfoClass;
-using SAIN.Patches.Shoot.Grenades;
-using SAIN.Patches.Hearing;
+
+// advanced insurance mod
+// track insured items, override default spt behavior
+// if an item is dropped, track if the position it was dropped at is on the navmesh or not, if its in a bush or not, maybe figure out of way to detect "hiding spots"?
+// if an item is dropped in a non-hidden area, track how long it was there before the player left the area, based return percentage off of that.
+// if a player is killed, track the gear status of the person who killed them, base return percentage off of that.
+// also could track backpack size/space available, maybe make it require looting bots for simpler code?
+// if a player dies to landmines, ect, have a 100% return rate
+// lower return percentage when killed by scavs or PMCs, very high from bosses, followers, rogues, ect
 
 namespace SAIN
 {

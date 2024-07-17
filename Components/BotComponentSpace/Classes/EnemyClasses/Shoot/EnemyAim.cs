@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
+    // todo: set maxing aiming upgrade by time depending on weapon class and attachments,
+    // set bots who use boltys to take longe to aim, but be much more accurate
+    // setting each weapon class to have its own "base time to aim" would be good too
     public class EnemyAim : EnemyBase
     {
         private const float CALC_SCATTER_FREQ = 0.025f;

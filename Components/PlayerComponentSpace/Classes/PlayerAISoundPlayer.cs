@@ -4,9 +4,21 @@ namespace SAIN.Components.PlayerComponentSpace.Classes
 {
     public class PlayerAISoundPlayer : AIDataBase
     {
+        public bool SoundMakerStarted { get; private set; }
+
         public PlayerAISoundPlayer(SAINAIData aidata) : base(aidata)
         {
+            SoundMakerStarted = false;
+            _startPlaySoundsTime = Time.time + 0.5f;
         }
+
+        public void InitAI()
+        {
+            SoundMakerStarted = false;
+            _startPlaySoundsTime = Time.time + 1f;
+        }
+
+        private float _startPlaySoundsTime;
 
         private float _soundFrequency => (IsAI ? SOUND_FREQUENCY_AI : SOUND_FREQUENCY_HUMAN);
         private float _lastSoundPower;
@@ -18,6 +30,14 @@ namespace SAIN.Components.PlayerComponentSpace.Classes
 
         public bool ShallPlayAISound(float power)
         {
+            if (!SoundMakerStarted) {
+
+                if (_startPlaySoundsTime > Time.time) {
+                    return false;
+                }
+                SoundMakerStarted = true;
+            }
+
             if (_nextPlaySoundTime < Time.time || 
                 _lastSoundPower > power * SOUND_POWER_THRESH)
             {
@@ -25,6 +45,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes
                 _lastSoundPower = power;
                 return true;
             }
+
             return false;
         }
     }
