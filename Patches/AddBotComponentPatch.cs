@@ -9,6 +9,7 @@ using UnityEngine;
 using SAIN.Components.PlayerComponentSpace;
 using UnityEngine.UIElements;
 using SAIN.Components;
+using EFT.Interactive;
 
 namespace SAIN.Patches.Components
 {
@@ -22,19 +23,15 @@ namespace SAIN.Patches.Components
         [PatchPostfix]
         public static void PatchPostfix(ref BotOwner __instance)
         {
-            try
-            {
-                if (__instance.BotState != EBotState.ActiveFail)
-                {
+            try {
+                if (__instance.BotState != EBotState.ActiveFail) {
                     BotSpawnController.Instance.AddBot(__instance);
                 }
-                else
-                {
+                else {
                     Logger.LogDebug($"{__instance.name} failed EFT Init, skipping adding SAIN components");
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Logger.LogError($" SAIN Add Bot Error: {ex}");
             }
         }
@@ -50,7 +47,26 @@ namespace SAIN.Patches.Components
         [PatchPostfix]
         public static void PatchPostfix(VolumetricLight __instance)
         {
-            SAIN.Components.LightManager.AddLight(__instance);
+            SAIN.Components.BotLightTracker.AddLight(__instance.Light);
+        }
+    }
+
+    internal class AddLightComponentPatch2 : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(LampController), "Awake");
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(LampController __instance)
+        {
+            int count = 0;
+            foreach (var light in __instance.Lights) {
+                SAIN.Components.BotLightTracker.AddLight(light);
+                Logger.LogDebug($"Added Light [{count}]");
+                count++;
+            }
         }
     }
 
@@ -64,12 +80,10 @@ namespace SAIN.Patches.Components
         [PatchPostfix]
         public static void PatchPostfix(GameObject gameObject)
         {
-            try
-            {
+            try {
                 GameWorldHandler.Create(gameObject);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Logger.LogError($" SAIN Init Gameworld Error: {ex}");
             }
         }
@@ -86,8 +100,7 @@ namespace SAIN.Patches.Components
         public static void PatchPrefix(BotsController __instance)
         {
             var controller = SAINBotController.Instance;
-            if (controller != null && controller.DefaultController == null)
-            {
+            if (controller != null && controller.DefaultController == null) {
                 controller.DefaultController = __instance;
             }
         }
@@ -104,8 +117,7 @@ namespace SAIN.Patches.Components
         public static void PatchPostfix(BotSpawner __instance)
         {
             var controller = SAINBotController.Instance;
-            if (controller != null && controller.BotSpawner == null)
-            {
+            if (controller != null && controller.BotSpawner == null) {
                 controller.BotSpawner = __instance;
             }
         }

@@ -299,11 +299,13 @@
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulActionSet.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />
-    <Compile Include="Components\GameWorldSpace\BotDoorTrigger.cs" />
-    <Compile Include="Components\GameWorldSpace\DoorHandler.cs" />
+    <Compile Include="Components\GameWorldSpace\Doors\BotDoorTrigger.cs" />
+    <Compile Include="Components\GameWorldSpace\Doors\DoorHandler.cs" />
     <Compile Include="Components\GameWorldSpace\GameWorldBase.cs" />
     <Compile Include="Components\GameWorldSpace\IGameWorldClass.cs" />
-    <Compile Include="Components\GameWorldSpace\LocationClass.cs" />
+    <Compile Include="Components\GameWorldSpace\Lights\BotLightTracker.cs" />
+    <Compile Include="Components\GameWorldSpace\Lights\LightComponent.cs" />
+    <Compile Include="Components\GameWorldSpace\Info\LocationClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\BodyPart.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\BodyPartsClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\PartDictionary.cs" />
@@ -362,7 +364,7 @@
     <Compile Include="Components\BotControllerSpace\Classes\BotHearingClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\RayCastJobClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\ETimeOfDay.cs" />
-    <Compile Include="Components\GameWorldSpace\PlayerDictionary.cs" />
+    <Compile Include="Components\GameWorldSpace\Players\PlayerDictionary.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\AIDataBase.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\DeviceMode.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\Equipment\AIGearModifierClass.cs" />
@@ -411,7 +413,7 @@
     <Compile Include="Components\Extract\ExtractFinderComponent.cs" />
     <Compile Include="Components\PlayerComponentSpace\PlayerComponentBase.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\SAINCamoClass.cs" />
-    <Compile Include="Components\GameWorldSpace\PlayerSpawnTracker.cs" />
+    <Compile Include="Components\GameWorldSpace\Players\PlayerSpawnTracker.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\SAINAIData.cs" />
     <Compile Include="Components\GameWorldSpace\GameWorldComponent.cs" />
     <Compile Include="Components\PlayerComponentSpace\PlayerComponent.cs" />

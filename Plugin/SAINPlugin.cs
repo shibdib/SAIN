@@ -176,6 +176,7 @@ namespace SAIN
                 typeof(Patches.Components.AddBotComponentPatch),
                 typeof(Patches.Components.AddGameWorldPatch),
                 typeof(Patches.Components.AddLightComponentPatch),
+                typeof(Patches.Components.AddLightComponentPatch2),
                 typeof(Patches.Components.GetBotController),
                 typeof(Patches.Components.GetBotSpawner),
             };
