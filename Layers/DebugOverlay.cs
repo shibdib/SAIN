@@ -255,9 +255,12 @@ namespace SAIN.Layers
                 $"Name [{enemy.EnemyPlayer?.Profile.Nickname}] " +
                 $"RealDistance [{enemy.RealDistance}] " +
                 $"Power [{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}]");
+
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine($"Visible [{enemy.IsVisible}] Seen [{enemy.Seen}]");
+            stringBuilder.AppendLine($"Illuminated [{enemy.Vision.Illuminated}] LightLevel [{enemy.Vision.IlluminationLevel}]");
             stringBuilder.AppendLine();
 
-            stringBuilder.AppendLine($"Visible Now [{enemy.IsVisible}] Seen [{enemy.Seen}]");
             stringBuilder.AppendLine($"Aim/Scatter Multi [{enemy.Aim.AimAndScatterMultiplier}]");
             stringBuilder.AppendLabeledValue("Time To Spot", $"{enemy.Vision.LastGainSightResult.Round100()}", Color.white, Color.yellow, true);
             float highestPercent = getPercentSpotted(enemy, out var partType);
@@ -275,7 +278,7 @@ namespace SAIN.Layers
             }
             stringBuilder.AppendLine();
 
-            stringBuilder.AppendLabeledValue("Can Shoot", $"{enemy.CanShoot}", Color.white, Color.yellow, true);
+            stringBuilder.AppendLabeledValue("Can Shoot", $"{enemy.Vision.VisionChecker.EnemyParts.CanShoot}", Color.white, Color.yellow, true);
             stringBuilder.AppendLabeledValue("In Line of Sight", $"{enemy.InLineOfSight}", Color.white, Color.yellow, true);
             if (_expandedEnemyInfo) {
                 var parts = enemy.Vision.VisionChecker.EnemyParts.Parts.Values;

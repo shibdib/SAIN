@@ -205,6 +205,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float calcTimeModifier(bool flareEnabled)
         {
+            bool illuminated = Enemy.Vision.Illuminated;
+            float illuminatedLevel = Enemy.Vision.IlluminationLevel;
+            if (illuminated && illuminatedLevel >= 1f) {
+                    return 1f;
+            }
+
             float baseModifier = baseTimeModifier(flareEnabled);
 
             if (baseModifier <= 1f)
@@ -238,6 +244,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             float num2 = enemyDist - minDist;
             float ratio = num2 / num;
             float result = Mathf.Lerp(min, max, ratio);
+            if (illuminated) {
+                result = Mathf.Lerp(result, 1f, illuminatedLevel);
+            }
             return result;
         }
 

@@ -61,11 +61,8 @@ namespace SAIN.Patches.Components
         [PatchPostfix]
         public static void PatchPostfix(LampController __instance)
         {
-            int count = 0;
             foreach (var light in __instance.Lights) {
-                SAIN.Components.BotLightTracker.AddLight(light);
-                Logger.LogDebug($"Added Light [{count}]");
-                count++;
+                SAIN.Components.BotLightTracker.AddLight(light, __instance);
             }
         }
     }

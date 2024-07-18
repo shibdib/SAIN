@@ -320,6 +320,7 @@
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonSubClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\ProfileData.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PlayerData.cs" />
+    <Compile Include="Components\PlayerComponentSpace\PlayerIlluminationClass.cs" />
     <Compile Include="Helpers\Events\ToggleEvent.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyChooserClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Path\CornerHelpers.cs" />

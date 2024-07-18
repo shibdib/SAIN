@@ -15,6 +15,7 @@ namespace SAIN.Components.PlayerComponentSpace
     public class PlayerComponent : MonoBehaviour
     {
         public BodyPartsClass BodyParts { get; private set; }
+        public PlayerIlluminationClass Illumination { get; private set; }
 
         private void Update()
         {
@@ -25,6 +26,7 @@ namespace SAIN.Components.PlayerComponentSpace
             }
 
             if (!IsAI || Person.ActivationClass.BotActive) {
+                Illumination.Update();
                 drawTransformGizmos();
                 Flashlight.Update();
                 Equipment.Update();
@@ -47,7 +49,7 @@ namespace SAIN.Components.PlayerComponentSpace
                 return false;
             }
 
-            //if (aggressive && 
+            //if (aggressive &&
             //    speaker.PhrasesBanks.TryGetValue(phrase, out var phrasesBank)) {
             //    _aggroIndexes.Clear();
             //    int count = phrasesBank.Clips.Length;
@@ -197,20 +199,12 @@ namespace SAIN.Components.PlayerComponentSpace
                 Flashlight = new FlashLightClass(this);
                 Equipment = new SAINEquipmentClass(this);
                 AIData = new SAINAIData(Equipment.GearInfo, this);
+                Illumination = new PlayerIlluminationClass(this);
 
-                //StringBuilder sb = new StringBuilder();
-                //foreach (var phrase in Player.Speaker.PhrasesBanks) {
-                //    sb.AppendLine($"{phrase.Key} : {phrase.Value.Clips.Length}...");
-                //    foreach (var clip in phrase.Value.Clips) {
-                //        sb.AppendLine($"{clip.Clip.name} : {(ETagStatus)clip.Mask}");
-                //    }
-                //    sb.AppendLine();
-                //}
-                //Logger.LogInfo(sb.ToString());
+                Illumination.Init();
 
                 Person.ActivationClass.OnPlayerActiveChanged += handleCoroutines;
                 handleCoroutines(true);
-                //StartCoroutine(voiceTest());
             }
             catch (Exception ex) {
                 Logger.LogError(ex);
@@ -219,6 +213,14 @@ namespace SAIN.Components.PlayerComponentSpace
             //Logger.LogDebug($"{Person.Nickname} Player Component Created");
             StartCoroutine(delayInit());
             return true;
+        }
+
+        private void enterTrigger(IPhysicsTrigger trigger)
+        {
+        }
+
+        private void exitTrigger(IPhysicsTrigger trigger)
+        {
         }
 
         private void handleCoroutines(bool active)
@@ -261,6 +263,7 @@ namespace SAIN.Components.PlayerComponentSpace
             stopCoroutines();
             Person.ActivationClass.OnBotActiveChanged -= handleCoroutines;
             Person.ActivationClass.OnPlayerActiveChanged -= handleCoroutines;
+            Illumination?.Dispose();
             Equipment?.Dispose();
             Destroy(this);
         }

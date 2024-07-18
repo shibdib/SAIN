@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SAIN.Components.PlayerComponentSpace;
+using System;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
@@ -25,6 +26,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public float GainSightCoef => _gainSight.GainSightModifier;
         public float VisionDistance => _visionDistance.Value;
 
+        public bool Illuminated { get; private set; }
+        public float IlluminationLevel => EnemyPlayerComponent.Illumination.Level;
+
         public EnemyAnglesClass Angles { get; }
         public EnemyVisionChecker VisionChecker { get; }
 
@@ -39,6 +43,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Init()
         {
             Enemy.Events.OnEnemyKnownChanged.OnToggle += OnEnemyKnownChanged;
+            EnemyPlayerComponent.Illumination.OnPlayerIlluminationChanged += enemyIlluminationChanged;
             Angles.Init();
             VisionChecker.Init();
         }
@@ -53,6 +58,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Dispose()
         {
             Enemy.Events.OnEnemyKnownChanged.OnToggle -= OnEnemyKnownChanged;
+            if (EnemyPlayerComponent != null ) {
+            EnemyPlayerComponent.Illumination.OnPlayerIlluminationChanged -= enemyIlluminationChanged;
+            }
             Angles.Dispose();
             VisionChecker.Dispose();
         }
@@ -65,6 +73,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
             UpdateVisibleState(true);
             UpdateCanShootState(true);
+        }
+
+        private void enemyIlluminationChanged(bool value)
+        {
+            Illuminated = value;
         }
 
         private void updateVision()
