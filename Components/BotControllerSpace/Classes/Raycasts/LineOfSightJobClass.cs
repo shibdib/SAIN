@@ -1,5 +1,6 @@
 ﻿using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.EnemyClasses;
+using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
@@ -13,6 +14,35 @@ namespace SAIN.Components
 
         public void Execute(int index)
         {
+            EnemyRaycastStruct raycast = Raycasts[index];
+            BotComponent bot = raycast.Bot;
+            if (bot == null) {
+                return;
+            }
+            Enemy enemy = raycast.Enemy;
+            if (enemy == null) {
+                return;
+            }
+
+            Vector3 origin = bot.Transform.EyePosition;
+            var parts = raycast.Raycasts;
+            int count = parts.Length;
+
+            for (int i = 0; i < count; i++) {
+                var part = parts[i];
+                Vector3 castPoint = part.CastPoint;
+
+                Vector3 direction = castPoint - origin;
+                float distance = direction.magnitude;
+                float rayLength = Mathf.Clamp(distance, 0f, part.MaxRange);
+
+                Physics.Raycast(origin, direction, out part.RaycastHit, rayLength, LayerMaskClass.HighPolyWithTerrainMask);
+                if (part.RaycastHit.collider == null) {
+                    //Logger.LogDebug("line of sight!");
+                }
+            }
+
+            bot.Vision.TimeLastCheckedLOS = Time.time;
         }
     }
 
@@ -29,6 +59,7 @@ namespace SAIN.Components
         public Vector3 CastPoint;
         public RaycastHit RaycastHit;
         public EBodyPartColliderType PartType;
+        public float MaxRange;
     }
 
     public class LineOfSightJobClass : SAINControllerBase
@@ -48,18 +79,19 @@ namespace SAIN.Components
         {
         }
 
-        public void Init()
-        {
-        }
-
         public void Update()
         {
-            finishJob();
-            if (Bots.Count == 0) {
-                return;
+            try {
+                finishJob();
+                if (Bots.Count == 0) {
+                    return;
+                }
+                findBotsForJob();
+                setupJob(_enemyRaycasts);
             }
-            findBotsForJob();
-            setupJob(_enemyRaycasts);
+            catch (Exception ex) {
+                Logger.LogError(ex);
+            }
         }
 
         public void Dispose()
@@ -168,6 +200,8 @@ namespace SAIN.Components
 
             // Set this bool to true so the job can complete next frame
             hasJobFromLastFrame = true;
+
+            Logger.LogDebug($"Job Scheduled for {count} Enemies...");
         }
     }
 }

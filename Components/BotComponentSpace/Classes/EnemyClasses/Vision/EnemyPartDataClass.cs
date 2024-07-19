@@ -34,7 +34,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
         }
 
-        public BodyPartRaycast GetRaycast(Vector3 origin)
+        public BodyPartRaycast GetRaycast(Vector3 origin, float maxRange)
         {
             BodyPartCollider collider = getCollider();
             Vector3 castPoint = getCastPoint(origin, collider);
@@ -44,6 +44,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 CastPoint = castPoint,
                 PartData = this,
                 PartType = collider.BodyPartColliderType,
+                MaxRange = maxRange
             };
         }
 

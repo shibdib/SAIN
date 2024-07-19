@@ -47,24 +47,24 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public List<BodyPartRaycast> GetPartsToCheck(Vector3 origin)
         {
             _raycasts.Clear();
-            ERaycastPart[] partsToCheck = getPartsToCheck();
+            ERaycastPart[] partsToCheck = getPartsToCheck(out float maxRange);
             int count = partsToCheck.Length;
 
             for (int i = 0; i < count; i++) {
                 var type = partsToCheck[i];
                 switch (type) {
                     case ERaycastPart.Body:
-                        _raycasts.Add(EnemyParts.Parts[EBodyPart.Chest].GetRaycast(origin));
+                        _raycasts.Add(EnemyParts.Parts[EBodyPart.Chest].GetRaycast(origin, maxRange));
                         continue;
 
                     case ERaycastPart.Head:
-                        _raycasts.Add(EnemyParts.Parts[EBodyPart.Head].GetRaycast(origin));
+                        _raycasts.Add(EnemyParts.Parts[EBodyPart.Head].GetRaycast(origin, maxRange));
                         continue;
 
                     case ERaycastPart.RandomPart:
                         var part = EnemyParts.GetNextPart();
                         if (part != null) {
-                            _raycasts.Add(part.GetRaycast(origin));
+                            _raycasts.Add(part.GetRaycast(origin, maxRange));
                         }
                         continue;
                 }
@@ -151,9 +151,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private static readonly ERaycastPart[] _bodyHeadPlus1Random = new ERaycastPart[] { ERaycastPart.Body, ERaycastPart.Head, ERaycastPart.RandomPart };
         private static readonly ERaycastPart[] _bodyHeadPlus2Random = new ERaycastPart[] { ERaycastPart.Body, ERaycastPart.Head, ERaycastPart.RandomPart, ERaycastPart.RandomPart };
 
-        private ERaycastPart[] getPartsToCheck()
+        private ERaycastPart[] getPartsToCheck(out float maxRange)
         {
-            float maxRange = AIVisionRangeLimit();
+            maxRange = AIVisionRangeLimit();
             if (Enemy.RealDistance > maxRange) {
                 return _empty;
             }
@@ -164,7 +164,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (isAI) {
                 return _bodyPlus1Random;
             }
-
             // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
             if (Enemy.IsCurrentEnemy) {
                 return _bodyHeadPlus2Random;
