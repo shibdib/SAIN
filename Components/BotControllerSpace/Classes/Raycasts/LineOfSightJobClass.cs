@@ -70,7 +70,7 @@ namespace SAIN.Components
 
         private JobHandle _raycastJobHandle;
         private RaycastEnemiesJob _raycastJob;
-        private EnemyRaycastStruct[] raycastArray;
+        private EnemyRaycastStruct[] _raycastArray;
 
         private readonly List<BotComponent> _localList = new List<BotComponent>();
         private readonly List<EnemyRaycastStruct> _enemyRaycasts = new List<EnemyRaycastStruct>();
@@ -108,10 +108,10 @@ namespace SAIN.Components
             _raycastJobHandle.Complete();
 
             // update each enemy with results
-            raycastArray = _raycastJob.Raycasts.ToArray();
+            _raycastArray = _raycastJob.Raycasts.ToArray();
 
-            for (int i = 0; i < raycastArray.Length; i++) {
-                EnemyRaycastStruct raycastStruct = raycastArray[i];
+            for (int i = 0; i < _raycastArray.Length; i++) {
+                EnemyRaycastStruct raycastStruct = _raycastArray[i];
                 BotComponent bot = raycastStruct.Bot;
                 if (bot == null) {
                     continue;
@@ -124,6 +124,7 @@ namespace SAIN.Components
                 }
             }
 
+            _raycastJob.Raycasts.Dispose();
             hasJobFromLastFrame = false;
         }
 
@@ -196,7 +197,7 @@ namespace SAIN.Components
             _raycastJobHandle = _raycastJob.Schedule(count, new JobHandle());
 
             // Dispose of temporary NativeArray
-            raycastNativeArrayTemp.Dispose();
+            //raycastNativeArrayTemp.Dispose();
 
             // Set this bool to true so the job can complete next frame
             hasJobFromLastFrame = true;
