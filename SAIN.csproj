@@ -290,7 +290,6 @@
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\HardCoverData.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\PathData.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\TargetData.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\BotVolumetricLightController.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\BotGatheringController.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\IPeacefulActionExecutor.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\Actions\PeacefulActionHelpers.cs" />
@@ -299,6 +298,8 @@
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulActionSet.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\LineOfSightJobClass.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\UnityJobExample%281%29.cs" />
     <Compile Include="Components\GameWorldSpace\Doors\BotDoorTrigger.cs" />
     <Compile Include="Components\GameWorldSpace\Doors\DoorHandler.cs" />
     <Compile Include="Components\GameWorldSpace\GameWorldBase.cs" />
@@ -363,7 +364,7 @@
     <Compile Include="Components\BotComponentSpace\Routine.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverFinderStatus.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\BotHearingClass.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\RayCastJobClass.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\RayCastJobClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\ETimeOfDay.cs" />
     <Compile Include="Components\GameWorldSpace\Players\PlayerDictionary.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\AIDataBase.cs" />
@@ -631,9 +632,9 @@
     <Compile Include="Components\BotControllerSpace\Classes\SAINWeatherClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\TimeClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINVisionClass.cs" />
-    <Compile Include="Components\BotControllerSpace\BotControllerAbstract.cs" />
+    <Compile Include="Components\BotControllerSpace\SAINControllerBase.cs" />
     <Compile Include="Components\BotControllerSpace\SAINBotController.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\LineOfSightManager.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\LineOfSightManager.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\SAINCoverClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\EnemyDecisionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\SelfActionDecisionClass.cs" />

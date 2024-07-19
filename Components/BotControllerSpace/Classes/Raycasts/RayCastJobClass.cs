@@ -1,8 +1,10 @@
 ﻿using EFT;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace SAIN.Components
@@ -25,8 +27,7 @@ namespace SAIN.Components
         private void raycastCommandAllParts(List<Player> players, List<BotComponent> bots, int partCount)
         {
             int total = bots.Count * players.Count * partCount;
-            if (total <= 0)
-            {
+            if (total <= 0) {
                 return;
             }
 
@@ -44,17 +45,14 @@ namespace SAIN.Components
         private void setSpherecastTargetsHuman(List<BotComponent> botList, List<Player> players, NativeArray<SpherecastCommand> allSpherecastCommands)
         {
             int total = 0;
-            for (int i = 0; i < botList.Count; i++)
-            {
+            for (int i = 0; i < botList.Count; i++) {
                 var bot = botList[i];
                 Vector3 head = getHeadPoint(bot);
                 float maxVisDist = getMaxVisionDist(bot);
 
-                for (int j = 0; j < _players.Count; j++)
-                {
+                for (int j = 0; j < _players.Count; j++) {
                     Player player = _players[j];
-                    foreach (var part in player.MainParts.Values)
-                    {
+                    foreach (var part in player.MainParts.Values) {
                         Vector3 target = getTarget(part, head);
                         Vector3 direction = target - head;
                         float maxRange = getMaxRange(bot, player.ProfileId, direction, head, maxVisDist);
@@ -69,12 +67,10 @@ namespace SAIN.Components
         private float getMaxRange(BotComponent bot, string profileID, Vector3 direction, Vector3 head, float maxVisDist)
         {
             float maxRange = maxVisDist;
-            if (head == Vector3.zero || bot == null || bot.ProfileId == profileID)
-            {
+            if (head == Vector3.zero || bot == null || bot.ProfileId == profileID) {
                 maxRange = 0f;
             }
-            else if (bot.EnemyController.Enemies.TryGetValue(profileID, out var enemy))
-            {
+            else if (bot.EnemyController.Enemies.TryGetValue(profileID, out var enemy)) {
                 maxRange += enemy.Vision.VisionDistance;
             }
             maxRange = Mathf.Clamp(maxRange, 0f, direction.magnitude);
@@ -84,19 +80,16 @@ namespace SAIN.Components
         private void analyzeHitsHuman(List<BotComponent> botList, List<Player> players, NativeArray<RaycastHit> hits)
         {
             int total = 0;
-            for (int i = 0; i < botList.Count; i++)
-            {
+            for (int i = 0; i < botList.Count; i++) {
                 var bot = botList[i];
                 List<string> visiblePlayerIDs = null;
-                for (int j = 0; j < players.Count; j++)
-                {
+                for (int j = 0; j < players.Count; j++) {
                     Player player = players[j];
                     string profileID = player.ProfileId;
 
                     bool lineOfSight = false;
 
-                    foreach (var part in player.MainParts.Values)
-                    {
+                    foreach (var part in player.MainParts.Values) {
                         if (!lineOfSight)
                             lineOfSight = hits[total].collider == null;
                         total++;
@@ -115,8 +108,7 @@ namespace SAIN.Components
         {
             getAIPlayers(_players, out _);
             int total = botList.Count * _players.Count;
-            if (total > 0)
-            {
+            if (total > 0) {
                 NativeArray<SpherecastCommand> allSpherecastCommands = new NativeArray<SpherecastCommand>(total, Allocator.TempJob);
                 setSpherecastTargetsAI(botList, _players, allSpherecastCommands);
                 NativeArray<RaycastHit> allRaycastHits = new NativeArray<RaycastHit>(total, Allocator.TempJob);
@@ -135,12 +127,10 @@ namespace SAIN.Components
         private float getMaxVisionDist(BotComponent bot)
         {
             float maxVisDist;
-            if (bot != null && bot.BotOwner.LookSensor != null)
-            {
+            if (bot != null && bot.BotOwner.LookSensor != null) {
                 maxVisDist = bot.BotOwner.LookSensor.VisibleDist;
             }
-            else
-            {
+            else {
                 maxVisDist = 0f;
             }
             return maxVisDist;
@@ -149,14 +139,12 @@ namespace SAIN.Components
         private void setSpherecastTargetsAI(List<BotComponent> botList, List<Player> players, NativeArray<SpherecastCommand> allSpherecastCommands)
         {
             int total = 0;
-            for (int i = 0; i < botList.Count; i++)
-            {
+            for (int i = 0; i < botList.Count; i++) {
                 var bot = botList[i];
                 Vector3 head = getHeadPoint(bot);
                 float maxVisDist = getMaxVisionDist(bot);
 
-                for (int j = 0; j < players.Count; j++)
-                {
+                for (int j = 0; j < players.Count; j++) {
                     Player player = players[j];
                     Vector3 target = getTarget(player.MainParts[BodyPartType.body], head);
                     Vector3 direction = target - head;
@@ -170,20 +158,17 @@ namespace SAIN.Components
         private void analyzeHitsAI(List<BotComponent> botList, List<Player> players, NativeArray<RaycastHit> allRaycastHits)
         {
             int total = 0;
-            for (int i = 0; i < botList.Count; i++)
-            {
+            for (int i = 0; i < botList.Count; i++) {
                 BotComponent bot = botList[i];
                 string botProfileId = bot.ProfileId;
 
                 List<string> visPlayerIds = null;
                 visPlayerIds?.Clear();
 
-                for (int j = 0; j < players.Count; j++)
-                {
+                for (int j = 0; j < players.Count; j++) {
                     Player player = players[j];
                     string profileId = player.ProfileId;
-                    if (botProfileId != profileId)
-                    {
+                    if (botProfileId != profileId) {
                         bool lineOfSight =
                             allRaycastHits[total].collider == null;
 
@@ -215,8 +200,7 @@ namespace SAIN.Components
             if (players == null)
                 return;
 
-            foreach (var player in players)
-            {
+            foreach (var player in players) {
                 if (!shallCheckPlayer(player))
                     continue;
 
@@ -234,13 +218,11 @@ namespace SAIN.Components
         {
             if (player == null ||
                 player.Transform == null ||
-                !player.gameObject.activeInHierarchy)
-            {
+                !player.gameObject.activeInHierarchy) {
                 return false;
             }
             if (player.IsAI &&
-                player.AIData.BotOwner?.BotState != EBotState.Active)
-            {
+                player.AIData.BotOwner?.BotState != EBotState.Active) {
                 return false;
             }
             return player.HealthController.IsAlive;
@@ -248,20 +230,17 @@ namespace SAIN.Components
 
         private Vector3 getHeadPoint(BotComponent bot)
         {
-            if (bot == null)
-            {
+            if (bot == null) {
                 //Logger.LogError("BotComponent Null");
                 return Vector3.zero;
             }
             var botOwner = bot?.BotOwner;
-            if (botOwner == null)
-            {
+            if (botOwner == null) {
                 //Logger.LogError("botOwner Null");
                 return Vector3.zero;
             }
             var lookSensor = botOwner?.LookSensor;
-            if (lookSensor == null)
-            {
+            if (lookSensor == null) {
                 //Logger.LogError("lookSensor Null");
                 return Vector3.zero;
             }
@@ -272,12 +251,10 @@ namespace SAIN.Components
         private Vector3 getTarget(EnemyPart part, Vector3 head)
         {
             Vector3 target;
-            if (part.Collider != null)
-            {
+            if (part.Collider != null) {
                 target = part.Collider.GetRandomPointToCastLocal(head);
             }
-            else
-            {
+            else {
                 target = part.Position;
             }
             return target;

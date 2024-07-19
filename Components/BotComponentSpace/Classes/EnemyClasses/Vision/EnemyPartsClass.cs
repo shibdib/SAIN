@@ -104,7 +104,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 }
             }
 
-            EnemyPartDataClass checkingPart = getNextPart();
+            EnemyPartDataClass checkingPart = GetNextPart();
 
             if (checkingPart == _lastCheckSuccessPart) {
                 successPoint = LastSuccessPosition;
@@ -127,7 +127,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return inSight;
         }
 
-        private EnemyPartDataClass getNextPart()
+        public EnemyPartDataClass GetNextPart()
         {
             EnemyPartDataClass result = null;
             EBodyPart epart = (EBodyPart)_index;
@@ -141,6 +141,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 _index = 0;
             }
 
+            if (result == null) {
+                result = Parts.PickRandom().Value;
+            }
             return result;
         }
 
