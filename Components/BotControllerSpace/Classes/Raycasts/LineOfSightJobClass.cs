@@ -7,11 +7,9 @@ using UnityEngine;
 
 namespace SAIN.Components
 {
-    public struct RaycastAllEnemiesJob : IJobFor
+    public struct RaycastEnemiesJob : IJobFor
     {
-        [ReadOnly] public NativeArray<EnemyRaycastStruct> RaycastsInput;
-
-        [WriteOnly] public NativeArray<EnemyRaycastStruct> RaycastsOutput;
+        public NativeArray<EnemyRaycastStruct> Raycasts;
 
         public void Execute(int index)
         {
@@ -39,11 +37,9 @@ namespace SAIN.Components
 
         private bool hasJobFromLastFrame = false;
 
-        private JobHandle raycastJobHandle;
-        private RaycastAllEnemiesJob RayCastJob;
-
+        private JobHandle _raycastJobHandle;
+        private RaycastEnemiesJob _raycastJob;
         private EnemyRaycastStruct[] raycastArray;
-        private NativeArray<EnemyRaycastStruct> raycastNativeArray;
 
         private readonly List<BotComponent> _localList = new List<BotComponent>();
         private readonly List<EnemyRaycastStruct> _enemyRaycasts = new List<EnemyRaycastStruct>();
@@ -54,7 +50,6 @@ namespace SAIN.Components
 
         public void Init()
         {
-            raycastNativeArray = new NativeArray<EnemyRaycastStruct>(100, Allocator.Persistent);
         }
 
         public void Update()
@@ -78,10 +73,10 @@ namespace SAIN.Components
             }
 
             // Ensure the last frame's job is completed
-            raycastJobHandle.Complete();
+            _raycastJobHandle.Complete();
 
             // update each enemy with results
-            raycastArray = RayCastJob.RaycastsOutput.ToArray();
+            raycastArray = _raycastJob.Raycasts.ToArray();
 
             for (int i = 0; i < raycastArray.Length; i++) {
                 EnemyRaycastStruct raycastStruct = raycastArray[i];
@@ -114,6 +109,7 @@ namespace SAIN.Components
             // the lower the TimeLastChecked, the longer the time since they had their enemies checked
             bots.Sort((x, y) => x.Vision.TimeLastCheckedLOS.CompareTo(y.Vision.TimeLastCheckedLOS));
 
+            int foundBots = 0;
             for (int i = 0; i < bots.Count; i++) {
                 BotComponent bot = bots[i];
                 if (bot == null) continue;
@@ -121,6 +117,7 @@ namespace SAIN.Components
 
                 Vector3 origin = bot.Transform.EyePosition;
                 var enemies = bot.EnemyController.Enemies;
+                bool gotEnemyToCheck = false;
 
                 foreach (Enemy enemy in enemies.Values) {
                     if (enemy == null) continue;
@@ -135,8 +132,16 @@ namespace SAIN.Components
                         Raycasts = rayCasts.ToArray()
                     };
                     enemiesResult.Add(result);
+                    if (!gotEnemyToCheck)
+                        gotEnemyToCheck = true;
                 }
-                if (i == countToCheck) break;
+
+                if (gotEnemyToCheck) {
+                    foundBots++;
+                    if (foundBots == countToCheck) {
+                        break;
+                    }
+                }
             }
         }
 
@@ -144,23 +149,19 @@ namespace SAIN.Components
         {
             // Then we start creating the job for the next frame
 
-            // Create a temporary NativeArray to store the data from verticesArray
+            // Create a temporary NativeArray to store the data
             var enemyArray = enemyList.ToArray();
             int count = enemyArray.Length;
 
             var raycastNativeArrayTemp = new NativeArray<EnemyRaycastStruct>(enemyArray, Allocator.TempJob);
 
-            ////// the number here changes?
-            raycastNativeArray = new NativeArray<EnemyRaycastStruct>(count, Allocator.Persistent);
-
             // Create the job
-            RayCastJob = new RaycastAllEnemiesJob {
-                RaycastsInput = raycastNativeArrayTemp,
-                RaycastsOutput = raycastNativeArray
+            _raycastJob = new RaycastEnemiesJob {
+                Raycasts = raycastNativeArrayTemp,
             };
 
             // Schedule the job
-            raycastJobHandle = RayCastJob.Schedule(count, new JobHandle());
+            _raycastJobHandle = _raycastJob.Schedule(count, new JobHandle());
 
             // Dispose of temporary NativeArray
             raycastNativeArrayTemp.Dispose();
