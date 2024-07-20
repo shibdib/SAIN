@@ -37,6 +37,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             _minFriendlyDistToThrow = sainSettings.Grenade.MinFriendlyDistance;
             _minFriendlyDistToThrow_SQR = _minFriendlyDistToThrow * _minFriendlyDistToThrow;
             _throwGrenadeFreq = sainSettings.Grenade.ThrowGrenadeFrequency;
+            _throwGrenadeFreqMax = sainSettings.Grenade.ThrowGrenadeFrequency_MAX;
             _minThrowDistPercent = 0.66f;
 
             _blindCornerDistToThrow = 10f;
@@ -52,6 +53,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private float _maxTimeSinceUpdatedCanThrow = 120f;
         private float _minEnemyDistToThrow = 8f;
         private float _throwGrenadeFreq = 5f;
+        private float _throwGrenadeFreqMax = 10f;
         private float _minFriendlyDistToThrow = 8f;
         private float _minFriendlyDistToThrow_SQR = 64;
         private float _blindCornerDistToThrow = 5f;
@@ -78,13 +80,13 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             }
             var grenades = BotOwner.WeaponManager.Grenades;
             if (!grenades.HaveGrenade) {
-                _nextPosibleAttempt = Time.time + UnityEngine.Random.Range(_throwGrenadeFreq, _throwGrenadeFreq * THROW_FREQUENCY_RANDOMIZATION_FACTOR);
+                _nextPosibleAttempt = Time.time + UnityEngine.Random.Range(_throwGrenadeFreq, _throwGrenadeFreqMax);
                 sayNeedNades();
                 reason = "noNades";
                 return false;
             }
             if (tryThrowGrenade() || (findThrowTarget(enemy) && tryThrowGrenade())) {
-                _nextPosibleAttempt = Time.time + UnityEngine.Random.Range(_throwGrenadeFreq, _throwGrenadeFreq * THROW_FREQUENCY_RANDOMIZATION_FACTOR);
+                _nextPosibleAttempt = Time.time + UnityEngine.Random.Range(_throwGrenadeFreq, _throwGrenadeFreqMax);
                 reason = "startThrow";
                 return true;
             }
@@ -249,10 +251,10 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return target + (targetDirectionNormal * UnityEngine.Random.Range(-dispersion, dispersion));
         }
 
-        private const float MIN_THROW_DISPERSION = 1f;
+        private const float MIN_THROW_DISPERSION = 0.5f;
         private const float MAX_THROW_DISPERSION = 5f;
         private const float MIN_THROW_DISTANCE_DISPERSION = 10f;
-        private const float MAX_THROW_DISTANCE_DISPERSION = 40f;
+        private const float MAX_THROW_DISTANCE_DISPERSION = 50f;
 
         private bool tryThrowGrenade()
         {

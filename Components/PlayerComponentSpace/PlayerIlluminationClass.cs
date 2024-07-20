@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent;
 using System;
@@ -10,11 +11,12 @@ namespace SAIN.Components.PlayerComponentSpace
     public class PlayerIlluminationClass : PlayerComponentBase
     {
         public event Action<bool> OnPlayerIlluminationChanged;
-        public bool Illuminated => TimeSinceIlluminated > ILLUMINATED_BUFFER_PERIOD;
+
+        public bool Illuminated => TimeSinceIlluminated <= ILLUMINATED_BUFFER_PERIOD;
         public float Level { get; private set; }
         public float TimeSinceIlluminated => Time.time - _timeLastIlluminated;
 
-        private const float ILLUMINATED_BUFFER_PERIOD = 0.25f;
+        private const float ILLUMINATED_BUFFER_PERIOD = 0.5f;
 
         private float _timeLastIlluminated;
 
@@ -41,11 +43,10 @@ namespace SAIN.Components.PlayerComponentSpace
                 _nextCheckRaycastTime = Time.time + (GlobalSettingsClass.Instance.General.Performance.PerformanceMode ? RAYCAST_FREQ_PERF_MODE : RAYCAST_FREQ);
 
                 bool illuminated = checkIfLightsInRange(out float illumLevel);
+                bool lineOfSight = false;
                 if (illuminated) {
                     Vector3 bodyPos = Player.MainParts[BodyPartType.body].Position;
-                    bool lineOfSight = false;
                     foreach (var light in _lightsInRange) {
-
                         LightTrigger trigger = light.Key;
                         if (trigger == null || !trigger.LightActive) continue;
 
@@ -53,24 +54,20 @@ namespace SAIN.Components.PlayerComponentSpace
                         Vector3 direction = bodyPos - lightPos;
                         if (!Physics.Raycast(lightPos, direction, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask)) {
                             lineOfSight = true;
+                            DebugGizmos.Ray(lightPos, direction, Color.red, direction.magnitude, 0.05f, true, 1f);
                             if (light.Value >= illumLevel * 0.75f) {
                                 break;
                             }
                         }
-                    }
-                    if (!lineOfSight) {
-                        illuminated = false;
-                        illumLevel = 0f;
-                    }
-                    else {
-                        //Logger.LogInfo($"illuminated : {illumLevel}");
+                        DebugGizmos.Ray(lightPos, direction, Color.white, direction.magnitude, 0.05f, true, 1f);
                     }
                 }
 
                 bool wasIlluminated = Illuminated;
                 Level = illumLevel;
-                if (illuminated) {
+                if (illuminated && lineOfSight) {
                     _timeLastIlluminated = Time.time;
+                    Logger.LogDebug("illuminated!");
                 }
 
                 if (wasIlluminated != Illuminated) {

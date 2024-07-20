@@ -10,7 +10,7 @@ namespace SAIN.Components
 {
     public class LightTrigger : MonoBehaviour, IPhysicsTrigger, IPhysicsTriggerWithStay
     {
-        public bool LightActive {  get; private set; }
+        public bool LightActive { get; private set; } = true;
         public string Description { get; private set; }
 
         private LightComponent _lightComponent;
@@ -25,14 +25,17 @@ namespace SAIN.Components
             _lightRange_SQR = _lightRange * _lightRange;
 
             this.transform.rotation = _light.transform.rotation;
-            this.transform.position = _light.transform.position + (this.transform.forward * 0.33f);
+            this.transform.localPosition = _light.transform.localPosition;
+            //this.transform.localRotation = _light.transform.localRotation;
+            //this.transform.localScale = _light.transform.localScale;
+            //this.transform.position = _light.transform.position + (this.transform.forward * 0.33f);
+            this.transform.position = _light.transform.position;
 
             _collider = this.gameObject.AddComponent<SphereCollider>();
             _collider.enabled = true;
             _collider.isTrigger = true;
             _collider.radius = _lightRange;
             _collider.transform.position = this.transform.position;
-
 
             //_lineRenderer = this.gameObject.AddComponent<LineRenderer>();
             //_lineRenderer.material.color = Color.white;
@@ -61,7 +64,6 @@ namespace SAIN.Components
             }
             Vector3 bodyPosition = player.MainParts[BodyPartType.body].Position;
             if (inRangeOfLight(player, out float illuminationLevel, out float sqrMag)) {
-
                 float intensity = _light.intensity / 5f;
                 intensity = Mathf.Clamp(intensity, 0.1f, 1f);
                 illuminationLevel *= intensity;
@@ -134,6 +136,7 @@ namespace SAIN.Components
 
         private void Update()
         {
+            return;
             if (_nextCheckActiveTime < Time.time) {
                 _nextCheckActiveTime = Time.time + CHECK_ACTIVE_FREQ;
 
@@ -177,8 +180,12 @@ namespace SAIN.Components
 
     public class LightComponent : MonoBehaviour
     {
-        public bool LightActive => LampController?.Enabled == true || VolumetricLight?.enabled == true || Light?.enabled == true;
-        public LampController LampController {  get; private set; }
+        public bool LightActive =>
+            (LampController != null && LampController.Enabled) ||
+            (VolumetricLight != null && VolumetricLight.enabled) ||
+            (Light != null && Light.enabled);
+
+        public LampController LampController { get; private set; }
         public VolumetricLight VolumetricLight { get; private set; }
         public Light Light { get; private set; }
         public LightTrigger LightTrigger { get; private set; }
@@ -202,6 +209,5 @@ namespace SAIN.Components
         private void OnDestroy()
         {
         }
-
     }
 }

@@ -50,8 +50,7 @@ namespace SAIN
 
         private void Awake()
         {
-            if (!VersionChecker.CheckEftVersion(Logger, Info, Config))
-            {
+            if (!VersionChecker.CheckEftVersion(Logger, Info, Config)) {
                 throw new Exception("Invalid EFT Version");
             }
 
@@ -79,7 +78,6 @@ namespace SAIN
         public static ConfigEntry<KeyboardShortcut> OpenEditorConfigEntry { get; private set; }
 
         private List<Type> patches => new List<Type>() {
-
                 typeof(Patches.Generic.StopRefillMagsPatch),
                 typeof(Patches.Generic.SetEnvironmentPatch),
                 typeof(Patches.Generic.SetPanicPointPatch),
@@ -175,8 +173,8 @@ namespace SAIN
 
                 typeof(Patches.Components.AddBotComponentPatch),
                 typeof(Patches.Components.AddGameWorldPatch),
-                typeof(Patches.Components.AddLightComponentPatch),
-                typeof(Patches.Components.AddLightComponentPatch2),
+                //typeof(Patches.Components.AddLightComponentPatch),
+                //typeof(Patches.Components.AddLightComponentPatch2),
                 typeof(Patches.Components.GetBotController),
                 typeof(Patches.Components.GetBotSpawner),
             };
@@ -185,20 +183,16 @@ namespace SAIN
         {
             // Reflection go brrrrrrrrrrrrrr
             MethodInfo enableMethod = AccessTools.Method(typeof(ModulePatch), "Enable");
-            foreach (var patch in patches)
-            {
-                if (!typeof(ModulePatch).IsAssignableFrom(patch))
-                {
+            foreach (var patch in patches) {
+                if (!typeof(ModulePatch).IsAssignableFrom(patch)) {
                     Logger.LogError($"Type {patch.Name} is not a ModulePatch");
                     continue;
                 }
 
-                try
-                {
+                try {
                     enableMethod.Invoke(Activator.CreateInstance(patch), null);
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     Logger.LogError(ex);
                 }
             }

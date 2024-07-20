@@ -37,9 +37,6 @@ namespace SAIN.Components
                 float rayLength = Mathf.Clamp(distance, 0f, part.MaxRange);
 
                 Physics.Raycast(origin, direction, out part.RaycastHit, rayLength, LayerMaskClass.HighPolyWithTerrainMask);
-                if (part.RaycastHit.collider == null) {
-                    //Logger.LogDebug("line of sight!");
-                }
             }
 
             bot.Vision.TimeLastCheckedLOS = Time.time;
@@ -81,6 +78,7 @@ namespace SAIN.Components
 
         public void Update()
         {
+            return;
             try {
                 finishJob();
                 if (Bots.Count == 0) {
@@ -180,29 +178,14 @@ namespace SAIN.Components
 
         private void setupJob(List<EnemyRaycastStruct> enemyList)
         {
-            // Then we start creating the job for the next frame
-
-            // Create a temporary NativeArray to store the data
             var enemyArray = enemyList.ToArray();
             int count = enemyArray.Length;
-
-            var raycastNativeArrayTemp = new NativeArray<EnemyRaycastStruct>(enemyArray, Allocator.TempJob);
-
-            // Create the job
             _raycastJob = new RaycastEnemiesJob {
-                Raycasts = raycastNativeArrayTemp,
+                Raycasts = new NativeArray<EnemyRaycastStruct>(enemyArray, Allocator.TempJob),
             };
-
-            // Schedule the job
             _raycastJobHandle = _raycastJob.Schedule(count, new JobHandle());
-
-            // Dispose of temporary NativeArray
-            //raycastNativeArrayTemp.Dispose();
-
-            // Set this bool to true so the job can complete next frame
             hasJobFromLastFrame = true;
-
-            Logger.LogDebug($"Job Scheduled for {count} Enemies...");
+            //Logger.LogDebug($"Job Scheduled for {count} Enemies...");
         }
     }
 }
