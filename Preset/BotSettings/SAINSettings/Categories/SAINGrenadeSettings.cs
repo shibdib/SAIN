@@ -22,13 +22,13 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [NameAndDescription(
             "Time Before Next Throw - Min",
             "How much time to wait before a bot is allowed to throw another grenade.")]
-        [MinMax(0f, 30f, 100f)]
-        public float ThrowGrenadeFrequency = 4f;
+        [MinMax(3f, 30f, 100f)]
+        public float ThrowGrenadeFrequency = 5f;
 
         [NameAndDescription(
             "Time Before Next Throw - Max",
             "How much time to wait before a bot is allowed to throw another grenade.")]
-        [MinMax(0f, 30f, 100f)]
+        [MinMax(3f, 60f, 100f)]
         public float ThrowGrenadeFrequency_MAX = 10f;
 
         [NameAndDescription(
@@ -50,7 +50,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         //[CopyValue]
         [Hidden]
         [JsonIgnore]
-        public float GrenadePrecision = 0.05f;
+        public float GrenadePrecision = 0f;
 
         [Percentage0to1]
         [Advanced]
@@ -68,6 +68,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public int BEWARE_TYPE = 3;
+        public int BEWARE_TYPE = 2;
+
+        [Hidden]
+        [JsonIgnore]
+        public float DELTA_NEXT_ATTEMPT = 3f;
     }
 }

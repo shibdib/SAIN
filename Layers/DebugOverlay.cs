@@ -43,26 +43,26 @@ namespace SAIN.Layers
 
         public static void UpdateSelectedOverlay()
         {
-            if (_changedOverlay &&
-                SAINPlugin.NextDebugOverlay.Value.IsUp() &&
-                SAINPlugin.PreviousDebugOverlay.Value.IsUp()) {
-                _changedOverlay = false;
-            }
-            if (_changedOverlay) {
-                return;
-            }
-
-            if (SAINPlugin.NextDebugOverlay.Value.IsDown()) {
-                changeOverlay(true);
-                _changedOverlay = true;
-                return;
-            }
-
-            if (SAINPlugin.PreviousDebugOverlay.Value.IsDown()) {
-                changeOverlay(false);
-                _changedOverlay = true;
-                return;
-            }
+            //if (_changedOverlay &&
+            //    SAINPlugin.NextDebugOverlay.Value.IsUp() &&
+            //    SAINPlugin.PreviousDebugOverlay.Value.IsUp()) {
+            //    _changedOverlay = false;
+            //}
+            //if (_changedOverlay) {
+            //    return;
+            //}
+            //
+            //if (SAINPlugin.NextDebugOverlay.Value.IsDown()) {
+            //    changeOverlay(true);
+            //    _changedOverlay = true;
+            //    return;
+            //}
+            //
+            //if (SAINPlugin.PreviousDebugOverlay.Value.IsDown()) {
+            //    changeOverlay(false);
+            //    _changedOverlay = true;
+            //    return;
+            //}
         }
 
         private static void changeOverlay(bool next)
@@ -193,7 +193,7 @@ namespace SAIN.Layers
 
         private static Enemy getEnemy2Show(BotComponent bot)
         {
-                var debug = SAINPlugin.DebugSettings.Overlay;
+            var debug = SAINPlugin.DebugSettings.Overlay;
             Enemy mainPlayer = null;
             if (debug.OverLay_AlwaysShowMainPlayerInfo)
                 foreach (var enemy in bot.EnemyController.Enemies.Values)

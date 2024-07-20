@@ -17,17 +17,16 @@ namespace SAIN.Layers.Combat.Solo
             _lastSelfDecision = _currentSelfDecision;
             _lastDecision = _currentDecision;
 
-            if (_doSurgeryAction)
-            {
+            if (_doSurgeryAction) {
                 _doSurgeryAction = false;
                 return new Action(typeof(DoSurgeryAction), $"Surgery");
             }
 
-            switch (_lastDecision)
-            {
+            switch (_lastDecision) {
                 case ECombatDecision.MoveToEngage:
                     return new Action(typeof(MoveToEngageAction), $"{_lastDecision}");
 
+                case ECombatDecision.TagillaMelee:
                 case ECombatDecision.MeleeAttack:
                     return new Action(typeof(MeleeAttackAction), $"{_lastDecision}");
 
@@ -77,8 +76,7 @@ namespace SAIN.Layers.Combat.Solo
 
         public override bool IsActive()
         {
-            if (Bot == null)
-            {
+            if (Bot == null) {
                 return false;
             }
             bool active = _currentDecision != ECombatDecision.None;
@@ -91,15 +89,13 @@ namespace SAIN.Layers.Combat.Solo
             // this is dumb im sorry
             if (!_doSurgeryAction
                 && _currentSelfDecision == ESelfDecision.Surgery
-                && Bot.Cover.BotIsAtCoverInUse())
-            {
+                && Bot.Cover.BotIsAtCoverInUse()) {
                 _doSurgeryAction = true;
                 return true;
             }
 
-            if (_lastSelfDecision == ESelfDecision.Surgery && 
-                _currentSelfDecision != ESelfDecision.Surgery )
-            {
+            if (_lastSelfDecision == ESelfDecision.Surgery &&
+                _currentSelfDecision != ESelfDecision.Surgery) {
                 return true;
             }
 

@@ -65,16 +65,17 @@ namespace SAIN
         {
             string category = "SAIN Editor";
 
-            NextDebugOverlay = Config.Bind(category, "Next Debug Overlay", new KeyboardShortcut(KeyCode.LeftBracket), "Change The Debug Overlay with DrakiaXYZs Debug Overlay");
-            PreviousDebugOverlay = Config.Bind(category, "Previous Debug Overlay", new KeyboardShortcut(KeyCode.RightBracket), "Change The Debug Overlay with DrakiaXYZs Debug Overlay");
+            //NextDebugOverlay = Config.Bind(category, "Next Debug Overlay", new KeyboardShortcut(KeyCode.LeftBracket), "Change The Debug Overlay with DrakiaXYZs Debug Overlay");
+            //PreviousDebugOverlay = Config.Bind(category, "Previous Debug Overlay", new KeyboardShortcut(KeyCode.RightBracket), "Change The Debug Overlay with DrakiaXYZs Debug Overlay");
 
             OpenEditorButton = Config.Bind(category, "Open Editor", false, "Opens the Editor on press");
             OpenEditorConfigEntry = Config.Bind(category, "Open Editor Shortcut", new KeyboardShortcut(KeyCode.F6), "The keyboard shortcut that toggles editor");
         }
 
-        public static ConfigEntry<KeyboardShortcut> NextDebugOverlay { get; private set; }
-        public static ConfigEntry<KeyboardShortcut> PreviousDebugOverlay { get; private set; }
+        //public static ConfigEntry<KeyboardShortcut> NextDebugOverlay { get; private set; }
+        //public static ConfigEntry<KeyboardShortcut> PreviousDebugOverlay { get; private set; }
         public static ConfigEntry<bool> OpenEditorButton { get; private set; }
+
         public static ConfigEntry<KeyboardShortcut> OpenEditorConfigEntry { get; private set; }
 
         private List<Type> patches => new List<Type>() {
@@ -165,6 +166,9 @@ namespace SAIN
                 typeof(Patches.Shoot.Aim.AimRotateSpeedPatch),
 
                 typeof(Patches.Shoot.Grenades.DoThrowPatch),
+                typeof(Patches.Shoot.Grenades.DisableSpreadPatch),
+                typeof(Patches.Shoot.Grenades.ResetGrenadePatch),
+                typeof(Patches.Shoot.Grenades.SetGrenadePatch),
 
                 typeof(Patches.Shoot.RateOfFire.FullAutoPatch),
                 typeof(Patches.Shoot.RateOfFire.SemiAutoPatch),
@@ -199,7 +203,6 @@ namespace SAIN
         }
 
         public static SAINPresetClass LoadedPreset => PresetHandler.LoadedPreset;
-        public static SAINBotController BotController => SAINBotController.Instance;
 
         private void Update()
         {

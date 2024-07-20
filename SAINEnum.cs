@@ -1,5 +1,4 @@
-﻿
-using SAIN.Attributes;
+﻿using SAIN.Attributes;
 
 namespace SAIN
 {
@@ -23,6 +22,7 @@ namespace SAIN
         Freeze,
         CreepOnEnemy,
         MeleeAttack,
+        TagillaMelee,
         DebugNoDecision
     }
 
@@ -41,7 +41,7 @@ namespace SAIN
         FriendlyBlock,
         Clear,
     }
-    
+
     public enum EHeardFromPeaceBehavior
     {
         None,
