@@ -30,13 +30,18 @@ namespace SAIN.Components
 
             for (int i = 0; i < count; i++) {
                 var part = parts[i];
-                Vector3 castPoint = part.CastPoint;
+                if (enemy.RealDistance > part.MaxRange) {
+                    part.LineOfSight = false;
+                    continue;
+                }
 
+                Vector3 castPoint = part.CastPoint;
                 Vector3 direction = castPoint - origin;
                 float distance = direction.magnitude;
-                float rayLength = Mathf.Clamp(distance, 0f, part.MaxRange);
 
-                Physics.Raycast(origin, direction, out part.RaycastHit, rayLength, LayerMaskClass.HighPolyWithTerrainMask);
+                if (!Physics.Raycast(origin, direction, out part.RaycastHit, distance, LayerMaskClass.HighPolyWithTerrainMask)) {
+                    part.LineOfSight = true;
+                }
             }
 
             bot.Vision.TimeLastCheckedLOS = Time.time;
@@ -57,6 +62,7 @@ namespace SAIN.Components
         public RaycastHit RaycastHit;
         public EBodyPartColliderType PartType;
         public float MaxRange;
+        public bool LineOfSight;
     }
 
     public class LineOfSightJobClass : SAINControllerBase
@@ -78,7 +84,6 @@ namespace SAIN.Components
 
         public void Update()
         {
-            return;
             try {
                 finishJob();
                 if (Bots.Count == 0) {

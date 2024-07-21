@@ -59,9 +59,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallTagillaHammerAttack()
         {
-            if (Bot.Info.Profile.WildSpawnType != WildSpawnType.bossTagilla) {
-                return false;
-            }
             if (CurrentSelfDecision != ESelfDecision.None) {
                 return false;
             }
@@ -89,11 +86,15 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private void getDecision()
         {
-            if (shallTagillaHammerAttack()) {
-                SetDecisions(ECombatDecision.TagillaMelee, ESquadDecision.None, ESelfDecision.None);
-                return;
-            }
             BaseClass.EnemyDecisions.DebugShallSearch = null;
+            if (Bot.Info.Profile.WildSpawnType == WildSpawnType.bossTagilla) {
+                if (shallTagillaHammerAttack()) {
+                    if (!BotOwner.WeaponManager.IsMelee) BotOwner.WeaponManager.Selector.ChangeToMelee();
+                    SetDecisions(ECombatDecision.TagillaMelee, ESquadDecision.None, ESelfDecision.None);
+                    return;
+                }
+                if (BotOwner.WeaponManager.IsMelee) BotOwner.WeaponManager.Selector.ChangeToMain();
+            }
             if (BaseClass.DogFightDecision.ShallDogFight()) {
                 SetDecisions(ECombatDecision.DogFight, ESquadDecision.None, ESelfDecision.None);
                 return;
