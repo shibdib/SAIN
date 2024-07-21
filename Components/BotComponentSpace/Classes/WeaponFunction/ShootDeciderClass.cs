@@ -266,7 +266,7 @@ namespace SAIN.SAINComponent.Classes
             return aimData.IsReady;
         }
 
-        private const float MIN_ANGLE_TO_START_AIM = 10f;
+        private const float MIN_ANGLE_TO_START_AIM = 20f;
         private const float MIN_ANGLE_TO_KEEP_AIMING = 50f;
         private const float TURN_SPEED_START_AIM = 200f;
         private const float TURN_SPEED_AIMING = 250f;
@@ -316,7 +316,6 @@ namespace SAIN.SAINComponent.Classes
             if (enemy != null &&
                 enemy.IsVisible &&
                 enemy.CanShoot) {
-
                 //Vector3? test = enemy.Shoot.Targets.GetPointToShoot();
                 //if (test == null) {
                 //    Logger.LogWarning($"cant get point to shoot with new system! oh no!");

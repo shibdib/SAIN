@@ -3,7 +3,6 @@ using SAIN.Components;
 using SAIN.Helpers;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.UI.Image;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -15,23 +14,65 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Transform = transform;
             Colliders = colliders;
             _indexMax = colliders.Count - 1;
+            foreach (BodyPartCollider collider in colliders) {
+                if (!_colliderDictionary.ContainsKey(collider.BodyPartColliderType)) {
+                    _colliderDictionary.Add(collider.BodyPartColliderType, collider);
+                }
+            }
+
+            //var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            //sphere.GetComponent<Renderer>().material.color = Color.red;
+            //sphere.GetComponent<Collider>().enabled = false;
+            //sphere.name = $"los_line_{_debugCount++}";
+            //sphere.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
+            //_debugLine = sphere;
+            //
+            //_debugLineRenderer = sphere.AddComponent<LineRenderer>();
+            //// Modify the color and width of the line
+            //_debugLineRenderer.material.color = Color.white;
+            //_debugLineRenderer.startWidth = 0.02f;
+            //_debugLineRenderer.endWidth = 0.01f;
         }
 
-        public Vector3 Position {
-            get
-            {
-                if (Time.frameCount != this._posCachedForFrame &&
-                    Transform != null &&
-                    Transform.Original != null) {
-                    this._position = this.Transform.position;
-                    this._posCachedForFrame = Time.frameCount;
-                }
-                return this._position;
+        public void UpdateDebugGizmos(Vector3 eyePosition)
+        {
+            _debugLineRenderer.SetPosition(0, eyePosition);
+            if (!LineOfSight) {
+                _debugLineRenderer.material.color = Color.white;
+
+                if (LastRaycastHit != null)
+                    _debugLineRenderer.SetPosition(1, LastRaycastHit.Value.point);
+
+                return;
+            }
+
+            _debugLineRenderer.material.color = Color.red;
+            if (LastSuccessPoint != null) {
+                _debugLine.transform.position = LastSuccessPoint.Value;
+                _debugLineRenderer.SetPosition(1, LastSuccessPoint.Value);
             }
         }
 
+        private static int _debugCount = 0;
+        private GameObject _debugLine;
+        private LineRenderer _debugLineRenderer;
+
+        private readonly Dictionary<EBodyPartColliderType, BodyPartCollider> _colliderDictionary = new Dictionary<EBodyPartColliderType, BodyPartCollider>();
+
         public void SetLineOfSight(BodyPartRaycast result)
         {
+            LastRaycastHit = result.LookRaycastHit;
+            float time = Time.time;
+            _lastCheckTime = time;
+            if (result.LineOfSight) {
+                LastSuccessPoint = result.CastPoint;
+                _lastVisionSuccessTime = time;
+                _lastSuccessPart = _colliderDictionary[result.PartType];
+            }
+            if (result.CanShoot) {
+                LastSuccessShootPoint = result.CastPoint;
+                _lastShootSucessTime = time;
+            }
         }
 
         public BodyPartRaycast GetRaycast(Vector3 origin, float maxRange)
@@ -40,7 +81,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Vector3 castPoint = getCastPoint(origin, collider);
 
             return new BodyPartRaycast {
-                RaycastHit = new RaycastHit(),
+                LookRaycastHit = new RaycastHit(),
                 CastPoint = castPoint,
                 PartData = this,
                 PartType = collider.BodyPartColliderType,
@@ -50,9 +91,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public Vector3? LastSuccessShootPoint { get; private set; }
         public Vector3? LastSuccessPoint { get; private set; }
+        public RaycastHit? LastRaycastHit { get; private set; }
 
-        private Vector3 _position;
-        private int _posCachedForFrame;
         public readonly EBodyPart BodyPart;
         public readonly List<BodyPartCollider> Colliders;
         public readonly BifacialTransform Transform;
@@ -79,10 +119,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private int _index;
         private readonly int _indexMax;
 
-        public bool CheckLineOfSight(Vector3 origin, float maxRange, out Vector3? successPoint)
+        public bool CheckLineOfSight(Vector3 origin, float maxRange)
         {
             if (LineOfSight) {
-                successPoint = LastSuccessPoint;
                 return true;
             }
 
@@ -104,8 +143,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             else {
                 _lastSuccessPart = null;
             }
-
-            successPoint = LastSuccessPoint;
 
             if (SAINPlugin.DebugMode &&
                 _nextdrawTime < Time.time) {

@@ -24,7 +24,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public Vector3? EyeLevelPosition(ECornerType type)
         {
             var corner = GetCorner(type);
-            return corner?.EyeLevelCorner(_weaponRoot.position, _transform.Position);
+            return corner?.EyeLevelCorner(_weaponRoot.position + Vector3.down * 0.15f, _transform.Position);
         }
 
         public Vector3? PointPastCorner(ECornerType type)
@@ -37,8 +37,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public EnemyCorner GetCorner(ECornerType cornerType)
         {
-            if (this.TryGetValue(cornerType, out EnemyCorner corner))
-            {
+            if (this.TryGetValue(cornerType, out EnemyCorner corner)) {
                 return corner;
             }
             return null;
@@ -46,13 +45,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void AddOrReplace(ECornerType type, EnemyCorner corner)
         {
-            if (corner == null)
-            {
+            if (corner == null) {
                 this.Remove(type);
                 return;
             }
-            if (!this.ContainsKey(type))
-            {
+            if (!this.ContainsKey(type)) {
                 this.Add(type, corner);
                 return;
             }

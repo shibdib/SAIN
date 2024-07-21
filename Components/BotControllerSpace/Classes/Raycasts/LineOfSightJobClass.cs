@@ -24,7 +24,8 @@ namespace SAIN.Components
                 return;
             }
 
-            Vector3 origin = bot.Transform.EyePosition;
+            Vector3 eyePos = bot.Transform.EyePosition;
+            Vector3 shootPoint = bot.Transform.WeaponFirePort;
             var parts = raycast.Raycasts;
             int count = parts.Length;
 
@@ -36,15 +37,21 @@ namespace SAIN.Components
                 }
 
                 Vector3 castPoint = part.CastPoint;
-                Vector3 direction = castPoint - origin;
+                Vector3 direction = castPoint - eyePos;
                 float distance = direction.magnitude;
 
-                if (!Physics.Raycast(origin, direction, out part.RaycastHit, distance, LayerMaskClass.HighPolyWithTerrainMask)) {
+                if (!Physics.Raycast(eyePos, direction, out part.LookRaycastHit, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask)) {
                     part.LineOfSight = true;
+
+                    Vector3 weaponDirection = castPoint - shootPoint;
+                    if (!Physics.Raycast(shootPoint, weaponDirection, out part.ShootRayCastHit, weaponDirection.magnitude)) {
+                        part.CanShoot = true;
+                    }
                 }
+                parts[i] = part;
             }
 
-            bot.Vision.TimeLastCheckedLOS = Time.time;
+            enemy.Vision.VisionChecker.LastCheckLOSTime = Time.time;
         }
     }
 
@@ -58,11 +65,13 @@ namespace SAIN.Components
     public struct BodyPartRaycast
     {
         public EnemyPartDataClass PartData;
-        public Vector3 CastPoint;
-        public RaycastHit RaycastHit;
         public EBodyPartColliderType PartType;
         public float MaxRange;
+        public Vector3 CastPoint;
+        public RaycastHit LookRaycastHit;
         public bool LineOfSight;
+        public RaycastHit ShootRayCastHit;
+        public bool CanShoot;
     }
 
     public class LineOfSightJobClass : SAINControllerBase
@@ -120,6 +129,8 @@ namespace SAIN.Components
                     continue;
                 }
 
+                bot.Vision.TimeLastCheckedLOS = Time.time;
+
                 BodyPartRaycast[] raycasts = raycastStruct.Raycasts;
                 for (int j = 0; j < raycasts.Length; j++) {
                     BodyPartRaycast raycast = raycasts[j];
@@ -150,13 +161,18 @@ namespace SAIN.Components
                 BotComponent bot = bots[i];
                 if (bot == null) continue;
                 if (!bot.BotActive) continue;
+                if (bot.Vision.TimeSinceCheckedLOS < 0.05f) continue;
 
                 Vector3 origin = bot.Transform.EyePosition;
                 var enemies = bot.EnemyController.Enemies;
                 bool gotEnemyToCheck = false;
+                float time = Time.time;
 
                 foreach (Enemy enemy in enemies.Values) {
                     if (enemy == null) continue;
+
+                    float delay = enemy.IsAI ? 0.1f : 0.05f;
+                    if (time - enemy.Vision.VisionChecker.LastCheckLOSTime < delay) continue;
                     if (!enemy.CheckValid()) continue;
 
                     List<BodyPartRaycast> rayCasts = enemy.Vision.VisionChecker.GetPartsToCheck(origin);

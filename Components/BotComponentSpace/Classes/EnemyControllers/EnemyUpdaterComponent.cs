@@ -15,13 +15,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void Update()
         {
-            if (Bot == null || Bot.EnemyController == null || !Bot.BotActive)
-            {
+            if (Bot == null || Bot.EnemyController == null || !Bot.BotActive) {
                 return;
             }
 
-            foreach (var kvp in Enemies)
-            {
+            foreach (var kvp in Enemies) {
                 string profileId = kvp.Key;
                 Enemy enemy = kvp.Value;
                 if (!checkValid(profileId, enemy))
@@ -35,13 +33,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void LateUpdate()
         {
-            if (Bot == null || Bot.EnemyController == null || !Bot.BotActive)
-            {
+            if (Bot == null || Bot.EnemyController == null || !Bot.BotActive) {
                 return;
             }
 
-            foreach (var kvp in Enemies)
-            {
+            foreach (var kvp in Enemies) {
                 checkValid(kvp.Key, kvp.Value);
             }
             removeInvalid();
@@ -49,8 +45,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private bool checkValid(string id, Enemy enemy)
         {
-            if (enemy == null || enemy.CheckValid() == false)
-            {
+            if (enemy == null || enemy.CheckValid() == false) {
                 _idsToRemove.Add(id);
                 return false;
             }
@@ -59,10 +54,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void removeInvalid()
         {
-            if (_idsToRemove.Count > 0)
-            {
-                foreach (var id in _idsToRemove)
-                {
+            if (_idsToRemove.Count > 0) {
+                foreach (var id in _idsToRemove) {
                     Bot.EnemyController.RemoveEnemy(id);
                 }
                 Logger.LogWarning($"Removed {_idsToRemove.Count} Invalid Enemies");
