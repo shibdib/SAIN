@@ -17,29 +17,29 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         // How long a bot will look at where they last saw an enemy instead of something they hear
         private readonly float Steer_TimeSinceLocationKnown_Threshold = 3f;
+
         // How long a bot will look at where they last saw an enemy if they don't hear any other threats
         private readonly float Steer_TimeSinceSeen_Long = 60f;
+
         // How far a sound can be for them to react by looking toward it.
         private readonly float Steer_HeardSound_Dist = 50f;
+
         // How old a sound can be, in seconds, for them to react by looking toward it.
         private readonly float Steer_HeardSound_Age = 3f;
 
-        public AimStatus AimStatus
-        {
+        public AimStatus AimStatus {
             get
             {
                 object aimStatus = aimStatusField.GetValue(BotOwner.AimingData);
-                if (aimStatus == null)
-                {
+                if (aimStatus == null) {
                     return AimStatus.NoTarget;
                 }
 
                 var status = (AimStatus)aimStatus;
 
-                if (status != AimStatus.NoTarget && 
-                    Bot.Enemy?.IsVisible == false && 
-                    Bot.LastEnemy?.IsVisible == false)
-                {
+                if (status != AimStatus.NoTarget &&
+                    Bot.Enemy?.IsVisible == false &&
+                    Bot.LastEnemy?.IsVisible == false) {
                     return AimStatus.NoTarget;
                 }
                 return (AimStatus)aimStatus;
@@ -48,7 +48,6 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public SteerPriorityClass(SAINSteeringClass steering) : base(steering)
         {
-
         }
 
         public SteerPriority GetCurrentSteerPriority(bool lookRandom, bool ignoreRunningPath)
@@ -66,27 +65,23 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             SteerPriority result = strickChecks(ignoreRunningPath);
 
-            if (result != SteerPriority.None)
-            {
+            if (result != SteerPriority.None) {
                 return result;
             }
 
             result = reactiveSteering();
 
-            if (result != SteerPriority.None)
-            {
+            if (result != SteerPriority.None) {
                 return result;
             }
 
             result = senseSteering();
 
-            if (result != SteerPriority.None)
-            {
+            if (result != SteerPriority.None) {
                 return result;
             }
 
-            if (lookRandom)
-            {
+            if (lookRandom) {
                 return SteerPriority.RandomLook;
             }
             return SteerPriority.None;
@@ -115,8 +110,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private SteerPriority reactiveSteering()
         {
-            if (enemyShotMe())
-            {
+            if (enemyShotMe()) {
                 return SteerPriority.LastHit;
             }
 
@@ -144,25 +138,28 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool heardThreat()
         {
-            if (BaseClass.HeardSoundSteering.LastHeardVisibleDanger != null) {
-
+            if (BaseClass.HeardSoundSteering.LastHeardVisibleDanger?.ShallLook == true) {
+                return true;
             }
-            return BaseClass.HeardSoundSteering.LastHeardVisibleDanger != null || (!Bot.Search.SearchActive && BaseClass.HeardSoundSteering.LastHeardDanger != null);
+            if (Bot.Search.SearchActive) {
+                return false;
+            }
+            if (BaseClass.HeardSoundSteering.LastHeardDanger?.ShallLook == true) {
+                return true;
+            }
+            return false;
         }
 
         private bool heardThreat(out PlaceForCheck placeForCheck)
         {
             placeForCheck = BotOwner.BotsGroup.YoungestFastPlace(BotOwner, Steer_HeardSound_Dist, Steer_HeardSound_Age);
-            if (placeForCheck != null)
-            {
+            if (placeForCheck != null) {
                 Enemy enemy = Bot.Enemy;
-                if (enemy == null)
-                {
+                if (enemy == null) {
                     return true;
                 }
                 if (Bot.Squad.SquadInfo?.PlayerPlaceChecks.TryGetValue(enemy.EnemyProfileId, out PlaceForCheck enemyPlace) == true &&
-                    enemyPlace != placeForCheck)
-                {
+                    enemyPlace != placeForCheck) {
                     return true;
                 }
             }
@@ -172,18 +169,16 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool enemyShotMe()
         {
             float timeSinceShot = Bot.Medical.TimeSinceShot;
-            if (timeSinceShot > 3f || timeSinceShot < 0.2f)
-            {
+            if (timeSinceShot > 3f || timeSinceShot < 0.2f) {
                 EnemyWhoLastShotMe = null;
                 return false;
             }
 
             Enemy enemy = Bot.Medical.HitByEnemy.EnemyWhoLastShotMe;
-            if (enemy != null && 
-                enemy.CheckValid() && 
-                enemy.EnemyPerson.Active && 
-                !enemy.IsCurrentEnemy)
-            {
+            if (enemy != null &&
+                enemy.CheckValid() &&
+                enemy.EnemyPerson.Active &&
+                !enemy.IsCurrentEnemy) {
                 EnemyWhoLastShotMe = enemy;
                 return true;
             }
@@ -193,15 +188,13 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool lookToAimTarget()
         {
-            if (BotOwner.WeaponManager.Reload?.Reloading == true)
-            {
+            if (BotOwner.WeaponManager.Reload?.Reloading == true) {
                 return false;
             }
-            if (Bot.Aim.AimStatus == AimStatus.NoTarget)
-            {
+            if (Bot.Aim.AimStatus == AimStatus.NoTarget) {
                 return false;
             }
-            return canSeeAndShoot(Bot.Enemy) || canSeeAndShoot(Bot.LastEnemy);
+            return canSeeAndShoot(Bot.Enemy) || canSeeAndShoot(Bot.LastEnemy) || canSeeAndShoot(Bot.Shoot.LastShotEnemy);
         }
 
         private bool canSeeAndShoot(Enemy enemy)
@@ -213,16 +206,13 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             Enemy enemy = Bot.Enemy;
 
-            if (enemy != null)
-            {
-                if (enemy.IsVisible)
-                {
+            if (enemy != null) {
+                if (enemy.IsVisible) {
                     return true;
                 }
 
                 if (enemy.Seen &&
-                    enemy.TimeSinceSeen < 0.5f)
-                {
+                    enemy.TimeSinceSeen < 0.5f) {
                     return true;
                 }
             }

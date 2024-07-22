@@ -1,15 +1,14 @@
-﻿using SPT.Reflection.Patching;
-using EFT;
-using HarmonyLib;
-using System.Reflection;
-using System;
-using SAIN.SAINComponent;
-using SAIN.Components.BotController;
-using UnityEngine;
-using SAIN.Components.PlayerComponentSpace;
-using UnityEngine.UIElements;
-using SAIN.Components;
+﻿using EFT;
 using EFT.Interactive;
+using HarmonyLib;
+using SAIN.Components;
+using SAIN.Components.BotController;
+using SAIN.Helpers;
+using SPT.Reflection.Patching;
+using System;
+using System.Reflection;
+using UnityEngine;
+using EFTSettingsLoadClass = GClass531;
 
 namespace SAIN.Patches.Components
 {
@@ -116,6 +115,25 @@ namespace SAIN.Patches.Components
             var controller = SAINBotController.Instance;
             if (controller != null && controller.BotSpawner == null) {
                 controller.BotSpawner = __instance;
+            }
+        }
+    }
+
+    internal class UpdateCoreSettingsPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(EFTSettingsLoadClass), "Load");
+        }
+
+        [PatchPostfix]
+        public static void Patch()
+        {
+            try {
+                EFTCoreSettings.UpdateCoreSettings();
+            }
+            catch (Exception e) {
+                Logger.LogError(e);
             }
         }
     }

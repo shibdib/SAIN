@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         public SteerPriority CurrentSteerPriority => _steerPriorityClass.CurrentSteerPriority;
         public SteerPriority LastSteerPriority => _steerPriorityClass.LastSteerPriority;
         public EEnemySteerDir EnemySteerDir { get; private set; }
-        public Vector3 WeaponRootOffset => BotOwner.WeaponRoot.position - Bot.Position;
+        public Vector3 WeaponRootOffset => BotOwner.WeaponRoot.position - Bot.Position + (Vector3.down * 0.1f);
         public AimStatus AimStatus => _steerPriorityClass.AimStatus;
 
         public bool SteerByPriority(bool lookRandom = true, bool ignoreRunningPath = false)
@@ -50,7 +50,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
                 case SteerPriority.HeardThreat:
                     HeardSoundSteering.LookToHeardPosition();
-                    return false;
+                    return true;
 
                 case SteerPriority.Sprinting:
                     LookToMovingDirection(400);
@@ -138,6 +138,13 @@ namespace SAIN.SAINComponent.Classes.Mover
             LookToPoint(pos, rotateSpeed);
         }
 
+        public void LookToDirection(Vector2 direction, float rotateSpeed = -1f)
+        {
+            Vector3 vector = new Vector3(direction.x, 0, direction.y);
+            Vector3 pos = BotOwner.WeaponRoot.position + vector.normalized;
+            LookToPoint(pos, rotateSpeed);
+        }
+
         public void LookToEnemy(Enemy enemy)
         {
             if (enemy != null) {
@@ -181,6 +188,12 @@ namespace SAIN.SAINComponent.Classes.Mover
         public void Update()
         {
             HeardSoundSteering.Update();
+            if (!Bot.SAINLayersActive) {
+                BotOwner.Settings.FileSettings.Move.BASE_ROTATE_SPEED = 180f;
+            }
+            else {
+                BotOwner.Settings.FileSettings.Move.BASE_ROTATE_SPEED = 250f;
+            }
         }
 
         public void Dispose()

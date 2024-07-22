@@ -61,7 +61,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void SetLineOfSight(BodyPartRaycast result)
         {
-            LastRaycastHit = result.LookRaycastHit;
+            LastRaycastHit = result.LOSRaycastHit;
             float time = Time.time;
             _lastCheckTime = time;
             if (result.LineOfSight) {
@@ -81,7 +81,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Vector3 castPoint = getCastPoint(origin, collider);
 
             return new BodyPartRaycast {
-                LookRaycastHit = new RaycastHit(),
+                LOSRaycastHit = new RaycastHit(),
+                ShootRayCastHit = new RaycastHit(),
+                VisionRaycastHit = new RaycastHit(),
                 CastPoint = castPoint,
                 PartData = this,
                 PartType = collider.BodyPartColliderType,

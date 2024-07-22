@@ -13,7 +13,8 @@ namespace SAIN.Preset.GlobalSettings
         [JsonIgnore]
         public static GlobalSettingsClass Instance;
 
-        public GlobalSettingsClass() {
+        public GlobalSettingsClass()
+        {
             Instance = this;
         }
 
@@ -22,12 +23,10 @@ namespace SAIN.Preset.GlobalSettings
             string fileName = FileAndFolderNames[JsonEnum.GlobalSettings];
             string presetsFolder = FileAndFolderNames[JsonEnum.Presets];
 
-            if (!Load.LoadObject(out GlobalSettingsClass result, fileName, presetsFolder, Preset.Name))
-            {
+            if (!Load.LoadObject(out GlobalSettingsClass result, fileName, presetsFolder, Preset.Name)) {
                 result = new GlobalSettingsClass();
                 SaveObjectToJson(result, fileName, presetsFolder, Preset.Name);
             }
-            EFTCoreSettings.UpdateCoreSettings();
             return result;
         }
 

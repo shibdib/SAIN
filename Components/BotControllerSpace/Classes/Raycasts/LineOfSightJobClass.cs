@@ -1,6 +1,5 @@
 ﻿using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
@@ -20,40 +19,53 @@ namespace SAIN.Components
                 return;
             }
             Enemy enemy = raycast.Enemy;
-            if (enemy == null) {
+            if (enemy == null || !enemy.WasValid) {
                 return;
             }
 
+            LayerMask lineOfSightMask = LayerMaskClass.HighPolyWithTerrainMask;
+            LayerMask shootMask = LayerMaskClass.GrenadeAffectedMask;
+            LayerMask visionMask = LayerMaskClass.AI;
+            float enemyDistance = enemy.RealDistance;
             Vector3 eyePos = bot.Transform.EyePosition;
             Vector3 shootPoint = bot.Transform.WeaponFirePort;
             var parts = raycast.Raycasts;
             int count = parts.Length;
 
             for (int i = 0; i < count; i++) {
-                var part = parts[i];
+                parts[i] = checkPart(
+                    parts[i],
+                    enemyDistance,
+                    eyePos,
+                    shootPoint,
+                    lineOfSightMask,
+                    shootMask,
+                    visionMask);
+            }
+        }
 
-                if (enemy.RealDistance > part.MaxRange) {
-                    part.LineOfSight = false;
-                    continue;
-                }
-
-                Vector3 castPoint = part.CastPoint;
-                Vector3 direction = castPoint - eyePos;
-                float distance = direction.magnitude;
-
-                if (!Physics.Raycast(eyePos, direction, out part.LookRaycastHit, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask)) {
-                    part.LineOfSight = true;
-
-                    Vector3 weaponDirection = castPoint - shootPoint;
-                    if (!Physics.Raycast(shootPoint, weaponDirection, out part.ShootRayCastHit, weaponDirection.magnitude)) {
-                        part.CanShoot = true;
-                    }
-                }
-
-                parts[i] = part;
+        private BodyPartRaycast checkPart(BodyPartRaycast part, float enemyDistance, Vector3 eyePos, Vector3 shootPoint, LayerMask LOSMask, LayerMask shootMask, LayerMask visionMask)
+        {
+            part.LineOfSight = false;
+            part.CanShoot = false;
+            if (enemyDistance > part.MaxRange) {
+                return part;
             }
 
-            enemy.Vision.VisionChecker.LastCheckLOSTime = Time.time;
+            Vector3 castPoint = part.CastPoint;
+            Vector3 direction = castPoint - eyePos;
+            float distance = direction.magnitude;
+            part.LineOfSight = !Physics.Raycast(eyePos, direction, out RaycastHit losHit, distance, LOSMask);
+            part.LOSRaycastHit = losHit;
+            if (part.LineOfSight) {
+                Vector3 weaponDirection = castPoint - shootPoint;
+                part.CanShoot = !Physics.Raycast(shootPoint, weaponDirection, out RaycastHit shootHit, weaponDirection.magnitude, shootMask);
+                part.ShootRayCastHit = shootHit;
+
+                part.IsVisible = !Physics.Raycast(eyePos, direction, out RaycastHit visionHit, distance, visionMask);
+                part.VisionRaycastHit = visionHit;
+            }
+            return part;
         }
     }
 
@@ -70,10 +82,15 @@ namespace SAIN.Components
         public EBodyPartColliderType PartType;
         public float MaxRange;
         public Vector3 CastPoint;
-        public RaycastHit LookRaycastHit;
+
+        public RaycastHit LOSRaycastHit;
         public bool LineOfSight;
+
         public RaycastHit ShootRayCastHit;
         public bool CanShoot;
+
+        public RaycastHit VisionRaycastHit;
+        public bool IsVisible;
     }
 
     public class LineOfSightJobClass : SAINControllerBase
@@ -95,17 +112,18 @@ namespace SAIN.Components
 
         public void Update()
         {
-            try {
-                finishJob();
-                if (Bots.Count == 0) {
-                    return;
-                }
-                findBotsForJob();
-                setupJob(_enemyRaycasts);
+            //try {
+            finishJob();
+            if (Bots.Count == 0) {
+                return;
             }
-            catch (Exception ex) {
-                Logger.LogError(ex);
-            }
+            findBotsForJob();
+            setupJob(_enemyRaycasts);
+
+            //}
+            //catch (Exception ex) {
+            //    Logger.LogError(ex);
+            //}
         }
 
         public void Dispose()

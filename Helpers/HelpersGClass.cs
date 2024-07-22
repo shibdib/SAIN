@@ -58,8 +58,7 @@ namespace SAIN.Helpers
     {
         public TemporaryStatModifiers(float precision, float accuracySpeed, float gainSight, float scatter, float priorityScatter)
         {
-            Modifiers = new EFTStatModifiersClass
-            {
+            Modifiers = new EFTStatModifiersClass {
                 PrecicingSpeedCoef = precision,
                 AccuratySpeedCoef = accuracySpeed,
                 GainSightCoef = gainSight,
@@ -83,22 +82,25 @@ namespace SAIN.Helpers
 
             //core.MIN_DIST_TO_STOP_RUN = 0f;
 
-            core.CAN_SHOOT_TO_HEAD = false;
-
-            core.ARMOR_CLASS_COEF = 6f;
+            core.CAN_SHOOT_TO_HEAD = true;
 
             core.SOUND_DOOR_OPEN_METERS = 40f;
             core.SOUND_DOOR_BREACH_METERS = 70f;
             core.JUMP_SPREAD_DIST = 65f;
             core.BASE_WALK_SPEREAD2 = 65f;
+            core.GRENADE_PRECISION = 10;
 
-            core.PRONE_POSE = 0.5f;
-            core.MOVE_COEF = 1.3f;
+            core.PRONE_POSE = 1f;
+            core.MOVE_COEF = 1f;
+            core.LOWER_POSE = 0f;
+            core.MAX_POSE = 1f;
 
             core.FLARE_POWER = 1.75f;
             core.FLARE_TIME = 2.5f;
 
             core.SHOOT_TO_CHANGE_RND_PART_DELTA = 2f;
+
+            ModDetection.UpdateArmorClassCoef();
         }
 
         public static void UpdateArmorClassCoef(float coef)
@@ -119,16 +121,17 @@ namespace SAIN.Helpers
         {
             Name = name;
             WildSpawnType = type;
-            foreach (BotDifficulty diff in difficulties)
-            {
+            foreach (BotDifficulty diff in difficulties) {
                 Settings.Add(diff, EFTCore.GetSettings(diff, type));
             }
         }
 
         [JsonProperty]
         public string Name;
+
         [JsonProperty]
         public WildSpawnType WildSpawnType;
+
         [JsonProperty]
         public Dictionary<BotDifficulty, BotSettingsComponents> Settings = new Dictionary<BotDifficulty, BotSettingsComponents>();
     }

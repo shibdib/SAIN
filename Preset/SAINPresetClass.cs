@@ -42,7 +42,6 @@ namespace SAIN.Preset
         public SAINPresetClass(SAINDifficulty sainDifficulty)
         {
             Instance = this;
-            EFTCoreSettings.UpdateCoreSettings();
             SAINPlugin.EditorDefaults.SelectedCustomPreset = string.Empty;
             SAINPlugin.EditorDefaults.SelectedDefaultPreset = sainDifficulty;
             PresetHandler.ExportEditorDefaults();
