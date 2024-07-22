@@ -57,26 +57,22 @@ namespace SAIN.SAINComponent.Classes
 
         public bool CheckIfSoundHeard(BotSound sound)
         {
-            if (shallLimitAI(sound))
-            {
+            if (shallLimitAI(sound)) {
                 sound.Results.LimitedByAI = true;
                 return false;
             }
-            if (!doIDetectFootsteps(sound))
-            {
+            if (!doIDetectFootsteps(sound)) {
                 return false;
             }
 
             bool farFromPlayer = checkDistToPlayer(sound);
             sound.Results.SoundFarFromPlayer = farFromPlayer;
-            if (farFromPlayer)
-            {
+            if (farFromPlayer) {
                 return false;
             }
 
             sound.Range.FinalRange = sound.Range.BaseRange * calcModifiers(sound);
-            if (sound.Distance > sound.Range.FinalRange)
-            {
+            if (sound.Distance > sound.Range.FinalRange) {
                 return false;
             }
             return true;
@@ -105,15 +101,12 @@ namespace SAIN.SAINComponent.Classes
 
             bool botinBunker = botLocation.InBunker;
             bool playerinBunker = enemyLocation.InBunker;
-            if (botinBunker != playerinBunker)
-            {
+            if (botinBunker != playerinBunker) {
                 return BUNKER_REDUCTION_COEF;
             }
-            if (botinBunker)
-            {
+            if (botinBunker) {
                 float diff = Mathf.Abs(botLocation.BunkerDepth - enemyLocation.BunkerDepth);
-                if (diff > 0)
-                {
+                if (diff > 0) {
                     return BUNKER_ELEV_DIFF_COEF;
                 }
             }
@@ -122,50 +115,41 @@ namespace SAIN.SAINComponent.Classes
 
         private bool doIDetectFootsteps(BotSound sound)
         {
-            if (sound.Info.IsGunShot)
-            {
+            if (sound.Info.IsGunShot) {
                 return true;
             }
 
             bool hasheadPhones = Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece;
             float closehearing = hasheadPhones ? HEAR_CHANCE_MIN_DIST_HEADPHONES : HEAR_CHANCE_MIN_DIST;
             float distance = sound.Distance;
-            if (distance <= closehearing)
-            {
+            if (distance <= closehearing) {
                 return true;
             }
 
             float farhearing = hasheadPhones ? SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxFootstepAudioDistance : SAINPlugin.LoadedPreset.GlobalSettings.Hearing.MaxFootstepAudioDistanceNoHeadphones;
-            if (distance > farhearing)
-            {
+            if (distance > farhearing) {
                 return false;
             }
 
             float minimumChance = 0f;
-            if (hasheadPhones)
-            {
-                if (distance < farhearing * HEAR_CHANCE_MIDRANGE_COEF)
-                {
+            if (hasheadPhones) {
+                if (distance < farhearing * HEAR_CHANCE_MIDRANGE_COEF) {
                     minimumChance += HEAR_CHANCE_MIDRANGE_MINCHANCE_HEADPHONES;
                 }
-                else
-                {
+                else {
                     minimumChance += HEAR_CHANCE_LONGRANGE_MINCHANCE_HEADPHONES;
                 }
-                if (sound.Info.SoundType != SAINSoundType.FootStep)
-                {
+                if (sound.Info.SoundType != SAINSoundType.FootStep) {
                     minimumChance += HEAR_CHANCE_HEADPHONES_GUNFIRE;
                 }
             }
 
-            if (Bot.PlayerComponent.Transform.VelocityMagnitudeNormal < HEAR_CHANCE_NOTMOVING_VELOCITY)
-            {
+            if (Bot.PlayerComponent.Transform.VelocityMagnitudeNormal < HEAR_CHANCE_NOTMOVING_VELOCITY) {
                 minimumChance += hasheadPhones ? HEAR_CHANCE_NOTMOVING_MINCHANCE_HEADPHONES : HEAR_CHANCE_NOTMOVING_MINCHANCE;
             }
 
             if (Bot.HasEnemy &&
-                Bot.Enemy.EnemyProfileId == sound.Info.SourcePlayer.ProfileId)
-            {
+                Bot.Enemy.EnemyProfileId == sound.Info.SourcePlayer.ProfileId) {
                 minimumChance += hasheadPhones ? HEAR_CHANCE_CURRENTENEMY_MINCHANCE_HEADPHONES : HEAR_CHANCE_CURRENTENEMY_MINCHANCE;
             }
 
@@ -182,8 +166,7 @@ namespace SAIN.SAINComponent.Classes
         private float calcOcclusionMod(BotSound sound)
         {
             bool isGunshot = sound.Info.IsGunShot;
-            if (sound.Enemy.InLineOfSight)
-            {
+            if (sound.Enemy.InLineOfSight) {
                 sound.Results.VisibleSource = true;
                 return 1f;
             }
@@ -192,8 +175,7 @@ namespace SAIN.SAINComponent.Classes
 
         private float calcEnvironmentMod(BotSound sound)
         {
-            if (Player.AIData.EnvironmentId == sound.Info.SourcePlayer.Player.AIData.EnvironmentId)
-            {
+            if (Player.AIData.EnvironmentId == sound.Info.SourcePlayer.Player.AIData.EnvironmentId) {
                 return 1f;
             }
             float envMod = sound.Info.IsGunShot ? GUNSHOT_ENVIR_MOD : FOOTSTEP_ENVIR_MOD;
@@ -202,7 +184,6 @@ namespace SAIN.SAINComponent.Classes
             result = Mathf.Clamp(result, MIN_ENVIRONMENT_MOD, 1f);
             return result;
         }
-
 
         private bool shallLimitAI(BotSound sound)
         {
@@ -222,25 +203,20 @@ namespace SAIN.SAINComponent.Classes
 
             var enemyBot = enemyPlayer.BotComponent;
             float maxRange;
-            if (enemyBot == null)
-            {
-                if (enemyPlayer.BotOwner?.Memory.GoalEnemy?.ProfileId == Bot.ProfileId)
-                {
+            if (enemyBot == null) {
+                if (enemyPlayer.BotOwner?.Memory.GoalEnemy?.ProfileId == Bot.ProfileId) {
                     return false;
                 }
                 maxRange = getMaxRange(Bot.CurrentAILimit);
             }
-            else
-            {
-                if (enemyBot.Enemy?.EnemyProfileId == Bot.ProfileId)
-                {
+            else {
+                if (enemyBot.Enemy?.EnemyProfileId == Bot.ProfileId) {
                     return false;
                 }
                 maxRange = getMaxRange(enemyBot.CurrentAILimit);
             }
 
-            if (sound.Distance <= maxRange)
-            {
+            if (sound.Distance <= maxRange) {
                 return false;
             }
             return true;
@@ -248,8 +224,7 @@ namespace SAIN.SAINComponent.Classes
 
         private float getMaxRange(AILimitSetting aiLimit)
         {
-            switch (aiLimit)
-            {
+            switch (aiLimit) {
                 case AILimitSetting.Far:
                     return _farDistance;
 
@@ -270,46 +245,37 @@ namespace SAIN.SAINComponent.Classes
             var mods = sound.Range.Modifiers;
             float dist = sound.Distance * mods.EnvironmentModifier;
             float maxAffectDist = HEAR_MODIFIER_MAX_AFFECT_DIST;
-            if (dist <= maxAffectDist)
-            {
+            if (dist <= maxAffectDist) {
                 return 1f;
             }
 
             float modifier = 1f;
-            if (!sound.Info.IsGunShot)
-            {
+            if (!sound.Info.IsGunShot) {
                 modifier *= GlobalSettings.Hearing.FootstepAudioMultiplier;
             }
-            else
-            {
+            else {
                 modifier *= GlobalSettings.Hearing.GunshotAudioMultiplier;
             }
-            modifier *= Bot.Info.FileSettings.Core.HearingSense;
+            modifier *= Bot.Info.FileSettings.Core.HearingDistanceMulti;
 
             if (dist * modifier < maxAffectDist)
                 return 1f;
 
-            if (!sound.Info.IsGunShot && sound.Distance > HEAR_MODIFIER_MAX_AFFECT_DIST)
-            {
-                if (!Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece)
-                {
+            if (!sound.Info.IsGunShot && sound.Distance > HEAR_MODIFIER_MAX_AFFECT_DIST) {
+                if (!Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece) {
                     modifier *= HEAR_MODIFIER_NO_EARS;
                 }
-                if (Bot.PlayerComponent.Equipment.GearInfo.HasHeavyHelmet)
-                {
+                if (Bot.PlayerComponent.Equipment.GearInfo.HasHeavyHelmet) {
                     modifier *= HEAR_MODIFIER_HEAVY_HELMET;
                 }
                 if (Bot.Memory.Health.Dying &&
-                    !Bot.Memory.Health.OnPainKillers)
-                {
+                    !Bot.Memory.Health.OnPainKillers) {
                     modifier *= HEAR_MODIFIER_DYING;
                 }
-                if (Player.IsSprintEnabled)
-                {
+                if (Player.IsSprintEnabled) {
                     modifier *= HEAR_MODIFIER_SPRINT;
                 }
-                if (Player.HeavyBreath)
-                {
+                if (Player.HeavyBreath) {
                     modifier *= HEAR_MODIFIER_HEAVYBREATH;
                 }
             }
@@ -323,8 +289,7 @@ namespace SAIN.SAINComponent.Classes
         private void updateSettings(SAINPresetClass preset)
         {
             int frame = Time.frameCount;
-            if (_lastCalcFrame == frame)
-            {
+            if (_lastCalcFrame == frame) {
                 return;
             }
             _lastCalcFrame = frame;
@@ -338,6 +303,5 @@ namespace SAIN.SAINComponent.Classes
         private static float _farDistance;
         private static float _veryFarDistance;
         private static float _narniaDistance;
-
     }
 }

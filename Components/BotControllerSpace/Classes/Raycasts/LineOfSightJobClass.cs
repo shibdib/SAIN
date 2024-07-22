@@ -31,6 +31,7 @@ namespace SAIN.Components
 
             for (int i = 0; i < count; i++) {
                 var part = parts[i];
+
                 if (enemy.RealDistance > part.MaxRange) {
                     part.LineOfSight = false;
                     continue;
@@ -48,6 +49,7 @@ namespace SAIN.Components
                         part.CanShoot = true;
                     }
                 }
+
                 parts[i] = part;
             }
 

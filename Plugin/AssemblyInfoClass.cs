@@ -17,8 +17,8 @@
 
         public const string SAINGUID = "me.sol.sain";
         public const string SAINName = "SAIN";
-        public const string SAINVersion = "3.0.6";
-        public const string SAINPresetVersion = "3.0.6";
+        public const string SAINVersion = "3.0.7";
+        public const string SAINPresetVersion = "3.0.7";
 
         public const string SPTGUID = "com.SPT.core";
         public const string SPTVersion = "3.9.0";

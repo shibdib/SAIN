@@ -44,11 +44,10 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [CopyValue]
         public float ScatteringClosePerMeter = 0.12f;
 
-        [Name("Hearing Sense Multiplier")]
+        [Name("Hearing Distance Multiplier")]
         [Description("Modifies the distance that this bot can hear sounds")]
         [MinMax(0.1f, 3f, 1000f)]
-        [CopyValue]
-        public float HearingSense = 1f;
+        public float HearingDistanceMulti = 1f;
 
         [Name("Can Use Grenades")]
         public bool CanGrenade = true;
