@@ -86,7 +86,7 @@ namespace SAIN.Components
         public Vector3 EyePosition;
         public Vector3 WeaponFirePort;
         public float EnemyDistance;
-        public BodyPartRaycast[] Raycasts;
+        public NativeArray<BodyPartRaycast> Raycasts;
     }
 
     public struct BodyPartRaycast
@@ -148,7 +148,7 @@ namespace SAIN.Components
 
         private void onBotRemoved(BotComponent bot)
         {
-            finishJob();
+            //finishJob();
         }
 
         private void finishJob()
@@ -165,23 +165,30 @@ namespace SAIN.Components
 
             for (int i = 0; i < _raycastArray.Length; i++) {
                 EnemyRaycastStruct raycastStruct = _raycastArray[i];
+                var raycasts = raycastStruct.Raycasts;
                 if (!Bots.TryGetValue(raycastStruct.BotName, out var bot) || bot == null) {
+                    raycasts.Dispose();
                     continue;
                 }
                 bot.Vision.TimeLastCheckedLOS = Time.time;
+                if (!bot.BotActive) {
+                    raycasts.Dispose();
+                    continue;
+                }
                 Enemy enemy = bot.EnemyController.GetEnemy(raycastStruct.EnemyProfileId, false);
                 if (enemy == null) {
+                    raycasts.Dispose();
                     continue;
                 }
 
                 var enemyParts = enemy.Vision.VisionChecker.EnemyParts.Parts;
 
-                BodyPartRaycast[] raycasts = raycastStruct.Raycasts;
                 for (int j = 0; j < raycasts.Length; j++) {
                     BodyPartRaycast raycast = raycasts[j];
                     enemyParts.TryGetValue(raycast.PartType, out var partData);
                     partData?.SetLineOfSight(raycast);
                 }
+                raycasts.Dispose();
             }
 
             _raycastJob.Raycasts.Dispose();
@@ -231,7 +238,7 @@ namespace SAIN.Components
                         EnemyDistance = enemy.RealDistance,
                         EyePosition = origin,
                         WeaponFirePort = firePort,
-                        Raycasts = rayCasts.ToArray()
+                        Raycasts = new NativeArray<BodyPartRaycast>(rayCasts.ToArray(), Allocator.TempJob),
                     };
                     enemiesResult.Add(result);
                     if (!gotEnemyToCheck)
