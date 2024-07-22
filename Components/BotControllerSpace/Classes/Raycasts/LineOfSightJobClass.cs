@@ -14,21 +14,15 @@ namespace SAIN.Components
         public void Execute(int index)
         {
             EnemyRaycastStruct raycast = Raycasts[index];
-            BotComponent bot = raycast.Bot;
-            if (bot == null) {
-                return;
-            }
-            Enemy enemy = raycast.Enemy;
-            if (enemy == null || !enemy.WasValid) {
-                return;
-            }
 
             LayerMask lineOfSightMask = LayerMaskClass.HighPolyWithTerrainMask;
-            LayerMask shootMask = LayerMaskClass.GrenadeAffectedMask;
+            LayerMask shootMask = LayerMaskClass.HighPolyWithTerrainMask;
             LayerMask visionMask = LayerMaskClass.AI;
-            float enemyDistance = enemy.RealDistance;
-            Vector3 eyePos = bot.Transform.EyePosition;
-            Vector3 shootPoint = bot.Transform.WeaponFirePort;
+
+            float enemyDistance = raycast.EnemyDistance;
+            Vector3 eyePos = raycast.EyePosition;
+            Vector3 shootPoint = raycast.WeaponFirePort;
+
             var parts = raycast.Raycasts;
             int count = parts.Length;
 
@@ -71,15 +65,19 @@ namespace SAIN.Components
 
     public struct EnemyRaycastStruct
     {
-        public BotComponent Bot;
-        public Enemy Enemy;
+        public string BotName;
+        public string EnemyProfileId;
+        public Vector3 EyePosition;
+        public Vector3 WeaponFirePort;
+        public float EnemyDistance;
         public BodyPartRaycast[] Raycasts;
     }
 
     public struct BodyPartRaycast
     {
-        public EnemyPartDataClass PartData;
-        public EBodyPartColliderType PartType;
+        public EBodyPart PartType;
+        public EBodyPartColliderType ColliderType;
+
         public float MaxRange;
         public Vector3 CastPoint;
 
@@ -144,17 +142,22 @@ namespace SAIN.Components
 
             for (int i = 0; i < _raycastArray.Length; i++) {
                 EnemyRaycastStruct raycastStruct = _raycastArray[i];
-                BotComponent bot = raycastStruct.Bot;
-                if (bot == null) {
+                if (!Bots.TryGetValue(raycastStruct.BotName, out var bot) || bot == null) {
+                    continue;
+                }
+                bot.Vision.TimeLastCheckedLOS = Time.time;
+                Enemy enemy = bot.EnemyController.GetEnemy(raycastStruct.EnemyProfileId, false);
+                if (enemy == null) {
                     continue;
                 }
 
-                bot.Vision.TimeLastCheckedLOS = Time.time;
+                var enemyParts = enemy.Vision.VisionChecker.EnemyParts.Parts;
 
                 BodyPartRaycast[] raycasts = raycastStruct.Raycasts;
                 for (int j = 0; j < raycasts.Length; j++) {
                     BodyPartRaycast raycast = raycasts[j];
-                    raycast.PartData.SetLineOfSight(raycast);
+                    enemyParts.TryGetValue(raycast.PartType, out var partData);
+                    partData?.SetLineOfSight(raycast);
                 }
             }
 
@@ -184,6 +187,7 @@ namespace SAIN.Components
                 if (bot.Vision.TimeSinceCheckedLOS < 0.05f) continue;
 
                 Vector3 origin = bot.Transform.EyePosition;
+                Vector3 firePort = bot.Transform.WeaponFirePort;
                 var enemies = bot.EnemyController.Enemies;
                 bool gotEnemyToCheck = false;
                 float time = Time.time;
@@ -199,8 +203,11 @@ namespace SAIN.Components
                     if (rayCasts.Count == 0) continue;
 
                     EnemyRaycastStruct result = new EnemyRaycastStruct {
-                        Bot = bot,
-                        Enemy = enemy,
+                        BotName = bot.name,
+                        EnemyProfileId = enemy.EnemyProfileId,
+                        EnemyDistance = enemy.RealDistance,
+                        EyePosition = origin,
+                        WeaponFirePort = firePort,
                         Raycasts = rayCasts.ToArray()
                     };
                     enemiesResult.Add(result);

@@ -67,7 +67,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (result.LineOfSight) {
                 LastSuccessPoint = result.CastPoint;
                 _lastVisionSuccessTime = time;
-                _lastSuccessPart = _colliderDictionary[result.PartType];
+                _lastSuccessPart = _colliderDictionary[result.ColliderType];
             }
             if (result.CanShoot) {
                 LastSuccessShootPoint = result.CastPoint;
@@ -85,8 +85,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 ShootRayCastHit = new RaycastHit(),
                 VisionRaycastHit = new RaycastHit(),
                 CastPoint = castPoint,
-                PartData = this,
-                PartType = collider.BodyPartColliderType,
+                PartType = BodyPart,
+                ColliderType = collider.BodyPartColliderType,
                 MaxRange = maxRange
             };
         }
