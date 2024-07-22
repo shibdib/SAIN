@@ -49,17 +49,33 @@ namespace SAIN.Components
             Vector3 castPoint = part.CastPoint;
             Vector3 direction = castPoint - eyePos;
             float distance = direction.magnitude;
-            part.LineOfSight = !Physics.Raycast(eyePos, direction, out RaycastHit losHit, distance, LOSMask);
+            part.LineOfSight = checkLineOfSight(eyePos, direction, out RaycastHit losHit, distance, LOSMask);
             part.LOSRaycastHit = losHit;
             if (part.LineOfSight) {
                 Vector3 weaponDirection = castPoint - shootPoint;
-                part.CanShoot = !Physics.Raycast(shootPoint, weaponDirection, out RaycastHit shootHit, weaponDirection.magnitude, shootMask);
+                float weapDist = weaponDirection.magnitude;
+                part.CanShoot = checkShoot(shootPoint, weaponDirection, out RaycastHit shootHit, weapDist, shootMask);
                 part.ShootRayCastHit = shootHit;
 
-                part.IsVisible = !Physics.Raycast(eyePos, direction, out RaycastHit visionHit, distance, visionMask);
-                part.VisionRaycastHit = visionHit;
+                //part.IsVisible = checkVisible(eyePos, direction, out RaycastHit visionHit, distance, visionMask);
+                //part.VisionRaycastHit = visionHit;
             }
             return part;
+        }
+
+        private bool checkLineOfSight(Vector3 origin, Vector3 direction, out RaycastHit hit, float distance, LayerMask mask)
+        {
+            return !Physics.Raycast(origin, direction, out hit, distance, mask);
+        }
+
+        private bool checkShoot(Vector3 origin, Vector3 direction, out RaycastHit hit, float distance, LayerMask mask)
+        {
+            return !Physics.Raycast(origin, direction, out hit, distance, mask);
+        }
+
+        private bool checkVisible(Vector3 origin, Vector3 direction, out RaycastHit hit, float distance, LayerMask mask)
+        {
+            return !Physics.Raycast(origin, direction, out hit, distance, mask);
         }
     }
 
@@ -106,6 +122,7 @@ namespace SAIN.Components
 
         public LineOfSightJobClass(SAINBotController botController) : base(botController)
         {
+            botController.BotSpawnController.OnBotRemoved += onBotRemoved;
         }
 
         public void Update()
@@ -126,6 +143,12 @@ namespace SAIN.Components
 
         public void Dispose()
         {
+            BotController.BotSpawnController.OnBotRemoved -= onBotRemoved;
+        }
+
+        private void onBotRemoved(BotComponent bot)
+        {
+            finishJob();
         }
 
         private void finishJob()
