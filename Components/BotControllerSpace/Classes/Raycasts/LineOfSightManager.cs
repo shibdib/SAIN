@@ -39,7 +39,7 @@ namespace SAIN.Components
             foreach (var bot in _localBotList) {
                 if (bot == null) continue;
 
-                float frequency = bot.BotActive ? 0.01f : 0.25f;
+                float frequency = bot.BotActive ? 0.05f : 0.25f;
                 if (bot.LastCheckVisibleTime + frequency > Time.time)
                     continue;
 

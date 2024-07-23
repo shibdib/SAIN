@@ -9,16 +9,128 @@ using UnityEngine;
 
 namespace SAIN.Components
 {
+    public struct BotRaycastJob
+    {
+        public BotComponent Bot;
+        public JobHandle Handle;
+        public NativeArray<SpherecastCommand> Commands;
+        public NativeArray<RaycastHit> Hits;
+
+        public void Dispose()
+        {
+            Commands.Dispose();
+            Hits.Dispose();
+        }
+    }
+
+    public struct BotEnemyRaycastData
+    {
+        public Enemy Enemy;
+        public Vector3[] Points;
+        public EBodyPartColliderType[] ColliderTypes;
+        public EBodyPart[] BodyParts;
+    }
+
+    public struct BotRaycastData
+    {
+        public BotRaycastJob Job;
+        public BotEnemyRaycastData Data;
+    }
+
     public class RayCastJobClass : SAINControllerBase
     {
         public RayCastJobClass(SAINBotController botController) : base(botController)
         {
         }
 
-        private void updateSettings()
+        public BotRaycastTotalCheck? ScheduleJobs(BotComponent bot)
         {
-            MinJobSize = Mathf.RoundToInt(SAINPlugin.LoadedPreset.GlobalSettings.General.Performance.MinJobSize);
-            SpherecastRadius = SAINPlugin.LoadedPreset.GlobalSettings.General.Performance.SpherecastRadius;
+            Enemy[] enemies = GetEnemies(bot);
+            if (enemies == null || enemies.Length == 0) {
+                return null;
+            }
+            BotRaycastTotalCheck result = new BotRaycastTotalCheck {
+                Bot = bot,
+                Count = enemies.Length,
+                LineOfSightChecks = SetupJobsForBot(bot, bot.Transform.EyePosition, enemies, LayerMaskClass.HighPolyWithTerrainMask),
+                ShootChecks = SetupJobsForBot(bot, bot.Transform.WeaponFirePort, enemies, LayerMaskClass.HighPolyWithTerrainMask),
+                VisibleChecks = SetupJobsForBot(bot, bot.Transform.EyePosition, enemies, LayerMaskClass.AI),
+            };
+            return result;
+        }
+
+        public Enemy[] GetEnemies(BotComponent bot)
+        {
+            float time = Time.time;
+            _enemiesToCheck.Clear();
+            var enemies = bot.EnemyController.Enemies;
+            foreach (var enemy in enemies.Values) {
+                float delay = enemy.IsAI ? 0.1f : 0.05f;
+                //if (time - enemy.Vision.VisionChecker.LastCheckLOSTime < delay) continue;
+                if (!enemy.CheckValid()) continue;
+                _enemiesToCheck.Add(enemy);
+            }
+            int count = _enemiesToCheck.Count;
+            if (count == 0) {
+                return null;
+            }
+            return _enemiesToCheck.ToArray();
+        }
+
+        public BotRaycastData[] SetupJobsForBot(BotComponent bot, Vector3 origin, Enemy[] enemies, LayerMask mask)
+        {
+            if (enemies == null) {
+                return null;
+            }
+            int count = enemies.Length;
+            BotRaycastData[] datas = new BotRaycastData[count];
+            for (int i = 0; i < count; i++) {
+                var enemyData = GetEnemyData(enemies[i], origin);
+
+                var job = CreateJob(bot, origin, enemyData.Points, mask);
+
+                datas[i] = new BotRaycastData {
+                    Job = job,
+                    Data = enemyData,
+                };
+            }
+            return datas;
+        }
+
+        private readonly List<Enemy> _enemiesToCheck = new List<Enemy>();
+
+        public BotRaycastJob CreateJob(BotComponent bot, Vector3 origin, Vector3[] targets, LayerMask mask, JobHandle? dependency = null)
+        {
+            int count = targets.Length;
+
+            var casts = new NativeArray<SpherecastCommand>(count, Allocator.TempJob);
+            for (int i = 0; i < count; i++) {
+                Vector3 target = targets[i];
+                Vector3 direction = target - origin;
+                casts[i] = new SpherecastCommand(origin, 0.001f, direction, direction.magnitude, mask);
+            }
+
+            var hits = new NativeArray<RaycastHit>(count, Allocator.TempJob);
+
+            JobHandle handle;
+            if (dependency != null) {
+                handle = SpherecastCommand.ScheduleBatch(casts, hits, 1, dependency.Value);
+            }
+            else {
+                handle = SpherecastCommand.ScheduleBatch(casts, hits, 1);
+            }
+
+            return new BotRaycastJob {
+                Bot = bot,
+                Handle = handle,
+                Commands = casts,
+                Hits = hits,
+            };
+        }
+
+        public BotEnemyRaycastData GetEnemyData(Enemy enemy, Vector3 origin)
+        {
+            return enemy.Vision.VisionChecker.GetPartsToCheck2(origin);
         }
 
         private List<Player> Players => GameWorldInfo.AlivePlayers;
@@ -26,20 +138,6 @@ namespace SAIN.Components
 
         private void raycastCommandAllParts(List<Player> players, List<BotComponent> bots, int partCount)
         {
-            int total = bots.Count * players.Count * partCount;
-            if (total <= 0) {
-                return;
-            }
-
-            var casts = new NativeArray<SpherecastCommand>(total, Allocator.TempJob);
-            var hits = new NativeArray<RaycastHit>(total, Allocator.TempJob);
-
-            setSpherecastTargetsHuman(bots, players, casts);
-            SpherecastCommand.ScheduleBatch(casts, hits, MinJobSize).Complete();
-            analyzeHitsHuman(bots, players, hits);
-
-            casts.Dispose();
-            hits.Dispose();
         }
 
         private void setSpherecastTargetsHuman(List<BotComponent> botList, List<Player> players, NativeArray<SpherecastCommand> allSpherecastCommands)

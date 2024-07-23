@@ -5,6 +5,7 @@ using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.Search;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -71,6 +72,46 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             return _raycasts;
+        }
+
+        public BotEnemyRaycastData GetPartsToCheck2(Vector3 origin)
+        {
+            ERaycastPart[] partsToCheck = getPartsToCheck(out float maxRange);
+
+            int count = partsToCheck.Length;
+            Vector3[] points = new Vector3[count];
+            EBodyPartColliderType[] colliderTypes = new EBodyPartColliderType[count];
+            EBodyPart[] bodyParts = new EBodyPart[count];
+
+            for (int i = 0; i < count; i++) {
+                var type = partsToCheck[i];
+                BodyPartRaycast rayCastInfo;
+                switch (type) {
+                    case ERaycastPart.Body:
+                        rayCastInfo = EnemyParts.Parts[EBodyPart.Chest].GetRaycast(origin, maxRange);
+                        break;
+
+                    case ERaycastPart.Head:
+                        rayCastInfo = EnemyParts.Parts[EBodyPart.Head].GetRaycast(origin, maxRange);
+                        break;
+
+                    default:
+                        rayCastInfo = EnemyParts.GetNextPart().GetRaycast(origin, maxRange);
+                        break;
+                }
+                bodyParts[i] = rayCastInfo.PartType;
+                colliderTypes[i] = rayCastInfo.ColliderType;
+                points[i] = rayCastInfo.CastPoint;
+            }
+
+            BotEnemyRaycastData data = new BotEnemyRaycastData {
+                Enemy = Enemy,
+                Points = points,
+                ColliderTypes = colliderTypes,
+                BodyParts = bodyParts,
+            };
+
+            return data;
         }
 
         public void CheckVision(out bool didCheck)

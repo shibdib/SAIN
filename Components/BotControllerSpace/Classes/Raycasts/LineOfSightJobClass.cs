@@ -109,7 +109,8 @@ namespace SAIN.Components
 
     public class LineOfSightJobClass : SAINControllerBase
     {
-        private const int BOTS_PER_FRAME = 5;
+        public RaycastWorkDelegator RaycastJobDelegator { get; }
+        private const int BOTS_PER_FRAME = 4;
 
         private bool hasJobFromLastFrame = false;
 
@@ -117,16 +118,17 @@ namespace SAIN.Components
         private RaycastEnemiesJob _raycastJob;
         private EnemyRaycastStruct[] _raycastArray;
 
-        private readonly List<BotComponent> _localList = new List<BotComponent>();
         private readonly List<EnemyRaycastStruct> _enemyRaycasts = new List<EnemyRaycastStruct>();
 
         public LineOfSightJobClass(SAINBotController botController) : base(botController)
         {
+            RaycastJobDelegator = new RaycastWorkDelegator(botController);
             botController.BotSpawnController.OnBotRemoved += onBotRemoved;
         }
 
         public void Update()
         {
+            RaycastJobDelegator.Update();
             //try {
             finishJob();
             if (Bots.Count == 0) {
@@ -143,6 +145,7 @@ namespace SAIN.Components
 
         public void Dispose()
         {
+            RaycastJobDelegator.Dispose();
             BotController.BotSpawnController.OnBotRemoved -= onBotRemoved;
         }
 
@@ -253,6 +256,8 @@ namespace SAIN.Components
                 }
             }
         }
+
+        private readonly List<BotComponent> _localList = new List<BotComponent>();
 
         private void setupJob(List<EnemyRaycastStruct> enemyList)
         {
