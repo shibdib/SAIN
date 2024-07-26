@@ -130,12 +130,12 @@ namespace SAIN.Components
         {
             RaycastJobDelegator.Update();
             //try {
-            finishJob();
-            if (Bots.Count == 0) {
-                return;
-            }
-            findBotsForJob();
-            setupJob(_enemyRaycasts);
+            //finishJob();
+            //if (Bots.Count == 0) {
+            //    return;
+            //}
+            //findBotsForJob();
+            //setupJob(_enemyRaycasts);
 
             //}
             //catch (Exception ex) {

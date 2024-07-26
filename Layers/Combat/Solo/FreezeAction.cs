@@ -8,6 +8,7 @@ namespace SAIN.Layers.Combat.Solo
         public FreezeAction(BotOwner bot) : base(bot, nameof(FreezeAction))
         {
         }
+
         public void Toggle(bool value)
         {
             ToggleAction(value);
@@ -16,8 +17,7 @@ namespace SAIN.Layers.Combat.Solo
         public override void Update()
         {
             Bot.Mover.SetTargetPose(0f);
-            if (!Bot.Steering.SteerByPriority(false))
-            {
+            if (!Bot.Steering.SteerByPriority(null, false)) {
                 Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
             }
             Shoot.CheckAimAndFire();

@@ -6,8 +6,42 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
+    public class RaycastResult
+    {
+        private const float SIGHT_PERIOD_SEC = 0.25f;
+
+        public bool InSight => TimeSinceSuccess <= SIGHT_PERIOD_SEC;
+        public float TimeSinceChecked => Time.time - _lastCheckTime;
+        public float TimeSinceSuccess => Time.time - _lastSuccessTime;
+
+        public RaycastHit LastRaycastHit { get; private set; }
+        public BodyPartCollider LastSuccessBodyPart { get; private set; }
+        public Vector3? LastSuccessPoint { get; private set; }
+
+        public void Update(Vector3 castPoint, BodyPartCollider bodyPartCollider, RaycastHit raycastHit, float time)
+        {
+            _lastCheckTime = time;
+            LastRaycastHit = raycastHit;
+
+            if (raycastHit.collider == null) {
+                LastSuccessBodyPart = bodyPartCollider;
+                LastSuccessPoint = castPoint;
+                _lastSuccessTime = time;
+            }
+            else {
+                LastSuccessBodyPart = null;
+                LastSuccessPoint = null;
+            }
+        }
+
+        private float _lastCheckTime;
+        private float _lastSuccessTime;
+    }
+
     public class EnemyPartDataClass
     {
+        public readonly Dictionary<ERaycastCheck, RaycastResult> RaycastResults = new Dictionary<ERaycastCheck, RaycastResult>();
+
         public EnemyPartDataClass(EBodyPart bodyPart, BifacialTransform transform, List<BodyPartCollider> colliders)
         {
             BodyPart = bodyPart;
@@ -19,6 +53,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     _colliderDictionary.Add(collider.BodyPartColliderType, collider);
                 }
             }
+            RaycastResults.Add(ERaycastCheck.LineofSight, new RaycastResult());
+            RaycastResults.Add(ERaycastCheck.Shoot, new RaycastResult());
+            RaycastResults.Add(ERaycastCheck.Vision, new RaycastResult());
 
             //var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             //sphere.GetComponent<Renderer>().material.color = Color.red;
@@ -40,9 +77,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             if (!LineOfSight) {
                 _debugLineRenderer.material.color = Color.white;
 
-                if (LastRaycastHit != null)
-                    _debugLineRenderer.SetPosition(1, LastRaycastHit.Value.point);
-
                 return;
             }
 
@@ -61,7 +95,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void SetLineOfSight(BodyPartRaycast result)
         {
-            LastRaycastHit = result.LOSRaycastHit;
+            //LastRaycastHit = result.LOSRaycastHit;
             float time = Time.time;
             _lastCheckTime = time;
             if (result.LineOfSight) {
@@ -73,6 +107,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 LastSuccessShootPoint = result.CastPoint;
                 _lastShootSucessTime = time;
             }
+        }
+
+        public void SetLineOfSight(Vector3 castPoint, EBodyPartColliderType colliderType, RaycastHit raycastHit, ERaycastCheck type, float time)
+        {
+            RaycastResults[type].Update(castPoint, _colliderDictionary[colliderType], raycastHit, time);
         }
 
         public BodyPartRaycast GetRaycast(Vector3 origin, float maxRange)
@@ -93,16 +132,15 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public Vector3? LastSuccessShootPoint { get; private set; }
         public Vector3? LastSuccessPoint { get; private set; }
-        public RaycastHit? LastRaycastHit { get; private set; }
 
         public readonly EBodyPart BodyPart;
         public readonly List<BodyPartCollider> Colliders;
         public readonly BifacialTransform Transform;
 
-        public float TimeSinceLastVisionCheck => Time.time - _lastCheckTime;
-        public float TimeSinceLastVisionSuccess => Time.time - _lastVisionSuccessTime;
-        public bool LineOfSight => _lastVisionSuccessTime + 0.25f > Time.time;
-        public bool CanShoot => _lastShootSucessTime + 0.25f > Time.time;
+        public float TimeSinceLastVisionCheck => RaycastResults[ERaycastCheck.LineofSight].TimeSinceChecked;
+        public float TimeSinceLastVisionSuccess => RaycastResults[ERaycastCheck.LineofSight].TimeSinceSuccess;
+        public bool LineOfSight => RaycastResults[ERaycastCheck.LineofSight].InSight;
+        public bool CanShoot => RaycastResults[ERaycastCheck.Shoot].InSight;
 
         private BodyPartCollider getCollider()
         {

@@ -13,7 +13,7 @@ namespace SAIN.Components
     {
         public BotComponent Bot;
         public JobHandle Handle;
-        public NativeArray<SpherecastCommand> Commands;
+        public NativeArray<RaycastCommand> Commands;
         public NativeArray<RaycastHit> Hits;
 
         public void Dispose()
@@ -99,26 +99,19 @@ namespace SAIN.Components
 
         private readonly List<Enemy> _enemiesToCheck = new List<Enemy>();
 
-        public BotRaycastJob CreateJob(BotComponent bot, Vector3 origin, Vector3[] targets, LayerMask mask, JobHandle? dependency = null)
+        public BotRaycastJob CreateJob(BotComponent bot, Vector3 origin, Vector3[] targets, LayerMask mask)
         {
             int count = targets.Length;
 
-            var casts = new NativeArray<SpherecastCommand>(count, Allocator.TempJob);
+            var casts = new NativeArray<RaycastCommand>(count, Allocator.TempJob);
             for (int i = 0; i < count; i++) {
                 Vector3 target = targets[i];
                 Vector3 direction = target - origin;
-                casts[i] = new SpherecastCommand(origin, 0.001f, direction, direction.magnitude, mask);
+                casts[i] = new RaycastCommand(origin, direction, direction.magnitude, mask);
             }
 
             var hits = new NativeArray<RaycastHit>(count, Allocator.TempJob);
-
-            JobHandle handle;
-            if (dependency != null) {
-                handle = SpherecastCommand.ScheduleBatch(casts, hits, 1, dependency.Value);
-            }
-            else {
-                handle = SpherecastCommand.ScheduleBatch(casts, hits, 1);
-            }
+            JobHandle handle = RaycastCommand.ScheduleBatch(casts, hits, 5);
 
             return new BotRaycastJob {
                 Bot = bot,

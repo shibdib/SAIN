@@ -18,16 +18,14 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Update()
         {
-            if (Bot.Medical.Surgery.AreaClearForSurgery)
-            {
+            if (Bot.Medical.Surgery.AreaClearForSurgery) {
                 Bot.Mover.PauseMovement(30);
                 Bot.Mover.SprintController.CancelRun();
                 Bot.Mover.SetTargetMoveSpeed(0f);
                 Bot.Cover.DuckInCover();
                 tryStartSurgery();
             }
-            else
-            {
+            else {
                 BotOwner.Mover.MovementResume();
                 Bot.Mover.SetTargetMoveSpeed(1);
                 Bot.Mover.SetTargetPose(1);
@@ -37,21 +35,18 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 Bot.Mover.DogFight.DogFightMove(false);
             }
 
-            if (!Bot.Steering.SteerByPriority(false) &&
-                !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy))
-            {
+            if (!Bot.Steering.SteerByPriority(null, false) &&
+                !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy)) {
                 Bot.Steering.LookToRandomPosition();
             }
         }
 
         private bool tryStartSurgery()
         {
-            if (tryStart())
-            {
+            if (tryStart()) {
                 return true;
             }
-            if (checkFullHeal())
-            {
+            if (checkFullHeal()) {
                 return true;
             }
             return false;
@@ -62,8 +57,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             var surgery = BotOwner.Medecine.SurgicalKit;
             if (_startSurgeryTime < Time.time
                 && !surgery.Using
-                && surgery.ShallStartUse())
-            {
+                && surgery.ShallStartUse()) {
                 Bot.Medical.Surgery.SurgeryStarted = true;
                 surgery.ApplyToCurrentPart(new System.Action(onSurgeryDone));
                 return true;
@@ -74,8 +68,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private bool checkFullHeal()
         {
             if (Bot.Medical.Surgery.SurgeryStarted = true &&
-                _actionStartedTime + 30f < Time.time)
-            {
+                _actionStartedTime + 30f < Time.time) {
                 Bot.Player?.ActiveHealthController?.RestoreFullHealth();
                 Bot.Decision.ResetDecisions(true);
                 return true;
@@ -89,10 +82,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
             _actionStartedTime = Time.time;
             _startSurgeryTime = Time.time + 1f;
 
-            if (BotOwner.Medecine.SurgicalKit.HaveWork)
-            {
-                if (Bot.Enemy == null || Bot.Enemy.TimeSinceSeen > 90f)
-                {
+            if (BotOwner.Medecine.SurgicalKit.HaveWork) {
+                if (Bot.Enemy == null || Bot.Enemy.TimeSinceSeen > 90f) {
                     Bot.Player?.ActiveHealthController?.RestoreFullHealth();
                     Bot.Decision.ResetDecisions(true);
                 }

@@ -18,8 +18,11 @@ namespace SAIN.SAINComponent.Classes.Mover
         public Vector3 WeaponRootOffset => BotOwner.WeaponRoot.position - Bot.Position + (Vector3.down * 0.1f);
         public AimStatus AimStatus => _steerPriorityClass.AimStatus;
 
-        public bool SteerByPriority(bool lookRandom = true, bool ignoreRunningPath = false)
+        public bool SteerByPriority(Enemy enemy = null, bool lookRandom = true, bool ignoreRunningPath = false)
         {
+            if (enemy == null)
+                enemy = Bot.Enemy;
+
             switch (_steerPriorityClass.GetCurrentSteerPriority(lookRandom, ignoreRunningPath)) {
                 case SteerPriority.RunningPath:
                 case SteerPriority.Aiming:
@@ -43,7 +46,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 
                 case SteerPriority.EnemyLastKnownLong:
                 case SteerPriority.EnemyLastKnown:
-                    if (!LookToLastKnownEnemyPosition(Bot.Enemy)) {
+                    if (!LookToLastKnownEnemyPosition(enemy)) {
                         LookToRandomPosition();
                     }
                     return true;
@@ -273,13 +276,13 @@ namespace SAIN.SAINComponent.Classes.Mover
                 }
             }
 
-            if (enemy.Path.CanSeeLastCornerToEnemy) {
-                Vector3? lastCorner = corners.PointPastCorner(ECornerType.Last);
-                if (lastCorner != null) {
-                    EnemySteerDir = EEnemySteerDir.LastCorner;
-                    return lastCorner;
-                }
-            }
+            //if (enemy.Path.CanSeeLastCornerToEnemy) {
+            //    Vector3? lastCorner = corners.PointPastCorner(ECornerType.Last);
+            //    if (lastCorner != null) {
+            //        EnemySteerDir = EEnemySteerDir.LastCorner;
+            //        return lastCorner;
+            //    }
+            //}
 
             //Vector3? first = corners.PointPastCorner(ECornerType.First);
             //if (first != null)

@@ -20,14 +20,14 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Update()
         {
-            if (!Bot.Mover.SprintController.Running)
-            {
+            if (!Bot.Mover.SprintController.Running) {
                 Shoot.CheckAimAndFire();
-                Bot.Steering.SteerByPriority();
+                if (!Bot.Steering.SteerByPriority(_enemy, false)) {
+                    Bot.Steering.LookToLastKnownEnemyPosition(_enemy ?? Bot.Enemy);
+                }
             }
 
-            if (_nextUpdatePosTime < Time.time)
-            {
+            if (_nextUpdatePosTime < Time.time) {
                 moveToLead(out float nextTime);
                 _nextUpdatePosTime = Time.time + nextTime;
             }
@@ -36,39 +36,33 @@ namespace SAIN.Layers.Combat.Squad
         private void moveToLead(out float nextUpdateTime)
         {
             var leader = Bot.Squad.SquadInfo?.LeaderComponent;
-            if (leader == null)
-            {
+            if (leader == null) {
                 nextUpdateTime = 1f;
                 return;
             }
-            if ((_LastLeadPos - leader.Position).sqrMagnitude < 1f)
-            {
+            if ((_LastLeadPos - leader.Position).sqrMagnitude < 1f) {
                 nextUpdateTime = 1f;
                 return;
             }
             Vector3? movePosition = getPosNearLead(leader.Position);
-            if (movePosition == null)
-            {
+            if (movePosition == null) {
                 nextUpdateTime = 0.25f;
                 return;
             }
 
             _LastLeadPos = leader.Position;
             float moveDistance = (movePosition.Value - Bot.Position).sqrMagnitude;
-            if (moveDistance < 1f)
-            {
+            if (moveDistance < 1f) {
                 nextUpdateTime = 1f;
                 return;
             }
 
             if (moveDistance > 20f * 20f &&
-                Bot.Mover.SprintController.RunToPoint(movePosition.Value, SAINComponent.Classes.Mover.ESprintUrgency.Middle, true))
-            {
+                Bot.Mover.SprintController.RunToPoint(movePosition.Value, SAINComponent.Classes.Mover.ESprintUrgency.Middle, true)) {
                 nextUpdateTime = 2f;
                 return;
             }
-            if (Bot.Mover.SprintController.Running)
-            {
+            if (Bot.Mover.SprintController.Running) {
                 nextUpdateTime = 2f;
                 return;
             }
@@ -79,17 +73,14 @@ namespace SAIN.Layers.Combat.Squad
         private Vector3? getPosNearLead(Vector3 leadPos)
         {
             Vector3? result = null;
-            if (NavMesh.SamplePosition(leadPos, out var leadHit, 3f, -1))
-            {
+            if (NavMesh.SamplePosition(leadPos, out var leadHit, 3f, -1)) {
                 Vector3 leadDir = Bot.Position - leadHit.position;
                 leadDir.y = 0;
                 leadDir = leadDir.normalized * 2f;
-                if (NavMesh.Raycast(leadHit.position, (leadDir + leadHit.position), out var rayHit, -1))
-                {
+                if (NavMesh.Raycast(leadHit.position, (leadDir + leadHit.position), out var rayHit, -1)) {
                     result = rayHit.position;
                 }
-                else
-                {
+                else {
                     result = leadDir + leadHit.position;
                 }
             }

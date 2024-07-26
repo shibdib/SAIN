@@ -13,6 +13,7 @@ namespace SAIN.Layers.Combat.Squad
         public RegroupAction(BotOwner bot) : base(bot, nameof(RegroupAction))
         {
         }
+
         public void Toggle(bool value)
         {
             ToggleAction(value);
@@ -21,8 +22,7 @@ namespace SAIN.Layers.Combat.Squad
         public override void Update()
         {
             var SquadLeadPos = Bot.Squad.LeaderComponent?.Position;
-            if (SquadLeadPos != null)
-            {
+            if (SquadLeadPos != null) {
                 Bot.Mover.GoToPoint(SquadLeadPos.Value, out _);
                 CheckShouldSprint(SquadLeadPos.Value);
             }
@@ -30,8 +30,7 @@ namespace SAIN.Layers.Combat.Squad
             Bot.Mover.SetTargetPose(1f);
             Bot.Mover.SetTargetMoveSpeed(1f);
 
-            if (!Bot.Mover.SprintController.Running)
-            {
+            if (!Bot.Mover.SprintController.Running) {
                 Shoot.CheckAimAndFire();
                 Bot.Steering.SteerByPriority();
             }
@@ -49,26 +48,22 @@ namespace SAIN.Layers.Combat.Squad
             float leadDist = (pos - BotOwner.Position).magnitude;
             float enemyDist = hasEnemy ? (Bot.Enemy.EnemyIPlayer.Position - BotOwner.Position).magnitude : 999f;
 
-            bool sprint = 
-                hasEnemy && 
-                leadDist > 30f && 
-                !enemyLOS && 
+            bool sprint =
+                hasEnemy &&
+                leadDist > 30f &&
+                !enemyLOS &&
                 enemyDist > 50f;
 
-            if (Bot.Steering.SteerByPriority(false))
-            {
+            if (Bot.Steering.SteerByPriority(null, false)) {
                 sprint = false;
             }
 
-            if (_nextChangeSprintTime < Time.time)
-            {
+            if (_nextChangeSprintTime < Time.time) {
                 _nextChangeSprintTime = Time.time + 1f;
-                if (sprint)
-                {
+                if (sprint) {
                     Bot.Mover.Sprint(true);
                 }
-                else
-                {
+                else {
                     Bot.Mover.Sprint(false);
                     Bot.Steering.SteerByPriority();
                 }

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine;
+using SAIN.SAINComponent.Classes.EnemyClasses;
 
 namespace SAIN.Components
 {
@@ -57,11 +59,15 @@ namespace SAIN.Components
 
         private void updateResults(BotRaycastTotalCheck cachedJobs)
         {
+            float time = Time.time;
             int count = cachedJobs.Count;
             for (int i = 0; i < count; i++) {
                 var losCheck = cachedJobs.LineOfSightChecks[i];
+                losCheck.Data.Enemy?.Vision.VisionChecker.EnemyParts.ReadRaycastResult(losCheck, ERaycastCheck.LineofSight, time);
                 var shootCheck = cachedJobs.ShootChecks[i];
+                shootCheck.Data.Enemy?.Vision.VisionChecker.EnemyParts.ReadRaycastResult(shootCheck, ERaycastCheck.Shoot, time);
                 var visionCheck = cachedJobs.VisibleChecks[i];
+                visionCheck.Data.Enemy?.Vision.VisionChecker.EnemyParts.ReadRaycastResult(visionCheck, ERaycastCheck.Vision, time);
             }
         }
     }

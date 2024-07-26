@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         public Vector3 Position => Place.Position;
 
         public bool ShallLook =>
-            clearForLook && 
+            clearForLook &&
             TimeSinceHeard < TIME_TO_LOOK;
 
         private bool clearForLook => Place != null && Enemy != null && Enemy.WasValid;
@@ -57,15 +57,12 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void checkClearPlaces()
         {
-            if (_nextCheckClearTime < Time.time)
-            {
+            if (_nextCheckClearTime < Time.time) {
                 _nextCheckClearTime = Time.time + CHECK_CLEAR_FREQ;
-                if (LastHeardDanger?.ShallClear == true)
-                {
+                if (LastHeardDanger?.ShallClear == true) {
                     clearPlace(LastHeardDanger.Value.Place);
                 }
-                if (LastHeardVisibleDanger?.ShallClear == true)
-                {
+                if (LastHeardVisibleDanger?.ShallClear == true) {
                     clearPlace(LastHeardVisibleDanger.Value.Place);
                 }
             }
@@ -76,17 +73,14 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void clearPlace(EnemyPlace place)
         {
-            if (place == null)
-            {
+            if (place == null) {
                 return;
             }
-            if (LastHeardDanger?.Place == place)
-            {
+            if (LastHeardDanger?.Place == place) {
                 LastHeardDanger.Value.Place.OnDispose -= clearPlace;
                 LastHeardDanger = null;
             }
-            if (LastHeardVisibleDanger?.Place == place)
-            {
+            if (LastHeardVisibleDanger?.Place == place) {
                 LastHeardVisibleDanger.Value.Place.OnDispose -= clearPlace;
                 LastHeardVisibleDanger = null;
             }
@@ -100,22 +94,18 @@ namespace SAIN.SAINComponent.Classes.Mover
         public void LookToHeardPosition()
         {
             var visibleDanger = LastHeardVisibleDanger;
-            if (visibleDanger?.ShallLook == true)
-            {
+            if (visibleDanger?.ShallLook == true) {
                 BaseClass.LookToPoint(visibleDanger.Value.Position + BaseClass.WeaponRootOffset);
                 return;
             }
             var heardSound = LastHeardDanger;
-            if (heardSound?.ShallLook == true)
-            {
-                if (heardSound.Value.Enemy.InLineOfSight)
-                {
+            if (heardSound?.ShallLook == true) {
+                if (heardSound.Value.Enemy.InLineOfSight) {
                     BaseClass.LookToPoint(heardSound.Value.Position + BaseClass.WeaponRootOffset);
                     return;
                 }
                 heardSound.Value.Enemy.Path.EnemyCorners.TryGetValue(ECornerType.First, out EnemyCorner corner);
-                if (corner != null)
-                {
+                if (corner != null) {
                     BaseClass.LookToPoint(corner.EyeLevelCorner(Bot.Transform.WeaponRoot, Bot.Position));
                     return;
                 }
@@ -128,36 +118,32 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void enemyHeard(Enemy enemy, SAINSoundType soundType, bool isDanger, EnemyPlace place)
         {
-            if (place == null)
-            {
+            if (place == null) {
                 return;
             }
-            if (!isDanger)
-            {
+            if (!place.VisibleSourceOnLastUpdate) {
                 return;
             }
-            if (place.PlaceData.OwnerID == Bot.ProfileId)
-            {
+            if (!isDanger) {
+                return;
+            }
+            if (place.PlaceData.OwnerID == Bot.ProfileId) {
                 setLastVisSound(place, enemy);
                 return;
             }
             var myEnemy = Bot.EnemyController.GetEnemy(enemy.EnemyProfileId, true);
-            if (myEnemy == null)
-            {
+            if (myEnemy == null) {
                 return;
             }
-            if (myEnemy.InLineOfSight)
-            {
+            if (myEnemy.InLineOfSight) {
                 setLastVisSound(place, myEnemy);
                 return;
             }
-
         }
 
         private void setLastVisSound(EnemyPlace place, Enemy enemy)
         {
-            if (place.VisibleSourceOnLastUpdate && place.PlaceData.OwnerID == Bot.ProfileId)
-            {
+            if (place.VisibleSourceOnLastUpdate && place.PlaceData.OwnerID == Bot.ProfileId) {
                 LastHeardVisibleDanger = new SoundStruct(enemy, place);
                 return;
             }
@@ -169,42 +155,34 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void LookToHeardPosition(Vector3 soundPos, bool visionCheck = false)
         {
-            if ((soundPos - Bot.Position).sqrMagnitude > 125f.Sqr())
-            {
+            if ((soundPos - Bot.Position).sqrMagnitude > 125f.Sqr()) {
                 BaseClass.LookToPoint(soundPos);
                 return;
             }
 
             findCorner(soundPos);
 
-            if (_lastHeardSoundCorner != null)
-            {
+            if (_lastHeardSoundCorner != null) {
                 BaseClass.LookToPoint(_lastHeardSoundCorner.Value);
             }
-            else
-            {
+            else {
                 BaseClass.LookToPoint(soundPos);
             }
         }
 
         private void findCorner(Vector3 soundPos)
         {
-            if (_lastHeardSoundTimer < Time.time || (_lastHeardSoundCheckedPos - soundPos).magnitude > 1f)
-            {
+            if (_lastHeardSoundTimer < Time.time || (_lastHeardSoundCheckedPos - soundPos).magnitude > 1f) {
                 _lastHeardSoundTimer = Time.time + 1f;
                 _lastHeardSoundCheckedPos = soundPos;
                 _hearingPath.ClearCorners();
-                if (NavMesh.CalculatePath(Bot.Position, soundPos, -1, _hearingPath))
-                {
-                    if (_hearingPath.corners.Length > 2)
-                    {
+                if (NavMesh.CalculatePath(Bot.Position, soundPos, -1, _hearingPath)) {
+                    if (_hearingPath.corners.Length > 2) {
                         Vector3 headPos = BotOwner.LookSensor._headPoint;
-                        for (int i = _hearingPath.corners.Length - 1; i >= 0; i--)
-                        {
+                        for (int i = _hearingPath.corners.Length - 1; i >= 0; i--) {
                             Vector3 corner = _hearingPath.corners[i] + Vector3.up;
                             Vector3 cornerDir = corner - headPos;
-                            if (!Physics.Raycast(headPos, cornerDir.normalized, cornerDir.magnitude, LayerMaskClass.HighPolyWithTerrainMask))
-                            {
+                            if (!Physics.Raycast(headPos, cornerDir.normalized, cornerDir.magnitude, LayerMaskClass.HighPolyWithTerrainMask)) {
                                 _lastHeardSoundCorner = corner;
                                 return;
                             }

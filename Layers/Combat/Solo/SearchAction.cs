@@ -153,17 +153,11 @@ namespace SAIN.Layers.Combat.Solo
 
         private void Steer()
         {
-            if (!SteerByPriority(false) &&
+            if (!Bot.Steering.SteerByPriority(_searchTarget, false) &&
                 !Bot.Steering.LookToLastKnownEnemyPosition(_searchTarget) &&
                 !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy)) {
                 Bot.Steering.LookToDirection(Bot.Player.MovementContext.MovementDirection);
             }
         }
-
-        private bool SteerByPriority(bool value) => Bot.Steering.SteerByPriority(value);
-
-        private void LookToMovingDirection() => Bot.Steering.LookToMovingDirection();
-
-        public NavMeshPath Path = new NavMeshPath();
     }
 }

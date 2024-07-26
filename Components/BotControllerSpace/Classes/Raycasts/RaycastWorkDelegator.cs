@@ -86,7 +86,7 @@ namespace SAIN.Components
                 }
             }
 
-            Logger.LogInfo($"Scheduled {foundBots} bots...");
+            //Logger.LogInfo($"Scheduled {foundBots} bots...");
         }
 
         private int AvailableWorkers {

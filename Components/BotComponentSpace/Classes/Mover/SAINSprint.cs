@@ -533,7 +533,7 @@ namespace SAIN.SAINComponent.Classes.Mover
                 if (shallLookAtEnemy()) {
                     Bot.Steering.LookToEnemy(Bot.Enemy);
                 }
-                else if (!shallSteerbyPriority() || !Bot.Steering.SteerByPriority(false, true)) {
+                else if (!shallSteerbyPriority() || !Bot.Steering.SteerByPriority(null, false, true)) {
                     Bot.Steering.LookToDirection(targetLookDirNormal, true, turnSpeed);
                 }
             }
