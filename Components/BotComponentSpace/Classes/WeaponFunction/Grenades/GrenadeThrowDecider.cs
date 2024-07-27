@@ -85,7 +85,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 reason = "noNades";
                 return false;
             }
-            if (tryThrowGrenade() || (findThrowTarget(enemy) && tryThrowGrenade())) {
+            //if (tryThrowGrenade() || (findThrowTarget(enemy) && tryThrowGrenade())) {
+            if (findThrowTarget(enemy) && tryThrowGrenade()) {
                 _nextPosibleAttempt = Time.time + UnityEngine.Random.Range(_throwGrenadeFreq, _throwGrenadeFreqMax);
                 reason = "startThrow";
                 return true;
@@ -274,7 +275,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 //{
                 //    Logger.LogWarning("fail");
                 //}
-                Bot.Talk.GroupSay(EPhraseTrigger.OnGrenade, null, false, _announceThrowingNadeChance);
+                //Bot.Talk.GroupSay(EPhraseTrigger.OnGrenade, null, false, _announceThrowingNadeChance);
                 return true;
             }
             return false;
@@ -294,7 +295,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             }
 
             AIGreandeAng angle = possibleAngles.PickRandom();
-            AIGreanageThrowData throwData = GrenadeThrowChecker.CanThrowGrenade2(from, trg, _maxPower, angle, -1f, _minThrowDistPercent);
+            AIGreanageThrowData throwData = GrenadeThrowChecker.CanThrowGrenade2(from, trg, _maxPower * 0.9f, angle, -1f, _minThrowDistPercent);
 
             if (throwData.CanThrow) {
                 if (Physics.Raycast(from, throwData.Direction, 1.5f, LayerMaskClass.HighPolyWithTerrainMask)) {

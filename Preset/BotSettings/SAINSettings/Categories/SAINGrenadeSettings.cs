@@ -47,10 +47,8 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
             "Grenade Spread",
             "How much distance, in meters, to randomize a bot's throw target position.")]
         [MinMax(0f, 5f, 100f)]
-        //[CopyValue]
-        [Hidden]
-        [JsonIgnore]
-        public float GrenadePrecision = 0f;
+        [CopyValue]
+        public float GrenadePrecision = 0.25f;
 
         [Percentage0to1]
         [Advanced]
@@ -72,6 +70,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 
         [Hidden]
         [JsonIgnore]
-        public float DELTA_NEXT_ATTEMPT = 3f;
+        public float DELTA_NEXT_ATTEMPT = 4f;
     }
 }

@@ -165,8 +165,8 @@ namespace SAIN
                 typeof(Patches.Shoot.Aim.ForceNoHeadAimPatch),
                 typeof(Patches.Shoot.Aim.AimRotateSpeedPatch),
 
-                typeof(Patches.Shoot.Grenades.DoThrowPatch),
-                typeof(Patches.Shoot.Grenades.DisableSpreadPatch),
+                //typeof(Patches.Shoot.Grenades.DoThrowPatch),
+                //typeof(Patches.Shoot.Grenades.DisableSpreadPatch),
                 typeof(Patches.Shoot.Grenades.ResetGrenadePatch),
                 typeof(Patches.Shoot.Grenades.SetGrenadePatch),
 

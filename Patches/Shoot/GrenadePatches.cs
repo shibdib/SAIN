@@ -28,7 +28,7 @@ namespace SAIN.Patches.Shoot.Grenades
             if (!SAINBotController.Instance.GetSAIN(___botOwner_0, out var botComponent)) {
                 return;
             }
-            __instance.Mass = potentialGrenade.Weight;
+            //__instance.Mass = potentialGrenade.Weight;
             botComponent.Grenade.MyGrenade = potentialGrenade;
         }
     }
@@ -85,6 +85,9 @@ namespace SAIN.Patches.Shoot.Grenades
                 return false;
             }
             if (__instance.CheckPeriodTime()) {
+                return false;
+            }
+            if (__instance.ThrowindNow == true) {
                 return false;
             }
             __instance.method_5();

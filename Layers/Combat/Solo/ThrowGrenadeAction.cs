@@ -17,15 +17,9 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            if (!Stopped && Time.time - StartTime > 1f || Bot.Cover.CheckLimbsForCover())
-            {
+            if (!Stopped && Time.time - StartTime > 1f || Bot.Cover.CheckLimbsForCover()) {
                 Stopped = true;
                 BotOwner.StopMove();
-            }
-
-            if (Bot.Squad.BotInGroup && Bot.Talk.GroupTalk.FriendIsClose)
-            {
-                Bot.Talk.Say(EPhraseTrigger.OnGrenade);
             }
         }
 
@@ -36,6 +30,9 @@ namespace SAIN.Layers.Combat.Solo
         {
             StartTime = Time.time;
             Toggle(true);
+            if (Bot.Squad.BotInGroup && Bot.Talk.GroupTalk.FriendIsClose) {
+                Bot.Talk.Say(EPhraseTrigger.OnGrenade);
+            }
         }
 
         public override void Stop()
