@@ -110,6 +110,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         private void EngageEnemy()
         {
             if (!Bot.Enemy.IsVisible &&
+                Time.time - _timeStart > 1f &&
                 BotOwner.WeaponManager.HaveBullets &&
                 Bot.Enemy.TimeSinceLastKnownUpdated < 30f) {
                 Vector3? suppressTarget = Bot.Enemy?.SuppressionTarget;
@@ -161,6 +162,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
         public override void Start()
         {
             Toggle(true);
+            _timeStart = Time.time;
         }
 
         public override void Stop()
@@ -182,6 +184,8 @@ namespace SAIN.Layers.Combat.Solo.Cover
                 }
             }
         }
+
+        private float _timeStart;
 
         public override void BuildDebugText(StringBuilder stringBuilder)
         {

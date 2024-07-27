@@ -156,7 +156,7 @@ namespace SAIN.Layers.Combat.Solo
             if (!Bot.Steering.SteerByPriority(_searchTarget, false) &&
                 !Bot.Steering.LookToLastKnownEnemyPosition(_searchTarget) &&
                 !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy)) {
-                Bot.Steering.LookToDirection(Bot.Player.MovementContext.MovementDirection);
+                Bot.Steering.LookToMovingDirection();
             }
         }
     }

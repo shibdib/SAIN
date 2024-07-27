@@ -114,7 +114,8 @@ namespace SAIN.SAINComponent.Classes.Mover
                 return SteerPriority.LastHit;
             }
 
-            if (BotOwner.Memory.IsUnderFire && !Bot.Memory.LastUnderFireEnemy.IsCurrentEnemy)
+            //if (BotOwner.Memory.IsUnderFire && !Bot.Memory.LastUnderFireEnemy.IsCurrentEnemy)
+            if (BotOwner.Memory.IsUnderFire)
                 return SteerPriority.UnderFire;
 
             return SteerPriority.None;

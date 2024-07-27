@@ -202,7 +202,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
                 if (run) {
                     result = ECombatDecision.RunToCover;
-                    return true;
                 }
                 return true;
             }
@@ -499,8 +498,8 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             if (!enemy.IsVisible &&
                 (!enemy.Seen || enemy.TimeSinceSeen > 3f)) {
-                reason = "runNow cantSeeEnemy";
-                return true;
+                //reason = "runNow cantSeeEnemy";
+                //return true;
             }
 
             if (StartRunCoverTimer < Time.time) {

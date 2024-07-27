@@ -66,7 +66,7 @@ namespace SAIN.Components
             var enemies = bot.EnemyController.Enemies;
             foreach (var enemy in enemies.Values) {
                 float delay = enemy.IsAI ? 0.1f : 0.05f;
-                //if (time - enemy.Vision.VisionChecker.LastCheckLOSTime < delay) continue;
+                if (time - enemy.Vision.VisionChecker.LastCheckLOSTime < delay) continue;
                 if (!enemy.CheckValid()) continue;
                 _enemiesToCheck.Add(enemy);
             }

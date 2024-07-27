@@ -299,6 +299,7 @@
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Raycasts\BotRaycastTotalCheck.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\EnemyDistanceJob.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Raycasts\LineOfSightJobClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Raycasts\RaycastWorkDelegator.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Raycasts\RaycastWorker.cs" />

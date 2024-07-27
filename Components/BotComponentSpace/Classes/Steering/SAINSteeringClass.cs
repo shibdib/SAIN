@@ -239,6 +239,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                 EnemySteerDir = EEnemySteerDir.VisibleLastKnown;
                 return lastKnown.Position + WeaponRootOffset;
             }
+            if (enemy.InLineOfSight && lastKnown.VisibleSourceOnLastUpdate && lastKnown.TimeSincePositionUpdated < 4f) {
+                return lastKnown.Position + WeaponRootOffset;
+            }
 
             //Vector3? lastKnown = EnemyLastKnown(enemy, out bool visible);
             //if (lastKnown != null &&
@@ -291,10 +294,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             //    return first;
             //}
 
-            Vector3? lastKnownCorner = corners.PointPastCorner(ECornerType.LastKnown);
-            if (lastKnownCorner != null) {
+            //Vector3? lastKnownCorner = corners.PointPastCorner(ECornerType.LastKnown);
+            if (lastKnown != null) {
                 EnemySteerDir = EEnemySteerDir.LastKnown;
-                return lastKnownCorner;
+                return lastKnown.Position + WeaponRootOffset;
             }
 
             return null;

@@ -66,7 +66,7 @@ namespace SAIN.Components
                 BotComponent bot = bots[i];
                 if (bot == null) continue;
                 if (!bot.BotActive) continue;
-                //if (bot.Vision.TimeSinceCheckedLOS < 0.05f) continue;
+                if (bot.Vision.TimeSinceCheckedLOS < 0.05f) continue;
 
                 var job = JobCreator.ScheduleJobs(bot);
                 if (job == null) continue;

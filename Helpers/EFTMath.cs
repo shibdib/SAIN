@@ -46,8 +46,7 @@ namespace SAIN.Helpers
         public static int RandomInclude(int a, int b)
         {
             b++;
-            if (a > b)
-            {
+            if (a > b) {
                 return random_0.Next(b, a);
             }
             return random_0.Next(a, b);
@@ -59,8 +58,7 @@ namespace SAIN.Helpers
         /// <returns>A random sign of either 1 or -1.</returns>
         public static int RandomSing()
         {
-            if (Random(0f, 100f) < 50f)
-            {
+            if (Random(0f, 100f) < 50f) {
                 return 1;
             }
             return -1;
@@ -242,12 +240,10 @@ namespace SAIN.Helpers
         /// <returns>The clamped double Rounding.</returns>
         public static double Clamp01(this double value)
         {
-            if (value < 0.0)
-            {
+            if (value < 0.0) {
                 return 0.0;
             }
-            if (value <= 1.0)
-            {
+            if (value <= 1.0) {
                 return value;
             }
             return 1.0;
@@ -262,13 +258,11 @@ namespace SAIN.Helpers
         /// <returns>The clamped Rounding.</returns>
         public static double Clamp(this double value, double limit1, double limit2)
         {
-            if (limit1 < limit2)
-            {
+            if (limit1 < limit2) {
                 value = System.Math.Max(value, limit1);
                 value = System.Math.Min(value, limit2);
             }
-            else
-            {
+            else {
                 value = System.Math.Max(value, limit2);
                 value = System.Math.Min(value, limit1);
             }
@@ -295,17 +289,14 @@ namespace SAIN.Helpers
         /// <returns>A random item from the list, excluding the specified item.</returns>
         public static T GetRandomItem<T>(this List<T> list, T excludedItem)
         {
-            if (list == null)
-            {
+            if (list == null) {
                 return default;
             }
             int count = list.Count;
-            if (count == 0)
-            {
+            if (count == 0) {
                 return default;
             }
-            if (count == 1)
-            {
+            if (count == 1) {
                 return list[0];
             }
             int num = 0;
@@ -315,10 +306,8 @@ namespace SAIN.Helpers
                 int index = UnityEngine.Random.Range(0, count);
                 result = list[index];
                 num++;
-                if (result.Equals(excludedItem))
-                {
-                    if (num != 100)
-                    {
+                if (result.Equals(excludedItem)) {
+                    if (num != 100) {
                         break;
                     }
                 }
@@ -334,8 +323,7 @@ namespace SAIN.Helpers
         /// <returns>A random item from the list.</returns>
         public static T GetRandomItem<T>(this List<T> list)
         {
-            if (list != null && list.Count != 0)
-            {
+            if (list != null && list.Count != 0) {
                 int index = UnityEngine.Random.Range(0, list.Count);
                 return list[index];
             }
@@ -396,20 +384,16 @@ namespace SAIN.Helpers
         /// <returns>The last n elements from the given collection.</returns>
         public static IEnumerable<T> TakeLast<T>(this IEnumerable<T> collection, int n)
         {
-            if (collection == null)
-            {
+            if (collection == null) {
                 throw new ArgumentNullException("collection");
             }
-            if (n < 0)
-            {
+            if (n < 0) {
                 throw new ArgumentOutOfRangeException("n", "n must be 0 or greater");
             }
             LinkedList<T> linkedList = new LinkedList<T>();
-            foreach (T value in collection)
-            {
+            foreach (T value in collection) {
                 linkedList.AddLast(value);
-                if (linkedList.Count > n)
-                {
+                if (linkedList.Count > n) {
                     linkedList.RemoveFirst();
                 }
             }
@@ -459,12 +443,10 @@ namespace SAIN.Helpers
             objectType
             }, true);
             ILGenerator ilgenerator = dynamicMethod.GetILGenerator();
-            if (fieldInfo.IsStatic)
-            {
+            if (fieldInfo.IsStatic) {
                 ilgenerator.Emit(OpCodes.Ldsfld, fieldInfo);
             }
-            else
-            {
+            else {
                 ilgenerator.Emit(OpCodes.Ldarg_0);
                 ilgenerator.Emit(OpCodes.Ldfld, fieldInfo);
             }
@@ -482,20 +464,15 @@ namespace SAIN.Helpers
         public static List<Transform> GetChildsName(Transform transform, string name, bool onlyActive = true)
         {
             List<Transform> list = new List<Transform>();
-            foreach (object obj in transform)
-            {
+            foreach (object obj in transform) {
                 Transform transform2 = (Transform)obj;
-                if (transform2.name.Contains(name))
-                {
-                    if (onlyActive)
-                    {
-                        if (transform2.gameObject.activeSelf)
-                        {
+                if (transform2.name.Contains(name)) {
+                    if (onlyActive) {
+                        if (transform2.gameObject.activeSelf) {
                             list.Add(transform2);
                         }
                     }
-                    else
-                    {
+                    else {
                         list.Add(transform2);
                     }
                 }
@@ -514,17 +491,13 @@ namespace SAIN.Helpers
         /// </returns>
         public static Transform GetChildName(Transform transform, string name, string nocontains = "")
         {
-            foreach (object obj in transform)
-            {
+            foreach (object obj in transform) {
                 Transform transform2 = (Transform)obj;
-                if (transform2.name.Contains(name) && transform2.gameObject.activeSelf)
-                {
-                    if (nocontains.Length <= 0)
-                    {
+                if (transform2.name.Contains(name) && transform2.gameObject.activeSelf) {
+                    if (nocontains.Length <= 0) {
                         return transform2;
                     }
-                    if (!transform2.name.Contains(nocontains))
-                    {
+                    if (!transform2.name.Contains(nocontains)) {
                         return transform2;
                     }
                 }
@@ -599,13 +572,11 @@ namespace SAIN.Helpers
             valueType
             }, true);
             ILGenerator ilgenerator = dynamicMethod.GetILGenerator();
-            if (field.IsStatic)
-            {
+            if (field.IsStatic) {
                 ilgenerator.Emit(OpCodes.Ldarg_1);
                 ilgenerator.Emit(OpCodes.Stsfld, field);
             }
-            else
-            {
+            else {
                 ilgenerator.Emit(OpCodes.Ldarg_0);
                 ilgenerator.Emit(OpCodes.Ldarg_1);
                 ilgenerator.Emit(OpCodes.Stfld, field);
@@ -624,8 +595,7 @@ namespace SAIN.Helpers
         {
             double num = 3.5;
             double num2;
-            while ((num2 = BoxMuller((double)min + (double)(max - min) / 2.0, (double)(max - min) / 2.0 / num)) > (double)max || num2 < (double)min)
-            {
+            while ((num2 = BoxMuller((double)min + (double)(max - min) / 2.0, (double)(max - min) / 2.0 / num)) > (double)max || num2 < (double)min) {
             }
             return (float)num2;
         }
@@ -647,16 +617,14 @@ namespace SAIN.Helpers
         /// <returns>A random number generated using the Box-Muller algorithm.</returns>
         public static double BoxMuller()
         {
-            if (bool_1)
-            {
+            if (bool_1) {
                 bool_1 = false;
                 return double_0;
             }
             double num;
             double num2;
             double num3;
-            do
-            {
+            do {
                 num = 2.0 * random_0.NextDouble() - 1.0;
                 num2 = 2.0 * random_0.NextDouble() - 1.0;
                 num3 = num * num + num2 * num2;
@@ -679,20 +647,16 @@ namespace SAIN.Helpers
         {
             bool result = false;
             Queue<T> queue = new Queue<T>();
-            while (q.Count > 0)
-            {
+            while (q.Count > 0) {
                 T item2 = q.Dequeue();
-                if (item2.Equals(item))
-                {
+                if (item2.Equals(item)) {
                     result = true;
                 }
-                else
-                {
+                else {
                     queue.Enqueue(item2);
                 }
             }
-            while (queue.Count > 0)
-            {
+            while (queue.Count > 0) {
                 q.Enqueue(queue.Dequeue());
             }
             return result;
@@ -705,8 +669,7 @@ namespace SAIN.Helpers
         /// <returns>A full screen mesh for the given camera.</returns>
         public static Mesh MakeFullScreenMesh(Camera cam)
         {
-            Mesh mesh = new Mesh
-            {
+            Mesh mesh = new Mesh {
                 name = "Utils MakeFullScreenMesh"
             };
             cam.ViewportToWorldPoint(new Vector3(0f, 0f, 0f));
@@ -774,8 +737,7 @@ namespace SAIN.Helpers
         /// <param value="t">The Transform whose children will be destroyed.</param>
         public static void ClearTransform(this Transform t)
         {
-            foreach (object obj in t)
-            {
+            foreach (object obj in t) {
                 UnityEngine.Object.Destroy(((Transform)obj).gameObject);
             }
         }
@@ -786,14 +748,12 @@ namespace SAIN.Helpers
         public static void ClearTransformImmediate(this Transform t)
         {
             List<Transform> list = new List<Transform>();
-            foreach (object obj in t)
-            {
+            foreach (object obj in t) {
                 Transform item = (Transform)obj;
                 list.Add(item);
             }
             Transform[] array = list.ToArray();
-            for (int i = 0; i < array.Length; i++)
-            {
+            for (int i = 0; i < array.Length; i++) {
                 UnityEngine.Object.DestroyImmediate(array[i].gameObject);
             }
         }
