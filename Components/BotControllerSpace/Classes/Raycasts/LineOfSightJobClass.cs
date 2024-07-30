@@ -53,7 +53,7 @@ namespace SAIN.Components
                     continue;
                 }
 
-                if (BotController?.BotGame?.Status == EFT.GameStatus.Stopping) {
+                if (BotController.BotGame?.Status == EFT.GameStatus.Stopping) {
                     continue;
                 }
 
@@ -113,6 +113,7 @@ namespace SAIN.Components
 
                 float time = Time.time;
                 int hits = 0;
+                int colliderTypeCount = 0;
 
                 for (int i = 0; i < enemyCount; i++) {
                     var enemy = _enemies[i];
@@ -125,8 +126,9 @@ namespace SAIN.Components
 
                     for (int j = 0; j < partCount; j++) {
                         var part = parts[j];
-                        EBodyPartColliderType colliderType = _colliderTypes[i + j];
-                        Vector3 castPoint = _castPoints[i + j];
+                        EBodyPartColliderType colliderType = _colliderTypes[colliderTypeCount];
+                        Vector3 castPoint = _castPoints[colliderTypeCount];
+                        colliderTypeCount++;
 
                         part.SetLineOfSight(castPoint, colliderType, raycastHits[hits], ERaycastCheck.LineofSight, time);
                         hits++;
@@ -147,8 +149,8 @@ namespace SAIN.Components
         private readonly LayerMask _VisionMask = LayerMaskClass.AI;
         private readonly LayerMask _ShootMask = LayerMaskClass.HighPolyWithTerrainMask;
         private int _partCount = -1;
-        private readonly List<EBodyPartColliderType> _colliderTypes;
-        private readonly List<Vector3> _castPoints;
+        private readonly List<EBodyPartColliderType> _colliderTypes = new List<EBodyPartColliderType>();
+        private readonly List<Vector3> _castPoints = new List<Vector3>();
 
         private static void findEnemies(BotDictionary bots, List<Enemy> result)
         {
