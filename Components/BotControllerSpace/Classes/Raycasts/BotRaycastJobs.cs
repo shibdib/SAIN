@@ -8,13 +8,13 @@ using UnityEngine;
 
 namespace SAIN.Components
 {
-    public class LineOfSightJobClass : SAINControllerBase
+    public class BotRaycastJobs : SAINControllerBase
     {
-        public BatchRaycastJob BatchRaycasts { get; }
+        public VisionRaycastJob VisionJob { get; }
 
-        public LineOfSightJobClass(SAINBotController botController) : base(botController)
+        public BotRaycastJobs(SAINBotController botController) : base(botController)
         {
-            BatchRaycasts = new BatchRaycastJob(botController);
+            VisionJob = new VisionRaycastJob(botController);
         }
 
         public void Update()
@@ -26,9 +26,9 @@ namespace SAIN.Components
         }
     }
 
-    public class BatchRaycastJob : SAINControllerBase
+    public class VisionRaycastJob : SAINControllerBase
     {
-        public BatchRaycastJob(SAINBotController botcontroller) : base(botcontroller)
+        public VisionRaycastJob(SAINBotController botcontroller) : base(botcontroller)
         {
             botcontroller.StartCoroutine(checkVisionLoop());
         }

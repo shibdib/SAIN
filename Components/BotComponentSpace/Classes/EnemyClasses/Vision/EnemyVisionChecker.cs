@@ -43,46 +43,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
         }
 
-        public BotEnemyRaycastData GetPartsToCheck2(Vector3 origin)
-        {
-            ERaycastPart[] partsToCheck = getPartsToCheck(out float maxRange);
-
-            int count = partsToCheck.Length;
-            Vector3[] points = new Vector3[count];
-            EBodyPartColliderType[] colliderTypes = new EBodyPartColliderType[count];
-            EBodyPart[] bodyParts = new EBodyPart[count];
-
-            for (int i = 0; i < count; i++) {
-                var type = partsToCheck[i];
-                BodyPartRaycast rayCastInfo;
-                switch (type) {
-                    case ERaycastPart.Body:
-                        rayCastInfo = EnemyParts.Parts[EBodyPart.Chest].GetRaycast(origin, maxRange);
-                        break;
-
-                    case ERaycastPart.Head:
-                        rayCastInfo = EnemyParts.Parts[EBodyPart.Head].GetRaycast(origin, maxRange);
-                        break;
-
-                    default:
-                        rayCastInfo = EnemyParts.GetNextPart().GetRaycast(origin, maxRange);
-                        break;
-                }
-                bodyParts[i] = rayCastInfo.PartType;
-                colliderTypes[i] = rayCastInfo.ColliderType;
-                points[i] = rayCastInfo.CastPoint;
-            }
-
-            BotEnemyRaycastData data = new BotEnemyRaycastData {
-                Enemy = Enemy,
-                Points = points,
-                ColliderTypes = colliderTypes,
-                BodyParts = bodyParts,
-            };
-
-            return data;
-        }
-
         public void CheckVision(out bool didCheck)
         {
             // staggers ai vision over a few quarters of a second
@@ -119,26 +79,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private static readonly ERaycastPart[] _bodyPlus1Random = new ERaycastPart[] { ERaycastPart.Body, ERaycastPart.RandomPart };
         private static readonly ERaycastPart[] _bodyHeadPlus1Random = new ERaycastPart[] { ERaycastPart.Body, ERaycastPart.Head, ERaycastPart.RandomPart };
         private static readonly ERaycastPart[] _bodyHeadPlus2Random = new ERaycastPart[] { ERaycastPart.Body, ERaycastPart.Head, ERaycastPart.RandomPart, ERaycastPart.RandomPart };
-
-        private ERaycastPart[] getPartsToCheck(out float maxRange)
-        {
-            maxRange = AIVisionRangeLimit();
-            if (Enemy.RealDistance > maxRange) {
-                return _empty;
-            }
-            bool isAI = Enemy.IsAI;
-            if (isAI && Enemy.RealDistance > MAX_LOS_RANGE_LIMBS_AI) {
-                return _onlyBody;
-            }
-            if (isAI) {
-                return _bodyPlus1Random;
-            }
-            // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
-            if (Enemy.IsCurrentEnemy) {
-                return _bodyHeadPlus2Random;
-            }
-            return _bodyHeadPlus1Random;
-        }
 
         public float AIVisionRangeLimit()
         {

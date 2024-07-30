@@ -70,7 +70,7 @@ namespace SAIN.Components
         }
 
         private BotSpawner _spawner;
-        public LineOfSightManager LineOfSightManager { get; private set; }
+        public BotJobsClass LineOfSightManager { get; private set; }
         public BotExtractManager BotExtractManager { get; private set; }
         public TimeClass TimeVision { get; private set; }
         public BotController.SAINWeatherClass WeatherVision { get; private set; }
@@ -110,7 +110,7 @@ namespace SAIN.Components
             BotSquads = new BotSquads(this);
             BotHearing = new BotHearingClass(this);
             PeacefulActions = new BotPeacefulActionController(this);
-            LineOfSightManager = new LineOfSightManager(this);
+            LineOfSightManager = new BotJobsClass(this);
             GameWorld.OnDispose += Dispose;
         }
 

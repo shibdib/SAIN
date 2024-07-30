@@ -6,27 +6,27 @@ using UnityEngine;
 
 namespace SAIN.Components
 {
-    public class LineOfSightManager : SAINControllerBase
+    public class BotJobsClass : SAINControllerBase
     {
-        public LineOfSightJobClass LineOfSightJob { get; }
+        public BotRaycastJobs RaycastJobs { get; }
 
-        public LineOfSightManager(SAINBotController botController) : base(botController)
+        public BotJobsClass(SAINBotController botController) : base(botController)
         {
-            LineOfSightJob = new LineOfSightJobClass(BotController);
+            RaycastJobs = new BotRaycastJobs(BotController);
         }
 
         public void Update()
         {
             var bots = Bots;
             if (bots != null && bots.Count > 0) {
-                LineOfSightJob.Update();
+                RaycastJobs.Update();
                 updateVisionForBots();
             }
         }
 
         public void Dispose()
         {
-            LineOfSightJob.Dispose();
+            RaycastJobs.Dispose();
         }
 
         private void updateVisionForBots()
@@ -58,7 +58,7 @@ namespace SAIN.Components
         private static int maxBotsPerFrame = 5;
         private readonly List<BotComponent> _localBotList = new List<BotComponent>();
 
-        static LineOfSightManager()
+        static BotJobsClass()
         {
             PresetHandler.OnPresetUpdated += updateSettings;
             updateSettings(SAINPresetClass.Instance);

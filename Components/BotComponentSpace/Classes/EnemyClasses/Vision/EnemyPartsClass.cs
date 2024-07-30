@@ -8,13 +8,6 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public enum ERaycastCheck
-    {
-        LineofSight,
-        Shoot,
-        Vision,
-    }
-
     public class EnemyPartsClass : EnemyBase
     {
         private const float LINEOFSIGHT_TIME = 0.25f;
@@ -61,20 +54,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 if (!inSight && part.LineOfSight) {
                     inSight = true;
                     _timeLastInSight = time;
-                }
-            }
-        }
-
-        public void ReadRaycastResult(BotRaycastData data, ERaycastCheck type, float time)
-        {
-            Enemy.Vision.VisionChecker.LastCheckLOSTime = time;
-            var parts = data.Data.BodyParts;
-            var colliderTypes = data.Data.ColliderTypes;
-            var points = data.Data.Points;
-            var hits = data.Job.Hits;
-            for (int i = 0; i < parts.Length; i++) {
-                if (Parts.TryGetValue(parts[i], out EnemyPartDataClass partData)) {
-                    partData.SetLineOfSight(points[i], colliderTypes[i], hits[i], type, time);
                 }
             }
         }

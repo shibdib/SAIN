@@ -140,9 +140,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\EscapeFromTarkov_Data\Managed\DissonanceVoip.dll</HintPath>
     </Reference>
-    <Reference Include="DrakiaXYZ-BigBrain, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\BepInEx\plugins\DrakiaXYZ-BigBrain.dll</HintPath>
+    <Reference Include="DrakiaXYZ-BigBrain">
+      <HintPath>..\..\BepInEx\DrakiaXYZ-BigBrain.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -272,6 +271,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyVisionChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyPartDataClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyPartsClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\ERaycastCheck.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\RaycastResult.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyControllerEvents.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyListController.cs" />
@@ -301,11 +301,8 @@
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Raycasts\BodyPartRaycast.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\BotRaycastTotalCheck.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Raycasts\EnemyDistanceJob.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\LineOfSightJobClass.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\RaycastWorkDelegator.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\RaycastWorker.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\BotRaycastJobs.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Raycasts\UnityJobExample%281%29.cs" />
     <Compile Include="Components\GameWorldSpace\Doors\BotDoorTrigger.cs" />
     <Compile Include="Components\GameWorldSpace\Doors\DoorHandler.cs" />
@@ -371,7 +368,6 @@
     <Compile Include="Components\BotComponentSpace\Routine.cs" />
     <Compile Include="Components\BotComponentSpace\SubComponents\CoverFinder\CoverFinderStatus.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\BotHearingClass.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\RayCastJobClass.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\ETimeOfDay.cs" />
     <Compile Include="Components\GameWorldSpace\Players\PlayerDictionary.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\AIDataBase.cs" />
@@ -642,7 +638,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINVisionClass.cs" />
     <Compile Include="Components\BotControllerSpace\SAINControllerBase.cs" />
     <Compile Include="Components\BotControllerSpace\SAINBotController.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\LineOfSightManager.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\BotJobsClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\SAINCoverClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\EnemyDecisionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\SelfActionDecisionClass.cs" />
