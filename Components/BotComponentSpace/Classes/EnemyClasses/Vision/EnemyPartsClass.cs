@@ -3,6 +3,7 @@ using SAIN.Components;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
@@ -22,6 +23,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public EnemyPartsClass(Enemy enemy) : base(enemy)
         {
             createPartDatas(enemy.Player.PlayerBones);
+            PartsArray = Parts.Values.ToArray();
             _indexMax = Parts.Count;
         }
 
@@ -34,6 +36,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public Vector3 LastSuccessShootPosition { get; private set; }
 
         public Dictionary<EBodyPart, EnemyPartDataClass> Parts { get; } = new Dictionary<EBodyPart, EnemyPartDataClass>();
+
+        public EnemyPartDataClass[] PartsArray { get; private set; }
 
         public void Update()
         {

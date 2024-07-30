@@ -300,6 +300,7 @@
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulActionSet.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\BodyPartRaycast.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Raycasts\BotRaycastTotalCheck.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Raycasts\EnemyDistanceJob.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Raycasts\LineOfSightJobClass.cs" />

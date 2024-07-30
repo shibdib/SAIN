@@ -43,35 +43,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
         }
 
-        public List<BodyPartRaycast> GetPartsToCheck(Vector3 origin)
-        {
-            _raycasts.Clear();
-            ERaycastPart[] partsToCheck = getPartsToCheck(out float maxRange);
-            int count = partsToCheck.Length;
-
-            for (int i = 0; i < count; i++) {
-                var type = partsToCheck[i];
-                switch (type) {
-                    case ERaycastPart.Body:
-                        _raycasts.Add(EnemyParts.Parts[EBodyPart.Chest].GetRaycast(origin, maxRange));
-                        continue;
-
-                    case ERaycastPart.Head:
-                        _raycasts.Add(EnemyParts.Parts[EBodyPart.Head].GetRaycast(origin, maxRange));
-                        continue;
-
-                    case ERaycastPart.RandomPart:
-                        var part = EnemyParts.GetNextPart();
-                        if (part != null) {
-                            _raycasts.Add(part.GetRaycast(origin, maxRange));
-                        }
-                        continue;
-                }
-            }
-
-            return _raycasts;
-        }
-
         public BotEnemyRaycastData GetPartsToCheck2(Vector3 origin)
         {
             ERaycastPart[] partsToCheck = getPartsToCheck(out float maxRange);

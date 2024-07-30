@@ -93,13 +93,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Vector3 castPoint = getCastPoint(origin, collider);
 
             return new BodyPartRaycast {
-                LOSRaycastHit = new RaycastHit(),
-                ShootRayCastHit = new RaycastHit(),
-                VisionRaycastHit = new RaycastHit(),
                 CastPoint = castPoint,
                 PartType = BodyPart,
-                ColliderType = collider.BodyPartColliderType,
-                MaxRange = maxRange
+                ColliderType = collider.BodyPartColliderType
             };
         }
 
