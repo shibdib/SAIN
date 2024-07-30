@@ -5,18 +5,18 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
-using UnityEngine.UI;
-using static HBAO_Core;
 
 namespace SAIN.Components
 {
     public class LineOfSightJobClass : SAINControllerBase
     {
         public RaycastWorkDelegator RaycastJobDelegator { get; }
+        public BatchRaycastJob1 BatchRaycasts { get; }
 
         public LineOfSightJobClass(SAINBotController botController) : base(botController)
         {
             RaycastJobDelegator = new RaycastWorkDelegator(botController);
+            BatchRaycasts = new BatchRaycastJob1(botController);
         }
 
         public void Update()
@@ -32,27 +32,28 @@ namespace SAIN.Components
 
     public class BatchRaycastJob1 : SAINControllerBase
     {
-        private Coroutine _VisionChecker;
-
-        public BatchRaycastJob1(SAINBotController sAINBotController) : base(sAINBotController)
+        public BatchRaycastJob1(SAINBotController botcontroller) : base(botcontroller)
         {
-        }
-
-        public void Update()
-        {
-        }
-
-        public void Dispose()
-        {
+            botcontroller.StartCoroutine(checkVisionLoop());
         }
 
         private IEnumerator checkVisionLoop()
         {
+            yield return null;
+
             while (true) {
                 yield return null;
 
-                var bots = Bots;
+                if (BotController == null) {
+                    continue;
+                }
+
+                var bots = BotController.BotSpawnController?.BotDictionary;
                 if (bots == null || bots.Count == 0) {
+                    continue;
+                }
+
+                if (BotController?.BotGame?.Status == EFT.GameStatus.Stopping) {
                     continue;
                 }
 
@@ -106,9 +107,9 @@ namespace SAIN.Components
                     }
                 }
 
-                JobHandle losHandle = RaycastCommand.ScheduleBatch(raycastCommands, raycastHits, 24);
+                JobHandle handle = RaycastCommand.ScheduleBatch(raycastCommands, raycastHits, 24);
                 yield return null;
-                losHandle.Complete();
+                handle.Complete();
 
                 float time = Time.time;
                 int hits = 0;
@@ -118,7 +119,9 @@ namespace SAIN.Components
                     var transform = enemy.Bot.Transform;
                     Vector3 origin = transform.EyePosition;
                     Vector3 weaponFirePort = transform.WeaponFirePort;
-                    var parts = enemy.Vision.VisionChecker.EnemyParts.PartsArray;
+                    var visionChecker = enemy.Vision.VisionChecker;
+                    var parts = visionChecker.EnemyParts.PartsArray;
+                    visionChecker.LastCheckLOSTime = time;
 
                     for (int j = 0; j < partCount; j++) {
                         var part = parts[j];
