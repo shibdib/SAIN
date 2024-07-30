@@ -1,6 +1,6 @@
 ﻿namespace SAIN.SAINComponent.Classes.Mover
 {
-    public enum SteerPriority
+    public enum ESteerPriority
     {
         None,
         Shooting,

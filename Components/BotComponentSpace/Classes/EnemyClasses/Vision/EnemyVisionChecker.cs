@@ -2,10 +2,8 @@
 using SAIN.Components.PlayerComponentSpace.PersonClasses;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
-using SAIN.SAINComponent.Classes.Search;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -123,14 +121,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
 
             didCheck = true;
-            //checkLOS(out Vector3? successPoint);
-            //if (successPoint != null) {
-            //    LastSeenPoint = successPoint.Value;
-            //}
-
             Enemy.Events.OnEnemyLineOfSightChanged.CheckToggle(LineOfSight);
-            bool canShoot = EnemyParts.CheckCanShoot(Enemy.Shoot.Targets.CanShootHead);
-            Enemy.Events.OnEnemyCanShootChanged.CheckToggle(canShoot);
+            //bool canShoot = EnemyParts.CheckCanShoot(Enemy.Shoot.Targets.CanShootHead);
+            //Enemy.Events.OnEnemyCanShootChanged.CheckToggle(canShoot);
         }
 
         private bool shallStart()
@@ -147,41 +140,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private const float MAX_LOS_RANGE_HEAD_HUMAN = 125f;
         private const float MAX_LOS_RANGE_LIMBS_AI = 200f;
-
-        private bool checkLOS()
-        {
-            Vector3 lookPoint = _transform.EyePosition;
-            float maxRange = AIVisionRangeLimit();
-            bool inSight = false;
-
-            if (Enemy.RealDistance > maxRange) {
-                return inSight;
-            }
-
-            bool isAI = Enemy.IsAI;
-            if (EnemyParts.CheckBodyLineOfSight(lookPoint, maxRange)) {
-                inSight = true;
-            }
-            if (isAI && Enemy.RealDistance > MAX_LOS_RANGE_LIMBS_AI) {
-                return inSight;
-            }
-            if (EnemyParts.CheckRandomPartLineOfSight(lookPoint, maxRange)) {
-                inSight = true;
-            }
-            if (isAI) {
-                return inSight;
-            }
-
-            // Do an extra check if the bot has this enemy as their active primary enemy or the enemy is not AI
-            if (Enemy.IsCurrentEnemy &&
-                EnemyParts.CheckRandomPartLineOfSight(lookPoint, maxRange)) {
-                inSight = true;
-            }
-            if (EnemyParts.CheckHeadLineOfSight(lookPoint, MAX_LOS_RANGE_HEAD_HUMAN)) {
-                inSight = true;
-            }
-            return inSight;
-        }
 
         private readonly List<BodyPartRaycast> _raycasts = new List<BodyPartRaycast>();
 

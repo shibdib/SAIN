@@ -278,7 +278,7 @@ namespace SAIN.SAINComponent.Classes.Search
             if (_searchSettings.Sneaky &&
                 Bot.Cover.CoverPoints.Count > 2 &&
                 Time.time - BotOwner.Memory.UnderFireTime > 30f) {
-                speed = 0.33f;
+                speed = 0.25f;
                 pose = 0.6f;
                 return;
             }
@@ -302,8 +302,8 @@ namespace SAIN.SAINComponent.Classes.Search
                 pose = searchSettings.SneakyPose;
             }
             else if (stealthy) {
-                speed = 0f;
-                pose = 0f;
+                speed = 0.33f;
+                pose = 1f;
             }
             return true;
         }

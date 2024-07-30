@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using EFT.Console.Core;
 using EFT.UI;
+using SAIN.Components.PlayerComponentSpace;
 using SAIN.Editor.Util;
 using SAIN.Plugin;
 using SAIN.Preset;

@@ -1,11 +1,10 @@
 ﻿using BepInEx.Logging;
 using EFT;
 using SAIN.Editor;
+using SAIN.Editor.Util;
 using SAIN.Plugin;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Net;
 using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
@@ -18,21 +17,22 @@ namespace SAIN.Helpers
         public Vector3 WorldPos;
         public string Text;
         public GUIStyle Style;
+        public float Scale = 1;
         public StringBuilder StringBuilder = new StringBuilder();
+        public bool Enabled = true;
     }
 
     public class DebugGizmos
     {
         static DebugGizmos()
         {
-            GameWorld.OnDispose += dispose; 
+            GameWorld.OnDispose += dispose;
             PresetHandler.OnEditorSettingsChanged += Update;
         }
 
         public static void Update(PresetEditorDefaults defaults)
         {
-            if (!DrawGizmos)
-            {
+            if (!DrawGizmos) {
                 clearGizmos();
             }
         }
@@ -40,15 +40,13 @@ namespace SAIN.Helpers
         private static void dispose()
         {
             clearGizmos();
-            GUIObjects.Clear();
+            DebugLabels.Clear();
         }
 
         private static void clearGizmos()
         {
-            if (DrawnGizmos.Count > 0)
-            {
-                for (int i = 0; i < DrawnGizmos.Count; i++)
-                {
+            if (DrawnGizmos.Count > 0) {
+                for (int i = 0; i < DrawnGizmos.Count; i++) {
                     if (DrawnGizmos[i] != null)
                         Object.Destroy(DrawnGizmos[i]);
                 }
@@ -56,18 +54,25 @@ namespace SAIN.Helpers
             }
         }
 
-        public static void OnGUI()
+        public static void OnGUIGame()
         {
-            if (!SAINPlugin.DebugSettings.Logs.DrawDebugLabels)
-            {
-                GUIObjects.Clear();
+            foreach (var obj in GameLabels) {
+                if (!obj.Enabled) continue;
+                string text = obj.Text.IsNullOrEmpty() ? obj.StringBuilder.ToString() : obj.Text;
+                OnGUIDrawLabel(obj.WorldPos, text, obj.Style, obj.Scale);
             }
-            else
-            {
-                foreach (var obj in GUIObjects)
-                {
+        }
+
+        public static void OnGUIDebug()
+        {
+            if (!SAINPlugin.DebugSettings.Logs.DrawDebugLabels) {
+                DebugLabels.Clear();
+            }
+            else {
+                foreach (var obj in DebugLabels) {
+                    if (!obj.Enabled) continue;
                     string text = obj.Text.IsNullOrEmpty() ? obj.StringBuilder.ToString() : obj.Text;
-                    OnGUIDrawLabel(obj.WorldPos, text, obj.Style);
+                    OnGUIDrawLabel(obj.WorldPos, text, obj.Style, obj.Scale);
                 }
             }
         }
@@ -78,45 +83,54 @@ namespace SAIN.Helpers
 
         private static GUIStyle DefaultStyle;
 
-        public static GUIObject CreateLabel(Vector3 worldPos, string text, GUIStyle guiStyle = null)
+        public static GUIObject CreateLabel(Vector3 worldPos, string text, GUIStyle guiStyle = null, float scale = 1f, bool debug = true)
         {
-            GUIObject obj = new GUIObject { WorldPos = worldPos, Text = text, Style = guiStyle };
-            AddGUIObject(obj);
+            GUIObject obj = new GUIObject { WorldPos = worldPos, Text = text, Style = guiStyle, Scale = scale };
+            AddGUIObject(obj, debug);
             return obj;
         }
 
-        public static void AddGUIObject(GUIObject obj)
+        public static void AddGUIObject(GUIObject obj, bool debug)
         {
-            if (GUIObjects.Contains(obj))
-            {
+            if (debug) {
+                if (!DebugLabels.Contains(obj)) {
+                    DebugLabels.Add(obj);
+                }
                 return;
             }
-            GUIObjects.Add(obj);
+            if (!GameLabels.Contains(obj)) {
+                GameLabels.Add(obj);
+            }
         }
 
         public static void DestroyLabel(GUIObject obj)
         {
-            GUIObjects.Remove(obj);
+            DebugLabels.Remove(obj);
+            GameLabels.Remove(obj);
         }
 
-        public static void OnGUIDrawLabel(Vector3 worldPos, string text, GUIStyle guiStyle = null)
+        public static void OnGUIDrawLabel(Vector3 worldPos, string text, GUIStyle guiStyle = null, float scale = 1f)
         {
             Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
-            if (screenPos.z <= 0)
-            {
+            if (screenPos.z <= 0) {
                 return;
             }
 
-            if (guiStyle == null)
-            {
-                if (DefaultStyle == null)
-                {
+            if (guiStyle == null) {
+                if (DefaultStyle == null) {
                     DefaultStyle = new GUIStyle(GUI.skin.box);
                     DefaultStyle.alignment = TextAnchor.MiddleLeft;
-                    DefaultStyle.fontSize = 14;
+                    DefaultStyle.fontSize = 20;
                     DefaultStyle.margin = new RectOffset(3, 3, 3, 3);
+                    ApplyToStyle.BackgroundAllStates(null, DefaultStyle);
                 }
                 guiStyle = DefaultStyle;
+            }
+
+            int origFontSize = guiStyle.fontSize;
+            if (scale < 1) {
+                int newFontSize = Mathf.RoundToInt(origFontSize * scale);
+                guiStyle.fontSize = newFontSize;
             }
 
             GUIContent content = new GUIContent(text);
@@ -126,15 +140,16 @@ namespace SAIN.Helpers
             float x = (screenPos.x * screenScale) - (guiSize.x / 2);
             float y = Screen.height - ((screenPos.y * screenScale) + guiSize.y);
             Rect rect = new Rect(new Vector2(x, y), guiSize);
-            GUI.Label(rect, content);
+            GUI.Label(rect, content, guiStyle);
+            guiStyle.fontSize = origFontSize;
         }
 
-        private static readonly List<GUIObject> GUIObjects = new List<GUIObject>();
+        private static readonly List<GUIObject> DebugLabels = new List<GUIObject>();
+        private static readonly List<GUIObject> GameLabels = new List<GUIObject>();
 
         private static float GetScreenScale()
         {
-            if (_nextCheckScreenTime < Time.time && CameraClass.Instance.SSAA.isActiveAndEnabled)
-            {
+            if (_nextCheckScreenTime < Time.time && CameraClass.Instance.SSAA.isActiveAndEnabled) {
                 _nextCheckScreenTime = Time.time + 10f;
                 _screenScale = (float)CameraClass.Instance.SSAA.GetOutputWidth() / (float)CameraClass.Instance.SSAA.GetInputWidth();
             }
@@ -146,12 +161,10 @@ namespace SAIN.Helpers
 
         public static GameObject Sphere(Vector3 position, float size, Color color, bool temporary = false, float expiretime = 1f)
         {
-            if (!DrawGizmos)
-            {
+            if (!DrawGizmos) {
                 return null;
             }
-            if (!SAINPlugin.DebugMode)
-            {
+            if (!SAINPlugin.DebugMode) {
                 return null;
             }
 
@@ -168,12 +181,10 @@ namespace SAIN.Helpers
 
         public static GameObject Box(Vector3 position, float length, float height, Color color, float expiretime = -1f)
         {
-            if (!DrawGizmos)
-            {
+            if (!DrawGizmos) {
                 return null;
             }
-            if (!SAINPlugin.DebugMode)
-            {
+            if (!SAINPlugin.DebugMode) {
                 return null;
             }
 
@@ -190,12 +201,10 @@ namespace SAIN.Helpers
 
         private static void AddGizmo(GameObject obj, float expireTime)
         {
-            if (expireTime > 0)
-            {
+            if (expireTime > 0) {
                 TempCoroutine.DestroyAfterDelay(obj, expireTime);
             }
-            else
-            {
+            else {
                 DrawnGizmos.Add(obj);
             }
         }
@@ -212,12 +221,10 @@ namespace SAIN.Helpers
 
         public static GameObject Line(Vector3 startPoint, Vector3 endPoint, Color color, float lineWidth = 0.1f, bool temporary = false, float expiretime = 1f, bool taperLine = false)
         {
-            if (!DrawGizmos)
-            {
+            if (!DrawGizmos) {
                 return null;
             }
-            if (!SAINPlugin.DebugMode)
-            {
+            if (!SAINPlugin.DebugMode) {
                 return null;
             }
 
@@ -240,8 +247,7 @@ namespace SAIN.Helpers
 
         public static void UpdatePositionLine(Vector3 a, Vector3 b, GameObject gameObject)
         {
-            if (gameObject == null)
-            {
+            if (gameObject == null) {
                 return;
             }
             var lineRenderer = gameObject.GetComponent<LineRenderer>();
@@ -277,21 +283,17 @@ namespace SAIN.Helpers
 
         public static void DrawLinesToPoint(List<GameObject> list, Vector3 origin, Color color, float lineSize, float expireTime, float raisePoints, params Vector3[] points)
         {
-            if (!DrawGizmos)
-            {
+            if (!DrawGizmos) {
                 return;
             }
-            for (int j = 0; j < points.Length; j++)
-            {
+            for (int j = 0; j < points.Length; j++) {
                 Vector3 pointB = points[j];
                 pointB.y += raisePoints;
 
-                if (origin != points[j])
-                {
+                if (origin != points[j]) {
                     Vector3 direction = origin - pointB;
                     float magnitude = direction.magnitude;
-                    if (magnitude > minMag)
-                    {
+                    if (magnitude > minMag) {
                         GameObject ray = Ray(pointB, direction, color, magnitude, lineSize, expireTime > 0, expireTime);
                         list.Add(ray);
                     }
@@ -301,8 +303,7 @@ namespace SAIN.Helpers
 
         public static List<GameObject> DrawLinesToPoint(Vector3 origin, Color color, float lineSize, float expireTime, float raisePoints, params Vector3[] points)
         {
-            if (!DrawGizmos)
-            {
+            if (!DrawGizmos) {
                 return null;
             }
             List<GameObject> list = new List<GameObject>();
@@ -312,12 +313,10 @@ namespace SAIN.Helpers
 
         public static void DrawSpheresAtPoints(List<GameObject> list, Color color, float size, float expireTime, float raisePoints, params Vector3[] points)
         {
-            if (!DrawGizmos)
-            {
+            if (!DrawGizmos) {
                 return;
             }
-            for (int i = 0; i < points.Length; i++)
-            {
+            for (int i = 0; i < points.Length; i++) {
                 Vector3 pointA = points[i];
                 pointA.y += raisePoints;
                 GameObject sphere = Sphere(pointA, size, color, expireTime > 0, expireTime);
@@ -327,8 +326,7 @@ namespace SAIN.Helpers
 
         public static List<GameObject> DrawSpheresAtPoints(Color color, float size, float expireTime, float raisePoints, params Vector3[] points)
         {
-            if (!DrawGizmos)
-            {
+            if (!DrawGizmos) {
                 return null;
             }
             List<GameObject> list = new List<GameObject>();
@@ -338,14 +336,12 @@ namespace SAIN.Helpers
 
         public static List<GameObject> DrawLinesBetweenPoints(float lineSize, float expireTime, float raisePoints, params Vector3[] points)
         {
-            if (!DrawGizmos)
-            {
+            if (!DrawGizmos) {
                 return null;
             }
 
             List<GameObject> list = new List<GameObject>();
-            for (int i = 0; i < points.Length; i++)
-            {
+            for (int i = 0; i < points.Length; i++) {
                 Vector3 pointA = points[i];
                 pointA.y += raisePoints;
 
@@ -362,14 +358,12 @@ namespace SAIN.Helpers
 
         public static List<GameObject> DrawLinesBetweenPoints(float lineSize, float expireTime, float raisePoints, Color color, params Vector3[] points)
         {
-            if (!DrawGizmos)
-            {
+            if (!DrawGizmos) {
                 return null;
             }
 
             List<GameObject> list = new List<GameObject>();
-            for (int i = 0; i < points.Length; i++)
-            {
+            for (int i = 0; i < points.Length; i++) {
                 Vector3 pointA = points[i];
                 pointA.y += raisePoints;
 
@@ -395,13 +389,11 @@ namespace SAIN.Helpers
             {
                 LogName += "[Drawer]";
 
-                if (randomColor)
-                {
+                if (randomColor) {
                     ColorA = new Color(Random.value, Random.value, Random.value);
                     ColorB = new Color(Random.value, Random.value, Random.value);
                 }
-                else
-                {
+                else {
                     ColorA = colorA;
                     ColorB = colorB;
                 }
@@ -411,23 +403,19 @@ namespace SAIN.Helpers
 
             public void DrawTempPath(NavMeshPath Path, bool active, Color colorActive, Color colorInActive, float lineSize = 0.05f, float expireTime = 0.5f, bool useDrawerSetColors = false)
             {
-                if (!DrawGizmos)
-                {
+                if (!DrawGizmos) {
                     return;
                 }
 
-                for (int i = 0; i < Path.corners.Length - 1; i++)
-                {
+                for (int i = 0; i < Path.corners.Length - 1; i++) {
                     Vector3 corner1 = Path.corners[i] + Vector3.up;
                     Vector3 corner2 = Path.corners[i + 1] + Vector3.up;
 
                     Color color;
-                    if (useDrawerSetColors)
-                    {
+                    if (useDrawerSetColors) {
                         color = active ? ColorA : ColorB;
                     }
-                    else
-                    {
+                    else {
                         color = active ? colorActive : colorInActive;
                     }
 
@@ -437,17 +425,14 @@ namespace SAIN.Helpers
 
             public void Draw(List<Vector3> list, bool destroy, float size = 0.1f, bool rays = false, float rayLength = 0.35f)
             {
-                if (!DrawGizmos)
-                {
+                if (!DrawGizmos) {
                     DestroyDebug();
                     return;
                 }
-                if (destroy)
-                {
+                if (destroy) {
                     DestroyDebug();
                 }
-                else if (list.Count > 0 && DebugObjects == null)
-                {
+                else if (list.Count > 0 && DebugObjects == null) {
                     Logger.LogWarning($"Drawing {list.Count} Vector3s");
 
                     DebugObjects = Create(list, size, rays, rayLength);
@@ -456,17 +441,14 @@ namespace SAIN.Helpers
 
             public void Draw(Vector3[] array, bool destroy, float size = 0.1f, bool rays = false, float rayLength = 0.35f)
             {
-                if (!DrawGizmos)
-                {
+                if (!DrawGizmos) {
                     DestroyDebug();
                     return;
                 }
-                if (destroy)
-                {
+                if (destroy) {
                     DestroyDebug();
                 }
-                else if (array.Length > 0 && DebugObjects == null)
-                {
+                else if (array.Length > 0 && DebugObjects == null) {
                     Logger.LogWarning($"Drawing {array.Length} Vector3s");
 
                     DebugObjects = Create(array, size, rays, rayLength);
@@ -476,17 +458,14 @@ namespace SAIN.Helpers
             private GameObject[] Create(List<Vector3> list, float size = 0.1f, bool rays = false, float rayLength = 0.35f)
             {
                 List<GameObject> debugObjects = new List<GameObject>();
-                foreach (var point in list)
-                {
-                    if (rays)
-                    {
+                foreach (var point in list) {
+                    if (rays) {
                         size *= Random.Range(0.5f, 1.5f);
                         rayLength *= Random.Range(0.5f, 1.5f);
                         var ray = Ray(point, Vector3.up, ColorA, rayLength, size);
                         debugObjects.Add(ray);
                     }
-                    else
-                    {
+                    else {
                         var sphere = Sphere(point, size, ColorA);
                         debugObjects.Add(sphere);
                     }
@@ -498,17 +477,14 @@ namespace SAIN.Helpers
             private GameObject[] Create(Vector3[] array, float size = 0.1f, bool rays = false, float rayLength = 0.35f)
             {
                 List<GameObject> debugObjects = new List<GameObject>();
-                foreach (var point in array)
-                {
-                    if (rays)
-                    {
+                foreach (var point in array) {
+                    if (rays) {
                         size *= Random.Range(0.5f, 1.5f);
                         rayLength *= Random.Range(0.5f, 1.5f);
                         var ray = Ray(point, Vector3.up, ColorA, rayLength, size);
                         debugObjects.Add(ray);
                     }
-                    else
-                    {
+                    else {
                         var sphere = Sphere(point, size, ColorA);
                         debugObjects.Add(sphere);
                     }
@@ -519,10 +495,8 @@ namespace SAIN.Helpers
 
             private void DestroyDebug()
             {
-                if (DebugObjects != null)
-                {
-                    foreach (var point in DebugObjects)
-                    {
+                if (DebugObjects != null) {
+                    foreach (var point in DebugObjects) {
                         Object.Destroy(point);
                     }
 
@@ -605,8 +579,7 @@ namespace SAIN.Helpers
             /// <param value="delay">The delay before the GameObject is destroyed.</param>
             public static void DestroyAfterDelay(GameObject obj, float delay)
             {
-                if (obj != null)
-                {
+                if (obj != null) {
                     var runner = new GameObject("TempCoroutineRunner").AddComponent<TempCoroutineRunner>();
                     runner?.StartCoroutine(RunDestroyAfterDelay(obj, delay));
                 }
@@ -621,11 +594,9 @@ namespace SAIN.Helpers
             private static IEnumerator RunDestroyAfterDelay(GameObject obj, float delay)
             {
                 yield return new WaitForSeconds(delay);
-                if (obj != null)
-                {
+                if (obj != null) {
                     TempCoroutineRunner runner = obj.GetComponentInParent<TempCoroutineRunner>();
-                    if (runner != null)
-                    {
+                    if (runner != null) {
                         Destroy(runner.gameObject);
                     }
                     Destroy(obj);

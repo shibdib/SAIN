@@ -76,7 +76,7 @@ namespace SAIN.Helpers
         {
             var core = EFTCore.Core;
 
-            core.SCAV_GROUPS_TOGETHER = true;
+            core.SCAV_GROUPS_TOGETHER = false;
             core.DIST_NOT_TO_GROUP = 50f;
             core.DIST_NOT_TO_GROUP_SQR = core.DIST_NOT_TO_GROUP.Sqr();
 

@@ -31,6 +31,46 @@ namespace SAIN.Components.PlayerComponentSpace
                 Flashlight.Update();
                 Equipment.Update();
             }
+            if (Player.IsYourPlayer) {
+                //testNavMeshNodes();
+            }
+        }
+
+        private void testNavMeshNodes()
+        {
+            List<Vector3> visibleNodes = new List<Vector3>();
+            Vector3 origin = Transform.EyePosition;
+            Vector3[] vertices = NavMesh.CalculateTriangulation().vertices;
+            foreach (Vector3 vert in vertices) {
+                Vector3 direction = (vert - origin);
+                float sqrMag = direction.sqrMagnitude;
+                if (sqrMag > 100f * 100f) {
+                    continue;
+                }
+                float distance = Mathf.Sqrt(sqrMag);
+                if (!Physics.Raycast(origin, direction, distance, LayerMaskClass.HighPolyWithTerrainMask)) {
+                    visibleNodes.Add(vert);
+                    continue;
+                }
+                direction.y += 0.5f;
+                if (!Physics.Raycast(origin, direction, distance, LayerMaskClass.HighPolyWithTerrainMask)) {
+                    visibleNodes.Add(vert);
+                    continue;
+                }
+                direction.y += 0.5f;
+                if (!Physics.Raycast(origin, direction, distance, LayerMaskClass.HighPolyWithTerrainMask)) {
+                    visibleNodes.Add(vert);
+                    continue;
+                }
+                direction.y += 0.5f;
+                if (!Physics.Raycast(origin, direction, distance, LayerMaskClass.HighPolyWithTerrainMask)) {
+                    visibleNodes.Add(vert);
+                    continue;
+                }
+            }
+            foreach (var visibleVert in visibleNodes) {
+                DebugGizmos.Ray(visibleVert, Vector3.up, Color.green, 1.5f, 0.025f, true, 0.25f);
+            }
         }
 
         private IEnumerator voiceTest()

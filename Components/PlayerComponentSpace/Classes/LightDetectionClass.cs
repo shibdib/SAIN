@@ -18,8 +18,7 @@ namespace SAIN.Components.PlayerComponentSpace
 
         public void CreateDetectionPoints(bool visibleLight, bool onlyLaser)
         {
-            if (PlayerComponent.IsAI)
-            {
+            if (PlayerComponent.IsAI) {
                 return;
             }
 
@@ -29,8 +28,7 @@ namespace SAIN.Components.PlayerComponentSpace
             Vector3 firePort = Transform.WeaponFirePort;
 
             // Our flashlight did not hit an object, return
-            if (!Physics.Raycast(firePort, lightDirection, out RaycastHit hit, detectionDistance, mask))
-            {
+            if (!Physics.Raycast(firePort, lightDirection, out RaycastHit hit, detectionDistance, mask)) {
                 return;
             }
 
@@ -41,13 +39,11 @@ namespace SAIN.Components.PlayerComponentSpace
             LightPoints.Add(new FlashLightPoint(point));
 
             // Debug is off, return
-            if (!SAINPlugin.LoadedPreset.GlobalSettings.General.Flashlight.DebugFlash)
-            {
+            if (!SAINPlugin.LoadedPreset.GlobalSettings.General.Flashlight.DebugFlash) {
                 return;
             }
 
-            if (visibleLight)
-            {
+            if (visibleLight) {
                 DebugGizmos.Sphere(point, 0.1f, Color.red, true, 0.25f);
                 DebugGizmos.Line(point, firePort, Color.red, 0.015f, true, 0.25f);
                 return;
@@ -59,12 +55,10 @@ namespace SAIN.Components.PlayerComponentSpace
 
         private Vector3 getLightDirection(bool onlyLaser)
         {
-            if (onlyLaser)
-            {
+            if (onlyLaser) {
                 return Transform.WeaponPointDirection;
             }
-            if (_nextUpdatebeamtime < Time.time)
-            {
+            if (_nextUpdatebeamtime < Time.time) {
                 _nextUpdatebeamtime = Time.time + 0.5f;
                 createFlashlightBeam(_lightBeamDirections);
             }
@@ -78,8 +72,7 @@ namespace SAIN.Components.PlayerComponentSpace
 
             beamDirections.Clear();
             Vector3 weaponPointDir = Transform.WeaponPointDirection;
-            for (int i = 0; i < 10; i++)
-            {
+            for (int i = 0; i < 10; i++) {
                 // Generate random angles within the cone range for yaw and pitch
                 float angle = coneAngle * 0.5f;
                 float x = Random.Range(-angle, angle);
@@ -98,37 +91,31 @@ namespace SAIN.Components.PlayerComponentSpace
 
         public void DetectAndInvestigateFlashlight()
         {
-            if (!PlayerComponent.IsSAINBot)
-            {
+            if (!PlayerComponent.IsSAINBot) {
                 return;
             }
-            if (_searchTime > Time.time)
-            {
+            if (_searchTime > Time.time) {
                 return;
             }
 
-            if (PlayerComponent.BotComponent?.BotActive != true)
-            {
+            if (PlayerComponent.BotComponent?.BotActive != true) {
                 return;
             }
 
             var enemies = PlayerComponent.BotComponent.EnemyController.Enemies.Values;
-            if (enemies == null)
-            {
+            if (enemies == null) {
                 return;
             }
 
             BotOwner bot = PlayerComponent.BotOwner;
-            if (bot == null)
-            {
+            if (bot == null) {
                 return;
             }
 
             bool usingNVGs = bot.NightVision?.UsingNow == true;
             Vector3 botPos = bot.LookSensor._headPoint;
 
-            foreach (var enemy in enemies)
-            {
+            foreach (var enemy in enemies) {
                 checkEnemyLight(enemy, botPos, usingNVGs);
             }
         }
@@ -136,76 +123,64 @@ namespace SAIN.Components.PlayerComponentSpace
         private void checkEnemyLight(Enemy enemy, Vector3 botPos, bool usingNVGs)
         {
             // something is wrong with this enemy, or the enemy is another bot
-            if (!validateEnemyIsHuman(enemy))
-            {
+            if (!validateEnemyIsHuman(enemy)) {
                 return;
             }
 
             // we checked this enemies flashlight recently, continue to next enemy
-            if (enemy.NextCheckFlashLightTime > Time.time)
-            {
+            if (enemy.NextCheckFlashLightTime > Time.time) {
                 return;
             }
             enemy.NextCheckFlashLightTime = Time.time + 0.2f;
 
             var flashLight = enemy.EnemyPlayerComponent.Flashlight;
-            if (!checkIsBeamVisible(flashLight, usingNVGs))
-            {
+            if (!checkIsBeamVisible(flashLight, usingNVGs)) {
                 return;
             }
 
             // Light point is out of range, dont raycast to check vision
             FlashLightPoint lightPoint = flashLight.LightDetection.LightPoints.PickRandom();
-            if (!isLightInRange(botPos, lightPoint.Point))
-            {
+            if (!isLightInRange(botPos, lightPoint.Point)) {
                 return;
             }
 
             // is the point within a bot's field of view?
-            if (!PlayerComponent.BotOwner.LookSensor.IsPointInVisibleSector(lightPoint.Point))
-            {
+            if (!PlayerComponent.BotOwner.LookSensor.IsPointInVisibleSector(lightPoint.Point)) {
                 return;
             }
 
             // raycast to check if the point is visible
-            if (!raycastToLightPoint(lightPoint.Point, botPos))
-            {
-                if (SAINPlugin.DebugMode)
-                {
+            if (!raycastToLightPoint(lightPoint.Point, botPos)) {
+                if (SAINPlugin.DebugMode) {
                     DebugGizmos.Line(lightPoint.Point, botPos, Color.white, 0.05f, true, 0.25f);
                     DebugGizmos.Line(lightPoint.Point, enemy.EnemyPosition + Vector3.up, Color.white, 0.05f, true, 0.25f);
                 }
                 return;
             }
 
-            if (SAINPlugin.DebugMode)
-            {
+            if (SAINPlugin.DebugMode) {
                 DebugGizmos.Line(lightPoint.Point, botPos, Color.red, 0.1f, true, 3f);
                 DebugGizmos.Line(lightPoint.Point, enemy.EnemyPosition + Vector3.up, Color.red, 0.1f, true, 3f);
             }
 
             // all checks are passed, estimate the enemy position and try to investigate
-            Vector3 estimatedPosition = estimatePosition(enemy.EnemyPosition, lightPoint.Point, botPos, 10f);
+            Vector3 estimatedPosition = estimatePosition(enemy.EnemyPosition, lightPoint.Point, botPos, 20f);
             tryToInvestigate(estimatedPosition);
             _searchTime = Time.time + 1f;
         }
 
         private bool validateEnemyIsHuman(Enemy enemy)
         {
-            if (enemy == null)
-            {
+            if (enemy == null) {
                 return false;
             }
-            if (enemy.IsAI)
-            {
+            if (enemy.IsAI) {
                 return false;
             }
-            if (!enemy.CheckValid())
-            {
+            if (!enemy.CheckValid()) {
                 return false;
             }
-            if (enemy.EnemyPlayerComponent == null)
-            {
+            if (enemy.EnemyPlayerComponent == null) {
                 return false;
             }
             return true;
@@ -216,12 +191,10 @@ namespace SAIN.Components.PlayerComponentSpace
             // If this isn't visible light, and the bot doesn't have night vision, ignore it
             if (!flashLight.WhiteLight &&
                 !flashLight.Laser &&
-                !usingNVGs)
-            {
+                !usingNVGs) {
                 return false;
             }
-            if (flashLight.LightDetection.LightPoints.Count <= 0)
-            {
+            if (flashLight.LightDetection.LightPoints.Count <= 0) {
                 return false;
             }
             return true;
@@ -244,8 +217,7 @@ namespace SAIN.Components.PlayerComponentSpace
         private void tryToInvestigate(Vector3 estimatedPosition)
         {
             var botComponent = PlayerComponent.BotComponent;
-            if (botComponent != null)
-            {
+            if (botComponent != null) {
                 botComponent.Squad.SquadInfo.AddPointToSearch
                     (estimatedPosition,
                     25f,
@@ -254,19 +226,19 @@ namespace SAIN.Components.PlayerComponentSpace
                     Singleton<GameWorld>.Instance.MainPlayer,
                     SAIN.BotController.Classes.Squad.ESearchPointType.Flashlight);
             }
-            else
-            {
+            else {
                 PlayerComponent.BotOwner?.BotsGroup.AddPointToSearch(estimatedPosition, 20f, PlayerComponent.BotOwner, true, false);
             }
         }
 
         private Vector3 estimatePosition(Vector3 playerPos, Vector3 flashPos, Vector3 botPos, float dispersion)
         {
-            Vector3 estimatedPosition = Vector3.Lerp(playerPos, flashPos, Random.Range(0.0f, 0.25f));
+            Vector3 estimatedPosition = playerPos;
+            // Vector3 estimatedPosition = Vector3.Lerp(playerPos, flashPos, Random.Range(0.0f, 0.25f));
 
             float distance = (playerPos - botPos).magnitude;
 
-            float maxDispersion = Mathf.Clamp(distance, 0f, 20f);
+            float maxDispersion = Mathf.Clamp(distance, 0f, 50f);
 
             float positionDispersion = maxDispersion / dispersion;
 

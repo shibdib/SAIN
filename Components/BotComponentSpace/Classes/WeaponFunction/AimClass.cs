@@ -31,7 +31,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-
         }
 
         private void updateSettings(SAINPresetClass preset)
@@ -68,13 +67,13 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 baseAimTime *= AIMTIME_COVER_COEF;
             }
 
-            float angleTime = 
+            float angleTime =
                 calcCurveOutput(_aimAngleCurve, angle, AIMTIME_MULTIPLIER_ANGLE, stringBuilder, "Angle");
-            float distanceTime = 
+            float distanceTime =
                 calcCurveOutput(_aimDistanceCurve, distance, AIMTIME_MULTIPLIER_DISTANCE, stringBuilder, "Distance");
-            float calculatedAimTime = 
+            float calculatedAimTime =
                 calcAimTime(angleTime, distanceTime, BotOwner, stringBuilder);
-            calculatedAimTime = 
+            calculatedAimTime =
                 calcPanic(panicing, calculatedAimTime, fileSettings, stringBuilder);
 
             float timeToAimResult = (baseAimTime + calculatedAimTime + aimDelay);
@@ -86,9 +85,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             timeToAimResult = calcFasterCQB(distance, timeToAimResult, sainAimSettings, stringBuilder);
             timeToAimResult = calcAttachmentMod(Bot, timeToAimResult, stringBuilder);
 
-            if (stringBuilder != null && 
-                BotOwner?.Memory?.GoalEnemy?.Person?.IsYourPlayer == true)
-            {
+            if (stringBuilder != null &&
+                BotOwner?.Memory?.GoalEnemy?.Person?.IsYourPlayer == true) {
                 Logger.LogDebug(stringBuilder.ToString());
             }
             return timeToAimResult;
@@ -108,8 +106,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             CoverPoint coverInUse = botComponent?.Cover.CoverInUse;
             bool inCover = coverInUse?.BotInThisCover == true;
-            if (inCover)
-            {
+            if (inCover) {
                 baseAimTime *= fileSettings.Aiming.COEF_FROM_COVER;
                 stringBuilder?.AppendLine($"In Cover: [{baseAimTime}] : COEF_FROM_COVER [{fileSettings.Aiming.COEF_FROM_COVER}]");
             }
@@ -126,8 +123,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private static float calcMoveModifier(bool moving, float timeToAimResult, BotSettingsComponents fileSettings, StringBuilder stringBuilder)
         {
-            if (moving)
-            {
+            if (moving) {
                 timeToAimResult *= fileSettings.Aiming.COEF_IF_MOVE;
                 stringBuilder?.AppendLine($"Moving [{timeToAimResult}] : Moving Coef [{fileSettings.Aiming.COEF_IF_MOVE}]");
             }
@@ -136,8 +132,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private static float calcADSModifier(bool aiming, float timeToAimResult, StringBuilder stringBuilder)
         {
-            if (aiming)
-            {
+            if (aiming) {
                 float adsMulti = SAINPlugin.LoadedPreset.GlobalSettings.Aiming.AimDownSightsAimTimeMultiplier;
                 timeToAimResult *= adsMulti;
                 stringBuilder?.AppendLine($"Aiming Down Sights [{timeToAimResult}] : ADS Multiplier [{adsMulti}]");
@@ -148,8 +143,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private static float clampAimTime(float timeToAimResult, BotSettingsComponents fileSettings, StringBuilder stringBuilder)
         {
             float clampedResult = Mathf.Clamp(timeToAimResult, 0f, fileSettings.Aiming.MAX_AIM_TIME);
-            if (clampedResult != timeToAimResult)
-            {
+            if (clampedResult != timeToAimResult) {
                 stringBuilder?.AppendLine($"Clamped Aim Time [{clampedResult}] : MAX_AIM_TIME [{fileSettings.Aiming.MAX_AIM_TIME}]");
             }
             return clampedResult;
@@ -157,8 +151,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private static float calcPanic(bool panicing, float calculatedAimTime, BotSettingsComponents fileSettings, StringBuilder stringBuilder)
         {
-            if (panicing)
-            {
+            if (panicing) {
                 calculatedAimTime *= fileSettings.Aiming.PANIC_COEF;
                 stringBuilder?.AppendLine($"Panicing [{calculatedAimTime}] : Panic Coef [{fileSettings.Aiming.PANIC_COEF}]");
             }
@@ -167,13 +160,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private static float calcFasterCQB(float distance, float aimTimeResult, SAINAimingSettings aimSettings, StringBuilder stringBuilder)
         {
-            if (!SAINPlugin.LoadedPreset.GlobalSettings.Aiming.FasterCQBReactionsGlobal)
-            {
+            if (!SAINPlugin.LoadedPreset.GlobalSettings.Aiming.FasterCQBReactionsGlobal) {
                 return aimTimeResult;
             }
             if (aimSettings?.FasterCQBReactions == true &&
-                distance <= aimSettings.FasterCQBReactionsDistance)
-            {
+                distance <= aimSettings.FasterCQBReactionsDistance) {
                 float ratio = distance / aimSettings.FasterCQBReactionsDistance;
                 float fasterTime = aimTimeResult * ratio;
                 fasterTime = Mathf.Clamp(fasterTime, aimSettings.FasterCQBReactionsMinimum, aimTimeResult);
@@ -186,8 +177,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private static float calcAttachmentMod(BotComponent bot, float aimTimeResult, StringBuilder stringBuilder)
         {
             Enemy enemy = bot?.Enemy;
-            if (enemy != null)
-            {
+            if (enemy != null) {
                 float modifier = enemy.Aim.AimAndScatterMultiplier;
                 stringBuilder?.AppendLine($"Bot Attachment Mod: Result [{aimTimeResult / modifier}] : Original [{aimTimeResult}] : Modifier [{modifier}]");
                 aimTimeResult /= modifier;
@@ -195,32 +185,31 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return aimTimeResult;
         }
     }
+
     public class AimClass : BotBase, IBotClass
     {
         public event Action<bool> OnAimAllowedOrBlocked;
 
         public bool CanAim { get; private set; }
-        
+
         public float LastAimTime { get; set; }
 
-        public AimStatus AimStatus
-        {
+        public AimStatus AimStatus {
             get
             {
                 object aimStatus = aimStatusField.GetValue(BotOwner.AimingData);
-                if (aimStatus == null)
-                {
+                if (aimStatus == null) {
                     return AimStatus.NoTarget;
                 }
 
                 var status = (AimStatus)aimStatus;
 
-                if (status != AimStatus.NoTarget &&
-                    Bot.Enemy?.IsVisible == false &&
-                    Bot.LastEnemy?.IsVisible == false)
-                {
-                    return AimStatus.NoTarget;
-                }
+                //if (status != AimStatus.NoTarget &&
+                //    Bot.Enemy?.IsVisible == false &&
+                //    Bot.LastEnemy?.IsVisible == false)
+                //{
+                //    return AimStatus.NoTarget;
+                //}
                 return status;
             }
         }
@@ -241,15 +230,13 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void LateUpdate()
         {
-
         }
 
         private void checkCanAim()
         {
             bool couldAim = CanAim;
             CanAim = canAim();
-            if (couldAim != CanAim)
-            {
+            if (couldAim != CanAim) {
                 OnAimAllowedOrBlocked?.Invoke(CanAim);
             }
         }
@@ -257,29 +244,24 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private bool canAim()
         {
             var aimData = BotOwner.AimingData;
-            if (aimData == null)
-            {
+            if (aimData == null) {
+                //return false;
+            }
+            if (Player.IsSprintEnabled) {
                 return false;
             }
-            if (Player.IsSprintEnabled)
-            {
-                return false;
+            if (BotOwner.WeaponManager.Reload.Reloading) {
+                //return false;
             }
-            if (BotOwner.WeaponManager.Reload.Reloading)
-            {
-                return false;
-            }
-            if (!Bot.HasEnemy)
-            {
-                return false;
+            if (!Bot.HasEnemy) {
+                //return false;
             }
             return true;
         }
 
         private void checkLoseTarget()
         {
-            if (!CanAim)
-            {
+            if (!CanAim) {
                 BotOwner.AimingData?.LoseTarget();
                 return;
             }
@@ -287,7 +269,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-
         }
 
         static AimClass()

@@ -10,8 +10,8 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class SteerPriorityClass : BotSubClass<SAINSteeringClass>
     {
-        public SteerPriority CurrentSteerPriority { get; private set; }
-        public SteerPriority LastSteerPriority { get; private set; }
+        public ESteerPriority CurrentSteerPriority { get; private set; }
+        public ESteerPriority LastSteerPriority { get; private set; }
         public PlaceForCheck LastHeardSound { get; private set; }
         public Enemy EnemyWhoLastShotMe { get; private set; }
 
@@ -50,7 +50,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
         }
 
-        public SteerPriority GetCurrentSteerPriority(bool lookRandom, bool ignoreRunningPath)
+        public ESteerPriority GetCurrentSteerPriority(bool lookRandom, bool ignoreRunningPath)
         {
             var lastPriority = CurrentSteerPriority;
             CurrentSteerPriority = findSteerPriority(lookRandom, ignoreRunningPath);
@@ -61,80 +61,80 @@ namespace SAIN.SAINComponent.Classes.Mover
             return CurrentSteerPriority;
         }
 
-        private SteerPriority findSteerPriority(bool lookRandom, bool ignoreRunningPath)
+        private ESteerPriority findSteerPriority(bool lookRandom, bool ignoreRunningPath)
         {
-            SteerPriority result = strickChecks(ignoreRunningPath);
+            ESteerPriority result = strickChecks(ignoreRunningPath);
 
-            if (result != SteerPriority.None) {
+            if (result != ESteerPriority.None) {
                 return result;
             }
 
             result = reactiveSteering();
 
-            if (result != SteerPriority.None) {
+            if (result != ESteerPriority.None) {
                 return result;
             }
 
             result = senseSteering();
 
-            if (result != SteerPriority.None) {
+            if (result != ESteerPriority.None) {
                 return result;
             }
 
             if (lookRandom) {
-                return SteerPriority.RandomLook;
+                return ESteerPriority.RandomLook;
             }
-            return SteerPriority.None;
+            return ESteerPriority.None;
         }
 
-        private SteerPriority strickChecks(bool ignoreRunningPath)
+        private ESteerPriority strickChecks(bool ignoreRunningPath)
         {
             if (!ignoreRunningPath && Bot.Mover.SprintController.Running)
-                return SteerPriority.RunningPath;
+                return ESteerPriority.RunningPath;
 
             if (Player.IsSprintEnabled)
-                return SteerPriority.Sprinting;
+                return ESteerPriority.Sprinting;
 
             if (lookToAimTarget())
-                return SteerPriority.Aiming;
+                return ESteerPriority.Aiming;
 
             if (Bot.ManualShoot.Reason != EShootReason.None
                 && Bot.ManualShoot.ShootPosition != Vector3.zero)
-                return SteerPriority.ManualShooting;
+                return ESteerPriority.ManualShooting;
 
             if (enemyVisible())
-                return SteerPriority.EnemyVisible;
+                return ESteerPriority.EnemyVisible;
 
-            return SteerPriority.None;
+            return ESteerPriority.None;
         }
 
-        private SteerPriority reactiveSteering()
+        private ESteerPriority reactiveSteering()
         {
             if (enemyShotMe()) {
-                return SteerPriority.LastHit;
+                return ESteerPriority.LastHit;
             }
 
             //if (BotOwner.Memory.IsUnderFire && !Bot.Memory.LastUnderFireEnemy.IsCurrentEnemy)
             if (BotOwner.Memory.IsUnderFire)
-                return SteerPriority.UnderFire;
+                return ESteerPriority.UnderFire;
 
-            return SteerPriority.None;
+            return ESteerPriority.None;
         }
 
-        private SteerPriority senseSteering()
+        private ESteerPriority senseSteering()
         {
             EnemyPlace lastKnownPlace = Bot.Enemy?.KnownPlaces?.LastKnownPlace;
 
             if (lastKnownPlace != null && lastKnownPlace.TimeSincePositionUpdated < Steer_TimeSinceLocationKnown_Threshold)
-                return SteerPriority.EnemyLastKnown;
+                return ESteerPriority.EnemyLastKnown;
 
             if (heardThreat())
-                return SteerPriority.HeardThreat;
+                return ESteerPriority.HeardThreat;
 
             if (lastKnownPlace != null && lastKnownPlace.TimeSincePositionUpdated < Steer_TimeSinceSeen_Long)
-                return SteerPriority.EnemyLastKnownLong;
+                return ESteerPriority.EnemyLastKnownLong;
 
-            return SteerPriority.None;
+            return ESteerPriority.None;
         }
 
         private bool heardThreat()

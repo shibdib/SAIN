@@ -12,8 +12,8 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class SAINSteeringClass : BotBase, IBotClass
     {
-        public SteerPriority CurrentSteerPriority => _steerPriorityClass.CurrentSteerPriority;
-        public SteerPriority LastSteerPriority => _steerPriorityClass.LastSteerPriority;
+        public ESteerPriority CurrentSteerPriority => _steerPriorityClass.CurrentSteerPriority;
+        public ESteerPriority LastSteerPriority => _steerPriorityClass.LastSteerPriority;
         public EEnemySteerDir EnemySteerDir { get; private set; }
         public Vector3 WeaponRootOffset => BotOwner.WeaponRoot.position - Bot.Position + (Vector3.down * 0.1f);
         public AimStatus AimStatus => _steerPriorityClass.AimStatus;
@@ -24,42 +24,42 @@ namespace SAIN.SAINComponent.Classes.Mover
                 enemy = Bot.Enemy;
 
             switch (_steerPriorityClass.GetCurrentSteerPriority(lookRandom, ignoreRunningPath)) {
-                case SteerPriority.RunningPath:
-                case SteerPriority.Aiming:
+                case ESteerPriority.RunningPath:
+                case ESteerPriority.Aiming:
                     return true;
 
-                case SteerPriority.ManualShooting:
+                case ESteerPriority.ManualShooting:
                     LookToPoint(Bot.ManualShoot.ShootPosition + Bot.Info.WeaponInfo.Recoil.CurrentRecoilOffset);
                     return true;
 
-                case SteerPriority.EnemyVisible:
+                case ESteerPriority.EnemyVisible:
                     LookToEnemy(Bot.Enemy);
                     return true;
 
-                case SteerPriority.UnderFire:
+                case ESteerPriority.UnderFire:
                     lookToUnderFirePos();
                     return true;
 
-                case SteerPriority.LastHit:
+                case ESteerPriority.LastHit:
                     lookToLastHitPos();
                     return true;
 
-                case SteerPriority.EnemyLastKnownLong:
-                case SteerPriority.EnemyLastKnown:
+                case ESteerPriority.EnemyLastKnownLong:
+                case ESteerPriority.EnemyLastKnown:
                     if (!LookToLastKnownEnemyPosition(enemy)) {
                         LookToRandomPosition();
                     }
                     return true;
 
-                case SteerPriority.HeardThreat:
+                case ESteerPriority.HeardThreat:
                     HeardSoundSteering.LookToHeardPosition();
                     return true;
 
-                case SteerPriority.Sprinting:
+                case ESteerPriority.Sprinting:
                     LookToMovingDirection(400);
                     return true;
 
-                case SteerPriority.RandomLook:
+                case ESteerPriority.RandomLook:
                     LookToRandomPosition();
                     return true;
 
@@ -192,7 +192,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             HeardSoundSteering.Update();
             if (!Bot.SAINLayersActive) {
-                BotOwner.Settings.FileSettings.Move.BASE_ROTATE_SPEED = 180f;
+                BotOwner.Settings.FileSettings.Move.BASE_ROTATE_SPEED = 120f;
             }
             else {
                 BotOwner.Settings.FileSettings.Move.BASE_ROTATE_SPEED = 250f;
@@ -230,16 +230,32 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (enemy == null) {
                 return null;
             }
+
             if (enemy.IsVisible) {
-                return adjustLookPoint(enemy.EnemyPosition);
+                return enemy.EnemyPosition + WeaponRootOffset;
             }
 
             var lastKnown = enemy.KnownPlaces.LastKnownPlace;
+            if (lastKnown == null) {
+                return null;
+            }
+
+            var lastSeen = enemy.KnownPlaces.LastSeenPlace;
+            if (lastSeen != null) {
+                if (lastSeen == lastKnown) {
+                    return lastSeen.Position + WeaponRootOffset;
+                }
+                if ((lastSeen.Position - lastKnown.Position).sqrMagnitude < 5f) {
+                    return lastSeen.Position + WeaponRootOffset;
+                }
+            }
+
+            return lastKnown.Position + WeaponRootOffset;
             if (lastKnown != null && lastKnown.CheckLineOfSight(Bot.Transform.EyePosition, LayerMaskClass.HighPolyWithTerrainMask)) {
                 EnemySteerDir = EEnemySteerDir.VisibleLastKnown;
                 return lastKnown.Position + WeaponRootOffset;
             }
-            if (enemy.InLineOfSight && lastKnown.VisibleSourceOnLastUpdate && lastKnown.TimeSincePositionUpdated < 4f) {
+            if (enemy.InLineOfSight && lastKnown != null && lastKnown.VisibleSourceOnLastUpdate && lastKnown.TimeSincePositionUpdated < 4f) {
                 return lastKnown.Position + WeaponRootOffset;
             }
 
@@ -253,31 +269,31 @@ namespace SAIN.SAINComponent.Classes.Mover
 
             EnemyCornerDictionary corners = enemy.Path.EnemyCorners;
 
-            Vector3? blindCorner = corners.EyeLevelPosition(ECornerType.Blind);
-            if (blindCorner != null) {
-                bool correctDirection = true;
-                Vector3 root = Bot.Transform.WeaponRoot;
-                Vector3 blindCornerDir = blindCorner.Value - root;
-
-                //Vector3? firstCorner = corners.GroundPosition(ECornerType.First);
-                //if (firstCorner != null) {
-                //    Vector3 firstCornerDir = firstCorner.Value - root;
-                //    if (Vector3.Angle(firstCornerDir, blindCornerDir) > 180){
-                //        correctDirection = false;
-                //    }
-                //}
-
-                // Bots are spinning around to look back at their blind corner after passing it, need a better solution, but this might be a decent temp fix
-                if (blindCornerDir.sqrMagnitude < 0.5f * 0.5f &&
-                    Vector3.Dot(blindCornerDir.normalized, enemy.EnemyDirectionNormal) < 0.33f) {
-                    correctDirection = false;
-                }
-
-                if (correctDirection) {
-                    EnemySteerDir = EEnemySteerDir.BlindCorner;
-                    return blindCorner;
-                }
-            }
+            //Vector3? blindCorner = corners.GroundPosition(ECornerType.Blind);
+            //if (blindCorner != null) {
+            //    bool correctDirection = true;
+            //    Vector3 root = Bot.Transform.WeaponRoot;
+            //    Vector3 blindCornerDir = blindCorner.Value - root;
+            //
+            //    //Vector3? firstCorner = corners.GroundPosition(ECornerType.First);
+            //    //if (firstCorner != null) {
+            //    //    Vector3 firstCornerDir = firstCorner.Value - root;
+            //    //    if (Vector3.Angle(firstCornerDir, blindCornerDir) > 180){
+            //    //        correctDirection = false;
+            //    //    }
+            //    //}
+            //
+            //    // Bots are spinning around to look back at their blind corner after passing it, need a better solution, but this might be a decent temp fix
+            //    if (blindCornerDir.sqrMagnitude < 0.5f * 0.5f &&
+            //        Vector3.Dot(blindCornerDir.normalized, enemy.EnemyDirectionNormal) < 0.33f) {
+            //        correctDirection = false;
+            //    }
+            //
+            //    if (correctDirection) {
+            //        EnemySteerDir = EEnemySteerDir.BlindCorner;
+            //        return blindCorner;
+            //    }
+            //}
 
             //if (enemy.Path.CanSeeLastCornerToEnemy) {
             //    Vector3? lastCorner = corners.PointPastCorner(ECornerType.Last);

@@ -82,7 +82,7 @@ namespace SAIN.Components
                     break;
                 }
                 if (foundBots > MAX_BOTS_SCHEDULED_PER_FRAME) {
-                    //break;
+                    break;
                 }
             }
 

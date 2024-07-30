@@ -1,10 +1,12 @@
 ﻿using EFT;
-using SAIN.Helpers;
+using HarmonyLib;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 // Found in Botowner.Looksensor
+using EnemyTotalCheck = GClass520;
 using EnemyVisionCheck = GClass500;
 using LookAllData = GClass521;
 
@@ -13,7 +15,7 @@ namespace SAIN.SAINComponent.Classes
     public class SAINBotLookClass : BotBase
     {
         private const float VISION_FREQ_INACTIVE_BOT_COEF = 5f;
-        private const float VISION_FREQ_ACTIVE_BOT_COEF = 2.5f;
+        private const float VISION_FREQ_ACTIVE_BOT_COEF = 2f;
         private const float VISION_FREQ_CURRENT_ENEMY = 0.04f;
         private const float VISION_FREQ_UNKNOWN_ENEMY = 0.1f;
         private const float VISION_FREQ_KNOWN_ENEMY = 0.05f;
@@ -39,8 +41,7 @@ namespace SAIN.SAINComponent.Classes
         public int UpdateLook()
         {
             if (BotOwner.LeaveData == null ||
-                BotOwner.LeaveData.LeaveComplete)
-            {
+                BotOwner.LeaveData.LeaveComplete) {
                 return 0;
             }
 
@@ -71,7 +72,6 @@ namespace SAIN.SAINComponent.Classes
             _cachedList.Clear();
             _cachedList.AddRange(_enemies.Values);
             foreach (Enemy enemy in _cachedList) {
-
                 if (!shallCheckEnemy(enemy))
                     continue;
 
@@ -90,9 +90,8 @@ namespace SAIN.SAINComponent.Classes
             if (enemy?.CheckValid() != true)
                 return false;
 
-            if (!enemy.InLineOfSight || 
-                !enemy.Vision.Angles.CanBeSeen)
-            {
+            if (!enemy.InLineOfSight ||
+                !enemy.Vision.Angles.CanBeSeen) {
                 setNotVis(enemy);
                 return false;
             }
@@ -101,8 +100,14 @@ namespace SAIN.SAINComponent.Classes
 
         private void setNotVis(Enemy enemy)
         {
-            if (enemy.EnemyInfo.IsVisible)
+            foreach (var part in enemy.EnemyInfo.AllActiveParts.Values) {
+                if (part.IsVisible || part.VisibleBySense) {
+                    part.UpdateVision(1000f, false, false, false, BotOwner);
+                }
+            }
+            if (enemy.EnemyInfo.IsVisible) {
                 enemy.EnemyInfo.SetVisible(false);
+            }
         }
 
         private bool checkEnemy(Enemy enemy, LookAllData lookAll)
@@ -110,8 +115,7 @@ namespace SAIN.SAINComponent.Classes
             float delay = getDelay(enemy);
             var look = enemy.Vision.VisionChecker;
             float timeSince = Time.time - look.LastCheckLookTime;
-            if (timeSince >= delay)
-            {
+            if (timeSince >= delay) {
                 look.LastCheckLookTime = Time.time;
                 enemy.EnemyInfo.CheckLookEnemy(lookAll);
                 return true;
@@ -123,13 +127,11 @@ namespace SAIN.SAINComponent.Classes
         {
             float updateFreqCoef = enemy.UpdateFrequencyCoefNormal + 1f;
             float baseDelay = calcBaseDelay(enemy) * updateFreqCoef;
-            if (!enemy.IsAI)
-            {
+            if (!enemy.IsAI) {
                 return baseDelay;
             }
             var active = Bot.BotActivation;
-            if (!active.BotActive || active.BotInStandBy)
-            {
+            if (!active.BotActive || active.BotInStandBy) {
                 return baseDelay * VISION_FREQ_INACTIVE_BOT_COEF;
             }
             return baseDelay * VISION_FREQ_ACTIVE_BOT_COEF;
@@ -143,6 +145,5 @@ namespace SAIN.SAINComponent.Classes
                 return VISION_FREQ_KNOWN_ENEMY;
             return VISION_FREQ_UNKNOWN_ENEMY;
         }
-
     }
 }

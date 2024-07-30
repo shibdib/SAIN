@@ -37,7 +37,7 @@ namespace SAIN.Preset.GlobalSettings.Categories
 
         [Name("Only Sneaky Personalities can be Stealthy")]
         [Description("Only allow sneaky personality types (rat, snapping turtle) to be stealthy while searching for an enemy, ignored if Stealth Search is disabled above")]
-        public bool OnlySneakyPersonalitiesSneaky = false;
+        public bool OnlySneakyPersonalitiesSneaky = true;
 
         [Description("The distance from a bot's search destination that they will begin to be stealthy, if enabled.")]
         [Advanced]

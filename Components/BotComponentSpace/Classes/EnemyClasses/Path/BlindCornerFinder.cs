@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -10,12 +11,118 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
     {
         public BlindCornerFinder(Enemy enemy) : base(enemy)
         {
+            //createDebug();
+        }
+
+        public void Init()
+        {
+            //_blindCornerLoop = Bot.StartCoroutine(blindCornerLoop());
+            //SubscribeToDispose(Dispose);
+        }
+
+        public void Dispose()
+        {
+            if (_blindCornerLoop != null) {
+                Bot.StopCoroutine(_blindCornerLoop);
+                _blindCornerLoop = null;
+            }
+            foreach (var debug in _debugObjects) {
+                GameObject.Destroy(debug);
+            }
         }
 
         public void ClearBlindCorner()
         {
             Enemy.Path.EnemyCorners.Remove(ECornerType.Blind);
         }
+
+        private Coroutine _blindCornerLoop;
+
+        public IEnumerator blindCornerLoop()
+        {
+            WaitForSeconds wait = new WaitForSeconds(1f);
+            yield return wait;
+
+            while (true) {
+                if (!Enemy.EnemyKnown) {
+                    yield return wait;
+                    continue;
+                }
+
+                Vector3[] corners = Enemy.Path.PathToEnemy.corners;
+                if (corners == null || corners.Length <= 1) {
+                    yield return wait;
+                    continue;
+                }
+
+                findCastPoints(corners, _castPoints);
+                int castPointCount = _castPoints.Count;
+                Logger.LogDebug($"Found {castPointCount} castPoints");
+
+                if (castPointCount == 0) {
+                    yield return wait;
+                    continue;
+                }
+
+                for (int i = 0; i < _debugObjects.Length; i++) {
+                    GameObject sphere = _debugObjects[i];
+                    var renderer = sphere.GetComponent<Renderer>();
+                    if (i < castPointCount) {
+                        renderer.enabled = true;
+                        sphere.transform.position = _castPoints[i];
+                        continue;
+                    }
+                    renderer.enabled = false;
+                }
+                yield return wait;
+            }
+        }
+
+        private void createDebug()
+        {
+            float size = 0.015f;
+            Color color = Color.white;
+            for (int i = 0; i < _debugObjects.Length; i++) {
+                GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                sphere.GetComponent<Renderer>().material.color = color;
+                sphere.GetComponent<Collider>().enabled = false;
+                sphere.transform.position = new Vector3(0, -1000, 0);
+                sphere.transform.localScale = new Vector3(size, size, size);
+                _debugObjects[i] = sphere;
+            }
+        }
+
+        private readonly GameObject[] _debugObjects = new GameObject[2000];
+
+        private void findCastPoints(Vector3[] corners, List<Vector3> castPoints)
+        {
+            const int STEPCOUNT = 5;
+            castPoints.Clear();
+            int count = corners.Length;
+            Vector3 characterHeight = Vector3.up * 1.65f;
+            Vector3 step = characterHeight * (1 / STEPCOUNT);
+
+            for (int i = count - 1; i > 0; i--) {
+                Vector3 corner = corners[i];
+                Vector3 nextCorner = corners[i - 1];
+
+                _segments.Clear();
+                findSegmentsBetweenCorner(corner, nextCorner, _segments);
+
+                Logger.LogInfo($"segments count {_segments.Count}");
+
+                for (int j = 0; j < _segments.Count; j++) {
+                    Vector3 segment = _segments[j];
+                    castPoints.Add(segment);
+                    for (int h = 0; h < STEPCOUNT; h++) {
+                        segment += step;
+                        castPoints.Add(segment);
+                    }
+                }
+            }
+        }
+
+        private readonly List<Vector3> _castPoints = new List<Vector3>();
 
         public IEnumerator FindBlindCorner2(Vector3[] corners, Vector3 enemyPosition)
         {
@@ -32,7 +139,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Vector3? blindCorner = null;
 
             for (int i = count - 1; i > 0; i--) {
-
                 Vector3 corner = _corners[i];
                 blindCornerIndex = i - 1;
                 Vector3 nextCorner = _corners[i - 1];
@@ -41,7 +147,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 findSegmentsBetweenCorner(corner, nextCorner, _segments);
 
                 for (int j = 0; j < _segments.Count; j++) {
-
                     Vector3 segment = _segments[j];
                     if (CheckSightAtSegment(segment, Bot.Transform.EyePosition, out Vector3 sightPoint)) {
                         blindCorner = segment;
@@ -54,7 +159,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     break;
                 }
             }
-            
+
             if (blindCorner != null) {
                 Vector3 blindCornerDir = (blindCorner.Value - Bot.Transform.EyePosition).normalized;
                 blindCornerDir.y = 0;

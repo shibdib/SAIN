@@ -51,6 +51,7 @@ namespace SAIN.Preset.GlobalSettings
 
         public GlobalMoveSettings Move = new GlobalMoveSettings();
 
+        [Advanced]
         public SteeringSettings Steering = new SteeringSettings();
 
         public ShootSettings Shoot = new ShootSettings();

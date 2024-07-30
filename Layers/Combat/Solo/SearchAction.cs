@@ -2,8 +2,10 @@
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Search;
+using System;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -15,37 +17,42 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
-            var enemy = _searchTarget;
-            if (enemy == null) {
-                enemy = Bot.Enemy;
+            try {
+                var enemy = _searchTarget;
                 if (enemy == null) {
-                    return;
+                    enemy = Bot.Enemy;
+                    if (enemy == null) {
+                        return;
+                    }
+                    _searchTarget = enemy;
+                    enemy = _searchTarget;
+                    Search.ToggleSearch(true, enemy);
                 }
-                _searchTarget = enemy;
-                enemy = _searchTarget;
-                Search.ToggleSearch(true, enemy);
-            }
 
-            bool isBeingStealthy = enemy.Hearing.EnemyHeardFromPeace;
-            if (isBeingStealthy) {
-                _sprintEnabled = false;
-            }
-            else {
-                CheckShouldSprint();
-                talk();
-            }
+                bool isBeingStealthy = enemy.Hearing.EnemyHeardFromPeace;
+                if (isBeingStealthy) {
+                    _sprintEnabled = false;
+                }
+                else {
+                    CheckShouldSprint();
+                    talk();
+                }
 
-            if (_nextUpdateSearchTime < Time.time) {
-                _nextUpdateSearchTime = Time.time + 0.1f;
-                Search.Search(_sprintEnabled, enemy);
+                Steer();
+
+                if (_nextUpdateSearchTime < Time.time) {
+                    _nextUpdateSearchTime = Time.time + 0.1f;
+                    Search.Search(_sprintEnabled, enemy);
+                }
+
+                if (!_sprintEnabled) {
+                    Shoot.CheckAimAndFire();
+                    if (!isBeingStealthy)
+                        checkWeapon();
+                }
             }
-
-            Steer();
-
-            if (!_sprintEnabled) {
-                Shoot.CheckAimAndFire();
-                if (!isBeingStealthy)
-                    checkWeapon();
+            catch (Exception ex) {
+                Logger.LogError(ex);
             }
         }
 
@@ -68,7 +75,7 @@ namespace SAIN.Layers.Combat.Solo
             Search.ToggleSearch(false, _searchTarget);
             _searchTarget = null;
             Toggle(false);
-            BotOwner.Mover.MovementResume();
+            BotOwner.Mover?.MovementResume();
             HaveTalked = false;
         }
 
@@ -113,12 +120,14 @@ namespace SAIN.Layers.Combat.Solo
 
         private void CheckShouldSprint()
         {
-            if (Search.CurrentState == ESearchMove.MoveToEndPeek || Search.CurrentState == ESearchMove.Wait || Search.CurrentState == ESearchMove.MoveToDangerPoint) {
+            //  || Search.CurrentState == ESearchMove.MoveToDangerPoint
+            if (Search.CurrentState == ESearchMove.MoveToEndPeek || Search.CurrentState == ESearchMove.Wait) {
                 _sprintEnabled = false;
                 return;
             }
 
-            if (Bot.Enemy?.IsVisible == true || Bot.Enemy?.InLineOfSight == true) {
+            //  || Bot.Enemy?.InLineOfSight == true
+            if (_searchTarget?.IsVisible == true) {
                 _sprintEnabled = false;
                 return;
             }
@@ -153,9 +162,10 @@ namespace SAIN.Layers.Combat.Solo
 
         private void Steer()
         {
-            if (!Bot.Steering.SteerByPriority(_searchTarget, false) &&
-                !Bot.Steering.LookToLastKnownEnemyPosition(_searchTarget) &&
-                !Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy)) {
+            if (!Bot.Steering.SteerByPriority(null, false)
+                //!Bot.Steering.LookToLastKnownEnemyPosition(_searchTarget) &&
+                //!Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy)) {
+                ) {
                 Bot.Steering.LookToMovingDirection();
             }
         }

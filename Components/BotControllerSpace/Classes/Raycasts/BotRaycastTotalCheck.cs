@@ -13,12 +13,6 @@ namespace SAIN.Components
         public BotRaycastData[] ShootChecks;
         public BotRaycastData[] VisibleChecks;
 
-        public JobHandle CombineDependencies(List<JobHandle> jobs, out NativeArray<JobHandle> handles)
-        {
-            handles = new NativeArray<JobHandle>(jobs.ToArray(), Allocator.TempJob);
-            return JobHandle.CombineDependencies(handles);
-        }
-
         public void Complete()
         {
             for (int i = 0; i < Count; i++) {

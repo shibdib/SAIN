@@ -272,6 +272,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyVisionChecker.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyPartDataClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyPartsClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\RaycastResult.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyControllerEvents.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyListController.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Mover\ObstacleAgent.cs" />
@@ -280,6 +281,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingBulletAnalysisClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingDispersionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingInputClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Steering\SteeringController.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Grenades\BotFlashbangedClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Grenades\GrenadeReactionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\WeaponFunction\Grenades\GrenadeThrowDecider.cs" />
@@ -351,7 +353,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Steering\HeardSoundSteeringClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Steering\RandomLookClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Steering\SAINHeadSteering.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\Steering\SteerPriority.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Steering\ESteerPriority.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\ESearchReason.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SearchDeciderClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Search\SearchPathFinder.cs" />

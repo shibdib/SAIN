@@ -3,10 +3,8 @@ using BepInEx.Configuration;
 using DrakiaXYZ.VersionChecker;
 using EFT;
 using HarmonyLib;
-using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Helpers;
-using SAIN.Patches.Components;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
@@ -64,16 +62,10 @@ namespace SAIN
         private void BindConfigs()
         {
             string category = "SAIN Editor";
-
-            //NextDebugOverlay = Config.Bind(category, "Next Debug Overlay", new KeyboardShortcut(KeyCode.LeftBracket), "Change The Debug Overlay with DrakiaXYZs Debug Overlay");
-            //PreviousDebugOverlay = Config.Bind(category, "Previous Debug Overlay", new KeyboardShortcut(KeyCode.RightBracket), "Change The Debug Overlay with DrakiaXYZs Debug Overlay");
-
             OpenEditorButton = Config.Bind(category, "Open Editor", false, "Opens the Editor on press");
             OpenEditorConfigEntry = Config.Bind(category, "Open Editor Shortcut", new KeyboardShortcut(KeyCode.F6), "The keyboard shortcut that toggles editor");
         }
 
-        //public static ConfigEntry<KeyboardShortcut> NextDebugOverlay { get; private set; }
-        //public static ConfigEntry<KeyboardShortcut> PreviousDebugOverlay { get; private set; }
         public static ConfigEntry<bool> OpenEditorButton { get; private set; }
 
         public static ConfigEntry<KeyboardShortcut> OpenEditorConfigEntry { get; private set; }
@@ -93,6 +85,7 @@ namespace SAIN
                 //typeof(Patches.Generic.Fixes.HealCancelPatch),
                 typeof(Patches.Generic.Fixes.StopSetToNavMeshPatch),
                 typeof(Patches.Generic.Fixes.FightShallReloadFixPatch),
+                typeof(Patches.Generic.Fixes.EnableVaultPatch),
                 typeof(Patches.Generic.Fixes.BotMemoryAddEnemyPatch),
                 typeof(Patches.Generic.Fixes.BotGroupAddEnemyPatch),
                 //typeof(Patches.Generic.Fixes.NoTeleportPatch),

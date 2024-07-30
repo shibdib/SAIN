@@ -23,28 +23,25 @@ namespace SAIN.Components.Extract
         private float CheckExtractDelay = 10f;
         private float NextCheckExtractTime = 0f;
         private bool hasExfilControl = false;
-        
+
         public void Update()
         {
-            if (!hasExfilControl && !GetExfilControl())
-            {
-                // This is important! Need to wait a couple frames for Waypoints to add NavMeshObstacles to locked doors. 
+            if (!hasExfilControl && !GetExfilControl()) {
+                // This is important! Need to wait a couple frames for Waypoints to add NavMeshObstacles to locked doors.
                 NextCheckExtractTime = Time.time + 0.1f;
-                
+
                 return;
             }
 
             hasExfilControl = true;
 
-            if (NextCheckExtractTime > Time.time)
-            {
+            if (NextCheckExtractTime > Time.time) {
                 return;
             }
 
             NextCheckExtractTime = Time.time + CheckExtractDelay;
 
-            if (!IsFindingExtracts)
-            {
+            if (!IsFindingExtracts) {
                 StartCoroutine(FindAllExfils());
             }
         }
@@ -56,29 +53,27 @@ namespace SAIN.Components.Extract
 
         public void OnGUI()
         {
-            if (!DebugMode || !SAINPlugin.DebugSettings.Logs.DrawDebugLabels)
-            {
+            DebugGizmos.OnGUIGame();
+
+            if (!DebugMode || !SAINPlugin.DebugSettings.Logs.DrawDebugLabels) {
                 return;
             }
 
-            DebugGizmos.OnGUI();
+            DebugGizmos.OnGUIDebug();
 
             GUIStyle guiStyle = new GUIStyle(GUI.skin.label);
             guiStyle.alignment = TextAnchor.MiddleLeft;
             guiStyle.fontSize = 14;
             guiStyle.margin = new RectOffset(3, 3, 3, 3);
 
-            foreach (ExfiltrationPoint ex in extractPositionFinders.Keys)
-            {
+            foreach (ExfiltrationPoint ex in extractPositionFinders.Keys) {
                 Vector3[] pathEndpoints = extractPositionFinders[ex].PathEndpoints.ToArray();
-                for (int i = 0; i < pathEndpoints.Length; i++)
-                {
+                for (int i = 0; i < pathEndpoints.Length; i++) {
                     Vector3 worldPos = pathEndpoints[i] + new Vector3(0, 1, 0);
                     DebugGizmos.OnGUIDrawLabel(worldPos, "Path Endpoint " + (i + 1) + ": " + ex.Settings.Name, guiStyle);
                 }
 
-                if (extractPositionFinders[ex].ExtractPosition.HasValue)
-                {
+                if (extractPositionFinders[ex].ExtractPosition.HasValue) {
                     Vector3 worldPos = extractPositionFinders[ex].ExtractPosition.Value + new Vector3(0, 1, 0);
                     DebugGizmos.OnGUIDrawLabel(worldPos, "Extract point: " + ex.Settings.Name, guiStyle);
                 }
@@ -87,18 +82,15 @@ namespace SAIN.Components.Extract
 
         private void DrawGizmoSpheres(ExtractPositionFinder finder)
         {
-            if (!DebugGizmos.DrawGizmos || !DebugMode)
-            {
+            if (!DebugGizmos.DrawGizmos || !DebugMode) {
                 return;
             }
 
-            foreach (Vector3 pathEndPoint in finder.PathEndpoints)
-            {
+            foreach (Vector3 pathEndPoint in finder.PathEndpoints) {
                 DebugGizmos.Sphere(pathEndPoint, 1f, Color.blue, true, CheckExtractDelay);
             }
 
-            if (finder.ExtractPosition.HasValue)
-            {
+            if (finder.ExtractPosition.HasValue) {
                 Color color = finder.ValidPathFound ? Color.green : Color.red;
                 DebugGizmos.Sphere(finder.ExtractPosition.Value, 1f, color, true, CheckExtractDelay);
             }
@@ -116,26 +108,22 @@ namespace SAIN.Components.Extract
 
         private bool GetExfilControl()
         {
-            if (Singleton<AbstractGame>.Instance?.GameTimer == null)
-            {
+            if (Singleton<AbstractGame>.Instance?.GameTimer == null) {
                 return false;
             }
 
             ExfiltrationControllerClass ExfilController = Singleton<GameWorld>.Instance.ExfiltrationController;
-            if (ExfilController == null)
-            {
+            if (ExfilController == null) {
                 return false;
             }
 
             AllExfils = ExfilController.ExfiltrationPoints;
-            if (DebugMode && AllExfils != null)
-            {
+            if (DebugMode && AllExfils != null) {
                 Logger.LogInfo($"Found {AllExfils?.Length} possible Exfil Points in this map.");
             }
 
             AllScavExfils = ExfilController.ScavExfiltrationPoints;
-            if (DebugMode && AllScavExfils != null)
-            {
+            if (DebugMode && AllScavExfils != null) {
                 Logger.LogInfo($"Found {AllScavExfils?.Length} possible Scav Exfil Points in this map.");
             }
 
@@ -145,8 +133,7 @@ namespace SAIN.Components.Extract
         private IEnumerator FindAllExfils()
         {
             bool completedCoroutine = false;
-            try
-            {
+            try {
                 IsFindingExtracts = true;
 
                 yield return UpdateValidExfils(ValidExfils, AllExfils);
@@ -154,12 +141,10 @@ namespace SAIN.Components.Extract
 
                 completedCoroutine = true;
             }
-            finally
-            {
+            finally {
                 IsFindingExtracts = false;
 
-                if (!completedCoroutine)
-                {
+                if (!completedCoroutine) {
                     Logger.LogError("An error occurred when searching for extracts.");
                 }
             }
@@ -167,17 +152,14 @@ namespace SAIN.Components.Extract
 
         private IEnumerator UpdateValidExfils(IDictionary<ExfiltrationPoint, Vector3> validExfils, ExfiltrationPoint[] allExfils)
         {
-            if (allExfils == null)
-            {
+            if (allExfils == null) {
                 yield break;
             }
 
-            foreach (var ex in allExfils)
-            {
+            foreach (var ex in allExfils) {
                 ExtractPositionFinder finder = GetExtractPositionSearchJob(ex);
 
-                if (validExfils.ContainsKey(ex))
-                {
+                if (validExfils.ContainsKey(ex)) {
                     DrawGizmoSpheres(finder);
 
                     continue;
@@ -187,8 +169,7 @@ namespace SAIN.Components.Extract
 
                 DrawGizmoSpheres(finder);
 
-                if (finder.ValidPathFound)
-                {
+                if (finder.ValidPathFound) {
                     validExfils.Add(ex, finder.ExtractPosition.Value);
                     continue;
                 }
@@ -197,8 +178,7 @@ namespace SAIN.Components.Extract
 
         private ExtractPositionFinder GetExtractPositionSearchJob(ExfiltrationPoint ex)
         {
-            if (extractPositionFinders.ContainsKey(ex))
-            {
+            if (extractPositionFinders.ContainsKey(ex)) {
                 return extractPositionFinders[ex];
             }
 

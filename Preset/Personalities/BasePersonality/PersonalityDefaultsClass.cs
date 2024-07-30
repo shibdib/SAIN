@@ -79,7 +79,7 @@ namespace SAIN.Preset.Personalities
             behavior.Search.WillSearchFromAudio = true;
             behavior.Search.WillChaseDistantGunshots = true;
             behavior.Search.SearchBaseTime = 6;
-            behavior.Search.SprintWhileSearchChance = 60;
+            behavior.Search.SprintWhileSearchChance = 75;
             behavior.Search.SearchHasEnemySpeed = 1f;
             behavior.Search.SearchHasEnemyPose = 1f;
             behavior.Search.SearchNoEnemySpeed = 1f;
@@ -95,8 +95,7 @@ namespace SAIN.Preset.Personalities
 
             addPMCs(settings.Assignment.AllowedTypes);
             Personalities.Add(personality, settings);
-            if (Preset.Info.IsCustom == true)
-            {
+            if (Preset.Info.IsCustom == true) {
                 SAINPresetClass.Export(settings, Preset.Info.Name, personality.ToString(), nameof(Personalities));
             }
         }
@@ -147,7 +146,7 @@ namespace SAIN.Preset.Personalities
             behavior.Search.WillSearchFromAudio = true;
             behavior.Search.WillChaseDistantGunshots = true;
             behavior.Search.SearchBaseTime = 0.1f;
-            behavior.Search.SprintWhileSearchChance = 85;
+            behavior.Search.SprintWhileSearchChance = 90;
             behavior.Search.SearchHasEnemySpeed = 1f;
             behavior.Search.SearchHasEnemyPose = 1f;
             behavior.Search.SearchNoEnemySpeed = 1f;
@@ -163,8 +162,7 @@ namespace SAIN.Preset.Personalities
 
             addAllTypes(settings.Assignment.AllowedTypes);
             Personalities.Add(personality, settings);
-            if (Preset.Info.IsCustom == true)
-            {
+            if (Preset.Info.IsCustom == true) {
                 SAINPresetClass.Export(settings, Preset.Info.Name, personality.ToString(), nameof(Personalities));
             }
         }
@@ -213,10 +211,10 @@ namespace SAIN.Preset.Personalities
             behavior.Search.WillSearchFromAudio = true;
             behavior.Search.WillChaseDistantGunshots = false;
             behavior.Search.SearchBaseTime = 90f;
-            behavior.Search.SprintWhileSearchChance = 0f;
+            behavior.Search.SprintWhileSearchChance = 40f;
             behavior.Search.Sneaky = true;
-            behavior.Search.SneakyPose = 0f;
-            behavior.Search.SneakySpeed = 0f;
+            behavior.Search.SneakyPose = 1f;
+            behavior.Search.SneakySpeed = 0.33f;
             behavior.Search.SearchHasEnemySpeed = 1f;
             behavior.Search.SearchHasEnemyPose = 1f;
             behavior.Search.SearchNoEnemySpeed = 1f;
@@ -232,8 +230,7 @@ namespace SAIN.Preset.Personalities
 
             addPMCs(settings.Assignment.AllowedTypes);
             Personalities.Add(personality, settings);
-            if (Preset.Info.IsCustom == true)
-            {
+            if (Preset.Info.IsCustom == true) {
                 SAINPresetClass.Export(settings, Preset.Info.Name, personality.ToString(), nameof(Personalities));
             }
         }
@@ -283,7 +280,7 @@ namespace SAIN.Preset.Personalities
             behavior.Search.WillSearchFromAudio = true;
             behavior.Search.WillChaseDistantGunshots = true;
             behavior.Search.SearchBaseTime = 16f;
-            behavior.Search.SprintWhileSearchChance = 30f;
+            behavior.Search.SprintWhileSearchChance = 60f;
             behavior.Search.Sneaky = false;
             behavior.Search.SneakyPose = 0f;
             behavior.Search.SneakySpeed = 0f;
@@ -302,8 +299,7 @@ namespace SAIN.Preset.Personalities
 
             addPMCs(settings.Assignment.AllowedTypes);
             Personalities.Add(personality, settings);
-            if (Preset.Info.IsCustom == true)
-            {
+            if (Preset.Info.IsCustom == true) {
                 SAINPresetClass.Export(settings, Preset.Info.Name, personality.ToString(), nameof(Personalities));
             }
         }
@@ -379,8 +375,7 @@ namespace SAIN.Preset.Personalities
             allowedTypes.Remove(WildSpawnType.pmcBot);
 
             Personalities.Add(personality, settings);
-            if (Preset.Info.IsCustom == true)
-            {
+            if (Preset.Info.IsCustom == true) {
                 SAINPresetClass.Export(settings, Preset.Info.Name, personality.ToString(), nameof(Personalities));
             }
         }
@@ -431,7 +426,7 @@ namespace SAIN.Preset.Personalities
             behavior.Search.WillSearchFromAudio = false;
             behavior.Search.WillChaseDistantGunshots = false;
             behavior.Search.SearchBaseTime = 90f;
-            behavior.Search.SprintWhileSearchChance = 0f;
+            behavior.Search.SprintWhileSearchChance = 20f;
             behavior.Search.Sneaky = false;
             behavior.Search.SneakyPose = 0f;
             behavior.Search.SneakySpeed = 0f;
@@ -456,8 +451,7 @@ namespace SAIN.Preset.Personalities
             allowedTypes.Remove(WildSpawnType.pmcBot);
 
             Personalities.Add(personality, settings);
-            if (Preset.Info.IsCustom == true)
-            {
+            if (Preset.Info.IsCustom == true) {
                 SAINPresetClass.Export(settings, Preset.Info.Name, personality.ToString(), nameof(Personalities));
             }
         }
@@ -508,8 +502,7 @@ namespace SAIN.Preset.Personalities
             allowedTypes.Remove(WildSpawnType.pmcBot);
 
             Personalities.Add(personality, settings);
-            if (Preset.Info.IsCustom == true)
-            {
+            if (Preset.Info.IsCustom == true) {
                 SAINPresetClass.Export(settings, Preset.Info.Name, personality.ToString(), nameof(Personalities));
             }
         }
@@ -566,8 +559,7 @@ namespace SAIN.Preset.Personalities
             addAllTypes(allowedTypes);
 
             Personalities.Add(personality, settings);
-            if (Preset.Info.IsCustom == true)
-            {
+            if (Preset.Info.IsCustom == true) {
                 SAINPresetClass.Export(settings, Preset.Info.Name, personality.ToString(), nameof(Personalities));
             }
         }
@@ -581,8 +573,7 @@ namespace SAIN.Preset.Personalities
         private static void addAllTypes(List<WildSpawnType> allowedTypes)
         {
             allowedTypes.Clear();
-            foreach (var botType in BotTypeDefinitions.BotTypes)
-            {
+            foreach (var botType in BotTypeDefinitions.BotTypes) {
                 allowedTypes.Add(botType.Key);
             }
         }

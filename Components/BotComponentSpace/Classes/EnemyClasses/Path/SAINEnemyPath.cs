@@ -72,6 +72,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public void Init()
         {
             Enemy.Events.OnEnemyKnownChanged.OnToggle += OnEnemyKnownChanged;
+            _blindCornerFinder.Init();
         }
 
         public void OnEnemyKnownChanged(bool known, Enemy enemy)

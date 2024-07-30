@@ -46,9 +46,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             bool canShoot = false;
             float time = Time.time;
 
-            Vector3 eyePos = Bot.Transform.EyePosition;
             foreach (var part in Parts.Values) {
-                //part.UpdateDebugGizmos(eyePos);
+                part.Update(Enemy);
 
                 if (!canShoot && part.CanShoot) {
                     canShoot = true;
@@ -64,6 +63,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void ReadRaycastResult(BotRaycastData data, ERaycastCheck type, float time)
         {
+            Enemy.Vision.VisionChecker.LastCheckLOSTime = time;
             var parts = data.Data.BodyParts;
             var colliderTypes = data.Data.ColliderTypes;
             var points = data.Data.Points;
@@ -73,66 +73,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                     partData.SetLineOfSight(points[i], colliderTypes[i], hits[i], type, time);
                 }
             }
-        }
-
-        public bool CheckCanShoot(bool canShootHead)
-        {
-            bool canShoot = false;
-            bool isAI = Enemy.IsAI;
-            Vector3 firePort = Enemy.Bot.Transform.WeaponData.FirePort;
-
-            foreach (var part in Parts.Values) {
-                if (!canShootHead && part.BodyPart == EBodyPart.Head) {
-                    continue;
-                }
-                if (part.CheckCanShoot(firePort, isAI))
-                    canShoot = true;
-            }
-            return canShoot;
-        }
-
-        public bool CheckBodyLineOfSight(Vector3 origin, float maxRange)
-        {
-            EnemyPartDataClass checkingPart = Parts[EBodyPart.Chest];
-            if (checkingPart.CheckLineOfSight(origin, maxRange)) {
-                return true;
-            }
-            return false;
-        }
-
-        public bool CheckHeadLineOfSight(Vector3 origin, float maxRange)
-        {
-            EnemyPartDataClass checkingPart = Parts[EBodyPart.Head];
-            if (checkingPart.CheckLineOfSight(origin, maxRange)) {
-                return true;
-            }
-            return false;
-        }
-
-        public bool CheckRandomPartLineOfSight(Vector3 origin, float maxRange)
-        {
-            bool inSight = false;
-
-            if (_lastCheckSuccessPart != null) {
-                if (_lastCheckSuccessPart.CheckLineOfSight(origin, maxRange)) {
-                    inSight = true;
-                }
-                else {
-                    _lastCheckSuccessPart = null;
-                }
-            }
-
-            EnemyPartDataClass checkingPart = GetNextPart();
-
-            if (checkingPart == _lastCheckSuccessPart) {
-                return inSight;
-            }
-
-            if (checkingPart.CheckLineOfSight(origin, maxRange)) {
-                _lastCheckSuccessPart = checkingPart;
-                inSight = true;
-            }
-            return inSight;
         }
 
         public EnemyPartDataClass GetNextPart()
@@ -167,6 +107,5 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private float _timeLastCanShoot;
         private int _index;
         private readonly int _indexMax;
-        private EnemyPartDataClass _lastCheckSuccessPart;
     }
 }
