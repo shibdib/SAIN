@@ -54,12 +54,11 @@ namespace SAIN.Components.Extract
         public void OnGUI()
         {
             DebugGizmos.OnGUIGame();
+            DebugGizmos.OnGUIDebug();
 
             if (!DebugMode || !SAINPlugin.DebugSettings.Logs.DrawDebugLabels) {
                 return;
             }
-
-            DebugGizmos.OnGUIDebug();
 
             GUIStyle guiStyle = new GUIStyle(GUI.skin.label);
             guiStyle.alignment = TextAnchor.MiddleLeft;

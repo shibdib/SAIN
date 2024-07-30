@@ -33,8 +33,30 @@ namespace SAIN.Components.PlayerComponentSpace
             }
             if (Player.IsYourPlayer) {
                 //testNavMeshNodes();
+                //testObjectInFront();
             }
         }
+
+        private void testObjectInFront()
+        {
+            if (!Player.IsYourPlayer) {
+                return;
+            }
+            if (Physics.Raycast(Transform.EyePosition, Transform.LookDirection, out var hit, 100f, LayerMaskClass.HighPolyWithTerrainMaskAI)) {
+                if (_hitLabel == null) {
+                    _hitLabel = DebugGizmos.CreateLabel(hit.point, null);
+                }
+                if (_hitLabel != null) {
+                    _hitLabel.StringBuilder.Clear();
+                    _hitLabel.WorldPos = hit.point;
+                    _hitLabel.StringBuilder.AppendLine($"{hit.collider.gameObject.name}");
+                    _hitLabel.StringBuilder.AppendLine($"{LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+                    _hitLabel.StringBuilder.AppendLine($"{hit.distance}");
+                }
+            }
+        }
+
+        private GUIObject _hitLabel;
 
         private void testNavMeshNodes()
         {
