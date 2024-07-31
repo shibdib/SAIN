@@ -43,7 +43,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private const float PARTS_VISIBLE_MIN_DIST = 12.5f;
         private const float PARTS_VISIBLE_MAX_PARTS = 6;
-        private const float PARTS_VISIBLE_MIN_PARTS = 1;
+        private const float PARTS_VISIBLE_MIN_PARTS = 2;
 
         private float PARTS_VISIBLE_MAX_COEF => _settings.PartsVisibility.PARTS_VISIBLE_MAX_COEF;
         private float PARTS_VISIBLE_MIN_COEF => _settings.PartsVisibility.PARTS_VISIBLE_MIN_COEF;
@@ -74,6 +74,19 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private float PRONE_VISION_SPEED_COEF => _settings.Pose.PRONE_VISION_SPEED_COEF;
         private float DUCK_VISION_SPEED_COEF => _settings.Pose.DUCK_VISION_SPEED_COEF;
 
+        private const float UNKNOWN_ENEMY_HAS_ENEMY_COEF = 1.5f;
+
+        private float calcUnknownMod()
+        {
+            if (Enemy.EnemyKnown) {
+                return 1f;
+            }
+            if (Enemy.Bot.HasEnemy) {
+                return UNKNOWN_ENEMY_HAS_ENEMY_COEF;
+            }
+            return 1f;
+        }
+
         private float calcModifier()
         {
             float partMod = calcPartsMod();
@@ -92,6 +105,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             float thirdPartyMod = calcThirdPartyMod();
             float angleMod = calcAngleMod();
             float poseMod = poseModifier();
+            float unknownMod = calcUnknownMod();
             float locationMod = Bot.Info.LocationSettings != null ? Bot.Info.LocationSettings.VisionSpeedModifier : 1f;
 
             float notLookMod = 1f;
@@ -99,7 +113,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 notLookMod = SAINNotLooking.GetVisionSpeedDecrease(Enemy.EnemyInfo);
 
             float result =
-                1f * 
+                1f *
                 locationMod *
                 underFireMod *
                 partMod *
@@ -111,14 +125,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 thirdPartyMod *
                 angleMod *
                 notLookMod *
+                unknownMod *
                 poseMod;
-
-            if (Player.IsInPronePose) {
-                result *= PRONE_VISION_SPEED_COEF;
-            }
-            else if (Player.Pose == EPlayerPose.Duck) {
-                result *= DUCK_VISION_SPEED_COEF;
-            }
 
             //if (EnemyPlayer.IsYourPlayer && result != 1f)
             //{
@@ -134,10 +142,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
                 return 1f;
             }
             float result = 1f;
-            if (Player.IsInPronePose) {
+            if (EnemyPlayer.IsInPronePose) {
                 result *= PRONE_VISION_SPEED_COEF;
             }
-            else if (Player.Pose == EPlayerPose.Duck) {
+            else if (EnemyPlayer.Pose == EPlayerPose.Duck) {
                 result *= DUCK_VISION_SPEED_COEF;
             }
             return result;
@@ -208,7 +216,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             bool illuminated = Enemy.Vision.Illuminated;
             float illuminatedLevel = Enemy.Vision.IlluminationLevel;
             if (illuminated && illuminatedLevel >= 1f) {
-                    return 1f;
+                return 1f;
             }
 
             float baseModifier = baseTimeModifier(flareEnabled);

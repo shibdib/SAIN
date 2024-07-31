@@ -272,6 +272,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyPartDataClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\EnemyPartsClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\ERaycastCheck.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\ERaycastPart.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\RaycastResult.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyControllerEvents.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyListController.cs" />
@@ -300,10 +301,10 @@
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulActionSet.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\BodyPartRaycast.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\EnemyDistanceJob.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\BotRaycastJobs.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\UnityJobExample%281%29.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Jobs\BodyPartRaycast.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Jobs\EnemyDistanceJob.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Jobs\BotRaycastJobs.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Jobs\UnityJobExample%281%29.cs" />
     <Compile Include="Components\GameWorldSpace\Doors\BotDoorTrigger.cs" />
     <Compile Include="Components\GameWorldSpace\Doors\DoorHandler.cs" />
     <Compile Include="Components\GameWorldSpace\GameWorldBase.cs" />
@@ -638,7 +639,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Sense\SAINVisionClass.cs" />
     <Compile Include="Components\BotControllerSpace\SAINControllerBase.cs" />
     <Compile Include="Components\BotControllerSpace\SAINBotController.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Raycasts\BotJobsClass.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Jobs\BotJobsClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\SAINCoverClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\EnemyDecisionClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Decision\SelfActionDecisionClass.cs" />

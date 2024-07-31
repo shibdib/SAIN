@@ -7,13 +7,6 @@ using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
-    public enum ERaycastPart
-    {
-        Head,
-        Body,
-        RandomPart,
-    }
-
     public class EnemyVisionChecker : EnemyBase, IBotClass
     {
         public float LastCheckLookTime { get; set; }
@@ -80,7 +73,18 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private static readonly ERaycastPart[] _bodyHeadPlus1Random = new ERaycastPart[] { ERaycastPart.Body, ERaycastPart.Head, ERaycastPart.RandomPart };
         private static readonly ERaycastPart[] _bodyHeadPlus2Random = new ERaycastPart[] { ERaycastPart.Body, ERaycastPart.Head, ERaycastPart.RandomPart, ERaycastPart.RandomPart };
 
+        private const float MAX_RANGE_VISION_UNKNOWN = 300f;
+
         public float AIVisionRangeLimit()
+        {
+            float max = checkMaxVisionRangeAI();
+            if (!Enemy.EnemyKnown && max > MAX_RANGE_VISION_UNKNOWN) {
+                return MAX_RANGE_VISION_UNKNOWN;
+            }
+            return max;
+        }
+
+        private float checkMaxVisionRangeAI()
         {
             if (!Enemy.IsAI) {
                 return float.MaxValue;
@@ -131,10 +135,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             _farDistance = aiLimit.MaxVisionRanges[AILimitSetting.Far];
             _veryFarDistance = aiLimit.MaxVisionRanges[AILimitSetting.VeryFar];
             _narniaDistance = aiLimit.MaxVisionRanges[AILimitSetting.Narnia];
-
-            if (SAINPlugin.DebugMode) {
-                Logger.LogDebug($"Updated AI Vision Limit Settings: [{_farDistance}, {_veryFarDistance}, {_narniaDistance}]");
-            }
         }
 
         private bool _visionStarted;
