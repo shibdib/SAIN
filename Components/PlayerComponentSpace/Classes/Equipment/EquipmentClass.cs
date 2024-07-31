@@ -26,8 +26,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         public void Dispose()
         {
-            foreach (var weapon in WeaponInfos.Values)
-            {
+            foreach (var weapon in WeaponInfos.Values) {
                 weapon?.Dispose();
             }
             WeaponInfos.Clear();
@@ -38,9 +37,8 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         private void ReCalcPowerOfEquipment()
         {
             float oldPower = Player.AIData.PowerOfEquipment;
-            if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(PlayerComponent, out float power) && 
-                oldPower != power)
-            {
+            if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(PlayerComponent, out float power) &&
+                oldPower != power) {
                 OnPowerRecalced?.Invoke(power);
             }
         }
@@ -50,25 +48,14 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         public bool PlayAIShootSound()
         {
             var weapon = CurrentWeapon;
-            if (weapon == null)
-            {
-                Logger.LogWarning("CurrentWeapon Null");
+            if (weapon == null) {
+                //Logger.LogWarning("CurrentWeapon Null");
                 return false;
             }
 
-            if (_nextPlaySoundTime < Time.time)
-            {
+            if (_nextPlaySoundTime < Time.time) {
                 _nextPlaySoundTime = Time.time + (PlayerComponent.IsAI ? 0.5f : 0.1f);
-
-                float range = weapon.CalculatedAudibleRange;
-
-                var weather = SAINWeatherClass.Instance;
-                if (weather != null)
-                {
-                    range *= weather.RainSoundModifier;
-                }
-
-                SAINBotController.Instance.BotHearing.PlayAISound(PlayerComponent, weapon.SoundType, PlayerComponent.Transform.WeaponFirePort, range, 1f, false);
+                SAINBotController.Instance.BotHearing.PlayAISound(PlayerComponent, weapon.SoundType, PlayerComponent.Transform.WeaponFirePort, weapon.CalculatedAudibleRange, 1f, false);
             }
             return true;
         }
@@ -84,8 +71,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private void getAllWeapons()
         {
-            foreach (EquipmentSlot slot in _weaponSlots)
-            {
+            foreach (EquipmentSlot slot in _weaponSlots) {
                 addWeaponFromSlot(slot);
             }
         }
@@ -93,15 +79,12 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         private void addWeaponFromSlot(EquipmentSlot slot)
         {
             Item item = EquipmentClass.GetSlot(slot).ContainedItem;
-            if (item != null && item is Weapon weapon)
-            {
-                if (!WeaponInfos.ContainsKey(slot))
-                {
+            if (item != null && item is Weapon weapon) {
+                if (!WeaponInfos.ContainsKey(slot)) {
                     WeaponInfos.Add(slot, new WeaponInfo(weapon));
                 }
                 else if (WeaponInfos.TryGetValue(slot, out WeaponInfo info) &&
-                    info.Weapon != weapon)
-                {
+                    info.Weapon != weapon) {
                     info.Dispose();
                     WeaponInfos[slot] = new WeaponInfo(weapon);
                 }
@@ -110,12 +93,10 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private void updateAllWeapons()
         {
-            if (_nextUpdateWeapTime < Time.time)
-            {
+            if (_nextUpdateWeapTime < Time.time) {
                 _nextUpdateWeapTime = Time.time + 1f;
 
-                foreach (var info in WeaponInfos.Values)
-                {
+                foreach (var info in WeaponInfos.Values) {
                     if (info?.Update() == true)
                         return;
                 }
@@ -140,8 +121,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         private WeaponInfo getCurrentWeapon()
         {
             Item item = Player.HandsController.Item;
-            if (item != null)
-            {
+            if (item != null) {
                 _currentWeapon = getInfoFromItem(item);
             }
             return _currentWeapon;
@@ -149,15 +129,12 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private WeaponInfo getInfoFromItem(Item item)
         {
-            if (item is Weapon weapon)
-            {
-                if (_currentWeapon?.Weapon == weapon)
-                {
+            if (item is Weapon weapon) {
+                if (_currentWeapon?.Weapon == weapon) {
                     return _currentWeapon;
                 }
                 var weaponInfo = getInfoFromWeapon(weapon);
-                if (weaponInfo == null)
-                {
+                if (weaponInfo == null) {
                     getAllWeapons();
                     weaponInfo = getInfoFromWeapon(weapon);
                 }
@@ -168,10 +145,8 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private WeaponInfo getInfoFromWeapon(Weapon weapon)
         {
-            foreach (var weaponInfo in WeaponInfos.Values)
-            {
-                if (weapon == weaponInfo.Weapon)
-                {
+            foreach (var weaponInfo in WeaponInfos.Values) {
+                if (weapon == weaponInfo.Weapon) {
                     _currentWeapon = weaponInfo;
                     ReCalcPowerOfEquipment();
                     return weaponInfo;
@@ -180,7 +155,8 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
             return null;
         }
 
-        public WeaponInfo GetWeaponInfo(EquipmentSlot slot) {
+        public WeaponInfo GetWeaponInfo(EquipmentSlot slot)
+        {
             if (WeaponInfos.TryGetValue(slot, out WeaponInfo weaponInfo))
                 return weaponInfo;
             return null;

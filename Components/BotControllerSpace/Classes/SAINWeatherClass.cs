@@ -41,7 +41,7 @@ namespace SAIN.Components.BotController
                     float Rain = WeatherController.Instance.WeatherCurve.Rain;
                     _rainSoundMod = 1f;
                     float max = 1f;
-                    float rainMin = 0.7f;
+                    float rainMin = 0.5f;
 
                     Rain = InverseScaling(Rain, rainMin, max);
 
