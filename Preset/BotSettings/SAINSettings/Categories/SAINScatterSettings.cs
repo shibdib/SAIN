@@ -1,4 +1,5 @@
-﻿using SAIN.Attributes;
+﻿using Newtonsoft.Json;
+using SAIN.Attributes;
 using SAIN.Preset.GlobalSettings;
 
 namespace SAIN.Preset.BotSettings.SAINSettings.Categories
@@ -21,5 +22,13 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [MinMax(1f, 5f, 100f)]
         [Advanced]
         public float HandDamageAccuracySpeed = 1.5f;
+
+        [JsonIgnore]
+        [Hidden]
+        public float DIST_NOT_TO_SHOOT = 0f;
+
+        [JsonIgnore]
+        [Hidden]
+        public float FromShot = 0.002f;
     }
 }

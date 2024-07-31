@@ -5,6 +5,7 @@ using EFT;
 using HarmonyLib;
 using SAIN.Editor;
 using SAIN.Helpers;
+using SAIN.Patches.Movement;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
@@ -102,6 +103,7 @@ namespace SAIN
                 typeof(Patches.Movement.PoseStaminaPatch),
                 typeof(Patches.Movement.AimStaminaPatch),
                 typeof(Patches.Movement.GlobalShootSettingsPatch),
+                typeof(Patches.Movement.GlobalLookPatch),
 
                 typeof(Patches.Hearing.TryPlayShootSoundPatch),
                 typeof(Patches.Hearing.OnMakingShotPatch),

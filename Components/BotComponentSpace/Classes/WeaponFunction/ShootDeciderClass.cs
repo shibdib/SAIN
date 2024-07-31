@@ -74,7 +74,7 @@ namespace SAIN.SAINComponent.Classes
             }
 
             Vector3? target = getTarget(out Enemy enemy);
-            Bot.BotLight.HandleLightForEnemy(enemy);
+            //Bot.BotLight.HandleLightForEnemy(enemy);
             if (target != null &&
                 enemy != null) {
                 Bot.BotLight.HandleLightForEnemy(enemy);
@@ -229,33 +229,33 @@ namespace SAIN.SAINComponent.Classes
         private bool aimAtTarget(Vector3 target)
         {
             var aimData = BotOwner.AimingData;
-            AimStatus aimStatus = Bot.Aim.AimStatus;
-            bool steerComplete = false;
+            //AimStatus aimStatus = Bot.Aim.AimStatus;
+            //bool steerComplete = false;
 
-            if (aimStatus == AimStatus.NoTarget) {
-                if (!Bot.FriendlyFire.CheckFriendlyFire(target)) {
-                    BotOwner.ShootData.EndShoot();
-                    return false;
-                }
-                steerComplete = checkSteerDirection(MIN_ANGLE_TO_START_AIM, target);
-                if (!steerComplete) {
-                    Bot.Steering.LookToPoint(target, TURN_SPEED_START_AIM);
-                    return false;
-                }
-            }
+            //if (aimStatus == AimStatus.NoTarget) {
+            //    if (!Bot.FriendlyFire.CheckFriendlyFire(target)) {
+            //        BotOwner.ShootData.EndShoot();
+            //        return false;
+            //    }
+            //    steerComplete = checkSteerDirection(MIN_ANGLE_TO_START_AIM, target);
+            //    if (!steerComplete) {
+            //        Bot.Steering.LookToPoint(target, TURN_SPEED_START_AIM);
+            //        return false;
+            //    }
+            //}
 
             aimData.SetTarget(target);
-            Vector3 aimTarget = aimData.EndTargetPoint;
+            //Vector3 aimTarget = aimData.EndTargetPoint;
 
-            if (!steerComplete &&
-                !checkSteerDirection(MIN_ANGLE_TO_KEEP_AIMING, aimTarget)) {
-                Bot.Steering.LookToPoint(aimTarget, TURN_SPEED_AIMING);
-                return false;
-            }
+            //if (!steerComplete &&
+            //    !checkSteerDirection(MIN_ANGLE_TO_KEEP_AIMING, aimTarget)) {
+            //    Bot.Steering.LookToPoint(aimTarget, TURN_SPEED_AIMING);
+            //    return false;
+            //}
 
             aimData.NodeUpdate();
 
-            if (!Bot.FriendlyFire.CheckFriendlyFire(aimTarget)) {
+            if (!Bot.FriendlyFire.CheckFriendlyFire(aimData.EndTargetPoint)) {
                 BotOwner.ShootData.EndShoot();
                 return false;
             }

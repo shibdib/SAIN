@@ -176,69 +176,69 @@ namespace SAIN.SAINComponent
                 CoroutineManager = new CoroutineManager<BotComponent>(this);
                 NoBushESP = this.gameObject.AddComponent<SAINNoBushESP>();
 
-                Squad = 
+                Squad =
                     initBotClass<SAINSquadClass>();
-                BusyHandsDetector = 
+                BusyHandsDetector =
                     initBotClass<BotBusyHandsDetector>();
-                GlobalEvents = 
+                GlobalEvents =
                     initBotClass<BotGlobalEventsClass>();
-                Shoot = 
+                Shoot =
                     initBotClass<ShootDeciderClass>();
-                WeightManagement = 
+                WeightManagement =
                     initBotClass<BotWeightManagement>();
-                Memory = 
+                Memory =
                     initBotClass<SAINMemoryClass>();
-                BotStuck = 
+                BotStuck =
                     initBotClass<SAINBotUnstuckClass>();
-                Hearing = 
+                Hearing =
                     initBotClass<SAINHearingSensorClass>();
-                Talk = 
+                Talk =
                     initBotClass<SAINBotTalkClass>();
-                Decision = 
+                Decision =
                     initBotClass<SAINDecisionClass>();
-                Cover = 
+                Cover =
                     initBotClass<SAINCoverClass>();
-                SelfActions = 
+                SelfActions =
                     initBotClass<SAINSelfActionClass>();
-                Steering = 
+                Steering =
                     initBotClass<SAINSteeringClass>();
-                Grenade = 
+                Grenade =
                     initBotClass<BotGrenadeManager>();
-                Mover = 
+                Mover =
                     initBotClass<SAINMoverClass>();
-                EnemyController = 
+                EnemyController =
                     initBotClass<SAINEnemyController>();
-                FriendlyFire = 
+                FriendlyFire =
                     initBotClass<SAINFriendlyFireClass>();
-                Vision = 
+                Vision =
                     initBotClass<SAINVisionClass>();
-                Search = 
+                Search =
                     initBotClass<SAINSearchClass>();
-                Vault = 
+                Vault =
                     initBotClass<SAINVaultClass>();
-                Suppression = 
+                Suppression =
                     initBotClass<SAINBotSuppressClass>();
-                AILimit = 
+                AILimit =
                     initBotClass<SAINAILimit>();
-                AimDownSightsController = 
+                AimDownSightsController =
                     initBotClass<AimDownSightsController>();
-                SpaceAwareness = 
+                SpaceAwareness =
                     initBotClass<SAINBotSpaceAwareness>();
-                DoorOpener = 
+                DoorOpener =
                     initBotClass<DoorOpener>();
-                Medical = 
+                Medical =
                     initBotClass<SAINBotMedicalClass>();
-                BotLight = 
+                BotLight =
                     initBotClass<BotLightController>();
-                BackpackDropper = 
+                BackpackDropper =
                     initBotClass<BotBackpackDropClass>();
-                CurrentTarget = 
+                CurrentTarget =
                     initBotClass<CurrentTargetClass>();
-                ManualShoot = 
+                ManualShoot =
                     initBotClass<ManualShootClass>();
-                BotActivation = 
+                BotActivation =
                     initBotClass<SAINActivationClass>();
-                Aim = 
+                Aim =
                     initBotClass<AimClass>();
             }
             catch (Exception ex) {
@@ -298,6 +298,7 @@ namespace SAIN.SAINComponent
 
                 try {
                     BotOwner.LookSensor.MaxShootDist = float.MaxValue;
+                    BotOwner.AIData.IsNoOffsetShooting = false;
                 }
                 catch (Exception ex) {
                     Logger.LogError($"Error setting MaxShootDist during init, but continuing with initialization...: {ex}");

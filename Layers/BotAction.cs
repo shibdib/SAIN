@@ -17,8 +17,7 @@ namespace SAIN.Layers
 
         protected void ToggleAction(bool value)
         {
-            switch (value)
-            {
+            switch (value) {
                 case true:
                     BotOwner.PatrollingData?.Pause();
                     break;
@@ -34,17 +33,14 @@ namespace SAIN.Layers
             DebugOverlay.AddBaseInfo(Bot, BotOwner, stringBuilder);
         }
 
-        public BotComponent Bot
-        {
+        public BotComponent Bot {
             get
             {
                 if (_bot == null &&
-                    SAINBotController.Instance.GetSAIN(BotOwner, out var bot))
-                {
+                    SAINBotController.Instance.GetSAIN(BotOwner, out var bot)) {
                     _bot = bot;
                 }
-                if (_bot == null)
-                {
+                if (_bot == null) {
                     _bot = BotOwner.GetComponent<BotComponent>();
                 }
                 return _bot;

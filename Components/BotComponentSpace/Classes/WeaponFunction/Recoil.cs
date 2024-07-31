@@ -27,8 +27,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private float calcModFromInjury(EInjurySeverity severity)
         {
-            switch (severity)
-            {
+            switch (severity) {
                 default:
                     return 1f;
 
@@ -49,8 +48,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void removeCoroutine(bool value)
         {
-            if (!value)
-            {
+            if (!value) {
                 CurrentRecoilOffset = Vector3.zero;
                 _recoilActive = false;
                 Bot.CoroutineManager.Remove("RecoilLoop");
@@ -66,14 +64,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private IEnumerator RecoilLoop()
         {
-            while (true)
-            {
+            while (true) {
                 calcBarrelRise();
                 calcDecay();
-                if (_recoilFinished)
-                {
-                    if (_debugRecoilLogs)
-                    {
+                if (_recoilFinished) {
+                    if (_debugRecoilLogs) {
                         Logger.LogDebug(_debugString.ToString());
                         _debugString.Clear();
                     }
@@ -86,8 +81,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void calcBarrelRise()
         {
-            if (!_barrelRising)
-            {
+            if (!_barrelRising) {
                 return;
             }
 
@@ -97,16 +91,14 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             if (_debugRecoilLogs)
                 _debugString.AppendLine($"Barrel Rise Progress [{_barrelRiseTime}] Rise Step: {riseTime}");
 
-            if (_barrelRiseTime > 1)
-            {
+            if (_barrelRiseTime > 1) {
                 _barrelRising = false;
                 _barrelRiseTime = 1f;
             }
 
             CurrentRecoilOffset = Vector3.Lerp(CurrentRecoilOffset, _recoilOffsetTarget, _barrelRiseTime);
 
-            if (!_barrelRising)
-            {
+            if (!_barrelRising) {
                 _barrelRiseTime = 0f;
                 _recoilOffsetTarget = Vector3.zero;
             }
@@ -117,8 +109,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void calcDecay()
         {
-            if (_recoilFinished)
-            {
+            if (_recoilFinished) {
                 return;
             }
 
@@ -128,20 +119,17 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             if (_debugRecoilLogs)
                 _debugString.AppendLine($"Recoil Decay Progress [{_barrelRecoveryTime}] Decay Step: {decayTime}");
 
-            if (_barrelRecoveryTime > 1)
-            {
+            if (_barrelRecoveryTime > 1) {
                 _barrelRecoveryTime = 1;
                 _recoilFinished = true;
             }
 
             CurrentRecoilOffset = Vector3.Lerp(CurrentRecoilOffset, Vector3.zero, _barrelRecoveryTime);
-            if (_barrelRising )
-            {
+            if (_barrelRising) {
                 _recoilOffsetTarget = Vector3.Lerp(_recoilOffsetTarget, Vector3.zero, _barrelRecoveryTime);
             }
 
-            if (_recoilFinished)
-            {
+            if (_recoilFinished) {
                 _barrelRecoveryTime = 0;
             }
         }
@@ -156,16 +144,14 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void WeaponShot()
         {
-            if (Bot.IsCheater)
-            {
+            if (Bot.IsCheater) {
                 return;
             }
             calculateRecoil();
             _barrelRising = true;
             _recoilFinished = false;
 
-            if (!_recoilActive)
-            {
+            if (!_recoilActive) {
                 _recoilActive = true;
                 Bot.CoroutineManager.Add(RecoilLoop(), "RecoilLoop");
             }
@@ -174,8 +160,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private void calculateRecoil()
         {
             Weapon weapon = Bot.Info?.WeaponInfo?.CurrentWeapon;
-            if (weapon == null)
-            {
+            if (weapon == null) {
                 return;
             }
 
@@ -209,37 +194,31 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             float recoilMod = 1f * RecoilMultiplier;
 
-            if (Player.IsInPronePose)
-            {
+            if (Player.IsInPronePose) {
                 recoilMod *= 0.7f;
             }
-            else if (Player.Pose == EPlayerPose.Duck)
-            {
+            else if (Player.Pose == EPlayerPose.Duck) {
                 recoilMod *= 0.9f;
             }
 
-            if (BotOwner.WeaponManager?.ShootController?.IsAiming == true)
-            {
+            if (BotOwner.WeaponManager?.ShootController?.IsAiming == true) {
                 recoilMod *= 0.9f;
             }
-            if (Player.Velocity.magnitude < 0.5f)
-            {
+            if (Bot.Transform.VelocityMagnitudeNormal < 0.1f) {
                 recoilMod *= 0.85f;
             }
-            if (_armsInjured)
-            {
+            if (_armsInjured) {
                 recoilMod *= Mathf.Sqrt(ArmInjuryModifier);
             }
 
             return recoilMod;
         }
 
-        float calcRecoilNum(float recoilVal)
+        private float calcRecoilNum(float recoilVal)
         {
             float result = recoilVal / 100;
-            if (ModDetection.RealismLoaded)
-            {
-                result = recoilVal / 150;
+            if (ModDetection.RealismLoaded) {
+                result = recoilVal / 100;
             }
             result *= Bot.Info.WeaponInfo.FinalModifier;
             result *= UnityEngine.Random.Range(0.8f, 1.2f);
@@ -251,20 +230,5 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private bool _recoilFinished;
         private bool _armsInjured => Bot.Medical.HitReaction.ArmsInjured;
         private float RecoilMultiplier => Mathf.Round(Bot.Info.FileSettings.Shoot.RecoilMultiplier * GlobalSettings.Shoot.RecoilMultiplier * 100f) / 100f;
-
-        private float RecoilBaseline
-        {
-            get
-            {
-                if (ModDetection.RealismLoaded)
-                {
-                    return 225f;
-                }
-                else
-                {
-                    return 112f;
-                }
-            }
-        }
     }
 }
