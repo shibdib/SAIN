@@ -28,14 +28,14 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             Enemy targetEnemy = Bot.CurrentTarget?.CurrentTargetEnemy;
 
             // If a bot is sneaky, don't change ADS if their enemy is close to avoid alerting them.
-            if (Bot.Info.PersonalitySettings.Search.Sneaky &&
+            if (Bot?.Info?.PersonalitySettings?.Search?.Sneaky == true &&
                 targetEnemy != null &&
                 !targetEnemy.IsVisible &&
                 targetEnemy.KnownPlaces.EnemyDistanceFromLastKnown < 40f) {
                 return;
             }
 
-            bool shallADS = ShallAimDownSights(targetEnemy.KnownPlaces.LastKnownPosition);
+            bool shallADS = ShallAimDownSights(targetEnemy?.KnownPlaces.LastKnownPosition);
             SetADS(shallADS);
         }
 

@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 _nextUpdateTime = Time.time + GRENADE_UPDATE_FREQUENCY;
                 Velocity = _rigidBody.velocity;
                 VelocityMagnitude = Velocity.magnitude;
-                Logger.LogInfo($"Grenade {_grenade.Id} Velocity [{Velocity}] Magnitude: [{VelocityMagnitude}]");
+                //Logger.LogInfo($"Grenade {_grenade.Id} Velocity [{Velocity}] Magnitude: [{VelocityMagnitude}]");
             }
         }
 
@@ -82,8 +82,17 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             SAINBotController.Instance.OnGrenadeThrown -= enemyGrenadeThrown;
 
             foreach (var tracker in EnemyGrenadesList.Values) {
-                removeGrenade(tracker?.Grenade);
+                if (tracker?.Grenade != null) {
+                    tracker.Grenade.DestroyEvent -= removeGrenade;
+                }
             }
+            foreach (var grenade in FriendlyGrenadesList.Values) {
+                if (grenade != null) {
+                    grenade.DestroyEvent -= removeGrenade;
+                }
+            }
+            EnemyGrenadesList.Clear();
+            FriendlyGrenadesList.Clear();
         }
 
         public void enemyGrenadeThrown(Grenade grenade, Vector3 dangerPoint, string profileId)
@@ -99,9 +108,9 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 grenade.DestroyEvent += removeGrenade;
                 return;
             }
-            if (enemy == null && (dangerPoint - Bot.Position).sqrMagnitude <= MAX_FRIENDLY_GRENADE_DIST_TOCARE_SQR) {
-                FriendlyGrenadesList.Add(grenade.Id, grenade);
-            }
+            //if (enemy == null && (dangerPoint - Bot.Position).sqrMagnitude <= MAX_FRIENDLY_GRENADE_DIST_TOCARE_SQR) {
+            //    FriendlyGrenadesList.Add(grenade.Id, grenade);
+            //}
         }
 
         private const float MAX_ENEMY_GRENADE_DIST_TOCARE = 100;
