@@ -75,16 +75,16 @@ namespace SAIN.Preset.GlobalSettings
         public float _underFireNeedHelpFreq = 1f;
 
         [Percentage]
-        public float _hearNoiseChance = 40f;
+        public float _hearNoiseChance = 50f;
 
         [MinMax(1f, 120f, 1f)]
-        public float _hearNoiseMaxDist = 60f;
+        public float _hearNoiseMaxDist = 70f;
 
         [MinMax(1f, 60f, 100f)]
         public float _hearNoiseFreq = 30f;
 
         [Percentage]
-        public float _enemyLocationTalkChance = 60f;
+        public float _enemyLocationTalkChance = 70f;
 
         [MinMax(0.1f, 10f, 100f)]
         public float _enemyLocationTalkTimeSinceSeen = 3f;

@@ -354,6 +354,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                     Bot.EnemyController.Events.OnEnemyHealthChanged -= onEnemyHealthChanged;
                 }
 
+                BotOwner.DeadBodyWork.OnStartLookToBody -= OnLootBody;
                 Bot.Decision.DecisionManager.OnDecisionMade -= onDecisionMade;
                 Bot.Memory.Health.HealthStatusChanged -= myHealthChanged;
             }
@@ -957,7 +958,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         private bool _underFireNeedHelpGroupDelay = true;
         private float _underFireNeedHelpFreq = 1f;
         private float _hearNoiseChance = 40f;
-        private float _hearNoiseMaxDist = 60f;
+        private float _hearNoiseMaxDist = 70f;
         private float _hearNoiseFreq = 1f;
         private float _enemyLocationTalkChance = 60f;
         private float _enemyLocationTalkTimeSinceSeen = 3f;
