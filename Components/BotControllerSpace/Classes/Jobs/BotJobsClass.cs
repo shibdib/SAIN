@@ -1,3 +1,4 @@
+using SAIN.Components.BotControllerSpace.Classes.Raycasts;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.SAINComponent;
@@ -10,9 +11,12 @@ namespace SAIN.Components
     {
         public BotRaycastJobs RaycastJobs { get; }
 
+        public PlayerDistancesJob PlayerDistancesJob { get; }
+
         public BotJobsClass(SAINBotController botController) : base(botController)
         {
             RaycastJobs = new BotRaycastJobs(BotController);
+            PlayerDistancesJob = new PlayerDistancesJob(BotController);
         }
 
         public void Update()
@@ -27,6 +31,7 @@ namespace SAIN.Components
         public void Dispose()
         {
             RaycastJobs.Dispose();
+            PlayerDistancesJob.Dispose();
         }
 
         private void updateVisionForBots()

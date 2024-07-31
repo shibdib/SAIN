@@ -96,6 +96,7 @@ namespace SAIN.Components
                 Vector3 eyePosition = transform.EyePosition;
                 Vector3 weaponFirePort = transform.WeaponFirePort;
                 var parts = enemy.Vision.VisionChecker.EnemyParts.PartsArray;
+                var partDistances = enemy.EnemyPlayerData.DistanceData.BodyPartDistances;
 
                 for (int j = 0; j < partCount; j++) {
                     var part = parts[j];
@@ -107,7 +108,7 @@ namespace SAIN.Components
 
                     Vector3 weaponDir = castPoint - weaponFirePort;
                     Vector3 eyeDir = castPoint - eyePosition;
-                    float eyeDirMag = eyeDir.magnitude;
+                    float eyeDirMag = partDistances[raycastData.PartType];
 
                     raycastCommands[commands] = new RaycastCommand(eyePosition, eyeDir, eyeDirMag, _LOSMask);
                     commands++;

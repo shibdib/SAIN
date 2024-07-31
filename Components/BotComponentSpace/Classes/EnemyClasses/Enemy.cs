@@ -11,26 +11,24 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyEquipmentInfo : EnemyBase, IBotEnemyClass
     {
-        public EnemyEquipmentInfo(Enemy enemy) : base(enemy) { }
+        public EnemyEquipmentInfo(Enemy enemy) : base(enemy)
+        {
+        }
 
         public void Init()
         {
-
         }
 
         public void Update()
         {
-
         }
 
         public void Dispose()
         {
-
         }
 
         public void OnEnemyKnownChanged(bool value, Enemy enemy)
         {
-
         }
     }
 
@@ -45,7 +43,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public bool IsCurrentEnemy { get; private set; }
         public float LastCheckLookTime { get; set; }
-        public float RealDistance { get; private set; }
+        public float RealDistance => EnemyPlayerData.DistanceData.Distance;
         public bool IsSniper { get; private set; }
 
         public EnemyEvents Events { get; }
@@ -64,14 +62,18 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public event Action OnEnemyDisposed;
 
-        public Enemy(BotComponent bot, PlayerComponent playerComponent, EnemyInfo enemyInfo) : base(bot)
+        public OtherPlayerData EnemyPlayerData { get; }
+
+        public Enemy(BotComponent bot, PlayerComponent enemyComponent, EnemyInfo enemyInfo) : base(bot)
         {
-            EnemyPlayerComponent = playerComponent;
-            EnemyPerson = playerComponent.Person;
-            EnemyTransform = playerComponent.Transform;
-            EnemyName = $"{playerComponent.Name} ({playerComponent.Person.Nickname})";
+            EnemyPlayerComponent = enemyComponent;
+            EnemyPerson = enemyComponent.Person;
+            EnemyTransform = enemyComponent.Transform;
+            EnemyName = $"{enemyComponent.Name} ({enemyComponent.Person.Nickname})";
             EnemyInfo = enemyInfo;
-            EnemyProfileId = playerComponent.ProfileId;
+            EnemyProfileId = enemyComponent.ProfileId;
+
+            EnemyPlayerData = bot.PlayerComponent.OtherPlayersData.Datas[enemyComponent.ProfileId];
 
             Events = new EnemyEvents(this);
             _activeThreatChecker = new EnemyActiveThreatChecker(this);
@@ -84,7 +86,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Aim = new EnemyAim(this);
             Hearing = new EnemyHearing(this);
             Shoot = new EnemyShootClass(this);
-            
+
             updateDistAndDirection(true);
         }
 
@@ -106,7 +108,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public void Update()
         {
-            IsCurrentEnemy = Bot.Enemy?.EnemyProfileId == EnemyProfileId;
+            IsCurrentEnemy = Bot.EnemyController.ActiveEnemy?.EnemyProfileId == EnemyProfileId;
             calcFrequencyCoef();
             updateDistAndDirection();
             Events.Update();
@@ -265,8 +267,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public Vector3 LastMoveDirection { get; private set; }
         public Vector3 LastSprintDirection { get; private set; }
         public Vector3 EnemyPosition => EnemyTransform.Position;
-        public Vector3 EnemyDirection { get; private set; }
-        public Vector3 EnemyDirectionNormal { get; private set; }
+        public Vector3 EnemyDirection => EnemyPlayerData.DistanceData.Direction;
+        public Vector3 EnemyDirectionNormal => EnemyPlayerData.DistanceData.DirectionNormal;
         public Vector3 EnemyHeadPosition => EnemyTransform.HeadPosition;
 
         public float TimeSinceLastKnownUpdated => KnownPlaces.TimeSinceLastKnownUpdated;
@@ -282,22 +284,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void updateDistAndDirection(bool force = false)
         {
-            float timeAdd = calcMagnitudeDelay();
-            if (force || _lastUpdateDistanceTime + timeAdd < Time.time) {
-                _lastUpdateDistanceTime = Time.time;
-                Vector3 dir = EnemyPosition - Bot.Position;
-                EnemyDirection = dir;
-                EnemyDirectionNormal = dir.normalized;
-                RealDistance = dir.magnitude;
-
-                // EFT code throwing random errors as usual.
-                try {
-                    EnemyInfo.Direction = dir;
-                    EnemyInfo.Distance = RealDistance;
-                }
-                catch {
-
-                }
+            try {
+                EnemyInfo.Direction = EnemyDirection;
+                EnemyInfo.Distance = RealDistance;
+            }
+            catch {
             }
         }
 

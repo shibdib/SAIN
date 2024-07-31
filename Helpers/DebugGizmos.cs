@@ -111,6 +111,9 @@ namespace SAIN.Helpers
 
         public static void OnGUIDrawLabel(Vector3 worldPos, string text, GUIStyle guiStyle = null, float scale = 1f)
         {
+            if (Camera.main == null) {
+                return;
+            }
             Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
             if (screenPos.z <= 0) {
                 return;

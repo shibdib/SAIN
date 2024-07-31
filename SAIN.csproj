@@ -302,7 +302,7 @@
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\PeacefulBotFinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\PeacefulActions\BotZoneData.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Jobs\BodyPartRaycast.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\Jobs\EnemyDistanceJob.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\Jobs\PlayerDistancesJob.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Jobs\BotRaycastJobs.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\Jobs\UnityJobExample%281%29.cs" />
     <Compile Include="Components\GameWorldSpace\Doors\BotDoorTrigger.cs" />
@@ -326,7 +326,10 @@
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PersonSubClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\ProfileData.cs" />
     <Compile Include="Components\PlayerComponentSpace\PersonClasses\PlayerData.cs" />
+    <Compile Include="Components\PlayerComponentSpace\PlayerData.cs" />
+    <Compile Include="Components\PlayerComponentSpace\PlayerDistanceData.cs" />
     <Compile Include="Components\PlayerComponentSpace\PlayerIlluminationClass.cs" />
+    <Compile Include="Components\PlayerComponentSpace\OtherPlayersData.cs" />
     <Compile Include="Helpers\Events\ToggleEvent.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyChooserClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Path\CornerHelpers.cs" />

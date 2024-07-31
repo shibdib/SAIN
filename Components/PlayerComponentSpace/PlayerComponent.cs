@@ -1,4 +1,6 @@
 ﻿using EFT;
+using EFT.Ballistics;
+using EFT.Interactive;
 using SAIN.Components.PlayerComponentSpace.Classes;
 using SAIN.Components.PlayerComponentSpace.Classes.Equipment;
 using SAIN.Components.PlayerComponentSpace.PersonClasses;
@@ -14,6 +16,7 @@ namespace SAIN.Components.PlayerComponentSpace
 {
     public class PlayerComponent : MonoBehaviour
     {
+        public OtherPlayersData OtherPlayersData { get; private set; }
         public BodyPartsClass BodyParts { get; private set; }
         public PlayerIlluminationClass Illumination { get; private set; }
 
@@ -42,16 +45,77 @@ namespace SAIN.Components.PlayerComponentSpace
             if (!Player.IsYourPlayer) {
                 return;
             }
-            if (Physics.Raycast(Transform.EyePosition, Transform.LookDirection, out var hit, 100f, LayerMaskClass.HighPolyWithTerrainMaskAI)) {
-                if (_hitLabel == null) {
-                    _hitLabel = DebugGizmos.CreateLabel(hit.point, null);
-                }
-                if (_hitLabel != null) {
-                    _hitLabel.StringBuilder.Clear();
+            if (_hitLabel == null) {
+                _hitLabel = DebugGizmos.CreateLabel(Vector3.zero, string.Empty);
+            }
+            if (_hitLabel != null) {
+                _hitLabel.StringBuilder.Clear();
+                if (Physics.Raycast(Transform.EyePosition, Transform.LookDirection, out var hit, 100f, LayerMaskClass.DoorLayer)) {
+                    _hitLabel.Enabled = true;
                     _hitLabel.WorldPos = hit.point;
                     _hitLabel.StringBuilder.AppendLine($"{hit.collider.gameObject.name}");
                     _hitLabel.StringBuilder.AppendLine($"{LayerMask.LayerToName(hit.collider.gameObject.layer)}");
                     _hitLabel.StringBuilder.AppendLine($"{hit.distance}");
+                    Door door = hit.collider.gameObject.GetComponent<Door>();
+                    if (door != null) {
+                        _hitLabel.StringBuilder.AppendLine($"Found Door: [{door.Id}]");
+                    }
+                    NavMeshDoorLink link = hit.collider.gameObject.GetComponent<NavMeshDoorLink>();
+                    if (link != null) {
+                        _hitLabel.StringBuilder.AppendLine($"Found Link: [{link.Id}]");
+                    }
+                }
+                if (Physics.Raycast(Transform.EyePosition, Transform.LookDirection, out hit, 100f, LayerMaskClass.PlayerStaticDoorMask)) {
+                    _hitLabel.Enabled = true;
+                    _hitLabel.WorldPos = hit.point;
+                    _hitLabel.StringBuilder.AppendLine($"{hit.collider.gameObject.name}");
+                    _hitLabel.StringBuilder.AppendLine($"{LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+                    _hitLabel.StringBuilder.AppendLine($"{hit.distance}");
+                    Door door = hit.collider.gameObject.GetComponent<Door>();
+                    if (door != null) {
+                        _hitLabel.StringBuilder.AppendLine($"Found Door: [{door.Id}]");
+                    }
+                    NavMeshDoorLink link = hit.collider.gameObject.GetComponent<NavMeshDoorLink>();
+                    if (link != null) {
+                        _hitLabel.StringBuilder.AppendLine($"Found Link: [{link.Id}]");
+                    }
+                }
+                if (Physics.Raycast(Transform.EyePosition, Transform.LookDirection, out hit, 100f, LayerMaskClass.InteractiveMask)) {
+                    _hitLabel.Enabled = true;
+                    _hitLabel.WorldPos = hit.point;
+                    _hitLabel.StringBuilder.AppendLine($"{hit.collider.gameObject.name}");
+                    _hitLabel.StringBuilder.AppendLine($"{LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+                    _hitLabel.StringBuilder.AppendLine($"{hit.distance}");
+                    Door door = hit.collider.gameObject.GetComponent<Door>();
+                    if (door != null) {
+                        _hitLabel.StringBuilder.AppendLine($"Found Door: [{door.Id}]");
+                    }
+                    NavMeshDoorLink link = hit.collider.gameObject.GetComponent<NavMeshDoorLink>();
+                    if (link != null) {
+                        _hitLabel.StringBuilder.AppendLine($"Found Link: [{link.Id}]");
+                    }
+                }
+                else if (Physics.Raycast(Transform.EyePosition, Transform.LookDirection, out hit, 100f, LayerMaskClass.HighPolyWithTerrainMaskAI)) {
+                    _hitLabel.Enabled = true;
+                    _hitLabel.WorldPos = hit.point;
+                    _hitLabel.StringBuilder.AppendLine($"{hit.collider.gameObject.name}");
+                    _hitLabel.StringBuilder.AppendLine($"{LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+                    _hitLabel.StringBuilder.AppendLine($"{hit.distance}");
+                    var ballistic = hit.collider.gameObject.GetComponent<BallisticCollider>();
+                    if (ballistic != null) {
+                        _hitLabel.StringBuilder.AppendLine($"Found Ballistic: [{ballistic.name}, {ballistic.PenetrationChance}, {ballistic.PenetrationLevel}]");
+                    }
+                    var components = hit.collider.gameObject.GetComponentsInChildren(typeof(Component));
+                    foreach (var component in components) {
+                        _hitLabel.StringBuilder.AppendLine($"Found [{component.name}] : Type [{component.GetType()}]");
+                    }
+                }
+                else {
+                    _hitLabel.Enabled = false;
+                }
+
+                if (_hitLabel.Enabled) {
+                    DebugGizmos.Sphere(_hitLabel.WorldPos, 0.025f, 0.05f);
                 }
             }
         }
@@ -257,6 +321,7 @@ namespace SAIN.Components.PlayerComponentSpace
                 var playerData = new PlayerData(this, player, iPlayer);
                 Person = new PersonClass(playerData);
 
+                OtherPlayersData = new OtherPlayersData(this);
                 BodyParts = new BodyPartsClass(this);
                 Flashlight = new FlashLightClass(this);
                 Equipment = new SAINEquipmentClass(this);
@@ -264,6 +329,7 @@ namespace SAIN.Components.PlayerComponentSpace
                 Illumination = new PlayerIlluminationClass(this);
 
                 Illumination.Init();
+                OtherPlayersData.Init();
 
                 Person.ActivationClass.OnPlayerActiveChanged += handleCoroutines;
                 handleCoroutines(true);
@@ -275,14 +341,6 @@ namespace SAIN.Components.PlayerComponentSpace
             //Logger.LogDebug($"{Person.Nickname} Player Component Created");
             StartCoroutine(delayInit());
             return true;
-        }
-
-        private void enterTrigger(IPhysicsTrigger trigger)
-        {
-        }
-
-        private void exitTrigger(IPhysicsTrigger trigger)
-        {
         }
 
         private void handleCoroutines(bool active)
@@ -327,6 +385,7 @@ namespace SAIN.Components.PlayerComponentSpace
             Person.ActivationClass.OnPlayerActiveChanged -= handleCoroutines;
             Illumination?.Dispose();
             Equipment?.Dispose();
+            OtherPlayersData?.Dispose();
             Destroy(this);
         }
 

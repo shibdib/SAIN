@@ -2,6 +2,7 @@
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.SAINComponent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SAIN.Components
@@ -10,9 +11,12 @@ namespace SAIN.Components
     {
         public PartDictionary Parts { get; } = new PartDictionary();
 
+        public BodyPart[] PartsArray { get; private set; }
+
         public BodyPartsClass(PlayerComponent component) : base(component)
         {
             createParts();
+            PartsArray = Parts.Values.ToArray();
         }
 
         private void createParts()
