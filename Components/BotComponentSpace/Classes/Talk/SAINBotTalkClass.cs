@@ -23,7 +23,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         public void Init()
         {
-            Player.BeingHitAction += GetHit;
+            //Player.BeingHitAction += GetHit;
             GroupTalk.Init();
             EnemyTalk.Init();
         }
@@ -100,7 +100,7 @@ namespace SAIN.SAINComponent.Classes.Talk
         public void Dispose()
         {
             if (Player != null) {
-                Player.BeingHitAction -= GetHit;
+                //Player.BeingHitAction -= GetHit;
             }
             _phraseDictionary.Clear();
             GroupTalk.Dispose();
@@ -210,7 +210,6 @@ namespace SAIN.SAINComponent.Classes.Talk
             }
             ETagStatus etagStatus = (aggressive || Player.Awareness > Time.time) ? ETagStatus.Combat : ETagStatus.Unaware;
             if (PlayerComponent.PlayVoiceLine(trigger, Bot.Memory.Health.HealthStatus | mask | etagStatus, aggressive)) {
-
                 SAINBotController.Instance?.BotHearing.PlayerTalked(trigger, etagStatus, Player);
                 BotOwner.BotsGroup.GroupTalk.PhraseSad(BotOwner, trigger);
 
