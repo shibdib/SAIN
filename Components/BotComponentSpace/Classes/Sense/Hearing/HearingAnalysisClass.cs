@@ -29,14 +29,14 @@ namespace SAIN.SAINComponent.Classes
         private const float HEAR_CHANCE_MIN_DIST = 0.25f;
         private const float HEAR_CHANCE_MIN_DIST_HEADPHONES = 1;
         private const float HEAR_CHANCE_MIDRANGE_COEF = 0.66f;
-        private const float HEAR_CHANCE_MIDRANGE_MINCHANCE_HEADPHONES = 10;
-        private const float HEAR_CHANCE_LONGRANGE_MINCHANCE_HEADPHONES = 5;
+        private const float HEAR_CHANCE_MIDRANGE_MINCHANCE_HEADPHONES = 5;
+        private const float HEAR_CHANCE_LONGRANGE_MINCHANCE_HEADPHONES = 2;
         private const float HEAR_CHANCE_NOTMOVING_VELOCITY = 0.1f;
-        private const float HEAR_CHANCE_NOTMOVING_MINCHANCE = 3;
+        private const float HEAR_CHANCE_NOTMOVING_MINCHANCE = 2;
         private const float HEAR_CHANCE_NOTMOVING_MINCHANCE_HEADPHONES = 5;
-        private const float HEAR_CHANCE_HEADPHONES_GUNFIRE = 10;
-        private const float HEAR_CHANCE_CURRENTENEMY_MINCHANCE = 5;
-        private const float HEAR_CHANCE_CURRENTENEMY_MINCHANCE_HEADPHONES = 10;
+        private const float HEAR_CHANCE_HEADPHONES_OTHERSOUNDS = 7;
+        private const float HEAR_CHANCE_CURRENTENEMY_MINCHANCE = 2;
+        private const float HEAR_CHANCE_CURRENTENEMY_MINCHANCE_HEADPHONES = 7;
 
         public HearingAnalysisClass(SAINHearingSensorClass hearing) : base(hearing)
         {
@@ -140,7 +140,7 @@ namespace SAIN.SAINComponent.Classes
                     minimumChance += HEAR_CHANCE_LONGRANGE_MINCHANCE_HEADPHONES;
                 }
                 if (sound.Info.SoundType != SAINSoundType.FootStep) {
-                    minimumChance += HEAR_CHANCE_HEADPHONES_GUNFIRE;
+                    minimumChance += HEAR_CHANCE_HEADPHONES_OTHERSOUNDS;
                 }
             }
 

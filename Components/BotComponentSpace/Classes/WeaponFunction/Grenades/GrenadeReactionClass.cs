@@ -25,6 +25,11 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void Update()
         {
+            if (_grenade == null) return;
+            if (_rigidBody == null) {
+                grenadeDestroyed(_grenade);
+                return;
+            }
             if (_nextUpdateTime < Time.time) {
                 _nextUpdateTime = Time.time + GRENADE_UPDATE_FREQUENCY;
                 Velocity = _rigidBody.velocity;
@@ -43,6 +48,9 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void grenadeDestroyed(Throwable grenade)
         {
+            if (grenade != null) {
+                grenade.DestroyEvent -= grenadeDestroyed;
+            }
             Destroy(this);
         }
 
@@ -63,8 +71,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Init()
         {
-            SAINBotController.Instance.OnGrenadeCollision += grenadeCollision;
-            SAINBotController.Instance.OnGrenadeThrown += enemyGrenadeThrown;
+            SAINBotController.Instance.GrenadeController.OnGrenadeCollision += grenadeCollision;
+            SAINBotController.Instance.GrenadeController.OnGrenadeThrown += enemyGrenadeThrown;
         }
 
         public void Update()
@@ -78,8 +86,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void Dispose()
         {
-            SAINBotController.Instance.OnGrenadeCollision -= grenadeCollision;
-            SAINBotController.Instance.OnGrenadeThrown -= enemyGrenadeThrown;
+            SAINBotController.Instance.GrenadeController.OnGrenadeCollision -= grenadeCollision;
+            SAINBotController.Instance.GrenadeController.OnGrenadeThrown -= enemyGrenadeThrown;
 
             foreach (var tracker in EnemyGrenadesList.Values) {
                 if (tracker?.Grenade != null) {

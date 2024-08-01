@@ -6,7 +6,6 @@ using SAIN.Components.BotComponentSpace.Classes.EnemyClasses;
 using SAIN.Components.BotController;
 using SAIN.Components.BotController.PeacefulActions;
 using SAIN.Components.BotControllerSpace.Classes;
-using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.Layers;
 using SAIN.SAINComponent;
@@ -20,19 +19,127 @@ using UnityEngine.AI;
 
 namespace SAIN.Components
 {
-    public class SAINBotController : MonoBehaviour
+    public class GrenadeController : SAINControllerBase
     {
-        public static SAINBotController Instance { get; private set; }
-
-        public Action<SAINSoundType, Vector3, PlayerComponent, float, float> AISoundPlayed { get; set; }
-        public Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk { get; set; }
-        public Action<EftBulletClass> BulletImpact { get; set; }
-
         public event Action<Grenade, float> OnGrenadeCollision;
 
         public event Action<Grenade, Vector3, string> OnGrenadeThrown;
 
         public event Action<Vector3, string, bool, float, float> OnGrenadeExploded;
+
+        public GrenadeController(SAINBotController controller) : base(controller)
+        {
+        }
+
+        public void Init()
+        {
+        }
+
+        public void Update()
+        {
+        }
+
+        public void Dispose()
+        {
+        }
+
+        public void Subscribe(BotEventHandler eventHandler)
+        {
+            eventHandler.OnGrenadeThrow += GrenadeThrown;
+            eventHandler.OnGrenadeExplosive += GrenadeExplosion;
+        }
+
+        public void UnSubscribe(BotEventHandler eventHandler)
+        {
+            eventHandler.OnGrenadeThrow -= GrenadeThrown;
+            eventHandler.OnGrenadeExplosive -= GrenadeExplosion;
+        }
+
+        public void GrenadeCollided(Grenade grenade, float maxRange)
+        {
+            OnGrenadeCollision?.Invoke(grenade, maxRange);
+        }
+
+        private void GrenadeExplosion(Vector3 explosionPosition, string playerProfileID, bool isSmoke, float smokeRadius, float smokeLifeTime)
+        {
+            if (!Singleton<BotEventHandler>.Instantiated || playerProfileID == null) {
+                return;
+            }
+            Player player = GameWorldInfo.GetAlivePlayer(playerProfileID);
+            if (player != null) {
+                if (!isSmoke) {
+                    registerGrenadeExplosionForSAINBots(explosionPosition, player, playerProfileID, 200f);
+                }
+                else {
+                    registerGrenadeExplosionForSAINBots(explosionPosition, player, playerProfileID, 50f);
+
+                    float radius = smokeRadius * HelpersGClass.SMOKE_GRENADE_RADIUS_COEF;
+                    Vector3 position = player.Position;
+
+                    if (BotController.DefaultController != null)
+                        foreach (var keyValuePair in BotController.DefaultController.Groups())
+                            foreach (BotsGroup botGroupClass in keyValuePair.Value.GetGroups(true))
+                                botGroupClass.AddSmokePlace(explosionPosition, smokeLifeTime, radius, position);
+                }
+            }
+        }
+
+        private void registerGrenadeExplosionForSAINBots(Vector3 explosionPosition, Player player, string playerProfileID, float range)
+        {
+            // Play a sound with the input range.
+            Singleton<BotEventHandler>.Instance?.PlaySound(player, explosionPosition, range, AISoundType.gun);
+
+            // We dont want bots to think the grenade explosion was a place they heard an enemy, so set this manually.
+            foreach (var bot in Bots.Values) {
+                if (bot?.BotActive == true) {
+                    float distance = (bot.Position - explosionPosition).magnitude;
+                    if (distance < range) {
+                        Enemy enemy = bot.EnemyController.GetEnemy(playerProfileID, true);
+                        if (enemy != null) {
+                            float dispersion = distance / 10f;
+                            Vector3 random = UnityEngine.Random.onUnitSphere * dispersion;
+                            random.y = 0;
+                            Vector3 estimatedThrowPosition = enemy.EnemyPosition + random;
+
+                            HearingReport report = new HearingReport {
+                                position = estimatedThrowPosition,
+                                soundType = SAINSoundType.GrenadeExplosion,
+                                placeType = EEnemyPlaceType.Hearing,
+                                isDanger = distance < 100f || enemy.InLineOfSight,
+                                shallReportToSquad = true,
+                            };
+                            enemy.Hearing.SetHeard(report);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void GrenadeThrown(Grenade grenade, Vector3 position, Vector3 force, float mass)
+        {
+            if (grenade == null) {
+                return;
+            }
+
+            Player player = GameWorldInfo.GetAlivePlayer(grenade.ProfileId);
+            if (player == null) {
+                Logger.LogError($"Player Null from ID {grenade.ProfileId}");
+                return;
+            }
+            if (!player.HealthController.IsAlive) {
+                return;
+            }
+
+            Vector3 dangerPoint = Vector.DangerPoint(position, force, mass);
+            Singleton<BotEventHandler>.Instance?.PlaySound(player, grenade.transform.position, 20f, AISoundType.gun);
+            grenade.gameObject.AddComponent<GrenadeVelocityTracker>();
+            OnGrenadeThrown?.Invoke(grenade, dangerPoint, grenade.ProfileId);
+        }
+    }
+
+    public class SAINBotController : MonoBehaviour
+    {
+        public static SAINBotController Instance { get; private set; }
 
         public BotDictionary Bots => BotSpawnController.Bots;
         public GameWorld GameWorld => SAINGameWorld.GameWorld;
@@ -44,8 +151,7 @@ namespace SAIN.Components
                 if (_eventHandler == null) {
                     _eventHandler = Singleton<BotEventHandler>.Instance;
                     if (_eventHandler != null) {
-                        _eventHandler.OnGrenadeThrow += GrenadeThrown;
-                        _eventHandler.OnGrenadeExplosive += GrenadeExplosion;
+                        GrenadeController.Subscribe(_eventHandler);
                     }
                 }
                 return _eventHandler;
@@ -70,7 +176,8 @@ namespace SAIN.Components
         }
 
         private BotSpawner _spawner;
-        public BotJobsClass LineOfSightManager { get; private set; }
+        public GrenadeController GrenadeController { get; private set; }
+        public BotJobsClass BotJobs { get; private set; }
         public BotExtractManager BotExtractManager { get; private set; }
         public TimeClass TimeVision { get; private set; }
         public BotController.SAINWeatherClass WeatherVision { get; private set; }
@@ -92,13 +199,6 @@ namespace SAIN.Components
             SAINGameWorld.PlayerTracker.GetPlayerComponent(profileID)?.AIData.PlayerLocation.UpdateEnvironment(trigger);
         }
 
-        public void BulletImpacted(EftBulletClass bullet)
-        {
-            //Logger.LogInfo($"Shot By: {bullet.Player?.iPlayer?.Profile.Nickname} at Time: {Time.time}");
-            //DebugGizmos.Sphere(bullet.CurrentPosition);
-            BulletImpact?.Invoke(bullet);
-        }
-
         private void Awake()
         {
             Instance = this;
@@ -110,7 +210,8 @@ namespace SAIN.Components
             BotSquads = new BotSquads(this);
             BotHearing = new BotHearingClass(this);
             PeacefulActions = new BotPeacefulActionController(this);
-            LineOfSightManager = new BotJobsClass(this);
+            BotJobs = new BotJobsClass(this);
+            GrenadeController = new GrenadeController(this);
             GameWorld.OnDispose += Dispose;
         }
 
@@ -131,19 +232,8 @@ namespace SAIN.Components
             BotExtractManager.Update();
             TimeVision.Update();
             WeatherVision.Update();
-            LineOfSightManager.Update();
+            BotJobs.Update();
             PeacefulActions.Update();
-
-            //showBotInfoDebug();
-            //CoverManager.Update();
-            //PathManager.Update();
-            //AddNavObstacles();
-            //UpdateObstacles();
-        }
-
-        public void GrenadeCollided(Grenade grenade, float maxRange)
-        {
-            OnGrenadeCollision?.Invoke(grenade, maxRange);
         }
 
         private void showBotInfoDebug()
@@ -237,82 +327,6 @@ namespace SAIN.Components
             }
         }
 
-        private void GrenadeExplosion(Vector3 explosionPosition, string playerProfileID, bool isSmoke, float smokeRadius, float smokeLifeTime)
-        {
-            if (!Singleton<BotEventHandler>.Instantiated || playerProfileID == null) {
-                return;
-            }
-            Player player = GameWorldInfo.GetAlivePlayer(playerProfileID);
-            if (player != null) {
-                if (!isSmoke) {
-                    registerGrenadeExplosionForSAINBots(explosionPosition, player, playerProfileID, 200f);
-                }
-                else {
-                    registerGrenadeExplosionForSAINBots(explosionPosition, player, playerProfileID, 50f);
-
-                    float radius = smokeRadius * HelpersGClass.SMOKE_GRENADE_RADIUS_COEF;
-                    Vector3 position = player.Position;
-
-                    if (DefaultController != null)
-                        foreach (var keyValuePair in DefaultController.Groups())
-                            foreach (BotsGroup botGroupClass in keyValuePair.Value.GetGroups(true))
-                                botGroupClass.AddSmokePlace(explosionPosition, smokeLifeTime, radius, position);
-                }
-            }
-        }
-
-        private void registerGrenadeExplosionForSAINBots(Vector3 explosionPosition, Player player, string playerProfileID, float range)
-        {
-            // Play a sound with the input range.
-            Singleton<BotEventHandler>.Instance?.PlaySound(player, explosionPosition, range, AISoundType.gun);
-
-            // We dont want bots to think the grenade explosion was a place they heard an enemy, so set this manually.
-            foreach (var bot in Bots.Values) {
-                if (bot?.BotActive == true) {
-                    float distance = (bot.Position - explosionPosition).magnitude;
-                    if (distance < range) {
-                        Enemy enemy = bot.EnemyController.GetEnemy(playerProfileID, true);
-                        if (enemy != null) {
-                            float dispersion = distance / 10f;
-                            Vector3 random = UnityEngine.Random.onUnitSphere * dispersion;
-                            random.y = 0;
-                            Vector3 estimatedThrowPosition = enemy.EnemyPosition + random;
-
-                            HearingReport report = new HearingReport {
-                                position = estimatedThrowPosition,
-                                soundType = SAINSoundType.GrenadeExplosion,
-                                placeType = EEnemyPlaceType.Hearing,
-                                isDanger = distance < 100f || enemy.InLineOfSight,
-                                shallReportToSquad = true,
-                            };
-                            enemy.Hearing.SetHeard(report);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void GrenadeThrown(Grenade grenade, Vector3 position, Vector3 force, float mass)
-        {
-            if (grenade == null) {
-                return;
-            }
-
-            Player player = GameWorldInfo.GetAlivePlayer(grenade.ProfileId);
-            if (player == null) {
-                Logger.LogError($"Player Null from ID {grenade.ProfileId}");
-                return;
-            }
-            if (!player.HealthController.IsAlive) {
-                return;
-            }
-
-            Vector3 dangerPoint = Vector.DangerPoint(position, force, mass);
-            Singleton<BotEventHandler>.Instance?.PlaySound(player, grenade.transform.position, 20f, AISoundType.gun);
-            grenade.gameObject.AddComponent<GrenadeVelocityTracker>();
-            OnGrenadeThrown?.Invoke(grenade, dangerPoint, grenade.ProfileId);
-        }
-
         public List<string> Groups = new List<string>();
 
         private void OnDestroy()
@@ -324,13 +338,12 @@ namespace SAIN.Components
             try {
                 GameWorld.OnDispose -= Dispose;
                 StopAllCoroutines();
-                LineOfSightManager.Dispose();
+                BotJobs.Dispose();
                 BotSpawnController.UnSubscribe();
                 PeacefulActions.Dispose();
 
                 if (BotEventHandler != null) {
-                    BotEventHandler.OnGrenadeThrow -= GrenadeThrown;
-                    BotEventHandler.OnGrenadeExplosive -= GrenadeExplosion;
+                    GrenadeController.UnSubscribe(BotEventHandler);
                 }
 
                 if (Bots != null && Bots.Count > 0) {

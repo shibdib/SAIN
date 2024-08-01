@@ -1,6 +1,7 @@
 ﻿using EFT;
 using SAIN.Components.BotController;
 using SAIN.Components.PlayerComponentSpace;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -8,8 +9,21 @@ namespace SAIN.Components.BotControllerSpace.Classes
 {
     public class BotHearingClass : SAINControllerBase
     {
+        public event Action<EPhraseTrigger, ETagStatus, Player> PlayerTalk;
+
+        public event Action<SAINSoundType, Vector3, PlayerComponent, float, float> AISoundPlayed;
+
+        public event Action<EftBulletClass> BulletImpact;
+
         public BotHearingClass(SAINBotController botController) : base(botController)
         {
+        }
+
+        public void BulletImpacted(EftBulletClass bullet)
+        {
+            //Logger.LogInfo($"Shot By: {bullet.Player?.iPlayer?.Profile.Nickname} at Time: {Time.time}");
+            //DebugGizmos.Sphere(bullet.CurrentPosition);
+            BulletImpact?.Invoke(bullet);
         }
 
         public void PlayerTalked(EPhraseTrigger phrase, ETagStatus mask, Player player)
@@ -22,7 +36,7 @@ namespace SAIN.Components.BotControllerSpace.Classes
                 return;
             }
 
-            BotController.PlayerTalk?.Invoke(phrase, mask, player);
+            PlayerTalk?.Invoke(phrase, mask, player);
         }
 
         public void PlayShootSound(string profileId)
@@ -72,7 +86,7 @@ namespace SAIN.Components.BotControllerSpace.Classes
 
         private IEnumerator delaySoundHeard(SAINSoundType soundType, PlayerComponent playerComponent, Vector3 position, float range, float volume, float delay = 0.1f)
         {
-            BotController.AISoundPlayed?.Invoke(soundType, position, playerComponent, range, volume);
+            AISoundPlayed?.Invoke(soundType, position, playerComponent, range, volume);
             if (playerComponent.Player.IsYourPlayer) {
                 //Logger.LogDebug($"SoundType [{soundType}] FinalRange: {range * volume} Base Range {range} : Volume: {volume}");
             }

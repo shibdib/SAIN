@@ -347,7 +347,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 var botController = SAINBotController.Instance;
 
                 if (botController != null)
-                    botController.PlayerTalk -= EnemyConversation;
+                    botController.BotHearing.PlayerTalk -= EnemyConversation;
 
                 if (Bot.EnemyController != null) {
                     Bot.EnemyController.Events.OnEnemyKilled -= OnEnemyDown;
@@ -369,7 +369,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 squad.OnMemberHeardEnemy += enemyHeard;
                 squad.OnMemberDecisionMade += onMemberMadeDecision;
 
-                SAINBotController.Instance.PlayerTalk += EnemyConversation;
+                SAINBotController.Instance.BotHearing.PlayerTalk += EnemyConversation;
 
                 BotOwner.DeadBodyWork.OnStartLookToBody += OnLootBody;
                 Bot.EnemyController.Events.OnEnemyKilled += OnEnemyDown;

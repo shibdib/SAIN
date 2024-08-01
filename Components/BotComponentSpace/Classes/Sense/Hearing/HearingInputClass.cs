@@ -27,8 +27,8 @@ namespace SAIN.SAINComponent.Classes
         public void Init()
         {
             base.SubscribeToPreset(null);
-            SAINBotController.Instance.AISoundPlayed += soundHeard;
-            SAINBotController.Instance.BulletImpact += bulletImpacted;
+            SAINBotController.Instance.BotHearing.AISoundPlayed += soundHeard;
+            SAINBotController.Instance.BotHearing.BulletImpact += bulletImpacted;
         }
 
         public void Update()
@@ -58,8 +58,8 @@ namespace SAIN.SAINComponent.Classes
 
         public void Dispose()
         {
-            SAINBotController.Instance.AISoundPlayed -= soundHeard;
-            SAINBotController.Instance.BulletImpact -= bulletImpacted;
+            SAINBotController.Instance.BotHearing.AISoundPlayed -= soundHeard;
+            SAINBotController.Instance.BotHearing.BulletImpact -= bulletImpacted;
         }
 
         private void soundHeard(
