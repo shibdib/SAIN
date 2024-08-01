@@ -72,10 +72,6 @@ namespace SAIN.Components.BotControllerSpace.Classes
 
         private IEnumerator delaySoundHeard(SAINSoundType soundType, PlayerComponent playerComponent, Vector3 position, float range, float volume, float delay = 0.1f)
         {
-            var weather = SAINWeatherClass.Instance;
-            if (weather != null) {
-                range *= weather.RainSoundModifier;
-            }
             BotController.AISoundPlayed?.Invoke(soundType, position, playerComponent, range, volume);
             if (playerComponent.Player.IsYourPlayer) {
                 //Logger.LogDebug($"SoundType [{soundType}] FinalRange: {range * volume} Base Range {range} : Volume: {volume}");

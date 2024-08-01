@@ -1,10 +1,12 @@
 ﻿using EFT;
 using SAIN.Components;
 using SAIN.Components.BotComponentSpace.Classes.EnemyClasses;
+using SAIN.Components.BotController;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
+using static RootMotion.FinalIK.InteractionTrigger;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -88,6 +90,11 @@ namespace SAIN.SAINComponent.Classes
                 if (enemy == null) {
                     return;
                 }
+            }
+            var weather = SAINWeatherClass.Instance;
+            if (weather != null &&
+                PlayerComponent.Player.AIData.EnvironmentId == 0) {
+                power *= weather.RainSoundModifier;
             }
             float baseRange = power * volume;
             if (!isGunshot &&

@@ -23,6 +23,7 @@ namespace SAIN.Components
 
         public void Dispose()
         {
+            VisionJob.Dispose();
         }
     }
 
@@ -68,21 +69,31 @@ namespace SAIN.Components
 
                 int totalRaycasts = enemyCount * partCount * RAYCAST_CHECKS;
 
-                NativeArray<RaycastHit> raycastHits = new NativeArray<RaycastHit>(totalRaycasts, Allocator.TempJob);
-                NativeArray<RaycastCommand> raycastCommands = new NativeArray<RaycastCommand>(totalRaycasts, Allocator.TempJob);
+                _hits = new NativeArray<RaycastHit>(totalRaycasts, Allocator.TempJob);
+                _commands = new NativeArray<RaycastCommand>(totalRaycasts, Allocator.TempJob);
 
-                createCommands(_enemies, raycastCommands, enemyCount, partCount);
-                JobHandle handle = RaycastCommand.ScheduleBatch(raycastCommands, raycastHits, 24);
+                createCommands(_enemies, _commands, enemyCount, partCount);
+                _handle = RaycastCommand.ScheduleBatch(_commands, _hits, 24);
 
                 yield return null;
 
-                handle.Complete();
-                analyzeHits(_enemies, raycastHits, enemyCount, partCount);
-
-                raycastCommands.Dispose();
-                raycastHits.Dispose();
+                _handle.Complete();
+                analyzeHits(_enemies, _hits, enemyCount, partCount);
+                _commands.Dispose();
+                _hits.Dispose();
             }
         }
+
+        public void Dispose()
+        {
+            if (!_handle.IsCompleted) _handle.Complete();
+            if (_commands.IsCreated) _commands.Dispose();
+            if (_hits.IsCreated) _hits.Dispose();
+        }
+
+        private NativeArray<RaycastHit> _hits;
+        private NativeArray<RaycastCommand> _commands;
+        private JobHandle _handle;
 
         private void createCommands(List<Enemy> enemies, NativeArray<RaycastCommand> raycastCommands, int enemyCount, int partCount)
         {

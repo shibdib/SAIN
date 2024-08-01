@@ -20,6 +20,13 @@ namespace SAIN.Components.BotControllerSpace.Classes.Raycasts
             distances[index] = direction.magnitude;
             normals[index] = direction.normalized;
         }
+
+        public void Dispose()
+        {
+            if (directions.IsCreated) directions.Dispose();
+            if (distances.IsCreated) distances.Dispose();
+            if (normals.IsCreated) normals.Dispose();
+        }
     }
 
     public struct CalcDistanceJob : IJobFor
@@ -31,6 +38,12 @@ namespace SAIN.Components.BotControllerSpace.Classes.Raycasts
         {
             Vector3 direction = directions[index];
             distances[index] = direction.magnitude;
+        }
+
+        public void Dispose()
+        {
+            if (directions.IsCreated) directions.Dispose();
+            if (distances.IsCreated) distances.Dispose();
         }
     }
 
@@ -63,6 +76,11 @@ namespace SAIN.Components.BotControllerSpace.Classes.Raycasts
                     continue;
                 }
 
+                if (BotController?.BotGame?.Status == EFT.GameStatus.Stopping) {
+                    yield return null;
+                    continue;
+                }
+
                 _players.Clear();
                 _players.AddRange(players.Values);
                 int playerCount = _players.Count;
@@ -80,6 +98,7 @@ namespace SAIN.Components.BotControllerSpace.Classes.Raycasts
                 yield return null;
                 _distanceJobHandle.Complete();
                 readData(_players, _distanceJob);
+                _distanceJob.Dispose();
 
                 // Reset players list incase any were removed
                 _players.Clear();
@@ -99,6 +118,7 @@ namespace SAIN.Components.BotControllerSpace.Classes.Raycasts
                 yield return null;
                 _partDistanceJobHandle.Complete();
                 readData(_players, _partDistanceJob);
+                _partDistanceJob.Dispose();
 
                 _players.Clear();
             }
@@ -124,10 +144,6 @@ namespace SAIN.Components.BotControllerSpace.Classes.Raycasts
                     count++;
                 }
             }
-
-            directions.Dispose();
-            normals.Dispose();
-            distances.Dispose();
         }
 
         private static void readData(List<PlayerComponent> players, CalcDistanceJob job)
@@ -154,9 +170,6 @@ namespace SAIN.Components.BotControllerSpace.Classes.Raycasts
                     }
                 }
             }
-
-            directions.Dispose();
-            distances.Dispose();
         }
 
         private static NativeArray<Vector3> getPartDirections(List<PlayerComponent> players, int playerCount)
@@ -205,18 +218,10 @@ namespace SAIN.Components.BotControllerSpace.Classes.Raycasts
 
         public void Dispose()
         {
-            DisposeArray(_distanceJob.directions);
-            DisposeArray(_distanceJob.normals);
-            DisposeArray(_distanceJob.distances);
-            DisposeArray(_partDistanceJob.distances);
-            DisposeArray(_partDistanceJob.directions);
-        }
-
-        private static void DisposeArray<T>(NativeArray<T> array) where T : struct
-        {
-            if (array.IsCreated) {
-                array.Dispose();
-            }
+            if (!_partDistanceJobHandle.IsCompleted) _partDistanceJobHandle.Complete();
+            if (!_distanceJobHandle.IsCompleted) _distanceJobHandle.Complete();
+            _distanceJob.Dispose();
+            _partDistanceJob.Dispose();
         }
     }
 }
