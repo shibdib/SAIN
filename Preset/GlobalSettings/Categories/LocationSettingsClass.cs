@@ -21,38 +21,34 @@ namespace SAIN.Preset.GlobalSettings
         private void addNewLocations(float baseMod)
         {
             foreach (var type in EnumValues.GetEnum<ELocation>()) {
-                if (Settings.ContainsKey(type))
+                if (LocationSettings.ContainsKey(type))
                     continue;
 
                 if (type == ELocation.None || type == ELocation.Terminal || type == ELocation.Town) {
                     continue;
                 }
-
-                var settings = new LocationSettings {
-                    VisionSpeedModifier = baseMod,
-                    ScatterMultiplier = baseMod,
-                    AggressionMultiplier = baseMod,
-                };
-                Settings.Add(type, settings);
+                LocationSettings.Add(type, new LocationDifficultySettings());
             }
         }
 
-        public LocationSettings Current()
+        public LocationDifficultySettings Current()
         {
             var gameworld = GameWorldComponent.Instance;
             if (gameworld == null || gameworld.Location == null) {
+                Logger.LogError($"gameworld or location class null");
                 return null;
             }
-            if (Settings.TryGetValue(gameworld.Location.Location, out var settings)) {
+            if (LocationSettings.TryGetValue(gameworld.Location.Location, out var settings)) {
                 return settings;
             }
+            Logger.LogError($"no settings for {gameworld.Location.Location}");
             return null;
         }
 
         [Name("Location Specific Modifiers")]
         [Description("These modifiers only apply to bots on the location they are assigned to. Applies to all bots equally.")]
         [MinMax(0.01f, 5f, 100f)]
-        public Dictionary<ELocation, LocationSettings> Settings = new Dictionary<ELocation, LocationSettings>();
+        public Dictionary<ELocation, LocationDifficultySettings> LocationSettings = new Dictionary<ELocation, LocationDifficultySettings>();
 
         public override void Init(List<ISAINSettings> list)
         {

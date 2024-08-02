@@ -462,7 +462,7 @@ namespace SAIN.SAINComponent.Classes.Talk
 
         private float _nextGestureTime;
 
-        private bool shallBeChatty()
+        public bool ShallBeChatty()
         {
             if (Bot.Info.Profile.IsScav) {
                 return SAINPlugin.LoadedPreset.GlobalSettings.Talk.TalkativeScavs;
@@ -494,7 +494,7 @@ namespace SAIN.SAINComponent.Classes.Talk
                 && _nextResponseTime < Time.time) {
                 _nextResponseTime = Time.time + _friendlyResponseFrequencyLimit;
 
-                if (player.IsAI == false || shallBeChatty()) {
+                if (player.IsAI == false || ShallBeChatty()) {
                     float chance = player.IsAI ? _friendlyResponseChanceAI : _friendlyResponseChance;
 
                     Bot.StartCoroutine(RespondToFriendly(

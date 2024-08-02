@@ -7,11 +7,6 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class ShootSettings : SAINSettingsBase<ShootSettings>, ISAINSettings
     {
-        [Name("Global Scatter Multiplier")]
-        [Description("Higher = more scattering. Modifies EFT's default scatter feature. 1.5 = 1.5x more scatter")]
-        [MinMax(0.01f, 10f, 100f)]
-        public float GlobalScatterMultiplier = 1f;
-
         [Name("Global Recoil Multiplier")]
         [Description("Higher = more recoil. Modifies SAIN's recoil scatter feature. 1.5 = 1.5x more recoilfrom a single gunshot")]
         [MinMax(0.01f, 3f, 100f)]
@@ -35,7 +30,7 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         public float RecoilRiseCoef = 8;
 
-        [Name("Ammo Shootability" )]
+        [Name("Ammo Shootability")]
         [Description(
             "Lower is BETTER. " +
             "How Shootable this ammo type is, affects semi auto firerate and full auto burst length." +

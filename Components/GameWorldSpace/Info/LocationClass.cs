@@ -1,7 +1,5 @@
-﻿using EFT;
-using HarmonyLib;
-using UnityEngine;
-using WeatherInterface = GInterface26;
+﻿using UnityEngine;
+using SeasonController = Class393;
 
 namespace SAIN.Components
 {
@@ -40,15 +38,13 @@ namespace SAIN.Components
             }
             _nextCheckWeatherTime = Time.time + 0.5f;
 
-            var weather = (AccessTools.Field(typeof(GameWorld), WEATHER_INTERFACE).GetValue(GameWorld) as WeatherInterface);
-            if (weather == null) {
-                Season = ESeason.Summer;
+            if (SeasonController.Controller == null) {
+                return;
             }
-            else {
-                Logger.LogDebug($"Got Weather {weather.Status}");
-                Season = weather.Season;
-                _weatherFound = true;
-            }
+
+            Season = SeasonController.Controller.Season;
+            Logger.LogDebug($"Got Season {Season}");
+            _weatherFound = true;
         }
 
         private void findLocation()
@@ -116,11 +112,12 @@ namespace SAIN.Components
                     break;
 
                 default:
+                    Logger.LogError($"{locationString}");
                     Location = ELocation.None;
                     break;
             }
 
-            _foundLocation = true;
+            _foundLocation = Location != ELocation.None;
             return Location;
         }
 

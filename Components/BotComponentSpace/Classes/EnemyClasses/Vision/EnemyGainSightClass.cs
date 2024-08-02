@@ -13,13 +13,11 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             {
                 if (_nextCheckVisTime < Time.time) {
                     _nextCheckVisTime = Time.time + 0.05f;
-                    _gainSightModifier = calcModifier() * calcRepeatSeenCoef() * _personalityModifier;
+                    _gainSightModifier = calcModifier() * calcRepeatSeenCoef();
                 }
                 return _gainSightModifier;
             }
         }
-
-        private float _personalityModifier => Bot.Info.PersonalitySettingsClass.StatModifiers.VisionSpeedMultiplier;
 
         private const float UNDER_FIRE_FROM_ME_COEF = 0.4f;
 
@@ -106,7 +104,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             float angleMod = calcAngleMod();
             float poseMod = poseModifier();
             float unknownMod = calcUnknownMod();
-            float locationMod = Bot.Info.LocationSettings != null ? Bot.Info.LocationSettings.VisionSpeedModifier : 1f;
 
             float notLookMod = 1f;
             if (!Enemy.IsAI)
@@ -114,7 +111,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             float result =
                 1f *
-                locationMod *
                 underFireMod *
                 partMod *
                 gearMod *

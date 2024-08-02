@@ -13,6 +13,7 @@ namespace SAIN.SAINComponent.Classes.Talk
     {
         public GroupTalk(BotComponent bot) : base(bot)
         {
+            _nextRandomTalkTime = Time.time + 15f;
         }
 
         public bool FriendIsClose {
@@ -81,9 +82,23 @@ namespace SAIN.SAINComponent.Classes.Talk
                     if (ShallReportNeedHelp()) {
                         return;
                     }
+                    randomTalk();
                 }
             }
         }
+
+        private void randomTalk()
+        {
+            if (_nextRandomTalkTime < Time.time &&
+                BotOwner.Memory.IsPeace &&
+                Bot.Talk.EnemyTalk.ShallBeChatty()) {
+                float delay = UnityEngine.Random.Range(60, 240f);
+                _nextRandomTalkTime = Time.time + delay;
+                Bot.Talk.Say(EPhraseTrigger.MumblePhrase, null);
+            }
+        }
+
+        private float _nextRandomTalkTime;
 
         private void onDecisionMade(ECombatDecision solo, ESquadDecision squad, ESelfDecision self, BotComponent me)
         {

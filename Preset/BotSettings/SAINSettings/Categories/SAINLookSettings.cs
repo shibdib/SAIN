@@ -6,14 +6,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINLookSettings : SAINSettingsBase<SAINLookSettings>, ISAINSettings
     {
-        [NameAndDescription(
-            "Base Vision Speed Multiplier",
-            "The Base vision speed multiplier, affects all ranges to enemy. " +
-            "Bots will see this much faster, or slower, at any range. " +
-            "Higher is slower speed, so 1.5 would result in bots taking 1.5 times longer to spot an enemy")]
-        [MinMax(0.1f, 3f, 10f)]
-        public float VisionSpeedModifier = 1;
-
         [Name("Minimum Vision Speed")]
         [Description("Add a minimum vision speed, in seconds, for all vision checks. 0 means this is disabled.")]
         [MinMax(0f, 1f, 100f)]

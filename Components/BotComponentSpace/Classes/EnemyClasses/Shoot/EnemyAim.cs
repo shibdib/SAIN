@@ -10,18 +10,17 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
     {
         private const float CALC_SCATTER_FREQ = 0.025f;
         private const float CALC_SCATTER_FREQ_AI = 0.1f;
+
         public EnemyAim(Enemy enemy) : base(enemy)
         {
         }
 
-        public float AimAndScatterMultiplier
-        {
+        public float AimAndScatterMultiplier {
             get
             {
-                if (_getModTime < Time.time)
-                {
+                if (_getModTime < Time.time) {
                     _getModTime = Time.time + (Enemy.IsAI ? CALC_SCATTER_FREQ_AI : CALC_SCATTER_FREQ);
-                    _modifier = _poseFactor * _visibilityFactor * _opticFactor * _injuryFactor * _velocityFactor * _personalityModifier * _locationModifier;
+                    _modifier = _poseFactor * _visibilityFactor * _opticFactor * _injuryFactor * _velocityFactor;
                 }
                 return _modifier;
             }
@@ -34,59 +33,44 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private static AimSettings _aimSettings => SAINPlugin.LoadedPreset.GlobalSettings.Aiming;
 
-        private float _personalityModifier => Bot.Info.PersonalitySettingsClass.StatModifiers.ScatterMultiplier;
-
-        private float _locationModifier => Bot.Info.LocationSettings != null ? Bot.Info.LocationSettings.ScatterMultiplier : 1f;
-
-        private float _opticFactor
-        {
+        private float _opticFactor {
             get
             {
                 var weapon = Enemy.Bot.PlayerComponent.Equipment.CurrentWeapon;
-                if (weapon == null)
-                {
+                if (weapon == null) {
                     return 1f;
                 }
 
                 float enemyDistance = Enemy.RealDistance;
 
-                if (weapon.HasOptic)
-                {
-                    if (enemyDistance >= _aimSettings.OpticFarDistance)
-                    {
+                if (weapon.HasOptic) {
+                    if (enemyDistance >= _aimSettings.OpticFarDistance) {
                         return _aimSettings.OpticFarMulti;
                     }
-                    else if (enemyDistance <= _aimSettings.OpticCloseDistance)
-                    {
+                    else if (enemyDistance <= _aimSettings.OpticCloseDistance) {
                         return _aimSettings.OpticCloseMulti;
                     }
                 }
 
-                if (weapon.HasRedDot)
-                {
-                    if (enemyDistance <= _aimSettings.RedDotCloseDistance)
-                    {
+                if (weapon.HasRedDot) {
+                    if (enemyDistance <= _aimSettings.RedDotCloseDistance) {
                         return _aimSettings.RedDotCloseMulti;
                     }
-                    else if (enemyDistance >= _aimSettings.RedDotFarDistance)
-                    {
+                    else if (enemyDistance >= _aimSettings.RedDotFarDistance) {
                         return _aimSettings.RedDotFarMulti;
                     }
                 }
 
-                if (!weapon.HasRedDot && 
-                    !weapon.HasOptic)
-                {
+                if (!weapon.HasRedDot &&
+                    !weapon.HasOptic) {
                     float min = _aimSettings.IronSightScaleDistanceStart;
-                    if (enemyDistance < min)
-                    {
+                    if (enemyDistance < min) {
                         return 1f;
                     }
 
                     float multi = _aimSettings.IronSightFarMulti;
                     float max = _aimSettings.IronSightScaleDistanceEnd;
-                    if (enemyDistance > max)
-                    {
+                    if (enemyDistance > max) {
                         return multi;
                     }
                     float num = max - min;
@@ -102,12 +86,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float PoseLevel => EnemyPlayer.PoseLevel;
 
-        private float _poseFactor
-        {
+        private float _poseFactor {
             get
             {
-                if (EnemyPlayer.IsInPronePose)
-                {
+                if (EnemyPlayer.IsInPronePose) {
                     return _aimSettings.ProneScatterMulti;
                 }
 
@@ -119,12 +101,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        private float _visibilityFactor
-        {
+        private float _visibilityFactor {
             get
             {
-                if (_checkVisTime < Time.time)
-                {
+                if (_checkVisTime < Time.time) {
                     _checkVisTime = Time.time + _checkVisFreq;
                     _visFactor = calcVisFactor();
                 }
@@ -132,12 +112,10 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        private float _velocityFactor
-        {
+        private float _velocityFactor {
             get
             {
-                if (Enemy.Player.IsSprintEnabled)
-                {
+                if (Enemy.Player.IsSprintEnabled) {
                     return _aimSettings.EnemySprintingScatterMulti;
                 }
                 return Mathf.Lerp(_aimSettings.EnemyVelocityMaxDebuff, _aimSettings.EnemyVelocityMaxBuff, 1f - Enemy.EnemyTransform.VelocityMagnitudeNormal);
@@ -147,25 +125,21 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private float calcVisFactor()
         {
             var enemyParts = Enemy.EnemyInfo.AllActiveParts;
-            if (enemyParts == null || enemyParts.Count < 1)
-            {
+            if (enemyParts == null || enemyParts.Count < 1) {
                 return 1f;
             }
             int visCount = 0;
             int totalCount = 0;
-            foreach (var part in enemyParts)
-            {
+            foreach (var part in enemyParts) {
                 totalCount++;
-                if (part.Value.IsVisible)
-                {
+                if (part.Value.IsVisible) {
                     visCount++;
                 }
             }
 
             totalCount++;
             var bodyPart = Enemy.EnemyInfo.BodyData().Value;
-            if (bodyPart.IsVisible)
-            {
+            if (bodyPart.IsVisible) {
                 visCount++;
             }
 

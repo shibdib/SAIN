@@ -37,6 +37,8 @@ namespace SAIN.Preset.GlobalSettings
             Update();
         }
 
+        public GlobalDifficultySettings Difficulty = new GlobalDifficultySettings();
+
         public GeneralSettings General = new GeneralSettings();
 
         public AimSettings Aiming = new AimSettings();
@@ -70,6 +72,7 @@ namespace SAIN.Preset.GlobalSettings
         {
             SettingsList.Clear();
 
+            Difficulty.Init(SettingsList);
             General.Init(SettingsList);
             Aiming.Init(SettingsList);
             Hearing.Init(SettingsList);

@@ -1,10 +1,12 @@
 ﻿using SAIN.Preset.BotSettings.SAINSettings.Categories;
+using SAIN.Preset.GlobalSettings;
 using SAIN.Preset.Personalities;
 
 namespace SAIN.Preset.BotSettings.SAINSettings
 {
     public class SAINSettingsClass : SettingsGroupBase<SAINSettingsClass>
     {
+        public BotDifficultySettings Difficulty = new BotDifficultySettings();
         public SAINCoreSettings Core = new SAINCoreSettings();
         public SAINAimingSettings Aiming = new SAINAimingSettings();
         public SAINBossSettings Boss = new SAINBossSettings();
@@ -22,6 +24,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings
         public override void InitList()
         {
             SettingsList.Clear();
+            SettingsList.Add(Difficulty);
             SettingsList.Add(Core);
             SettingsList.Add(Aiming);
             SettingsList.Add(Boss);

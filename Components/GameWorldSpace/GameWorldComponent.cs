@@ -24,6 +24,7 @@ namespace SAIN.Components
         private void Update()
         {
             Doors?.Update();
+            Location?.Update();
             findSpawnPointMarkers();
             BotLightTracker.LogDictionaryInfo();
         }

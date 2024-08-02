@@ -276,6 +276,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Vision\RaycastResult.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyControllerEvents.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyListController.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Info\BotDifficultyClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Mover\ObstacleAgent.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\BotWeightManagement.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingAnalysisClass.cs" />
@@ -465,6 +466,7 @@
     <Compile Include="Preset\GearStealthValues\EEquipmentType.cs" />
     <Compile Include="Preset\GearStealthValues\GearStealthValuesClass.cs" />
     <Compile Include="Preset\GearStealthValues\ItemStealthValue.cs" />
+    <Compile Include="Preset\BotSettings\SAINSettings\Categories\BotDifficultySettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\General\AILimitSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\CloneSettingsClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\General\DoorSettings.cs" />
@@ -494,8 +496,10 @@
     <Compile Include="Preset\GlobalSettings\Categories\General\LootingBotsSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\General\VanillaBotSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\General\PerformanceSettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\LocationSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\LocationSettingsClass.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\GlobalDifficultySettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\LocationDifficultySettings.cs" />
+    <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalityDifficultySettings.cs" />
     <Compile Include="Preset\ISettingsGroup.cs" />
     <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalityAssignmentSettings.cs" />
     <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalityBehaviorSettings.cs" />

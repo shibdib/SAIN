@@ -59,7 +59,8 @@ namespace SAIN.Attributes
         }
 
         private static object checkEditValue(ref object value, object settingsObject, ConfigInfoClass info, out bool wasEdited, int listDepth, GUIEntryConfig config = null, string search = null)
-        {           wasEdited = false;
+        {
+            wasEdited = false;
             if (value != null && info != null && !info.DoNotShowGUI) {
                 config = config ?? _defaultEntryConfig;
 
@@ -88,7 +89,7 @@ namespace SAIN.Attributes
                     EditAllValuesInObj(group, out wasEdited, search, config, listDepth++);
                     return value;
                 }
-                value = FindListTypeAndEdit(ref value, settingsObject, info, listDepth, out wasEdited, config);
+                value = FindListTypeAndEdit(ref value, settingsObject, info, listDepth, out wasEdited, config, search);
             }
             return value;
         }
@@ -103,13 +104,13 @@ namespace SAIN.Attributes
             EndHorizontal(100f);
         }
 
-        public static object FindListTypeAndEdit(ref object value, object settingsObject, ConfigInfoClass info, int listDepth, out bool wasEdited, GUIEntryConfig config = null)
+        public static object FindListTypeAndEdit(ref object value, object settingsObject, ConfigInfoClass info, int listDepth, out bool wasEdited, GUIEntryConfig config = null, string search = null)
         {
             wasEdited = false;
             CreateLabelStyle();
 
-            if (value is Dictionary<ELocation, LocationSettings> locationDict) {
-                editLocationDict(locationDict, settingsObject, info, listDepth, config, out wasEdited);
+            if (value is Dictionary<ELocation, LocationDifficultySettings> locationDict) {
+                editLocationDict(locationDict, settingsObject, info, listDepth, config, out wasEdited, search);
                 return value;
             }
 
@@ -410,65 +411,30 @@ namespace SAIN.Attributes
             EndVertical(5f);
         }
 
-        private static void editLocationDict(Dictionary<ELocation, LocationSettings> dictionary, object settingsObject, ConfigInfoClass info, int listDepth, GUIEntryConfig config, out bool wasEdited)
+        private static void editLocationDict(Dictionary<ELocation, LocationDifficultySettings> dictionary, object settingsObject, ConfigInfoClass info, int listDepth, GUIEntryConfig config, out bool wasEdited, string search = null)
         {
             BeginVertical(5f);
 
-            var defaultDictionary = info.GetDefault(settingsObject) as Dictionary<ELocation, LocationSettings>;
+            var defaultDictionary = info.GetDefault(settingsObject) as Dictionary<ELocation, LocationDifficultySettings>;
             ELocation[] array = EnumValues.GetEnum<ELocation>();
             wasEdited = false;
 
             for (int i = 0; i < array.Length; i++) {
                 var location = array[i];
-                if (!dictionary.TryGetValue(location, out LocationSettings originalValue)) {
+                if (!dictionary.TryGetValue(location, out LocationDifficultySettings originalValue)) {
                     continue;
                 }
                 string name = location.ToString();
-                
+
                 BeginHorizontal(100f + (listDepth * config.SubList_Indent_Horizontal));
                 Label(name, Height(config.EntryHeight));
                 EndHorizontal(100f);
 
                 int subListDepth = listDepth + 1;
-
-                BeginHorizontal(100f + (subListDepth * config.SubList_Indent_Horizontal));
-                float scatter = slider(originalValue.ScatterMultiplier, "Scatter Multiplier", info, config);
-                if (resetButton()) {
-                    scatter = defaultDictionary[location].ScatterMultiplier;
-                    dictionary[location].ScatterMultiplier = scatter;
-                    //ConfigEditingTracker.Remove(attributes);
-                }
-                if (dictionary[location].ScatterMultiplier != scatter) {
-                    dictionary[location].ScatterMultiplier = scatter;
+                EditAllValuesInObj(originalValue, out bool newEdit, search, config, subListDepth);
+                if (newEdit) {
                     wasEdited = true;
                 }
-                EndHorizontal(100f);
-                
-                BeginHorizontal(100f + (subListDepth * config.SubList_Indent_Horizontal));
-                float visionSpeed = slider(originalValue.VisionSpeedModifier, "Vision Speed Multiplier", info, config);
-                if (resetButton()) {
-                    visionSpeed = defaultDictionary[location].VisionSpeedModifier;
-                    dictionary[location].VisionSpeedModifier = visionSpeed;
-                    //ConfigEditingTracker.Remove(attributes);
-                }
-                if (dictionary[location].VisionSpeedModifier != visionSpeed) {
-                    dictionary[location].VisionSpeedModifier = visionSpeed;
-                    wasEdited = true;
-                }
-                EndHorizontal(100f);
-                
-                BeginHorizontal(100f + (subListDepth * config.SubList_Indent_Horizontal));
-                float aggression = slider(originalValue.AggressionMultiplier, "Aggression Multiplier", info, config);
-                if (resetButton()) {
-                    aggression = defaultDictionary[location].AggressionMultiplier;
-                    dictionary[location].AggressionMultiplier = aggression;
-                    //ConfigEditingTracker.Remove(attributes);
-                }
-                if (dictionary[location].AggressionMultiplier != aggression) {
-                    dictionary[location].AggressionMultiplier = aggression;
-                    wasEdited = true;
-                }
-                EndHorizontal(100f);
             }
             EndVertical(5f);
         }

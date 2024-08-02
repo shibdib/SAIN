@@ -84,7 +84,7 @@ namespace SAIN.SAINComponent.Classes
             mods.EnvironmentModifier = calcEnvironmentMod(sound);
             mods.ConditionModifier = calcConditionMod(sound);
             mods.OcclusionModifier = calcOcclusionMod(sound);
-            mods.FinalModifier = mods.CalcFinalModifier(HEAR_MODIFIER_MIN_CLAMP, HEAR_MODIFIER_MAX_CLAMP);
+            mods.FinalModifier = mods.CalcFinalModifier(HEAR_MODIFIER_MIN_CLAMP, HEAR_MODIFIER_MAX_CLAMP) * Bot.Info.Difficulty.HearingDistanceModifier;
             return mods.FinalModifier;
         }
 

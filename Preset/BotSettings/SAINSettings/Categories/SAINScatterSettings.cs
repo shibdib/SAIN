@@ -6,11 +6,6 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
 {
     public class SAINScatterSettings : SAINSettingsBase<SAINScatterSettings>, ISAINSettings
     {
-        [Name("EFT Scatter Multiplier")]
-        [Description("Higher = more scattering. Modifies EFT's default scatter feature. 1.5 = 1.5x more scatter")]
-        [MinMax(0.1f, 10f, 100f)]
-        public float ScatterMultiplier = 1f;
-
         [Name("Arm Injury Scatter Multiplier")]
         [Description("Increase scatter when a bots arms are injured.")]
         [MinMax(1f, 5f, 100f)]

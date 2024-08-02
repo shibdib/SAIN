@@ -1,23 +1,20 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using SAIN.Helpers;
 using SAIN.Preset;
-using SAIN.Preset.GlobalSettings;
 using System.Collections.Generic;
 using UnityEngine;
-using static HBAO_Core;
 
 namespace SAIN.Plugin
 {
     internal static class SAINDifficultyClass
     {
-        const string PresetNameEasy = "Baby Bots";
-        const string PresetNameNormal = "Less Difficult";
-        const string PresetNameHard = "Default";
-        const string PresetNameHarderPMCs = "Default with Harder PMCs";
-        const string DefaultPresetDescription = "Bots are difficult but fair, the way SAIN was meant to played.";
-        const string PresetNameVeryHard = "I Like Pain";
-        const string PresetNameImpossible = "Death Wish";
+        private const string PresetNameEasy = "Baby Bots";
+        private const string PresetNameNormal = "Less Difficult";
+        private const string PresetNameHard = "Default";
+        private const string PresetNameHarderPMCs = "Default with Harder PMCs";
+        private const string DefaultPresetDescription = "Bots are difficult but fair, the way SAIN was meant to played.";
+        private const string PresetNameVeryHard = "I Like Pain";
+        private const string PresetNameImpossible = "Death Wish";
 
         public static readonly Dictionary<SAINDifficulty, SAINPresetDefinition> DefaultPresetDefinitions = new Dictionary<SAINDifficulty, SAINPresetDefinition>();
 
@@ -45,7 +42,7 @@ namespace SAIN.Plugin
                     DefaultPresetDescription));
 
             DefaultPresetDefinitions.Add(
-                SAINDifficulty.harderpmcs, 
+                SAINDifficulty.harderpmcs,
                 SAINPresetDefinition.CreateDefaultDefinition(
                     PresetNameHarderPMCs,
                     SAINDifficulty.harderpmcs,
@@ -69,8 +66,7 @@ namespace SAIN.Plugin
         public static SAINPresetClass GetDefaultPreset(SAINDifficulty difficulty)
         {
             SAINPresetClass result;
-            switch (difficulty)
-            {
+            switch (difficulty) {
                 case SAINDifficulty.easy:
                     result = SAINDifficultyClass.CreateEasyPreset();
                     break;
@@ -106,20 +102,32 @@ namespace SAIN.Plugin
             var preset = new SAINPresetClass(SAINDifficulty.easy);
 
             var global = preset.GlobalSettings;
-            global.Shoot.RecoilMultiplier = 2.0f;
-            global.Shoot.GlobalScatterMultiplier = 1.5f;
+            global.Shoot.RecoilMultiplier = 3f;
+            global.Difficulty.ScatteringCoef = 5f;
+            global.Difficulty.PrecisionSpeedCoef = 2f;
+            global.Difficulty.AccuracySpeedCoef = 2f;
+            global.Difficulty.HearingDistanceCoef = 0.6f;
             global.Aiming.FasterCQBReactionsGlobal = false;
-            global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 0.66f;
-            global.Look.VisionSpeed.GlobalVisionSpeedModifier = 2.5f;
+            global.Difficulty.VisibleDistCoef = 0.66f;
+            global.Difficulty.GainSightCoef = 2.5f;
 
-            foreach (var bot in preset.BotSettings.SAINSettings)
-            {
-                bot.Value.DifficultyModifier = Mathf.Clamp(bot.Value.DifficultyModifier * 0.5f, 0.01f, 1f).Round100();
-                foreach (var setting in bot.Value.Settings)
-                {
+            foreach (var bot in preset.BotSettings.SAINSettings) {
+                bot.Value.DifficultyModifier = Mathf.Clamp(bot.Value.DifficultyModifier * 0.5f, 0.01f, 2f).Round100();
+                foreach (var setting in bot.Value.Settings) {
                     setting.Value.Core.VisibleAngle = 120f;
-                    setting.Value.Shoot.FireratMulti *= 0.6f;
-                    setting.Value.Look.MinimumVisionSpeed = 0.33f;
+                    setting.Value.Shoot.FireratMulti *= 0.4f;
+                    setting.Value.Shoot.BurstMulti *= 0.5f;
+                    setting.Value.Look.MinimumVisionSpeed = 0.4f;
+                    setting.Value.Aiming.DistanceAimTimeMultiplier = 1.5f;
+                    setting.Value.Aiming.AngleAimTimeMultiplier = 1.5f;
+                    if (setting.Value.Aiming.MAX_AIM_TIME < 1f) {
+                        setting.Value.Aiming.MAX_AIM_TIME = 1f;
+                    }
+                    if (setting.Value.Aiming.MAX_AIMING_UPGRADE_BY_TIME < 0.4f) {
+                        setting.Value.Aiming.MAX_AIMING_UPGRADE_BY_TIME = 0.4f;
+                    }
+                    setting.Value.Core.ScatteringPerMeter += 0.05f;
+                    setting.Value.Core.ScatteringClosePerMeter += 0.1f;
                 }
             }
             return preset;
@@ -131,16 +139,17 @@ namespace SAIN.Plugin
 
             var global = preset.GlobalSettings;
             global.Shoot.RecoilMultiplier = 1.6f;
-            global.Shoot.GlobalScatterMultiplier = 1.2f;
+            global.Difficulty.ScatteringCoef = 1.25f;
+            global.Difficulty.PrecisionSpeedCoef = 1.25f;
+            global.Difficulty.AccuracySpeedCoef = 1.25f;
+            global.Difficulty.VisibleDistCoef = 0.85f;
+            global.Difficulty.GainSightCoef = 1.25f;
+            global.Difficulty.HearingDistanceCoef = 0.85f;
             global.Aiming.FasterCQBReactionsGlobal = false;
-            global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 0.85f;
-            global.Look.VisionSpeed.GlobalVisionSpeedModifier = 1.25f;
 
-            foreach (var bot in preset.BotSettings.SAINSettings)
-            {
-                bot.Value.DifficultyModifier = Mathf.Clamp(bot.Value.DifficultyModifier * 0.85f, 0.01f, 1f).Round100();
-                foreach (var setting in bot.Value.Settings)
-                {
+            foreach (var bot in preset.BotSettings.SAINSettings) {
+                bot.Value.DifficultyModifier = Mathf.Clamp(bot.Value.DifficultyModifier * 0.85f, 0.01f, 2f).Round100();
+                foreach (var setting in bot.Value.Settings) {
                     setting.Value.Core.VisibleAngle = 150f;
                     setting.Value.Shoot.FireratMulti *= 0.8f;
                     setting.Value.Look.MinimumVisionSpeed = 0.1f;
@@ -165,22 +174,23 @@ namespace SAIN.Plugin
         private static void ApplyHarderPMCs(SAINPresetClass preset)
         {
             var botSettings = preset.BotSettings;
-            foreach (var botsetting in botSettings.SAINSettings)
-            {
-                if (botsetting.Key == WildSpawnType.pmcUSEC || botsetting.Key == WildSpawnType.pmcBEAR)
-                {
+            foreach (var botsetting in botSettings.SAINSettings) {
+                if (botsetting.Key == WildSpawnType.pmcUSEC || botsetting.Key == WildSpawnType.pmcBEAR) {
                     var pmcSettings = botsetting.Value.Settings;
 
                     // Set for all difficulties
-                    foreach (var diff in pmcSettings.Values)
-                    {
+                    foreach (var diff in pmcSettings.Values) {
                         diff.Aiming.BASE_HIT_AFFECTION_MIN_ANG = 1f;
                         diff.Aiming.BASE_HIT_AFFECTION_MAX_ANG = 3f;
                         diff.Core.ScatteringPerMeter = 0.03f;
                         diff.Core.ScatteringClosePerMeter = 0.080f;
-                        diff.Core.GainSightCoef -= 0.005f;
                         diff.Mind.WeaponProficiency = 0.75f;
-                        diff.Scattering.ScatterMultiplier = 0.8f;
+                        diff.Difficulty.ScatteringCoef = 0.8f;
+                        diff.Difficulty.PrecisionSpeedCoef = 0.8f;
+                        diff.Difficulty.AccuracySpeedCoef = 0.8f;
+                        diff.Difficulty.GainSightCoef = 0.8f;
+                        diff.Difficulty.VisibleDistCoef = 1.25f;
+                        diff.Difficulty.AggressionCoef = 1.2f;
                     }
 
                     var easy = pmcSettings[BotDifficulty.easy];
@@ -224,16 +234,16 @@ namespace SAIN.Plugin
 
             var global = preset.GlobalSettings;
             global.Shoot.RecoilMultiplier = 0.66f;
-            global.Shoot.GlobalScatterMultiplier = 0.85f;
+            global.Difficulty.ScatteringCoef = 0.85f;
             global.Aiming.AimCenterMassGlobal = false;
-            global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 1.33f;
-            global.Look.VisionSpeed.GlobalVisionSpeedModifier = 0.8f;
+            global.Difficulty.VisibleDistCoef = 1.33f;
+            global.Difficulty.GainSightCoef = 0.8f;
+            global.Difficulty.PrecisionSpeedCoef = 0.8f;
+            global.Difficulty.AccuracySpeedCoef = 0.8f;
 
-            foreach (var bot in preset.BotSettings.SAINSettings)
-            {
-                bot.Value.DifficultyModifier = Mathf.Clamp(bot.Value.DifficultyModifier * 1.33f, 0.01f, 1f).Round100();
-                foreach (var setting in bot.Value.Settings)
-                {
+            foreach (var bot in preset.BotSettings.SAINSettings) {
+                bot.Value.DifficultyModifier = Mathf.Clamp(bot.Value.DifficultyModifier * 1.33f, 0.01f, 2f).Round100();
+                foreach (var setting in bot.Value.Settings) {
                     setting.Value.Core.VisibleAngle = 170f;
                     setting.Value.Shoot.FireratMulti = 1.5f;
                     setting.Value.Shoot.BurstMulti = 2f;
@@ -249,25 +259,25 @@ namespace SAIN.Plugin
 
             var global = preset.GlobalSettings;
             global.Shoot.RecoilMultiplier = 0.25f;
-            global.Shoot.GlobalScatterMultiplier = 0.01f;
-            global.Look.VisionDistance.GlobalVisionDistanceMultiplier = 3f;
-            global.Look.VisionSpeed.GlobalVisionSpeedModifier = 0.65f;
+
+            global.Difficulty.ScatteringCoef = 0.01f;
+            global.Difficulty.VisibleDistCoef = 3f;
+            global.Difficulty.GainSightCoef = 0.65f;
+            global.Difficulty.PrecisionSpeedCoef = 0.5f;
+            global.Difficulty.AccuracySpeedCoef = 0.5f;
+
             global.Aiming.AimCenterMassGlobal = false;
             global.Look.NotLooking.NotLookingToggle = false;
             global.Aiming.PMCSAimForHead = true;
 
-            foreach (var bot in preset.BotSettings.SAINSettings)
-            {
-                bot.Value.DifficultyModifier = Mathf.Sqrt(bot.Value.DifficultyModifier).Round100();
-                foreach (var setting in bot.Value.Settings)
-                {
+            foreach (var bot in preset.BotSettings.SAINSettings) {
+                foreach (var setting in bot.Value.Settings) {
                     setting.Value.Core.VisibleAngle = 180f;
                     setting.Value.Shoot.FireratMulti = 3f;
                     setting.Value.Shoot.BurstMulti = 3f;
                     setting.Value.Aiming.AimCenterMass = false;
                     setting.Value.Core.VisibleAngle = 180;
                     setting.Value.Core.GainSightCoef *= 0.66f;
-                    //setting.Value.Core.VisibleDistance *= 1.25f;
                 }
             }
             return preset;
