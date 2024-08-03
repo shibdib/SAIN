@@ -97,19 +97,19 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Advanced]
         public float BASE_HIT_AFFECTION_DELAY_SEC = 0.65f;
 
-        [NameAndDescription(
-            "Minimum Hit Reaction Angle",
-            "How much to kick a bot's aim when they get hit by a bullet")]
-        [MinMax(0f, 25f, 10f)]
-        [Advanced]
-        public float BASE_HIT_AFFECTION_MIN_ANG = 3f;
-
-        [NameAndDescription(
-            "Maximum Hit Reaction Angle",
-            "How much to kick a bot's aim when they get hit by a bullet")]
-        [MinMax(0f, 25f, 10f)]
-        [Advanced]
-        public float BASE_HIT_AFFECTION_MAX_ANG = 5f;
+        //[NameAndDescription(
+        //    "Minimum Hit Reaction Angle",
+        //    "How much to kick a bot's aim when they get hit by a bullet")]
+        //[MinMax(0f, 25f, 10f)]
+        //[Advanced]
+        //public float BASE_HIT_AFFECTION_MIN_ANG = 3f;
+        //
+        //[NameAndDescription(
+        //    "Maximum Hit Reaction Angle",
+        //    "How much to kick a bot's aim when they get hit by a bullet")]
+        //[MinMax(0f, 25f, 10f)]
+        //[Advanced]
+        //public float BASE_HIT_AFFECTION_MAX_ANG = 5f;
 
         [Name("Hit Aim Time Penalty Seconds - Min")]
         [MinMax(0f, 1f, 100f)]
@@ -133,7 +133,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Hidden]
         [JsonIgnore]
         public float FIRST_CONTACT_ADD_CHANCE_100 = 100f;
-        
+
         [Hidden]
         [JsonIgnore]
         public float OFFSET_RECAL_ANYWAY_TIME = 30f;

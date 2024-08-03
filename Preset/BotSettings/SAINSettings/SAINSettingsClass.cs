@@ -6,7 +6,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings
 {
     public class SAINSettingsClass : SettingsGroupBase<SAINSettingsClass>
     {
-        public BotDifficultySettings Difficulty = new BotDifficultySettings();
+        public DifficultySettings Difficulty = new DifficultySettings();
         public SAINCoreSettings Core = new SAINCoreSettings();
         public SAINAimingSettings Aiming = new SAINAimingSettings();
         public SAINBossSettings Boss = new SAINBossSettings();

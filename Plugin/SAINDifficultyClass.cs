@@ -180,10 +180,8 @@ namespace SAIN.Plugin
 
                     // Set for all difficulties
                     foreach (var diff in pmcSettings.Values) {
-                        diff.Aiming.BASE_HIT_AFFECTION_MIN_ANG = 1f;
-                        diff.Aiming.BASE_HIT_AFFECTION_MAX_ANG = 3f;
-                        diff.Core.ScatteringPerMeter = 0.03f;
-                        diff.Core.ScatteringClosePerMeter = 0.080f;
+                        //diff.Core.ScatteringPerMeter = 0.03f;
+                        //diff.Core.ScatteringClosePerMeter = 0.080f;
                         diff.Mind.WeaponProficiency = 0.75f;
                         diff.Difficulty.ScatteringCoef = 0.8f;
                         diff.Difficulty.PrecisionSpeedCoef = 0.8f;

@@ -407,6 +407,7 @@
     <Compile Include="Plugin\ConfigEditingTracker.cs" />
     <Compile Include="Plugin\SAINDifficulty.cs" />
     <Compile Include="Plugin\SAINDifficultyClass.cs" />
+    <Compile Include="Preset\DifficultySettings.cs" />
     <Compile Include="Preset\Editor\Attributes\AttributesGUI.cs" />
     <Compile Include="Preset\Editor\Attributes\ConfigInfoClass.cs" />
     <Compile Include="Preset\Editor\Attributes\GUIEntryConfig.cs" />
@@ -501,7 +502,6 @@
     <Compile Include="Preset\GlobalSettings\Categories\LocationSettingsClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\GlobalDifficultySettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\LocationDifficultySettings.cs" />
-    <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalityDifficultySettings.cs" />
     <Compile Include="Preset\ISettingsGroup.cs" />
     <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalityAssignmentSettings.cs" />
     <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalityBehaviorSettings.cs" />

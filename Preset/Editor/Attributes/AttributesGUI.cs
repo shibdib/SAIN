@@ -426,6 +426,10 @@ namespace SAIN.Attributes
                 }
                 string name = location.ToString();
 
+                if (!ExpandableList(name, string.Empty, config.EntryHeight + 3, listDepth, config)) {
+                    continue;
+                }
+
                 BeginHorizontal(100f + (listDepth * config.SubList_Indent_Horizontal));
                 Label(name, Height(config.EntryHeight));
                 EndHorizontal(100f);

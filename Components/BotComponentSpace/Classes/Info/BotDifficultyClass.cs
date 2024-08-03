@@ -1,6 +1,7 @@
 ﻿using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Preset;
+using SAIN.Preset.GlobalSettings;
 using System.Collections;
 using static HBAO_Core;
 
@@ -13,8 +14,8 @@ namespace SAIN.SAINComponent.Classes
         public TemporaryStatModifiers PersonalityDifficultyModifiers { get; }
         public TemporaryStatModifiers LocationDifficultyModifiers { get; }
 
-        public float AggressionModifier { get; private set; }
-        public float HearingDistanceModifier { get; private set; }
+        public float AggressionModifier { get; private set; } = 1f;
+        public float HearingDistanceModifier { get; private set; } = 1f;
 
         public BotDifficultyClass(BotComponent sain) : base(sain)
         {
@@ -55,10 +56,10 @@ namespace SAIN.SAINComponent.Classes
             var botSettings = Bot.Info.FileSettings.Difficulty;
             var personalitySettings = Bot.Info.PersonalitySettingsClass.Difficulty;
 
-            AggressionModifier = 1f *
-                globalSettings.AggressionCoef *
-                botSettings.AggressionCoef *
-                personalitySettings.AggressionCoef;
+            HearingDistanceModifier = 1f *
+                globalSettings.HearingDistanceCoef *
+                botSettings.HearingDistanceCoef *
+                personalitySettings.HearingDistanceCoef;
 
             AggressionModifier = 1f *
                 globalSettings.AggressionCoef *
@@ -86,6 +87,17 @@ namespace SAIN.SAINComponent.Classes
             //mods.PriorityScatteringCoef = globalSettings.PriorityScatteringCoef;
             mods.GainSightCoef = globalSettings.GainSightCoef;
             mods.HearingDistCoef = globalSettings.HearingDistanceCoef;
+        }
+
+        private void apply(DifficultySettings settings, TemporaryStatModifiers mods)
+        {
+            mods.Modifiers.AccuratySpeedCoef = settings.AccuracySpeedCoef;
+            mods.Modifiers.PrecicingSpeedCoef = settings.PrecisionSpeedCoef;
+            mods.Modifiers.VisibleDistCoef = settings.VisibleDistCoef;
+            mods.Modifiers.ScatteringCoef = settings.ScatteringCoef;
+            //mods.PriorityScatteringCoef = botSettings.PriorityScatteringCoef;
+            mods.Modifiers.GainSightCoef = settings.GainSightCoef;
+            mods.Modifiers.HearingDistCoef = settings.HearingDistanceCoef;
         }
 
         private void applyBot(SAINPresetClass preset)
@@ -149,6 +161,11 @@ namespace SAIN.SAINComponent.Classes
             current.Dismiss(BotDifficultyModifiers.Modifiers);
             current.Dismiss(PersonalityDifficultyModifiers.Modifiers);
             current.Dismiss(LocationDifficultyModifiers.Modifiers);
+        }
+
+        private void applyMods(TemporaryStatModifiers mods)
+        {
+            BotOwner.Settings.Current.Apply(mods.Modifiers);
         }
     }
 }

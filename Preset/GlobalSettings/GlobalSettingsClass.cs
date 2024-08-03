@@ -37,7 +37,7 @@ namespace SAIN.Preset.GlobalSettings
             Update();
         }
 
-        public GlobalDifficultySettings Difficulty = new GlobalDifficultySettings();
+        public DifficultySettings Difficulty = new DifficultySettings();
 
         public GeneralSettings General = new GeneralSettings();
 

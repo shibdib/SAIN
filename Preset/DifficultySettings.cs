@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class PersonalityDifficultySettings : SAINSettingsBase<PersonalityDifficultySettings>, ISAINSettings
+    public class DifficultySettings : SAINSettingsBase<DifficultySettings>, ISAINSettings
     {
         [Name("Vision Distance Multiplier")]
         [Description("Higher is more difficult.")]
@@ -44,6 +44,11 @@ namespace SAIN.Preset.GlobalSettings
         [Description("Lower is more difficult.")]
         [DifficultyModAttribute]
         public float AccuracySpeedCoef = 1f;
+
+        //[Name("Recoil Multiplier")]
+        //[Description("Lower is more difficult.")]
+        //[DifficultyModAttribute]
+        //public float RecoilCoef = 1f;
 
         public override void Init(List<ISAINSettings> list)
         {

@@ -22,7 +22,7 @@ namespace SAIN.Preset.Personalities
 
         public PersonalityAssignmentSettings Assignment = new PersonalityAssignmentSettings();
         public PersonalityBehaviorSettings Behavior = new PersonalityBehaviorSettings();
-        public PersonalityDifficultySettings Difficulty = new PersonalityDifficultySettings();
+        public DifficultySettings Difficulty = new DifficultySettings();
 
         public override void Init()
         {

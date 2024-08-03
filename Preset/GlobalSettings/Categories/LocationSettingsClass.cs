@@ -23,11 +23,11 @@ namespace SAIN.Preset.GlobalSettings
                 if (type == ELocation.None || type == ELocation.Terminal || type == ELocation.Town) {
                     continue;
                 }
-                LocationSettings.Add(type, new LocationDifficultySettings());
+                LocationSettings.Add(type, new DifficultySettings());
             }
         }
 
-        public LocationDifficultySettings Current()
+        public DifficultySettings Current()
         {
             var gameworld = GameWorldComponent.Instance;
             if (gameworld == null || gameworld.Location == null) {
@@ -44,7 +44,7 @@ namespace SAIN.Preset.GlobalSettings
         [Name("Location Specific Modifiers")]
         [Description("These modifiers only apply to bots on the location they are assigned to. Applies to all bots equally.")]
         [MinMax(0.01f, 5f, 100f)]
-        public Dictionary<ELocation, LocationDifficultySettings> LocationSettings = new Dictionary<ELocation, LocationDifficultySettings>();
+        public Dictionary<ELocation, DifficultySettings> LocationSettings = new Dictionary<ELocation, DifficultySettings>();
 
         public override void Init(List<ISAINSettings> list)
         {
