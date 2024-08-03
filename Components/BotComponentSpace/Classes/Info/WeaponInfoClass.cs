@@ -12,7 +12,7 @@ namespace SAIN.SAINComponent.Classes.Info
 {
     public class WeaponInfoClass : BotBase, IBotClass
     {
-        const float MACHINEGUN_SWAPDIST_MULTI = 1.5f;
+        private const float MACHINEGUN_SWAPDIST_MULTI = 1.5f;
         public float FinalModifier { get; private set; }
         public EWeaponClass EWeaponClass { get; private set; }
         public ECaliber ECaliber { get; private set; }
@@ -62,14 +62,11 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void checkCalcWeaponInfo()
         {
-            if (_nextCheckWeapTime < Time.time || _forceNewCheck)
-            {
+            if (_nextCheckWeapTime < Time.time || _forceNewCheck) {
                 Weapon currentWeapon = CurrentWeapon;
-                if (currentWeapon != null)
-                {
+                if (currentWeapon != null) {
                     _nextCheckWeapTime = Time.time + _checkWeapFreq;
-                    if (_forceNewCheck || _nextRecalcTime < Time.time || _lastCheckedWeapon == null || _lastCheckedWeapon != currentWeapon)
-                    {
+                    if (_forceNewCheck || _nextRecalcTime < Time.time || _lastCheckedWeapon == null || _lastCheckedWeapon != currentWeapon) {
                         if (_forceNewCheck)
                             _forceNewCheck = false;
 
@@ -92,8 +89,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private static float getAmmoShootability(ECaliber caliber)
         {
-            if (_shootSettings.AmmoCaliberShootability.TryGetValue(caliber, out var ammo))
-            {
+            if (_shootSettings.AmmoCaliberShootability.TryGetValue(caliber, out var ammo)) {
                 return ammo;
             }
             return 0.5f;
@@ -101,20 +97,16 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private static float getWeaponShootability(EWeaponClass weaponClass)
         {
-            if (_shootSettings.WeaponClassShootability.TryGetValue(weaponClass, out var weap))
-            {
+            if (_shootSettings.WeaponClassShootability.TryGetValue(weaponClass, out var weap)) {
                 return weap;
             }
             return 0.5f;
         }
 
-
         private static float getWeaponSwapToSemiDist(ECaliber caliber, EWeaponClass weaponClass)
         {
-            if (_shootSettings.AmmoCaliberFullAutoMaxDistances.TryGetValue(caliber, out var caliberDist))
-            {
-                if (weaponClass == EWeaponClass.machinegun)
-                {
+            if (_shootSettings.AmmoCaliberFullAutoMaxDistances.TryGetValue(caliber, out var caliberDist)) {
+                if (weaponClass == EWeaponClass.machinegun) {
                     return caliberDist * MACHINEGUN_SWAPDIST_MULTI;
                 }
                 return caliberDist;
@@ -173,24 +165,20 @@ namespace SAIN.SAINComponent.Classes.Info
             Reload.Dispose();
         }
 
-        public float EffectiveWeaponDistance
-        {
+        public float EffectiveWeaponDistance {
             get
             {
-                if (ECaliber == ECaliber.Caliber9x39)
-                {
+                if (ECaliber == ECaliber.Caliber9x39) {
                     return 125f;
                 }
-                if (GlobalSettings.Shoot.EngagementDistance.TryGetValue(EWeaponClass, out float engagementDist))
-                {
+                if (GlobalSettings.Shoot.EngagementDistance.TryGetValue(EWeaponClass, out float engagementDist)) {
                     return engagementDist;
                 }
                 return 125f;
             }
         }
 
-        public float PreferedShootDistance
-        {
+        public float PreferedShootDistance {
             get
             {
                 return EffectiveWeaponDistance * 0.66f;
@@ -217,26 +205,23 @@ namespace SAIN.SAINComponent.Classes.Info
             return modes.Contains(fireMode);
         }
 
-        public EFireMode SelectedFireMode
-        {
+        public EFireMode SelectedFireMode {
             get
             {
-                if (CurrentWeapon != null)
-                {
+                if (CurrentWeapon != null) {
                     return CurrentWeapon.SelectedFireMode;
                 }
                 return EFireMode.fullauto;
             }
         }
 
-        public Weapon CurrentWeapon
-        {
+        public Weapon CurrentWeapon {
             get
             {
+                return BotOwner?.WeaponManager?.CurrentWeapon;
                 BotWeaponManager weaponManager = BotOwner?.WeaponManager;
-                if (weaponManager.Selector?.IsWeaponReady == true)
-                {
-                    return weaponManager.CurrentWeapon;
+                if (weaponManager.Selector?.IsWeaponReady == true) {
+                    return BotOwner?.WeaponManager?.CurrentWeapon;
                 }
                 return null;
             }

@@ -1,67 +1,22 @@
 ﻿using EFT;
 using EFT.HealthSystem;
-using RootMotion.FinalIK;
-using SAIN.SAINComponent.Classes.EnemyClasses;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
 {
-    public class BotHitByEnemyClass : BotMedicalBase, IBotClass
-    {
-        public Enemy EnemyWhoLastShotMe { get; private set; }
-
-        public BotHitByEnemyClass(SAINBotMedicalClass medical) : base(medical)
-        {
-        }
-
-        public void Init()
-        {
-            Bot.EnemyController.Events.OnEnemyRemoved += clearEnemy;
-        }
-
-        public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
-        {
-            var player = damageInfo.Player?.iPlayer;
-            if (player == null)
-            {
-                return;
-            }
-            Enemy enemy = Bot.EnemyController.GetEnemy(player.ProfileId, true);
-            if (enemy == null)
-            {
-                return;
-            }
-            EnemyWhoLastShotMe = enemy;
-            enemy.Status.GetHit(damageInfo);
-        }
-
-        private void clearEnemy(string profileId, Enemy enemy)
-        {
-            if (enemy == EnemyWhoLastShotMe)
-                EnemyWhoLastShotMe = null;
-        }
-
-        public void Update()
-        {
-
-        }
-
-        public void Dispose()
-        {
-            Bot.EnemyController.Events.OnEnemyRemoved -= clearEnemy;
-        }
-    }
-
     public class SAINBotHitReaction : BotMedicalBase, IBotClass
     {
         public EHitReaction HitReaction { get; private set; }
         public IHealthController HealthController => Player.HealthController;
-        public BodyPartHitEffectClass HitEffects { get; private set; }
+        public BodyPartHitEffectClass BodyHitEffect { get; private set; }
+
+        public AimHitEffectClass AimHitEffect { get; private set; }
 
         public SAINBotHitReaction(SAINBotMedicalClass medical) : base(medical)
         {
-            HitEffects = new BodyPartHitEffectClass(medical);
+            BodyHitEffect = new BodyPartHitEffectClass(medical);
+            AimHitEffect = new AimHitEffectClass(medical);
 
             addPart(EBodyPart.Head);
             addPart(EBodyPart.Chest);
@@ -72,56 +27,58 @@ namespace SAIN.SAINComponent.Classes
             addPart(EBodyPart.Stomach);
         }
 
-        private void addPart(EBodyPart part) {
+        private void addPart(EBodyPart part)
+        {
             BodyParts.Add(part, new BodyPartStatus(part, this));
         }
 
         public void Init()
         {
-            HitEffects.Init();
+            BodyHitEffect.Init();
+            AimHitEffect.Init();
         }
 
         public void Update()
         {
-            HitEffects.Update();
+            BodyHitEffect.Update();
+            AimHitEffect.Update();
         }
 
         public EInjurySeverity LeftArmInjury { get; private set; }
         public EInjurySeverity RightArmInjury { get; private set; }
 
-        public bool ArmsInjured => HitEffects.LeftArmInjury != EInjurySeverity.None || HitEffects.RightArmInjury != EInjurySeverity.None;
+        public bool ArmsInjured => BodyHitEffect.LeftArmInjury != EInjurySeverity.None || BodyHitEffect.RightArmInjury != EInjurySeverity.None;
 
         public void Dispose()
         {
-            HitEffects?.Dispose();
+            BodyHitEffect.Dispose();
             BodyParts.Clear();
+            AimHitEffect.Dispose();
         }
 
         public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
-            HitEffects.GetHit(damageInfo, bodyPart, floatVal);
+            BodyHitEffect.GetHit(damageInfo, bodyPart, floatVal);
+            AimHitEffect.GetHit(damageInfo.Damage);
         }
 
-        const float StunDamageThreshold = 50;
-        const float BaseStunTime = 3f;
+        private const float StunDamageThreshold = 50;
+        private const float BaseStunTime = 3f;
 
         private float TimeStunHappened;
         private float StunTime;
 
-        public bool IsStunned 
-        { 
+        public bool IsStunned {
             get
             {
-                if (_isStunned && StunTime < Time.time)
-                {
+                if (_isStunned && StunTime < Time.time) {
                     _isStunned = false;
                 }
                 return _isStunned;
             }
             set
             {
-                if (value)
-                {
+                if (value) {
                     TimeStunHappened = Time.time;
                     StunTime = Time.time + BaseStunTime * UnityEngine.Random.Range(0.75f, 1.25f);
                 }

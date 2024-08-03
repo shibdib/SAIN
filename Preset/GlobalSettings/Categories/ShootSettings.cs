@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
+    // note for later: Need to find a way to remove the clunky duplicates of the dictionaries here, as its a hold over from a previous system of getting the default values for different config options.
     public class ShootSettings : SAINSettingsBase<ShootSettings>, ISAINSettings
     {
         [Name("Global Recoil Multiplier")]
@@ -20,15 +21,33 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("Recoil Decay Coefficient")]
         [Description("Controls the speed that bots will recover from a weapon's recoil. Higher = faster decay")]
-        [MinMax(0.01f, 5f, 100f)]
+        [MinMax(0.01f, 3f, 100f)]
         [Advanced]
-        public float RecoilDecayCoef = 1;
+        public float RECOIL_DECAY_COEF = 0.2f;
 
-        [Name("Recoil Barrel Rise Coefficient")]
-        [Description("Controls the speed that a bot's weapon will rise after a shot occurs.  Higher = faster application")]
-        [MinMax(0.01f, 20f, 100f)]
+        [Name("Bot Weapon Recoil Baseline")]
+        [Description("A Bot's weapon's recoil will get divided by this to calculate how much to rotate their view on each shot, so, for example, with a baseline of 100 - if a bot has 250 total recoil, that number gets divided by this to produce 2.5. Higher = Less recoil for bots. This is basically an average recoil of all possible weapons.")]
+        [MinMax(25f, 300f, 1f)]
         [Advanced]
-        public float RecoilRiseCoef = 8;
+        public float RECOIL_BASELINE = 100;
+
+        [Name("Bot Weapon Recoil Baseline - Realism Mod")]
+        [Description("A Bot's weapon's recoil will get divided by this to calculate how much to rotate their view on each shot. This value is used if Realism mod is on to reflect different recoil numbers.")]
+        [MinMax(25f, 300f, 1f)]
+        [Advanced]
+        public float RECOIL_BASELINE_REALISM = 125f;
+
+        [Name("Recoil Randomization - Min")]
+        [Description("Randomizes Bot Recoil. this is the min value, so the number that gets picked to multiply a bot's recoil by will be randomly picked between this and the Max")]
+        [Advanced]
+        [MinMax(0.0f, 2f, 100f)]
+        public float RECOIL_RANDOM_MIN = 0.8f;
+
+        [Name("Recoil Randomization - Max")]
+        [Description("Randomizes Bot Recoil. this is the max value, so the number that gets picked to multiply a bot's recoil by will be randomly picked between this and the min")]
+        [Advanced]
+        [MinMax(0.0f, 2f, 100f)]
+        public float RECOIL_RANDOM_MAX = 1.2f;
 
         [Name("Ammo Shootability")]
         [Description(
@@ -307,34 +326,36 @@ namespace SAIN.Preset.GlobalSettings
 
         [JsonIgnore]
         [Hidden]
-        private const string Shootability = "Affects Weapon Shootability Calculations. ";
+        private const string Shootability = "Affects Weapon Shootability Calculations, which tells a bot how fast they should shoot, how long they should hold down full auto fire, and how far they will decide to fire full auto or swap to only semi-auto.. ";
 
-        [Description(Shootability)]
+        private const string Scaling = "Affects how much this type of effect has on how Shootable a bot's weapon is considered. Higher = More effect. So if you set RecoilScaling to 0, recoil will play no part in how fast or slow a bot shoots.";
+
+        [Description(Shootability + Scaling)]
         [Advanced]
         [Percentage01to99]
         public float WeaponClassScaling = 0.25f;
 
-        [Description(Shootability)]
+        [Description(Shootability + Scaling)]
         [Advanced]
         [Percentage01to99]
         public float RecoilScaling = 0.35f;
 
-        [Description(Shootability)]
+        [Description(Shootability + Scaling)]
         [Advanced]
         [Percentage01to99]
         public float ErgoScaling = 0.08f;
 
-        [Description(Shootability)]
+        [Description(Shootability + Scaling)]
         [Advanced]
         [Percentage01to99]
         public float AmmoCaliberScaling = 0.3f;
 
-        [Description(Shootability)]
+        [Description(Shootability + Scaling)]
         [Advanced]
         [Percentage01to99]
         public float WeaponProficiencyScaling = 0.3f;
 
-        [Description(Shootability)]
+        [Description(Shootability + Scaling)]
         [Advanced]
         [Percentage01to99]
         public float DifficultyScaling = 0.3f;

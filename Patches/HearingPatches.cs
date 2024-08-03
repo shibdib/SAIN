@@ -305,6 +305,9 @@ namespace SAIN.Patches.Hearing
         public static void PatchPrefix(Player __instance)
         {
             SAINBotController.Instance?.BotHearing.PlayShootSound(__instance.ProfileId);
+            if (__instance.IsYourPlayer) {
+                Logger.LogDebug($"Weapon Shot");
+            }
             if (__instance.IsAI && SAINEnableClass.GetSAIN(__instance, out var sain)) {
                 sain.Info.WeaponInfo.Recoil.WeaponShot();
             }

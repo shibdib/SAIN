@@ -1,6 +1,7 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings;
 using System.Collections;
 using System.Text;
 using UnityEngine;
@@ -10,19 +11,101 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
     public class Recoil : BotBase, IBotClass
     {
         public Vector3 CurrentRecoilOffset { get; private set; } = Vector3.zero;
-        private Vector3 _lookDir => Player.LookDirection * 10f;
 
+        private Vector3 _lookDir => Player.LookDirection * 3f;
         public float ArmInjuryModifier => calcModFromInjury(Bot.Medical.HitReaction.LeftArmInjury) * calcModFromInjury(Bot.Medical.HitReaction.RightArmInjury);
+        private readonly StringBuilder _debugString = new StringBuilder();
+        private static bool _debugRecoilLogs => SAINPlugin.DebugSettings.Logs.DebugRecoilCalculations;
+        private static float _recoilDecayCoef => SAINPlugin.LoadedPreset.GlobalSettings.Shoot.RECOIL_DECAY_COEF;
+        private float _barrelRecoveryTime;
+        private bool _recoilFinished;
+        private bool _armsInjured => Bot.Medical.HitReaction.ArmsInjured;
+        private float RecoilMultiplier => Mathf.Round(Bot.Info.FileSettings.Shoot.RecoilMultiplier * GlobalSettings.Shoot.RecoilMultiplier * 100f) / 100f;
 
         public Recoil(BotComponent sain) : base(sain)
         {
         }
 
-        private readonly StringBuilder _debugString = new StringBuilder();
-
         public void Init()
         {
-            Bot.BotActivation.BotActiveToggle.OnToggle += removeCoroutine;
+        }
+
+        public void Update()
+        {
+            calcDecay();
+        }
+
+        public void Dispose()
+        {
+        }
+
+        private void calcDecay()
+        {
+            if (_recoilFinished) {
+                return;
+            }
+
+            float decayTime = Time.deltaTime * _recoilDecayCoef;
+            _barrelRecoveryTime += decayTime;
+
+            if (_barrelRecoveryTime >= 1) {
+                _barrelRecoveryTime = 0;
+                _recoilFinished = true;
+                CurrentRecoilOffset = Vector3.zero;
+                return;
+            }
+
+            CurrentRecoilOffset = Vector3.Lerp(CurrentRecoilOffset, Vector3.zero, _barrelRecoveryTime);
+        }
+
+        public void WeaponShot()
+        {
+            if (Bot.IsCheater) {
+                Logger.LogDebug("cheato");
+                return;
+            }
+
+            calculateRecoil();
+            _recoilFinished = false;
+        }
+
+        private void calculateRecoil()
+        {
+            Weapon weapon = Bot.Info?.WeaponInfo?.CurrentWeapon;
+            if (weapon == null) {
+                Logger.LogError("Weapon Null!");
+                return;
+            }
+
+            float addRecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.AddRecoil;
+            float recoilMod = calcRecoilMod();
+            float recoilTotal = weapon.RecoilTotal;
+            float recoilNum = calcRecoilNum(recoilTotal) + addRecoil;
+            float calcdRecoil = recoilNum * recoilMod;
+
+            float randomvertRecoil = Random.Range(calcdRecoil / 2f, calcdRecoil) * randomSign();
+            float randomHorizRecoil = Random.Range(calcdRecoil / 2f, calcdRecoil) * randomSign();
+
+            Vector3 dir = Bot.Transform.WeaponPointDirection;
+            Vector3 result = Vector.Rotate(dir, randomHorizRecoil, randomvertRecoil, 0f);
+            result -= dir;
+            CurrentRecoilOffset += result;
+
+            if (SAINPlugin.DebugSettings.Gizmos.DebugDrawRecoilGizmos) {
+                DebugGizmos.Ray(Bot.Transform.WeaponFirePort, dir * BotOwner.AimingData.LastDist2Target, Color.red, BotOwner.AimingData.LastDist2Target, 0.02f, true, 10f);
+            }
+
+            if (_debugRecoilLogs)
+                Logger.LogDebug($"Recoil! New Recoil: [{result.magnitude}] " +
+                $"Current Total Recoil Magnitude: [{CurrentRecoilOffset.magnitude}] " +
+                $"recoilNum: [{recoilNum}] calcdRecoil: [{calcdRecoil}] : " +
+                $"Randomized Vert [{randomvertRecoil}] : Randomized Horiz [{randomHorizRecoil}] " +
+                $"Modifiers [ Add: [{addRecoil}] Multi: [{recoilMod}] Weapon RecoilTotal [{recoilTotal}]] Shoot Modifier: [{Bot.Info.WeaponInfo.FinalModifier}]");
+        }
+
+        private float randomSign()
+        {
+            return EFTMath.RandomBool() ? -1 : 1;
         }
 
         private float calcModFromInjury(EInjurySeverity severity)
@@ -40,154 +123,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 case EInjurySeverity.Destroyed:
                     return 1.65f;
             }
-        }
-
-        public void Update()
-        {
-        }
-
-        private void removeCoroutine(bool value)
-        {
-            if (!value) {
-                CurrentRecoilOffset = Vector3.zero;
-                _recoilActive = false;
-                Bot.CoroutineManager.Remove("RecoilLoop");
-                _recoilFinished = true;
-                _barrelRising = false;
-                _debugString.Clear();
-            }
-        }
-
-        private bool _recoilActive;
-
-        private static bool _debugRecoilLogs => SAINPlugin.DebugSettings.Logs.DebugRecoilCalculations;
-
-        private IEnumerator RecoilLoop()
-        {
-            while (true) {
-                calcBarrelRise();
-                calcDecay();
-                if (_recoilFinished) {
-                    if (_debugRecoilLogs) {
-                        Logger.LogDebug(_debugString.ToString());
-                        _debugString.Clear();
-                    }
-                    removeCoroutine(false);
-                    break;
-                }
-                yield return null;
-            }
-        }
-
-        private void calcBarrelRise()
-        {
-            if (!_barrelRising) {
-                return;
-            }
-
-            float riseTime = Time.deltaTime * _barrelRiseCoef;
-            _barrelRiseTime += riseTime;
-
-            if (_debugRecoilLogs)
-                _debugString.AppendLine($"Barrel Rise Progress [{_barrelRiseTime}] Rise Step: {riseTime}");
-
-            if (_barrelRiseTime > 1) {
-                _barrelRising = false;
-                _barrelRiseTime = 1f;
-            }
-
-            CurrentRecoilOffset = Vector3.Lerp(CurrentRecoilOffset, _recoilOffsetTarget, _barrelRiseTime);
-
-            if (!_barrelRising) {
-                _barrelRiseTime = 0f;
-                _recoilOffsetTarget = Vector3.zero;
-            }
-        }
-
-        private static float _barrelRiseCoef => SAINPlugin.LoadedPreset.GlobalSettings.Shoot.RecoilRiseCoef;
-        private float _barrelRiseTime;
-
-        private void calcDecay()
-        {
-            if (_recoilFinished) {
-                return;
-            }
-
-            float decayTime = Time.deltaTime * _recoilDecayCoef;
-            _barrelRecoveryTime += decayTime;
-
-            if (_debugRecoilLogs)
-                _debugString.AppendLine($"Recoil Decay Progress [{_barrelRecoveryTime}] Decay Step: {decayTime}");
-
-            if (_barrelRecoveryTime > 1) {
-                _barrelRecoveryTime = 1;
-                _recoilFinished = true;
-            }
-
-            CurrentRecoilOffset = Vector3.Lerp(CurrentRecoilOffset, Vector3.zero, _barrelRecoveryTime);
-            if (_barrelRising) {
-                _recoilOffsetTarget = Vector3.Lerp(_recoilOffsetTarget, Vector3.zero, _barrelRecoveryTime);
-            }
-
-            if (_recoilFinished) {
-                _barrelRecoveryTime = 0;
-            }
-        }
-
-        private static float _recoilDecayCoef => SAINPlugin.LoadedPreset.GlobalSettings.Shoot.RecoilDecayCoef;
-        private float _barrelRecoveryTime;
-
-        public void Dispose()
-        {
-            Bot.BotActivation.BotActiveToggle.OnToggle -= removeCoroutine;
-        }
-
-        public void WeaponShot()
-        {
-            if (Bot.IsCheater) {
-                return;
-            }
-            calculateRecoil();
-            _barrelRising = true;
-            _recoilFinished = false;
-
-            if (!_recoilActive) {
-                _recoilActive = true;
-                Bot.CoroutineManager.Add(RecoilLoop(), "RecoilLoop");
-            }
-        }
-
-        private void calculateRecoil()
-        {
-            Weapon weapon = Bot.Info?.WeaponInfo?.CurrentWeapon;
-            if (weapon == null) {
-                return;
-            }
-
-            float addRecoil = SAINPlugin.LoadedPreset.GlobalSettings.Shoot.AddRecoil;
-            float recoilMod = calcRecoilMod();
-            float recoilTotal = weapon.RecoilTotal;
-            float recoilNum = calcRecoilNum(recoilTotal) + addRecoil;
-            float calcdRecoil = recoilNum * recoilMod;
-
-            float randomvertRecoil = Random.Range(calcdRecoil / 2f, calcdRecoil) * randomSign();
-            float randomHorizRecoil = Random.Range(calcdRecoil / 2f, calcdRecoil) * randomSign();
-
-            Vector3 result = Vector.Rotate(_lookDir, randomHorizRecoil, randomvertRecoil, randomHorizRecoil);
-            result -= _lookDir;
-            _recoilOffsetTarget += result;
-
-            if (_debugRecoilLogs)
-                _debugString.AppendLine($"Recoil! New Recoil: [{result.magnitude}] " +
-                $"Current Total Recoil Magnitude: [{_recoilOffsetTarget.magnitude}] " +
-                $"recoilNum: [{recoilNum}] calcdRecoil: [{calcdRecoil}] : " +
-                $"Randomized Vert [{randomvertRecoil}] : Randomized Horiz [{randomHorizRecoil}] " +
-                $"Modifiers [ Add: [{addRecoil}] Multi: [{recoilMod}] Weapon RecoilTotal [{recoilTotal}]]");
-        }
-
-        private float randomSign()
-        {
-            return EFTMath.RandomBool() ? -1 : 1;
         }
 
         private float calcRecoilMod()
@@ -216,19 +151,21 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private float calcRecoilNum(float recoilVal)
         {
-            float result = recoilVal / 100;
+            float result = recoilVal / _shootSettings.RECOIL_BASELINE;
             if (ModDetection.RealismLoaded) {
-                result = recoilVal / 100;
+                result = recoilVal / _shootSettings.RECOIL_BASELINE_REALISM;
             }
-            result *= Bot.Info.WeaponInfo.FinalModifier;
+            result *= shootModClamped();
             result *= UnityEngine.Random.Range(0.8f, 1.2f);
             return result;
         }
 
-        private bool _barrelRising;
-        private Vector3 _recoilOffsetTarget;
-        private bool _recoilFinished;
-        private bool _armsInjured => Bot.Medical.HitReaction.ArmsInjured;
-        private float RecoilMultiplier => Mathf.Round(Bot.Info.FileSettings.Shoot.RecoilMultiplier * GlobalSettings.Shoot.RecoilMultiplier * 100f) / 100f;
+        private float shootModClamped()
+        {
+            return Mathf.Clamp(_shootModifier, 0.5f, 2f);
+        }
+
+        private float _shootModifier => Bot.Info.WeaponInfo.FinalModifier;
+        private ShootSettings _shootSettings => GlobalSettingsClass.Instance.Shoot;
     }
 }

@@ -82,15 +82,32 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return result;
         }
 
-        public bool SetADS(bool value)
+        public void SetADS(bool value)
         {
+            var aim = BotAimingClass;
+            if (aim != null) {
+                aim.HardAim = value;
+            }
             var shootController = BotOwner.WeaponManager.ShootController;
             if (shootController != null && shootController.IsAiming != value) {
-                shootController?.SetAim(value);
-                return true;
+                shootController.SetAim(value);
             }
-            return false;
         }
+
+        public BotAimingClass BotAimingClass {
+            get
+            {
+                if (_botAimingClass == null) {
+                    var aimData = BotOwner.AimingData;
+                    if (aimData != null && aimData is BotAimingClass aimClass) {
+                        _botAimingClass = aimClass;
+                    }
+                }
+                return _botAimingClass;
+            }
+        }
+
+        private BotAimingClass _botAimingClass;
 
         public EAimDownSightsStatus CurrentADSstatus { get; private set; }
         public EAimDownSightsStatus LastADSstatus { get; private set; }

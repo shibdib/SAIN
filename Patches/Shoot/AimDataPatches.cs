@@ -1,5 +1,6 @@
 ﻿using EFT;
 using HarmonyLib;
+using RootMotion.FinalIK;
 using SAIN.Components;
 using SAIN.Helpers;
 using SAIN.Plugin;
@@ -11,20 +12,99 @@ using SAIN.SAINComponent.Classes;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using SPT.Reflection.Patching;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using AimDataClass = GClass518;
+using HitAffectClass = GClass516;
 
 namespace SAIN.Patches.Shoot.Aim
 {
+    internal class PlayerHitReactionDisablePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(HitReaction), "Hit");
+        }
+
+        [PatchPrefix]
+        public static bool Patch()
+        {
+            return false;
+        }
+    }
+
+    internal class HitAffectApplyPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(HitAffectClass), "Affect");
+        }
+
+        [PatchPrefix]
+        public static bool Patch(BotOwner ___botOwner_0, ref Vector3 __result, Vector3 dir)
+        {
+            if (SAINEnableClass.GetSAIN(___botOwner_0, out var bot)) {
+                __result = bot.Medical.HitReaction.AimHitEffect.ApplyEffect(dir);
+                return false;
+            }
+            return true;
+        }
+    }
+
+    internal class DoHitAffectPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(HitAffectClass), "DoAffection");
+        }
+
+        [PatchPrefix]
+        public static bool Patch(BotOwner ___botOwner_0)
+        {
+            if (SAINEnableClass.GetSAIN(___botOwner_0, out var bot)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    internal class SetAimStatusPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.PropertySetter(typeof(BotAimingClass), "Status");
+        }
+
+        [PatchPrefix]
+        public static bool PatchPrefix(BotAimingClass __instance, AimStatus value, BotOwner ___botOwner_0, ref AimStatus ___aimStatus_0, float ___float_7)
+        {
+            if (___aimStatus_0 == value || ___botOwner_0.BotState != EBotState.Active) {
+                return false;
+            }
+            if (SAINEnableClass.GetSAIN(___botOwner_0, out var bot)) {
+                ___aimStatus_0 = value;
+                //bool flag;
+                //if ((flag = (((this.bool_0 && this.botOwner_0.Tactic.IsCurTactic(BotsGroup.BotCurrentTactic.Attack)) || this.botOwner_0.Memory.IsInCover || this.method_1()) && this.aimStatus_0 != AimStatus.NoTarget && this.method_0())) != this.botOwner_0.WeaponManager.ShootController.IsAiming)
+                //{
+                //	this.botOwner_0.WeaponManager.ShootController.SetAim(flag);
+                //}
+                //this.HardAim = flag;
+                if (value == AimStatus.AimComplete) {
+                    ___botOwner_0.BotPersonalStats.Aim(__instance.EndTargetPoint, ___float_7);
+                }
+                return false;
+            }
+            return true;
+        }
+    }
+
     internal class AimOffsetPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
             _endTargetPointProp = AccessTools.Property(HelpersGClass.AimDataType, "EndTargetPoint");
-            return AccessTools.Method(HelpersGClass.AimDataType, "method_13");
+            return AccessTools.Method(typeof(BotAimingClass), "method_13");
+            //return AccessTools.Method(HelpersGClass.AimDataType, "method_13");
         }
 
         private static PropertyInfo _endTargetPointProp;
@@ -86,12 +166,12 @@ namespace SAIN.Patches.Shoot.Aim
                 DebugGizmos.Line(weaponRoot, realTargetPoint, Color.white, 0.02f, true, 0.25f, true);
                 DebugGizmos.Sphere(realTargetPoint, 0.025f, Color.white, true, 10f);
             }
-            if (SAINPlugin.DebugSettings.Gizmos.DebugDrawRecoilGizmos &&
-                enemy.EnemyPerson.IPlayer.IsYourPlayer == true &&
-                ___botOwner_0.ShootData.Shooting) {
-                DebugGizmos.Sphere(recoilOffset + realTargetPoint, 0.035f, Color.red, true, 10f);
-                DebugGizmos.Line(recoilOffset + realTargetPoint, realTargetPoint, Color.red, 0.02f, true, 10f, true);
-            }
+            //if (SAINPlugin.DebugSettings.Gizmos.DebugDrawRecoilGizmos &&
+            //    enemy.EnemyPerson.IPlayer.IsYourPlayer == true &&
+            //    ___botOwner_0.ShootData.Shooting) {
+            //    DebugGizmos.Sphere(recoilOffset + realTargetPoint, 0.035f, Color.red, true, 10f);
+            //    DebugGizmos.Line(recoilOffset + realTargetPoint, realTargetPoint, Color.red, 0.02f, true, 10f, true);
+            //}
 
             _endTargetPointProp.SetValue(___botOwner_0.AimingData, result);
             return false;

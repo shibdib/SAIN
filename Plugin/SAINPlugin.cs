@@ -6,6 +6,7 @@ using HarmonyLib;
 using SAIN.Editor;
 using SAIN.Helpers;
 using SAIN.Patches.Movement;
+using SAIN.Patches.Shoot.Aim;
 using SAIN.Plugin;
 using SAIN.Preset;
 using SAIN.Preset.GlobalSettings;
@@ -153,6 +154,11 @@ namespace SAIN
                 typeof(Patches.Vision.VisionDistancePatch),
                 typeof(Patches.Vision.CheckFlashlightPatch),
 
+                typeof(Patches.Shoot.Aim.DoHitAffectPatch),
+                typeof(Patches.Shoot.Aim.HitAffectApplyPatch),
+                typeof(Patches.Shoot.Aim.PlayerHitReactionDisablePatch),
+
+                typeof(Patches.Shoot.Aim.SetAimStatusPatch),
                 typeof(Patches.Shoot.Aim.AimOffsetPatch),
                 typeof(Patches.Shoot.Aim.AimTimePatch),
                 //typeof(Patches.Shoot.Aim.WeaponPresetPatch),

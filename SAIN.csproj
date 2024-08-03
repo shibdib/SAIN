@@ -277,6 +277,8 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyControllerEvents.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyListController.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Info\BotDifficultyClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Medical\AimHitEffectClass.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\Medical\BotHitByEnemyClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Mover\ObstacleAgent.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\BotWeightManagement.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Sense\Hearing\HearingAnalysisClass.cs" />
