@@ -501,7 +501,6 @@
     <Compile Include="Preset\GlobalSettings\Categories\General\PerformanceSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\LocationSettingsClass.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\GlobalDifficultySettings.cs" />
-    <Compile Include="Preset\GlobalSettings\Categories\LocationDifficultySettings.cs" />
     <Compile Include="Preset\ISettingsGroup.cs" />
     <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalityAssignmentSettings.cs" />
     <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalityBehaviorSettings.cs" />

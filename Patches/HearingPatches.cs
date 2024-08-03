@@ -144,26 +144,13 @@ namespace SAIN.Patches.Hearing
         public static void Patch(Player __instance, BetterSource ___NestedStepSoundSource)
         {
             float volume = calcVolume(__instance);
-            float range = ___NestedStepSoundSource.MaxDistance;
+            float range = ___NestedStepSoundSource.MaxDistance * 0.75f;
             SAINBotController.Instance?.BotHearing.PlayAISound(__instance.ProfileId, SAINSoundType.FootStep, __instance.Position, range, volume);
         }
 
         private static float calcVolume(Player player)
         {
             return player.MovementContext.CovertMovementVolumeBySpeed * player.method_49();
-        }
-
-        private static float calcVolumeOld(Player player)
-        {
-            float num = player.Speed;
-            if (player.IsSprintEnabled) {
-                num = 2f;
-            }
-            float num2 = Mathf.Clamp(0.5f * player.PoseLevel + 0.5f, 0f, 1f);
-            num *= num2;
-            float num3 = player.IsSprintEnabled ? 1f : player.MovementContext.CovertMovementVolumeBySpeed;
-            float volume = (num3 + num) / 2f;
-            return volume;
         }
     }
 
@@ -191,7 +178,7 @@ namespace SAIN.Patches.Hearing
                 float num2 = Mathf.Clamp(0.5f * ____player.PoseLevel + 0.5f, 0f, 1f);
                 num *= num2;
                 float volume = (1f + num) / 2f;
-                float baseRange = 45f;
+                float baseRange = 40f;
                 SAINBotController.Instance?.BotHearing.PlayAISound(____player.ProfileId, SAINSoundType.Sprint, ____player.Position, baseRange, volume);
             }
             return false;
@@ -305,9 +292,6 @@ namespace SAIN.Patches.Hearing
         public static void PatchPrefix(Player __instance)
         {
             SAINBotController.Instance?.BotHearing.PlayShootSound(__instance.ProfileId);
-            if (__instance.IsYourPlayer) {
-                Logger.LogDebug($"Weapon Shot");
-            }
             if (__instance.IsAI && SAINEnableClass.GetSAIN(__instance, out var sain)) {
                 sain.Info.WeaponInfo.Recoil.WeaponShot();
             }

@@ -13,10 +13,10 @@ namespace SAIN.SAINComponent.Classes
         private const float GUNSHOT_OCCLUSION_MOD = 0.8f;
         private const float FOOTSTEP_OCCLUSION_MOD = 0.8f;
         private const float GUNSHOT_ENVIR_MOD = 0.65f;
-        private const float FOOTSTEP_ENVIR_MOD = 0.8f;
-        private const float MIN_ENVIRONMENT_MOD = 0.1f;
+        private const float FOOTSTEP_ENVIR_MOD = 0.7f;
+        private const float MIN_ENVIRONMENT_MOD = 0.05f;
 
-        private const float HEAR_MODIFIER_NO_EARS = 0.65f;
+        private const float HEAR_MODIFIER_NO_EARS = 0.6f;
         private const float HEAR_MODIFIER_HEAVY_HELMET = 0.8f;
         private const float HEAR_MODIFIER_DYING = 0.8f;
         private const float HEAR_MODIFIER_SPRINT = 0.85f;
@@ -29,14 +29,14 @@ namespace SAIN.SAINComponent.Classes
         private const float HEAR_CHANCE_MIN_DIST = 0.25f;
         private const float HEAR_CHANCE_MIN_DIST_HEADPHONES = 1;
         private const float HEAR_CHANCE_MIDRANGE_COEF = 0.66f;
-        private const float HEAR_CHANCE_MIDRANGE_MINCHANCE_HEADPHONES = 5;
-        private const float HEAR_CHANCE_LONGRANGE_MINCHANCE_HEADPHONES = 2;
-        private const float HEAR_CHANCE_NOTMOVING_VELOCITY = 0.1f;
+        private const float HEAR_CHANCE_MIDRANGE_MINCHANCE_HEADPHONES = 3;
+        private const float HEAR_CHANCE_LONGRANGE_MINCHANCE_HEADPHONES = 1;
+        private const float HEAR_CHANCE_NOTMOVING_VELOCITY = 0.05f;
         private const float HEAR_CHANCE_NOTMOVING_MINCHANCE = 2;
-        private const float HEAR_CHANCE_NOTMOVING_MINCHANCE_HEADPHONES = 5;
-        private const float HEAR_CHANCE_HEADPHONES_OTHERSOUNDS = 7;
+        private const float HEAR_CHANCE_NOTMOVING_MINCHANCE_HEADPHONES = 4;
+        private const float HEAR_CHANCE_HEADPHONES_OTHERSOUNDS = 3;
         private const float HEAR_CHANCE_CURRENTENEMY_MINCHANCE = 2;
-        private const float HEAR_CHANCE_CURRENTENEMY_MINCHANCE_HEADPHONES = 7;
+        private const float HEAR_CHANCE_CURRENTENEMY_MINCHANCE_HEADPHONES = 3;
 
         public HearingAnalysisClass(SAINHearingSensorClass hearing) : base(hearing)
         {
@@ -74,6 +74,10 @@ namespace SAIN.SAINComponent.Classes
             sound.Range.FinalRange = sound.Range.BaseRange * calcModifiers(sound);
             if (sound.Distance > sound.Range.FinalRange) {
                 return false;
+            }
+
+            if (!sound.Enemy.Player.IsAI) {
+                //Logger.LogDebug($"Heard Sound : Final Range [{sound.Range.FinalRange}] : Modifier {sound.Range.Modifiers.FinalModifier}");
             }
             return true;
         }
@@ -160,6 +164,9 @@ namespace SAIN.SAINComponent.Classes
 
             chanceToHear = Mathf.Clamp(chanceToHear, minimumChance, 100f);
             sound.Results.ChanceToHear = chanceToHear;
+            if (!sound.Enemy.Player.IsAI) {
+                //Logger.LogDebug($"chanceToHear [{chanceToHear}] : minChance [{minimumChance}] : distance [{distance}]");
+            }
             return EFTMath.RandomBool(chanceToHear);
         }
 

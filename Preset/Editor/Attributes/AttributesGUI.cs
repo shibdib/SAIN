@@ -109,7 +109,7 @@ namespace SAIN.Attributes
             wasEdited = false;
             CreateLabelStyle();
 
-            if (value is Dictionary<ELocation, LocationDifficultySettings> locationDict) {
+            if (value is Dictionary<ELocation, DifficultySettings> locationDict) {
                 editLocationDict(locationDict, settingsObject, info, listDepth, config, out wasEdited, search);
                 return value;
             }
@@ -411,17 +411,17 @@ namespace SAIN.Attributes
             EndVertical(5f);
         }
 
-        private static void editLocationDict(Dictionary<ELocation, LocationDifficultySettings> dictionary, object settingsObject, ConfigInfoClass info, int listDepth, GUIEntryConfig config, out bool wasEdited, string search = null)
+        private static void editLocationDict(Dictionary<ELocation, DifficultySettings> dictionary, object settingsObject, ConfigInfoClass info, int listDepth, GUIEntryConfig config, out bool wasEdited, string search = null)
         {
             BeginVertical(5f);
 
-            var defaultDictionary = info.GetDefault(settingsObject) as Dictionary<ELocation, LocationDifficultySettings>;
+            var defaultDictionary = info.GetDefault(settingsObject) as Dictionary<ELocation, DifficultySettings>;
             ELocation[] array = EnumValues.GetEnum<ELocation>();
             wasEdited = false;
 
             for (int i = 0; i < array.Length; i++) {
                 var location = array[i];
-                if (!dictionary.TryGetValue(location, out LocationDifficultySettings originalValue)) {
+                if (!dictionary.TryGetValue(location, out DifficultySettings originalValue)) {
                     continue;
                 }
                 string name = location.ToString();

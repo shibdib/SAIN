@@ -10,7 +10,7 @@ namespace SAIN.Preset.GlobalSettings
             "at the default value of 0.2, bots will see 0.2 times as far, or 20% of " +
             "their base vision distance at night-time.")]
         [MinMax(0.01f, 1f, 100f)]
-        public float NightTimeVisionModifier = 0.33f;
+        public float NightTimeVisionModifier = 0.2f;
 
         [Name("Snow Nighttime Vision Modifier")]
         [Description(
@@ -18,7 +18,7 @@ namespace SAIN.Preset.GlobalSettings
             "at the default value of 0.2, bots will see 0.2 times as far, or 20% of " +
             "their base vision distance at night-time.")]
         [MinMax(0.01f, 1f, 100f)]
-        public float NightTimeVisionModifierSnow = 0.5f;
+        public float NightTimeVisionModifierSnow = 0.35f;
 
         [Name("Dawn Start Hour")]
         [MinMax(5f, 8f, 10f)]
