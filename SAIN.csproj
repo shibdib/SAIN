@@ -513,7 +513,6 @@
     <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalityRushSettings.cs" />
     <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalitySearchSettings.cs" />
     <Compile Include="Preset\Personalities\BasePersonality\PersonalitySettingsClass.cs" />
-    <Compile Include="Preset\Personalities\BasePersonality\Categories\PersonalityStatModifierSettings.cs" />
     <Compile Include="Preset\Personalities\Perks\BotPerksClass.cs" />
     <Compile Include="Preset\SettingsGroupBase.cs" />
     <Compile Include="Preset\SAINPresetDefinition.cs" />

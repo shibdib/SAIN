@@ -103,6 +103,10 @@ namespace SAIN.Components
                     Location = ELocation.Streets;
                     break;
 
+                case "woods":
+                    Location = ELocation.Streets;
+                    break;
+
                 case "terminal":
                     Location = ELocation.Terminal;
                     break;

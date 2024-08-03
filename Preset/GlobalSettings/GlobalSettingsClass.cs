@@ -45,7 +45,7 @@ namespace SAIN.Preset.GlobalSettings
 
         public HearingSettings Hearing = new HearingSettings();
 
-        public LocationSettingsClass Location = new LocationSettingsClass(1f);
+        public LocationSettingsClass Location = new LocationSettingsClass();
 
         public LookSettings Look = new LookSettings();
 

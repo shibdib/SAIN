@@ -52,21 +52,26 @@ namespace SAIN.SAINComponent.Classes
         private void createCustomMods(SAINPresetClass preset)
         {
             var globalSettings = preset.GlobalSettings.Difficulty;
-            var locationSettings = preset.GlobalSettings.Location.Current();
             var botSettings = Bot.Info.FileSettings.Difficulty;
             var personalitySettings = Bot.Info.PersonalitySettingsClass.Difficulty;
 
             AggressionModifier = 1f *
                 globalSettings.AggressionCoef *
-                locationSettings.AggressionCoef *
                 botSettings.AggressionCoef *
                 personalitySettings.AggressionCoef;
 
-            HearingDistanceModifier = 1f *
-                globalSettings.HearingDistanceCoef *
-                locationSettings.HearingDistanceCoef *
-                botSettings.HearingDistanceCoef *
-                personalitySettings.HearingDistanceCoef;
+            AggressionModifier = 1f *
+                globalSettings.AggressionCoef *
+                botSettings.AggressionCoef *
+                personalitySettings.AggressionCoef;
+
+            var locationSettings = preset.GlobalSettings.Location.Current();
+            if (locationSettings == null) {
+                return;
+            }
+
+            HearingDistanceModifier *= locationSettings.HearingDistanceCoef;
+            AggressionModifier *= locationSettings.AggressionCoef;
         }
 
         private void applyGlobal(SAINPresetClass preset)
@@ -100,6 +105,9 @@ namespace SAIN.SAINComponent.Classes
         private void applyLocation(SAINPresetClass preset)
         {
             var locationSettings = preset.GlobalSettings.Location.Current();
+            if (locationSettings == null) {
+                return;
+            }
             var mods = LocationDifficultyModifiers.Modifiers;
 
             mods.AccuratySpeedCoef = locationSettings.AccuracySpeedCoef;
