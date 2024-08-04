@@ -476,6 +476,7 @@
     <Compile Include="Preset\GlobalSettings\Categories\General\JokeSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\General\LayerSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\GlobalMoveSettings.cs" />
+    <Compile Include="Preset\GlobalSettings\Categories\HitEffectSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\ISAINSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\Look\VisionSpeed\ElevationVisionSettings.cs" />
     <Compile Include="Preset\GlobalSettings\Categories\Look\LightNVGSettings.cs" />

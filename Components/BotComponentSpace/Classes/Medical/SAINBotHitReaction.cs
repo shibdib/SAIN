@@ -59,7 +59,7 @@ namespace SAIN.SAINComponent.Classes
         public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
         {
             BodyHitEffect.GetHit(damageInfo, bodyPart, floatVal);
-            AimHitEffect.GetHit(damageInfo.Damage);
+            AimHitEffect.GetHit(damageInfo);
         }
 
         private const float StunDamageThreshold = 50;

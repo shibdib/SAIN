@@ -29,6 +29,9 @@ namespace SAIN.Patches.Shoot.Aim
         [PatchPrefix]
         public static bool Patch()
         {
+            if (!GlobalSettingsClass.Instance.Aiming.HitEffects.HIT_REACTION_TOGGLE) {
+                return true;
+            }
             return false;
         }
     }
@@ -43,6 +46,9 @@ namespace SAIN.Patches.Shoot.Aim
         [PatchPrefix]
         public static bool Patch(BotOwner ___botOwner_0, ref Vector3 __result, Vector3 dir)
         {
+            if (!GlobalSettingsClass.Instance.Aiming.HitEffects.HIT_REACTION_TOGGLE) {
+                return true;
+            }
             if (SAINEnableClass.GetSAIN(___botOwner_0, out var bot)) {
                 __result = bot.Medical.HitReaction.AimHitEffect.ApplyEffect(dir);
                 return false;
@@ -61,6 +67,9 @@ namespace SAIN.Patches.Shoot.Aim
         [PatchPrefix]
         public static bool Patch(BotOwner ___botOwner_0)
         {
+            if (!GlobalSettingsClass.Instance.Aiming.HitEffects.HIT_REACTION_TOGGLE) {
+                return true;
+            }
             if (SAINEnableClass.GetSAIN(___botOwner_0, out var bot)) {
                 return false;
             }

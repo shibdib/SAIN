@@ -174,11 +174,8 @@ namespace SAIN.Patches.Hearing
                     return false;
                 }
 
-                float num = 2f;
-                float num2 = Mathf.Clamp(0.5f * ____player.PoseLevel + 0.5f, 0f, 1f);
-                num *= num2;
-                float volume = (1f + num) / 2f;
-                float baseRange = 40f;
+                float volume = ____player.MovementContext.CovertMovementVolumeBySpeed * ____player.method_49();
+                float baseRange = 60f;
                 SAINBotController.Instance?.BotHearing.PlayAISound(____player.ProfileId, SAINSoundType.Sprint, ____player.Position, baseRange, volume);
             }
             return false;

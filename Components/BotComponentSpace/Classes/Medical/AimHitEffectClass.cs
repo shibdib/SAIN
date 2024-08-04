@@ -15,10 +15,12 @@ namespace SAIN.SAINComponent.Classes
 
         private float EFFECT_MIN_ANGLE => _settings.DAMAGE_BASE_MIN_ANGLE;
         private float EFFECT_MAX_ANGLE => _settings.DAMAGE_BASE_MAX_ANGLE;
-        private float DAMAGE_BASELINE => _settings.DAMAGE_BASELINE;
+        private float DAMAGE_BASELINE => _settings.DAMAGE_RECEIVED_BASELINE;
         private float DAMAGE_MIN_MOD => _settings.DAMAGE_MIN_MOD;
         private float DAMAGE_MAX_MOD => _settings.DAMAGE_MAX_MOD;
         private float DAMAGE_MANUAL_MODIFIER => _settings.DAMAGE_MANUAL_MODIFIER;
+        private bool DAMAGE_USE_HIT_OFFSET_DIR => _settings.USE_HIT_POINT_DIRECTION;
+        private float DAMAGE_HIT_OFFSET_BASE_DIST => _settings.HIT_POINT_DIRECTION_BASE_DISTANCE;
 
         private HitEffectSettings _settings => GlobalSettingsClass.Instance.Aiming.HitEffects;
 
@@ -44,30 +46,56 @@ namespace SAIN.SAINComponent.Classes
                 this.decayAffect();
                 Vector3 affect = this._affectVector * this._affectAmount;
                 Vector3 result = dir.normalized + affect;
-                DebugGizmos.Ray(Bot.Transform.WeaponRoot, result, Color.yellow, 1f, 0.05f, true, 5f);
+                //DebugGizmos.Ray(Bot.Transform.WeaponRoot, result, Color.yellow, 1f, 0.05f, true, 5f);
                 return result;
             }
             return dir;
         }
 
-        public void GetHit(float damageNumber)
+        private float calcDamageMod(DamageInfo damageInfo)
         {
-            float mod = damageNumber / DAMAGE_BASELINE;
+            float mod = damageInfo.Damage / DAMAGE_BASELINE;
             mod = Mathf.Clamp(mod, DAMAGE_MIN_MOD, DAMAGE_MAX_MOD) * DAMAGE_MANUAL_MODIFIER;
+            if (_affectActive) {
+                mod *= 0.5f;
+            }
+            return mod;
+        }
+
+        private Vector3 getHitReactionDir(DamageInfo damageInfo)
+        {
+            Vector3 hitPoint = damageInfo.HitPoint;
+            //DebugGizmos.Sphere(hitPoint, 0.25f, Color.red, true, 0.25f);
+            Vector3 center = Bot.Transform.BodyPosition;
+            //DebugGizmos.Sphere(center, 0.25f, Color.blue, true, 0.25f);
+            Vector3 offset = hitPoint - center;
+            Vector3 result = offset.normalized * DAMAGE_HIT_OFFSET_BASE_DIST;
+            //result.x *= 1.5f;
+            //result.z *= 1.5f;
+            result.y *= 0.5f;
+            return result;
+        }
+
+        public void GetHit(DamageInfo damageInfo)
+        {
+            float mod = calcDamageMod(damageInfo);
+            Vector3 hitReactionDir;
+            if (DAMAGE_USE_HIT_OFFSET_DIR) {
+                hitReactionDir = getHitReactionDir(damageInfo) * mod;
+                _affectVector += hitReactionDir;
+            }
+            else {
+                float minAngle = Mathf.Clamp(EFFECT_MIN_ANGLE * mod, 0f, 90f);
+                float maxAngle = Mathf.Clamp(EFFECT_MAX_ANGLE * mod, 0f, 90f);
+                float x = UnityEngine.Random.Range(-minAngle, -maxAngle) * 0.5f;
+                float y = (float)EFTMath.RandomSing() * UnityEngine.Random.Range(minAngle, maxAngle);
+                Vector3 lookDir = Bot.Transform.LookDirection;
+                this._affectVector = Vector.Rotate(_affectVector + lookDir, x, y, 0) - lookDir;
+            }
 
             var aimSettings = BotOwner.Settings.FileSettings.Aiming;
-            float minAngle = Mathf.Clamp(EFFECT_MIN_ANGLE * mod, 0f, 90f);
-            float maxAngle = Mathf.Clamp(EFFECT_MAX_ANGLE * mod, 0f, 90f);
-            //float minAngle = aimSettings.BASE_HIT_AFFECTION_MIN_ANG * mod;
-            //float maxAngle = aimSettings.BASE_HIT_AFFECTION_MAX_ANG * mod;
-            float x = UnityEngine.Random.Range(-minAngle, -maxAngle);
-            float y = (float)EFTMath.RandomSing() * UnityEngine.Random.Range(minAngle, maxAngle);
-            Vector3 lookDir = Bot.Transform.LookDirection;
-            this._affectVector = Vector.Rotate(_affectVector + lookDir, x, y, y) - lookDir;
-            DebugGizmos.Ray(Bot.Transform.WeaponRoot, _affectVector + lookDir, Color.green, 1f, 0.15f, true, 10f);
-            DebugGizmos.Ray(Bot.Transform.WeaponRoot, lookDir, Color.white, 1f, 0.15f, true, 10f);
             this._affectActive = true;
-            this._finishDelay = aimSettings.BASE_HIT_AFFECTION_DELAY_SEC * mod * UnityEngine.Random.Range(0.8f, 1.2f);
+            this._finishDelay = aimSettings.BASE_HIT_AFFECTION_DELAY_SEC * Mathf.Clamp(mod, 0f, 1.5f) * UnityEngine.Random.Range(0.8f, 1.2f);
             this._timeFinished = Time.time + this._finishDelay;
         }
 

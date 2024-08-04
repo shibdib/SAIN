@@ -4,49 +4,6 @@ using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
 {
-    public class HitEffectSettings : SAINSettingsBase<HitEffectSettings>, ISAINSettings
-    {
-        [Name("Hit Effect Multiplier")]
-        [Description("Higher = getting shot has more affect on bot aim.")]
-        [MinMax(0.01f, 5f, 100f)]
-        public float DAMAGE_MANUAL_MODIFIER = 1f;
-
-        [Name("Min Base Hit Effect Angle")]
-        [Description("")]
-        [MinMax(1f, 60f, 10f)]
-        [Advanced]
-        public float DAMAGE_BASE_MIN_ANGLE = 15f;
-
-        [Name("Max Base Hit Effect Angle")]
-        [Description("")]
-        [MinMax(1f, 90f, 10f)]
-        [Advanced]
-        public float DAMAGE_BASE_MAX_ANGLE = 20f;
-
-        [Name("Damage Multiplier Baseline")]
-        [Description("")]
-        [MinMax(10f, 60f, 1f)]
-        [Advanced]
-        public float DAMAGE_BASELINE = 30;
-
-        [Name("Min Hit Damage Multiplier")]
-        [Description("")]
-        [MinMax(0.01f, 1f, 100f)]
-        [Advanced]
-        public float DAMAGE_MIN_MOD = 0.25f;
-
-        [Name("Max Hit Damage Multiplier")]
-        [Description("")]
-        [MinMax(1f, 10f, 100f)]
-        [Advanced]
-        public float DAMAGE_MAX_MOD = 5f;
-
-        public override void Init(List<ISAINSettings> list)
-        {
-            list.Add(this);
-        }
-    }
-
     public class AimSettings : SAINSettingsBase<AimSettings>, ISAINSettings
     {
         [Name("Always Aim Center Mass Global")]
