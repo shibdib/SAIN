@@ -74,8 +74,11 @@ namespace SAIN.Patches.Components
         }
 
         [PatchPostfix]
-        public static void PatchPostfix(GameObject gameObject)
+        public static void PatchPostfix(GameObject gameObject, GameWorld gameWorld)
         {
+			if (gameWorld is HideoutGameWorld)
+				return;
+
             try {
                 GameWorldHandler.Create(gameObject);
             }
