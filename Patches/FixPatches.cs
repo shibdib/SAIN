@@ -59,7 +59,7 @@ namespace SAIN.Patches.Generic.Fixes
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotItemTaker), "method_11");
+            return AccessTools.Method(typeof(BotItemTaker), nameof(BotItemTaker.method_12));
         }
 
         [PatchPrefix]
