@@ -87,7 +87,7 @@ namespace SAIN.Patches.Generic.Fixes
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass436), "method_4");
+            return AccessTools.Method(typeof(GClass483), "method_4");
         }
 
         [PatchPrefix]
