@@ -8,7 +8,7 @@ using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
 using UnityEngine;
-using EFTSettingsLoadClass = GClass531;
+using EFTSettingsLoadClass = GClass583;
 
 namespace SAIN.Patches.Components
 {
@@ -16,7 +16,7 @@ namespace SAIN.Patches.Components
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotOwner), "method_10");
+            return AccessTools.Method(typeof(BotOwner), nameof(BotOwner.method_10));
         }
 
         [PatchPostfix]
@@ -40,7 +40,7 @@ namespace SAIN.Patches.Components
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(VolumetricLight), "Awake");
+            return AccessTools.Method(typeof(VolumetricLight), nameof(VolumetricLight.Awake));
         }
 
         [PatchPostfix]
@@ -54,7 +54,7 @@ namespace SAIN.Patches.Components
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(LampController), "Awake");
+            return AccessTools.Method(typeof(LampController), nameof(LampController.Awake));
         }
 
         [PatchPostfix]
@@ -70,7 +70,7 @@ namespace SAIN.Patches.Components
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GameWorldUnityTickListener), "Create");
+            return AccessTools.Method(typeof(GameWorldUnityTickListener), nameof(GameWorldUnityTickListener.Create));
         }
 
         [PatchPostfix]
@@ -92,7 +92,7 @@ namespace SAIN.Patches.Components
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotsController), "method_0");
+            return AccessTools.Method(typeof(BotsController), nameof(BotsController.method_0));
         }
 
         [PatchPrefix]
@@ -109,7 +109,7 @@ namespace SAIN.Patches.Components
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotSpawner), "AddPlayer");
+            return AccessTools.Method(typeof(BotSpawner), nameof(BotSpawner.AddPlayer));
         }
 
         [PatchPostfix]
@@ -126,7 +126,7 @@ namespace SAIN.Patches.Components
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(EFTSettingsLoadClass), "Load");
+            return AccessTools.Method(typeof(EFTSettingsLoadClass), nameof(EFTSettingsLoadClass.Load));
         }
 
         [PatchPostfix]
