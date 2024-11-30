@@ -14,7 +14,7 @@ namespace SAIN.Patches.Generic.Fixes
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "method_74");
+            return AccessTools.Method(typeof(Player), nameof(Player.InitVaultingComponent));
         }
 
         [PatchPrefix]

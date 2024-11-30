@@ -41,11 +41,11 @@ namespace SAIN.Patches.Generic
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(AIData), "SetEnvironment");
+            return AccessTools.Method(typeof(GClass551), "SetEnvironment");
         }
 
         [PatchPostfix]
-        public static void Patch(AIData __instance, IndoorTrigger trigger)
+        public static void Patch(GClass551 __instance, IndoorTrigger trigger)
         {
             SAINBotController.Instance?.PlayerEnviromentChanged(__instance?.Player?.ProfileId, trigger);
         }
@@ -104,12 +104,12 @@ namespace SAIN.Patches.Generic
 
     public class TurnDamnLightOffPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(BotWeaponSelector), "method_1");
-        }
+		protected override MethodBase GetTargetMethod()
+		{
+			return AccessTools.Method(typeof(BotWeaponSelector), nameof(BotWeaponSelector.TryChangeToSlot));
+		}
 
-        [PatchPrefix]
+		[PatchPrefix]
         public static void PatchPrefix(ref BotOwner ___botOwner_0)
         {
             // Try to turn a gun's light off before swapping weapon.

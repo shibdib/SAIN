@@ -4,7 +4,7 @@ namespace SAIN.Components.BotComponentSpace.Classes
 {
     public class MagRefillClass
     {
-        public bool canAccept(MagazineClass mag)
+        public bool canAccept(MagazineItemClass mag)
         {
             return this.magazineSlot.CanAccept(mag);
         }

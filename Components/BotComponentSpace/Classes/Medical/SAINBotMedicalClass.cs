@@ -52,12 +52,12 @@ namespace SAIN.SAINComponent.Classes
             HitByEnemy?.Dispose();
         }
 
-        public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
+        public void GetHit(DamageInfoStruct DamageInfoStruct, EBodyPart bodyPart, float floatVal)
         {
             TimeLastShot = Time.time;
-            HitByEnemy.GetHit(damageInfo, bodyPart, floatVal);
-            HitReaction.GetHit(damageInfo, bodyPart, floatVal);
-            Bot.Cover.GetHit(damageInfo, bodyPart, floatVal);
+            HitByEnemy.GetHit(DamageInfoStruct, bodyPart, floatVal);
+            HitReaction.GetHit(DamageInfoStruct, bodyPart, floatVal);
+            Bot.Cover.GetHit(DamageInfoStruct, bodyPart, floatVal);
         }
 
         public float TimeLastShot { get; private set; }

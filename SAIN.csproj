@@ -391,7 +391,6 @@
     <Compile Include="Layers\Combat\Solo\MeleeAttackAction.cs" />
     <Compile Include="Layers\Combat\Squad\FollowSearchParty - Copy.cs" />
     <Compile Include="Layers\Debug\CrawlAction.cs" />
-    <Compile Include="Layers\Debug\GrenadeThrowTestAction.cs" />
     <Compile Include="Layers\Flashbanged\ExtractAction.cs" />
     <Compile Include="Layers\Flashbanged\PeacefulLayer.cs" />
     <Compile Include="Layers\ISAINAction.cs" />

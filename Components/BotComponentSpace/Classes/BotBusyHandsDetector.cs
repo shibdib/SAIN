@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -140,7 +141,7 @@ namespace SAIN.SAINComponent.Classes
 
         private void collectQueEvents()
         {
-            InventoryControllerClass inventoryController = Player.InventoryControllerClass;
+            InventoryController inventoryController = Player.InventoryController;
             if (inventoryController == null)
             {
                 Logger.LogError("FixHandsController: could not find '_inventoryController'");
@@ -186,7 +187,7 @@ namespace SAIN.SAINComponent.Classes
         // Credit to Lacyway's "Hands are Not Busy" mod https://github.com/Lacyway/HandsAreNotBusy/blob/main/HANB_Component.cs
         private static void resetHandsController(Player player)
         {
-            InventoryControllerClass inventoryController = player.InventoryControllerClass;
+            InventoryController inventoryController = player.InventoryController;
             if (inventoryController == null)
             {
                 Logger.LogError("FixHandsController: could not find '_inventoryController'");
@@ -208,14 +209,14 @@ namespace SAIN.SAINComponent.Classes
 
             if (handsController is FirearmController currentFirearmController)
             {
-                player.MovementContext.OnStateChanged -= currentFirearmController.method_14;
-                player.Physical.OnSprintStateChangedEvent -= currentFirearmController.method_13;
-                currentFirearmController.RemoveBallisticCalculator();
-            }
+				player.MovementContext.OnStateChanged -= currentFirearmController.method_17;
+				player.Physical.OnSprintStateChangedEvent -= currentFirearmController.method_16;
+				currentFirearmController.RemoveBallisticCalculator();
+			}
 
             try
             {
-                player.SpawnController(player.method_111());
+                player.SpawnController(player.method_127());
             }
             catch (Exception ex)
             {
@@ -224,15 +225,15 @@ namespace SAIN.SAINComponent.Classes
 
             if (player.LastEquippedWeaponOrKnifeItem != null)
             {
-                InteractionsHandlerClass.Discard(player.LastEquippedWeaponOrKnifeItem, inventoryController, true, true);
+				InteractionsHandlerClass.Discard(player.LastEquippedWeaponOrKnifeItem, inventoryController, true);
 
-                player.ProcessStatus = EProcessStatus.None;
+				player.ProcessStatus = EProcessStatus.None;
                 player.TrySetLastEquippedWeapon();
             }
             else
             {
                 player.ProcessStatus = EProcessStatus.None;
-                player.SetFirstAvailableItem(new Callback<IHandsController>(PlayerOwner.Class1537.class1537_0.method_0));
+                player.SetFirstAvailableItem(PlayerOwner.Class1643.class1643_0.method_0);
             }
 
             player.SetInventoryOpened(false);

@@ -28,7 +28,7 @@ namespace SAIN.SAINComponent.Classes.Talk
             EnemyTalk.Init();
         }
 
-        private void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
+        private void GetHit(DamageInfoStruct DamageInfoStruct, EBodyPart bodyPart, float floatVal)
         {
             if (Player == null || BotOwner == null || Bot == null) {
                 return;
@@ -85,10 +85,10 @@ namespace SAIN.SAINComponent.Classes.Talk
                 if (TalkPack.Value.phraseInfo.Phrase == EPhraseTrigger.Roger || TalkPack.Value.phraseInfo.Phrase == EPhraseTrigger.Negative) {
                     if (Bot.Squad.VisibleMembers != null && Bot.Squad.LeaderComponent != null && Bot.Squad.VisibleMembers.Contains(Bot.Squad.LeaderComponent) && Bot.Enemy?.IsVisible == false) {
                         if (TalkPack.Value.phraseInfo.Phrase == EPhraseTrigger.Roger) {
-                            Player.HandsController.ShowGesture(EGesture.Good);
+                            Player.HandsController.ShowGesture(EInteraction.OkGesture);
                         }
                         else {
-                            Player.HandsController.ShowGesture(EGesture.Bad);
+                            Player.HandsController.ShowGesture(EInteraction.NoGesture);
                         }
                         return;
                     }

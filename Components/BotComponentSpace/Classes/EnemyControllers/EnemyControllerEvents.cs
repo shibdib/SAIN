@@ -98,7 +98,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             OnEnemyHit?.Invoke(enemy);
         }
 
-        private void enemyKilled(Player player, IPlayer lastAggressor, DamageInfo lastDamageInfo, EBodyPart lastBodyPart)
+        private void enemyKilled(Player player, IPlayer lastAggressor, DamageInfoStruct lastDamageInfoStruct, EBodyPart lastBodyPart)
         {
             if (player != null)
             {

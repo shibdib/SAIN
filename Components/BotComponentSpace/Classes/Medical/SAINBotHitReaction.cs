@@ -56,10 +56,10 @@ namespace SAIN.SAINComponent.Classes
             AimHitEffect.Dispose();
         }
 
-        public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
+        public void GetHit(DamageInfoStruct DamageInfoStruct, EBodyPart bodyPart, float floatVal)
         {
-            BodyHitEffect.GetHit(damageInfo, bodyPart, floatVal);
-            AimHitEffect.GetHit(damageInfo);
+            BodyHitEffect.GetHit(DamageInfoStruct, bodyPart, floatVal);
+            AimHitEffect.GetHit(DamageInfoStruct);
         }
 
         private const float StunDamageThreshold = 50;
@@ -88,7 +88,7 @@ namespace SAIN.SAINComponent.Classes
 
         private bool _isStunned;
 
-        private bool IsStunnedFromDamage(DamageInfo damageInfo)
+        private bool IsStunnedFromDamage(DamageInfoStruct DamageInfoStruct)
         {
             return false;
         }

@@ -40,7 +40,7 @@ namespace SAIN.Patches.Talk
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "method_102");
+            return AccessTools.Method(typeof(Player), nameof(Player.method_117));
         }
 
         [PatchPrefix]
@@ -63,18 +63,18 @@ namespace SAIN.Patches.Talk
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "Say");
+            return AccessTools.Method(typeof(Player), nameof(Player.Say));
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(Player __instance, EPhraseTrigger @event, ETagStatus mask, bool aggressive)
+        public static bool PatchPrefix(Player __instance, EPhraseTrigger phrase, ETagStatus mask, bool aggressive)
         {
-            switch (@event) {
+            switch (phrase) {
                 case EPhraseTrigger.OnDeath:
                 case EPhraseTrigger.OnBeingHurt:
                 case EPhraseTrigger.OnAgony:
                 case EPhraseTrigger.OnBreath:
-                    SAINBotController.Instance?.BotHearing.PlayerTalked(@event, mask, __instance);
+                    SAINBotController.Instance?.BotHearing.PlayerTalked(phrase, mask, __instance);
                     return true;
 
                 default:
@@ -84,13 +84,13 @@ namespace SAIN.Patches.Talk
             if (__instance.IsAI) {
                 if (SAINPlugin.LoadedPreset.GlobalSettings.Talk.DisableBotTalkPatching ||
                     SAINPlugin.IsBotExluded(__instance.AIData?.BotOwner)) {
-                    SAINBotController.Instance?.BotHearing.PlayerTalked(@event, mask, __instance);
+                    SAINBotController.Instance?.BotHearing.PlayerTalked(phrase, mask, __instance);
                     return true;
                 }
                 return false;
             }
 
-            SAINBotController.Instance?.BotHearing.PlayerTalked(@event, mask, __instance);
+            SAINBotController.Instance?.BotHearing.PlayerTalked(phrase, mask, __instance);
             return true;
         }
     }

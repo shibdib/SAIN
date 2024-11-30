@@ -96,7 +96,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             OnEnemyHeard?.Invoke(Enemy, type, gunFire, place);
         }
 
-        private void enemyHit(DamageInfo damage, EBodyPart _, float _2)
+        private void enemyHit(DamageInfoStruct damage, EBodyPart _, float _2)
         {
             var damageSource = damage.Player?.iPlayer;
             if (damageSource == null)

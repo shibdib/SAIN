@@ -462,7 +462,7 @@ namespace SAIN.Patches.Vision
 
         protected override MethodBase GetTargetMethod()
         {
-            _UsingLight = AccessTools.PropertySetter(typeof(AIData), "UsingLight");
+            _UsingLight = AccessTools.PropertySetter(typeof(GClass551), "UsingLight");
             return AccessTools.Method(typeof(Player.FirearmController), "SetLightsState");
         }
 

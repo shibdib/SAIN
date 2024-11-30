@@ -6,9 +6,9 @@ using System.Reflection;
 using UnityEngine;
 
 // Found in Botowner.Looksensor
-using EnemyTotalCheck = GClass520;
-using EnemyVisionCheck = GClass500;
-using LookAllData = GClass521;
+using EnemyTotalCheck = GClass568;
+using EnemyVisionCheck = GClass548;
+using LookAllData = GClass573;
 
 namespace SAIN.SAINComponent.Classes
 {

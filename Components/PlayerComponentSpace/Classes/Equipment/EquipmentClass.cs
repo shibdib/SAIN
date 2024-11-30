@@ -32,7 +32,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
             WeaponInfos.Clear();
         }
 
-        public EquipmentClass EquipmentClass { get; private set; }
+        public InventoryEquipment EquipmentClass { get; private set; }
 
         private void ReCalcPowerOfEquipment()
         {

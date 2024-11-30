@@ -43,7 +43,7 @@ namespace SAIN.Components
             if (shallInvert)
                 door.OpenAngle = -door.OpenAngle;
 
-            door.method_3(state);
+            door.SetDoorState(state);
             OnDoorStateChanged?.Invoke(door, state, shallInvert);
 
             if (shallInvert)
