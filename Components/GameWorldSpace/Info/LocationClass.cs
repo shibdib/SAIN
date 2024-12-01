@@ -95,7 +95,11 @@ namespace SAIN.Components
                     Location = ELocation.GroundZero;
                     break;
 
-                case "shoreline":
+				case "sandbox_high":
+					Location = ELocation.GroundZero;
+					break;
+
+				case "shoreline":
                     Location = ELocation.Shoreline;
                     break;
 
