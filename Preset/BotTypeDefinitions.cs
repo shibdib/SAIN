@@ -157,9 +157,11 @@ namespace SAIN.Preset
 
                 new BotType{ WildSpawnType = WildSpawnType.bossBoar,                Name = "Kaban",                    Section = "Bosses" ,      Description = "Streets Boss" },
                 new BotType{ WildSpawnType = WildSpawnType.followerBoar,            Name = "Kaban Guard",              Section = "Followers" ,   Description = "Streets Boss Follower" },
+				new BotType{ WildSpawnType = WildSpawnType.followerBoarClose1,      Name = "Kaban Guard Close 1",      Section = "Followers" ,   Description = "Streets Boss Follower Close 1" },
+				new BotType{ WildSpawnType = WildSpawnType.followerBoarClose2,      Name = "Kaban Guard Close 2",      Section = "Followers" ,   Description = "Streets Boss Follower Close 2" },
                 new BotType{ WildSpawnType = WildSpawnType.bossBoarSniper,          Name = "Kaban Sniper",             Section = "Followers" ,   Description = "Streets Boss Follower Sniper" },
 
-                new BotType{ WildSpawnType = WildSpawnType.bossKolontay,            Name = "Kolontay",                 Section = "Bosses" ,      Description = "" },
+				new BotType{ WildSpawnType = WildSpawnType.bossKolontay,            Name = "Kolontay",                 Section = "Bosses" ,      Description = "" },
                 new BotType{ WildSpawnType = WildSpawnType.followerKolontayAssault, Name = "Kolontay Assault",         Section = "Followers" ,   Description = "" },
                 new BotType{ WildSpawnType = WildSpawnType.followerKolontaySecurity,Name = "Kolontay Security",        Section = "Followers" ,   Description = "" },
                 new BotType{ WildSpawnType = WildSpawnType.shooterBTR,              Name = "BTR",                      Section = "Other" ,       Description = "Zoom. Zoom. Bang. Bang." },
