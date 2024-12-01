@@ -395,7 +395,7 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "method_43");
+            return AccessTools.Method(typeof(Player), "method_46");
         }
 
         [PatchPostfix]

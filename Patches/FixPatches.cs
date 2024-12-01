@@ -110,7 +110,7 @@ namespace SAIN.Patches.Generic.Fixes
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass410), "CancelCurrent");
+            return AccessTools.Method(typeof(GClass455), "CancelCurrent");
         }
 
         [PatchPrefix]
@@ -217,7 +217,7 @@ namespace SAIN.Patches.Generic.Fixes
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotMover), "method_0");
+            return AccessTools.Method(typeof(BotMover), "method_1");
         }
 
         [PatchPrefix]
