@@ -76,6 +76,11 @@ namespace SAIN.Components.PlayerComponentSpace
                 return;
             }
 
+			if (player.UsedSimplifiedSkeleton) // Skip zombies
+			{
+				return;
+			}
+
             if (AlivePlayers.TryRemove(profileId, out bool compDestroyed)) {
                 string playerInfo = $"{player.name} : {player.Profile?.Nickname} : {profileId}";
                 Logger.LogWarning($"PlayerComponent already exists for Player: {playerInfo}");
