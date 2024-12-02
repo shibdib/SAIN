@@ -7,7 +7,7 @@ namespace SAIN.Preset.GlobalSettings
     {
         [Name("New Hit Reactions")]
         [Description("Disable to get vanilla bot hit reactions. If this is disabled, all below settings will do nothing.")]
-        public bool HIT_REACTION_TOGGLE = true;
+        public bool HIT_REACTION_TOGGLE = false;
 
         [Name("Hit Effect Multiplier")]
         [Description("Higher = getting shot has more affect on bot aim.")]
