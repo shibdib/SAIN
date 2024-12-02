@@ -739,9 +739,9 @@
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
   <PropertyGroup>
-    <PostBuildEvent>rem copy "$(TargetPath)" "..\..\BepInEx\plugins\SAIN\$(TargetName).dll"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "..\..\BepInEx\plugins\SAIN\$(TargetName).dll"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>rem powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "$(ProjectDir)\Plugin\VersionChecker\setbuild.ps1"</PreBuildEvent>
+    <PreBuildEvent>powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "$(ProjectDir)\Plugin\VersionChecker\setbuild.ps1"</PreBuildEvent>
   </PropertyGroup>
 </Project>
