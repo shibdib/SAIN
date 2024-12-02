@@ -20,9 +20,6 @@ namespace SAIN.Patches.Generic.Fixes
         [PatchPrefix]
         public static void Patch(Player __instance, ref bool aiControlled)
         {
-			if (__instance.UsedSimplifiedSkeleton)
-				return;
-
             aiControlled = false;
         }
     }

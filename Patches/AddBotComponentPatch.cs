@@ -24,7 +24,7 @@ namespace SAIN.Patches.Components
 		{
 			try
 			{
-				if (__instance.BotState != EBotState.ActiveFail && !__instance.GetPlayer.UsedSimplifiedSkeleton)
+				if (__instance.BotState != EBotState.ActiveFail)
 				{
 					BotSpawnController.Instance.AddBot(__instance);
 				}
