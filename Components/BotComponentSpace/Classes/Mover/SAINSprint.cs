@@ -566,7 +566,7 @@ namespace SAIN.SAINComponent.Classes.Mover
 			{
 				BotOwner.Mover.IsMoving = true;
 			}
-            Player.Move(findMoveDirection(direction));
+			Player.Move(findMoveDirection(direction));
         }
 
         public Vector2 findMoveDirection(Vector3 direction)
