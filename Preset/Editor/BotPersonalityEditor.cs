@@ -19,25 +19,21 @@ namespace SAIN.Editor.GUISections
             string toolTip = $"Apply Values set below to Personalities. " +
                 $"Exports edited values to SAIN/Presets/{SAINPlugin.LoadedPreset.Info.Name}/Personalities folder";
 
-            if (BuilderClass.SaveChanges(ConfigEditingTracker.GetUnsavedValuesString(), 35))
-            {
+            if (BuilderClass.SaveChanges(ConfigEditingTracker.GetUnsavedValuesString(), 35)) {
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
 
             var personalities = SAINPresetClass.Instance.PersonalityManager.PersonalityDictionary;
-            if (_options.Count == 0)
-            {
+            if (_options.Count == 0) {
                 _options.AddRange(personalities.Keys);
             }
 
             _selected = BuilderClass.SelectionGrid(_selected, 35f, 4, _options);
-            if (_selected == EPersonality.None)
-            {
+            if (_selected == EPersonality.None) {
                 return;
             }
 
-            if (personalities.TryGetValue(_selected, out var settings))
-            {
+            if (personalities.TryGetValue(_selected, out var settings)) {
                 EditAllValuesInObj(settings, out bool newEdit, null, null, 1);
             }
         }

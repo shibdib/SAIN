@@ -49,6 +49,7 @@ namespace SAIN.Preset.GlobalSettings.Categories
         public float MaximumDistanceToBeSneaky_SQR;
 
         [Description("The maximum distance between the bullet, and a bot's head to be considered Suppressing fire.")]
+        [Category("Suppression")]
         [MinMax(1f, 30f, 10f)]
         [Advanced]
         public float MaxSuppressionDistance = 10f;
@@ -59,6 +60,7 @@ namespace SAIN.Preset.GlobalSettings.Categories
 
         [Description("The maximum distance between the bullet, and a bot's head to be considered under active enemy fire.")]
         [MinMax(0.1f, 20f, 10f)]
+        [Category("Suppression")]
         [Advanced]
         public float MaxUnderFireDistance = 2f;
 

@@ -658,43 +658,6 @@ namespace SAIN.Attributes
 
         public static void EditAllValuesInObj(object obj, out bool wasEdited, string search = null, GUIEntryConfig entryConfig = null, int listDepth = 0)
         {
-            wasEdited = false;
-
-            float indent = getIndentValue(entryConfig);
-            BeginVertical(indent);
-
-            FieldInfo[] fields = obj.GetType().GetFields();
-
-            foreach (FieldInfo field in fields) {
-                ConfigInfoClass attributes = GetAttributeInfo(field);
-                if (SkipForSearch(attributes, search) || attributes.Advanced) {
-                    continue;
-                }
-                object value = field.GetValue(obj);
-                object newValue = EditValue(ref value, obj, attributes, out bool newEdit, listDepth, entryConfig, search);
-                if (newEdit) {
-                    field.SetValue(obj, newValue);
-                    wasEdited = true;
-                }
-            }
-            foreach (FieldInfo field in fields) {
-                ConfigInfoClass attributes = GetAttributeInfo(field);
-                if (SkipForSearch(attributes, search) || !attributes.Advanced) {
-                    continue;
-                }
-                object value = field.GetValue(obj);
-                object newValue = EditValue(ref value, obj, attributes, out bool newEdit, listDepth, entryConfig, search);
-                if (newEdit) {
-                    field.SetValue(obj, newValue);
-                    wasEdited = true;
-                }
-            }
-
-            EndVertical(indent);
-        }
-
-        public static void EditAllValuesInObjNew(object obj, out bool wasEdited, string search = null, GUIEntryConfig entryConfig = null, int listDepth = 0)
-        {
             ConfigParams configParams = new ConfigParams {
                 SettingsObject = obj,
                 Search = search,
@@ -708,8 +671,10 @@ namespace SAIN.Attributes
         {
             float indent = getIndentValue(configParams.EntryConfig);
             BeginVertical(indent);
-            getAllAttributeInfos(configParams.SettingsObject, _attributeInfos, configParams.Search);
-            displayOptionsByCategory(configParams, _attributeInfos, out wasEdited);
+            List<ConfigInfoClass> attributeInfos = new List<ConfigInfoClass>();
+            getAllAttributeInfos(configParams.SettingsObject, attributeInfos, configParams.Search);
+            displayOptionsByCategory(configParams, attributeInfos, out wasEdited);
+            attributeInfos.Clear();
             EndVertical(indent);
         }
 
@@ -726,14 +691,19 @@ namespace SAIN.Attributes
             return indent;
         }
 
-        private static void displayCategory(ConfigParams configParams, string category, out bool wasEdited)
+        private static void displayCategory(ConfigParams configParams, List<ConfigInfoClass> attributeInfos, string category, out bool wasEdited)
         {
             wasEdited = false;
             bool categoryDrawn = false;
 
+            int count = 0;
+
             // Display Non-Advanced Settings first, thats why there are 2 loops here. Probably a better way to do this.
-            foreach (ConfigInfoClass attributes in _attributeInfos) {
+            foreach (ConfigInfoClass attributes in attributeInfos) {
                 if (attributes.Advanced == true) {
+                    continue;
+                }
+                if (attributes.DoNotShowGUI) {
                     continue;
                 }
                 if (attributes.Category != category) {
@@ -743,14 +713,17 @@ namespace SAIN.Attributes
                     categoryDrawn = true;
                     drawCategory(configParams, attributes, category);
                 }
-                displayConfigGUI(attributes, configParams, out bool newEdit);
+                displayConfigGUI(attributes, configParams, count++, out bool newEdit);
                 if (newEdit) {
                     wasEdited = true;
                 }
             }
 
-            foreach (ConfigInfoClass attributes in _attributeInfos) {
+            foreach (ConfigInfoClass attributes in attributeInfos) {
                 if (attributes.Advanced == false) {
+                    continue;
+                }
+                if (attributes.DoNotShowGUI) {
                     continue;
                 }
                 if (attributes.Category != category) {
@@ -760,28 +733,34 @@ namespace SAIN.Attributes
                     categoryDrawn = true;
                     drawCategory(configParams, attributes, category);
                 }
-                displayConfigGUI(attributes, configParams, out bool newEdit);
+                displayConfigGUI(attributes, configParams, count++, out bool newEdit);
                 if (newEdit) {
                     wasEdited = true;
                 }
             }
+            Space(8f);
         }
 
         private static void drawCategory(ConfigParams configParams, ConfigInfoClass configInfo, string category)
         {
-            DisplayString(category, configParams.ListDepth, configParams.EntryConfig);
+            BeginHorizontal(25);
+            DisplayString($"Category: [{category}] ", configParams.ListDepth, configParams.EntryConfig, 15f);
+            FlexibleSpace();
+            EndHorizontal();
         }
 
         private static void displayOptionsByCategory(ConfigParams configParams, List<ConfigInfoClass> configInfos, out bool wasEdited)
         {
             wasEdited = false;
-            getCategories(configInfos, _categoriesList);
-            for (int i = 0; i < _categoriesList.Count; i++) {
-                displayCategory(configParams, _categoriesList[i], out bool newEdit);
+            List<string> categoriesList = new List<string>();
+            getCategories(configInfos, categoriesList);
+            for (int i = 0; i < categoriesList.Count; i++) {
+                displayCategory(configParams, configInfos, categoriesList[i], out bool newEdit);
                 if (newEdit) {
                     wasEdited = true;
                 }
             }
+            categoriesList.Clear();
         }
 
         private static void getCategories(List<ConfigInfoClass> configInfos, List<string> outputList)
@@ -799,8 +778,6 @@ namespace SAIN.Attributes
             }
         }
 
-        private static readonly List<string> _categoriesList = new List<string>();
-
         public struct ConfigParams
         {
             public object SettingsObject;
@@ -809,19 +786,7 @@ namespace SAIN.Attributes
             public int ListDepth;
         }
 
-        private static void displayConfigGUI(ConfigInfoClass configInfo, object obj, int listDepth, GUIEntryConfig entryConfig, string search, out bool edited)
-        {
-            object oldValue = getConfigValue(configInfo, obj);
-            object newValue = EditValue(ref oldValue, obj, configInfo, out bool newEdit, listDepth, entryConfig, search);
-            if (newEdit) {
-                setConfigValue(newValue, configInfo.MemberInfo, obj);
-                edited = true;
-                return;
-            }
-            edited = false;
-        }
-
-        private static void displayConfigGUI(ConfigInfoClass configInfo, ConfigParams configParams, out bool edited)
+        private static void displayConfigGUI(ConfigInfoClass configInfo, ConfigParams configParams, int count, out bool edited)
         {
             object oldValue = getConfigValue(configInfo, configParams.SettingsObject);
             object newValue = EditValue(ref oldValue, configParams.SettingsObject, configInfo, out bool newEdit, configParams.ListDepth, configParams.EntryConfig, configParams.Search);
@@ -877,38 +842,36 @@ namespace SAIN.Attributes
             }
         }
 
-        private static readonly List<ConfigInfoClass> _attributeInfos = new List<ConfigInfoClass>();
-
         public static void EditAllValuesInObj(Category category, object categoryObject, out bool wasEdited, string search = null)
         {
-            BeginVertical(5);
-
-            wasEdited = false;
-            foreach (var fieldAtt in category.FieldAttributesList) {
-                if (SkipForSearch(fieldAtt, search) || fieldAtt.Advanced) {
-                    continue;
-                }
-                object value = fieldAtt.GetValue(categoryObject);
-                object newValue = EditValue(ref value, categoryObject, fieldAtt, out bool newEdit, 0, null, search);
-                if (newEdit) {
-                    fieldAtt.SetValue(categoryObject, newValue);
-                    wasEdited = true;
-                }
-            }
-
-            foreach (var fieldAtt in category.FieldAttributesList) {
-                if (SkipForSearch(fieldAtt, search) || !fieldAtt.Advanced) {
-                    continue;
-                }
-                object value = fieldAtt.GetValue(categoryObject);
-                object newValue = EditValue(ref value, categoryObject, fieldAtt, out bool newEdit, 0, null, search);
-                if (newEdit) {
-                    fieldAtt.SetValue(categoryObject, newValue);
-                    wasEdited = true;
-                }
-            }
-
-            EndVertical(5);
+            EditAllValuesInObj(categoryObject, out wasEdited, search);
+            //BeginVertical(5);
+            //wasEdited = false;
+            //foreach (var fieldAtt in category.FieldAttributesList) {
+            //    if (SkipForSearch(fieldAtt, search) || fieldAtt.Advanced) {
+            //        continue;
+            //    }
+            //    object value = fieldAtt.GetValue(categoryObject);
+            //    object newValue = EditValue(ref value, categoryObject, fieldAtt, out bool newEdit, 0, null, search);
+            //    if (newEdit) {
+            //        fieldAtt.SetValue(categoryObject, newValue);
+            //        wasEdited = true;
+            //    }
+            //}
+            //
+            //foreach (var fieldAtt in category.FieldAttributesList) {
+            //    if (SkipForSearch(fieldAtt, search) || !fieldAtt.Advanced) {
+            //        continue;
+            //    }
+            //    object value = fieldAtt.GetValue(categoryObject);
+            //    object newValue = EditValue(ref value, categoryObject, fieldAtt, out bool newEdit, 0, null, search);
+            //    if (newEdit) {
+            //        fieldAtt.SetValue(categoryObject, newValue);
+            //        wasEdited = true;
+            //    }
+            //}
+            //
+            //EndVertical(5);
         }
 
         public static bool SkipForSearch(ConfigInfoClass attributes, string searchQuerry)
@@ -921,14 +884,6 @@ namespace SAIN.Attributes
 
         private static readonly Dictionary<string, bool> _listOpen = new Dictionary<string, bool>();
         private static readonly List<string> _failedAdds = new List<string>();
-
-        private static readonly Type[] _floatBoolIntTypes =
-        {
-            typeof(bool),
-            typeof(float),
-            typeof(int),
-        };
-
         private static readonly GUIEntryConfig _defaultEntryConfig = new GUIEntryConfig();
         private static GUIStyle _labelStyle;
         private static readonly Dictionary<string, ConfigInfoClass> _attributeClasses = new Dictionary<string, ConfigInfoClass>();

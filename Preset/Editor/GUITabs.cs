@@ -15,8 +15,7 @@ namespace SAIN.Editor
         public static void CreateTabs(EEditorTab selectedTab)
         {
             EditTabsClass.BeginScrollView();
-            switch (selectedTab)
-            {
+            switch (selectedTab) {
                 case EEditorTab.Home:
                     Home(); break;
 
@@ -50,8 +49,7 @@ namespace SAIN.Editor
                 35f,
                 out bool saved);
 
-            if (saved)
-            {
+            if (saved) {
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
                 ConfigEditingTracker.Clear();
             }
@@ -72,15 +70,13 @@ namespace SAIN.Editor
             BeginVertical();
 
             BeginHorizontal();
-            if (ConfigEditingTracker.UnsavedChanges)
-            {
+            if (ConfigEditingTracker.UnsavedChanges) {
                 BuilderClass.Alert(
                     "Click Save to export changes, and send changes to bots if in-game",
                     "YOU HAVE UNSAVED CHANGES!",
                     35f, ColorNames.DarkRed);
             }
-            else
-            {
+            else {
                 BuilderClass.Alert(null, null, 35f, null);
             }
 
@@ -88,8 +84,7 @@ namespace SAIN.Editor
                 "Save and Export",
                 ConfigEditingTracker.GetUnsavedValuesString(),
                 EUISoundType.InsuranceInsured,
-                Height(35f)))
-            {
+                Height(35f))) {
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
 
@@ -104,13 +99,11 @@ namespace SAIN.Editor
             Space(spacing);
 
             _forceDecisionMenuOpen = BuilderClass.ExpandableMenu("Force SAIN Bot Decisions", _forceDecisionMenuOpen);
-            if (_forceDecisionMenuOpen)
-            {
+            if (_forceDecisionMenuOpen) {
                 Space(spacing);
 
                 ForceSoloOpen = BuilderClass.ExpandableMenu("Force Solo Decision", ForceSoloOpen);
-                if (ForceSoloOpen)
-                {
+                if (ForceSoloOpen) {
                     Space(spacing / 2f);
 
                     if (Button("Reset"))
@@ -126,8 +119,7 @@ namespace SAIN.Editor
                 Space(spacing);
 
                 ForceSquadOpen = BuilderClass.ExpandableMenu("Force Squad Decision", ForceSquadOpen);
-                if (ForceSquadOpen)
-                {
+                if (ForceSquadOpen) {
                     Space(spacing / 2f);
 
                     if (Button("Reset"))
@@ -143,8 +135,7 @@ namespace SAIN.Editor
                 Space(spacing);
 
                 ForceSelfOpen = BuilderClass.ExpandableMenu("Force Self Decision", ForceSelfOpen);
-                if (ForceSelfOpen)
-                {
+                if (ForceSelfOpen) {
                     Space(spacing / 2f);
 
                     if (Button("Reset"))
@@ -162,13 +153,11 @@ namespace SAIN.Editor
         public static void Advanced()
         {
             AttributesGUI.EditAllValuesInObj(PresetHandler.EditorDefaults, out bool newEdit);
-            if (newEdit)
-            {
+            if (newEdit) {
                 PresetHandler.ExportEditorDefaults();
             }
 
-            if (!SAINPlugin.DebugMode)
-            {
+            if (!SAINPlugin.DebugMode) {
                 return;
             }
 
@@ -181,19 +170,14 @@ namespace SAIN.Editor
         {
             Space(spacing);
             _forceTalkMenuOpen = BuilderClass.ExpandableMenu("Force Bots to Say Phrase", _forceTalkMenuOpen);
-            if (_forceTalkMenuOpen)
-            {
+            if (_forceTalkMenuOpen) {
                 Space(5);
                 _forceTagStatusToggle = Toggle(_forceTagStatusToggle, "Force ETagStatus for Phrase");
-                if (_forceTagStatusToggle)
-                {
+                if (_forceTagStatusToggle) {
                     ETagStatus[] statuses = EnumValues.GetEnum<ETagStatus>();
-                    for (int i = 0; i < statuses.Length; i++)
-                    {
-                        if (Toggle(_forcedTagStatus == statuses[i], statuses[i].ToString()))
-                        {
-                            if (_forcedTagStatus != statuses[i])
-                            {
+                    for (int i = 0; i < statuses.Length; i++) {
+                        if (Toggle(_forcedTagStatus == statuses[i], statuses[i].ToString())) {
+                            if (_forcedTagStatus != statuses[i]) {
                                 _forcedTagStatus = statuses[i];
                             }
                         }
@@ -204,22 +188,15 @@ namespace SAIN.Editor
                 Space(5);
                 Label("Say Phrase");
                 EPhraseTrigger[] triggers = EnumValues.GetEnum<EPhraseTrigger>();
-                for (int i = 0; i < triggers.Length; i++)
-                {
-                    if (Button(triggers[i].ToString()))
-                    {
-                        if (SAINBotController.Instance?.Bots != null)
-                        {
-                            foreach (var bot in SAINBotController.Instance.Bots.Values)
-                            {
-                                if (bot != null)
-                                {
-                                    if (_forceTagStatusToggle)
-                                    {
+                for (int i = 0; i < triggers.Length; i++) {
+                    if (Button(triggers[i].ToString())) {
+                        if (SAINBotController.Instance?.Bots != null) {
+                            foreach (var bot in SAINBotController.Instance.Bots.Values) {
+                                if (bot != null) {
+                                    if (_forceTagStatusToggle) {
                                         bot.Talk.Say(triggers[i], _forcedTagStatus, _withGroupDelay);
                                     }
-                                    else
-                                    {
+                                    else {
                                         bot.Talk.Say(triggers[i], null, _withGroupDelay);
                                     }
                                 }

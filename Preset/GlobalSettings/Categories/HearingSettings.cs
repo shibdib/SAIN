@@ -59,11 +59,13 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("Max Footstep Audio Distance")]
         [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters.")]
+        [Category("Hearing Distance")]
         [MinMax(10f, 150f, 1f)]
         public float MaxFootstepAudioDistance = 70f;
 
         [Name("Max Footstep Audio Distance without Headphones")]
         [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters when not wearing headphones.")]
+        [Category("Hearing Distance")]
         [MinMax(10f, 150f, 1f)]
         public float MaxFootstepAudioDistanceNoHeadphones = 50f;
 
