@@ -22,12 +22,10 @@ namespace SAIN.SAINComponent.Classes.Decision
         public ESquadDecision PreviousSquadDecision { get; private set; }
         public ESelfDecision CurrentSelfDecision { get; private set; }
         public ESelfDecision PreviousSelfDecision { get; private set; }
+
         public bool HasDecision => HasDecisionToggle.Value;
         public float ChangeDecisionTime { get; private set; }
         public float TimeSinceChangeDecision => Time.time - ChangeDecisionTime;
-
-        public int TotalDecisionsMade { get; private set; }
-        public int DecisionsMadeThisFight { get; private set; }
 
         public BotDecisionManager(SAINDecisionClass decisionClass) : base(decisionClass)
         {
@@ -123,76 +121,6 @@ namespace SAIN.SAINComponent.Classes.Decision
             SetDecisions(ECombatDecision.None, ESquadDecision.None, ESelfDecision.None);
         }
 
-        private BotDecision<ESelfDecision>? _self;
-        private BotDecision<ECombatDecision>? _combat;
-        private BotDecision<ESquadDecision>? _squad;
-
-        private void setSelf(BotDecision<ESelfDecision>? decision)
-        {
-        }
-
-        private void setCombat(BotDecision<ECombatDecision>? decision)
-        {
-        }
-
-        private void setSquad(BotDecision<ESquadDecision>? decision)
-        {
-        }
-
-        private void getDecisionStructs()
-        {
-            BaseClass.EnemyDecisions.DebugShallSearch = null;
-
-            if (Bot.EnemyController.EnemyLists.KnownEnemies.Count == 0) {
-                setCombat(null);
-                setSelf(null);
-                setSquad(null);
-                return;
-            }
-
-            if (BaseClass.DogFightDecision.ShallDogFight()) {
-                setSelf(null);
-                setSquad(null);
-                setCombat(new BotDecision<ECombatDecision>(ECombatDecision.DogFight, "dogFight"));
-                return;
-            }
-
-            if (BotOwner.WeaponManager.IsMelee) {
-                setSelf(null);
-                setSquad(null);
-                setCombat(new BotDecision<ECombatDecision>(ECombatDecision.MeleeAttack, "meleeAttack"));
-                return;
-            }
-
-            if (BaseClass.SelfActionDecisions.GetDecision(out ESelfDecision selfDecision)) {
-                setSquad(null);
-                setCombat(new BotDecision<ECombatDecision>(ECombatDecision.Retreat, "selfCare"));
-                setSelf(new BotDecision<ESelfDecision>(selfDecision, "selfCare"));
-                return;
-            }
-
-            if (CheckContinueRetreat()) {
-                return;
-            }
-
-            if (BaseClass.SquadDecisions.GetDecision(out ESquadDecision squadDecision)) {
-                setSelf(null);
-                setCombat(null);
-                setSquad(new BotDecision<ESquadDecision>(squadDecision, "squadAction"));
-                return;
-            }
-
-            setSelf(null);
-            setSquad(null);
-
-            if (!Bot.HasEnemy) {
-                setCombat(null);
-                return;
-            }
-            var combat = BaseClass.EnemyDecisions.GetDecision();
-            setCombat(combat);
-        }
-
         private void SetDecisions(ECombatDecision solo, ESquadDecision squad, ESelfDecision self)
         {
             if (SAINPlugin.DebugMode) {
@@ -215,7 +143,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
                 HasDecisionToggle.CheckToggle(hasDecision);
 
-                TotalDecisionsMade++;
                 ChangeDecisionTime = Time.time;
                 OnDecisionMade?.Invoke(solo, squad, self, Bot);
             }

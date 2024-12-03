@@ -27,9 +27,6 @@ namespace SAIN.SAINComponent.Classes.Decision
         public StringBuilder DecisionReasons { get; } = new StringBuilder();
         public bool ShiftCoverComplete { get; set; }
         public bool? DebugShallSearch { get; set; }
-        public bool ShotInCover { get; set; }
-
-        private Dictionary<int, IBotDecisionClass> _decisions { get; } = new Dictionary<int, IBotDecisionClass>();
 
         public EnemyDecisionClass(BotComponent sain) : base(sain)
         {
@@ -46,73 +43,6 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         public void Dispose()
         {
-        }
-
-        public BotDecision<ECombatDecision>? GetDecision()
-        {
-            DecisionReasons.Clear();
-            Enemy enemy = Bot.Enemy;
-            if (enemy == null) {
-                return null;
-            }
-            string reason = string.Empty;
-            if (shallDogFight(enemy, out reason)) {
-                return new BotDecision<ECombatDecision>(ECombatDecision.DogFight, reason);
-            }
-            DecisionReasons.AppendLine($"{ECombatDecision.DogFight} {reason}");
-
-            if (shallStandAndShoot(enemy, out reason)) {
-                if (Bot.Decision.CurrentCombatDecision != ECombatDecision.StandAndShoot)
-                    Bot.Info.CalcHoldGroundDelay();
-
-                return new BotDecision<ECombatDecision>(ECombatDecision.StandAndShoot, reason);
-            }
-            DecisionReasons.AppendLine($"{ECombatDecision.StandAndShoot} {reason}");
-
-            if (shallShootDistantEnemy(enemy, out reason)) {
-                return new BotDecision<ECombatDecision>(ECombatDecision.ShootDistantEnemy, reason);
-            }
-            DecisionReasons.AppendLine($"{ECombatDecision.ShootDistantEnemy} {reason}");
-
-            if (shallRushEnemy(enemy, out reason)) {
-                return new BotDecision<ECombatDecision>(ECombatDecision.RushEnemy, reason);
-            }
-            DecisionReasons.AppendLine($"{ECombatDecision.RushEnemy} {reason}");
-
-            if (shallThrowGrenade(enemy, out reason)) {
-                return new BotDecision<ECombatDecision>(ECombatDecision.ThrowGrenade, reason);
-            }
-            DecisionReasons.AppendLine($"{ECombatDecision.ThrowGrenade} {reason}");
-
-            if (shallSearch(enemy, out reason)) {
-                if (Bot.Decision.CurrentCombatDecision != ECombatDecision.Search) {
-                    enemy.Status.NumberOfSearchesStarted++;
-                }
-                return new BotDecision<ECombatDecision>(ECombatDecision.Search, reason);
-            }
-            DecisionReasons.AppendLine($"{ECombatDecision.Search} {reason}");
-
-            if (shallFreezeAndWait(enemy, out reason)) {
-                return new BotDecision<ECombatDecision>(ECombatDecision.Freeze, reason);
-            }
-            DecisionReasons.AppendLine($"{ECombatDecision.Freeze} {reason}");
-
-            if (shallShiftCover(enemy, out reason)) {
-                return new BotDecision<ECombatDecision>(ECombatDecision.ShiftCover, reason);
-            }
-            DecisionReasons.AppendLine($"{ECombatDecision.ShiftCover} {reason}");
-
-            if (shallMoveToCover(out reason)) {
-                if (shallRunForCover(enemy, out reason)) {
-                    return new BotDecision<ECombatDecision>(ECombatDecision.RunToCover, reason);
-                }
-                DecisionReasons.AppendLine($"{ECombatDecision.RunToCover} {reason}");
-
-                return new BotDecision<ECombatDecision>(ECombatDecision.MoveToCover, reason);
-            }
-            DecisionReasons.AppendLine($"{ECombatDecision.MoveToCover} {reason}");
-
-            return new BotDecision<ECombatDecision>(ECombatDecision.HoldInCover, reason);
         }
 
         public bool GetDecision(out ECombatDecision result)
