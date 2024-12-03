@@ -23,12 +23,10 @@ namespace SAIN.Attributes
             Name = name;
         }
 
-        public Type ValueType
-        {
+        public Type ValueType {
             get
             {
-                switch (MemberInfo.MemberType)
-                {
+                switch (MemberInfo.MemberType) {
                     case MemberTypes.Field:
                         return (MemberInfo as FieldInfo).FieldType;
 
@@ -50,8 +48,7 @@ namespace SAIN.Attributes
             if (obj == null)
                 return null;
 
-            switch (MemberInfo.MemberType)
-            {
+            switch (MemberInfo.MemberType) {
                 case MemberTypes.Field:
                     return (MemberInfo as FieldInfo).GetValue(obj);
 
@@ -65,8 +62,7 @@ namespace SAIN.Attributes
 
         public void SetValue(object obj, object value)
         {
-            switch (MemberInfo.MemberType)
-            {
+            switch (MemberInfo.MemberType) {
                 case MemberTypes.Field:
                     (MemberInfo as FieldInfo).SetValue(obj, value);
                     return;
@@ -92,18 +88,17 @@ namespace SAIN.Attributes
             Debug = Get<DebugAttribute>() != null;
             CopyValue = Get<CopyValueAttribute>() != null;
 
-            if (Hidden)
-            {
+            if (Hidden) {
                 return;
             }
 
             var nameDescription = Get<NameAndDescriptionAttribute>();
             Name = nameDescription?.Name ?? Get<NameAttribute>()?.Value ?? member.Name;
             Description = nameDescription?.Description ?? Get<DescriptionAttribute>()?.Value ?? string.Empty;
+            Category = Get<CategoryAttribute>()?.Value ?? "None";
 
             GUIValuesAttribute GUIValues = Get<GUIValuesAttribute>();
-            if (GUIValues != null)
-            {
+            if (GUIValues != null) {
                 Min = GUIValues.Min;
                 Max = GUIValues.Max;
                 Rounding = GUIValues.Rounding;
@@ -120,32 +115,13 @@ namespace SAIN.Attributes
         public object DefaultDictionary => Reflection.GetStaticValue(DeclaringType, DictionaryString);
         private string DictionaryString;
 
-
         public string Name { get; private set; }
-
-        public string MemberName { get; private set; }
-
         public string Description { get; private set; }
-
-        public object GetDefault(object settingsObject)
-        {
-            if (settingsObject is ISAINSettings settings)
-            {
-                var defaults = settings.GetDefaults();
-                object value = GetValue(defaults);
-                return value;
-            }
-            return null;
-        }
-
+        public string Category { get; private set; }
         public float Min { get; private set; } = 0f;
-
         public float Max { get; private set; } = 300f;
-
         public float Rounding { get; private set; } = 10f;
-
         public bool Hidden { get; private set; }
-
         public bool Advanced { get; private set; }
         public bool Debug { get; private set; }
 
@@ -158,5 +134,15 @@ namespace SAIN.Attributes
         public Type SecondaryListType { get; private set; }
 
         public bool MenuOpen;
+
+        public object GetDefault(object settingsObject)
+        {
+            if (settingsObject is ISAINSettings settings) {
+                var defaults = settings.GetDefaults();
+                object value = GetValue(defaults);
+                return value;
+            }
+            return null;
+        }
     }
 }

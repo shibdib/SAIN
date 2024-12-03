@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using static SAIN.Attributes.AttributesGUI;
 using static SAIN.Editor.SAINLayout;
 
 namespace SAIN.Attributes
@@ -94,14 +95,34 @@ namespace SAIN.Attributes
             return value;
         }
 
-        private static void DisplayString(string value, float listDepth, GUIEntryConfig entryConfig, ConfigInfoClass info)
+        public static void DisplayString(string value, float listDepth, GUIEntryConfig entryConfig, ConfigInfoClass info)
         {
-            startConfigEntry(listDepth, entryConfig, info);
+            if (value != null &&
+                info != null &&
+                !info.DoNotShowGUI) {
+                if (entryConfig == null) {
+                    entryConfig = _defaultEntryConfig;
+                }
+                startConfigEntry(listDepth, entryConfig, info);
+                Label($"{info.Name}: ", Width(80), Height(entryConfig.EntryHeight));
+                Box(value, Height(entryConfig.EntryHeight));
+                EndHorizontal(100f);
+            }
+        }
 
-            Label($"{info.Name}: ", Width(80), Height(entryConfig.EntryHeight));
-            Box(value, Height(entryConfig.EntryHeight));
-
-            EndHorizontal(100f);
+        public static void DisplayString(string value, float listDepth, GUIEntryConfig entryConfig, float heightOverride = -1)
+        {
+            if (value != null) {
+                if (entryConfig == null) {
+                    entryConfig = _defaultEntryConfig;
+                }
+                startConfigEntry(listDepth, entryConfig, null);
+                if (heightOverride < 0) {
+                    heightOverride = entryConfig.EntryHeight;
+                }
+                Box(value, Height(heightOverride));
+                EndHorizontal(100f);
+            }
         }
 
         public static object FindListTypeAndEdit(ref object value, object settingsObject, ConfigInfoClass info, int listDepth, out bool wasEdited, GUIEntryConfig config = null, string search = null)
@@ -177,7 +198,7 @@ namespace SAIN.Attributes
         private static void startConfigEntry(float listDepth, GUIEntryConfig entryConfig, ConfigInfoClass info)
         {
             float horizDepth = listDepth * entryConfig.SubList_Indent_Horizontal;
-            if (info.Advanced) {
+            if (info != null && info.Advanced) {
                 BeginHorizontal(25f);
                 Space(horizDepth);
                 Box("Advanced",
@@ -583,13 +604,6 @@ namespace SAIN.Attributes
             return value;
         }
 
-        private static float slider(float value, string name, ConfigInfoClass info, GUIEntryConfig config)
-        {
-            Box(name, _labelStyle, Height(config.EntryHeight));
-            value = BuilderClass.CreateSlider(value, info, config);
-            return value;
-        }
-
         public static void EditFloatDictionary<T>(object dictValue, ConfigInfoClass info, out bool wasEdited) where T : Enum
         {
             BeginVertical(5f);
@@ -645,14 +659,14 @@ namespace SAIN.Attributes
         public static void EditAllValuesInObj(object obj, out bool wasEdited, string search = null, GUIEntryConfig entryConfig = null, int listDepth = 0)
         {
             wasEdited = false;
-            if (entryConfig != null)
-                BeginVertical(entryConfig.SubList_Indent_Vertical);
-            else
-                BeginVertical(5f);
 
-            var fields = obj.GetType().GetFields();
-            foreach (var field in fields) {
-                var attributes = GetAttributeInfo(field);
+            float indent = getIndentValue(entryConfig);
+            BeginVertical(indent);
+
+            FieldInfo[] fields = obj.GetType().GetFields();
+
+            foreach (FieldInfo field in fields) {
+                ConfigInfoClass attributes = GetAttributeInfo(field);
                 if (SkipForSearch(attributes, search) || attributes.Advanced) {
                     continue;
                 }
@@ -663,8 +677,8 @@ namespace SAIN.Attributes
                     wasEdited = true;
                 }
             }
-            foreach (var field in fields) {
-                var attributes = GetAttributeInfo(field);
+            foreach (FieldInfo field in fields) {
+                ConfigInfoClass attributes = GetAttributeInfo(field);
                 if (SkipForSearch(attributes, search) || !attributes.Advanced) {
                     continue;
                 }
@@ -676,11 +690,194 @@ namespace SAIN.Attributes
                 }
             }
 
-            if (entryConfig != null)
-                EndVertical(entryConfig.SubList_Indent_Vertical);
-            else
-                EndVertical(5f);
+            EndVertical(indent);
         }
+
+        public static void EditAllValuesInObjNew(object obj, out bool wasEdited, string search = null, GUIEntryConfig entryConfig = null, int listDepth = 0)
+        {
+            ConfigParams configParams = new ConfigParams {
+                SettingsObject = obj,
+                Search = search,
+                EntryConfig = entryConfig,
+                ListDepth = listDepth
+            };
+            EditAllValuesInObj(configParams, out wasEdited);
+        }
+
+        public static void EditAllValuesInObj(ConfigParams configParams, out bool wasEdited)
+        {
+            float indent = getIndentValue(configParams.EntryConfig);
+            BeginVertical(indent);
+            getAllAttributeInfos(configParams.SettingsObject, _attributeInfos, configParams.Search);
+            displayOptionsByCategory(configParams, _attributeInfos, out wasEdited);
+            EndVertical(indent);
+        }
+
+        private static float getIndentValue(GUIEntryConfig entryConfig)
+        {
+            const float defaultIndent = 5f;
+            float indent;
+            if (entryConfig != null) {
+                indent = entryConfig.SubList_Indent_Vertical;
+            }
+            else {
+                indent = defaultIndent;
+            }
+            return indent;
+        }
+
+        private static void displayCategory(ConfigParams configParams, string category, out bool wasEdited)
+        {
+            wasEdited = false;
+            bool categoryDrawn = false;
+
+            // Display Non-Advanced Settings first, thats why there are 2 loops here. Probably a better way to do this.
+            foreach (ConfigInfoClass attributes in _attributeInfos) {
+                if (attributes.Advanced == true) {
+                    continue;
+                }
+                if (attributes.Category != category) {
+                    continue;
+                }
+                if (!categoryDrawn) {
+                    categoryDrawn = true;
+                    drawCategory(configParams, attributes, category);
+                }
+                displayConfigGUI(attributes, configParams, out bool newEdit);
+                if (newEdit) {
+                    wasEdited = true;
+                }
+            }
+
+            foreach (ConfigInfoClass attributes in _attributeInfos) {
+                if (attributes.Advanced == false) {
+                    continue;
+                }
+                if (attributes.Category != category) {
+                    continue;
+                }
+                if (!categoryDrawn) {
+                    categoryDrawn = true;
+                    drawCategory(configParams, attributes, category);
+                }
+                displayConfigGUI(attributes, configParams, out bool newEdit);
+                if (newEdit) {
+                    wasEdited = true;
+                }
+            }
+        }
+
+        private static void drawCategory(ConfigParams configParams, ConfigInfoClass configInfo, string category)
+        {
+            DisplayString(category, configParams.ListDepth, configParams.EntryConfig);
+        }
+
+        private static void displayOptionsByCategory(ConfigParams configParams, List<ConfigInfoClass> configInfos, out bool wasEdited)
+        {
+            wasEdited = false;
+            getCategories(configInfos, _categoriesList);
+            for (int i = 0; i < _categoriesList.Count; i++) {
+                displayCategory(configParams, _categoriesList[i], out bool newEdit);
+                if (newEdit) {
+                    wasEdited = true;
+                }
+            }
+        }
+
+        private static void getCategories(List<ConfigInfoClass> configInfos, List<string> outputList)
+        {
+            outputList.Clear();
+            // Get all categories that exist on this settings page, populate list with unique ones.
+            for (int i = 0; i < configInfos.Count; i++) {
+                ConfigInfoClass configInfo = configInfos[i];
+                string category = configInfo.Category;
+                if (category.IsNullOrEmpty() ||
+                    outputList.Contains(category)) {
+                    continue;
+                }
+                outputList.Add(category);
+            }
+        }
+
+        private static readonly List<string> _categoriesList = new List<string>();
+
+        public struct ConfigParams
+        {
+            public object SettingsObject;
+            public string Search;
+            public GUIEntryConfig EntryConfig;
+            public int ListDepth;
+        }
+
+        private static void displayConfigGUI(ConfigInfoClass configInfo, object obj, int listDepth, GUIEntryConfig entryConfig, string search, out bool edited)
+        {
+            object oldValue = getConfigValue(configInfo, obj);
+            object newValue = EditValue(ref oldValue, obj, configInfo, out bool newEdit, listDepth, entryConfig, search);
+            if (newEdit) {
+                setConfigValue(newValue, configInfo.MemberInfo, obj);
+                edited = true;
+                return;
+            }
+            edited = false;
+        }
+
+        private static void displayConfigGUI(ConfigInfoClass configInfo, ConfigParams configParams, out bool edited)
+        {
+            object oldValue = getConfigValue(configInfo, configParams.SettingsObject);
+            object newValue = EditValue(ref oldValue, configParams.SettingsObject, configInfo, out bool newEdit, configParams.ListDepth, configParams.EntryConfig, configParams.Search);
+            if (newEdit) {
+                setConfigValue(newValue, configInfo.MemberInfo, configParams.SettingsObject);
+                edited = true;
+                return;
+            }
+            edited = false;
+        }
+
+        private static object getConfigValue(ConfigInfoClass configInfo, object obj)
+        {
+            MemberInfo memberInfo = configInfo.MemberInfo;
+            switch (memberInfo.MemberType) {
+                case MemberTypes.Field:
+                    return (memberInfo as FieldInfo).GetValue(obj);
+
+                case MemberTypes.Property:
+                    return (memberInfo as PropertyInfo).GetValue(obj);
+
+                default:
+                    return null;
+            }
+        }
+
+        private static void setConfigValue(object value, MemberInfo memberInfo, object obj)
+        {
+            switch (memberInfo.MemberType) {
+                case MemberTypes.Field:
+                    (memberInfo as FieldInfo).SetValue(obj, value);
+                    return;
+
+                case MemberTypes.Property:
+                    (memberInfo as PropertyInfo).SetValue(obj, value);
+                    return;
+
+                default:
+                    return;
+            }
+        }
+
+        private static void getAllAttributeInfos(object obj, List<ConfigInfoClass> outputList, string search)
+        {
+            outputList.Clear();
+            FieldInfo[] fieldInfos = obj.GetType().GetFields();
+            foreach (FieldInfo field in fieldInfos) {
+                ConfigInfoClass configInfo = GetAttributeInfo(field);
+                if (SkipForSearch(configInfo, search)) {
+                    continue;
+                }
+                outputList.Add(configInfo);
+            }
+        }
+
+        private static readonly List<ConfigInfoClass> _attributeInfos = new List<ConfigInfoClass>();
 
         public static void EditAllValuesInObj(Category category, object categoryObject, out bool wasEdited, string search = null)
         {
@@ -714,11 +911,12 @@ namespace SAIN.Attributes
             EndVertical(5);
         }
 
-        public static bool SkipForSearch(ConfigInfoClass attributes, string search)
+        public static bool SkipForSearch(ConfigInfoClass attributes, string searchQuerry)
         {
-            return !string.IsNullOrEmpty(search) &&
-                (attributes.Name?.ToLower().Contains(search) == false &&
-                attributes.Description?.ToLower().Contains(search) == false);
+            return !string.IsNullOrEmpty(searchQuerry) &&
+                (attributes.Name?.ToLower().Contains(searchQuerry) == false &&
+                attributes.Description?.ToLower().Contains(searchQuerry) == false &&
+                attributes.Category?.ToLower().Contains(searchQuerry) == false);
         }
 
         private static readonly Dictionary<string, bool> _listOpen = new Dictionary<string, bool>();
