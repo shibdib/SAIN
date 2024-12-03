@@ -6,6 +6,7 @@ using SAIN.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SAIN.Components
@@ -43,7 +44,12 @@ namespace SAIN.Components
 
         public IEnumerable<Vector3> GetAllSpawnPointPositionsOnNavMesh()
         {
-            List<Vector3> spawnPointPositions = new List<Vector3>();
+			if (SpawnPointMarkers == null)
+			{
+				return Enumerable.Empty<Vector3>();
+			}
+
+			List<Vector3> spawnPointPositions = new List<Vector3>();
             foreach (SpawnPointMarker spawnPointMarker in SpawnPointMarkers) {
                 // Try to find a point on the NavMesh nearby the spawn point
                 Vector3? spawnPointPosition = NavMeshHelpers.GetNearbyNavMeshPoint(spawnPointMarker.Position, 2);

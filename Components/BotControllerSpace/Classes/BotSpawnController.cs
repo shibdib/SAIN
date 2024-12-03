@@ -32,7 +32,12 @@ namespace SAIN.Components.BotController
             WildSpawnType.peacefullZryachiyEvent,
             WildSpawnType.ravangeZryachiyEvent,
             WildSpawnType.shooterBTR,
-            WildSpawnType.marksman
+            WildSpawnType.marksman,
+			WildSpawnType.infectedAssault,
+			WildSpawnType.infectedCivil,
+			WildSpawnType.infectedLaborant,
+			WildSpawnType.infectedPmc,
+			WildSpawnType.infectedTagilla
         };
 
         public void Update()

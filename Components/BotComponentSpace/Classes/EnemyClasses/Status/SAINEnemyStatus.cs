@@ -298,9 +298,9 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public int NumberOfSearchesStarted { get; set; }
 
-        public void GetHit(DamageInfo damageInfo)
+        public void GetHit(DamageInfoStruct DamageInfoStruct)
         {
-            IPlayer player = damageInfo.Player?.iPlayer;
+            IPlayer player = DamageInfoStruct.Player?.iPlayer;
             if (player != null && 
                 player.ProfileId == Enemy.EnemyProfileId)
             {

@@ -13,7 +13,7 @@ namespace SAIN.Components.Helpers
 
             if (Item != null)
             {
-                if (Item is GrenadeClass)
+                if (Item is ThrowWeapItemClass)
                 {
                     if (sound == "Pin")
                     {
@@ -26,7 +26,7 @@ namespace SAIN.Components.Helpers
                         soundDist = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_GrenadePinDraw;
                     }
                 }
-                else if (Item is MedsClass)
+                else if (Item is MedsItemClass)
                 {
                     soundType = SAINSoundType.Heal;
                     soundDist = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_Healing;

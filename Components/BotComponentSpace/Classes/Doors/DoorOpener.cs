@@ -529,17 +529,17 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private bool ShallInvertDoorAngle(Door door)
         {
-            if (!GlobalSettingsClass.Instance.General.Doors.InvertDoors)
-            {
-                return false;
-            }
-            var interactionParameters = door.GetInteractionParameters(BotOwner.Position);
-            if (interactionParameters.AnimationId == door.PushID)
-            {
-                return false;
-            }
-            return true;
-        }
+			if (!GlobalSettingsClass.Instance.General.Doors.InvertDoors)
+			{
+				return false;
+			}
+			var interactionParameters = door.GetInteractionParameters(BotOwner.Position);
+			if (interactionParameters.AnimationId == (door.DoorState is EDoorState.Locked ? (int)door.DoorKeyOpenInteraction : door.CalculateInteractionIndex(BotOwner.Position)))
+			{
+				return false;
+			}
+			return true;
+		}
 
         // Token: 0x060010AF RID: 4271 RVA: 0x0004CED4 File Offset: 0x0004B0D4
         public bool CheckWantToInteract(DoorData data, Vector3 botPosition)
@@ -567,7 +567,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private bool checkCrossPoint(Vector3 goTo, Vector3 botPosition, DoorData data)
         {
             NavMeshDoorLink link = data.Link;
-            GClass297 gclass;
+			GClass340 gclass;
             switch (link.Door.DoorState)
             {
                 case EDoorState.Open:

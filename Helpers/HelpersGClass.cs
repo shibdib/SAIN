@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using EFTCore = GClass531;
-using EFTStatModifiersClass = GClass528;
+using EFTCore = GClass583;
+using EFTStatModifiersClass = GClass580;
 
 ////////
 // Fixed some GClass References here, but classes were renamed in the deobfuscation, so much of this isn't necessary anymore. Need to clean this up

@@ -189,13 +189,13 @@ namespace SAIN.SAINComponent.Classes
             }
         }
 
-        public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
+        public void GetHit(DamageInfoStruct DamageInfoStruct, EBodyPart bodyPart, float floatVal)
         {
             if (InCover)
             {
                 bool wasSpotted = CoverInUse.Spotted;
                 LastHitInCoverTime = Time.time;
-                CoverInUse.GetHit(damageInfo, bodyPart, Bot.Enemy);
+                CoverInUse.GetHit(DamageInfoStruct, bodyPart, Bot.Enemy);
                 if (CoverInUse.Spotted && !wasSpotted)
                 {
                     _spottedTime = Time.time + SpottedCoverPoint.SPOTTED_PERIOD;

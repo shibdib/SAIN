@@ -15,7 +15,7 @@ using SPT.Reflection.Patching;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using HitAffectClass = GClass516;
+using HitAffectClass = GClass568;
 
 namespace SAIN.Patches.Shoot.Aim
 {
@@ -221,7 +221,7 @@ namespace SAIN.Patches.Shoot.Aim
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(BotOwner ___botOwner_0, DamageInfo damageInfo)
+        public static bool PatchPrefix(BotOwner ___botOwner_0, DamageInfoStruct DamageInfoStruct)
         {
             if (SAINPlugin.IsBotExluded(___botOwner_0)) {
                 return true;

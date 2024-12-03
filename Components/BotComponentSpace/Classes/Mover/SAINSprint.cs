@@ -562,7 +562,11 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             Player.CharacterController.SetSteerDirection(direction);
             BotOwner.AimingData?.Move(Player.Speed);
-            Player.Move(findMoveDirection(direction));
+			if (BotOwner.Mover != null)
+			{
+				BotOwner.Mover.IsMoving = true;
+			}
+			Player.Move(findMoveDirection(direction));
         }
 
         public Vector2 findMoveDirection(Vector3 direction)

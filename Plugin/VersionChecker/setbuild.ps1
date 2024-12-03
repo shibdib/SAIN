@@ -1,5 +1,5 @@
 # Fetch the version from EscapeFromTarkov.exe
-$tarkovPath = '{0}\..\..\..\..\EscapeFromTarkov.exe' -f $PSScriptRoot
+$tarkovPath = 'D:\Games\SPT\Dev310n\EscapeFromTarkov.exe' -f $PSScriptRoot
 $tarkovVersion = (Get-Item -Path $tarkovPath).VersionInfo.FileVersionRaw.Revision
 
 # Update AssemblyVersion

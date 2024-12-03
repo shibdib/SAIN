@@ -36,47 +36,47 @@ namespace SAIN.SAINComponent.Classes
 
         }
 
-        public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
+        public void GetHit(DamageInfoStruct DamageInfoStruct, EBodyPart bodyPart, float floatVal)
         {
             switch (bodyPart)
             {
                 case EBodyPart.Head:
-                    GetHitInHead(damageInfo);
+                    GetHitInHead(DamageInfoStruct);
                     break;
 
                 case EBodyPart.Chest:
                 case EBodyPart.Stomach:
-                    GetHitInCenter(damageInfo);
+                    GetHitInCenter(DamageInfoStruct);
                     break;
 
                 case EBodyPart.LeftLeg:
                 case EBodyPart.RightLeg:
-                    GetHitInLegs(damageInfo);
+                    GetHitInLegs(DamageInfoStruct);
                     break;
 
                 default:
-                    GetHitInArms(damageInfo);
+                    GetHitInArms(DamageInfoStruct);
                     break;
             }
         }
 
-        private void GetHitInLegs(DamageInfo damageInfo)
+        private void GetHitInLegs(DamageInfoStruct DamageInfoStruct)
         {
             HitReaction = EHitReaction.Legs;
         }
 
-        private void GetHitInArms(DamageInfo damageInfo)
+        private void GetHitInArms(DamageInfoStruct DamageInfoStruct)
         {
             HitReaction = EHitReaction.Arms;
             checkArmInjuries();
         }
 
-        private void GetHitInCenter(DamageInfo damageInfo)
+        private void GetHitInCenter(DamageInfoStruct DamageInfoStruct)
         {
             HitReaction = EHitReaction.Center;
         }
 
-        private void GetHitInHead(DamageInfo damageInfo)
+        private void GetHitInHead(DamageInfoStruct DamageInfoStruct)
         {
             HitReaction = EHitReaction.Head;
         }

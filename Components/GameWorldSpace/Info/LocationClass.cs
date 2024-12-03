@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
-using SeasonController = Class393;
+using SeasonController = Class442;
 
 namespace SAIN.Components
 {
     public class LocationClass : GameWorldBase, IGameWorldClass
     {
-        private const string WEATHER_INTERFACE = "ginterface26_0";
+        private const string WEATHER_INTERFACE = "ginterface29_0";
         public bool WinterActive => Season == ESeason.Winter;
         public ESeason Season { get; private set; }
         public ELocation Location { get; private set; }
@@ -95,7 +95,11 @@ namespace SAIN.Components
                     Location = ELocation.GroundZero;
                     break;
 
-                case "shoreline":
+				case "sandbox_high":
+					Location = ELocation.GroundZero;
+					break;
+
+				case "shoreline":
                     Location = ELocation.Shoreline;
                     break;
 

@@ -8,7 +8,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 {
     public class BotGrenadeManager : BotBase, IBotClass
     {
-        public GrenadeClass MyGrenade { get; set; }
+        public ThrowWeapItemClass MyGrenade { get; set; }
         public Vector3? GrenadeDangerPoint => GrenadeReactionClass.GrenadeDangerPoint;
 
         public GrenadeThrowDecider GrenadeThrowDecider { get; }

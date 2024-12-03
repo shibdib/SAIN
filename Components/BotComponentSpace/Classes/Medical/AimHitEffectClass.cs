@@ -52,9 +52,9 @@ namespace SAIN.SAINComponent.Classes
             return dir;
         }
 
-        private float calcDamageMod(DamageInfo damageInfo)
+        private float calcDamageMod(DamageInfoStruct DamageInfoStruct)
         {
-            float mod = damageInfo.Damage / DAMAGE_BASELINE;
+            float mod = DamageInfoStruct.Damage / DAMAGE_BASELINE;
             mod = Mathf.Clamp(mod, DAMAGE_MIN_MOD, DAMAGE_MAX_MOD) * DAMAGE_MANUAL_MODIFIER;
             if (_affectActive) {
                 mod *= 0.5f;
@@ -62,9 +62,9 @@ namespace SAIN.SAINComponent.Classes
             return mod;
         }
 
-        private Vector3 getHitReactionDir(DamageInfo damageInfo)
+        private Vector3 getHitReactionDir(DamageInfoStruct DamageInfoStruct)
         {
-            Vector3 hitPoint = damageInfo.HitPoint;
+            Vector3 hitPoint = DamageInfoStruct.HitPoint;
             //DebugGizmos.Sphere(hitPoint, 0.25f, Color.red, true, 0.25f);
             Vector3 center = Bot.Transform.BodyPosition;
             //DebugGizmos.Sphere(center, 0.25f, Color.blue, true, 0.25f);
@@ -76,12 +76,12 @@ namespace SAIN.SAINComponent.Classes
             return result;
         }
 
-        public void GetHit(DamageInfo damageInfo)
+        public void GetHit(DamageInfoStruct DamageInfoStruct)
         {
-            float mod = calcDamageMod(damageInfo);
+            float mod = calcDamageMod(DamageInfoStruct);
             Vector3 hitReactionDir;
             if (DAMAGE_USE_HIT_OFFSET_DIR) {
-                hitReactionDir = getHitReactionDir(damageInfo) * mod;
+                hitReactionDir = getHitReactionDir(DamageInfoStruct) * mod;
                 _affectVector += hitReactionDir;
             }
             else {

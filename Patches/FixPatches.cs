@@ -14,12 +14,15 @@ namespace SAIN.Patches.Generic.Fixes
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "method_74");
+            return AccessTools.Method(typeof(Player), nameof(Player.InitVaultingComponent));
         }
 
         [PatchPrefix]
-        public static void Patch(ref bool aiControlled)
+        public static void Patch(Player __instance, ref bool aiControlled)
         {
+			if (__instance.UsedSimplifiedSkeleton)
+				return;
+
             aiControlled = false;
         }
     }
@@ -59,7 +62,7 @@ namespace SAIN.Patches.Generic.Fixes
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotItemTaker), "method_11");
+            return AccessTools.Method(typeof(BotItemTaker), nameof(BotItemTaker.method_12));
         }
 
         [PatchPrefix]
@@ -87,7 +90,7 @@ namespace SAIN.Patches.Generic.Fixes
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass436), "method_4");
+            return AccessTools.Method(typeof(GClass483), "method_4");
         }
 
         [PatchPrefix]
@@ -110,7 +113,7 @@ namespace SAIN.Patches.Generic.Fixes
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass410), "CancelCurrent");
+            return AccessTools.Method(typeof(GClass455), "CancelCurrent");
         }
 
         [PatchPrefix]
@@ -217,7 +220,7 @@ namespace SAIN.Patches.Generic.Fixes
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotMover), "method_0");
+            return AccessTools.Method(typeof(BotMover), "method_1");
         }
 
         [PatchPrefix]

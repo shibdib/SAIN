@@ -15,9 +15,9 @@ namespace SAIN.SAINComponent.Classes
             Bot.EnemyController.Events.OnEnemyRemoved += clearEnemy;
         }
 
-        public void GetHit(DamageInfo damageInfo, EBodyPart bodyPart, float floatVal)
+        public void GetHit(DamageInfoStruct DamageInfoStruct, EBodyPart bodyPart, float floatVal)
         {
-            var player = damageInfo.Player?.iPlayer;
+            var player = DamageInfoStruct.Player?.iPlayer;
             if (player == null) {
                 return;
             }
@@ -26,7 +26,7 @@ namespace SAIN.SAINComponent.Classes
                 return;
             }
             EnemyWhoLastShotMe = enemy;
-            enemy.Status.GetHit(damageInfo);
+            enemy.Status.GetHit(DamageInfoStruct);
         }
 
         private void clearEnemy(string profileId, Enemy enemy)

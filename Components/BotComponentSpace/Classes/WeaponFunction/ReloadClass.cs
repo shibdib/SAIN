@@ -70,11 +70,11 @@ namespace SAIN.Components.BotComponentSpace.Classes
             try
             {
                 var reload = BotOwner.WeaponManager.Reload;
-                if (reload.CanReload(false, out var magazineClass, out var list))
+                if (reload.CanReload(false, out var MagazineItemClass, out var list))
                 {
-                    if (magazineClass != null)
+                    if (MagazineItemClass != null)
                     {
-                        reload.ReloadMagazine(magazineClass);
+                        reload.ReloadMagazine(MagazineItemClass);
                         result = true;
                         reload.Reloading = true;
                     }

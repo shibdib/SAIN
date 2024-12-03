@@ -65,7 +65,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         public Dictionary<int, GrenadeTracker> EnemyGrenadesList { get; private set; } = new Dictionary<int, GrenadeTracker>();
         public Dictionary<int, Grenade> FriendlyGrenadesList { get; private set; } = new Dictionary<int, Grenade>();
 
-        public GrenadeReactionClass(BotGrenadeManager grenadeClass) : base(grenadeClass)
+        public GrenadeReactionClass(BotGrenadeManager ThrowWeapItemClass) : base(ThrowWeapItemClass)
         {
         }
 
