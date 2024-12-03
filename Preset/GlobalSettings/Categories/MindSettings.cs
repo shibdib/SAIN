@@ -16,6 +16,7 @@ namespace SAIN.Preset.GlobalSettings.Categories
 
         [Name("Force Single Personality For All Bots")]
         [Description("All Spawned SAIN bots will be assigned the selected Personality, if any are set to true, no matter what.")]
+        [Category("Personality")]
         public Dictionary<EPersonality, bool> ForcePersonality = new Dictionary<EPersonality, bool>()
         {
             { EPersonality.Wreckless, false},
@@ -29,17 +30,21 @@ namespace SAIN.Preset.GlobalSettings.Categories
         };
 
         [MinMax(0.1f, 5f, 100f)]
+        [Category("Personality")]
         public float GlobalAggression = 1f;
 
         [Name("Bots can use Stealth Search")]
         [Description("If a bot thinks he was not heard, and isn't currently fighting an enemy, they can decide to be stealthy while they seek out an enemy, if they are inside a building.")]
+        [Category("Personality")]
         public bool SneakyBots = true;
 
         [Name("Only Sneaky Personalities can be Stealthy")]
         [Description("Only allow sneaky personality types (rat, snapping turtle) to be stealthy while searching for an enemy, ignored if Stealth Search is disabled above")]
+        [Category("Personality")]
         public bool OnlySneakyPersonalitiesSneaky = true;
 
         [Description("The distance from a bot's search destination that they will begin to be stealthy, if enabled.")]
+        [Category("Personality")]
         [Advanced]
         [MinMax(5f, 200f, 10f)]
         public float MaximumDistanceToBeSneaky = 80f;

@@ -738,11 +738,16 @@ namespace SAIN.Attributes
                     wasEdited = true;
                 }
             }
-            Space(8f);
+            if (count > 0) {
+                Space(10f);
+            }
         }
 
         private static void drawCategory(ConfigParams configParams, ConfigInfoClass configInfo, string category)
         {
+            if (category == "None") {
+                return;
+            }
             BeginHorizontal(25);
             DisplayString($"Category: [{category}] ", configParams.ListDepth, configParams.EntryConfig, 15f);
             FlexibleSpace();

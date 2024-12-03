@@ -10,41 +10,50 @@ namespace SAIN.Preset.GlobalSettings
     {
         [Name("Global Recoil Multiplier")]
         [Description("Higher = more recoil. Modifies SAIN's recoil scatter feature. 1.5 = 1.5x more recoilfrom a single gunshot")]
+        [Category("Bot Recoil")]
         [MinMax(0.01f, 3f, 100f)]
         public float RecoilMultiplier = 1f;
 
         [Name("Add or Subtract Recoil")]
         [Description("Linearly add or subtract from the final recoil result")]
+        [Category("Bot Recoil")]
         [MinMax(-20f, 20f, 100f)]
         [Advanced]
         public float AddRecoil = 5f;
 
         [Name("Recoil Decay Coefficient")]
         [Description("Controls the speed that bots will recover from a weapon's recoil. Higher = faster decay")]
+        [Category("Bot Recoil")]
         [MinMax(0.01f, 3f, 100f)]
         [Advanced]
         public float RECOIL_DECAY_COEF = 0.2f;
 
         [Name("Bot Weapon Recoil Baseline")]
-        [Description("A Bot's weapon's recoil will get divided by this to calculate how much to rotate their view on each shot, so, for example, with a baseline of 100 - if a bot has 250 total recoil, that number gets divided by this to produce 2.5. Higher = Less recoil for bots. This is basically an average recoil of all possible weapons.")]
+        [Description("A Bot's weapon's recoil will get divided by this to calculate how much to rotate their view on each shot, so, for example, " +
+            "with a baseline of 100 - if a bot has 250 total recoil, that number gets divided by this to produce 2.5. Higher = Less recoil for bots. " +
+            "This is basically an average recoil of all possible weapons.")]
+        [Category("Bot Recoil")]
         [MinMax(25f, 300f, 1f)]
         [Advanced]
         public float RECOIL_BASELINE = 100;
 
         [Name("Bot Weapon Recoil Baseline - Realism Mod")]
         [Description("A Bot's weapon's recoil will get divided by this to calculate how much to rotate their view on each shot. This value is used if Realism mod is on to reflect different recoil numbers.")]
+        [Category("Bot Recoil")]
         [MinMax(25f, 300f, 1f)]
         [Advanced]
         public float RECOIL_BASELINE_REALISM = 125f;
 
         [Name("Recoil Randomization - Min")]
         [Description("Randomizes Bot Recoil. this is the min value, so the number that gets picked to multiply a bot's recoil by will be randomly picked between this and the Max")]
+        [Category("Bot Recoil")]
         [Advanced]
         [MinMax(0.0f, 2f, 100f)]
         public float RECOIL_RANDOM_MIN = 0.8f;
 
         [Name("Recoil Randomization - Max")]
         [Description("Randomizes Bot Recoil. this is the max value, so the number that gets picked to multiply a bot's recoil by will be randomly picked between this and the min")]
+        [Category("Bot Recoil")]
         [Advanced]
         [MinMax(0.0f, 2f, 100f)]
         public float RECOIL_RANDOM_MAX = 1.2f;
@@ -57,6 +66,7 @@ namespace SAIN.Preset.GlobalSettings
             "For Example. 9x19 will shoot about 20% faster fire-rate on semi-auto at 50 meters" +
             ", and fire 20% longer bursts when on full auto"
             )]
+        [Category("Bot Weapon Control")]
         [Percentage0to1(0.01f)]
         [Advanced]
         [DefaultDictionary(nameof(AmmoCaliberShootabilityDefaults))]
@@ -128,6 +138,7 @@ namespace SAIN.Preset.GlobalSettings
 
         [Name("Max FullAuto Distances")]
         [Description("The maximum distance a bot using this caliber can fire it full auto. Not all values are used since some calibers don't have any full auto weapons that use it.")]
+        [Category("Bot Weapon Control")]
         [MinMax(10f, 150f)]
         [Advanced]
         [DefaultDictionary(nameof(AmmoCaliberFullAutoMaxDistancesDefaults))]
@@ -205,6 +216,7 @@ namespace SAIN.Preset.GlobalSettings
             "For Example. SMGs will shoot about 20% faster fire-rate on semi-auto at 50 meters" +
             ", and fire 20% longer bursts when on full auto"
             )]
+        [Category("Bot Weapon Control")]
         [Percentage0to1(0.01f)]
         [Advanced]
         [DefaultDictionary(nameof(WeaponClassShootabilityDefaults))]
@@ -250,6 +262,7 @@ namespace SAIN.Preset.GlobalSettings
             "This number is later modified by the Shootability multiplier, to get a final fire-rate that gets sent to a bot."
             )]
         [MinMax(30f, 250f, 1f)]
+        [Category("Bot Weapon Control")]
         [Advanced]
         [DefaultDictionary(nameof(WeaponPerMeterDefaults))]
         public Dictionary<EWeaponClass, float> WeaponPerMeter = new Dictionary<EWeaponClass, float>
@@ -290,6 +303,7 @@ namespace SAIN.Preset.GlobalSettings
             "Bots will try to close the distance if further than this."
             )]
         [MinMax(10f, 250f, 1f)]
+        [Category("Bot Weapon Control")]
         [Advanced]
         [DefaultDictionary(nameof(EngagementDistanceDefaults))]
         public Dictionary<EWeaponClass, float> EngagementDistance = new Dictionary<EWeaponClass, float>
@@ -331,31 +345,37 @@ namespace SAIN.Preset.GlobalSettings
         private const string Scaling = "Affects how much this type of effect has on how Shootable a bot's weapon is considered. Higher = More effect. So if you set RecoilScaling to 0, recoil will play no part in how fast or slow a bot shoots.";
 
         [Description(Shootability + Scaling)]
+        [Category("Bot Weapon Control")]
         [Advanced]
         [Percentage01to99]
         public float WeaponClassScaling = 0.25f;
 
         [Description(Shootability + Scaling)]
+        [Category("Bot Weapon Control")]
         [Advanced]
         [Percentage01to99]
         public float RecoilScaling = 0.35f;
 
         [Description(Shootability + Scaling)]
+        [Category("Bot Weapon Control")]
         [Advanced]
         [Percentage01to99]
         public float ErgoScaling = 0.08f;
 
         [Description(Shootability + Scaling)]
+        [Category("Bot Weapon Control")]
         [Advanced]
         [Percentage01to99]
         public float AmmoCaliberScaling = 0.3f;
 
         [Description(Shootability + Scaling)]
+        [Category("Bot Weapon Control")]
         [Advanced]
         [Percentage01to99]
         public float WeaponProficiencyScaling = 0.3f;
 
         [Description(Shootability + Scaling)]
+        [Category("Bot Weapon Control")]
         [Advanced]
         [Percentage01to99]
         public float DifficultyScaling = 0.3f;
