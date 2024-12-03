@@ -119,6 +119,11 @@ namespace SAIN.Attributes
                 return value;
             }
 
+            if (value is Dictionary<SAINSoundType, float>) {
+                EditFloatDictionary<SAINSoundType>(value, info, out wasEdited);
+                return value;
+            }
+
             if (value is Dictionary<EWeaponClass, float>) {
                 EditFloatDictionary<EWeaponClass>(value, info, out wasEdited);
                 return value;

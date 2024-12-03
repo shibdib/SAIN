@@ -1,4 +1,5 @@
 ﻿using EFT;
+using SAIN.Preset.GlobalSettings;
 using UnityEngine;
 
 namespace SAIN.SAINComponent.Classes
@@ -29,9 +30,10 @@ namespace SAIN.SAINComponent.Classes
             float dispersionMod = getDispersionModifier(sound) * addDispersion;
             float finalDispersion = baseDispersion * dispersionMod;
 
-            finalDispersion = Mathf.Clamp(finalDispersion, 0f, 50f);
+            HearingSettings hearingSettings = GlobalSettingsClass.Instance.Hearing;
+            finalDispersion = Mathf.Clamp(finalDispersion, 0f, hearingSettings.HEAR_DISPERSION_MAX_DISPERSION);
             sound.Dispersion.Dispersion = finalDispersion;
-            float min = distance < 10 ? 0f : 0.5f;
+            float min = distance < hearingSettings.HEAR_DISPERSION_MIN_DISTANCE_THRESH ? 0f : hearingSettings.HEAR_DISPERSION_MIN;
             Vector3 randomdirection = getRandomizedDirection(finalDispersion, min);
 
             if (SAINPlugin.DebugSettings.Logs.DebugHearing)
@@ -45,39 +47,12 @@ namespace SAIN.SAINComponent.Classes
 
         private float getBaseDispersion(float enemyDistance, SAINSoundType soundType)
         {
-            const float dispSuppGun = 13.5f;
-            const float dispGun = 17.5f;
-            const float dispStep = 12.5f;
-
-            float dispersion;
-            switch (soundType)
-            {
-                case SAINSoundType.Shot:
-                    dispersion = enemyDistance / dispGun;
-                    break;
-
-                case SAINSoundType.SuppressedShot:
-                    dispersion = enemyDistance / dispSuppGun;
-                    break;
-
-                default:
-                    dispersion = enemyDistance / dispStep;
-                    break;
+            HearingSettings hearingSettings = GlobalSettingsClass.Instance.Hearing;
+            if (hearingSettings.HEAR_DISPERSION_VALUES.TryGetValue(soundType, out float dispersionValue) == false) {
+                dispersionValue = 12.5f;
+                Logger.LogWarning($"Could not find [{soundType}] in Hearing Dispersion Dictionary!");
             }
-
-            return dispersion;
-        }
-
-        private void calcNewDispersion(BotSound sound)
-        {
-        }
-
-        private void calcNewDispersionAngle(BotSound sound)
-        {
-        }
-
-        private void calcNewDispersionDistance(BotSound sound)
-        {
+            return enemyDistance / dispersionValue;
         }
 
         private float getDispersionModifier(BotSound sound)
@@ -85,41 +60,19 @@ namespace SAIN.SAINComponent.Classes
             float dotProduct = Vector3.Dot(Bot.LookDirection.normalized, sound.Enemy.EnemyDirectionNormal);
             float scaled = (dotProduct + 1) / 2;
 
-            float dispersionModifier = Mathf.Lerp(1.5f, 0.5f, scaled);
+            HearingSettings hearingSettings = GlobalSettingsClass.Instance.Hearing;
+            float dispersionModifier = Mathf.Lerp(hearingSettings.HEAR_DISPERSION_ANGLE_MULTI_MAX, hearingSettings.HEAR_DISPERSION_ANGLE_MULTI_MIN, scaled);
+
             //Logger.LogInfo($"Dispersion Modifier for Sound [{dispersionModifier}] Dot Product [{dotProduct}]");
             return dispersionModifier;
         }
 
-        private float modifyDispersion(float dispersion, IPlayer person, out int soundCount)
-        {
-            // If a bot is hearing multiple sounds from a iPlayer, they will now be more accurate at finding the source soundPosition based on how many sounds they have heard from this particular iPlayer
-            soundCount = 0;
-            float finalDispersion = dispersion;
-            //if (person != null && SoundsHeardFromPlayer.ContainsKey(person.ProfileId))
-            //{
-            //    SAINSoundCollection collection = SoundsHeardFromPlayer[person.ProfileId];
-            //    if (collection != null)
-            //    {
-            //        soundCount = collection.Count;
-            //    }
-            //}
-            //if (soundCount > 1)
-            //{
-            //    finalDispersion = (dispersion / soundCount).Round100();
-            //}
-            return finalDispersion;
-        }
-
         private Vector3 getRandomizedDirection(float dispersion, float min = 0.5f)
         {
-            float randomHeight = dispersion / 10f;
             float randomX = UnityEngine.Random.Range(-dispersion, dispersion);
-            //float randomY = UnityEngine.Random.Range(-randomHeight, randomHeight);
             float randomZ = UnityEngine.Random.Range(-dispersion, dispersion);
             Vector3 randomdirection = new Vector3(randomX, 0, randomZ);
-
-            if (min > 0 && randomdirection.sqrMagnitude < min * min)
-            {
+            if (min > 0 && randomdirection.sqrMagnitude < min * min) {
                 randomdirection = Vector3.Normalize(randomdirection) * min;
             }
             return randomdirection;
