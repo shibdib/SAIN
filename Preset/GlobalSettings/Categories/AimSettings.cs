@@ -6,18 +6,13 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class AimSettings : SAINSettingsBase<AimSettings>, ISAINSettings
     {
+        [Category("Aim Target")]
+        public HitEffectSettings HitEffects = new HitEffectSettings();
+
         [Name("Always Aim Center Mass Global")]
         [Description("Force Bots to aim for center of mass. If this is disabled, all bots will have Always Aim Center Mass turned OFF, so their individual settings will be ignored.")]
         [Category("Aim Target")]
         public bool AimCenterMassGlobal = true;
-
-        public HitEffectSettings HitEffects = new HitEffectSettings();
-
-        [Category("Time To Aim")]
-        [Name("Aim Down Sight Aim Time Multiplier")]
-        [Description("If a bot is aiming down sights, their time to aim will be multiplied by this number")]
-        [MinMax(0.01f, 1f, 100f)]
-        public float AimDownSightsAimTimeMultiplier = 0.8f;
 
         [Category("Scatter Modifiers")]
         [Name("Enemy Move Scatter Max Buff")]
@@ -77,6 +72,7 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(25f, 150f, 10f)]
         public float OpticCloseDistance = 75f;
 
+        [Category("Scatter Modifiers")]
         [Description("Lower is more scatter")]
         [Advanced]
         [MinMax(0.5f, 1f, 100f)]
@@ -128,10 +124,18 @@ namespace SAIN.Preset.GlobalSettings
         [Description("if this toggle is disabled, all bots will have Faster CQB Reactions turned OFF, so their individual settings will be ignored.")]
         public bool FasterCQBReactionsGlobal = true;
 
+        [Category("Time To Aim")]
+        [Name("Aim Down Sight Aim Time Multiplier")]
+        [Description("If a bot is aiming down sights, their time to aim will be multiplied by this number")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float AimDownSightsAimTimeMultiplier = 0.8f;
+
+        [Name("PMCs Can Aim for Headshots")]
         [Category("Aim Target")]
         public bool PMCSAimForHead = false;
 
         [Category("Aim Target")]
+        [Name("PMCs Can Aim for Headshots - Percentage Chance")]
         [Percentage]
         public float PMCAimForHeadChance = 33f;
 

@@ -129,17 +129,31 @@ namespace SAIN.Editor
 
         private static void CreateTopBarOptions()
         {
-            var style = GetStyle(Style.toggle);
             SaveContent.tooltip = ConfigEditingTracker.GetUnsavedValuesString();
-            if (GUI.Button(SaveAllRect, SaveContent, GetStyle(Style.button))) {
+
+            var style = GetStyle(Style.botTypeGrid);
+            var oldAlignment = style.alignment;
+            style.alignment = TextAnchor.MiddleCenter;
+
+            bool advancedEnabled = PresetHandler.EditorDefaults.AdvancedBotConfigs;
+            string status = advancedEnabled ? "ON" : "OFF";
+            bool newValue = GUI.Toggle(AdvRect, advancedEnabled, $"Advanced Settings: [{status}]", GetStyle(Style.botTypeGrid));
+            if (advancedEnabled != newValue) {
+                PlaySound(EUISoundType.MenuEscape);
+                PresetHandler.EditorDefaults.AdvancedBotConfigs = newValue;
+                PresetHandler.ExportEditorDefaults();
+            }
+
+            if (GUI.Button(SaveAllRect, SaveContent, GetStyle(Style.botTypeGrid))) {
                 PlaySound(EUISoundType.InsuranceInsured);
                 SAINPresetClass.ExportAll(SAINPlugin.LoadedPreset);
             }
 
-            if (GUI.Button(ExitRect, "X", style)) {
+            if (GUI.Button(ExitRect, "X", GetStyle(Style.botTypeGrid))) {
                 PlaySound(EUISoundType.MenuEscape);
                 ToggleGUI();
             }
+            style.alignment = oldAlignment;
         }
 
         private static void DrawTooltip()

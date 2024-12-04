@@ -385,7 +385,7 @@ namespace SAIN.Editor
             return selectedOption;
         }
 
-        private static GUIStyle StyleHandler(bool selected, bool hovering)
+        public static GUIStyle StyleHandler(bool selected, bool hovering)
         {
             var style = StylesClass.GetFontStyleDynamic(Style.selectionGrid, selected);
             Texture2D texture;

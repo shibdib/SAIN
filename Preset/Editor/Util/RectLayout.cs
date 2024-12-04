@@ -18,16 +18,19 @@ namespace SAIN.Editor
 
         public static Rect MainWindow = new Rect(0, 0, 1920, 1080);
 
-        private const float RectHeight = 30;
-        private const float ExitWidth = 35f;
+        private const float RectHeight = 30f;
+        private const float ExitWidth = 30f;
         private const float SaveAllWidth = 175f;
+        private const float AdvWidth = 225f;
 
         private static readonly float ExitStartX = MainWindow.width - ExitWidth;
-        private static readonly float SaveAllStartX = ExitStartX - SaveAllWidth;
-        private static readonly float DragWidth = SaveAllStartX;
+        private static readonly float SaveAllStartX = ExitStartX - SaveAllWidth - 5;
+        private static readonly float AdvRectStartX = SaveAllStartX - AdvWidth - 5;
+        private static readonly float DragWidth = AdvRectStartX - 5;
 
         public static Rect ExitRect = new Rect(ExitStartX, 0, ExitWidth, RectHeight);
         public static Rect DragRect = new Rect(0, 0, DragWidth, RectHeight);
         public static Rect SaveAllRect = new Rect(SaveAllStartX, 0, SaveAllWidth, RectHeight);
+        public static Rect AdvRect = new Rect(AdvRectStartX, 0, AdvWidth, RectHeight);
     }
 }

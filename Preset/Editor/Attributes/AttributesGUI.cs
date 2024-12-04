@@ -748,8 +748,8 @@ namespace SAIN.Attributes
             if (category == "None") {
                 return;
             }
-            BeginHorizontal(25);
-            DisplayString($"Category: [{category}] ", configParams.ListDepth, configParams.EntryConfig, 15f);
+            BeginHorizontal(0f);
+            DisplayString($"    Category: {category}    ", configParams.ListDepth, configParams.EntryConfig, 15f);
             FlexibleSpace();
             EndHorizontal();
         }
