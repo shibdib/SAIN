@@ -201,7 +201,7 @@ namespace SAIN.BotController.Classes
         {
             Enemy enemy = sain.EnemyController.CheckAddEnemy(player);
             if (enemy == null) {
-                Logger.LogError($"Could not find enemy!");
+                //Logger.LogError($"Could not find enemy!");
                 return;
             }
 
@@ -651,13 +651,11 @@ namespace SAIN.BotController.Classes
                 return;
             }
 
-            if (botOwner.HealthController?.IsAlive == true && 
-                Members.TryGetValue(botOwner.ProfileId, out BotComponent bot) && 
+            if (botOwner.HealthController?.IsAlive == true &&
+                Members.TryGetValue(botOwner.ProfileId, out BotComponent bot) &&
                 bot != null) {
-
                 bot.Squad.RemoveFromSquad();
                 RemoveMember(bot);
-                
             }
         }
 

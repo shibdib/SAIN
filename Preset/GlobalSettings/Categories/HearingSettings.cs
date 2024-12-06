@@ -85,6 +85,13 @@ namespace SAIN.Preset.GlobalSettings
         [Hidden]
         public static readonly Dictionary<SAINSoundType, float> HEAR_DISPERSION_VALUES_Defaults;
 
+        [Name("Unheard Shot Bullet Fly-by Modifier")]
+        [Description("When a bot has a bullet fly by them, the dispersion on the source of the gunshot will be X times more random, " +
+            "so a value of 2 will mean that it will multiply the randomized position to be 2x as far as originally calculated.")]
+        [Category("Position Randomization")]
+        [MinMax(1f, 10f, 100f)]
+        public float HEAR_DISPERSION_BULLET_FELT_MOD = 2f;
+
         [Name("Minimum Hearing Randomization")]
         [Description("Higher = More Randomization, less accuracy in position prediction. Minimum Dispersion of a bot's estimated position from a sound they heard. In Meters. ")]
         [Category("Position Randomization")]
