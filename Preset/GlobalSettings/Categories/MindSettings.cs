@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using EFT;
+using Newtonsoft.Json;
 using SAIN.Attributes;
 using SAIN.Helpers;
 using System.Collections.Generic;
@@ -27,6 +28,43 @@ namespace SAIN.Preset.GlobalSettings.Categories
             { EPersonality.Coward, false },
             { EPersonality.Timmy, false},
             { EPersonality.Normal, false},
+        };
+
+        [Name("Force Personality for Player Nickname")]
+        [Description("Ties a specific personality to a nickname.")]
+        [Category("Personality")]
+        [Hidden]
+        public Dictionary<string, EPersonality> PERS_NAMES = new Dictionary<string, EPersonality>() {
+            { "solarint", EPersonality.GigaChad},
+            { "chomp", EPersonality.Chad},
+            { "senko", EPersonality.Chad},
+            { "kaeno", EPersonality.Timmy},
+            { "justnu", EPersonality.Timmy},
+            { "ratthew", EPersonality.Rat},
+            { "choccy", EPersonality.Rat},
+        };
+
+        [Name("Boss Personalities")]
+        [Description("Sets the pesonality that a boss will always use.")]
+        [Category("Personality")]
+        [Hidden]
+        public Dictionary<WildSpawnType, EPersonality> PERS_BOSSES = new Dictionary<WildSpawnType, EPersonality>() {
+            { WildSpawnType.bossKilla, EPersonality.Wreckless},
+            { WildSpawnType.bossTagilla, EPersonality.Wreckless},
+            { WildSpawnType.bossKolontay, EPersonality.Wreckless},
+
+            { WildSpawnType.bossKnight, EPersonality.GigaChad},
+            { WildSpawnType.followerBigPipe, EPersonality.GigaChad},
+
+            { WildSpawnType.followerBirdEye, EPersonality.SnappingTurtle},
+            { WildSpawnType.bossGluhar, EPersonality.SnappingTurtle},
+
+            { WildSpawnType.bossKojaniy, EPersonality.Rat},
+            { WildSpawnType.bossPartisan, EPersonality.Rat},
+
+            { WildSpawnType.bossBully, EPersonality.Coward},
+            { WildSpawnType.bossSanitar, EPersonality.Coward},
+            { WildSpawnType.bossBoar, EPersonality.Coward},
         };
 
         [MinMax(0.1f, 5f, 100f)]

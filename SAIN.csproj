@@ -423,7 +423,7 @@
     <Compile Include="Components\PlayerComponentSpace\Classes\Equipment\EquipmentClass.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\Equipment\GearInfo.cs" />
     <Compile Include="Components\PlayerComponentSpace\Classes\Equipment\WeaponInfo.cs" />
-    <Compile Include="Components\BotControllerSpace\Classes\BotCoverController.cs" />
+    <Compile Include="Components\BotControllerSpace\Classes\GlobalCoverfinder.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\BotSquads.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\ESquadPersonality.cs" />
     <Compile Include="Components\BotControllerSpace\Classes\ESquadRole.cs" />

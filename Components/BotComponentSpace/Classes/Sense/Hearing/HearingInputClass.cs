@@ -6,7 +6,6 @@ using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
-using static RootMotion.FinalIK.InteractionTrigger;
 
 namespace SAIN.SAINComponent.Classes
 {

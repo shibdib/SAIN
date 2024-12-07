@@ -1,6 +1,7 @@
 ﻿using EFT;
 using EFT.UI;
 using SAIN.Editor;
+using SAIN.Editor.GUISections;
 using SAIN.Editor.Util;
 using SAIN.Helpers;
 using SAIN.Plugin;
@@ -135,6 +136,16 @@ namespace SAIN.Attributes
                 return value;
             }
 
+            if (value is Dictionary<string, EPersonality> nicknamePersDict) {
+                createPersonalityDict(nicknamePersDict, out wasEdited);
+                return value;
+            }
+
+            if (value is Dictionary<WildSpawnType, EPersonality> bossPersDict) {
+                createPersonalityDict(bossPersDict, config, out wasEdited);
+                return value;
+            }
+
             if (value is Dictionary<ECaliber, float>) {
                 EditFloatDictionary<ECaliber>(value, info, out wasEdited);
                 return value;
@@ -182,6 +193,91 @@ namespace SAIN.Attributes
 
             return value;
         }
+
+        private static void createPersonalityDict(Dictionary<string, EPersonality> persDictionary, out bool wasEdited)
+        {
+            CreateLabelStyle();
+            BeginVertical(5f);
+
+            wasEdited = false;
+
+            foreach (KeyValuePair<string, EPersonality> kvp in persDictionary) {
+                BeginHorizontal(150f);
+                string outputNickname = TextArea(kvp.Key, null, Width(300f), Height(_defaultEntryConfig.EntryHeight));
+                string outputPers = TextArea(kvp.Value.ToString(), null, Width(300f), Height(_defaultEntryConfig.EntryHeight));
+                EndHorizontal(150f);
+            }
+            EndVertical(5f);
+        }
+
+        private static void createPersonalityDict(Dictionary<WildSpawnType, EPersonality> persDictionary, GUIEntryConfig entryConfig, out bool wasEdited)
+        {
+            CreateLabelStyle();
+            _tempBossPersDict.Clear();
+            _tempBossPersDict.AddRange(persDictionary);
+            wasEdited = false;
+
+            BeginVertical(5f);
+
+            foreach (KeyValuePair<WildSpawnType, EPersonality> kvp in _tempBossPersDict) {
+                BeginHorizontal(150f);
+                string bossPerString = $"Boss Personality: {kvp.Key}";
+                if (ExpandableList(bossPerString, null, 25f, 1, entryConfig)) {
+                    EPersonality newSelection = selectPersonality(kvp.Value, entryConfig);
+                    if (newSelection != kvp.Value) {
+                        persDictionary[kvp.Key] = newSelection;
+                    }
+                }
+                EndHorizontal(150f);
+            }
+
+            EndVertical(5f);
+
+            _tempBossPersDict.Clear();
+        }
+
+        private static Dictionary<string, bool> openedSelections = new Dictionary<string, bool>();
+        private static Dictionary<WildSpawnType, EPersonality> _tempBossPersDict = new Dictionary<WildSpawnType, EPersonality>();
+
+        private static EPersonality selectPersonality(EPersonality selected, GUIEntryConfig entryConfig)
+        {
+            const float gridOptionHeight = 25f;
+            int selectedId = 0;
+            EPersonality[] allPersonalities = EnumValues.GetEnum<EPersonality>();
+
+            // Get all possible personalities and create a string array of all options
+            if (personalities_strings == null) {
+                List<string> personalitiesstringList = new List<string>();
+                for (int i = 0; i < allPersonalities.Length; i++) {
+                    personalitiesstringList.Add(allPersonalities[i].ToString());
+                }
+                personalities_strings = personalitiesstringList.ToArray();
+            }
+
+            // find which one we have selected
+            for (int i = 0; i < personalities_strings.Length; i++) {
+                if (personalities_strings[i] == selected.ToString()) {
+                    selectedId = i;
+                    break;
+                }
+            }
+
+            BeginVertical(5f);
+
+            // select from string array
+            EPersonality newPersonality = BotPersonalityEditor.SelectPersonality(selected, gridOptionHeight, 3);
+            //int newSelection = GUILayout.SelectionGrid(selectedId, personalities_strings, 4, GetStyle(Style.selectionGrid), Width(gridWidth), Height(gridHeight));
+            if (newPersonality != selected) {
+                selected = newPersonality;
+                SAIN.Editor.Sounds.PlaySound(EUISoundType.MenuCheckBox, 0.5f);
+            };
+
+            EndVertical(10f);
+
+            return selected;
+        }
+
+        private static string[] personalities_strings;
 
         private static void CreateLabelStyle()
         {
