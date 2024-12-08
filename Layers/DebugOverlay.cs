@@ -101,7 +101,7 @@ namespace SAIN.Layers
                     stringBuilder.AppendLine();
                     if (debug.Overlay_Info_Expanded) {
                         stringBuilder.AppendLine($"CoverPoints: [{bot.Cover.CoverPoints.Count}] : StartSearchDelay [{info.TimeBeforeSearch}] : Hold Ground Time [{info.HoldGroundDelay}]");
-                        stringBuilder.AppendLine($"Suppression Num: [{bot.Suppression?.SuppressionNumber}] IsSuppressed: [{bot.Suppression?.IsSuppressed}] IsHeavySuppressed: [{bot.Suppression?.IsHeavySuppressed}]");
+                        stringBuilder.AppendLine($"Suppression Num: [{bot.Suppression?.SuppressionNumber}] State: [{bot.Suppression?.CurrentState}] Last State: [{bot.Suppression?.LastState}]");
                         stringBuilder.AppendLine($"Indoors? {bot.Memory.Location.IsIndoors} EnvironmentID: {bot.Player?.AIData.EnvironmentId} In Bunker? {bot.PlayerComponent.AIData.PlayerLocation.InBunker}");
                         var members = bot.Squad.SquadInfo?.Members;
                         if (members != null && members.Count > 1) {

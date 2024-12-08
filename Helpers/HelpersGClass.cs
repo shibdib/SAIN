@@ -56,7 +56,7 @@ namespace SAIN.Helpers
 
     public class TemporaryStatModifiers
     {
-        public TemporaryStatModifiers(float precision = 1f, float accuracySpeed = 1f, float gainSight = 1f, float scatter = 1f, float priorityScatter = 1f, float visibleDistance = 1f)
+        public TemporaryStatModifiers(float precision = 1f, float accuracySpeed = 1f, float gainSight = 1f, float scatter = 1f, float priorityScatter = 1f, float visibleDistance = 1f, float hearingDistance = 1f)
         {
             Modifiers = new EFTStatModifiersClass {
                 PrecicingSpeedCoef = precision,
@@ -64,7 +64,8 @@ namespace SAIN.Helpers
                 GainSightCoef = gainSight,
                 ScatteringCoef = scatter,
                 PriorityScatteringCoef = priorityScatter,
-                VisibleDistCoef = visibleDistance
+                VisibleDistCoef = visibleDistance,
+                HearingDistCoef = hearingDistance
             };
         }
 

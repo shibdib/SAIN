@@ -1,5 +1,6 @@
 ﻿using EFT;
 using EFT.UI;
+using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Editor.GUISections;
 using SAIN.Editor.Util;
@@ -11,6 +12,7 @@ using SAIN.Preset.GlobalSettings;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.Preset.Personalities;
 using SAIN.SAINComponent.Classes;
+using SAIN.SAINComponent.Classes.WeaponFunction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -96,6 +98,22 @@ namespace SAIN.Attributes
             return value;
         }
 
+        private static void editSuppressionDict(Dictionary<ESuppressionState, SuppressionConfig> suppDict, out bool wasEdited)
+        {
+            wasEdited = false;
+            CreateLabelStyle();
+
+            BeginVertical(5f);
+            foreach (KeyValuePair<ESuppressionState, SuppressionConfig> kvp in suppDict) {
+                BeginHorizontal(150f);
+                string suppStateString = $"Suppression State: {kvp.Key}";
+                if (ExpandableList(suppStateString, null, 25f, 1, _defaultEntryConfig)) {
+                }
+                EndHorizontal(150f);
+            }
+            EndVertical(5f);
+        }
+
         public static void DisplayString(string value, float listDepth, GUIEntryConfig entryConfig, ConfigInfoClass info)
         {
             if (value != null &&
@@ -133,6 +151,11 @@ namespace SAIN.Attributes
 
             if (value is Dictionary<ELocation, DifficultySettings> locationDict) {
                 editLocationDict(locationDict, settingsObject, info, listDepth, config, out wasEdited, search);
+                return value;
+            }
+
+            if (value is Dictionary<ESuppressionState, SuppressionConfig> suppDict) {
+                editSuppressionDict(suppDict, out wasEdited);
                 return value;
             }
 
