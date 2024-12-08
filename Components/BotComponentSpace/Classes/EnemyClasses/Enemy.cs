@@ -416,7 +416,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public float NextCheckFlashLightTime;
 
-        private float _updateCoef = 1f;
         private float _nextUpdateCoefTime;
         private bool _hasBeenActive;
         private Vector3? _centerMass;

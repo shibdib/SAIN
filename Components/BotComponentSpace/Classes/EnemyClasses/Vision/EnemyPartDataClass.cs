@@ -76,7 +76,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        private static int _debugCount = 0;
         private GameObject _debugLine;
         private LineRenderer _debugLineRenderer;
 

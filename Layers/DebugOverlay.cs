@@ -39,8 +39,6 @@ namespace SAIN.Layers
             "All Enemies Info",
         };
 
-        private static bool _changedOverlay;
-
         public static void UpdateSelectedOverlay()
         {
             //if (_changedOverlay &&
