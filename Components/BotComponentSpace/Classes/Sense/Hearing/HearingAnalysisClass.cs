@@ -22,9 +22,9 @@ namespace SAIN.SAINComponent.Classes
         private const float HEAR_MODIFIER_SPRINT = 0.85f;
         private const float HEAR_MODIFIER_HEAVYBREATH = 0.65f;
 
-        private const float HEAR_MODIFIER_MIN_CLAMP = 0.1f;
+        private const float HEAR_MODIFIER_MIN_CLAMP = 0.01f;
         private const float HEAR_MODIFIER_MAX_CLAMP = 5f;
-        private const float HEAR_MODIFIER_MAX_AFFECT_DIST = 10f;
+        private const float HEAR_MODIFIER_MAX_AFFECT_DIST = 3f;
 
         private const float HEAR_CHANCE_MIN_DIST = 0.25f;
         private const float HEAR_CHANCE_MIN_DIST_HEADPHONES = 1;
@@ -248,15 +248,18 @@ namespace SAIN.SAINComponent.Classes
 
         private float calcConditionMod(BotSound sound)
         {
-            // this is clumsy, not sure how to extract a modifier that would be clamped to be below the max affect distance, so im just returning 1f.
             var mods = sound.Range.Modifiers;
             float dist = sound.Distance * mods.EnvironmentModifier;
-            float maxAffectDist = HEAR_MODIFIER_MAX_AFFECT_DIST;
-            if (dist <= maxAffectDist) {
-                return 1f;
-            }
+            //float maxAffectDist = HEAR_MODIFIER_MAX_AFFECT_DIST;
+            // if (dist <= maxAffectDist) {
+            //     return 1f;
+            // }
 
             float modifier = 1f;
+            float? currentHearSense = BotOwner?.Settings?.Current?.CurrentHearingSense;
+            if (currentHearSense != null) {
+                modifier *= currentHearSense.Value;
+            }
             if (!sound.Info.IsGunShot) {
                 modifier *= GlobalSettings.Hearing.FootstepAudioMultiplier;
             }
@@ -265,10 +268,11 @@ namespace SAIN.SAINComponent.Classes
             }
             modifier *= Bot.Info.FileSettings.Core.HearingDistanceMulti;
 
-            if (dist * modifier < maxAffectDist)
-                return 1f;
+            //if (dist * modifier < maxAffectDist)
+            //    return 1f;
 
-            if (!sound.Info.IsGunShot && sound.Distance > HEAR_MODIFIER_MAX_AFFECT_DIST) {
+            //  && sound.Distance > HEAR_MODIFIER_MAX_AFFECT_DIST
+            if (sound.Info.SoundType != SAINSoundType.Shot) {
                 if (!Bot.PlayerComponent.Equipment.GearInfo.HasEarPiece) {
                     modifier *= HEAR_MODIFIER_NO_EARS;
                 }
@@ -287,8 +291,8 @@ namespace SAIN.SAINComponent.Classes
                 }
             }
 
-            if (dist * modifier < maxAffectDist)
-                return 1f;
+            //if (dist * modifier < maxAffectDist)
+            //    return 1f;
 
             return modifier;
         }
