@@ -19,8 +19,8 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0.01f, 1.5f, 100f)]
         public float BotSprintNotMovingThreshold = 0.5f;
 
-        [Name("")]
-        [Description("")]
+        [Name("Not Moving Check Frequency")]
+        [Description("Every X seconds, check if a bot has moved from their last position.")]
         [Category("Sprinting")]
         [Advanced]
         [MinMax(0.01f, 1.5f, 100f)]
