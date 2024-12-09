@@ -1,6 +1,5 @@
 ﻿using EFT;
 using EFT.UI;
-using SAIN.Components;
 using SAIN.Editor;
 using SAIN.Editor.GUISections;
 using SAIN.Editor.Util;
@@ -18,7 +17,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using static SAIN.Attributes.AttributesGUI;
 using static SAIN.Editor.SAINLayout;
 
 namespace SAIN.Attributes
@@ -107,7 +105,7 @@ namespace SAIN.Attributes
             foreach (KeyValuePair<ESuppressionState, SuppressionConfig> kvp in suppDict) {
                 BeginHorizontal(150f);
                 string suppStateString = $"Suppression State: {kvp.Key}";
-                if (ExpandableList(suppStateString, null, 25f, 1, _defaultEntryConfig)) {
+                if (ExpandableList(suppStateString, null, PresetHandler.EditorDefaults.ConfigEntryHeight, 1, _defaultEntryConfig)) {
                 }
                 EndHorizontal(150f);
             }
@@ -123,8 +121,8 @@ namespace SAIN.Attributes
                     entryConfig = _defaultEntryConfig;
                 }
                 startConfigEntry(listDepth, entryConfig, info);
-                Label($"{info.Name}: ", Width(80), Height(entryConfig.EntryHeight));
-                Box(value, Height(entryConfig.EntryHeight));
+                Label($"{info.Name}: ", Width(80), Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
+                Box(value, Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
                 EndHorizontal(100f);
             }
         }
@@ -226,8 +224,8 @@ namespace SAIN.Attributes
 
             foreach (KeyValuePair<string, EPersonality> kvp in persDictionary) {
                 BeginHorizontal(150f);
-                string outputNickname = TextArea(kvp.Key, null, Width(300f), Height(_defaultEntryConfig.EntryHeight));
-                string outputPers = TextArea(kvp.Value.ToString(), null, Width(300f), Height(_defaultEntryConfig.EntryHeight));
+                string outputNickname = TextArea(kvp.Key, null, Width(300f), Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
+                string outputPers = TextArea(kvp.Value.ToString(), null, Width(300f), Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
                 EndHorizontal(150f);
             }
             EndVertical(5f);
@@ -323,7 +321,7 @@ namespace SAIN.Attributes
                 Box("Advanced",
                     _labelStyle,
                     Width(70f),
-                    Height(entryConfig.EntryHeight));
+                    Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
             }
             else {
                 BeginHorizontal(100f + horizDepth);
@@ -341,14 +339,29 @@ namespace SAIN.Attributes
                 startConfigEntry(listDepth, entryConfig, info);
             }
 
+            GUILayoutOption[] layoutParams;
+            bool useSimpleLayout = info.SimpleValueEdit || !PresetHandler.EditorDefaults.SliderToggle;
+
             if (showLabel) {
                 CreateLabelStyle();
-
+                if (useSimpleLayout) {
+                    layoutParams = new GUILayoutOption[]
+                    {
+                        GUILayout.Width(450f),
+                        GUILayout.Height(PresetHandler.EditorDefaults.ConfigEntryHeight)
+                    };
+                }
+                else {
+                    layoutParams = new GUILayoutOption[]
+                    {
+                        GUILayout.Height(PresetHandler.EditorDefaults.ConfigEntryHeight)
+                    };
+                }
                 Box(new GUIContent(
                     info.Name,
                     info.Description),
                     _labelStyle,
-                    Height(entryConfig.EntryHeight)
+                    layoutParams
                     );
             }
 
@@ -356,37 +369,64 @@ namespace SAIN.Attributes
             string result = string.Empty;
 
             if (info.ValueType == typeof(bool)) {
-                value = Toggle((bool)value, (bool)value ? "On" : "Off", EUISoundType.MenuCheckBox, entryConfig.Toggle);
+                if (!useSimpleLayout) {
+                    value = Toggle((bool)value, (bool)value ? "On" : "Off", EUISoundType.MenuCheckBox, entryConfig.Toggle);
+                }
                 result = value.ToString();
             }
-            else if (info.ValueType == typeof(float) || info.ValueType == typeof(int)) {
-                float flValue = BuilderClass.CreateSlider((float)value, info.Min, info.Max, info.Rounding, entryConfig.Toggle);
-                if (value is int) {
-                    value = Mathf.RoundToInt(flValue);
+            else if (info.ValueType == typeof(float)) {
+                float flValue = (float)value;
+                if (!useSimpleLayout) {
+                    flValue = BuilderClass.CreateSlider(flValue, info.Min, info.Max, info.Rounding, entryConfig.Toggle);
                 }
-                else {
-                    value = flValue;
-                }
+                value = flValue;
                 result = flValue.Round(info.Rounding).ToString();
             }
 
-            string dirtyString = TextField(result, null, entryConfig.Result);
-            if (dirtyString != result) {
-                value = BuilderClass.CleanString(dirtyString, value);
+            if (useSimpleLayout) {
+                layoutParams = new GUILayoutOption[]
+                {
+                    GUILayout.Width(100),
+                    GUILayout.Height(PresetHandler.EditorDefaults.ConfigEntryHeight)
+                };
             }
-            if (value is int || value is float) {
-                value = info.Clamp(value);
+            else {
+                layoutParams = entryConfig.Result;
+            }
+
+            if (useSimpleLayout && info.ValueType == typeof(bool)) {
+                value = Toggle((bool)value, (bool)value ? "On" : "Off", EUISoundType.MenuCheckBox, layoutParams);
+            }
+            else {
+                string dirtyString = TextField(result, null, layoutParams);
+                if (dirtyString != result) {
+                    value = BuilderClass.CleanString(dirtyString, value);
+                }
+                if (value is int || value is float) {
+                    value = info.Clamp(value);
+                }
+            }
+
+            if (useSimpleLayout) {
+                layoutParams = new GUILayoutOption[]
+                {
+                    GUILayout.Width(100),
+                    GUILayout.Height(PresetHandler.EditorDefaults.ConfigEntryHeight)
+                };
+            }
+            else {
+                layoutParams = entryConfig.Reset;
             }
 
             var defaultValue = info.GetDefault(settingsObject);
             if (defaultValue != null) {
-                if (Button("Reset", "Reset To Default Value", EUISoundType.ButtonClick, entryConfig.Reset)) {
+                if (Button("Reset", "Reset To Default Value", EUISoundType.ButtonClick, layoutParams)) {
                     value = defaultValue;
                     ConfigEditingTracker.Remove(info);
                 }
             }
             else {
-                Box(" ", "No Default Value is assigned to this option.", entryConfig.Reset);
+                Box(" ", "No Default Value is assigned to this option.", layoutParams);
             }
 
             if (beginHoriz)
@@ -501,7 +541,7 @@ namespace SAIN.Attributes
 
                 var item = list[i];
                 var name = item.ToString();
-                Box(new GUIContent(name), _labelStyle, Height(_defaultEntryConfig.EntryHeight));
+                Box(new GUIContent(name), _labelStyle, Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
                 if (Toggle(dictionary[item], dictionary[item] ? "On" : "Off", EUISoundType.MenuCheckBox, _defaultEntryConfig.Toggle)) {
                     // Option was selected, set all other values to false, other than the 1 selected
                     for (int j = 0; j < list.Count; j++) {
@@ -571,12 +611,12 @@ namespace SAIN.Attributes
                 }
                 string name = location.ToString();
 
-                if (!ExpandableList(name, string.Empty, config.EntryHeight + 3, listDepth, config)) {
+                if (!ExpandableList(name, string.Empty, PresetHandler.EditorDefaults.ConfigEntryHeight + 3, listDepth, config)) {
                     continue;
                 }
 
                 BeginHorizontal(100f + (listDepth * config.SubList_Indent_Horizontal));
-                Label(name, Height(config.EntryHeight));
+                Label(name, Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
                 EndHorizontal(100f);
 
                 int subListDepth = listDepth + 1;
@@ -631,7 +671,7 @@ namespace SAIN.Attributes
             BeginVertical(2f);
             BeginHorizontal(150);
 
-            Box(new GUIContent(soundType.ToString()), _labelStyle, Height(_defaultEntryConfig.EntryHeight));
+            Box(new GUIContent(soundType.ToString()), _labelStyle, Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
 
             EndHorizontal(150);
             BeginHorizontal(200f);
@@ -717,7 +757,7 @@ namespace SAIN.Attributes
 
         private static float slider(string name, string description, float value, float min, float max, float rounding)
         {
-            Box(new GUIContent(name, description), _labelStyle, Height(_defaultEntryConfig.EntryHeight));
+            Box(new GUIContent(name, description), _labelStyle, Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
             value = BuilderClass.CreateSlider(value, min, max, rounding, _defaultEntryConfig.Toggle).Round(100f);
             Box(value.Round(rounding).ToString(), _defaultEntryConfig.Result);
             return value;
@@ -758,7 +798,7 @@ namespace SAIN.Attributes
                 float originalValue = dictionary[item];
                 float floatValue = originalValue;
 
-                Box(new GUIContent(item.ToString()), _labelStyle, Height(_defaultEntryConfig.EntryHeight));
+                Box(new GUIContent(item.ToString()), _labelStyle, Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
                 floatValue = BuilderClass.CreateSlider(floatValue, min, max, rounding, _defaultEntryConfig.Toggle);
                 Box(floatValue.Round(rounding).ToString(), _defaultEntryConfig.Result);
 
@@ -789,12 +829,12 @@ namespace SAIN.Attributes
         public static void EditAllValuesInObj(ConfigParams configParams, out bool wasEdited)
         {
             float indent = getIndentValue(configParams.EntryConfig);
-            BeginVertical(indent);
+            BeginVertical(0f);
             List<ConfigInfoClass> attributeInfos = new List<ConfigInfoClass>();
             getAllAttributeInfos(configParams.SettingsObject, attributeInfos, configParams.Search);
             displayOptionsByCategory(configParams, attributeInfos, out wasEdited);
             attributeInfos.Clear();
-            EndVertical(indent);
+            EndVertical(0f);
         }
 
         private static float getIndentValue(GUIEntryConfig entryConfig)

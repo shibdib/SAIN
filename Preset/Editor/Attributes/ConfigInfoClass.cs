@@ -87,12 +87,13 @@ namespace SAIN.Attributes
             Advanced = Get<AdvancedAttribute>() != null;
             Debug = Get<DebugAttribute>() != null;
             CopyValue = Get<CopyValueAttribute>() != null;
+            SimpleValueEdit = Get<SimpleValueAttribute>() != null;
 
             if (Hidden) {
                 return;
             }
 
-            var nameDescription = Get<NameAndDescriptionAttribute>();
+            NameAndDescriptionAttribute nameDescription = Get<NameAndDescriptionAttribute>();
             Name = nameDescription?.Name ?? Get<NameAttribute>()?.Value ?? member.Name;
             Description = nameDescription?.Description ?? Get<DescriptionAttribute>()?.Value ?? string.Empty;
             Category = Get<CategoryAttribute>()?.Value ?? "None";
@@ -105,6 +106,11 @@ namespace SAIN.Attributes
             }
 
             DictionaryString = Get<DefaultDictionaryAttribute>()?.Value;
+
+            DefaultFloatAttribute defaultValueAtt = Get<DefaultFloatAttribute>();
+            if (defaultValueAtt != null) {
+                DefaultFloatValue = defaultValueAtt.Value;
+            }
         }
 
         private T Get<T>() where T : Attribute
@@ -124,6 +130,8 @@ namespace SAIN.Attributes
         public bool Hidden { get; private set; }
         public bool Advanced { get; private set; }
         public bool Debug { get; private set; }
+        public bool SimpleValueEdit { get; private set; }
+        public float? DefaultFloatValue { get; private set; }
 
         public bool CopyValue { get; private set; }
 
@@ -137,6 +145,9 @@ namespace SAIN.Attributes
 
         public object GetDefault(object settingsObject)
         {
+            if (DefaultFloatValue != null) {
+                return DefaultFloatValue.Value;
+            }
             if (settingsObject is ISAINSettings settings) {
                 var defaults = settings.GetDefaults();
                 object value = GetValue(defaults);
