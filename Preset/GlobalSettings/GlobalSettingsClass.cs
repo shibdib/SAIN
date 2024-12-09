@@ -51,7 +51,7 @@ namespace SAIN.Preset.GlobalSettings
 
         public MindSettings Mind = new MindSettings();
 
-        public GlobalMoveSettings Move = new GlobalMoveSettings();
+        public MoveSettings Move = new MoveSettings();
 
         [Advanced]
         public SteeringSettings Steering = new SteeringSettings();

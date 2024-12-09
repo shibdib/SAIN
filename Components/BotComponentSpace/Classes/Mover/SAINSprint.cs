@@ -243,7 +243,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             return _path[count - 1];
         }
 
-        private static GlobalMoveSettings _moveSettings => SAINPlugin.LoadedPreset.GlobalSettings.Move;
+        private static MoveSettings _moveSettings => SAINPlugin.LoadedPreset.GlobalSettings.Move;
 
         private IEnumerator runPath(ESprintUrgency urgency)
         {
@@ -462,7 +462,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private void trackMovement()
         {
             if (nextCheckPosTime < Time.time) {
-                nextCheckPosTime = Time.time + 0.5f;
+                nextCheckPosTime = Time.time + _moveSettings.BotSprintNotMovingCheckFreq;
                 Vector3 botPos = BotPosition;
                 positionMoving = (botPos - lastCheckPos).sqrMagnitude > _moveSettings.BotSprintNotMovingThreshold;
                 if (positionMoving) {
@@ -562,11 +562,10 @@ namespace SAIN.SAINComponent.Classes.Mover
             }
             Player.CharacterController.SetSteerDirection(direction);
             BotOwner.AimingData?.Move(Player.Speed);
-			if (BotOwner.Mover != null)
-			{
-				BotOwner.Mover.IsMoving = true;
-			}
-			Player.Move(findMoveDirection(direction));
+            if (BotOwner.Mover != null) {
+                BotOwner.Mover.IsMoving = true;
+            }
+            Player.Move(findMoveDirection(direction));
         }
 
         public Vector2 findMoveDirection(Vector3 direction)
