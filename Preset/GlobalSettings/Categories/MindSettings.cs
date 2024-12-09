@@ -95,6 +95,8 @@ namespace SAIN.Preset.GlobalSettings.Categories
 
         [MinMax(0.1f, 5f, 100f)]
         [Category("Personality")]
+        [Name("Global Aggression")]
+        [Description("Higher = More aggressive bots, less time before seeking enemies. 2x = half the wait time.")]
         public float GlobalAggression = 1f;
 
         [Name("Bots can use Stealth Search")]
@@ -115,16 +117,39 @@ namespace SAIN.Preset.GlobalSettings.Categories
 
         [Name("Bot Suppression")]
         [Description("Toggles whether bots get suppressed or not. If disabled, all options below will do nothing.")]
+        [Category("Suppression")]
         public bool SUPP_TOGGLE = true;
 
-        [Description("The maximum distance between the bullet, and a bot's head to be considered Suppressing fire. In Meters.")]
+        [Name("Suppression Distance Scale Start")]
+        [Description("The distance between the bullet, and a bot's head to receive full suppression effect. In Meters.")]
         [Category("Suppression")]
-        [MinMax(1f, 30f, 10f)]
+        [MinMax(1f, 30f, 100f)]
         [Advanced]
-        public float MaxSuppressionDistance = 10f;
+        public float SUPP_DISTANCE_SCALE_START = 4f;
+
+        [Name("Suppression Distance Scale End")]
+        [Description("The maximum distance between the bullet, and a bot's head to be considered Suppressing fire. In Meters. Scales linearly between Scale End and Scale Start.")]
+        [Category("Suppression")]
+        [MinMax(1f, 30f, 100f)]
+        [Advanced]
+        public float SUPP_DISTANCE_SCALE_END = 10f;
+
+        [Name("Suppression Distance Amplify Distance")]
+        [Description("If a bullet is closer than this distance, in meters, to the bot's head. Amplify the amount of suppression.")]
+        [Category("Suppression")]
+        [MinMax(0f, 5f, 100f)]
+        [Advanced]
+        public float SUPP_DISTANCE_AMP_DIST = 0.5f;
+
+        [Name("Suppression Distance Amplify Amount")]
+        [Description("If a bullet is closer than Amplify Distance to the bot's head. Amplify the amount of suppression by this multiplier.")]
+        [Category("Suppression")]
+        [MinMax(1f, 3f, 100f)]
+        [Advanced]
+        public float SUPP_DISTANCE_AMP_AMOUNT = 1.5f;
 
         [Description("The maximum distance between the bullet, and a bot's head to be considered under active enemy fire.")]
-        [MinMax(0.1f, 20f, 10f)]
+        [MinMax(0.1f, 20f, 100f)]
         [Category("Suppression")]
         [Advanced]
         public float MaxUnderFireDistance = 2f;

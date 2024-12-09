@@ -123,63 +123,249 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(0.1f, 3f, 100f)]
         public float HEAR_DISPERSION_ANGLE_MULTI_MIN = 0.5f;
 
-        [MinMax(1f, 150f, 100f)]
-        [Category("Hearing Distance")]
-        [Advanced]
-        public float BaseSoundRange_Looting = 60f;
+        [Name("Bunker Audio Range")]
+        [Description("Reduces audio range if a bot and an enemy are not in the same bunker")]
+        [Category("Hearing Environment Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float BUNKER_REDUCTION_COEF = 0.2f;
+
+        [Name("Bunker Elevation Range")]
+        [Description("Reduces audio range if a bot and an enemy are both in a bunker, but at different levels")]
+        [Category("Hearing Environment Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float BUNKER_ELEV_DIFF_COEF = 0.66f;
+
+        [Name("Gunshot Occlusion")]
+        [Description("If an obstacle is inbetween a bot's head and the position of a sound, reduce its range by this amount")]
+        [Category("Hearing Environment Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float GUNSHOT_OCCLUSION_MOD = 0.8f;
+
+        [Name("Suppressed Gunshot Occlusion")]
+        [Description("If an obstacle is inbetween a bot's head and the position of a sound, reduce its range by this amount")]
+        [Category("Hearing Environment Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float GUNSHOT_OCCLUSION_MOD_SUPP = 0.65f;
+
+        [Name("Footstep Occlusion")]
+        [Description("If an obstacle is inbetween a bot's head and the position of a sound, reduce its range by this amount")]
+        [Category("Hearing Environment Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float FOOTSTEP_OCCLUSION_MOD = 0.6f;
+
+        [Name("Sprint Occlusion")]
+        [Description("If an obstacle is inbetween a bot's head and the position of a sound, reduce its range by this amount")]
+        [Category("Hearing Environment Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float FOOTSTEP_OCCLUSION_MOD_SPRINT = 0.8f;
+
+        [Name("Other Occlusion")]
+        [Description("If an obstacle is inbetween a bot's head and the position of a sound, reduce its range by this amount")]
+        [Category("Hearing Environment Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float OTHER_OCCLUSION_MOD = 0.6f;
+
+        [Name("Indoor / Outdoor Difference - Gunfire")]
+        [Description("If bots are not in the same area as the source of a sound, reduce audio range by this amount")]
+        [Category("Hearing Environment Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float GUNSHOT_ENVIR_MOD = 0.65f;
+
+        [Name("Indoor / Outdoor Difference - Footsteps/Other")]
+        [Description("If bots are not in the same area as the source of a sound, reduce audio range by this amount")]
+        [Category("Hearing Environment Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float FOOTSTEP_ENVIR_MOD = 0.7f;
+
+        [Name("Environment Modifier Minimum")]
+        [Description("")]
+        [Category("Hearing Environment Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float MIN_ENVIRONMENT_MOD = 0.05f;
+
+        [Name("No Headphones")]
+        [Description("If a bot does not have headphones, reduce audible range of all sounds by this amount.")]
+        [Category("Hearing Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float HEAR_MODIFIER_NO_EARS = 0.6f;
+
+        [Name("Heavy Helmet")]
+        [Description("If a bot is wearing a heavy helmet, reduce audible range of all sounds by this amount.")]
+        [Category("Hearing Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float HEAR_MODIFIER_HEAVY_HELMET = 0.8f;
+
+        [Name("Dying")]
+        [Description("If a bot is dying or seriously injured, reduce audible range of all sounds by this amount.")]
+        [Category("Hearing Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float HEAR_MODIFIER_DYING = 0.8f;
+
+        [Name("Sprinting")]
+        [Description("If a bot is sprinting, reduce audible range of all sounds by this amount.")]
+        [Category("Hearing Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float HEAR_MODIFIER_SPRINT = 0.85f;
+
+        [Name("Heavy Breathing")]
+        [Description("If a bot is breathing heavily, reduce audible range of all sounds by this amount.")]
+        [Category("Hearing Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float HEAR_MODIFIER_HEAVYBREATH = 0.65f;
+
+        [Name("Minimum Hear Modifier")]
+        [Description("")]
+        [Category("Hearing Modifiers")]
+        [MinMax(0.01f, 1f, 100f)]
+        public float HEAR_MODIFIER_MIN_CLAMP = 0.01f;
+
+        [Name("Maximum Hear Modifier")]
+        [Description("")]
+        [Category("Hearing Modifiers")]
+        [MinMax(1f, 5f, 100f)]
+        public float HEAR_MODIFIER_MAX_CLAMP = 5f;
+
+        [Name("Minimum Hearing Modifier Distance")]
+        [Description("")]
+        [Category("Hearing Modifiers")]
+        [MinMax(0f, 50f, 1f)]
+        public float HEAR_MODIFIER_MAX_AFFECT_DIST = 3f;
+
+        [Name("Scale Start Distance - No Headphones")]
+        [Description("")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_MIN_DIST = 0.25f;
+
+        [Name("Scale Start Distance - Headphones")]
+        [Description("")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_MIN_DIST_HEADPHONES = 1;
+
+        [Name("Midrange Coefficient")]
+        [Description("")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_MIDRANGE_COEF = 0.66f;
+
+        [Name("Mid range Minimum Chance - Headphones")]
+        [Description("")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_MIDRANGE_MINCHANCE_HEADPHONES = 3;
+
+        [Name("Long range Minimum Chance - Headphones")]
+        [Description("")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_LONGRANGE_MINCHANCE_HEADPHONES = 1;
+
+        [Name("Standing Still Velocity")]
+        [Description("Boost Hearing chance slightly if a bot's velocity is under this value.")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_NOTMOVING_VELOCITY = 0.05f;
+
+        [Name("Standing Still Min Chance - No Headphones")]
+        [Description("")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_NOTMOVING_MINCHANCE = 2;
+
+        [Name("Standing Still Min Chance - Headphones")]
+        [Description("")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_NOTMOVING_MINCHANCE_HEADPHONES = 4;
+
+        [Name("Other Sounds Min Chance")]
+        [Description("")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_HEADPHONES_OTHERSOUNDS = 3;
+
+        [Name("Active Enemy Min Chance - No Headphones")]
+        [Description("")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_CURRENTENEMY_MINCHANCE = 2;
+
+        [Name("Active Enemy Min Chance - Headphones")]
+        [Description("")]
+        [Category("Hearing Chance")]
+        [MinMax(0, 100, 1)]
+        public float HEAR_CHANCE_CURRENTENEMY_MINCHANCE_HEADPHONES = 3;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Looting Sound")]
+        [Advanced]
+        public float BaseSoundRange_Looting = 40f;
+
+        [MinMax(1f, 150f, 100f)]
+        [Category("Hearing Distance")]
+        [Name("Footstep Skid and Turn")]
         [Advanced]
         public float BaseSoundRange_MovementTurnSkid = 30f;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Grenade Pullout and Pin Pull")]
         [Advanced]
         public float BaseSoundRange_GrenadePinDraw = 35f;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Prone Sound")]
         [Advanced]
         public float BaseSoundRange_Prone = 50f;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Healing Sound")]
         [Advanced]
         public float BaseSoundRange_Healing = 40f;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Reload Sound")]
         [Advanced]
         public float BaseSoundRange_Reload = 30f;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Surgery Sound")]
         [Advanced]
         public float BaseSoundRange_Surgery = 55f;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Dryfire Sound")]
         [Advanced]
         public float BaseSoundRange_DryFire = 10f;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Fall Landing Sound")]
         [Advanced]
         public float MaxSoundRange_FallLanding = 70;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Aim Down Sights Sound")]
         [Advanced]
         public float BaseSoundRange_AimingandGearRattle = 35f;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Eat and Drink Sound")]
         [Advanced]
         public float BaseSoundRange_EatDrink = 40f;
 
         [MinMax(1f, 150f, 100f)]
         [Category("Hearing Distance")]
+        [Name("Max Squad Communication Range - No Headphones")]
         public float MaxRangeToReportEnemyActionNoHeadset = 50f;
 
         [Name("Hearing Delay / Reaction Time with Active Enemy")]

@@ -51,13 +51,31 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             if (resistance >= 1) {
                 return;
             }
+
             if (amount <= 0) {
                 amount = getSuppNum(enemy);
             }
-            amount *= _settings.SUPP_AMOUNT_MULTI;
+
+            amount = scaleSuppDist(amount * _settings.SUPP_AMOUNT_MULTI, distance);
+            if (amount <= 0) {
+                return;
+            }
+
             LastSuppressByEnemy = enemy;
             float resistedAmount = calcResistance(amount, resistance);
             clampAndUpdateSuppression(resistedAmount);
+        }
+
+        private static float scaleSuppDist(float suppNum, float distance)
+        {
+            MindSettings settings = GlobalSettingsClass.Instance.Mind;
+            if (distance < settings.SUPP_DISTANCE_AMP_DIST) {
+                return suppNum * settings.SUPP_DISTANCE_AMP_AMOUNT;
+            }
+            float max = settings.SUPP_DISTANCE_SCALE_END;
+            float min = settings.SUPP_DISTANCE_SCALE_START;
+            float ratio = (distance - min) / (max - min);
+            return Mathf.Lerp(suppNum, 0f, ratio);
         }
 
         private float getResistance()
