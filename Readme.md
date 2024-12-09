@@ -45,7 +45,7 @@ A Bepinex plugin for Single-player Escape From Tarkov that replaces the combat A
 4. Done! If SAIN is installed and working, you can open the GUI in the main menu. (F6 by default)
 
 ## Contributing
-SAIN is an open source project, and I welcome anyone who wants to tweak or add any features in the codebase.
+SAIN is an open source project, and I welcome anyone who wants to redesign, tweak, or add any features in the codebase.
 
 ## How It Works
 Escape from Tarkov's AI system works off a system with "Layers" of different behavior trees set at specific priorities. Using BigBrain, I have disabled and replaced bot "Combat Layers" with my own.
