@@ -56,12 +56,14 @@ Bot Decisions are calculated from a class instance within their "BotComponent". 
 ## Support SAIN's Development
 SAIN is a project of countless unpaid hours over the past years. 
 If you love the mod and want to financially support me, if can be done via my [Patreon Page](https://www.patreon.com/c/Solarint)
+I'm currently unemployed and seeking work doing Game AI Design and scripting. 
+I'm proficient in C# and Unity Scripting, self-taught with the assistance of the SPT community, and - based on SAIN's glowing reviews - I excel at designing scripts that make AI immersive and engaging to fight.
 
 ## SAIN's History
 SAIN is a first for many things for me. 
-I had 0 experience in coding, or managing a project of this size when I started SAIN. 
+I had 0 experience in coding or managing a project of this size when I started SAIN. 
 It originally started as a simple patch in Tarkov's code to manually swap the firerate on Bot Weapons to Semi-auto for enemies past 50 meters.
-I kept adding nuance and new features one by one until it grew into the convoluted and overdesigned beast it is today.
+I kept adding nuance and new features one by one until it grew into the slightly convoluted and overdesigned beast it is today!
 Because making SAIN was how I learned C# and coding in general, the quality of code can vary wildly, but I've replaced *most* of the ancient code by now.
 There are many classes that I created essentially just to see if I could, and I used them as learning experiences. 
 SAIN is very jank, in the classic style of some of my favorite games like S.T.A.L.K.E.R. and ARMA.
