@@ -268,6 +268,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\Doors\DoorData.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Doors\DoorFinder.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EBackpackStatus.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\EnemyEquipmentInfo.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Other\HearingReport.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Path\ECornerType.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyClasses\Checkers\EnemyActiveThreatChecker.cs" />

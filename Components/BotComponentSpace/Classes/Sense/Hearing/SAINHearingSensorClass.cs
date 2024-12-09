@@ -144,7 +144,7 @@ namespace SAIN.SAINComponent.Classes
                     Bot.Memory.SetUnderFire(enemy, sound.Results.EstimatedPosition);
                 }
                 Bot.Suppression.AddSuppression(enemy, projDist);
-                enemy.SetEnemyAsSniper(sound.Distance > 100f);
+                enemy.SetEnemyAsSniper(enemy.RealDistance > GlobalSettings.Mind.ENEMYSNIPER_DISTANCE);
                 enemy.Status.ShotAtMeRecently = true;
                 addPointToSearch(sound);
             }

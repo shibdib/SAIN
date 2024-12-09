@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Search;
 using UnityEngine;
@@ -163,11 +164,16 @@ namespace SAIN.Layers.Combat.Solo
                 return;
             }
 
+            if (_searchTarget.IsSniper && GlobalSettingsClass.Instance.Mind.ENEMYSNIPER_ALWAYS_SPRINT) {
+                _sprintEnabled = true;
+                return;
+            }
+
             var persSettings = Bot.Info.PersonalitySettings;
             float chance = persSettings.Search.SprintWhileSearchChance;
             if (_sprintTimer < Time.time && chance > 0) {
                 float myPower = Bot.Info.Profile.PowerLevel;
-                if (Bot.Enemy?.EnemyPlayer != null && Bot.Enemy.EnemyPlayer.AIData.PowerOfEquipment < myPower * 0.5f) {
+                if (_searchTarget?.EnemyPlayer != null && _searchTarget.EnemyPlayer.AIData.PowerOfEquipment < myPower * 0.5f) {
                     chance = 100f;
                 }
 
