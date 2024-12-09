@@ -19,7 +19,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         public bool IsAI => EnemyPlayer.IsAI;
 
         public bool IsCurrentEnemy { get; private set; }
-        public float LastCheckLookTime { get; set; }
         public float RealDistance => EnemyPlayerData.DistanceData.Distance;
         public bool IsSniper { get; private set; }
 
@@ -128,7 +127,6 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         public bool WasValid => _validChecker.WasValid;
 
-        public bool ActiveThreat => _activeThreatChecker.ActiveThreat;
         public float TimeSinceCurrentEnemy => _hasBeenActive ? Time.time - _timeLastActive : float.MaxValue;
 
         public Collider HidingBehindObject {
