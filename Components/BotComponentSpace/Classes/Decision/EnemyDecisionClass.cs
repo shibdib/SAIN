@@ -432,7 +432,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 //return true;
             }
 
-            if (enemy.IsSniper && GlobalSettings.Mind.ENEMYSNIPER_ALWAYS_SPRINT) {
+            if (enemy.IsSniper && GlobalSettings.Mind.ENEMYSNIPER_ALWAYS_SPRINT_COVER) {
                 reason = "EnemySniperRun";
                 return true;
             }

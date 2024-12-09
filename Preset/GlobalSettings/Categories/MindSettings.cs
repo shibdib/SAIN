@@ -14,9 +14,14 @@ namespace SAIN.Preset.GlobalSettings.Categories
         }
 
         [Category("Enemy Sniper Reaction")]
-        [Description("If a bot thinks it is under fire from a sniper, they will always sprint to cover and always sprint while seeking enemies.")]
+        [Description("If a bot thinks it is under fire from a sniper, they will always want to sprint to cover.")]
         [Name("Always Sprint")]
-        public bool ENEMYSNIPER_ALWAYS_SPRINT = true;
+        public bool ENEMYSNIPER_ALWAYS_SPRINT_COVER = true;
+
+        [Category("Enemy Sniper Reaction")]
+        [Description("If a bot thinks it is under fire from a sniper, they will always sprint while seeking that sniper.")]
+        [Name("Always Sprint")]
+        public bool ENEMYSNIPER_ALWAYS_SPRINT_SEARCH = true;
 
         [Category("Enemy Sniper Reaction")]
         [Name("Distance Under Fire")]
@@ -30,11 +35,11 @@ namespace SAIN.Preset.GlobalSettings.Categories
         [MinMax(30f, 250f, 1f)]
         public float ENEMYSNIPER_DISTANCE_END = 75f;
 
-        [Category("Enemy Sniper Reaction")]
-        [Name("Underfire by Sniper Status Duration")]
-        [Description("If a bot thinks it is underfire from a sniper, they will enter this state for X seconds.")]
-        [MinMax(0f, 120f, 1f)]
-        public float ENEMYSNIPER_STATUS_DURATION = 30f;
+        //[Category("Enemy Sniper Reaction")]
+        //[Name("Underfire by Sniper Status Duration")]
+        //[Description("If a bot thinks it is underfire from a sniper, they will enter this state for X seconds.")]
+        //[MinMax(0f, 120f, 1f)]
+        //public float ENEMYSNIPER_STATUS_DURATION = 30f;
 
         [Name("Force Single Personality For All Bots")]
         [Description("All Spawned SAIN bots will be assigned the selected Personality, if any are set to true, no matter what.")]
