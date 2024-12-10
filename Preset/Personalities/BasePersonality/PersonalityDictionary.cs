@@ -9,6 +9,29 @@ namespace SAIN.Preset.Personalities
 {
     public class PersonalityDictionary : Dictionary<EPersonality, PersonalitySettingsClass>
     {
+        static PersonalityDictionary()
+        {
+            if (!JsonUtility.Load.LoadObject(out NickNames nicknames, "NicknamePersonalities")) {
+                _nicknames = new NickNames();
+                JsonUtility.SaveObjectToJson(_nicknames, "NicknamePersonalities");
+            }
+        }
+
+        private class NickNames
+        {
+            public Dictionary<string, EPersonality> NicknamePersonalityMatches = new Dictionary<string, EPersonality>() {
+            { "solarint", EPersonality.GigaChad},
+            { "chomp", EPersonality.Chad},
+            { "senko", EPersonality.Chad},
+            { "kaeno", EPersonality.Timmy},
+            { "justnu", EPersonality.Timmy},
+            { "ratthew", EPersonality.Rat},
+            { "choccy", EPersonality.Rat},
+        };
+        }
+
+        private static readonly NickNames _nicknames;
+
         public EPersonality GetPersonality(SAINBotInfoClass infoClass, out PersonalitySettingsClass settings)
         {
             if (checkForcePersonality(out EPersonality result)) {
@@ -72,7 +95,7 @@ namespace SAIN.Preset.Personalities
                 return EPersonality.Normal;
             }
             string lowerNick = nickname.ToLower();
-            foreach (KeyValuePair<string, EPersonality> kvp in GlobalSettingsClass.Instance.Mind.PERS_NAMES) {
+            foreach (KeyValuePair<string, EPersonality> kvp in _nicknames.NicknamePersonalityMatches) {
                 if (lowerNick.Contains(kvp.Key.ToLower())) {
                     return kvp.Value;
                 }

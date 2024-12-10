@@ -56,20 +56,6 @@ namespace SAIN.Preset.GlobalSettings.Categories
             { EPersonality.Normal, false},
         };
 
-        [Name("Force Personality for Player Nickname")]
-        [Description("Ties a specific personality to a nickname.")]
-        [Category("Personality")]
-        [Hidden]
-        public Dictionary<string, EPersonality> PERS_NAMES = new Dictionary<string, EPersonality>() {
-            { "solarint", EPersonality.GigaChad},
-            { "chomp", EPersonality.Chad},
-            { "senko", EPersonality.Chad},
-            { "kaeno", EPersonality.Timmy},
-            { "justnu", EPersonality.Timmy},
-            { "ratthew", EPersonality.Rat},
-            { "choccy", EPersonality.Rat},
-        };
-
         [Name("Boss Personalities")]
         [Description("Sets the pesonality that a boss will always use.")]
         [Category("Personality")]
