@@ -20,14 +20,16 @@ namespace SAIN.Preset.Personalities
         private class NickNames
         {
             public Dictionary<string, EPersonality> NicknamePersonalityMatches = new Dictionary<string, EPersonality>() {
-            { "solarint", EPersonality.GigaChad},
-            { "chomp", EPersonality.Chad},
-            { "senko", EPersonality.Chad},
-            { "kaeno", EPersonality.Timmy},
-            { "justnu", EPersonality.Timmy},
-            { "ratthew", EPersonality.Rat},
-            { "choccy", EPersonality.Rat},
-        };
+                { "steve", EPersonality.Wreckless},
+                { "solarint", EPersonality.GigaChad},
+                { "lvndmark", EPersonality.SnappingTurtle},
+                { "chomp", EPersonality.Chad},
+                { "senko", EPersonality.Chad},
+                { "kaeno", EPersonality.Timmy},
+                { "justnu", EPersonality.Timmy},
+                { "ratthew", EPersonality.Rat},
+                { "choccy", EPersonality.Rat},
+            };
         }
 
         private static readonly NickNames _nicknames;
