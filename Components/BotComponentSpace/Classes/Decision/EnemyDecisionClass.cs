@@ -1,6 +1,5 @@
 ﻿using EFT;
 using SAIN.Preset.GlobalSettings;
-using SAIN.SAINComponent.Classes.Decision.Reasons;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Search;
 using System.Collections.Generic;
