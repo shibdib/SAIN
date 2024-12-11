@@ -11,7 +11,7 @@ namespace SAIN.Preset.Personalities
     {
         static PersonalityDictionary()
         {
-            if (!JsonUtility.Load.LoadObject(out NickNames nicknames, "NicknamePersonalities")) {
+            if (!JsonUtility.Load.LoadObject(out _nicknames, "NicknamePersonalities")) {
                 _nicknames = new NickNames();
                 JsonUtility.SaveObjectToJson(_nicknames, "NicknamePersonalities");
             }

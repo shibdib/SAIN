@@ -392,6 +392,9 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         public void Sprint(bool value)
         {
+            if (BotOwner == null || BotOwner.DoorOpener == null) {
+                return;
+            }
             if (BotOwner.DoorOpener.Interacting) {
                 value = false;
             }

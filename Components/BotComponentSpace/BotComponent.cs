@@ -73,6 +73,24 @@ namespace SAIN.SAINComponent
         public AimClass Aim { get; private set; }
         public CoroutineManager<BotComponent> CoroutineManager { get; private set; }
 
+        public bool ShallExecuteRequests {
+            get
+            {
+                BotRequest currRequest = BotOwner.BotRequestController.CurRequest;
+                if (currRequest == null) {
+                    return false;
+                }
+                IPlayer requester = currRequest.Requester;
+                if (requester == null) {
+                    return false;
+                }
+                if (HasEnemy && currRequest.Requester.IsAI) {
+                    return false;
+                }
+                return true;
+            }
+        }
+
         public bool IsDead => !Person.ActivationClass.IsAlive;
         public bool GameEnding => BotActivation.GameEnding;
         public bool SAINLayersActive => BotActivation.SAINLayersActive;
@@ -297,12 +315,11 @@ namespace SAIN.SAINComponent
                 }
 
                 try {
-					BotOwner.LookSensor.MaxShootDist = float.MaxValue;
-					if (BotOwner.AIData is GClass551 aiData)
-					{
-						aiData.IsNoOffsetShooting = false;
-					}
-				}
+                    BotOwner.LookSensor.MaxShootDist = float.MaxValue;
+                    if (BotOwner.AIData is GClass551 aiData) {
+                        aiData.IsNoOffsetShooting = false;
+                    }
+                }
                 catch (Exception ex) {
                     Logger.LogError($"Error setting MaxShootDist during init, but continuing with initialization...: {ex}");
                 }

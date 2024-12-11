@@ -5,6 +5,7 @@ using EFT;
 using HarmonyLib;
 using SAIN.Editor;
 using SAIN.Helpers;
+using SAIN.Patches.Generic;
 using SAIN.Patches.Movement;
 using SAIN.Patches.Shoot.Aim;
 using SAIN.Plugin;
@@ -83,6 +84,8 @@ namespace SAIN
                 typeof(Patches.Generic.ShallKnowEnemyPatch),
                 typeof(Patches.Generic.ShallKnowEnemyLatePatch),
                 typeof(Patches.Generic.HaveSeenEnemyPatch),
+                typeof(Patches.Generic.AllowRequestPatch),
+                typeof(Patches.Generic.FindRequestForMePatch),
 
                 //typeof(Patches.Generic.Fixes.HealCancelPatch),
                 typeof(Patches.Generic.Fixes.StopSetToNavMeshPatch),
