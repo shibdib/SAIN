@@ -19,6 +19,8 @@ namespace SAIN.Preset.Personalities
 
         private class NickNames
         {
+            public string Description = "Names are not case sensitive. Any bot nick name that contains one of the entries here will be forced to use the matching personality.";
+
             public Dictionary<string, EPersonality> NicknamePersonalityMatches = new Dictionary<string, EPersonality>() {
                 { "steve", EPersonality.Wreckless},
                 { "solarint", EPersonality.GigaChad},

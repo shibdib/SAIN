@@ -69,3 +69,11 @@ There are many classes that I created essentially just to see if I could, and I 
 SAIN is very jank, in the classic style of some of my favorite games like S.T.A.L.K.E.R. and ARMA.
 It's also "Dynamic" in the sense that it is about 95% map/level agnostic, as long as the level has NavMesh to querry. 
 It should work perfectly with any future level or location revamp released in the game.
+
+## SAIN Design Principles
+SAIN primary focus is to make challenging but fair bots by immitating player tactics in Tactical Shooters. 
+It is designed in such a way that all bots are subject to strict limitations, and make decisions based upon what a player might reasonably be able to see/hear. 
+With the exception of minor features that prioritize optimization and performance, bot behavior does not cheat nor receive any information on their enemy that couldn't reasonably be communicated between two players. 
+With that limitation, bots can perform a large variety of decisions that players tend to do in player vs player fight. Many of these are inspired by my own experience playing tactical shooters for over a decade. 
+SAIN is also built with user customization in mind. As an individual with limited resources, there are several features within SAIN that are set up with the intention that power users can tweak and share "Presets" - essentially mods for SAIN.
+Most internal configuration for AI can be changed (writing documentation for all these is tedious work), and changes made within the GUI take effect right away to see the differences live.
