@@ -5,6 +5,11 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class SteeringSettings : SAINSettingsBase<SteeringSettings>, ISAINSettings
     {
+        [Name("Smooth Bot Turn")]
+        [Description("When this is enabled, bots will not turn at a constant speed, scale the speed based on the angle amount they are turning.")]
+        [Category("Character Turning")]
+        public bool SMOOTH_TURN_TOGGLE = true;
+
         [Name("Turn Angle Max")]
         [Description("The maximum angle, in degrees, to scale turn speed by.")]
         [Category("Character Turning")]

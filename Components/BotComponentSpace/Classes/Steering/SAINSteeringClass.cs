@@ -12,24 +12,12 @@ namespace SAIN.SAINComponent.Classes.Mover
 {
     public class SAINSteeringClass : BotBase, IBotClass
     {
-        private static SteeringSettings _settings => GlobalSettingsClass.Instance.Steering;
-        private float _maxAngle => _settings.SteerSpeed_MaxAngle;
-        private float _minAngle => _settings.SteerSpeed_MinAngle;
-        private float _maxSpeed => _settings.SteerSpeed_MaxSpeed;
-        private float _minSpeed => _settings.SteerSpeed_MinSpeed;
-        private float STEER_LASTSEEN_TO_LASTKNOWN_DISTANCE = 2.5f;
-        private float STEER_LASTSEEN_TO_LASTKNOWN_DISTANCE_SQR => STEER_LASTSEEN_TO_LASTKNOWN_DISTANCE * STEER_LASTSEEN_TO_LASTKNOWN_DISTANCE;
-        private float STEER_BASE_ROTATE_SPEED_PEACE = 120f;
-        private float STEER_BASE_ROTATE_SPEED_COMBAT = 250f;
-        private float STEER_RANDOMLOOK_SPEED_MIN = 40f;
-        private float STEER_RANDOMLOOK_SPEED_MAX = 100f;
-        private float STEER_RANDOMLOOK_SPEED_MAX_COEF = 2f;
-
+        private static SteeringSettings _steerSettings => GlobalSettingsClass.Instance.Steering;
+        private float STEER_LASTSEEN_TO_LASTKNOWN_DISTANCE_SQR => _steerSettings.STEER_LASTSEEN_TO_LASTKNOWN_DISTANCE.Sqr();
         public ESteerPriority CurrentSteerPriority => _steerPriorityClass.CurrentSteerPriority;
         public ESteerPriority LastSteerPriority => _steerPriorityClass.LastSteerPriority;
         public EEnemySteerDir EnemySteerDir { get; private set; }
         public Vector3 WeaponRootOffset => BotOwner.WeaponRoot.position - Bot.Position + (Vector3.down * 0.1f);
-        public AimStatus AimStatus => _steerPriorityClass.AimStatus;
 
         public bool SteerByPriority(Enemy enemy = null, bool lookRandom = true, bool ignoreRunningPath = false)
         {
@@ -107,26 +95,32 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (direction.sqrMagnitude < 1f) {
                 direction = direction.normalized;
             }
-            float turnSpeed = calcTurnSpeed(direction, minTurnSpeed, maxTurnSpeed);
+            float turnSpeed;
+            if (_steerSettings.SMOOTH_TURN_TOGGLE) {
+                turnSpeed = calcTurnSpeed(direction, minTurnSpeed, maxTurnSpeed);
+            }
+            else {
+                turnSpeed = maxTurnSpeed;
+            }
             BotOwner.Steering.LookToDirection(direction, turnSpeed);
         }
 
         private float calcTurnSpeed(Vector3 targetDirection, float minTurnSpeed, float maxTurnSpeed)
         {
-            float minSpeed = minTurnSpeed > 0 ? minTurnSpeed : _minSpeed;
-            float maxSpeed = maxTurnSpeed > 0 ? maxTurnSpeed : _maxSpeed;
+            float minSpeed = minTurnSpeed > 0 ? minTurnSpeed : _steerSettings.SteerSpeed_MinSpeed;
+            float maxSpeed = maxTurnSpeed > 0 ? maxTurnSpeed : _steerSettings.SteerSpeed_MaxSpeed;
             if (minSpeed >= maxSpeed) {
                 return minSpeed;
             }
 
-            float maxAngle = _maxAngle;
+            float maxAngle = _steerSettings.SteerSpeed_MaxAngle;
             Vector3 currentDir = _lookDirection;
             float angle = Vector3.Angle(currentDir, targetDirection.normalized);
 
             if (angle >= maxAngle) {
                 return maxSpeed;
             }
-            float minAngle = _minAngle;
+            float minAngle = _steerSettings.SteerSpeed_MinAngle;
             if (angle <= minAngle) {
                 return minSpeed;
             }
@@ -166,8 +160,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             Vector3? point = _randomLook.UpdateRandomLook();
             if (point != null) {
-                float random = Random.Range(STEER_RANDOMLOOK_SPEED_MIN, STEER_RANDOMLOOK_SPEED_MAX);
-                LookToPoint(point.Value, random, random * STEER_RANDOMLOOK_SPEED_MAX_COEF);
+                float random = Random.Range(_steerSettings.STEER_RANDOMLOOK_SPEED_MIN, _steerSettings.STEER_RANDOMLOOK_SPEED_MAX);
+                LookToPoint(point.Value, random, random * _steerSettings.STEER_RANDOMLOOK_SPEED_MAX_COEF);
             }
         }
 
@@ -199,10 +193,10 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             HeardSoundSteering.Update();
             if (!Bot.SAINLayersActive) {
-                BotOwner.Settings.FileSettings.Move.BASE_ROTATE_SPEED = STEER_BASE_ROTATE_SPEED_PEACE;
+                BotOwner.Settings.FileSettings.Move.BASE_ROTATE_SPEED = _steerSettings.STEER_BASE_ROTATE_SPEED_PEACE;
             }
             else {
-                BotOwner.Settings.FileSettings.Move.BASE_ROTATE_SPEED = STEER_BASE_ROTATE_SPEED_COMBAT;
+                BotOwner.Settings.FileSettings.Move.BASE_ROTATE_SPEED = _steerSettings.STEER_BASE_ROTATE_SPEED_COMBAT;
             }
         }
 
