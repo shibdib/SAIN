@@ -7,10 +7,6 @@ using System.Linq;
 using EFTCore = GClass583;
 using EFTStatModifiersClass = GClass580;
 
-////////
-// Fixed some GClass References here, but classes were renamed in the deobfuscation, so much of this isn't necessary anymore. Need to clean this up
-////////
-
 namespace SAIN.Helpers
 {
     internal class HelpersGClass
@@ -46,7 +42,7 @@ namespace SAIN.Helpers
 
     public class CoreOverrides
     {
-        public string README = "Changes here require game restart! Not all settings do what the name suggests.";
+        public string README = "Dont change anything here unless you know exactly what you are doing. Changes here require game restart! Not all settings do what the name suggests.";
         public bool SCAV_GROUPS_TOGETHER = false;
         public float DIST_NOT_TO_GROUP = 50f;
         public bool CAN_SHOOT_TO_HEAD = true;
