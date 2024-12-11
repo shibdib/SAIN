@@ -61,11 +61,13 @@ namespace SAIN
                     "AssaultHaveEnemy",
                     "Request",
                     "FightReqNull",
-                    "PeacecReqNull",
+                    //"PeacecReqNull",
                     "Assault Building",
                     "Enemy Building",
                     "KnightFight",
-                    "PtrlBirdEye"
+                    //"PtrlBirdEye",
+                    "PmcBear",
+                    "PmcUsec",
                 };
                 checkExtractEnabled(LayersToRemove);
                 BrainManager.RemoveLayers(LayersToRemove, pmcBrain);
@@ -95,10 +97,12 @@ namespace SAIN
                     "Simple Target",
                     "Pmc",
                     "FightReqNull",
-                    "PeacecReqNull",
+                    //"PeacecReqNull",
                     "AssaultHaveEnemy",
                     "Assault Building",
                     "Enemy Building",
+                    "PmcBear",
+                    "PmcUsec",
                 };
                 checkExtractEnabled(LayersToRemove);
                 BrainManager.RemoveLayers(LayersToRemove, brainList);
@@ -126,11 +130,13 @@ namespace SAIN
                     "AssaultHaveEnemy",
                     "Request",
                     "FightReqNull",
-                    "PeacecReqNull",
+                    //"PeacecReqNull",
                     "Assault Building",
                     "Enemy Building",
                     "KnightFight",
-                    "PtrlBirdEye"
+                    //"PtrlBirdEye",
+                    "PmcBear",
+                    "PmcUsec",
                 };
                 checkExtractEnabled(LayersToRemove);
                 BrainManager.RemoveLayers(LayersToRemove, brainList);
@@ -163,11 +169,13 @@ namespace SAIN
                     "AssaultHaveEnemy",
                     "Request",
                     "FightReqNull",
-                    "PeacecReqNull",
+                    //"PeacecReqNull",
                     "Assault Building",
                     "Enemy Building",
                     "KnightFight",
-                    "PtrlBirdEye"
+                    //"PtrlBirdEye",
+                    "PmcBear",
+                    "PmcUsec",
                 };
                 checkExtractEnabled(LayersToRemove);
                 BrainManager.RemoveLayers(LayersToRemove, brainList);
@@ -200,10 +208,13 @@ namespace SAIN
                     "AssaultHaveEnemy",
                     "Request",
                     "FightReqNull",
-                    "PeacecReqNull",
+                    //"PeacecReqNull",
                     "Assault Building",
                     "Enemy Building",
                     "KnightFight",
+                    //"PtrlBirdEye",
+                    "PmcBear",
+                    "PmcUsec",
                 };
                 checkExtractEnabled(LayersToRemove);
                 BrainManager.RemoveLayers(LayersToRemove, brainList);
