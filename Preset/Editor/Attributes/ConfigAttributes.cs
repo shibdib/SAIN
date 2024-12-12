@@ -143,6 +143,13 @@ namespace SAIN.Attributes
         }
     }
 
+    public sealed class DeveloperOptionAttribute : BoolAttribute
+    {
+        public DeveloperOptionAttribute() : base(true)
+        {
+        }
+    }
+
     public sealed class SimpleValueAttribute : BoolAttribute
     {
         public SimpleValueAttribute() : base(true)

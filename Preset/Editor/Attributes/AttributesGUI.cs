@@ -315,7 +315,7 @@ namespace SAIN.Attributes
         private static void startConfigEntry(float listDepth, GUIEntryConfig entryConfig, ConfigInfoClass info)
         {
             float horizDepth = listDepth * entryConfig.SubList_Indent_Horizontal;
-            if (info != null && info.Advanced) {
+            if (info != null && info.AdvancedOption) {
                 BeginHorizontal(25f);
                 Space(horizDepth);
                 Box("Advanced",
@@ -859,7 +859,7 @@ namespace SAIN.Attributes
 
             // Display Non-Advanced Settings first, thats why there are 2 loops here. Probably a better way to do this.
             foreach (ConfigInfoClass attributes in attributeInfos) {
-                if (attributes.Advanced == true) {
+                if (attributes.AdvancedOption == true) {
                     continue;
                 }
                 if (attributes.DoNotShowGUI) {
@@ -879,7 +879,7 @@ namespace SAIN.Attributes
             }
 
             foreach (ConfigInfoClass attributes in attributeInfos) {
-                if (attributes.Advanced == false) {
+                if (attributes.AdvancedOption == false) {
                     continue;
                 }
                 if (attributes.DoNotShowGUI) {

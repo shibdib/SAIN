@@ -13,6 +13,9 @@ namespace SAIN.SAINComponent.Classes.Mover
         private const float LEAN_UPDATE_NOT_FOUND_FREQ = 0.25f;
         private const float LEAN_RAYCAST_OFFSET_DIST = 0.66f;
         private const float LEAN_MAX_RAYCAST_DIST = 16f;
+        private const float RESET_LEAN_AFTER_TIME = 1f;
+        private const float MAX_CORNER_DISTANCE_LEAN = 20f;
+        private const float MAX_CORNER_DISTANCE_LEAN_SQR = MAX_CORNER_DISTANCE_LEAN * MAX_CORNER_DISTANCE_LEAN;
 
         public LeanSetting LeanDirection { get; private set; }
         public LeanSetting LastLeanDirection { get; private set; }
@@ -96,7 +99,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             return true;
         }
 
-        private const float RESET_LEAN_AFTER_TIME = 1f;
 
         private void findLean(Enemy enemy)
         {
@@ -155,8 +157,6 @@ namespace SAIN.SAINComponent.Classes.Mover
             return result;
         }
 
-        private const float MAX_CORNER_DISTANCE_LEAN = 20f;
-        private const float MAX_CORNER_DISTANCE_LEAN_SQR = MAX_CORNER_DISTANCE_LEAN * MAX_CORNER_DISTANCE_LEAN;
 
         private float _stopHoldLeanTime;
 

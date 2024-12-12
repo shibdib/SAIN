@@ -70,13 +70,15 @@ namespace SAIN.Preset.GlobalSettings
         public float RAIN_SOUND_COEF_INSIDE = 0.75f;
 
         [Name("Max Footstep Audio Distance")]
-        [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters.")]
+        [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters. " +
+            "This is a theoretical max range, actual range heavily changes depending on conditions.")]
         [Category("Hearing Distance")]
         [MinMax(10f, 150f, 100f)]
         public float MaxFootstepAudioDistance = 70f;
 
         [Name("Max Footstep Audio Distance without Headphones")]
-        [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters when not wearing headphones.")]
+        [Description("The Maximum Range that a bot can hear footsteps, sprinting, and jumping, turning, gear sounds, and any movement related sounds, in meters. " +
+            "This is a theoretical max range, actual range heavily changes depending on conditions.")]
         [Category("Hearing Distance")]
         [MinMax(10f, 150f, 100f)]
         public float MaxFootstepAudioDistanceNoHeadphones = 50f;
@@ -226,49 +228,49 @@ namespace SAIN.Preset.GlobalSettings
         public float HEAR_MODIFIER_HEAVYBREATH = 0.65f;
 
         [Name("Minimum Hear Modifier")]
-        [Description("")]
+        [Description("Final Multiplier will not go below this value.")]
         [Category("Hearing Modifiers")]
         [MinMax(0.01f, 1f, 1000f)]
         public float HEAR_MODIFIER_MIN_CLAMP = 0.01f;
 
         [Name("Maximum Hear Modifier")]
-        [Description("")]
+        [Description("Final Multiplier will not go above this value.")]
         [Category("Hearing Modifiers")]
         [MinMax(1f, 5f, 1000f)]
         public float HEAR_MODIFIER_MAX_CLAMP = 5f;
 
         [Name("Minimum Hearing Modifier Distance")]
-        [Description("")]
+        [Description("Sounds that originate closer than this have a 100% chance of being heard.")]
         [Category("Hearing Modifiers")]
         [MinMax(0f, 50f, 100f)]
         public float HEAR_MODIFIER_MAX_AFFECT_DIST = 3f;
 
         [Name("Scale Start Distance - No Headphones")]
-        [Description("")]
+        [Description("Sounds that originate closer than this have a 100% chance of being heard.")]
         [Category("Hearing Chance")]
         [MinMax(0, 100, 1)]
         public float HEAR_CHANCE_MIN_DIST = 0.25f;
 
         [Name("Scale Start Distance - Headphones")]
-        [Description("")]
+        [Description("Sounds that originate closer than this have a 100% chance of being heard.")]
         [Category("Hearing Chance")]
         [MinMax(0, 100, 1)]
         public float HEAR_CHANCE_MIN_DIST_HEADPHONES = 1;
 
         [Name("Midrange Coefficient")]
-        [Description("")]
+        [Description("If the distance between a sound and the bot is X distance of its max range, increase its chance to hear slightly. So if a sound has a range of 50 meters, and the distance to a bot hears is 25 meters away, that would result in 25 / 50, so 0.5, which is below this mid range value.")]
         [Category("Hearing Chance")]
-        [MinMax(0.01f, 1f, 1000f)]
+        [MinMax(0.00f, 1f, 1000f)]
         public float HEAR_CHANCE_MIDRANGE_COEF = 0.66f;
 
         [Name("Mid range Minimum Chance - Headphones")]
-        [Description("")]
+        [Description("If a sound is within mid-range. Increase the minimum chance by this amount")]
         [Category("Hearing Chance")]
         [MinMax(0, 100, 1)]
         public float HEAR_CHANCE_MIDRANGE_MINCHANCE_HEADPHONES = 3;
 
         [Name("Long range Minimum Chance - Headphones")]
-        [Description("")]
+        [Description("If a sound is further than mid-range. Increase the minimum chance by this amount")]
         [Category("Hearing Chance")]
         [MinMax(0, 100, 1)]
         public float HEAR_CHANCE_LONGRANGE_MINCHANCE_HEADPHONES = 1;
@@ -280,31 +282,31 @@ namespace SAIN.Preset.GlobalSettings
         public float HEAR_CHANCE_NOTMOVING_VELOCITY = 0.05f;
 
         [Name("Standing Still Min Chance - No Headphones")]
-        [Description("")]
+        [Description("If a bot is standing still, add X percent to a bot minimum hear chance for sounds that aren't gunshots.")]
         [Category("Hearing Chance")]
         [MinMax(0, 100, 1)]
         public float HEAR_CHANCE_NOTMOVING_MINCHANCE = 2;
 
         [Name("Standing Still Min Chance - Headphones")]
-        [Description("")]
+        [Description("If a bot is standing still, add X percent to a bot minimum hear chance for sounds that aren't gunshots.")]
         [Category("Hearing Chance")]
         [MinMax(0, 100, 1)]
         public float HEAR_CHANCE_NOTMOVING_MINCHANCE_HEADPHONES = 4;
 
-        [Name("Other Sounds Min Chance")]
-        [Description("")]
+        [Name("Other Sounds Min Chance - Headphones")]
+        [Description("If the type of sound is not footsteps or gunfire, add X percent to a bot minimum hear chance.")]
         [Category("Hearing Chance")]
         [MinMax(0, 100, 1)]
         public float HEAR_CHANCE_HEADPHONES_OTHERSOUNDS = 3;
 
         [Name("Active Enemy Min Chance - No Headphones")]
-        [Description("")]
+        [Description("If the source of a sound is from a bot's active primary enemy, add X percent to a bot minimum hear chance for sounds that aren't gunshots.")]
         [Category("Hearing Chance")]
         [MinMax(0, 100, 1)]
         public float HEAR_CHANCE_CURRENTENEMY_MINCHANCE = 2;
 
         [Name("Active Enemy Min Chance - Headphones")]
-        [Description("")]
+        [Description("If the source of a sound is from a bot's active primary enemy, add X percent to a bot minimum hear chance for sounds that aren't gunshots.")]
         [Category("Hearing Chance")]
         [MinMax(0, 100, 1)]
         public float HEAR_CHANCE_CURRENTENEMY_MINCHANCE_HEADPHONES = 3;
