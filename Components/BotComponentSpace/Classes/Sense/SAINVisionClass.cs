@@ -6,6 +6,8 @@ using SPT.Reflection.Patching;
 using System.Reflection;
 using System;
 using UnityEngine;
+using static EFT.SpeedTree.TreeWind;
+using SAIN.Helpers;
 
 namespace SAIN.SAINComponent.Classes
 {
@@ -70,6 +72,13 @@ namespace SAIN.SAINComponent.Classes
                         _HourServerProperty.SetValue(lookSensor, (int)((short)dateTime.Value.Hour));
                     }
                 }
+
+                //var curve = botOwner.Settings.Curv.StandartVisionSettings;
+                //if (curve != null) {
+                //    if (!JsonUtility.Load.LoadObject(out AnimationCurve importedCurve, "StandardVisionCurve")) {
+                //        JsonUtility.SaveObjectToJson(curve, "StandardVisionCurve");
+                //    }
+                //}
 
                 float currentVisionDistance = botOwner.Settings.Current.CurrentVisibleDistance;
                 // Sets a minimum cap based on weather conditions to avoid bots having too low of a vision Distance while at peace in bad weather

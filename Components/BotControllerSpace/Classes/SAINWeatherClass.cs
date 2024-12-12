@@ -7,7 +7,7 @@ namespace SAIN.Components.BotController
     public class SAINWeatherClass : SAINControllerBase
     {
         public readonly float WEATHER_VISION_UPDATE_FREQ = 5f;
-        public readonly float WEATHER_RAINSOUND_UPDATE_FREQ = 2f;
+        public readonly float WEATHER_RAINSOUND_UPDATE_FREQ = 1f;
 
         public float VisionDistanceModifier { get; private set; } = 1f;
 
@@ -38,8 +38,9 @@ namespace SAIN.Components.BotController
                     RainSoundModifierIndoor = 1f;
                     return;
                 }
-                RainSoundModifierOutdoor = Mathf.Lerp(1f, GlobalSettingsClass.Instance.Hearing.RAIN_SOUND_COEF_OUTSIDE, curve.Rain);
-                RainSoundModifierIndoor = Mathf.Lerp(1f, GlobalSettingsClass.Instance.Hearing.RAIN_SOUND_COEF_INSIDE, curve.Rain);
+                var hearingSettings = GlobalSettingsClass.Instance.Hearing;
+                RainSoundModifierOutdoor = Mathf.Lerp(1f, hearingSettings.RAIN_SOUND_COEF_OUTSIDE, curve.Rain);
+                RainSoundModifierIndoor = Mathf.Lerp(1f, hearingSettings.RAIN_SOUND_COEF_INSIDE, curve.Rain);
             }
         }
 
