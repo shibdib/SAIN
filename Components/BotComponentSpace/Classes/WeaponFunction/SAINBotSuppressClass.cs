@@ -42,7 +42,7 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             Bot.EnemyController.Events.OnEnemyRemoved -= clearLastSuppEnemy;
         }
 
-        public void AddSuppression(Enemy enemy, float distance, float amount = -1)
+        public void CheckAddSuppression(Enemy enemy, float distance, float amount = -1)
         {
             if (!_settings.SUPP_TOGGLE) {
                 return;
