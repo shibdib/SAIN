@@ -277,7 +277,9 @@ namespace SAIN.SAINComponent.Classes.Mover
                         //{
                         //    SAINBot.Mover.TryJump();
                         //}
-                        else if (timeSinceNoMove > _moveSettings.BotSprintTryVaultTime) {
+                        else if (Bot.Info.FileSettings.Move.VAULT_TOGGLE
+                            && GlobalSettingsClass.Instance.Move.VAULT_TOGGLE
+                            && timeSinceNoMove > _moveSettings.BotSprintTryVaultTime) {
                             Bot.Mover.TryVault();
                         }
 

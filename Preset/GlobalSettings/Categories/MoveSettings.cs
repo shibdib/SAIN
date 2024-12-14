@@ -6,6 +6,46 @@ namespace SAIN.Preset.GlobalSettings
 {
     public class MoveSettings : SAINSettingsBase<MoveSettings>, ISAINSettings
     {
+        [Name("Can Lean - Global")]
+        [Description("Can any bot lean while peeking and while outside of cover?")]
+        [Category("Movement Option Toggles")]
+        public bool LEAN_TOGGLE = true;
+
+        [Name("Can Lean in Cover - Global")]
+        [Description("Can any bot lean while in cover?")]
+        [Category("Movement Option Toggles")]
+        public bool LEAN_INCOVER_TOGGLE = true;
+
+        [Name("Can Jump - Global")]
+        [Description("Can any bot Jump?")]
+        [Category("Movement Option Toggles")]
+        public bool JUMP_TOGGLE = true;
+
+        [Name("Auto Pose - Global")]
+        [Description("Does any bot automatically adjust their crouch height depending on objects between them and their enemy?")]
+        [Category("Movement Option Toggles")]
+        public bool AUTOCROUCH_TOGGLE = true;
+
+        [Name("Can Go Prone - Global")]
+        [Description("Can any bot go Prone at all?")]
+        [Category("Movement Option Toggles")]
+        public bool PRONE_TOGGLE = true;
+
+        [Name("Can Go Prone from Suppression - Global")]
+        [Description("Can any bot go Prone as a panic response to being suppressed?")]
+        [Category("Movement Option Toggles")]
+        public bool PRONE_SUPPRESS_TOGGLE = true;
+
+        [Name("Can Vault - Global")]
+        [Description("Can any bot Vault?")]
+        [Category("Movement Option Toggles")]
+        public bool VAULT_TOGGLE = true;
+
+        [Name("Can Vault to get Unstuck - Global")]
+        [Description("Can any bot Vault if they are stuck on map geometry?")]
+        [Category("Movement Option Toggles")]
+        public bool VAULT_UNSTUCK_TOGGLE = true;
+
         [Name("Force Constant Sprint Speed")]
         [Description("In vanilla, bot movement speed while sprinting is set to a constant speed, if this is disabled, bots will use the same movement speed calculations as a normal player.")]
         [Category("Sprinting")]

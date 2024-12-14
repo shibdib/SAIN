@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Text;
@@ -63,6 +64,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private void checkSetProne()
         {
+            if (!Bot.Info.FileSettings.Move.PRONE_TOGGLE || !GlobalSettingsClass.Instance.Move.PRONE_TOGGLE) {
+                return;
+            }
             if (Bot.Enemy != null
                 && Bot.Player.MovementContext.CanProne
                 && Bot.Player.PoseLevel <= 0.1
@@ -74,13 +78,10 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private void checkSetLean()
         {
-            if (Bot.Suppression.IsSuppressed) {
-                Bot.Mover.FastLean(LeanSetting.None);
-                CurrentLean = LeanSetting.None;
-                return;
-            }
-
-            if (Bot.Decision.CurrentSelfDecision != ESelfDecision.None) {
+            if (!Bot.Info.FileSettings.Move.LEAN_INCOVER_TOGGLE
+                || !GlobalSettingsClass.Instance.Move.LEAN_INCOVER_TOGGLE
+                || Bot.Suppression.IsSuppressed
+                || Bot.Decision.CurrentSelfDecision != ESelfDecision.None) {
                 Bot.Mover.FastLean(LeanSetting.None);
                 CurrentLean = LeanSetting.None;
                 return;

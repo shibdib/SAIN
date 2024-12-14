@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
 using UnityEngine.AI;
@@ -75,6 +76,9 @@ namespace SAIN.Layers.Combat.Solo
 
         private void checkJump()
         {
+            if (!Bot.Info.FileSettings.Move.JUMP_TOGGLE || !GlobalSettingsClass.Instance.Move.JUMP_TOGGLE) {
+                return;
+            }
             if (_shallTryJump && TryJumpTimer < Time.time && Bot.Player.IsSprintEnabled) {
                 //&& Bot.Enemy.Path.PathDistance > 3f
                 var corner = _enemy.Path.EnemyCorners.GroundPosition(ECornerType.Last);
@@ -88,6 +92,9 @@ namespace SAIN.Layers.Combat.Solo
 
         private void checkJumpEnemyInSight()
         {
+            if (!Bot.Info.FileSettings.Move.JUMP_TOGGLE || !GlobalSettingsClass.Instance.Move.JUMP_TOGGLE) {
+                return;
+            }
             if (_shallTryJump) {
                 if (_shallBunnyHop) {
                     Bot.Mover.TryJump();

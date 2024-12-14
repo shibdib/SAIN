@@ -2,6 +2,7 @@
 using EFT;
 using HarmonyLib;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -219,6 +220,9 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private bool tryVault()
         {
+            if (!Bot.Info.FileSettings.Move.VAULT_UNSTUCK_TOGGLE || !GlobalSettingsClass.Instance.Move.VAULT_UNSTUCK_TOGGLE) {
+                return false;
+            }
             Vector3 currentPos = Bot.Position;
             if (Bot.Mover.TryVault()) {
                 _botVaultedTime = Time.time;
@@ -256,6 +260,9 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private void tryAutoVault()
         {
+            if (!Bot.Info.FileSettings.Move.VAULT_TOGGLE || !GlobalSettingsClass.Instance.Move.VAULT_TOGGLE) {
+                return;
+            }
             if (_nextVaultCheckTime < Time.time
                 && (BotOwner?.Mover?.IsMoving == true || Bot.Mover.SprintController.Running)) {
                 float timeAdd;

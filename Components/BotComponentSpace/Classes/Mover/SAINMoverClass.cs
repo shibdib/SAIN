@@ -1,5 +1,6 @@
 ﻿using EFT;
 using HarmonyLib;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using System;
 using System.Collections;
@@ -195,7 +196,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             CurrentPathStatus = BotOwner.Mover.GoToPoint(point, slowAtEnd, reachDist, false, false, true);
             if (CurrentPathStatus != NavMeshPathStatus.PathInvalid) {
                 SprintController.CancelRun();
-                Crawling = crawl;
+                Crawling = crawl && Bot.Info.FileSettings.Move.PRONE_TOGGLE && GlobalSettingsClass.Instance.Move.PRONE_TOGGLE;
                 Prone.SetProne(crawl);
                 checkNewMove(point, wasMoving);
                 return true;
@@ -239,7 +240,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (reachDist < 0f)
                 reachDist = SAINPlugin.LoadedPreset.GlobalSettings.General.BaseReachDistance;
 
-            if (crawl)
+            if (crawl && Bot.Info.FileSettings.Move.PRONE_TOGGLE && GlobalSettingsClass.Instance.Move.PRONE_TOGGLE)
                 Prone.SetProne(true);
 
             bool wasMoving = Moving;

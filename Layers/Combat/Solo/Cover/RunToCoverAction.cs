@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
+using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.Mover;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Collections;
@@ -91,6 +92,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         private void checkJumpToCover()
         {
+            if (!Bot.Info.FileSettings.Move.JUMP_TOGGLE || !GlobalSettingsClass.Instance.Move.JUMP_TOGGLE) {
+                return;
+            }
             if (_shallJumpToCover &&
                 _moveSuccess &&
                 _sprinting &&
