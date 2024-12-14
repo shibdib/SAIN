@@ -49,6 +49,7 @@ namespace SAIN.Layers
 
         public override void Update()
         {
+            this.StartProfilingSample("Update");
             float stamina = Bot.Player.Physical.Stamina.NormalValue;
             bool fightingEnemy = isFightingEnemy();
             // Environment id of 0 means a bot is outside.
@@ -104,6 +105,7 @@ namespace SAIN.Layers
 
             Bot.Steering.SteerByPriority();
             Shoot.CheckAimAndFire();
+            this.EndProfilingSample();
         }
 
         private void setStatus(EExtractStatus status)

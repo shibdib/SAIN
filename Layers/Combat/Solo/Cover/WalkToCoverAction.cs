@@ -3,6 +3,7 @@ using SAIN.SAINComponent.Classes.WeaponFunction;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -21,16 +22,20 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Update()
         {
+            this.StartProfilingSample("Update");
+
             Bot.Mover.SetTargetMoveSpeed(1f);
             Bot.Mover.SetTargetPose(1f);
 
             if (Bot.Enemy == null) {
+                this.EndProfilingSample();
                 return;
             }
 
             if (Bot.Cover.CoverPoints.Count == 0) {
                 Bot.Mover.DogFight.DogFightMove(true);
                 EngageEnemy();
+                this.EndProfilingSample();
                 return;
             }
 
@@ -46,6 +51,7 @@ namespace SAIN.Layers.Combat.Solo.Cover
             }
 
             EngageEnemy();
+            this.EndProfilingSample();
         }
 
         private void findCover()

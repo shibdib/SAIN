@@ -25,7 +25,8 @@ namespace SAIN.Layers
 
         public override void Update()
         {
-
+            this.StartProfilingSample("Update");
+            this.EndProfilingSample();
         }
     }
 }

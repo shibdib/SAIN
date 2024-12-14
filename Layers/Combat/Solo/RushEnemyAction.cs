@@ -1,9 +1,9 @@
 ﻿using EFT;
 using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Profiling;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -15,20 +15,25 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
+            this.StartProfilingSample("Update");
             Bot.Mover.SetTargetPose(1f);
             Bot.Mover.SetTargetMoveSpeed(1f);
+            updateRushBehavior();
+            this.EndProfilingSample();
+        }
+
+        private void updateRushBehavior()
+        {
             if (!checkHasEnemy()) {
                 Bot.Steering.SteerByPriority(null, true);
-                return;
             }
-
-            if (_enemy.InLineOfSight) {
+            else if (_enemy.InLineOfSight) {
                 enemyInSight();
-                return;
             }
-
-            checkUpdateMove();
-            checkJump();
+            else {
+                checkUpdateMove();
+                checkJump();
+            }
         }
 
         public void Toggle(bool value)

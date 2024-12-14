@@ -22,6 +22,8 @@ namespace SAIN.Layers.Peace
 
         public override void Update()
         {
+            this.StartProfilingSample("Update");
+            this.EndProfilingSample();
         }
 
         public void Toggle(bool value)

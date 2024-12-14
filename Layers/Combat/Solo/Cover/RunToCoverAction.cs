@@ -5,6 +5,7 @@ using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Collections;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -23,10 +24,42 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Update()
         {
+            this.StartProfilingSample("Update");
             Bot.Mover.SetTargetMoveSpeed(1f);
             Bot.Mover.SetTargetPose(1f);
-            jumpToCover();
+            checkJumpToCover();
+            tryRun();
+            checkRunFailed();
+            this.EndProfilingSample();
+        }
 
+        private void checkRunFailed()
+        {
+            if (!_moveSuccess) {
+                Bot.Mover.EnableSprintPlayer(false);
+                Bot.Cover.CoverInUse = null;
+                Bot.Mover.SprintController.CancelRun();
+                Bot.Mover.DogFight.DogFightMove(true);
+
+                if (!Bot.Steering.SteerByPriority(null, false)) {
+                    Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
+                }
+                Shoot.CheckAimAndFire();
+                return;
+            }
+
+            if (!isRunning) {
+                Bot.Mover.EnableSprintPlayer(false);
+                if (!Bot.Steering.SteerByPriority(null, false)) {
+                    Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
+                }
+                Shoot.CheckAimAndFire();
+                return;
+            }
+        }
+
+        private void tryRun()
+        {
             if (_recalcMoveTimer < Time.time) {
                 _moveSuccess = moveToCover(out bool sprinting, out CoverPoint coverDestination, false);
                 if (_moveSuccess) {
@@ -54,40 +87,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
                     Bot.Cover.CoverInUse = null;
                 }
             }
-
-            //if (_moveSuccess &&
-            //    _sprinting &&
-            //    _nextTryReloadTime < Time.time &&
-            //    Bot.Decision.SelfActionDecisions.LowOnAmmo(0.5f))
-            //{
-            //    _nextTryReloadTime = Time.time + 2f;
-            //    Bot.SelfActions.TryReload();
-            //}
-
-            if (!_moveSuccess) {
-                Bot.Mover.EnableSprintPlayer(false);
-                Bot.Cover.CoverInUse = null;
-                Bot.Mover.SprintController.CancelRun();
-                Bot.Mover.DogFight.DogFightMove(true);
-
-                if (!Bot.Steering.SteerByPriority(null, false)) {
-                    Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
-                }
-                Shoot.CheckAimAndFire();
-                return;
-            }
-
-            if (!isRunning) {
-                Bot.Mover.EnableSprintPlayer(false);
-                if (!Bot.Steering.SteerByPriority(null, false)) {
-                    Bot.Steering.LookToLastKnownEnemyPosition(Bot.Enemy);
-                }
-                Shoot.CheckAimAndFire();
-                return;
-            }
         }
 
-        private void jumpToCover()
+        private void checkJumpToCover()
         {
             if (_shallJumpToCover &&
                 _moveSuccess &&

@@ -4,6 +4,7 @@ using SAIN.Preset.GlobalSettings;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.Classes.Search;
 using UnityEngine;
+using UnityEngine.Profiling;
 using Random = UnityEngine.Random;
 
 namespace SAIN.Layers.Combat.Solo
@@ -41,30 +42,37 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
+            this.StartProfilingSample("Update");
             setTargetEnemy();
+            updateSearch();
+            this.EndProfilingSample();
+        }
+
+        private void updateSearch()
+        {
             var enemy = _searchTarget;
-            if (enemy == null) return;
+            if (enemy != null) {
+                bool isBeingStealthy = enemy.Hearing.EnemyHeardFromPeace;
+                if (isBeingStealthy) {
+                    _sprintEnabled = false;
+                }
+                else {
+                    checkShouldSprint();
+                    talk();
+                }
 
-            bool isBeingStealthy = enemy.Hearing.EnemyHeardFromPeace;
-            if (isBeingStealthy) {
-                _sprintEnabled = false;
-            }
-            else {
-                checkShouldSprint();
-                talk();
-            }
+                steer();
 
-            steer();
+                if (_nextUpdateSearchTime < Time.time) {
+                    _nextUpdateSearchTime = Time.time + 0.1f;
+                    Search.Search(_sprintEnabled, enemy);
+                }
 
-            if (_nextUpdateSearchTime < Time.time) {
-                _nextUpdateSearchTime = Time.time + 0.1f;
-                Search.Search(_sprintEnabled, enemy);
-            }
-
-            if (!_sprintEnabled) {
-                Shoot.CheckAimAndFire();
-                if (!isBeingStealthy)
-                    checkWeapon();
+                if (!_sprintEnabled) {
+                    Shoot.CheckAimAndFire();
+                    if (!isBeingStealthy)
+                        checkWeapon();
+                }
             }
         }
 

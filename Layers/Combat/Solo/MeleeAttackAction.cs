@@ -1,5 +1,6 @@
 ﻿using EFT;
 using System.Collections;
+using UnityEngine.Profiling;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -11,7 +12,9 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
+            this.StartProfilingSample("Update");
             BotOwner.WeaponManager.Melee.RunToEnemyUpdate();
+            this.EndProfilingSample();
         }
 
         public override void Start()

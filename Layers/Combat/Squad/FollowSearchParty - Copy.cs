@@ -19,6 +19,8 @@ namespace SAIN.Layers.Combat.Squad
 
         public override void Update()
         {
+            this.StartProfilingSample("Update");
+            this.EndProfilingSample();
         }
 
         public override void Start()
@@ -30,8 +32,6 @@ namespace SAIN.Layers.Combat.Squad
         {
             Toggle(false);
         }
-
-        
     }
 
     internal class SquadHuntAction : CombatAction, ISAINAction

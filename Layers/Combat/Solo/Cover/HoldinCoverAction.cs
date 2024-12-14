@@ -4,6 +4,7 @@ using SAIN.SAINComponent.Classes.EnemyClasses;
 using SAIN.SAINComponent.SubComponents.CoverFinder;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace SAIN.Layers.Combat.Solo.Cover
 {
@@ -20,32 +21,40 @@ namespace SAIN.Layers.Combat.Solo.Cover
 
         public override void Update()
         {
+            this.StartProfilingSample("Update");
             Bot.Steering.SteerByPriority();
             Shoot.CheckAimAndFire();
+            checkPositionAdjustments();
+            this.EndProfilingSample();
+        }
 
+        private void checkPositionAdjustments()
+        {
             CoverPoint coverInUse = CoverInUse;
             if (coverInUse == null) {
                 Bot.Mover.DogFight.DogFightMove(true);
-                return;
             }
-
-            adjustPosition();
-            Bot.Cover.DuckInCover();
-            checkSetProne();
-            checkSetLean();
+            else {
+                adjustMyPosition();
+                Bot.Cover.DuckInCover();
+                checkSetProne();
+                checkSetLean();
+            }
         }
 
-        private void adjustPosition()
+        private void adjustMyPosition()
         {
             if (_nextCheckPosTime < Time.time) {
                 _nextCheckPosTime = Time.time + 1f;
                 Vector3 coverPos = CoverInUse.Position;
-                if (!Bot.Player.IsInPronePose && (coverPos - _position).sqrMagnitude > 0.5f) {
+                if (!Bot.Player.IsInPronePose
+                    && (coverPos - _position).sqrMagnitude > 0.5f) {
                     _position = coverPos;
                     Bot.Mover.GoToPoint(coverPos, out _, 0.5f);
-                    return;
                 }
-                Bot.Mover.StopMove();
+                else {
+                    Bot.Mover.StopMove();
+                }
             }
         }
 
@@ -167,6 +176,9 @@ namespace SAIN.Layers.Combat.Solo.Cover
             Toggle(true);
             ChangeLeanTimer = Time.time + 2f;
             CoverInUse = Bot.Cover.CoverInUse;
+            if (CoverInUse != null) {
+                _position = CoverInUse.Position;
+            }
         }
 
         public override void Stop()

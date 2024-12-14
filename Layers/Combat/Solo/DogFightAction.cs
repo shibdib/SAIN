@@ -1,6 +1,7 @@
 ﻿using EFT;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -12,11 +13,13 @@ namespace SAIN.Layers.Combat.Solo
 
         public override void Update()
         {
+            this.StartProfilingSample("Update");
             Bot.Mover.SetTargetPose(1f);
             Bot.Mover.SetTargetMoveSpeed(1f);
             Bot.Steering.SteerByPriority();
             Bot.Mover.DogFight.DogFightMove(true);
             Shoot.CheckAimAndFire();
+            this.EndProfilingSample();
         }
 
         public override void Start()
