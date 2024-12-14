@@ -267,7 +267,7 @@ namespace SAIN.Patches.Generic
                     continue;
                 }
                 // END NEW //
-                if ((botRequest2.CanExecuteByMyself || botRequest2.Requester != executer.GetPlayer) && (!executer.Boss.IamBoss || executer.Boss.AllowRequestSelf || executer.GetPlayer.Id != botRequest2.Requester.Id) && botRequest2.CanStartExecute(executer)) {
+                if ((botRequest2.CanExecuteByMyself || (Player)botRequest2.Requester != executer.GetPlayer) && (!executer.Boss.IamBoss || executer.Boss.AllowRequestSelf || executer.GetPlayer.Id != botRequest2.Requester.Id) && botRequest2.CanStartExecute(executer)) {
                     botRequest = botRequest2;
                     break;
                 }

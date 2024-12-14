@@ -104,7 +104,6 @@ namespace SAIN.SAINComponent.Classes.Mover
                 foreach (var link in voxel.DoorLinks)
                     if (isDoorOpenable(link.Door)) {
                         AllDoors.Add(new DoorData(link));
-                        GameWorldComponent.Instance.Doors.CheckAddDoorTrigger(link);
                     }
 
                 updateAllDoors(true);

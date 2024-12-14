@@ -94,8 +94,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             return false;
         }
 
-        private ThrowWeapItemClass _currentGrenade;
-
         private bool checkCanThrow(out string reason)
         {
             if (!_grenadesEnabled) {
@@ -341,7 +339,6 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private float _minThrowDistPercent;
         private float _maxPower => BotOwner.WeaponManager.Grenades.MaxPower;
         private float _nextPosibleAttempt;
-        private float _nextGrenadeCheckTime;
 
         private static AIGreandeAng[] _indoorAngles =
         {

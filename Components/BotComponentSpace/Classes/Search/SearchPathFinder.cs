@@ -385,7 +385,6 @@ namespace SAIN.SAINComponent.Classes.Search
             result = rayHit.position;
         }
 
-        private float _nextCheckFinishTime;
         private const float ComeToRandomDist = 1f;
         private bool _canStartSearch;
         private float _nextCheckSearchTime;

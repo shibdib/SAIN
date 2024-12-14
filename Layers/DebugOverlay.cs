@@ -254,10 +254,7 @@ namespace SAIN.Layers
                 $"RealDistance [{enemy.RealDistance}] " +
                 $"Power [{enemy.EnemyIPlayer?.AIData?.PowerOfEquipment}]");
 
-            stringBuilder.AppendLine();
             stringBuilder.AppendLine($"Visible [{enemy.IsVisible}] Seen [{enemy.Seen}]");
-            stringBuilder.AppendLine($"Illuminated [{enemy.Vision.Illuminated}] LightLevel [{enemy.Vision.IlluminationLevel}]");
-            stringBuilder.AppendLine();
 
             stringBuilder.AppendLine($"Aim/Scatter Multi [{enemy.Aim.AimAndScatterMultiplier}]");
             stringBuilder.AppendLabeledValue("Time To Spot", $"{enemy.Vision.LastGainSightResult.Round100()}", Color.white, Color.yellow, true);
