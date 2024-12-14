@@ -21,7 +21,7 @@ namespace SAIN.Preset.BotSettings.SAINSettings.Categories
         [Category("Movement Option Toggles")]
         public bool JUMP_TOGGLE = true;
 
-        [Name("Auto Pose")]
+        [Name("Can Auto Pose")]
         [Description("Does this bot automatically adjust their crouch height depending on objects between them and their enemy?")]
         [Category("Movement Option Toggles")]
         public bool AUTOCROUCH_TOGGLE = true;
