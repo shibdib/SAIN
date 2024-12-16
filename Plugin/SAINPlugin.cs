@@ -31,7 +31,6 @@ namespace SAIN
 {
     [BepInPlugin(SAINGUID, SAINName, SAINVersion)]
     [BepInDependency(BigBrainGUID, BigBrainVersion)]
-    [BepInDependency(WaypointsGUID, WaypointsVersion)]
     [BepInDependency(SPTGUID, SPTVersion)]
     [BepInProcess(EscapeFromTarkov)]
     [BepInIncompatibility("com.dvize.BushNoESP")]

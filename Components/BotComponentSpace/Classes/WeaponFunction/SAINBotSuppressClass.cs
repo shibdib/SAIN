@@ -56,13 +56,13 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
                 amount = getSuppNum(enemy);
             }
 
-            amount = scaleSuppDist(amount * _settings.SUPP_AMOUNT_MULTI, distance);
-            if (amount <= 0) {
+            float scaledSupNum = scaleSuppDist(amount * _settings.SUPP_AMOUNT_MULTI, distance);
+            if (scaledSupNum <= 0) {
                 return;
             }
 
             LastSuppressByEnemy = enemy;
-            float resistedAmount = calcResistance(amount, resistance);
+            float resistedAmount = calcResistance(scaledSupNum, resistance);
             clampAndUpdateSuppression(resistedAmount);
         }
 
