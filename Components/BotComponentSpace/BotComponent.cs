@@ -361,6 +361,7 @@ namespace SAIN.SAINComponent
         private void LateUpdate()
         {
             BotActivation.LateUpdate();
+            EnemyController.LateUpdate();
         }
 
         private void handleDumbShit()

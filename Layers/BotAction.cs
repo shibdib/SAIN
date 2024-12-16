@@ -49,19 +49,18 @@ namespace SAIN.Layers
 
         protected void StartProfilingSample(string functionName)
         {
-            if (_debugMode) {
+            if (SAINPlugin.ProfilingMode) {
                 UnityEngine.Profiling.Profiler.BeginSample(this.Name + "_" + functionName);
             }
         }
 
         protected void EndProfilingSample()
         {
-            if (_debugMode) {
+            if (SAINPlugin.ProfilingMode) {
                 UnityEngine.Profiling.Profiler.EndSample();
             }
         }
 
-        private static bool _debugMode => SAINPlugin.DebugMode;
         private BotComponent _bot;
     }
 }

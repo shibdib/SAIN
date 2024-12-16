@@ -248,13 +248,13 @@ namespace SAIN.Preset.GlobalSettings
         [Name("Scale Start Distance - No Headphones")]
         [Description("Sounds that originate closer than this have a 100% chance of being heard.")]
         [Category("Hearing Chance")]
-        [MinMax(0, 100, 1)]
+        [MinMax(0, 10, 100)]
         public float HEAR_CHANCE_MIN_DIST = 0.25f;
 
         [Name("Scale Start Distance - Headphones")]
         [Description("Sounds that originate closer than this have a 100% chance of being heard.")]
         [Category("Hearing Chance")]
-        [MinMax(0, 100, 1)]
+        [MinMax(0, 100, 100)]
         public float HEAR_CHANCE_MIN_DIST_HEADPHONES = 1;
 
         [Name("Midrange Coefficient")]

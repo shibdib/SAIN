@@ -491,7 +491,7 @@ namespace SAIN.Attributes
             float min = 0.1f;
             float max = 2;
 
-            fvalue = slider(name, description, fvalue, min, max, 100f);
+            fvalue = slider(name, description, fvalue, min, max, 1000f);
             if (defaultValue != null &&
                 resetButton()) {
                 fvalue = defaultValue.StealthValue;

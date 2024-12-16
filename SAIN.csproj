@@ -354,7 +354,7 @@
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EEnemyListType.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyList.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyListsClass.cs" />
-    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyUpdaterComponent.cs" />
+    <Compile Include="Components\BotComponentSpace\Classes\EnemyControllers\EnemyUpdaterClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\BodyPartHitEffectClass.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\BodyPartStatus.cs" />
     <Compile Include="Components\BotComponentSpace\Classes\Medical\BotMedicalBase.cs" />
