@@ -53,7 +53,6 @@ namespace SAIN.Preset.GlobalSettings
 
         public MoveSettings Move = new MoveSettings();
 
-        [Advanced]
         public SteeringSettings Steering = new SteeringSettings();
 
         public ShootSettings Shoot = new ShootSettings();
@@ -64,8 +63,6 @@ namespace SAIN.Preset.GlobalSettings
         public SquadTalkSettings SquadTalk = new SquadTalkSettings();
 
         [Name("Power Level Calculation")]
-        [Advanced]
-        [Hidden]
         public PowerCalcSettings PowerCalc = new PowerCalcSettings();
 
         public override void InitList()
