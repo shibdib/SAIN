@@ -315,13 +315,16 @@ namespace SAIN.Attributes
         private static void startConfigEntry(float listDepth, GUIEntryConfig entryConfig, ConfigInfoClass info)
         {
             float horizDepth = listDepth * entryConfig.SubList_Indent_Horizontal;
-            if (info != null && info.AdvancedOption) {
+            if (info != null && (info.AdvancedOption || info.DeveloperOption)) {
                 BeginHorizontal(25f);
+                var oldAlignment = _labelStyle.alignment;
+                _labelStyle.alignment = TextAnchor.MiddleCenter;
                 Space(horizDepth);
-                Box("Advanced",
+                Box(info.AdvancedOption ? "Advanced" : "Developer",
                     _labelStyle,
                     Width(70f),
                     Height(PresetHandler.EditorDefaults.ConfigEntryHeight));
+                _labelStyle.alignment = oldAlignment;
             }
             else {
                 BeginHorizontal(100f + horizDepth);
@@ -857,9 +860,9 @@ namespace SAIN.Attributes
 
             int count = 0;
 
-            // Display Non-Advanced Settings first, thats why there are 2 loops here. Probably a better way to do this.
+            // Display Non-Advanced Settings first, thats why there are 3 loops here. Probably a better way to do this.
             foreach (ConfigInfoClass attributes in attributeInfos) {
-                if (attributes.AdvancedOption == true) {
+                if (attributes.AdvancedOption || attributes.DeveloperOption) {
                     continue;
                 }
                 if (attributes.DoNotShowGUI) {
@@ -877,9 +880,27 @@ namespace SAIN.Attributes
                     wasEdited = true;
                 }
             }
-
             foreach (ConfigInfoClass attributes in attributeInfos) {
                 if (attributes.AdvancedOption == false) {
+                    continue;
+                }
+                if (attributes.DoNotShowGUI) {
+                    continue;
+                }
+                if (attributes.Category != category) {
+                    continue;
+                }
+                if (!categoryDrawn) {
+                    categoryDrawn = true;
+                    drawCategory(configParams, attributes, category);
+                }
+                displayConfigGUI(attributes, configParams, count++, out bool newEdit);
+                if (newEdit) {
+                    wasEdited = true;
+                }
+            }
+            foreach (ConfigInfoClass attributes in attributeInfos) {
+                if (attributes.DeveloperOption == false) {
                     continue;
                 }
                 if (attributes.DoNotShowGUI) {
