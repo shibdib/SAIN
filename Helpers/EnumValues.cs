@@ -55,7 +55,8 @@ namespace SAIN.Helpers
                 WildSpawnType.assaultGroup,
                 WildSpawnType.crazyAssaultEvent,
                 WildSpawnType.cursedAssault,
-                WildSpawnType.marksman
+                WildSpawnType.marksman,
+                WildSpawnType.skier
             };
 
             public static WildSpawnType[] Goons =

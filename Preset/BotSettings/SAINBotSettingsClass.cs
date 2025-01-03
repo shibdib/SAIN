@@ -255,6 +255,8 @@ namespace SAIN.Preset.BotSettings
                 { WildSpawnType.exUsec, 0.66f },
                 { WildSpawnType.arenaFighter, 0.66f },
                 { WildSpawnType.arenaFighterEvent, 0.66f },
+                { WildSpawnType.skier, 0.66f },
+                { WildSpawnType.gifter, 0.66f },
 
                 { WildSpawnType.pmcUSEC, 1f },
                 { WildSpawnType.pmcBEAR, 1f },

@@ -133,6 +133,8 @@ namespace SAIN.Preset
                 new BotType{ WildSpawnType = WildSpawnType.sectantWarrior,          Name = "Cultist",                  Section = "Other" ,       Description = "Found on Customs, Woods, Factory, Shoreline at night" },
                 new BotType{ WildSpawnType = WildSpawnType.bossKilla,               Name = "Killa",                    Section = "Bosses" ,      Description = "He shoot. Found on Interchange and Streets" },
 				new BotType{ WildSpawnType = WildSpawnType.bossPartisan,            Name = "Partisan",                 Section = "Bosses" ,      Description = "Crazy mall santa" },
+                new BotType{ WildSpawnType = WildSpawnType.skier,                   Name = "Smuggler",                 Section = "Other" ,       Description = "Scav like bots that carry strange loot" },
+                new BotType{ WildSpawnType = WildSpawnType.gifter,                  Name = "Santa",                    Section = "Other" ,       Description = "A scav santa that gives out loot" },
 
 				new BotType{ WildSpawnType = WildSpawnType.bossBully,               Name = "Rashala",                  Section = "Bosses" ,      Description = "Customs Boss" },
                 new BotType{ WildSpawnType = WildSpawnType.followerBully,           Name = "Rashala Guard",            Section = "Followers" ,   Description = "Customs Boss Follower" },

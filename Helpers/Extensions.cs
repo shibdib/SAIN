@@ -96,6 +96,8 @@ namespace SAIN.Helpers
                 case WildSpawnType.exUsec:
                 case WildSpawnType.arenaFighter:
                 case WildSpawnType.arenaFighterEvent:
+                case WildSpawnType.gifter:
+                case WildSpawnType.skier:
                     return true;
                     default:
                     return false;

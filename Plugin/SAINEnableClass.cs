@@ -143,6 +143,11 @@ namespace SAIN
 
         private static bool excludeOthers(WildSpawnType wildSpawnType)
         {
+            // Always exclude santa
+            if (wildSpawnType == WildSpawnType.gifter)
+            {
+                return true;
+            }
             if (SAINEnabled.VanillaCultists &&
                 WildSpawn.IsCultist(wildSpawnType))
             {

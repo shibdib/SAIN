@@ -743,6 +743,7 @@ namespace SAIN.Preset.GlobalSettings.Categories
                     UsedByWildSpawns = new WildSpawnType[]
                     {
                         WildSpawnType.assault,
+                        WildSpawnType.skier
                     },
                 }
             },
