@@ -198,6 +198,10 @@ namespace SAIN.SAINComponent.Classes.Decision
 
         private bool shallThrowGrenade(Enemy enemy, out string reason)
         {
+            if (enemy.IsAI && !GlobalSettings.General.BotVsBotGrenade) {
+                reason = "noGoodTarget";
+                return false;
+            }
             return Bot.Grenade.GrenadeThrowDecider.GetDecision(enemy, out reason);
         }
 
