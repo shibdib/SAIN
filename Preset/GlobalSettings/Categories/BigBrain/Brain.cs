@@ -9,9 +9,12 @@ namespace SAIN.Preset.GlobalSettings.Categories
         ArenaFighter,
         BossBully,
         BossGluhar,
+        BossBoar,
+        BossPartisan,
         Knight,
         BossKojaniy,
         BossSanitar,
+        BossKolontay,
         Tagilla,
         BossTest,
         //BossZryachiy,
@@ -25,6 +28,12 @@ namespace SAIN.Preset.GlobalSettings.Categories
         FollowerGluharScout,
         FollowerKojaniy,
         FollowerSanitar,
+        FollowerBoar,
+        FollowerBoarClose1,
+        FollowerBoarClose2,
+        BossBoarSniper,
+        FollowerKolontayAssault,
+        FollowerKolontaySecurity,
         TagillaFollower,
         //Fl_Zraychiy,
         Gifter,
@@ -69,6 +78,9 @@ namespace SAIN.Preset.GlobalSettings.Categories
             Brain.Gifter,
             Brain.Killa,
             Brain.SectantPriest,
+            Brain.BossBoar,
+            Brain.BossKolontay,
+            Brain.BossPartisan
         };
 
         public static readonly List<Brain> Followers = new List<Brain>
@@ -82,6 +94,12 @@ namespace SAIN.Preset.GlobalSettings.Categories
             Brain.FollowerSanitar,
             Brain.TagillaFollower,
             //Brain.Fl_Zraychiy,
+            Brain.FollowerBoar,
+            Brain.FollowerBoarClose1,
+            Brain.FollowerBoarClose2,
+            Brain.BossBoarSniper,
+            Brain.FollowerKolontayAssault,
+            Brain.FollowerKolontaySecurity,
         };
     }
 }
