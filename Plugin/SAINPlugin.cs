@@ -87,7 +87,7 @@ namespace SAIN
                 typeof(Patches.Generic.AllowRequestPatch),
                 typeof(Patches.Generic.FindRequestForMePatch),
 
-                //typeof(Patches.Generic.Fixes.HealCancelPatch),
+                typeof(Patches.Generic.Fixes.HealCancelPatch),
                 typeof(Patches.Generic.Fixes.StopSetToNavMeshPatch),
                 typeof(Patches.Generic.Fixes.FightShallReloadFixPatch),
                 typeof(Patches.Generic.Fixes.EnableVaultPatch),
