@@ -285,13 +285,13 @@ namespace SAIN.SAINComponent.Classes.Decision
 
             switch (enemy.EPathDistance) {
                 case EPathDistance.VeryClose:
-                    return timeSinceLastKnownUpdated > 6f;
-
-                case EPathDistance.Close:
                     return timeSinceLastKnownUpdated > 3f;
 
+                case EPathDistance.Close:
+                    return timeSinceLastKnownUpdated > 1f;
+
                 case EPathDistance.Mid:
-                    return enemy.TimeSinceSeen > 2f;
+                    return true;
 
                 case EPathDistance.Far:
                     return true;
@@ -316,7 +316,7 @@ namespace SAIN.SAINComponent.Classes.Decision
                 return false;
             }
             float timeSinceLastKnownUpdated = enemy.TimeSinceLastKnownUpdated;
-            if (!enemy.Seen && timeSinceLastKnownUpdated > 8f) {
+            if (!enemy.Seen && timeSinceLastKnownUpdated > 20f) {
                 return true;
             }
 
@@ -334,13 +334,13 @@ namespace SAIN.SAINComponent.Classes.Decision
                             return timeSinceLastKnownUpdated > 15f;
 
                         case EPathDistance.Mid:
-                            return enemy.TimeSinceSeen > 8f;
+                            return enemy.TimeSinceSeen > 12f;
 
                         case EPathDistance.Far:
-                            return enemy.TimeSinceSeen > 5f;
+                            return enemy.TimeSinceSeen > 10f;
 
                         case EPathDistance.VeryFar:
-                            return enemy.TimeSinceSeen > 3f;
+                            return enemy.TimeSinceSeen > 8f;
 
                         default:
                             return false;
@@ -350,19 +350,19 @@ namespace SAIN.SAINComponent.Classes.Decision
 
                     switch (enemy.EPathDistance) {
                         case EPathDistance.VeryClose:
-                            return timeSinceLastKnownUpdated > 18;
+                            return timeSinceLastKnownUpdated > 20f;
 
                         case EPathDistance.Close:
-                            return timeSinceLastKnownUpdated > 12;
+                            return timeSinceLastKnownUpdated > 15f;
 
                         case EPathDistance.Mid:
-                            return enemy.TimeSinceSeen > 6;
+                            return enemy.TimeSinceSeen > 12f;
 
                         case EPathDistance.Far:
-                            return enemy.TimeSinceSeen > 4;
+                            return enemy.TimeSinceSeen > 10f;
 
                         case EPathDistance.VeryFar:
-                            return enemy.TimeSinceSeen > 2;
+                            return enemy.TimeSinceSeen > 8f;
 
                         default:
                             return false;
@@ -372,19 +372,19 @@ namespace SAIN.SAINComponent.Classes.Decision
 
                     switch (enemy.EPathDistance) {
                         case EPathDistance.VeryClose:
-                            return timeSinceLastKnownUpdated > 15;
+                            return timeSinceLastKnownUpdated > 16f;
 
                         case EPathDistance.Close:
-                            return timeSinceLastKnownUpdated > 10;
+                            return timeSinceLastKnownUpdated > 13f;
 
                         case EPathDistance.Mid:
-                            return enemy.TimeSinceSeen > 4;
+                            return enemy.TimeSinceSeen > 10f;
 
                         case EPathDistance.Far:
-                            return enemy.TimeSinceSeen > 3;
+                            return enemy.TimeSinceSeen > 8f;
 
                         case EPathDistance.VeryFar:
-                            return enemy.TimeSinceSeen > 2;
+                            return enemy.TimeSinceSeen > 6f;
 
                         default:
                             return false;
