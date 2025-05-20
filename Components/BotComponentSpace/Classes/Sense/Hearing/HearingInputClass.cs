@@ -1,9 +1,10 @@
 ﻿using EFT;
 using SAIN.Components;
-using SAIN.Components.BotComponentSpace.Classes.EnemyClasses;
 using SAIN.Components.BotController;
 using SAIN.Components.PlayerComponentSpace;
 using SAIN.Helpers;
+using SAIN.Models.Enums;
+using SAIN.Models.Structs;
 using SAIN.SAINComponent.Classes.EnemyClasses;
 using UnityEngine;
 
@@ -37,18 +38,21 @@ namespace SAIN.SAINComponent.Classes
 
         private void checkResetHearing()
         {
-            if (!IgnoreHearing) {
+            if (!IgnoreHearing)
+            {
                 if (IgnoreUnderFire)
                     IgnoreUnderFire = false;
                 return;
             }
             if (_ignoreUntilTime > 0 &&
-                _ignoreUntilTime < Time.time) {
+                _ignoreUntilTime < Time.time)
+            {
                 IgnoreHearing = false;
                 IgnoreUnderFire = false;
                 return;
             }
-            if (Bot.EnemyController.EnemyLists.GetEnemyList(EEnemyListType.Visible)?.Count > 0) {
+            if (Bot.EnemyController.EnemyLists.GetEnemyList(EEnemyListType.Visible)?.Count > 0)
+            {
                 IgnoreHearing = false;
                 IgnoreUnderFire = false;
                 return;
@@ -68,47 +72,60 @@ namespace SAIN.SAINComponent.Classes
             float power,
             float volume)
         {
-            if (volume <= 0 || !canHearSounds()) {
+            if (volume <= 0 || !canHearSounds())
+            {
                 return;
             }
-            if (playerComponent.ProfileId == Bot.ProfileId) {
+            if (playerComponent.ProfileId == Bot.ProfileId)
+            {
                 return;
             }
-            if (!soundListenerStarted(playerComponent)) {
+            if (!soundListenerStarted(playerComponent))
+            {
                 return;
             }
             bool isGunshot = soundType.IsGunShot();
-            if (IgnoreHearing && !isGunshot) {
+            if (IgnoreHearing && !isGunshot)
+            {
                 return;
             }
             Enemy enemy = Bot.EnemyController.GetEnemy(playerComponent.ProfileId, true);
-            if (enemy == null) {
-                if (BotOwner.BotsGroup.IsEnemy(playerComponent.IPlayer)) {
+            if (enemy == null)
+            {
+                if (BotOwner.BotsGroup.IsEnemy(playerComponent.IPlayer))
+                {
                     enemy = Bot.EnemyController.CheckAddEnemy(playerComponent.IPlayer);
                 }
-                if (enemy == null) {
+                if (enemy == null)
+                {
                     return;
                 }
             }
 
-            if (!PlayerComponent.AIData.PlayerLocation.InBunker) {
+            if (!PlayerComponent.AIData.PlayerLocation.InBunker)
+            {
                 var weather = SAINWeatherClass.Instance;
-                if (weather != null) {
-                    if (PlayerComponent.Player.AIData.EnvironmentId == 0) {
+                if (weather != null)
+                {
+                    if (PlayerComponent.Player.AIData.EnvironmentId == 0)
+                    {
                         power *= weather.RainSoundModifierOutdoor;
                     }
-                    else {
+                    else
+                    {
                         power *= weather.RainSoundModifierIndoor;
                     }
                 }
             }
             float baseRange = power * volume;
             if (!isGunshot &&
-                enemy.RealDistance > baseRange) {
+                enemy.RealDistance > baseRange)
+            {
                 return;
             }
 
-            var info = new SoundInfoData {
+            var info = new SoundInfoData
+            {
                 SourcePlayer = playerComponent,
                 IsAI = playerComponent.IsAI,
                 Position = soundPosition,
@@ -117,37 +134,45 @@ namespace SAIN.SAINComponent.Classes
                 SoundType = soundType,
                 IsGunShot = isGunshot
             };
-            BotSound sound = new BotSound(info, enemy, baseRange);
+            BotSound sound = new(info, enemy, baseRange);
             BaseClass.ReactToHeardSound(sound);
         }
 
         private void bulletImpacted(EftBulletClass bullet)
         {
-            if (!canHearSounds()) {
+            if (!canHearSounds())
+            {
                 return;
             }
-            if (_nextHearImpactTime > Time.time) {
+            if (_nextHearImpactTime > Time.time)
+            {
                 return;
             }
-            if (Bot.HasEnemy) {
+            if (Bot.HasEnemy)
+            {
                 return;
             }
             var player = bullet.Player?.iPlayer;
-            if (player == null) {
+            if (player == null)
+            {
                 return;
             }
             var enemy = Bot.EnemyController.GetEnemy(player.ProfileId, true);
-            if (enemy == null) {
+            if (enemy == null)
+            {
                 return;
             }
-            if (!soundListenerStarted(enemy.EnemyPlayerComponent)) {
+            if (!soundListenerStarted(enemy.EnemyPlayerComponent))
+            {
                 return;
             }
-            if (Bot.PlayerComponent.AIData.PlayerLocation.InBunker != enemy.EnemyPlayerComponent.AIData.PlayerLocation.InBunker) {
+            if (Bot.PlayerComponent.AIData.PlayerLocation.InBunker != enemy.EnemyPlayerComponent.AIData.PlayerLocation.InBunker)
+            {
                 return;
             }
             float distance = (bullet.CurrentPosition - Bot.Position).sqrMagnitude;
-            if (distance > IMPACT_MAX_HEAR_DISTANCE) {
+            if (distance > IMPACT_MAX_HEAR_DISTANCE)
+            {
                 _nextHearImpactTime = Time.time + IMPACT_HEAR_FREQUENCY_FAR;
                 return;
             }
@@ -159,7 +184,8 @@ namespace SAIN.SAINComponent.Classes
             random = random.normalized * dispersion;
             Vector3 estimatedPos = enemy.EnemyPosition + random;
 
-            HearingReport report = new HearingReport {
+            SAINHearingReport report = new()
+            {
                 position = estimatedPos,
                 soundType = SAINSoundType.BulletImpact,
                 placeType = EEnemyPlaceType.Hearing,
@@ -171,10 +197,12 @@ namespace SAIN.SAINComponent.Classes
 
         private bool canHearSounds()
         {
-            if (!Bot.BotActive) {
+            if (!Bot.BotActive)
+            {
                 return false;
             }
-            if (Bot.GameEnding) {
+            if (Bot.GameEnding)
+            {
                 return false;
             }
             return true;
@@ -182,11 +210,14 @@ namespace SAIN.SAINComponent.Classes
 
         private bool soundListenerStarted(PlayerComponent player)
         {
-            if (!player.Person.AIInfo.IsAI) {
+            if (!player.Person.AIInfo.IsAI)
+            {
                 return true;
             }
-            if (!_hearingStarted) {
-                if (!PlayerComponent.AIData.AISoundPlayer.SoundMakerStarted) {
+            if (!_hearingStarted)
+            {
+                if (!PlayerComponent.AIData.AISoundPlayer.SoundMakerStarted)
+                {
                     return false;
                 }
                 _hearingStarted = true;
@@ -198,21 +229,25 @@ namespace SAIN.SAINComponent.Classes
 
         public bool SetIgnoreHearingExternal(bool value, bool ignoreUnderFire, float duration, out string reason)
         {
-            if (Bot.Enemy?.IsVisible == true) {
+            if (Bot.Enemy?.IsVisible == true)
+            {
                 reason = "Enemy Visible";
                 return false;
             }
-            if (BotOwner.Memory.IsUnderFire && !ignoreUnderFire) {
+            if (BotOwner.Memory.IsUnderFire && !ignoreUnderFire)
+            {
                 reason = "Under Fire";
                 return false;
             }
 
             IgnoreUnderFire = ignoreUnderFire;
             IgnoreHearing = value;
-            if (value && duration > 0f) {
+            if (value && duration > 0f)
+            {
                 _ignoreUntilTime = Time.time + duration;
             }
-            else {
+            else
+            {
                 _ignoreUntilTime = -1f;
             }
             reason = string.Empty;

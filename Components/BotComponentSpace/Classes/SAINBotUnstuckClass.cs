@@ -1,12 +1,8 @@
 ﻿using Comfort.Common;
 using EFT;
-using HarmonyLib;
-using SAIN.Helpers;
 using SAIN.Preset.GlobalSettings;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -14,13 +10,6 @@ namespace SAIN.SAINComponent.Classes.Debug
 {
     public class SAINBotUnstuckClass : BotBase, IBotClass
     {
-        static SAINBotUnstuckClass()
-        {
-            _pathControllerField = AccessTools.Field(typeof(BotMover), "_pathController");
-        }
-
-        private static readonly FieldInfo _pathControllerField;
-
         public SAINBotUnstuckClass(BotComponent sain) : base(sain)
         {
         }
@@ -28,7 +17,7 @@ namespace SAIN.SAINComponent.Classes.Debug
         public void Init()
         {
             base.SubscribeToPreset(null);
-            PathController = _pathControllerField.GetValue(BotOwner.Mover) as PathControllerClass;
+            PathController = BotOwner.Mover._pathController;
             DontUnstuckMe = DontUnstuckTheseTypes.Contains(Bot.Info.Profile.WildSpawnType);
         }
 
@@ -50,10 +39,12 @@ namespace SAIN.SAINComponent.Classes.Debug
             // Check if a bot is being told to move by the botowner pathfinder, and record the time this starts and stops
             bool botWasMoving = _botIsMoving;
             _botIsMoving = BotOwner.Mover.IsMoving || Bot.Mover.SprintController.Running;
-            if (_botIsMoving && !botWasMoving) {
+            if (_botIsMoving && !botWasMoving)
+            {
                 _timeStartMoving = time;
             }
-            else if (!_botIsMoving && botWasMoving) {
+            else if (!_botIsMoving && botWasMoving)
+            {
                 _timeStopMoving = time;
             }
 
@@ -61,14 +52,18 @@ namespace SAIN.SAINComponent.Classes.Debug
             const float movingForPeriod = 0.25f;
 
             // Has the bot been told to move for over x seconds? then record the state for use in other classes
-            if (_botIsMoving && time - _timeStartMoving > movingForPeriod) {
-                if (!BotIsMoving) {
+            if (_botIsMoving && time - _timeStartMoving > movingForPeriod)
+            {
+                if (!BotIsMoving)
+                {
                     TimeStartedMoving = time;
                 }
                 BotIsMoving = true;
             }
-            else if (!_botIsMoving && time - _timeStopMoving > movingForPeriod) {
-                if (BotIsMoving) {
+            else if (!_botIsMoving && time - _timeStopMoving > movingForPeriod)
+            {
+                if (BotIsMoving)
+                {
                     TimeStoppedMoving = time;
                 }
                 BotIsMoving = false;
@@ -77,23 +72,29 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private bool checkFixOffMeshBot()
         {
-            if (_nextCheckNavMeshTime < Time.time) {
+            if (_nextCheckNavMeshTime < Time.time)
+            {
                 _nextCheckNavMeshTime = Time.time + 1f;
                 bool wasOnNavMesh = _isOnNavMesh;
                 _isOnNavMesh = CheckBotIsOnNavMesh();
 
-                if (!_isOnNavMesh) {
-                    if (wasOnNavMesh) {
+                if (!_isOnNavMesh)
+                {
+                    if (wasOnNavMesh)
+                    {
                         _timeOffMeshStart = Time.time;
                     }
-                    if (Time.time - _timeOffMeshStart > 3f && _nextResetTime < Time.time) {
+                    if (Time.time - _timeOffMeshStart > 3f && _nextResetTime < Time.time)
+                    {
                         _nextResetTime = Time.time + 5f;
                         //Logger.LogWarning($"{BotOwner.name} is off navmesh! Trying to fix...");
                         Bot.Mover.ResetPath(0.33f);
                     }
                 }
-                if (_isOnNavMesh) {
-                    if (_timeOffMeshStart > 0) {
+                if (_isOnNavMesh)
+                {
+                    if (_timeOffMeshStart > 0)
+                    {
                         _timeOffMeshStart = -1f;
                     }
                 }
@@ -106,7 +107,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         public Vector2 findMoveDirection(Vector3 direction)
         {
-            Vector2 v = new Vector2(direction.x, direction.z);
+            Vector2 v = new(direction.x, direction.z);
             Vector3 vector = Quaternion.Euler(0f, 0f, Player.Rotation.x) * v;
             vector = Helpers.Vector.NormalizeFastSelf(vector);
             return new Vector2(vector.x, vector.y);
@@ -122,7 +123,8 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private void CheckIfPositionChanged()
         {
-            if (CheckPositionTimer < Time.time) {
+            if (CheckPositionTimer < Time.time)
+            {
                 CheckPositionTimer = Time.time + 0.5f;
 
                 bool botChangedPositionLast = BotHasChangedPosition;
@@ -130,10 +132,12 @@ namespace SAIN.SAINComponent.Classes.Debug
                 const float DistThreshold = 0.1f;
                 BotHasChangedPosition = (LastPos - Bot.Position).sqrMagnitude > DistThreshold * DistThreshold;
 
-                if (botChangedPositionLast && !BotHasChangedPosition) {
+                if (botChangedPositionLast && !BotHasChangedPosition)
+                {
                     TimeStartedChangingPosition = Time.time;
                 }
-                else if (BotHasChangedPosition) {
+                else if (BotHasChangedPosition)
+                {
                     TimeStartedChangingPosition = 0f;
                 }
 
@@ -143,33 +147,37 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private IEnumerator trackPostVault(Vector3 preVaultPosition)
         {
-            WaitForSeconds wait = new WaitForSeconds(1f);
+            WaitForSeconds wait = new(1f);
             yield return wait;
 
             if (Bot == null || BotOwner == null || Player == null || !Player.HealthController.IsAlive)
                 yield break;
 
-            if (NavMesh.SamplePosition(preVaultPosition, out var hit1, 0.5f, -1)) {
+            if (NavMesh.SamplePosition(preVaultPosition, out var hit1, 0.5f, -1))
+            {
                 preVaultPosition = hit1.position;
             }
 
-            NavMeshPath path = new NavMeshPath();
+            NavMeshPath path = new();
             float startTime = Time.time;
             bool botIsStuck = true;
 
-            while (botIsStuck) {
+            while (botIsStuck)
+            {
                 if (Bot == null || BotOwner == null || Player == null || !Player.HealthController.IsAlive)
                     break;
 
                 botIsStuck = isStuck(preVaultPosition);
-                if (!botIsStuck) {
+                if (!botIsStuck)
+                {
                     break;
                 }
                 _botStuckAfterVault = botIsStuck;
                 //Logger.LogWarning($"{BotOwner.name} has vaulted to somewhere they can't get down from! Trying to fix...");
 
                 if (!isHumanVisible() &&
-                    !isHumanClose()) {
+                    !isHumanClose())
+                {
                     teleport(preVaultPosition);
                     break;
                 }
@@ -181,7 +189,7 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private bool isStuck(Vector3 targetPosition)
         {
-            NavMeshPath path = new NavMeshPath();
+            NavMeshPath path = new();
             return !NavMesh.SamplePosition(Bot.Position, out var hit, 0.5f, -1)
                 || !NavMesh.CalculatePath(hit.position, targetPosition, -1, path)
                 || path.status != NavMeshPathStatus.PathComplete;
@@ -202,11 +210,13 @@ namespace SAIN.SAINComponent.Classes.Debug
         {
             bool closeHuman = false;
             var allPlayers = Singleton<GameWorld>.Instance.AllAlivePlayersList;
-            foreach (var player in allPlayers) {
+            foreach (var player in allPlayers)
+            {
                 if (player != null
                     && !player.IsAI
                     && player.HealthController.IsAlive
-                    && (player.Position - Bot.Position).sqrMagnitude < 50f * 50f) {
+                    && (player.Position - Bot.Position).sqrMagnitude < 50f * 50f)
+                {
                     closeHuman = true;
                     break;
                 }
@@ -220,13 +230,16 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private bool tryVault()
         {
-            if (!Bot.Info.FileSettings.Move.VAULT_UNSTUCK_TOGGLE || !GlobalSettingsClass.Instance.Move.VAULT_UNSTUCK_TOGGLE) {
+            if (!Bot.Info.FileSettings.Move.VAULT_UNSTUCK_TOGGLE || !GlobalSettingsClass.Instance.Move.VAULT_UNSTUCK_TOGGLE)
+            {
                 return false;
             }
             Vector3 currentPos = Bot.Position;
-            if (Bot.Mover.TryVault()) {
+            if (Bot.Mover.TryVault())
+            {
                 _botVaultedTime = Time.time;
-                if (postVaultTracker != null) {
+                if (postVaultTracker != null)
+                {
                     Bot.StopCoroutine(postVaultTracker);
                     _botStuckAfterVault = false;
                 }
@@ -239,7 +252,7 @@ namespace SAIN.SAINComponent.Classes.Debug
         private float _nextVaultCheckTime;
         private bool DontUnstuckMe;
 
-        private static readonly List<WildSpawnType> DontUnstuckTheseTypes = new List<WildSpawnType>
+        private static readonly List<WildSpawnType> DontUnstuckTheseTypes = new()
         {
             WildSpawnType.marksman,
             WildSpawnType.shooterBTR,
@@ -249,7 +262,8 @@ namespace SAIN.SAINComponent.Classes.Debug
         {
             if (_botVaulted
                 && !_botStuckAfterVault
-                && _botVaultedTime + 1f < Time.time) {
+                && _botVaultedTime + 1f < Time.time)
+            {
                 _botVaulted = false;
                 Bot.Mover.ResetPath(0.1f);
             }
@@ -260,19 +274,23 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private void tryAutoVault()
         {
-            if (!Bot.Info.FileSettings.Move.VAULT_TOGGLE || !GlobalSettingsClass.Instance.Move.VAULT_TOGGLE) {
+            if (!Bot.Info.FileSettings.Move.VAULT_TOGGLE || !GlobalSettingsClass.Instance.Move.VAULT_TOGGLE)
+            {
                 return;
             }
             if (_nextVaultCheckTime < Time.time
-                && (BotOwner?.Mover?.IsMoving == true || Bot.Mover.SprintController.Running)) {
+                && (BotOwner?.Mover?.IsMoving == true || Bot.Mover.SprintController.Running))
+            {
                 float timeAdd;
                 Vector3 lookDir = Player.LookDirection.normalized;
                 Vector3 targetDir = BotOwner.Mover.NormDirCurPoint;
-                if (Vector3.Dot(lookDir, targetDir) > 0.85f && tryVault()) {
+                if (Vector3.Dot(lookDir, targetDir) > 0.85f && tryVault())
+                {
                     _botVaulted = true;
                     timeAdd = 2f;
                 }
-                else {
+                else
+                {
                     timeAdd = 0.5f;
                 }
                 _nextVaultCheckTime = Time.time + timeAdd;
@@ -281,17 +299,20 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         public void Update()
         {
-            if (!DontUnstuckMe && !Bot.BotActivation.BotInStandBy) {
+            if (!DontUnstuckMe && !Bot.BotActivation.BotInStandBy)
+            {
                 startCoroutine();
             }
-            else if (botUnstuckCoroutine != null) {
+            else if (botUnstuckCoroutine != null)
+            {
                 Bot.StopCoroutine(botUnstuckCoroutine);
             }
         }
 
         private void startCoroutine()
         {
-            if (botUnstuckCoroutine == null) {
+            if (botUnstuckCoroutine == null)
+            {
                 botUnstuckCoroutine = Bot.StartCoroutine(botUnstuck());
             }
         }
@@ -300,9 +321,11 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private IEnumerator botUnstuck()
         {
-            while (true) {
+            while (true)
+            {
                 if (Bot.BotActive
-                && !Bot.GameEnding) {
+                && !Bot.GameEnding)
+                {
                     checkFixOffMeshBot();
                     tryAutoVault();
                     checkResetPathFromVault();
@@ -316,7 +339,8 @@ namespace SAIN.SAINComponent.Classes.Debug
         {
             CheckIfMoving();
             CheckIfPositionChanged();
-            if (CheckStuckTimer < Time.time) {
+            if (CheckStuckTimer < Time.time)
+            {
                 checkIfBotStuck();
                 checkCancelUnstuck();
                 tryFixStuckBot();
@@ -325,12 +349,15 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private void checkIfBotStuck()
         {
-            if (CheckStuckTimer < Time.time) {
-                if (BotOwner.DoorOpener.Interacting) {
+            if (CheckStuckTimer < Time.time)
+            {
+                if (BotOwner.DoorOpener.Interacting)
+                {
                     CheckStuckTimer = Time.time + 1f;
                     BotIsStuck = false;
                 }
-                else {
+                else
+                {
                     CheckStuckTimer = Time.time + 0.5f;
 
                     bool stuck = _botStuckAfterVault
@@ -338,7 +365,8 @@ namespace SAIN.SAINComponent.Classes.Debug
                         || BotStuckOnObject()
                         || BotStuckOnPlayer();
 
-                    if (!BotIsStuck && stuck) {
+                    if (!BotIsStuck && stuck)
+                    {
                         TimeStuck = Time.time;
                     }
                     BotIsStuck = stuck;
@@ -350,7 +378,8 @@ namespace SAIN.SAINComponent.Classes.Debug
         {
             // If the bot is no longer stuck, but we are checking if we can teleport them, cancel the coroutine
             if (!BotIsStuck
-                && TeleportCoroutine != null) {
+                && TeleportCoroutine != null)
+            {
                 Bot.StopCoroutine(TeleportCoroutine);
                 HasTriedJumpOrVault = false;
                 JumpTimer = Time.time + 1f;
@@ -360,8 +389,10 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private void tryFixStuckBot()
         {
-            if (BotIsStuck && TimeSinceStuck > 2f) {
-                if (SAINPlugin.DebugMode && DebugStuckTimer < Time.time && TimeSinceStuck > 5f) {
+            if (BotIsStuck && TimeSinceStuck > 2f)
+            {
+                if (SAINPlugin.DebugMode && DebugStuckTimer < Time.time && TimeSinceStuck > 5f)
+                {
                     DebugStuckTimer = Time.time + 10f;
                     Logger.LogWarning($"[{BotOwner.name}] has been stuck for [{TimeSinceStuck}] seconds " +
                         $"on [{StuckHit.transform?.name}] object " +
@@ -373,19 +404,23 @@ namespace SAIN.SAINComponent.Classes.Debug
                     && TimeSinceStuck > 6f
                     && TimeSinceTriedJumpOrVault + 2f < Time.time &&
                     !isHumanVisible() &&
-                    !isHumanClose()) {
+                    !isHumanClose())
+                {
                     TeleportCoroutine = Bot.StartCoroutine(CheckIfTeleport());
                 }
 
-                if (JumpTimer < Time.time && TimeSinceStuck > 2f) {
+                if (JumpTimer < Time.time && TimeSinceStuck > 2f)
+                {
                     JumpTimer = Time.time + 1f;
 
-                    if (!tryVault()) {
+                    if (!tryVault())
+                    {
                         Bot.Mover.ResetPath(0.1f);
                         HasTriedJumpOrVault = true;
                         TimeSinceTriedJumpOrVault = Time.time;
                     }
-                    else {
+                    else
+                    {
                         _botVaulted = true;
                     }
                 }
@@ -409,12 +444,15 @@ namespace SAIN.SAINComponent.Classes.Debug
             Vector3? teleportDestination = null;
 
             const float minTeleDist = 1f;
-            if (BotOwner.Mover.HavePath) {
-                for (int i = PathController.CurPath.CurIndex; i < PathController.CurPath.Length - 1; i++) {
+            if (BotOwner.Mover.HasPathAndNoComplete)
+            {
+                for (int i = PathController.CurPath.CurIndex; i < PathController.CurPath.Length - 1; i++)
+                {
                     Vector3 corner = PathController.CurPath.GetPoint(i);
                     Vector3 cornerDirection = corner - Bot.Position;
                     float cornerDistance = cornerDirection.sqrMagnitude;
-                    if (cornerDirection.sqrMagnitude >= minTeleDist * minTeleDist) {
+                    if (cornerDirection.sqrMagnitude >= minTeleDist * minTeleDist)
+                    {
                         teleportDestination = new Vector3?(corner);
                         break;
                     }
@@ -424,12 +462,17 @@ namespace SAIN.SAINComponent.Classes.Debug
 
             Vector3 botPosition = Bot.Position;
 
-            if (teleportDestination != null) {
+            if (teleportDestination != null)
+            {
                 var allPlayers = Singleton<GameWorld>.Instance?.AllAlivePlayersList;
-                if (allPlayers != null) {
-                    foreach (var player in allPlayers) {
-                        if (ShallCheckPlayer(player)) {
-                            if (!BotIsStuck) {
+                if (allPlayers != null)
+                {
+                    foreach (var player in allPlayers)
+                    {
+                        if (ShallCheckPlayer(player))
+                        {
+                            if (!BotIsStuck)
+                            {
                                 shallTeleport = false;
                                 yield break;
                             }
@@ -438,15 +481,18 @@ namespace SAIN.SAINComponent.Classes.Debug
 
                             // Makes sure the bot isn't too close to a human for them to hear
                             float sqrMag = (playerPosition - botPosition).sqrMagnitude;
-                            if (sqrMag < MinDistance * MinDistance) {
+                            if (sqrMag < MinDistance * MinDistance)
+                            {
                                 shallTeleport = false;
                                 break;
                             }
 
                             // Checks the max distance to do a path calculation
-                            if (sqrMag < MaxDistance * MaxDistance) {
+                            if (sqrMag < MaxDistance * MaxDistance)
+                            {
                                 NavMeshPath path = CalcPath(botPosition, playerPosition, out float pathLength);
-                                if (CheckPathLength(playerPosition, path, pathLength) == false) {
+                                if (CheckPathLength(playerPosition, path, pathLength) == false)
+                                {
                                     shallTeleport = false;
                                     break;
                                 }
@@ -461,7 +507,8 @@ namespace SAIN.SAINComponent.Classes.Debug
 
             IsTeleporting = BotIsStuck && shallTeleport && teleportDestination != null;
 
-            if (IsTeleporting) {
+            if (IsTeleporting)
+            {
                 Teleport(teleportDestination.Value + Vector3.up * 0.25f);
                 float distance = (teleportDestination.Value - botPosition).magnitude;
                 Logger.LogDebug($"Teleporting stuck bot: [{Player.name}] [{distance}] meters to the next corner they are trying to go to");
@@ -476,7 +523,8 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private bool ShallCheckPlayer(Player player)
         {
-            if (Player == null || Player.HealthController == null || Player.AIData == null) {
+            if (Player == null || Player.HealthController == null || Player.AIData == null)
+            {
                 return false;
             }
             return Player.HealthController.IsAlive == true && Player.AIData.IsAI == false;
@@ -484,7 +532,8 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private void Teleport(Vector3 position)
         {
-            if (teleportTimer < Time.time) {
+            if (teleportTimer < Time.time)
+            {
                 teleportTimer = Time.time + 3f;
                 Player.Teleport(position);
             }
@@ -496,12 +545,15 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private static NavMeshPath CalcPath(Vector3 start, Vector3 end, out float pathLength)
         {
-            if (PathToPlayer == null) {
+            if (PathToPlayer == null)
+            {
                 PathToPlayer = new NavMeshPath();
             }
-            if (NavMesh.SamplePosition(end, out NavMeshHit hit, 1f, -1)) {
+            if (NavMesh.SamplePosition(end, out NavMeshHit hit, 1f, -1))
+            {
                 PathToPlayer.ClearCorners();
-                if (NavMesh.CalculatePath(start, hit.position, -1, PathToPlayer)) {
+                if (NavMesh.CalculatePath(start, hit.position, -1, PathToPlayer))
+                {
                     pathLength = PathToPlayer.CalculatePathLength();
                     return PathToPlayer;
                 }
@@ -512,18 +564,22 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         private static bool CheckPathLength(Vector3 end, NavMeshPath path, float pathLength)
         {
-            if (path == null) {
+            if (path == null)
+            {
                 return false;
             }
-            if (path.status == NavMeshPathStatus.PathPartial) {
+            if (path.status == NavMeshPathStatus.PathPartial)
+            {
                 Vector3 lastCorner = path.corners[path.corners.Length - 1];
                 float sqrMag = (lastCorner - end).magnitude;
                 float combinedLength = sqrMag + pathLength;
-                if (combinedLength < MinDistancePathLength) {
+                if (combinedLength < MinDistancePathLength)
+                {
                     return false;
                 }
             }
-            if (path.status == NavMeshPathStatus.PathComplete && pathLength < MinDistancePathLength) {
+            if (path.status == NavMeshPathStatus.PathComplete && pathLength < MinDistancePathLength)
+            {
                 return false;
             }
             return path.status != NavMeshPathStatus.PathInvalid;
@@ -533,9 +589,12 @@ namespace SAIN.SAINComponent.Classes.Debug
         {
             HumanPlayers.Clear();
             var allPlayers = Singleton<GameWorld>.Instance?.AllAlivePlayersList;
-            if (allPlayers != null) {
-                foreach (var player in allPlayers) {
-                    if (player != null && player.AIData.IsAI == false && player.HealthController.IsAlive) {
+            if (allPlayers != null)
+            {
+                foreach (var player in allPlayers)
+                {
+                    if (player != null && player.AIData.IsAI == false && player.HealthController.IsAlive)
+                    {
                         HumanPlayers.Add(player);
                     }
                 }
@@ -544,13 +603,13 @@ namespace SAIN.SAINComponent.Classes.Debug
         }
 
         private static NavMeshPath PathToPlayer;
-        private List<Player> HumanPlayers = new List<Player>();
+        private List<Player> HumanPlayers = new();
 
         public void Dispose()
         {
         }
 
-        private RaycastHit StuckHit = new RaycastHit();
+        private RaycastHit StuckHit = new();
         private float DebugStuckTimer = 0f;
         private float CheckStuckTimer = 0f;
         public float TimeSinceStuck => Time.time - TimeStuck;
@@ -573,8 +632,10 @@ namespace SAIN.SAINComponent.Classes.Debug
 
         public bool BotStuckOnPlayer()
         {
-            if (!BotHasChangedPosition && CanBeStuckDecisions(Bot.Decision.CurrentCombatDecision)) {
-                if (BotOwner.Mover == null) {
+            if (!BotHasChangedPosition && CanBeStuckDecisions(Bot.Decision.CurrentCombatDecision))
+            {
+                if (BotOwner.Mover == null)
+                {
                     return false;
                 }
                 Vector3 botPos = BotOwner.Position;
@@ -585,9 +646,12 @@ namespace SAIN.SAINComponent.Classes.Debug
                 lookDir.y = 0;
 
                 var moveHits = Physics.SphereCastAll(botPos, 0.15f, moveDir, 0.5f, LayerMaskClass.PlayerMask);
-                if (moveHits.Length > 0) {
-                    foreach (var move in moveHits) {
-                        if (move.transform.name != BotOwner.name) {
+                if (moveHits.Length > 0)
+                {
+                    foreach (var move in moveHits)
+                    {
+                        if (move.transform.name != BotOwner.name)
+                        {
                             StuckHit = move;
                             return true;
                         }
@@ -595,9 +659,12 @@ namespace SAIN.SAINComponent.Classes.Debug
                 }
 
                 var lookHits = Physics.SphereCastAll(botPos, 0.15f, lookDir, 0.5f, LayerMaskClass.PlayerMask);
-                if (lookHits.Length > 0) {
-                    foreach (var look in lookHits) {
-                        if (look.transform.name != BotOwner.name) {
+                if (lookHits.Length > 0)
+                {
+                    foreach (var look in lookHits)
+                    {
+                        if (look.transform.name != BotOwner.name)
+                        {
                             StuckHit = look;
                             return true;
                         }
@@ -617,15 +684,18 @@ namespace SAIN.SAINComponent.Classes.Debug
             if (CanBeStuckDecisions(Bot.Decision.CurrentCombatDecision) &&
                 !BotHasChangedPosition &&
                 !BotOwner.DoorOpener.Interacting &&
-                Bot.Decision.TimeSinceChangeDecision > 1f) {
-                if (BotOwner.Mover == null) {
+                Bot.Decision.TimeSinceChangeDecision > 1f)
+            {
+                if (BotOwner.Mover == null)
+                {
                     return false;
                 }
                 Vector3 botPos = BotOwner.Position;
                 botPos.y += 0.4f;
                 Vector3 moveDir = BotOwner.Mover.DirCurPoint;
                 moveDir.y = 0;
-                if (Physics.SphereCast(botPos, 0.15f, moveDir, out var hit, 0.25f, LayerMaskClass.HighPolyWithTerrainMask)) {
+                if (Physics.SphereCast(botPos, 0.15f, moveDir, out var hit, 0.25f, LayerMaskClass.HighPolyWithTerrainMask))
+                {
                     StuckHit = hit;
                     return true;
                 }

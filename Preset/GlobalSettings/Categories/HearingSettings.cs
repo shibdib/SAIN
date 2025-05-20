@@ -1,8 +1,5 @@
 ﻿using Newtonsoft.Json;
 using SAIN.Attributes;
-using SAIN.Helpers;
-using SAIN.SAINComponent.Classes;
-using System;
 using System.Collections.Generic;
 
 namespace SAIN.Preset.GlobalSettings
@@ -89,7 +86,7 @@ namespace SAIN.Preset.GlobalSettings
         [Advanced]
         [MinMax(1f, 100f, 1000f)]
         [DefaultDictionary(nameof(HEAR_DISPERSION_VALUES_Defaults))]
-        public Dictionary<SAINSoundType, float> HEAR_DISPERSION_VALUES = new Dictionary<SAINSoundType, float>
+        public Dictionary<SAINSoundType, float> HEAR_DISPERSION_VALUES = new()
         {
             { SAINSoundType.Shot, 17.5f },
             { SAINSoundType.SuppressedShot, 13.5f },
@@ -450,7 +447,7 @@ namespace SAIN.Preset.GlobalSettings
         [MinMax(30f, 400f, 10f)]
         [Advanced]
         [DefaultDictionary(nameof(HearingDistancesDefaults))]
-        public Dictionary<ECaliber, float> HearingDistances = new Dictionary<ECaliber, float>
+        public Dictionary<ECaliber, float> HearingDistances = new()
         {
             { ECaliber.Caliber9x18PM, 110f },
             { ECaliber.Caliber9x19PARA, 110f },
@@ -484,7 +481,7 @@ namespace SAIN.Preset.GlobalSettings
 
         [JsonIgnore]
         [Hidden]
-        public static readonly Dictionary<ECaliber, float> HearingDistancesDefaults = new Dictionary<ECaliber, float>()
+        public static readonly Dictionary<ECaliber, float> HearingDistancesDefaults = new()
         {
             { ECaliber.Caliber9x18PM, 110f },
             { ECaliber.Caliber9x19PARA, 110f },

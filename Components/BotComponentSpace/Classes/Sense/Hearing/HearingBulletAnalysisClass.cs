@@ -28,10 +28,12 @@ namespace SAIN.SAINComponent.Classes
 
         public bool DoIFeelBullet(BotSound sound)
         {
-            if (!sound.Info.IsGunShot) {
+            if (!sound.Info.IsGunShot)
+            {
                 return false;
             }
-            if (sound.Distance > BULLET_FEEL_MAX_DIST) {
+            if (sound.Distance > BULLET_FEEL_MAX_DIST)
+            {
                 return false;
             }
             Vector3 directionToBot = (Bot.Position - sound.Info.Position).normalized;
@@ -41,10 +43,12 @@ namespace SAIN.SAINComponent.Classes
 
         public bool DidShotFlyByMe(BotSound sound)
         {
-            if (!sound.BulletData.BulletFelt) {
+            if (!sound.BulletData.BulletFelt)
+            {
                 return false;
             }
-            if (BaseClass.SoundInput.IgnoreUnderFire) {
+            if (BaseClass.SoundInput.IgnoreUnderFire)
+            {
                 return false;
             }
 
@@ -56,7 +60,8 @@ namespace SAIN.SAINComponent.Classes
 
             float maxDist = SAINPlugin.LoadedPreset.GlobalSettings.Mind.SUPP_DISTANCE_SCALE_END;
             float maxDistSqr = maxDist * maxDist;
-            if (pointDistanceSqr > maxDistSqr) {
+            if (pointDistanceSqr > maxDistSqr)
+            {
                 return false;
             }
 
@@ -64,11 +69,13 @@ namespace SAIN.SAINComponent.Classes
             Vector3 firePort = player.Transform.WeaponFirePort;
             Vector3 direction = projectionPoint - firePort;
             if (Physics.Raycast(firePort, direction, out var hit, direction.magnitude, LayerMaskClass.HighPolyWithTerrainMask) &&
-                (hit.point - Bot.Position).sqrMagnitude > maxDistSqr) {
+                (hit.point - Bot.Position).sqrMagnitude > maxDistSqr)
+            {
                 return false;
             }
 
-            if (SAINPlugin.DebugSettings.Logs.DebugHearing) {
+            if (SAINPlugin.DebugSettings.Logs.DebugHearing)
+            {
                 DebugGizmos.Sphere(projectionPoint, 0.25f, Color.red, true, 60f);
                 DebugGizmos.Line(projectionPoint, firePort, Color.red, 0.1f, true, 60f, true);
             }

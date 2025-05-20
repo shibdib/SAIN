@@ -1,11 +1,5 @@
-﻿using BepInEx.Logging;
-using DrakiaXYZ.BigBrain.Brains;
+﻿using DrakiaXYZ.BigBrain.Brains;
 using EFT;
-using SAIN.SAINComponent.Classes;
-using SAIN.SAINComponent.SubComponents;
-using SAIN.SAINComponent;
-using System.Collections;
-using UnityEngine.Profiling;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -30,7 +24,7 @@ namespace SAIN.Layers.Combat.Solo
             Toggle(false);
         }
 
-        public override void Update()
+        public override void Update(CustomLayer.ActionData data)
         {
             this.StartProfilingSample("Update");
             Bot.Steering.SteerByPriority();

@@ -1,21 +1,21 @@
 ﻿using EFT;
 using SAIN.Helpers;
-using System;
-using System.Collections;
-using UnityEngine;
+using SAIN.Models.Enums;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
     public class EnemyChooserClass : BotSubClass<SAINEnemyController>, IBotClass
     {
-        public Enemy ActiveEnemy {
+        public Enemy ActiveEnemy
+        {
             get
             {
                 return _activeEnemy;
             }
             private set
             {
-                if (value == _activeEnemy) {
+                if (value == _activeEnemy)
+                {
                     return;
                 }
 
@@ -53,7 +53,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
             if (!known &&
                 _activeEnemy != null &&
-                _activeEnemy.EnemyProfileId == enemy.EnemyProfileId) {
+                _activeEnemy.EnemyProfileId == enemy.EnemyProfileId)
+            {
                 setActiveEnemy(null);
             }
         }
@@ -61,13 +62,15 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private void enemyRemoved(string profileId, Enemy enemy)
         {
             if (ActiveEnemy != null &&
-                ActiveEnemy.EnemyProfileId == profileId) {
+                ActiveEnemy.EnemyProfileId == profileId)
+            {
                 ActiveEnemy = null;
                 LastEnemy = null;
                 return;
             }
             if (LastEnemy != null &&
-                LastEnemy.EnemyProfileId == profileId) {
+                LastEnemy.EnemyProfileId == profileId)
+            {
                 LastEnemy = null;
             }
         }
@@ -82,7 +85,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             Enemy activeEnemy = findActiveEnemy();
 
             if (activeEnemy != null &&
-                (!activeEnemy.CheckValid() || !activeEnemy.EnemyPerson.Active)) {
+                (!activeEnemy.CheckValid() || !activeEnemy.EnemyPerson.Active))
+            {
                 //Logger.LogWarning($"Tried to assign inactive or invalid player.");
                 activeEnemy = null;
             }
@@ -92,23 +96,28 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private Enemy findActiveEnemy()
         {
             Enemy dogFightTarget = Bot.Decision.DogFightDecision.DogFightTarget;
-            if (dogFightTarget?.CheckValid() == true && dogFightTarget.EnemyPerson.Active) {
+            if (dogFightTarget?.CheckValid() == true && dogFightTarget.EnemyPerson.Active)
+            {
                 return dogFightTarget;
             }
 
             var targetEnemy = Bot.CurrentTarget.CurrentTargetEnemy;
             if (targetEnemy != null &&
-                (ActiveEnemy == null || targetEnemy.IsDifferent(ActiveEnemy))) {
+                (ActiveEnemy == null || targetEnemy.IsDifferent(ActiveEnemy)))
+            {
                 return targetEnemy;
             }
 
             checkGoalEnemy(out Enemy goalEnemy);
 
-            if (goalEnemy != null) {
-                if (!goalEnemy.IsVisible) {
+            if (goalEnemy != null)
+            {
+                if (!goalEnemy.IsVisible)
+                {
                     Enemy visibileEnemy = BaseClass.EnemyLists.First(EEnemyListType.Visible);
                     if (visibileEnemy?.CheckValid() == true &&
-                        visibileEnemy.EnemyPerson.Active) {
+                        visibileEnemy.EnemyPerson.Active)
+                    {
                         return visibileEnemy;
                     }
                 }
@@ -128,21 +137,26 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             // make sure the bot's goal enemy isn't dead
             if (goalEnemy?.Person != null &&
-                goalEnemy.Person.HealthController.IsAlive == false) {
+                goalEnemy.Person.HealthController.IsAlive == false)
+            {
                 try { BotOwner.Memory.GoalEnemy = null; }
-                catch { // Sometimes bsg code throws an error here :D
+                catch
+                { // Sometimes bsg code throws an error here :D
                 }
                 goalEnemy = null;
             }
 
             // Bot has no goal enemy, set active enemy to null if they aren't already, and if they aren't currently visible or shot at me
-            if (goalEnemy == null) {
-                if (activeEnemy == null) {
+            if (goalEnemy == null)
+            {
+                if (activeEnemy == null)
+                {
                     return;
                 }
                 if (activeEnemy.CheckValid() &&
                     activeEnemy.EnemyPerson.Active &&
-                    (activeEnemy.Status.ShotAtMeRecently || activeEnemy.IsVisible)) {
+                    (activeEnemy.Status.ShotAtMeRecently || activeEnemy.IsVisible))
+                {
                     enemy = activeEnemy;
                 }
                 return;
@@ -150,7 +164,8 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
             // if the bot's active enemy already matches goal enemy, do nothing
             if (activeEnemy != null &&
-                activeEnemy.EnemyInfo.ProfileId == goalEnemy.ProfileId) {
+                activeEnemy.EnemyInfo.ProfileId == goalEnemy.ProfileId)
+            {
                 enemy = activeEnemy;
                 return;
             }
@@ -158,22 +173,26 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             // our enemy is changing.
             activeEnemy = BaseClass.CheckAddEnemy(goalEnemy?.Person);
 
-            if (activeEnemy == null) {
+            if (activeEnemy == null)
+            {
                 Logger.LogError($"{goalEnemy?.Person?.ProfileId} not SAIN enemy!");
                 return;
             }
 
-            if (activeEnemy.CheckValid() && activeEnemy.EnemyPerson.Active) {
+            if (activeEnemy.CheckValid() && activeEnemy.EnemyPerson.Active)
+            {
                 enemy = activeEnemy;
             }
-            else {
+            else
+            {
                 enemy = null;
             }
         }
 
         private void setActiveEnemy(Enemy enemy)
         {
-            if (enemy == null || (enemy.CheckValid() && enemy.EnemyPerson.Active)) {
+            if (enemy == null || (enemy.CheckValid() && enemy.EnemyPerson.Active))
+            {
                 ActiveEnemy = enemy;
                 setGoalEnemy(enemy?.EnemyInfo);
             }
@@ -184,14 +203,17 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             bool nullActiveEnemy = activeEnemy?.EnemyPerson?.Active == true;
             bool nullLastEnemy = LastEnemy?.EnemyPerson?.Active == true;
 
-            if (!nullLastEnemy && nullActiveEnemy) {
+            if (!nullLastEnemy && nullActiveEnemy)
+            {
                 return;
             }
-            if (nullLastEnemy && !nullActiveEnemy) {
+            if (nullLastEnemy && !nullActiveEnemy)
+            {
                 LastEnemy = activeEnemy;
                 return;
             }
-            if (!AreEnemiesSame(activeEnemy, LastEnemy)) {
+            if (!AreEnemiesSame(activeEnemy, LastEnemy))
+            {
                 LastEnemy = activeEnemy;
                 return;
             }
@@ -199,12 +221,15 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private void setGoalEnemy(EnemyInfo enemyInfo)
         {
-            if (BotOwner.Memory.GoalEnemy != enemyInfo) {
-                try {
+            if (BotOwner.Memory.GoalEnemy != enemyInfo)
+            {
+                try
+                {
                     BotOwner.Memory.GoalEnemy = enemyInfo;
                     BotOwner.CalcGoal();
                 }
-                catch {
+                catch
+                {
                     // Sometimes bsg code throws an error here :D
                 }
             }
@@ -225,36 +250,43 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private void checkDiscrepency()
         {
             EnemyInfo goalEnemy = BotOwner.Memory.GoalEnemy;
-            if (goalEnemy != null && ActiveEnemy == null) {
+            if (goalEnemy != null && ActiveEnemy == null)
+            {
                 //if (_nextLogTime < Time.time)
                 //{
                 //_nextLogTime = Time.time + 1f;
 
                 //Logger.LogError("Bot's Goal Enemy is not null, but SAIN enemy is null.");
-                if (goalEnemy.Person == null) {
+                if (goalEnemy.Person == null)
+                {
                     //Logger.LogError("Bot's Goal Enemy Person is null");
                     return;
                 }
-                if (goalEnemy.ProfileId == Bot.ProfileId) {
+                if (goalEnemy.ProfileId == Bot.ProfileId)
+                {
                     //Logger.LogError("goalEnemy.ProfileId == SAINBot.ProfileId");
                     return;
                 }
-                if (goalEnemy.ProfileId == Bot.Player.ProfileId) {
+                if (goalEnemy.ProfileId == Bot.Player.ProfileId)
+                {
                     //Logger.LogError("goalEnemy.ProfileId == SAINBot.Player.ProfileId");
                     return;
                 }
-                if (goalEnemy.ProfileId == Bot.BotOwner.ProfileId) {
+                if (goalEnemy.ProfileId == Bot.BotOwner.ProfileId)
+                {
                     //Logger.LogError("goalEnemy.ProfileId == SAINBot.Player.ProfileId");
                     return;
                 }
                 Enemy sainEnemy = BaseClass.GetEnemy(goalEnemy.ProfileId, true);
-                if (sainEnemy != null) {
+                if (sainEnemy != null)
+                {
                     setActiveEnemy(sainEnemy);
                     //Logger.LogError("Got SAINEnemy from goalEnemy.ProfileId");
                     return;
                 }
                 sainEnemy = BaseClass.CheckAddEnemy(goalEnemy.Person);
-                if (sainEnemy != null) {
+                if (sainEnemy != null)
+                {
                     setActiveEnemy(sainEnemy);
                     //Logger.LogError("Got SAINEnemy from goalEnemy.Person");
                     return;

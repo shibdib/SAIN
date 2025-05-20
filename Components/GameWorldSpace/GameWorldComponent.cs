@@ -22,7 +22,7 @@ namespace SAIN.Components
         public LocationClass Location { get; private set; }
         public SpawnPointMarker[] SpawnPointMarkers { get; private set; }
 
-        private void Update()
+        public void Update()
         {
             Doors?.Update();
             Location?.Update();
@@ -31,7 +31,8 @@ namespace SAIN.Components
 
         private void findSpawnPointMarkers()
         {
-            if ((SpawnPointMarkers != null) || (Camera.main == null)) {
+            if ((SpawnPointMarkers != null) || (Camera.main == null))
+            {
                 return;
             }
 
@@ -43,15 +44,18 @@ namespace SAIN.Components
 
         public IEnumerable<Vector3> GetAllSpawnPointPositionsOnNavMesh()
         {
-            if (SpawnPointMarkers == null) {
+            if (SpawnPointMarkers == null)
+            {
                 return Enumerable.Empty<Vector3>();
             }
 
-            List<Vector3> spawnPointPositions = new List<Vector3>();
-            foreach (SpawnPointMarker spawnPointMarker in SpawnPointMarkers) {
+            List<Vector3> spawnPointPositions = new();
+            foreach (SpawnPointMarker spawnPointMarker in SpawnPointMarkers)
+            {
                 // Try to find a point on the NavMesh nearby the spawn point
                 Vector3? spawnPointPosition = NavMeshHelpers.GetNearbyNavMeshPoint(spawnPointMarker.Position, 2);
-                if (spawnPointPosition.HasValue && !spawnPointPositions.Contains(spawnPointPosition.Value)) {
+                if (spawnPointPosition.HasValue && !spawnPointPositions.Contains(spawnPointPosition.Value))
+                {
                     spawnPointPositions.Add(spawnPointPosition.Value);
                 }
             }
@@ -59,11 +63,12 @@ namespace SAIN.Components
             return spawnPointPositions;
         }
 
-        private void Awake()
+        public void Awake()
         {
             Instance = this;
             GameWorld = this.GetComponent<GameWorld>();
-            if (GameWorld == null) {
+            if (GameWorld == null)
+            {
                 Logger.LogWarning($"GameWorld is null from GetComponent");
             }
             StartCoroutine(Init());
@@ -73,7 +78,8 @@ namespace SAIN.Components
         {
             yield return getGameWorld();
 
-            if (GameWorld == null) {
+            if (GameWorld == null)
+            {
                 Logger.LogWarning("GameWorld Null, cannot Init SAIN Gameworld! Check 2. Disposing Component...");
                 Dispose();
                 yield break;
@@ -86,10 +92,12 @@ namespace SAIN.Components
             ExtractFinder = this.GetOrAddComponent<Extract.ExtractFinderComponent>();
             GameWorld.OnDispose += Dispose;
 
-            try {
+            try
+            {
                 EFTCoreSettings.UpdateCoreSettings();
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Logger.LogError(e);
             }
 
@@ -101,23 +109,29 @@ namespace SAIN.Components
 
         private IEnumerator getGameWorld()
         {
-            if (GameWorld != null) {
+            if (GameWorld != null)
+            {
                 yield break;
             }
-            if (GameWorld == null) {
+            if (GameWorld == null)
+            {
                 yield return new WaitForEndOfFrame();
                 GameWorld = findGameWorld();
-                if (GameWorld != null) {
+                if (GameWorld != null)
+                {
                     Logger.LogWarning("Found GameWorld at EndOfFrame");
                     yield break;
                 }
             }
-            for (int i = 0; i < 30; i++) {
-                if (GameWorld == null) {
+            for (int i = 0; i < 30; i++)
+            {
+                if (GameWorld == null)
+                {
                     yield return null;
                     GameWorld = findGameWorld();
                 }
-                if (GameWorld != null) {
+                if (GameWorld != null)
+                {
                     break;
                 }
             }
@@ -126,7 +140,8 @@ namespace SAIN.Components
         private GameWorld findGameWorld()
         {
             GameWorld gameWorld = this.GetComponent<GameWorld>();
-            if (gameWorld == null) {
+            if (gameWorld == null)
+            {
                 gameWorld = Singleton<GameWorld>.Instance;
             }
             return gameWorld;
@@ -135,19 +150,23 @@ namespace SAIN.Components
         public void Dispose()
         {
             Instance = null;
-            try {
+            try
+            {
                 PlayerTracker?.Dispose();
                 Doors?.Dispose();
                 Location?.Dispose();
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Logger.LogError($"Dispose GameWorld Component Class Error: {e}");
             }
 
-            try {
+            try
+            {
                 ComponentHelpers.DestroyComponent(SAINBotController);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Logger.LogError($"Dispose GameWorld SubComponent Error: {e}");
             }
 

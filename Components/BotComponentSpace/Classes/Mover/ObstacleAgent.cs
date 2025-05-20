@@ -15,7 +15,7 @@ namespace SAIN.SAINComponent.Classes.Mover
         private float LastMoveTime;
         private Vector3 LastPosition;
 
-        private void Awake()
+        public void Awake()
         {
             Agent = GetComponent<NavMeshAgent>();
             Obstacle = GetComponent<NavMeshObstacle>();
@@ -27,7 +27,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             LastPosition = transform.position;
         }
 
-        private void Update()
+        public void Update()
         {
             if (Vector3.Distance(LastPosition, transform.position) > CarvingMoveThreshold)
             {

@@ -63,7 +63,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             float baseAimTime = AIMTIME_BASE;
             stringBuilder?.AppendLine($"baseAimTime [{baseAimTime}]");
 
-            if (Bot.Cover.InCover) {
+            if (Bot.Cover.InCover)
+            {
                 baseAimTime *= AIMTIME_COVER_COEF;
             }
 
@@ -86,7 +87,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             timeToAimResult = calcAttachmentMod(Bot, timeToAimResult, stringBuilder);
 
             if (stringBuilder != null &&
-                BotOwner?.Memory?.GoalEnemy?.Person?.IsYourPlayer == true) {
+                BotOwner?.Memory?.GoalEnemy?.Person?.IsYourPlayer == true)
+            {
                 Logger.LogDebug(stringBuilder.ToString());
             }
             return timeToAimResult;
@@ -106,7 +108,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             CoverPoint coverInUse = botComponent?.Cover.CoverInUse;
             bool inCover = coverInUse?.BotInThisCover == true;
-            if (inCover) {
+            if (inCover)
+            {
                 baseAimTime *= fileSettings.Aiming.COEF_FROM_COVER;
                 stringBuilder?.AppendLine($"In Cover: [{baseAimTime}] : COEF_FROM_COVER [{fileSettings.Aiming.COEF_FROM_COVER}]");
             }
@@ -123,7 +126,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private static float calcMoveModifier(bool moving, float timeToAimResult, BotSettingsComponents fileSettings, StringBuilder stringBuilder)
         {
-            if (moving) {
+            if (moving)
+            {
                 timeToAimResult *= fileSettings.Aiming.COEF_IF_MOVE;
                 stringBuilder?.AppendLine($"Moving [{timeToAimResult}] : Moving Coef [{fileSettings.Aiming.COEF_IF_MOVE}]");
             }
@@ -132,7 +136,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private static float calcADSModifier(bool aiming, float timeToAimResult, StringBuilder stringBuilder)
         {
-            if (aiming) {
+            if (aiming)
+            {
                 float adsMulti = SAINPlugin.LoadedPreset.GlobalSettings.Aiming.AimDownSightsAimTimeMultiplier;
                 timeToAimResult *= adsMulti;
                 stringBuilder?.AppendLine($"Aiming Down Sights [{timeToAimResult}] : ADS Multiplier [{adsMulti}]");
@@ -143,7 +148,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private static float clampAimTime(float timeToAimResult, BotSettingsComponents fileSettings, StringBuilder stringBuilder)
         {
             float clampedResult = Mathf.Clamp(timeToAimResult, 0f, fileSettings.Aiming.MAX_AIM_TIME);
-            if (clampedResult != timeToAimResult) {
+            if (clampedResult != timeToAimResult)
+            {
                 stringBuilder?.AppendLine($"Clamped Aim Time [{clampedResult}] : MAX_AIM_TIME [{fileSettings.Aiming.MAX_AIM_TIME}]");
             }
             return clampedResult;
@@ -151,7 +157,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private static float calcPanic(bool panicing, float calculatedAimTime, BotSettingsComponents fileSettings, StringBuilder stringBuilder)
         {
-            if (panicing) {
+            if (panicing)
+            {
                 calculatedAimTime *= fileSettings.Aiming.PANIC_COEF;
                 stringBuilder?.AppendLine($"Panicing [{calculatedAimTime}] : Panic Coef [{fileSettings.Aiming.PANIC_COEF}]");
             }
@@ -160,11 +167,13 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private static float calcFasterCQB(float distance, float aimTimeResult, SAINAimingSettings aimSettings, StringBuilder stringBuilder)
         {
-            if (!SAINPlugin.LoadedPreset.GlobalSettings.Aiming.FasterCQBReactionsGlobal) {
+            if (!SAINPlugin.LoadedPreset.GlobalSettings.Aiming.FasterCQBReactionsGlobal)
+            {
                 return aimTimeResult;
             }
             if (aimSettings?.FasterCQBReactions == true &&
-                distance <= aimSettings.FasterCQBReactionsDistance) {
+                distance <= aimSettings.FasterCQBReactionsDistance)
+            {
                 float ratio = distance / aimSettings.FasterCQBReactionsDistance;
                 float fasterTime = aimTimeResult * ratio;
                 fasterTime = Mathf.Clamp(fasterTime, aimSettings.FasterCQBReactionsMinimum, aimTimeResult);
@@ -177,7 +186,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private static float calcAttachmentMod(BotComponent bot, float aimTimeResult, StringBuilder stringBuilder)
         {
             Enemy enemy = bot?.Enemy;
-            if (enemy != null) {
+            if (enemy != null)
+            {
                 float modifier = enemy.Aim.AimAndScatterMultiplier;
                 stringBuilder?.AppendLine($"Bot Attachment Mod: Result [{aimTimeResult / modifier}] : Original [{aimTimeResult}] : Modifier [{modifier}]");
                 aimTimeResult /= modifier;
@@ -194,23 +204,27 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public float LastAimTime { get; set; }
 
-        public AimStatus AimStatus {
+        public AimStatus AimStatus
+        {
             get
             {
-                object aimStatus = aimStatusField.GetValue(BotOwner.AimingData);
-                if (aimStatus == null) {
+
+                if (BotOwner.AimingManager.CurrentAiming != null && BotOwner.AimingManager.CurrentAiming is BotAimingClass aimClass)
+                {
+                    var status = aimClass.aimStatus_0;
+
+                    //if (status != AimStatus.NoTarget &&
+                    //    Bot.Enemy?.IsVisible == false &&
+                    //    Bot.LastEnemy?.IsVisible == false)
+                    //{
+                    //    return AimStatus.NoTarget;
+                    //}
+                    return status;
+                }
+                else
+                {
                     return AimStatus.NoTarget;
                 }
-
-                var status = (AimStatus)aimStatus;
-
-                //if (status != AimStatus.NoTarget &&
-                //    Bot.Enemy?.IsVisible == false &&
-                //    Bot.LastEnemy?.IsVisible == false)
-                //{
-                //    return AimStatus.NoTarget;
-                //}
-                return status;
             }
         }
 
@@ -236,24 +250,29 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         {
             bool couldAim = CanAim;
             CanAim = canAim();
-            if (couldAim != CanAim) {
+            if (couldAim != CanAim)
+            {
                 OnAimAllowedOrBlocked?.Invoke(CanAim);
             }
         }
 
         private bool canAim()
         {
-            var aimData = BotOwner.AimingData;
-            if (aimData == null) {
+            var aimData = BotOwner.AimingManager.CurrentAiming;
+            if (aimData == null)
+            {
                 //return false;
             }
-            if (Player.IsSprintEnabled) {
+            if (Player.IsSprintEnabled)
+            {
                 return false;
             }
-            if (BotOwner.WeaponManager.Reload.Reloading) {
+            if (BotOwner.WeaponManager.Reload.Reloading)
+            {
                 //return false;
             }
-            if (!Bot.HasEnemy) {
+            if (!Bot.HasEnemy)
+            {
                 //return false;
             }
             return true;
@@ -261,8 +280,9 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void checkLoseTarget()
         {
-            if (!CanAim) {
-                BotOwner.AimingData?.LoseTarget();
+            if (!CanAim)
+            {
+                BotOwner.AimingManager.CurrentAiming?.LoseTarget();
                 return;
             }
         }
@@ -270,12 +290,5 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         public void Dispose()
         {
         }
-
-        static AimClass()
-        {
-            aimStatusField = AccessTools.Field(Helpers.HelpersGClass.AimDataType, "aimStatus_0");
-        }
-
-        private static FieldInfo aimStatusField;
     }
 }

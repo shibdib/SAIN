@@ -1,7 +1,7 @@
 ﻿using EFT;
 using Newtonsoft.Json;
 using SAIN.Attributes;
-using SAIN.Helpers;
+using SAIN.Models.Enums;
 using SAIN.SAINComponent.Classes.WeaponFunction;
 using System.Collections.Generic;
 
@@ -44,7 +44,7 @@ namespace SAIN.Preset.GlobalSettings.Categories
         [Name("Force Single Personality For All Bots")]
         [Description("All Spawned SAIN bots will be assigned the selected Personality, if any are set to true, no matter what.")]
         [Category("Personality")]
-        public Dictionary<EPersonality, bool> ForcePersonality = new Dictionary<EPersonality, bool>()
+        public Dictionary<EPersonality, bool> ForcePersonality = new()
         {
             { EPersonality.Wreckless, false},
             { EPersonality.GigaChad, false },
@@ -60,7 +60,7 @@ namespace SAIN.Preset.GlobalSettings.Categories
         [Description("Sets the pesonality that a boss will always use.")]
         [Category("Personality")]
         [Hidden]
-        public Dictionary<WildSpawnType, EPersonality> PERS_BOSSES = new Dictionary<WildSpawnType, EPersonality>() {
+        public Dictionary<WildSpawnType, EPersonality> PERS_BOSSES = new() {
             { WildSpawnType.bossKilla, EPersonality.Wreckless},
             { WildSpawnType.bossTagilla, EPersonality.Wreckless},
             { WildSpawnType.bossKolontay, EPersonality.Wreckless},
@@ -146,7 +146,7 @@ namespace SAIN.Preset.GlobalSettings.Categories
         [MinMax(0.01f, 10f, 100f)]
         [Category("Suppression")]
         [Advanced]
-        public Dictionary<ESuppressionState, SuppressionConfig> SUPPRESSION_STATES = new Dictionary<ESuppressionState, SuppressionConfig>()
+        public Dictionary<ESuppressionState, SuppressionConfig> SUPPRESSION_STATES = new()
         {
             {ESuppressionState.Light, new SuppressionConfig {
                 Threshold = 1f,
@@ -229,7 +229,8 @@ namespace SAIN.Preset.GlobalSettings.Categories
         [MinMax(0.1f, 20f, 100f)]
         [Category("Suppression")]
         [DefaultDictionary(nameof(SUPP_AMOUNTS_DEFAULT))]
-        public Dictionary<ECaliber, float> SUPP_AMOUNTS = new Dictionary<ECaliber, float> {
+        public Dictionary<ECaliber, float> SUPP_AMOUNTS = new()
+        {
             { ECaliber.Caliber9x18PM, 1f },
             { ECaliber.Caliber9x19PARA, 1.1f },
             { ECaliber.Caliber46x30, 1.2f },
@@ -262,7 +263,8 @@ namespace SAIN.Preset.GlobalSettings.Categories
 
         [JsonIgnore]
         [Hidden]
-        public static readonly Dictionary<ECaliber, float> SUPP_AMOUNTS_DEFAULT = new Dictionary<ECaliber, float> {
+        public static readonly Dictionary<ECaliber, float> SUPP_AMOUNTS_DEFAULT = new()
+        {
             { ECaliber.Caliber9x18PM, 1f },
             { ECaliber.Caliber9x19PARA, 1.1f },
             { ECaliber.Caliber46x30, 1.2f },

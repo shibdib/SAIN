@@ -63,27 +63,35 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         private void updateDebug()
         {
             var enemy = ActiveEnemy;
-            if (enemy != null) {
-                if (SAINPlugin.DebugMode && SAINPlugin.DrawDebugGizmos) {
-                    if (enemy.KnownPlaces.LastHeardPosition != null) {
-                        if (debugLastHeardPosition == null) {
+            if (enemy != null)
+            {
+                if (SAINPlugin.DebugMode && SAINPlugin.DrawDebugGizmos)
+                {
+                    if (enemy.KnownPlaces.LastHeardPosition != null)
+                    {
+                        if (debugLastHeardPosition == null)
+                        {
                             debugLastHeardPosition = DebugGizmos.Line(enemy.KnownPlaces.LastHeardPosition.Value, Bot.Position, Color.yellow, 0.01f, false, Time.deltaTime, true);
                         }
                         DebugGizmos.UpdatePositionLine(enemy.KnownPlaces.LastHeardPosition.Value, Bot.Position, debugLastHeardPosition);
                     }
-                    if (enemy.KnownPlaces.LastSeenPosition != null) {
-                        if (debugLastSeenPosition == null) {
+                    if (enemy.KnownPlaces.LastSeenPosition != null)
+                    {
+                        if (debugLastSeenPosition == null)
+                        {
                             debugLastSeenPosition = DebugGizmos.Line(enemy.KnownPlaces.LastSeenPosition.Value, Bot.Position, Color.red, 0.01f, false, Time.deltaTime, true);
                         }
                         DebugGizmos.UpdatePositionLine(enemy.KnownPlaces.LastSeenPosition.Value, Bot.Position, debugLastSeenPosition);
                     }
                 }
-                else if (debugLastHeardPosition != null || debugLastSeenPosition != null) {
+                else if (debugLastHeardPosition != null || debugLastSeenPosition != null)
+                {
                     GameObject.Destroy(debugLastHeardPosition);
                     GameObject.Destroy(debugLastSeenPosition);
                 }
             }
-            else if (debugLastHeardPosition != null || debugLastSeenPosition != null) {
+            else if (debugLastHeardPosition != null || debugLastSeenPosition != null)
+            {
                 GameObject.Destroy(debugLastHeardPosition);
                 GameObject.Destroy(debugLastSeenPosition);
             }

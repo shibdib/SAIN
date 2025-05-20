@@ -1,11 +1,10 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
 using Newtonsoft.Json;
+using SAIN.Attributes;
 using SAIN.Components.PlayerComponentSpace;
-using SAIN.Helpers;
 using SAIN.SAINComponent.Classes.Info;
 using System.Collections.Generic;
-using SAIN.Attributes;
 
 namespace SAIN.Preset.GlobalSettings
 {
@@ -134,19 +133,22 @@ namespace SAIN.Preset.GlobalSettings
         public bool CalcPower(PlayerComponent playerComponent, out float power)
         {
             power = 0f;
-            if (playerComponent == null) {
+            if (playerComponent == null)
+            {
                 return false;
             }
 
             power += WeaponPower(playerComponent);
-            if (power == 0f) {
+            if (power == 0f)
+            {
                 return false;
             }
 
             power += RolePower(playerComponent.Player.Profile.Info.Settings.Role);
             power += ArmorPower(playerComponent.Player);
 
-            if (playerComponent.Player.AIData is GClass551 aiData) {
+            if (playerComponent.Player.AIData is GClass567 aiData)
+            {
                 aiData.PowerOfEquipment = power;
             }
 
@@ -155,10 +157,12 @@ namespace SAIN.Preset.GlobalSettings
 
         private float RolePower(WildSpawnType type)
         {
-            if (_PMCS.Contains(type)) {
+            if (_PMCS.Contains(type))
+            {
                 return PMC_POWER;
             }
-            else if (_SCAVS.Contains(type)) {
+            else if (_SCAVS.Contains(type))
+            {
                 return SCAV_POWER;
             }
             return 0f;
@@ -169,22 +173,27 @@ namespace SAIN.Preset.GlobalSettings
             float result = 0f;
 
             WeaponInfo weaponInfo = player.Equipment.CurrentWeapon ?? player.Equipment.WeaponInInventory;
-            if (weaponInfo == null) {
+            if (weaponInfo == null)
+            {
                 //Logger.LogError("weaponInfo Null");
                 return 1f;
             }
 
-            if (weaponInfo.HasSuppressor) {
+            if (weaponInfo.HasSuppressor)
+            {
                 result += SUPPRESSOR_POWER;
             }
-            if (weaponInfo.HasRedDot) {
+            if (weaponInfo.HasRedDot)
+            {
                 result += RED_DOT_POWER;
             }
-            if (weaponInfo.HasOptic) {
+            if (weaponInfo.HasOptic)
+            {
                 result += OPTIC_POWER;
             }
 
-            switch (weaponInfo.WeaponClass) {
+            switch (weaponInfo.WeaponClass)
+            {
                 case EWeaponClass.pistol:
                     result += PISTOL_POWER;
                     break;
@@ -228,20 +237,25 @@ namespace SAIN.Preset.GlobalSettings
             armorComponents.Clear();
             float result = 0;
             var equipment = player.Inventory?.Equipment;
-            if (equipment != null) {
+            if (equipment != null)
+            {
                 var armorVest = equipment.GetSlot(EFT.InventoryLogic.EquipmentSlot.ArmorVest)?.ContainedItem;
-                if (armorVest != null) {
+                if (armorVest != null)
+                {
                     armorVest.GetItemComponentsInChildrenNonAlloc(armorComponents, true);
                     float highestArmorClass = FindHighestArmorClass(armorComponents);
                     //Logger.LogInfo($"Armor Components in Vest: [{armorComponents.Count}] Highest Armor Class: [{highestArmorClass}] Class Coef: [{ArmorClassCoef}] Combined: [{highestArmorClass * ArmorClassCoef}]");
                     result += highestArmorClass * ArmorClassCoef;
                     armorComponents.Clear();
                 }
-                else {
+                else
+                {
                     var rig = equipment.GetSlot(EFT.InventoryLogic.EquipmentSlot.TacticalVest)?.ContainedItem;
-                    if (rig != null) {
+                    if (rig != null)
+                    {
                         rig.GetItemComponentsInChildrenNonAlloc(armorComponents, true);
-                        if (armorComponents.Count > 0) {
+                        if (armorComponents.Count > 0)
+                        {
                             float highestArmorClass = FindHighestArmorClass(armorComponents);
                             //Logger.LogInfo($"Armor Components in Rig: [{armorComponents.Count}] Highest Armor Class: [{highestArmorClass}] Class Coef: [{ArmorClassCoef}] Combined: [{highestArmorClass * ArmorClassCoef}]");
                             result += highestArmorClass * ArmorClassCoef;
@@ -251,14 +265,18 @@ namespace SAIN.Preset.GlobalSettings
                 }
 
                 var helmet = equipment.GetSlot(EFT.InventoryLogic.EquipmentSlot.Headwear)?.ContainedItem;
-                if (helmet != null) {
+                if (helmet != null)
+                {
                     helmet.GetItemComponentsInChildrenNonAlloc(armorComponents, true);
-                    if (armorComponents.Count > 0) {
+                    if (armorComponents.Count > 0)
+                    {
                         float highestArmorClass = FindHighestArmorClass(armorComponents);
-                        if (highestArmorClass > 4) {
+                        if (highestArmorClass > 4)
+                        {
                             result += HELMET_HEAVY_POWER;
                         }
-                        else if (highestArmorClass > 1) {
+                        else if (highestArmorClass > 1)
+                        {
                             result += HELMET_POWER;
                         }
                         //Logger.LogInfo($"Armor Components in Helmet: [{armorComponents.Count}] Highest Armor Class: [{highestArmorClass}]");
@@ -267,14 +285,17 @@ namespace SAIN.Preset.GlobalSettings
                 }
 
                 var faceProtection = equipment.GetSlot(EFT.InventoryLogic.EquipmentSlot.FaceCover)?.ContainedItem;
-                if (faceProtection != null) {
+                if (faceProtection != null)
+                {
                     faceProtection.GetItemComponentsInChildrenNonAlloc(armorComponents, true);
-                    if (armorComponents.Count > 0) {
+                    if (armorComponents.Count > 0)
+                    {
                         result += FACESHIELD_POWER;
                     }
                 }
                 var earPro = equipment.GetSlot(EFT.InventoryLogic.EquipmentSlot.Earpiece)?.ContainedItem;
-                if (earPro != null) {
+                if (earPro != null)
+                {
                     result += EARPRO_POWER;
                 }
             }
@@ -286,9 +307,11 @@ namespace SAIN.Preset.GlobalSettings
         private float FindHighestArmorClass(List<ArmorComponent> armorComponents)
         {
             float result = 0f;
-            foreach (var armorComponent in armorComponents) {
+            foreach (var armorComponent in armorComponents)
+            {
                 float armorClass = armorComponent.ArmorClass;
-                if (armorClass > result) {
+                if (armorClass > result)
+                {
                     result = armorClass;
                 }
             }
@@ -296,10 +319,12 @@ namespace SAIN.Preset.GlobalSettings
         }
 
         [JsonIgnore]
-        private float ArmorClassCoef {
+        private float ArmorClassCoef
+        {
             get
             {
-                if (ModDetection.RealismLoaded) {
+                if (ModDetection.RealismLoaded)
+                {
                     return ARMOR_CLASS_COEF_REALISM;
                 }
                 return ARMOR_CLASS_COEF;
@@ -307,17 +332,17 @@ namespace SAIN.Preset.GlobalSettings
         }
 
         [JsonIgnore]
-        private static readonly List<ArmorComponent> armorComponents = new List<ArmorComponent>();
+        private static readonly List<ArmorComponent> armorComponents = new();
 
         [JsonIgnore]
-        private static readonly List<WildSpawnType> _PMCS = new List<WildSpawnType>
+        private static readonly List<WildSpawnType> _PMCS = new()
         {
             WildSpawnType.pmcUSEC,
             WildSpawnType.pmcBEAR
         };
 
         [JsonIgnore]
-        private static readonly List<WildSpawnType> _SCAVS = new List<WildSpawnType>
+        private static readonly List<WildSpawnType> _SCAVS = new()
         {
             WildSpawnType.assault,
             WildSpawnType.cursedAssault,

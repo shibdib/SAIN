@@ -1,5 +1,4 @@
 ﻿using EFT;
-using EFT.Interactive;
 using HarmonyLib;
 using SAIN.Components;
 using SAIN.Components.BotController;
@@ -8,7 +7,7 @@ using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
 using UnityEngine;
-using EFTSettingsLoadClass = GClass583;
+using EFTSettingsLoadClass = GClass598;
 
 namespace SAIN.Patches.Components
 {
@@ -22,15 +21,19 @@ namespace SAIN.Patches.Components
         [PatchPostfix]
         public static void PatchPostfix(ref BotOwner __instance)
         {
-            try {
-                if (__instance.BotState != EBotState.ActiveFail) {
+            try
+            {
+                if (__instance.BotState != EBotState.ActiveFail)
+                {
                     BotSpawnController.Instance.AddBot(__instance);
                 }
-                else {
+                else
+                {
                     Logger.LogDebug($"{__instance.name} failed EFT Init, skipping adding SAIN components");
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Logger.LogError($" SAIN Add Bot Error: {ex}");
             }
         }
@@ -49,10 +52,12 @@ namespace SAIN.Patches.Components
             if (gameWorld is HideoutGameWorld)
                 return;
 
-            try {
+            try
+            {
                 GameWorldHandler.Create(gameObject);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Logger.LogError($" SAIN Init Gameworld Error: {ex}");
             }
         }
@@ -69,7 +74,8 @@ namespace SAIN.Patches.Components
         public static void PatchPrefix(BotsController __instance)
         {
             var controller = SAINBotController.Instance;
-            if (controller != null && controller.DefaultController == null) {
+            if (controller != null && controller.DefaultController == null)
+            {
                 controller.DefaultController = __instance;
             }
         }
@@ -86,27 +92,9 @@ namespace SAIN.Patches.Components
         public static void PatchPostfix(BotSpawner __instance)
         {
             var controller = SAINBotController.Instance;
-            if (controller != null && controller.BotSpawner == null) {
+            if (controller != null && controller.BotSpawner == null)
+            {
                 controller.BotSpawner = __instance;
-            }
-        }
-    }
-
-    internal class UpdateCoreSettingsPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(EFTSettingsLoadClass), nameof(EFTSettingsLoadClass.Load));
-        }
-
-        [PatchPostfix]
-        public static void Patch()
-        {
-            try {
-                EFTCoreSettings.UpdateCoreSettings();
-            }
-            catch (Exception e) {
-                Logger.LogError(e);
             }
         }
     }

@@ -57,7 +57,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             var doors = Physics.OverlapSphere(Vector3.zero, 1000f, LayerMaskClass.DoorLayer);
             Logger.LogDebug($"Found {doors.Length} total doors");
-            foreach (var door in doors) {
+            foreach (var door in doors)
+            {
                 DebugGizmos.Sphere(door.transform.position, -1f);
             }
         }
@@ -71,7 +72,8 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void updateCurrentDoors()
         {
-            if (_nextUpdateDoorTime < Time.time) {
+            if (_nextUpdateDoorTime < Time.time)
+            {
                 _nextUpdateDoorTime = Time.time + DOORS_UPDATE_FREQ;
                 updateAllDoors(false);
             }
@@ -80,14 +82,16 @@ namespace SAIN.SAINComponent.Classes.Mover
         private void updateVoxel()
         {
             float time = Time.time;
-            if (_nextUpdateVoxelTime < time && _moving) {
+            if (_nextUpdateVoxelTime < time && _moving)
+            {
                 _nextUpdateVoxelTime = time + DOORS_UPDATE_VOXEL_FREQ;
                 BotOwner.AIData.SetPosToVoxel(Bot.Position);
 
                 var lastVoxel = CurrentVoxel;
                 CurrentVoxel = BotOwner.VoxelesPersonalData.CurVoxel;
 
-                if (lastVoxel != CurrentVoxel) {
+                if (lastVoxel != CurrentVoxel)
+                {
                     findAllDoors(CurrentVoxel);
                     OnNewVoxel?.Invoke(CurrentVoxel, lastVoxel);
                 }
@@ -97,12 +101,14 @@ namespace SAIN.SAINComponent.Classes.Mover
         private void findAllDoors(NavGraphVoxelSimple voxel)
         {
             AllDoors.Clear();
-            if (voxel != null) {
+            if (voxel != null)
+            {
                 _nextUpdateDoorTime = Time.time + DOORS_UPDATE_FREQ;
                 _nextCheckDistanceTime = Time.time + DOORS_FIND_CLOSE_FREQ;
 
                 foreach (var link in voxel.DoorLinks)
-                    if (isDoorOpenable(link.Door)) {
+                    if (isDoorOpenable(link.Door))
+                    {
                         AllDoors.Add(new DoorData(link));
                     }
 
@@ -114,11 +120,13 @@ namespace SAIN.SAINComponent.Classes.Mover
         {
             if (!door.enabled ||
                 !door.gameObject.activeInHierarchy ||
-                !door.Operatable) {
+                !door.Operatable)
+            {
                 return false;
             }
             if (GlobalSettings.General.Doors.DisableAllDoors &&
-                GameWorldComponent.Instance.Doors.DisableDoor(door)) {
+                GameWorldComponent.Instance.Doors.DisableDoor(door))
+            {
                 return false;
             }
             return true;
@@ -137,13 +145,14 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void findDoorsToInteract(Vector3 botPosition, bool force)
         {
-            if (force || _nextUpdateInteractTime < Time.time) {
+            if (force || _nextUpdateInteractTime < Time.time)
+            {
                 _nextUpdateInteractTime = Time.time + DOORS_FIND_INTERACTION_FREQ;
 
                 findDoorsInRange(DOORS_INTERACTION_DISTANCE, CloseDoors, InteractionDoors);
                 //
                 //Vector3 targetMovePos;
-                //if (BotOwner.Mover.HavePath)
+                //if (BotOwner.Mover.HasPathAndNoComplete)
                 //    targetMovePos = BotOwner.Mover.RealDestPoint;
                 //else if (Bot.Mover.SprintController.Running)
                 //    targetMovePos = Bot.Mover.SprintController.CurrentCornerDestination();
@@ -156,7 +165,8 @@ namespace SAIN.SAINComponent.Classes.Mover
         private void findDotProducts(Vector3 botPosition, Vector3 currentCornerDestination)
         {
             Vector3 moveDirection = (currentCornerDestination - botPosition).normalized;
-            foreach (var door in InteractionDoors) {
+            foreach (var door in InteractionDoors)
+            {
                 door.CalcDirection(botPosition);
                 door.DotProduct = Vector3.Dot(door.DirectionNormal, moveDirection);
             }
@@ -164,7 +174,8 @@ namespace SAIN.SAINComponent.Classes.Mover
 
         private void findCloseDoors(bool force)
         {
-            if (force || _nextCheckDistanceTime < Time.time) {
+            if (force || _nextCheckDistanceTime < Time.time)
+            {
                 findDoorsInRange(DOORS_CLOSE_DISTANCE, AllDoors, CloseDoors);
                 OnNewCloseDoorsFound?.Invoke(CloseDoors);
             }

@@ -54,7 +54,7 @@ namespace SAIN.SAINComponent.Classes.Memory
 
         public Enemy LastPrimaryEnemy { get; private set; }
 
-        public readonly Dictionary<EEnemyTargetType, EnemyTarget> EnemyTargets = new Dictionary<EEnemyTargetType, EnemyTarget>();
+        public readonly Dictionary<EEnemyTargetType, EnemyTarget> EnemyTargets = new();
 
         public bool IsHumanPlayerActiveEnemy => PrimaryEnemy?.IsAI == true;
     }

@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using SAIN.Attributes;
 using System.Collections.Generic;
 
@@ -111,9 +110,9 @@ namespace SAIN.Preset.GlobalSettings
 
     public class DebugSettings : SAINSettingsBase<DebugSettings>, ISAINSettings
     {
-        public DebugLogSettings Logs = new DebugLogSettings();
-        public DebugGizmoSettings Gizmos = new DebugGizmoSettings();
-        public DebugOverlaySettings Overlay = new DebugOverlaySettings();
+        public DebugLogSettings Logs = new();
+        public DebugGizmoSettings Gizmos = new();
+        public DebugOverlaySettings Overlay = new();
 
         public override void Init(List<ISAINSettings> list)
         {

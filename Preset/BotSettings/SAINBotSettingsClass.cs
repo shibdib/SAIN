@@ -21,8 +21,10 @@ namespace SAIN.Preset.BotSettings
 
         public void Update()
         {
-            foreach (var settings in SAINSettings) {
-                foreach (var group in settings.Value.Settings) {
+            foreach (var settings in SAINSettings)
+            {
+                foreach (var group in settings.Value.Settings)
+                {
                     group.Value.Update();
                 }
             }
@@ -30,8 +32,10 @@ namespace SAIN.Preset.BotSettings
 
         public void Init()
         {
-            foreach (var settings in SAINSettings) {
-                foreach (var group in settings.Value.Settings) {
+            foreach (var settings in SAINSettings)
+            {
+                foreach (var group in settings.Value.Settings)
+                {
                     group.Value.Init();
                 }
             }
@@ -39,9 +43,11 @@ namespace SAIN.Preset.BotSettings
 
         public void UpdateDefaults(SAINBotSettingsClass replacement)
         {
-            foreach (var settings in SAINSettings) {
+            foreach (var settings in SAINSettings)
+            {
                 var replacementSettings = replacement?.SAINSettings[settings.Key];
-                foreach (var group in settings.Value.Settings) {
+                foreach (var group in settings.Value.Settings)
+                {
                     var replacementGroup = replacementSettings?.Settings[group.Key];
                     group.Value.UpdateDefaults(replacementGroup);
                 }
@@ -51,16 +57,20 @@ namespace SAIN.Preset.BotSettings
         private void LoadSAINSettings()
         {
             BotDifficulty[] Difficulties = EnumValues.Difficulties;
-            foreach (var BotType in BotTypeDefinitions.BotTypesList) {
+            foreach (var BotType in BotTypeDefinitions.BotTypesList)
+            {
                 string name = BotType.Name;
                 WildSpawnType wildSpawnType = BotType.WildSpawnType;
 
-                if (BotSpawnController.StrictExclusionList.Contains(wildSpawnType)) {
+                if (BotSpawnController.StrictExclusionList.Contains(wildSpawnType))
+                {
                 }
 
                 SAINSettingsGroupClass sainSettingsGroup;
-                if (Preset.Info.IsCustom == false || !SAINPresetClass.Import(out sainSettingsGroup, Preset.Info.Name, name, "BotSettings")) {
-                    sainSettingsGroup = new SAINSettingsGroupClass(Difficulties) {
+                if (Preset.Info.IsCustom == false || !SAINPresetClass.Import(out sainSettingsGroup, Preset.Info.Name, name, "BotSettings"))
+                {
+                    sainSettingsGroup = new SAINSettingsGroupClass(Difficulties)
+                    {
                         Name = name,
                         WildSpawnType = wildSpawnType,
                         DifficultyModifier = DefaultDifficultyModifier[wildSpawnType]
@@ -68,7 +78,8 @@ namespace SAIN.Preset.BotSettings
 
                     UpdateSAINSettingsToEFTDefault(wildSpawnType, sainSettingsGroup);
 
-                    if (Preset.Info.IsCustom == true) {
+                    if (Preset.Info.IsCustom == true)
+                    {
                         SAINPresetClass.Export(sainSettingsGroup, Preset.Info.Name, name, "BotSettings");
                     }
                 }
@@ -78,13 +89,15 @@ namespace SAIN.Preset.BotSettings
 
         private void UpdateSAINSettingsToEFTDefault(WildSpawnType wildSpawnType, SAINSettingsGroupClass sainSettingsGroup)
         {
-            foreach (var keyPair in sainSettingsGroup.Settings) {
+            foreach (var keyPair in sainSettingsGroup.Settings)
+            {
                 SAINSettingsClass sainSettings = keyPair.Value;
                 BotDifficulty Difficulty = keyPair.Key;
 
                 // Get SAIN and EFT group for the given WildSpawnType and difficulties
                 object eftSettings = GetEFTSettings(wildSpawnType, Difficulty);
-                if (eftSettings != null) {
+                if (eftSettings != null)
+                {
                     CopyValuesAtoB(eftSettings, sainSettings, (field) => ShallUseEFTBotDefault(field));
                 }
             }
@@ -94,9 +107,11 @@ namespace SAIN.Preset.BotSettings
         {
             // Get the names of the fields in EFT group
             List<string> ACatNames = AccessTools.GetFieldNames(A);
-            foreach (FieldInfo BCatField in Reflection.GetFieldsInType(B.GetType())) {
+            foreach (FieldInfo BCatField in Reflection.GetFieldsInType(B.GetType()))
+            {
                 // Check if the category inside SAIN GlobalSettings has a matching category in EFT group
-                if (ACatNames.Contains(BCatField.Name)) {
+                if (ACatNames.Contains(BCatField.Name))
+                {
                     // Get the multiplier of the category from SAIN group
                     object BCatObject = BCatField.GetValue(B);
                     // Get the fields inside that category from SAIN group
@@ -104,21 +119,26 @@ namespace SAIN.Preset.BotSettings
 
                     // Get the category of the matching sain category from EFT group
                     FieldInfo ACatField = AccessTools.Field(A.GetType(), BCatField.Name);
-                    if (ACatField != null) {
+                    if (ACatField != null)
+                    {
                         // Get the value of the EFT group Category
                         object ACatObject = ACatField.GetValue(A);
                         // list the field names in that category
                         List<string> AVariableNames = AccessTools.GetFieldNames(ACatObject);
 
-                        foreach (FieldInfo BVariableField in BVariableFieldArray) {
+                        foreach (FieldInfo BVariableField in BVariableFieldArray)
+                        {
                             // Check if the sain variable is set to grab default EFT numbers and that it exists inside the EFT group category
-                            if (AVariableNames.Contains(BVariableField.Name)) {
-                                if (shouldCopyFieldFunc != null && !shouldCopyFieldFunc(BVariableField)) {
+                            if (AVariableNames.Contains(BVariableField.Name))
+                            {
+                                if (shouldCopyFieldFunc != null && !shouldCopyFieldFunc(BVariableField))
+                                {
                                     continue;
                                 }
                                 // Get the Variable from this category that matched
                                 FieldInfo AVariableField = AccessTools.Field(ACatObject.GetType(), BVariableField.Name);
-                                if (AVariableField != null) {
+                                if (AVariableField != null)
+                                {
                                     // Get the final Rounding of the variable from EFT group, and set the SAIN Setting variable to that multiplier
                                     object AValue = AVariableField.GetValue(ACatObject);
                                     BVariableField.SetValue(BCatObject, AValue);
@@ -136,20 +156,25 @@ namespace SAIN.Preset.BotSettings
         public void LoadEFTSettings()
         {
             BotDifficulty[] Difficulties = EnumValues.Difficulties;
-            foreach (var BotType in BotTypeDefinitions.BotTypesList) {
+            foreach (var BotType in BotTypeDefinitions.BotTypesList)
+            {
                 string name = BotType.Name;
                 WildSpawnType wildSpawnType = BotType.WildSpawnType;
 
-                if (!EFTSettings.ContainsKey(wildSpawnType)) {
-                    if (!Load.LoadObject(out EFTBotSettings eftSettings, name, "Default Bot Config Values")) {
+                if (!EFTSettings.ContainsKey(wildSpawnType))
+                {
+                    if (!Load.LoadObject(out EFTBotSettings eftSettings, name, "Default Bot Config Values"))
+                    {
                         Logger.LogError($"Failed to Import EFT Bot Settings for {name}");
                         eftSettings = new EFTBotSettings(name, wildSpawnType, Difficulties);
                         SaveObjectToJson(eftSettings, name, "Default Bot Config Values");
                     }
                     if (wildSpawnType != WildSpawnType.shooterBTR
                         && wildSpawnType != WildSpawnType.bossZryachiy
-                        && wildSpawnType != WildSpawnType.followerZryachiy) {
-                        foreach (var settings in eftSettings.Settings) {
+                        && wildSpawnType != WildSpawnType.followerZryachiy)
+                    {
+                        foreach (var settings in eftSettings.Settings)
+                        {
                             //var enemyTypes = settings.Value.Mind.ENEMY_BOT_TYPES;
                             //if (enemyTypes.Length == 0)
                             //{
@@ -178,20 +203,24 @@ namespace SAIN.Preset.BotSettings
             }
         }
 
-        private static List<WildSpawnType> _enemyTypeList = new List<WildSpawnType>();
+        private static List<WildSpawnType> _enemyTypeList = new();
 
         public SAINSettingsClass GetSAINSettings(WildSpawnType type, BotDifficulty difficulty)
         {
             LoadEFTSettings();
-            if (SAINSettings.TryGetValue(type, out var settingsGroup)) {
-                if (settingsGroup.Settings.TryGetValue(difficulty, out var settings)) {
+            if (SAINSettings.TryGetValue(type, out var settingsGroup))
+            {
+                if (settingsGroup.Settings.TryGetValue(difficulty, out var settings))
+                {
                     return settings;
                 }
-                else {
+                else
+                {
                     Logger.LogError($"[{difficulty}] does not exist in [{type}] SAIN Settings!");
                 }
             }
-            else {
+            else
+            {
                 Logger.LogError($"[{type}] does not exist in SAINSettings Dictionary!");
             }
             return SAINSettings[WildSpawnType.pmcUSEC].Settings[BotDifficulty.normal];
@@ -200,22 +229,26 @@ namespace SAIN.Preset.BotSettings
         public object GetEFTSettings(WildSpawnType type, BotDifficulty difficulty)
         {
             LoadEFTSettings();
-            if (EFTSettings.TryGetValue(type, out var settingsGroup)) {
-                if (settingsGroup.Settings.TryGetValue(difficulty, out var settings)) {
+            if (EFTSettings.TryGetValue(type, out var settingsGroup))
+            {
+                if (settingsGroup.Settings.TryGetValue(difficulty, out var settings))
+                {
                     return settings;
                 }
-                else {
+                else
+                {
                     Logger.LogError($"[{difficulty}] does not exist in [{type}] Settings Group!");
                 }
             }
-            else {
+            else
+            {
                 Logger.LogError($"[{type}] does not exist in EFTSettings Dictionary!");
             }
             return EFTSettings[WildSpawnType.pmcUSEC].Settings[BotDifficulty.normal];
         }
 
-        public Dictionary<WildSpawnType, SAINSettingsGroupClass> SAINSettings = new Dictionary<WildSpawnType, SAINSettingsGroupClass>();
-        public Dictionary<WildSpawnType, EFTBotSettings> EFTSettings = new Dictionary<WildSpawnType, EFTBotSettings>();
+        public Dictionary<WildSpawnType, SAINSettingsGroupClass> SAINSettings = new();
+        public Dictionary<WildSpawnType, EFTBotSettings> EFTSettings = new();
 
         static SAINBotSettingsClass()
         {
@@ -267,8 +300,10 @@ namespace SAIN.Preset.BotSettings
                 { WildSpawnType.pmcBEAR, 1f },
             };
 
-            foreach (WildSpawnType type in BotTypeDefinitions.BotTypes.Keys) {
-                if (!DefaultDifficultyModifier.ContainsKey(type)) {
+            foreach (WildSpawnType type in BotTypeDefinitions.BotTypes.Keys)
+            {
+                if (!DefaultDifficultyModifier.ContainsKey(type))
+                {
                     DefaultDifficultyModifier.Add(type, 0.5f);
                 }
             }

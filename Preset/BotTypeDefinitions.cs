@@ -16,9 +16,9 @@ namespace SAIN.Preset
 
     public class BotTypeDefinitions
     {
-        public static Dictionary<WildSpawnType, BotType> BotTypes = new Dictionary<WildSpawnType, BotType>();
+        public static Dictionary<WildSpawnType, BotType> BotTypes = new();
         public static List<BotType> BotTypesList;
-        public static readonly List<string> BotTypesNames = new List<string>();
+        public static readonly List<string> BotTypesNames = new();
 
         static BotTypeDefinitions()
         {
@@ -48,7 +48,7 @@ namespace SAIN.Preset
             }
             else
             {
-                JsonUtility.SaveObjectToJson(tempList, FileName); 
+                JsonUtility.SaveObjectToJson(tempList, FileName);
                 return tempList;
             }
         }
@@ -92,7 +92,7 @@ namespace SAIN.Preset
             }
         }
 
-        private static readonly List<BotType> _typesToRemove = new List<BotType>();
+        private static readonly List<BotType> _typesToRemove = new();
 
         public static void ExportBotTypes()
         {
@@ -132,9 +132,9 @@ namespace SAIN.Preset
                 new BotType{ WildSpawnType = WildSpawnType.sectantPriest,           Name = "Cultist Priest",           Section = "Other" ,       Description = "Found on Customs, Woods, Factory, Shoreline at night" },
                 new BotType{ WildSpawnType = WildSpawnType.sectantWarrior,          Name = "Cultist",                  Section = "Other" ,       Description = "Found on Customs, Woods, Factory, Shoreline at night" },
                 new BotType{ WildSpawnType = WildSpawnType.bossKilla,               Name = "Killa",                    Section = "Bosses" ,      Description = "He shoot. Found on Interchange and Streets" },
-				new BotType{ WildSpawnType = WildSpawnType.bossPartisan,            Name = "Partisan",                 Section = "Bosses" ,      Description = "Crazy mall santa" },
+				        new BotType{ WildSpawnType = WildSpawnType.bossPartisan,            Name = "Partisan",                 Section = "Bosses" ,      Description = "Crazy mall santa" },
 
-				new BotType{ WildSpawnType = WildSpawnType.bossBully,               Name = "Rashala",                  Section = "Bosses" ,      Description = "Customs Boss" },
+				        new BotType{ WildSpawnType = WildSpawnType.bossBully,               Name = "Rashala",                  Section = "Bosses" ,      Description = "Customs Boss" },
                 new BotType{ WildSpawnType = WildSpawnType.followerBully,           Name = "Rashala Guard",            Section = "Followers" ,   Description = "Customs Boss Follower" },
 
                 new BotType{ WildSpawnType = WildSpawnType.bossKojaniy,             Name = "Shturman",                 Section = "Bosses" ,      Description = "Woods Boss" },

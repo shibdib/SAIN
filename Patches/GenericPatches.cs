@@ -28,7 +28,7 @@ namespace SAIN.Patches.Generic
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotReload), "method_1");
+            return AccessTools.Method(typeof(BotReload), nameof(BotReload.method_1));
         }
 
         [PatchPrefix]
@@ -42,11 +42,11 @@ namespace SAIN.Patches.Generic
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass551), "SetEnvironment");
+            return AccessTools.Method(typeof(GClass567), nameof(GClass567.SetEnvironment));
         }
 
         [PatchPostfix]
-        public static void Patch(GClass551 __instance, IndoorTrigger trigger)
+        public static void Patch(GClass567 __instance, IndoorTrigger trigger)
         {
             SAINBotController.Instance?.PlayerEnviromentChanged(__instance?.Player?.ProfileId, trigger);
         }
@@ -56,7 +56,7 @@ namespace SAIN.Patches.Generic
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotsGroup), "AddPointToSearch");
+            return AccessTools.Method(typeof(BotsGroup), nameof(BotsGroup.AddPointToSearch));
         }
 
         [PatchPrefix]
@@ -70,7 +70,7 @@ namespace SAIN.Patches.Generic
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotMemoryClass), "SetPanicPoint");
+            return AccessTools.Method(typeof(BotMemoryClass), nameof(BotMemoryClass.SetPanicPoint));
         }
 
         [PatchPrefix]
@@ -84,18 +84,20 @@ namespace SAIN.Patches.Generic
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.PropertyGetter(typeof(EnemyInfo), "HaveSeen");
+            return AccessTools.PropertyGetter(typeof(EnemyInfo), nameof(EnemyInfo.HaveSeen));
         }
 
         [PatchPostfix]
         public static void PatchPostfix(ref bool __result, EnemyInfo __instance)
         {
-            if (__result == true) {
+            if (__result == true)
+            {
                 return;
             }
             if (SAINEnableClass.GetSAIN(__instance.Owner, out var sain)
                 //&& sain.Info.Profile.IsPMC
-                && sain.EnemyController.CheckAddEnemy(__instance.Person)?.Heard == true) {
+                && sain.EnemyController.CheckAddEnemy(__instance.Person)?.Heard == true)
+            {
                 __result = true;
             }
         }
@@ -120,59 +122,33 @@ namespace SAIN.Patches.Generic
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(EnemyInfo), "ShallKnowEnemy");
+            return AccessTools.Method(typeof(EnemyInfo), nameof(EnemyInfo.ShallISuppress));
         }
 
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            if (!SAINEnableClass.GetSAIN(__instance.Owner, out var botComponent)) {
+            if (!SAINEnableClass.GetSAIN(__instance.Owner, out var botComponent))
+            {
                 return;
             }
             var enemy = botComponent.EnemyController.CheckAddEnemy(__instance.Person);
             __result = enemy?.EnemyKnown == true;
         }
-
-        public static bool BotsGroupSenseRecently(EnemyInfo enemyInfo)
-        {
-            BotsGroup group = enemyInfo.GroupOwner;
-            for (int i = 0; i < group.MembersCount; i++) {
-                if (SAINEnableClass.GetSAIN(group.Member(i), out BotComponent sain)
-                    && EnemySenseRecently(sain, enemyInfo)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static bool EnemySenseRecently(BotComponent sain, EnemyInfo enemyInfo)
-        {
-            Enemy myEnemy = sain.EnemyController.CheckAddEnemy(enemyInfo.Person);
-            return myEnemy?.CheckValid() == true && myEnemy.EnemyKnown;
-        }
-    }
-
-    public enum KnowEnemyReason
-    {
-        None = 0,
-        HeardRecent = 1,
-        SeenRecent = 2,
-        SquadHeardRecent = 3,
-        SquadSeenRecent = 4,
     }
 
     internal class ShallKnowEnemyLatePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(EnemyInfo), "ShallKnowEnemyLate");
+            return AccessTools.Method(typeof(EnemyInfo), nameof(EnemyInfo.ShallKnowEnemyLate));
         }
 
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, ref bool __result)
         {
-            if (!SAINEnableClass.GetSAIN(__instance.Owner, out var botComponent)) {
+            if (!SAINEnableClass.GetSAIN(__instance.Owner, out var botComponent))
+            {
                 return;
             }
             var enemy = botComponent.EnemyController.CheckAddEnemy(__instance.Person);
@@ -184,15 +160,17 @@ namespace SAIN.Patches.Generic
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotsController), "method_4");
+            return AccessTools.Method(typeof(BotsController), nameof(BotsController.method_5));
         }
 
         [PatchPrefix]
         public static bool PatchPrefix(BotsController __instance, Grenade grenade, Vector3 position, Vector3 force, float mass)
         {
             Vector3 danger = Vector.DangerPoint(position, force, mass);
-            foreach (BotOwner bot in __instance.Bots.BotOwners) {
-                if (SAINPlugin.IsBotExluded(bot)) {
+            foreach (BotOwner bot in __instance.Bots.BotOwners)
+            {
+                if (SAINPlugin.IsBotExluded(bot))
+                {
                     bot.BewareGrenade.AddGrenadeDanger(danger, grenade);
                 }
             }
@@ -204,7 +182,7 @@ namespace SAIN.Patches.Generic
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotsController), "method_3");
+            return AccessTools.Method(typeof(BotsController), nameof(BotsController.method_3));
         }
 
         [PatchPrefix]
@@ -225,13 +203,16 @@ namespace SAIN.Patches.Generic
         public static bool Patch(BotOwner ____owner)
         {
             BotRequest curRequest = ____owner.BotRequestController.CurRequest;
-            if (curRequest == null) {
+            if (curRequest == null)
+            {
                 return false;
             }
-            if (!SAINEnableClass.GetSAIN(____owner, out BotComponent sain)) {
+            if (!SAINEnableClass.GetSAIN(____owner, out BotComponent sain))
+            {
                 return true;
             }
-            if (sain.HasEnemy && curRequest.Requester?.IsAI == true) {
+            if (sain.HasEnemy && curRequest.Requester?.IsAI == true)
+            {
                 curRequest.Dispose();
                 return false;
             }
@@ -251,28 +232,34 @@ namespace SAIN.Patches.Generic
         {
             // Copied original code in FindForMe, but add check to see if requester is AI or not if this bot currently has an active enemy.
             // START NEW //
-            if (!SAINEnableClass.GetSAIN(executer, out BotComponent sain)) {
+            if (!SAINEnableClass.GetSAIN(executer, out BotComponent sain))
+            {
                 return true;
             }
-            if (!sain.HasEnemy) {
+            if (!sain.HasEnemy)
+            {
                 return true;
             }
             // END NEW //
 
             BotRequest botRequest = null;
-            foreach (BotRequest botRequest2 in ____listOfRequests) {
+            foreach (BotRequest botRequest2 in ____listOfRequests)
+            {
                 // START NEW //
                 IPlayer requestor = botRequest2.Requester;
-                if (requestor != null && requestor.IsAI) {
+                if (requestor != null && requestor.IsAI)
+                {
                     continue;
                 }
                 // END NEW //
-                if ((botRequest2.CanExecuteByMyself || (Player)botRequest2.Requester != executer.GetPlayer) && (!executer.Boss.IamBoss || executer.Boss.AllowRequestSelf || executer.GetPlayer.Id != botRequest2.Requester.Id) && botRequest2.CanStartExecute(executer)) {
+                if ((botRequest2.CanExecuteByMyself || (Player)botRequest2.Requester != executer.GetPlayer) && (!executer.Boss.IamBoss || executer.Boss.AllowRequestSelf || executer.GetPlayer.Id != botRequest2.Requester.Id) && botRequest2.CanStartExecute(executer))
+                {
                     botRequest = botRequest2;
                     break;
                 }
             }
-            if (botRequest != null) {
+            if (botRequest != null)
+            {
                 botRequest.Take(executer);
                 ____listOfRequests.Remove(botRequest);
             }

@@ -1,5 +1,5 @@
-﻿using Audio.Data;
-using Comfort.Common;
+﻿using Comfort.Common;
+using CommonAssets.Scripts.Audio;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
@@ -14,27 +14,11 @@ using UnityEngine;
 
 namespace SAIN.Patches.Hearing
 {
-    public class VoicePatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(PhraseSpeakerClass), "Init");
-        }
-
-        [PatchPrefix]
-        public static void Patch(PhraseSpeakerClass __instance, ref EPlayerSide side, ref int id, string playerVoice)
-        {
-            //side = EPlayerSide.Usec;
-            //playerVoice = "Usec_3";
-            //Logger.LogInfo($"{playerVoice}");
-        }
-    }
-
     public class GrenadeCollisionPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Grenade), "OnCollisionHandler");
+            return AccessTools.Method(typeof(Grenade), nameof(Grenade.OnCollisionHandler));
         }
 
         [PatchPostfix]
@@ -53,7 +37,7 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Throwable), "OnCollisionHandler");
+            return AccessTools.Method(typeof(Throwable), nameof(Throwable.OnCollisionHandler));
         }
 
         [PatchPostfix]
@@ -67,15 +51,17 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(TreeInteractive), "method_0");
+            return AccessTools.Method(typeof(TreeInteractive), nameof(TreeInteractive.method_0));
         }
 
         [PatchPostfix]
         public static void Patch(Vector3 soundPosition, BetterSource source, IPlayerOwner player, SoundBank ____soundBank)
         {
-            if (player.iPlayer != null) {
+            if (player.iPlayer != null)
+            {
                 float baseRange = 50f;
-                if (____soundBank != null) {
+                if (____soundBank != null)
+                {
                     baseRange = ____soundBank.Rolloff * player.SoundRadius;
                 }
                 //Logger.LogDebug($"Playing Bush Sound Range: {baseRange}");
@@ -88,7 +74,7 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(MovementContext), "StartInteraction");
+            return AccessTools.Method(typeof(MovementContext), nameof(MovementContext.StartInteraction));
         }
 
         [PatchPrefix]
@@ -103,7 +89,7 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(MovementContext), "PlayBreachSound");
+            return AccessTools.Method(typeof(MovementContext), nameof(MovementContext.PlayBreachSound));
         }
 
         [PatchPrefix]
@@ -118,13 +104,14 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(MovementContext), "method_2");
+            return AccessTools.Method(typeof(MovementContext), nameof(MovementContext.method_2));
         }
 
         [PatchPrefix]
         public static bool PatchPrefix(Player ____player, ref float ____nextJumpNoise)
         {
-            if (____nextJumpNoise < Time.time) {
+            if (____nextJumpNoise < Time.time)
+            {
                 ____nextJumpNoise = Time.time + 0.5f;
                 float baseRange = 55f;
                 SAINBotController.Instance?.BotHearing.PlayAISound(____player.ProfileId, SAINSoundType.Jump, ____player.Position, baseRange, 1f);
@@ -137,20 +124,22 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "PlayStepSound");
+            return AccessTools.Method(typeof(Player), nameof(Player.PlayStepSound));
         }
 
         [PatchPostfix]
         public static void Patch(Player __instance, BetterSource ___NestedStepSoundSource)
         {
-            float volume = calcVolume(__instance);
+            float volume = CalcVolume(__instance);
             float range = ___NestedStepSoundSource.MaxDistance * 0.75f;
             SAINBotController.Instance?.BotHearing.PlayAISound(__instance.ProfileId, SAINSoundType.FootStep, __instance.Position, range, volume);
         }
 
-        private static float calcVolume(Player player)
+        public static float CalcVolume(Player player)
         {
-            return player.MovementContext.CovertMovementVolumeBySpeed * player.method_54();
+            var maxAllowedSpeed = player.MovementContext.MaxSpeed;
+            var charMovementSpeed = player.MovementContext.CharacterMovementSpeed;
+            return player.MovementContext.CovertMovementVolumeBySpeed * Mathf.Clamp(Mathf.InverseLerp(0f, maxAllowedSpeed, charMovementSpeed), player.MINStepSoundSpeedFactor, 1f);
         }
     }
 
@@ -158,23 +147,26 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(MovementContext), "method_1");
+            return AccessTools.Method(typeof(MovementContext), nameof(MovementContext.method_1));
         }
 
         [PatchPrefix]
         public static bool PatchPrefix(Player ____player, Vector3 motion, MovementContext __instance, ref float ____nextStepNoise)
         {
-            if (____nextStepNoise < Time.time && ____player.IsSprintEnabled) {
+            if (____nextStepNoise < Time.time && ____player.IsSprintEnabled)
+            {
                 ____nextStepNoise = Time.time + 0.33f;
 
-                if (motion.y < 0.2f && motion.y > -0.2f) {
+                if (motion.y < 0.2f && motion.y > -0.2f)
+                {
                     motion.y = 0f;
                 }
-                if (motion.sqrMagnitude < 1E-06f) {
+                if (motion.sqrMagnitude < 1E-06f)
+                {
                     return false;
                 }
 
-                float volume = ____player.MovementContext.CovertMovementVolumeBySpeed * ____player.method_54();
+                float volume = ____player.MovementContext.CovertMovementVolumeBySpeed * FootstepSoundPatch.CalcVolume(____player);
                 float baseRange = 60f;
                 SAINBotController.Instance?.BotHearing.PlayAISound(____player.ProfileId, SAINSoundType.Sprint, ____player.Position, baseRange, volume);
             }
@@ -186,14 +178,15 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "DefaultPlay");
+            return AccessTools.Method(typeof(Player), nameof(Player.DefaultPlay));
         }
 
         [PatchPostfix]
         public static void Patch(Player __instance, SoundBank bank, float volume, EAudioMovementState movementState)
         {
             SAINSoundType soundType;
-            switch (movementState) {
+            switch (movementState)
+            {
                 case EAudioMovementState.Sprint:
                     soundType = SAINSoundType.Sprint;
                     break;
@@ -224,7 +217,7 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player.FirearmController), "DryShot");
+            return AccessTools.Method(typeof(Player.FirearmController), nameof(Player.FirearmController.DryShot));
         }
 
         [PatchPrefix]
@@ -239,16 +232,18 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BotHearingSensor), "method_0");
+            return AccessTools.Method(typeof(BotHearingSensor), nameof(BotHearingSensor.method_0));
         }
 
         [PatchPrefix]
         public static bool PatchPrefix(BotOwner ____botOwner)
         {
-            if (!SAINPlugin.IsBotExluded(____botOwner)) {
+            if (!SAINPlugin.IsBotExluded(____botOwner))
+            {
                 return false;
             }
-            if (____botOwner == null || ____botOwner.GetPlayer == null) {
+            if (____botOwner == null || ____botOwner.GetPlayer == null)
+            {
                 return false;
             }
             return true;
@@ -257,23 +252,15 @@ namespace SAIN.Patches.Hearing
 
     public class TryPlayShootSoundPatch : ModulePatch
     {
-        private static PropertyInfo AIFlareEnabled;
-
         protected override MethodBase GetTargetMethod()
         {
-            AIFlareEnabled = AccessTools.Property(typeof(GClass551), "Boolean_0");
-            return AccessTools.Method(typeof(GClass551), "TryPlayShootSound");
+            return AccessTools.Method(typeof(GClass567), nameof(GClass567.TryPlayShootSound));
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(GClass551 __instance)
+        public static bool PatchPrefix(GClass567 __instance)
         {
-            //if (__instance.IsAI &&
-            //    SAINPlugin.IsBotExluded(__instance.BotOwner))
-            //{
-            //    return true;
-            //}
-            AIFlareEnabled.SetValue(__instance, true);
+            __instance.Boolean_0 = true;
             return false;
         }
     }
@@ -282,18 +269,20 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "OnMakingShot");
+            return AccessTools.Method(typeof(Player), nameof(Player.OnMakingShot));
         }
 
         [PatchPrefix]
         public static void PatchPrefix(Player __instance)
         {
             var botController = SAINBotController.Instance;
-            if (botController == null) {
+            if (botController == null)
+            {
                 return;
             }
             botController.BotHearing?.PlayShootSound(__instance.ProfileId);
-            if (__instance.IsAI && SAINEnableClass.GetSAIN(__instance, out var sain)) {
+            if (__instance.IsAI && SAINEnableClass.GetSAIN(__instance, out var sain))
+            {
                 sain.Info.WeaponInfo.Recoil.WeaponShot();
             }
         }
@@ -308,13 +297,14 @@ namespace SAIN.Patches.Hearing
         {
             _PlayerBridge = AccessTools.Field(typeof(BaseSoundPlayer), "playersBridge");
             _Player = AccessTools.PropertyGetter(_PlayerBridge.FieldType, "iPlayer");
-            return AccessTools.Method(typeof(BaseSoundPlayer), "SoundEventHandler");
+            return AccessTools.Method(typeof(BaseSoundPlayer), nameof(BaseSoundPlayer.SoundEventHandler));
         }
 
         [PatchPrefix]
         public static void PatchPrefix(string soundName, BaseSoundPlayer __instance)
         {
-            if (SAINBotController.Instance != null) {
+            if (SAINBotController.Instance != null)
+            {
                 object playerBridge = _PlayerBridge.GetValue(__instance);
                 Player player = _Player.Invoke(playerBridge, null) as Player;
                 SAINSoundTypeHandler.AISoundFileChecker(soundName, player);
@@ -326,15 +316,17 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(BaseSoundPlayer), "SoundAtPointEventHandler");
+            return AccessTools.Method(typeof(BaseSoundPlayer), nameof(BaseSoundPlayer.SoundAtPointEventHandler));
         }
 
         [PatchPrefix]
         public static void PatchPrefix(string soundName, BaseSoundPlayer __instance)
         {
-            if (soundName == FUSE) {
+            if (soundName == FUSE)
+            {
                 BaseSoundPlayer.SoundElement soundElement = __instance.AdditionalSounds.Find((BaseSoundPlayer.SoundElement elem) => elem.EventName == FUSE || elem.EventName == "Snd" + FUSE);
-                if (soundElement != null) {
+                if (soundElement != null)
+                {
                     soundElement.RollOff = 60;
                     soundElement.Volume = 1;
                 }
@@ -348,13 +340,14 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "PlayToggleSound");
+            return AccessTools.Method(typeof(Player), nameof(Player.PlayToggleSound));
         }
 
         [PatchPostfix]
         public static void PatchPostfix(Player __instance, bool previousState, bool isOn, Vector3 ___SpeechLocalPosition)
         {
-            if (previousState != isOn) {
+            if (previousState != isOn)
+            {
                 float baseRange = 5f;
                 SAINBotController.Instance?.BotHearing.PlayAISound(__instance.ProfileId, SAINSoundType.GearSound, __instance.Position + ___SpeechLocalPosition, baseRange, 1f);
             }
@@ -365,14 +358,15 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "SpawnInHands");
+            return AccessTools.Method(typeof(Player), nameof(Player.SpawnInHands));
         }
 
         [PatchPostfix]
         public static void PatchPostfix(Player __instance, Item item)
         {
             AudioClip itemClip = Singleton<GUISounds>.Instance.GetItemClip(item.ItemSound, EInventorySoundType.pickup);
-            if (itemClip != null) {
+            if (itemClip != null)
+            {
                 SAINBotController.Instance?.BotHearing.PlayAISound(__instance.ProfileId, SAINSoundType.GearSound, __instance.Position, 30f, 1f);
             }
         }
@@ -396,13 +390,14 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "method_46");
+            return AccessTools.Method(typeof(Player), nameof(Player.method_46));
         }
 
         [PatchPostfix]
         public static void PatchPostfix(Player __instance, BetterSource ____searchSource)
         {
-            if (____searchSource == null) {
+            if (____searchSource == null)
+            {
                 return;
             }
             float baseRange = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_Looting;
@@ -414,7 +409,7 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), "PlaySoundBank");
+            return AccessTools.Method(typeof(Player), nameof(Player.PlaySoundBank));
         }
 
         [PatchPrefix]
@@ -422,7 +417,8 @@ namespace SAIN.Patches.Hearing
         {
             if (soundBank == "Prone"
                 && __instance.SinceLastStep >= 0.5f
-                && __instance.CheckSurface(____runSurfaceCheck)) {
+                && __instance.CheckSurface(____runSurfaceCheck))
+            {
                 float range = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_Prone;
                 SAINBotController.Instance?.BotHearing.PlayAISound(__instance.ProfileId, SAINSoundType.Prone, __instance.Position, range, 1f);
             }
@@ -433,7 +429,7 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), nameof(Player.method_55));
+            return AccessTools.Method(typeof(Player), nameof(Player.method_58));
         }
 
         [PatchPrefix]
@@ -449,7 +445,7 @@ namespace SAIN.Patches.Hearing
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(Player), "SetInHands",
-                new[] { typeof(ThrowWeapItemClass), typeof(Callback<IHandsThrowController>) });
+                [typeof(ThrowWeapItemClass), typeof(Callback<IHandsThrowController>)]);
         }
 
         [PatchPrefix]
@@ -465,7 +461,7 @@ namespace SAIN.Patches.Hearing
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(Player), "SetInHands",
-                new[] { typeof(FoodDrinkItemClass), typeof(float), typeof(int), typeof(Callback<GInterface165>) });
+                [typeof(FoodDrinkItemClass), typeof(float), typeof(int), typeof(Callback<GInterface176>)]);
         }
 
         [PatchPrefix]
@@ -481,7 +477,7 @@ namespace SAIN.Patches.Hearing
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(Player), "SetInHands",
-                new[] { typeof(MedsItemClass), typeof(EBodyPart), typeof(int), typeof(Callback<GInterface165>) });
+                [typeof(MedsItemClass), typeof(EBodyPart), typeof(int), typeof(Callback<GInterface176>)]);
         }
 
         [PatchPrefix]
@@ -489,11 +485,13 @@ namespace SAIN.Patches.Hearing
         {
             SAINSoundType soundType;
             float range;
-            if (meds != null && meds.HealthEffectsComponent.AffectsAny(new EDamageEffectType[] { EDamageEffectType.DestroyedPart })) {
+            if (meds != null && meds.HealthEffectsComponent.AffectsAny([EDamageEffectType.DestroyedPart]))
+            {
                 soundType = SAINSoundType.Surgery;
                 range = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_Surgery;
             }
-            else {
+            else
+            {
                 soundType = SAINSoundType.Heal;
                 range = SAINPlugin.LoadedPreset.GlobalSettings.Hearing.BaseSoundRange_Healing;
             }
@@ -505,13 +503,14 @@ namespace SAIN.Patches.Hearing
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(EffectsCommutator), "PlayHitEffect");
+            return AccessTools.Method(typeof(EffectsCommutator), nameof(EffectsCommutator.PlayHitEffect));
         }
 
         [PatchPostfix]
         public static void PatchPostfix(EftBulletClass info)
         {
-            if (SAINBotController.Instance != null) {
+            if (SAINBotController.Instance != null)
+            {
                 SAINBotController.Instance.BotHearing.BulletImpacted(info);
             }
         }

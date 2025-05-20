@@ -1,9 +1,8 @@
-﻿using EFT;
+﻿using DrakiaXYZ.BigBrain.Brains;
+using EFT;
 using SAIN.Helpers;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Profiling;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -18,11 +17,12 @@ namespace SAIN.Layers.Combat.Solo
             ToggleAction(value);
         }
 
-        public override void Update()
+        public override void Update(CustomLayer.ActionData data)
         {
             this.StartProfilingSample("Update");
             Bot.Steering.SteerByPriority();
-            if (!shallMoveShoot) {
+            if (!shallMoveShoot)
+            {
                 Bot.Mover.Pose.SetPoseToCover();
             }
             Shoot.CheckAimAndFire();
@@ -36,7 +36,8 @@ namespace SAIN.Layers.Combat.Solo
             Toggle(true);
 
             shallMoveShoot = moveShoot();
-            if (!shallMoveShoot) {
+            if (!shallMoveShoot)
+            {
                 Bot.Mover.StopMove();
                 BotOwner.Mover.SprintPause(0.5f);
                 shallResume = Bot.Decision.CurrentCombatDecision == ECombatDecision.ShootDistantEnemy;
@@ -47,13 +48,16 @@ namespace SAIN.Layers.Combat.Solo
 
         private bool moveShoot()
         {
-            if (Bot.Player.IsInPronePose) {
+            if (Bot.Player.IsInPronePose)
+            {
                 return false;
             }
             if (Bot.Enemy != null &&
-                Bot.Enemy.RealDistance < 50) {
+                Bot.Enemy.RealDistance < 50)
+            {
                 float angle = UnityEngine.Random.Range(70, 110);
-                if (EFTMath.RandomBool()) {
+                if (EFTMath.RandomBool())
+                {
                     angle *= -1;
                 }
 
@@ -62,9 +66,11 @@ namespace SAIN.Layers.Combat.Solo
                 rotated.y = 0;
                 rotated *= 6f;
                 if (NavMesh.SamplePosition(Bot.Position + rotated, out var hit, 5f, -1) &&
-                    NavMesh.SamplePosition(Bot.Position, out var hit2, 0.5f, -1)) {
+                    NavMesh.SamplePosition(Bot.Position, out var hit2, 0.5f, -1))
+                {
                     Vector3 movePos = hit.position;
-                    if (NavMesh.Raycast(hit2.position, hit.position, out var rayHit, -1)) {
+                    if (NavMesh.Raycast(hit2.position, hit.position, out var rayHit, -1))
+                    {
                         movePos = rayHit.position;
                     }
                     return Bot.Mover.GoToPoint(movePos, out _, -1, false, false);

@@ -1,6 +1,5 @@
-﻿using EFT;
-using System.Collections;
-using UnityEngine.Profiling;
+﻿using DrakiaXYZ.BigBrain.Brains;
+using EFT;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -10,7 +9,7 @@ namespace SAIN.Layers.Combat.Solo
         {
         }
 
-        public override void Update()
+        public override void Update(CustomLayer.ActionData data)
         {
             this.StartProfilingSample("Update");
             BotOwner.WeaponManager.Melee.RunToEnemyUpdate();

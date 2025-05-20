@@ -28,9 +28,11 @@ namespace SAIN.Components
 
         public void Dispose()
         {
-            foreach (var door in _doorsWithTriggers) {
+            foreach (var door in _doorsWithTriggers)
+            {
                 var collider = door.Value?.gameObject?.GetComponent<SphereCollider>();
-                if (collider != null) {
+                if (collider != null)
+                {
                     GameObject.Destroy(collider);
                 }
                 GameObject.Destroy(door.Value);
@@ -62,14 +64,16 @@ namespace SAIN.Components
             bool shallDisable = _doorsDisabledByHost || GlobalSettingsClass.Instance.General.Doors.DisableAllDoors;
 
             if (!_doorsDisabled &&
-                shallDisable) {
+                shallDisable)
+            {
                 OnDoorsDisabled?.Invoke(true);
                 _doorsDisabled = true;
                 disableDoors();
                 return;
             }
             if (_doorsDisabled &&
-                !shallDisable) {
+                !shallDisable)
+            {
                 OnDoorsDisabled?.Invoke(false);
                 _doorsDisabled = false;
                 enableDoors();
@@ -101,7 +105,8 @@ namespace SAIN.Components
         {
             int doorCount = 0;
             // Code taken from Drakia's Door Randomizer Mod
-            UnityEngine.Object.FindObjectsOfType<Door>().ExecuteForEach(door => {
+            UnityEngine.Object.FindObjectsOfType<Door>().ExecuteForEach(door =>
+            {
                 if (DisableDoor(door))
                     doorCount++;
             });
@@ -113,7 +118,8 @@ namespace SAIN.Components
         private void enableDoors()
         {
             int doorCount = 0;
-            foreach (var door in _disabledDoors) {
+            foreach (var door in _disabledDoors)
+            {
                 door.Value.gameObject.SmartEnable();
                 door.Value.enabled = true;
                 doorCount++;
@@ -124,8 +130,8 @@ namespace SAIN.Components
         }
 
         private bool _doorsDisabled;
-        private readonly Dictionary<string, Door> _disabledDoors = new Dictionary<string, Door>();
-        private readonly Dictionary<int, GameObject> _doorsWithTriggers = new Dictionary<int, GameObject>();
+        private readonly Dictionary<string, Door> _disabledDoors = new();
+        private readonly Dictionary<int, GameObject> _doorsWithTriggers = new();
 
         private bool _doorsDisabledByHost;
     }

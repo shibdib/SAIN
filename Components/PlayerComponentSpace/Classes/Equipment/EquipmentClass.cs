@@ -29,7 +29,8 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         public void Dispose()
         {
-            foreach (var weapon in WeaponInfos.Values) {
+            foreach (var weapon in WeaponInfos.Values)
+            {
                 weapon?.Dispose();
             }
             WeaponInfos.Clear();
@@ -41,7 +42,8 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         {
             float oldPower = Player.AIData.PowerOfEquipment;
             if (SAINPlugin.LoadedPreset.GlobalSettings.PowerCalc.CalcPower(PlayerComponent, out float power) &&
-                oldPower != power) {
+                oldPower != power)
+            {
                 OnPowerRecalced?.Invoke(power);
             }
         }
@@ -51,12 +53,14 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         public bool PlayAIShootSound()
         {
             var weapon = CurrentWeapon;
-            if (weapon == null) {
+            if (weapon == null)
+            {
                 //Logger.LogWarning("CurrentWeapon Null");
                 return false;
             }
 
-            if (_nextPlaySoundTime < Time.time) {
+            if (_nextPlaySoundTime < Time.time)
+            {
                 _nextPlaySoundTime = Time.time + (PlayerComponent.IsAI ? 0.5f : 0.1f);
                 SAINBotController.Instance?.BotHearing.PlayAISound(PlayerComponent, weapon.SoundType, PlayerComponent.Transform.WeaponFirePort, weapon.CalculatedAudibleRange, 1f, false);
             }
@@ -65,21 +69,26 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         public bool BulletFired(EftBulletClass bulletClass)
         {
-            if (bulletClass == null) {
+            if (bulletClass == null)
+            {
                 return false;
             }
-            if (_nextPlaySoundTime < Time.time) {
+            if (_nextPlaySoundTime < Time.time)
+            {
                 _nextPlaySoundTime = Time.time + (PlayerComponent.IsAI ? 0.5f : 0.1f);
                 var weapon = CurrentWeapon;
-                if (weapon == null) {
+                if (weapon == null)
+                {
                     return false;
                 }
                 Logger.LogInfo("Bullet Fired");
-                FiredBulletContainer bulletContainer = new FiredBulletContainer(bulletClass, weapon);
-                if (PlayerComponent.IsAI) {
+                FiredBulletContainer bulletContainer = new(bulletClass, weapon);
+                if (PlayerComponent.IsAI)
+                {
                     SAINBotController.Instance.BotHearing.PlayAISound(PlayerComponent, weapon.SoundType, PlayerComponent.Transform.WeaponFirePort, weapon.CalculatedAudibleRange, 1f, false);
                 }
-                else {
+                else
+                {
                     PlayerComponent.StartCoroutine(bulletFiredCoroutine(bulletContainer));
                 }
             }
@@ -89,8 +98,10 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         private IEnumerator bulletFiredCoroutine(FiredBulletContainer bulletContainer)
         {
             float expireTime = Time.time + bulletFiredExpireTime;
-            while (bulletContainer.Bullet.BulletState == EftBulletClass.EBulletState.Flying) {
-                if (expireTime < Time.time) {
+            while (bulletContainer.Bullet.BulletState == EftBulletClass.EBulletState.Flying)
+            {
+                if (expireTime < Time.time)
+                {
                     yield break;
                 }
                 yield return null;
@@ -101,15 +112,18 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         private void findRelevantBots(List<BotComponent> botList, FiredBulletContainer bulletContainer)
         {
             var botcontroller = SAINBotController.Instance;
-            if (botcontroller == null) {
+            if (botcontroller == null)
+            {
                 return;
             }
             var bots = botcontroller.Bots;
-            if (bots == null) {
+            if (bots == null)
+            {
                 return;
             }
             Vector3 bulletTravelDir = bulletContainer.Bullet.CurrentDirection;
-            foreach (var bot in bots.Values) {
+            foreach (var bot in bots.Values)
+            {
             }
         }
 
@@ -123,7 +137,7 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
             public readonly EftBulletClass Bullet;
             public readonly WeaponInfo WeaponInfo;
-            public readonly List<BotBulletData> ActiveBots = new List<BotBulletData>();
+            public readonly List<BotBulletData> ActiveBots = new();
         }
 
         public class BotBulletData
@@ -146,7 +160,8 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private void getAllWeapons()
         {
-            foreach (EquipmentSlot slot in _weaponSlots) {
+            foreach (EquipmentSlot slot in _weaponSlots)
+            {
                 addWeaponFromSlot(slot);
             }
         }
@@ -154,12 +169,15 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         private void addWeaponFromSlot(EquipmentSlot slot)
         {
             Item item = EquipmentClass.GetSlot(slot).ContainedItem;
-            if (item != null && item is Weapon weapon) {
-                if (!WeaponInfos.ContainsKey(slot)) {
+            if (item != null && item is Weapon weapon)
+            {
+                if (!WeaponInfos.ContainsKey(slot))
+                {
                     WeaponInfos.Add(slot, new WeaponInfo(weapon));
                 }
                 else if (WeaponInfos.TryGetValue(slot, out WeaponInfo info) &&
-                    info.Weapon != weapon) {
+                    info.Weapon != weapon)
+                {
                     info.Dispose();
                     WeaponInfos[slot] = new WeaponInfo(weapon);
                 }
@@ -168,10 +186,12 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private void updateAllWeapons()
         {
-            if (_nextUpdateWeapTime < Time.time) {
+            if (_nextUpdateWeapTime < Time.time)
+            {
                 _nextUpdateWeapTime = Time.time + 1f;
 
-                foreach (var info in WeaponInfos.Values) {
+                foreach (var info in WeaponInfos.Values)
+                {
                     if (info?.Update() == true)
                         return;
                 }
@@ -180,12 +200,12 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private float _nextUpdateWeapTime;
 
-        private static readonly EquipmentSlot[] _weaponSlots = new EquipmentSlot[]
-        {
+        private static readonly EquipmentSlot[] _weaponSlots =
+        [
             EquipmentSlot.FirstPrimaryWeapon,
             EquipmentSlot.SecondPrimaryWeapon,
             EquipmentSlot.Holster,
-        };
+        ];
 
         public GearInfo GearInfo { get; private set; }
 
@@ -196,7 +216,8 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
         private WeaponInfo getCurrentWeapon()
         {
             Item item = Player.HandsController.Item;
-            if (item != null) {
+            if (item != null)
+            {
                 _currentWeapon = getInfoFromItem(item);
             }
             return _currentWeapon;
@@ -204,12 +225,15 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private WeaponInfo getInfoFromItem(Item item)
         {
-            if (item is Weapon weapon) {
-                if (_currentWeapon?.Weapon == weapon) {
+            if (item is Weapon weapon)
+            {
+                if (_currentWeapon?.Weapon == weapon)
+                {
                     return _currentWeapon;
                 }
                 var weaponInfo = getInfoFromWeapon(weapon);
-                if (weaponInfo == null) {
+                if (weaponInfo == null)
+                {
                     getAllWeapons();
                     weaponInfo = getInfoFromWeapon(weapon);
                 }
@@ -220,8 +244,10 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
 
         private WeaponInfo getInfoFromWeapon(Weapon weapon)
         {
-            foreach (var weaponInfo in WeaponInfos.Values) {
-                if (weapon == weaponInfo.Weapon) {
+            foreach (var weaponInfo in WeaponInfos.Values)
+            {
+                if (weapon == weaponInfo.Weapon)
+                {
                     _currentWeapon = weaponInfo;
                     ReCalcPowerOfEquipment();
                     return weaponInfo;
@@ -255,15 +281,18 @@ namespace SAIN.Components.PlayerComponentSpace.Classes.Equipment
             [PatchPostfix]
             public static void Patch(EftBulletClass shot)
             {
-                if (shot == null) {
+                if (shot == null)
+                {
                     return;
                 }
                 var gameWorld = GameWorldComponent.Instance;
-                if (gameWorld == null) {
+                if (gameWorld == null)
+                {
                     return;
                 }
                 PlayerComponent bulletOwner = gameWorld.PlayerTracker.GetPlayerComponent(shot.PlayerProfileID);
-                if (bulletOwner == null) {
+                if (bulletOwner == null)
+                {
                     return;
                 }
                 bulletOwner.Equipment.BulletFired(shot);

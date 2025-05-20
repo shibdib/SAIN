@@ -6,7 +6,6 @@ using SPT.Reflection.Patching;
 using System.Reflection;
 using UnityEngine;
 using static SAIN.Helpers.Shoot;
-using WeaponAIPresetManager = GClass440; // Contains property WeaponAIPreset
 
 namespace SAIN.Patches.Shoot.RateOfFire
 {
@@ -16,8 +15,7 @@ namespace SAIN.Patches.Shoot.RateOfFire
 
         protected override MethodBase GetTargetMethod()
         {
-            _ShootData = AccessTools.Property(typeof(BotOwner), "ShootData");
-            return AccessTools.Method(_ShootData.PropertyType, "method_6");
+            return AccessTools.Method(typeof(ShootData), nameof(ShootData.method_6));
         }
 
         [PatchPrefix]
@@ -27,7 +25,7 @@ namespace SAIN.Patches.Shoot.RateOfFire
             {
                 return true;
             }
-            if (____owner.AimingData == null)
+            if (____owner.AimingManager.CurrentAiming == null)
             {
                 return true;
             }
@@ -36,7 +34,7 @@ namespace SAIN.Patches.Shoot.RateOfFire
 
             if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
             {
-                float distance = ____owner.AimingData.LastDist2Target;
+                float distance = ____owner.AimingManager.CurrentAiming.LastDist2Target;
                 float scaledDistance = FullAutoBurstLength(____owner, distance);
 
                 ___nextFingerUpTime = scaledDistance + Time.time;
@@ -50,11 +48,32 @@ namespace SAIN.Patches.Shoot.RateOfFire
         }
     }
 
+    public class SemiAutoPatch3 : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(GClass453), nameof(GClass453.method_0));
+        }
+
+        [PatchPostfix]
+        public static void PatchPostfix(BotOwner ___botOwner_0, ref float __result)
+        {
+            if (SAINPlugin.IsBotExluded(___botOwner_0))
+            {
+                return;
+            }
+            if (SAINBotController.Instance.GetSAIN(___botOwner_0, out var component))
+            {
+                __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
+            }
+        }
+    }
+
     public class SemiAutoPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(WeaponAIPresetManager), "method_1");
+            return AccessTools.Method(typeof(GClass453), nameof(GClass453.method_1));
         }
 
         [PatchPostfix]
@@ -75,28 +94,7 @@ namespace SAIN.Patches.Shoot.RateOfFire
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(WeaponAIPresetManager), "method_6");
-        }
-
-        [PatchPostfix]
-        public static void PatchPostfix(BotOwner ___botOwner_0, ref float __result)
-        {
-            if (SAINPlugin.IsBotExluded(___botOwner_0))
-            {
-                return;
-            }
-            if (SAINBotController.Instance.GetSAIN(___botOwner_0, out var component))
-            {
-                __result = component.Info.WeaponInfo.Firerate.SemiAutoROF();
-            }
-        }
-    }
-
-    public class SemiAutoPatch3 : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(WeaponAIPresetManager), "method_0");
+            return AccessTools.Method(typeof(GClass453), nameof(GClass453.method_6));
         }
 
         [PatchPostfix]

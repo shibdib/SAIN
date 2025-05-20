@@ -1,8 +1,4 @@
-﻿using EFT;
-using UnityEngine;
-using UnityEngine.AI;
-
-namespace SAIN.SAINComponent.Classes.Mover
+﻿namespace SAIN.SAINComponent.Classes.Mover
 {
     public class JumpClass : BotBase, IBotClass
     {

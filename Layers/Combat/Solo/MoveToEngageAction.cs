@@ -1,8 +1,7 @@
-﻿using EFT;
+﻿using DrakiaXYZ.BigBrain.Brains;
+using EFT;
 using SAIN.SAINComponent.Classes.EnemyClasses;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace SAIN.Layers.Combat.Solo
 {
@@ -19,11 +18,12 @@ namespace SAIN.Layers.Combat.Solo
             ToggleAction(value);
         }
 
-        public override void Update()
+        public override void Update(CustomLayer.ActionData data)
         {
             this.StartProfilingSample("Update");
             Enemy enemy = Bot.Enemy;
-            if (enemy == null) {
+            if (enemy == null)
+            {
                 Bot.Steering.SteerByPriority();
                 this.EndProfilingSample();
                 return;
@@ -32,7 +32,8 @@ namespace SAIN.Layers.Combat.Solo
             Bot.Mover.SetTargetPose(1f);
             Bot.Mover.SetTargetMoveSpeed(1f);
 
-            if (CheckShoot(enemy)) {
+            if (CheckShoot(enemy))
+            {
                 Bot.Steering.SteerByPriority();
                 Shoot.CheckAimAndFire();
                 this.EndProfilingSample();
@@ -46,13 +47,16 @@ namespace SAIN.Layers.Combat.Solo
 
             Vector3? lastKnown = enemy.KnownPlaces.LastKnownPosition;
             Vector3 movePos;
-            if (lastKnown != null) {
+            if (lastKnown != null)
+            {
                 movePos = lastKnown.Value;
             }
-            else if (enemy.TimeSinceSeen < 5f) {
+            else if (enemy.TimeSinceSeen < 5f)
+            {
                 movePos = enemy.EnemyPosition;
             }
-            else {
+            else
+            {
                 Bot.Steering.SteerByPriority();
                 Shoot.CheckAimAndFire();
                 this.EndProfilingSample();
@@ -60,13 +64,16 @@ namespace SAIN.Layers.Combat.Solo
             }
 
             var cover = Bot.Cover.FindPointInDirection(movePos - Bot.Position, 0.5f, 3f);
-            if (cover != null) {
+            if (cover != null)
+            {
                 movePos = cover.Position;
             }
 
             float distance = enemy.RealDistance;
-            if (distance > 40f && !BotOwner.Memory.IsUnderFire) {
-                if (RecalcPathTimer < Time.time) {
+            if (distance > 40f && !BotOwner.Memory.IsUnderFire)
+            {
+                if (RecalcPathTimer < Time.time)
+                {
                     RecalcPathTimer = Time.time + 2f;
                     BotOwner.BotRun.Run(movePos, false, SAINPlugin.LoadedPreset.GlobalSettings.General.SprintReachDistance);
                     Bot.Steering.LookToMovingDirection(500f, true);
@@ -77,12 +84,14 @@ namespace SAIN.Layers.Combat.Solo
 
             Bot.Mover.Sprint(false);
 
-            if (RecalcPathTimer < Time.time) {
+            if (RecalcPathTimer < Time.time)
+            {
                 RecalcPathTimer = Time.time + 2f;
                 BotOwner.MoveToEnemyData.TryMoveToEnemy(movePos);
             }
 
-            if (!Bot.Steering.SteerByPriority(null, false)) {
+            if (!Bot.Steering.SteerByPriority(null, false))
+            {
                 Bot.Steering.LookToMovingDirection();
                 //SAIN.Steering.LookToPoint(movePos + Vector3.up * 1f);
             }
@@ -95,11 +104,14 @@ namespace SAIN.Layers.Combat.Solo
             bool enemyLookAtMe = enemy.EnemyLookingAtMe;
             float EffDist = Bot.Info.WeaponInfo.EffectiveWeaponDistance;
 
-            if (enemy.IsVisible) {
-                if (enemyLookAtMe) {
+            if (enemy.IsVisible)
+            {
+                if (enemyLookAtMe)
+                {
                     return true;
                 }
-                if (distance <= EffDist && enemy.CanShoot) {
+                if (distance <= EffDist && enemy.CanShoot)
+                {
                     return true;
                 }
             }

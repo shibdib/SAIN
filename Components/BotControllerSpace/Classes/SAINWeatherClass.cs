@@ -25,15 +25,18 @@ namespace SAIN.Components.BotController
 
         public void Update()
         {
-            if (_weatherCheckTime < Time.time) {
+            if (_weatherCheckTime < Time.time)
+            {
                 _weatherCheckTime = Time.time + WEATHER_VISION_UPDATE_FREQ;
-                VisionDistanceModifier = calcWeatherVisibility();
+                VisionDistanceModifier = CalcWeatherVisibility();
                 GainSightModifier = 2f - VisionDistanceModifier;
             }
-            if (_rainCheckTime < Time.time) {
+            if (_rainCheckTime < Time.time)
+            {
                 _rainCheckTime = Time.time + WEATHER_RAINSOUND_UPDATE_FREQ;
                 var curve = WeatherController.Instance?.WeatherCurve;
-                if (curve == null) {
+                if (curve == null)
+                {
                     RainSoundModifierOutdoor = 1f;
                     RainSoundModifierIndoor = 1f;
                     return;
@@ -44,14 +47,15 @@ namespace SAIN.Components.BotController
             }
         }
 
-        private float calcWeatherVisibility()
+        private float CalcWeatherVisibility()
         {
             IWeatherCurve weatherCurve = WeatherController.Instance?.WeatherCurve;
-            if (weatherCurve == null) {
+            if (weatherCurve == null)
+            {
                 return 1f;
             }
 
-            float weathermodifier = 1f * (fogModifier(weatherCurve.Fog) * rainModifier(weatherCurve.Rain) * cloudsModifier(weatherCurve.Cloudiness));
+            float weathermodifier = 1f * (FogModifier(weatherCurve.Fog) * RainModifier(weatherCurve.Rain) * CloudsModifier(weatherCurve.Cloudiness));
             weathermodifier = Mathf.Clamp(weathermodifier, 0.01f, 1f);
 
             //if (GameWorldComponent.Instance.Location.WinterActive) {
@@ -62,7 +66,7 @@ namespace SAIN.Components.BotController
             return weathermodifier;
         }
 
-        private float fogModifier(float Fog)
+        private float FogModifier(float Fog)
         {
             // Points where fog values actually matter. Anything over 0.018 has little to no effect
             float fogMax = 0.018f;
@@ -70,43 +74,51 @@ namespace SAIN.Components.BotController
             return Mathf.Lerp(1f, _timeSettings.VISION_WEATHER_FOG_MAXCOEF, fogValue);
         }
 
-        private float rainModifier(float rainValue0to1)
+        private float RainModifier(float rainValue0to1)
         {
             // Rain Tiers
             float rainScaleMin;
             // Sprinkling
-            if (rainValue0to1 <= _timeSettings.VISION_WEATHER_RAIN_SRINKLE_THRESH) {
+            if (rainValue0to1 <= _timeSettings.VISION_WEATHER_RAIN_SRINKLE_THRESH)
+            {
                 rainScaleMin = _timeSettings.VISION_WEATHER_RAIN_SRINKLE_COEF;
             }
-            else if (rainValue0to1 < _timeSettings.VISION_WEATHER_RAIN_LIGHT_THRESH) {
+            else if (rainValue0to1 < _timeSettings.VISION_WEATHER_RAIN_LIGHT_THRESH)
+            {
                 rainScaleMin = _timeSettings.VISION_WEATHER_RAIN_LIGHT_COEF;
             }
-            else if (rainValue0to1 < _timeSettings.VISION_WEATHER_RAIN_NORMAL_THRESH) {
+            else if (rainValue0to1 < _timeSettings.VISION_WEATHER_RAIN_NORMAL_THRESH)
+            {
                 rainScaleMin = _timeSettings.VISION_WEATHER_RAIN_NORMAL_COEF;
             }
-            else if (rainValue0to1 < _timeSettings.VISION_WEATHER_RAIN_HEAVY_THRESH) {
+            else if (rainValue0to1 < _timeSettings.VISION_WEATHER_RAIN_HEAVY_THRESH)
+            {
                 rainScaleMin = _timeSettings.VISION_WEATHER_RAIN_HEAVY_COEF;
             }
-            else {
+            else
+            {
                 rainScaleMin = _timeSettings.VISION_WEATHER_RAIN_DOWNPOUR_COEF;
             }
             return Mathf.Lerp(1f, rainScaleMin, rainValue0to1);
         }
 
-        private float cloudsModifier(float Clouds)
+        private float CloudsModifier(float Clouds)
         {
             // Clouds Rounding usually scales between -1 and 1, this sets it to scale between 0 and 1
             float cloudsScaled = (Clouds + 1f) / 2f;
             // Scattered Clouds
-            if (cloudsScaled <= _timeSettings.VISION_WEATHER_NOCLOUDS_THRESH) {
+            if (cloudsScaled <= _timeSettings.VISION_WEATHER_NOCLOUDS_THRESH)
+            {
                 return 1f;
             }
             // Cloudiness Tiers
             float minScale;
-            if (cloudsScaled <= _timeSettings.VISION_WEATHER_CLOUDY_THRESH) {
+            if (cloudsScaled <= _timeSettings.VISION_WEATHER_CLOUDY_THRESH)
+            {
                 minScale = _timeSettings.VISION_WEATHER_CLOUDY_COEF;
             }
-            else {
+            else
+            {
                 minScale = _timeSettings.VISION_WEATHER_OVERCAST_COEF;
             }
             return Mathf.Lerp(1f, minScale, cloudsScaled);

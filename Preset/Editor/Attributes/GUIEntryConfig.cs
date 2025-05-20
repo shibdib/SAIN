@@ -18,10 +18,10 @@ namespace SAIN.Attributes
         public GUILayoutOption[] Result => Params(ResultWidth);
         public GUILayoutOption[] Reset => Params(ResetWidth);
 
-        private GUILayoutOption[] Params(float width0to1) => new GUILayoutOption[]
-        {
+        private GUILayoutOption[] Params(float width0to1) =>
+        [
                 GUILayout.Width(width0to1 * TARGT_WIDTH_SCALE),
                 GUILayout.Height(EntryHeight)
-        };
+        ];
     }
 }

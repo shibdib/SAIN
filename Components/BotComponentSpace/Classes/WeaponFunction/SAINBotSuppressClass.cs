@@ -1,5 +1,6 @@
 ﻿using EFT;
 using SAIN.Helpers;
+using SAIN.Models.Enums;
 using SAIN.Preset.GlobalSettings;
 using SAIN.Preset.GlobalSettings.Categories;
 using SAIN.SAINComponent.Classes.EnemyClasses;
@@ -44,20 +45,24 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         public void CheckAddSuppression(Enemy enemy, float distance, float amount = -1)
         {
-            if (!_settings.SUPP_TOGGLE) {
+            if (!_settings.SUPP_TOGGLE)
+            {
                 return;
             }
             float resistance = getResistance();
-            if (resistance >= 1) {
+            if (resistance >= 1)
+            {
                 return;
             }
 
-            if (amount <= 0) {
+            if (amount <= 0)
+            {
                 amount = getSuppNum(enemy);
             }
 
             float scaledSupNum = scaleSuppDist(amount * _settings.SUPP_AMOUNT_MULTI, distance);
-            if (scaledSupNum <= 0) {
+            if (scaledSupNum <= 0)
+            {
                 return;
             }
 
@@ -69,7 +74,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private static float scaleSuppDist(float suppNum, float distance)
         {
             MindSettings settings = GlobalSettingsClass.Instance.Mind;
-            if (distance < settings.SUPP_DISTANCE_AMP_DIST) {
+            if (distance < settings.SUPP_DISTANCE_AMP_DIST)
+            {
                 return suppNum * settings.SUPP_DISTANCE_AMP_AMOUNT;
             }
             float max = settings.SUPP_DISTANCE_SCALE_END;
@@ -81,12 +87,14 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private float getResistance()
         {
             var mindSettings = Bot.Info.FileSettings.Mind;
-            if (mindSettings == null) {
+            if (mindSettings == null)
+            {
                 return 1f;
             }
 
             var persSettings = Bot.Info.PersonalitySettings.General;
-            if (persSettings == null) {
+            if (persSettings == null)
+            {
                 return Mathf.Clamp01(mindSettings.SuppressionResistance);
             }
 
@@ -101,24 +109,30 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             const float defaultNum = 2f;
 
             WeaponInfo weapon = enemy.EnemyPlayerComponent.Equipment.CurrentWeapon;
-            if (weapon == null) {
-                if (SAINPlugin.DebugMode) {
+            if (weapon == null)
+            {
+                if (SAINPlugin.DebugMode)
+                {
                     Logger.LogWarning($"Could not find Weapon to check suppression amount!");
                 }
                 return defaultNum;
             }
 
-            if (GlobalSettings.Mind.SUPP_AMOUNTS.TryGetValue(weapon.AmmoCaliber, out float result)) {
+            if (GlobalSettings.Mind.SUPP_AMOUNTS.TryGetValue(weapon.AmmoCaliber, out float result))
+            {
                 return result;
             }
-            if (SAINPlugin.DebugMode) {
+            if (SAINPlugin.DebugMode)
+            {
                 Logger.LogWarning($"Could not find [{weapon.AmmoCaliber}] to check suppression amount!");
             }
 
-            if (GlobalSettings.Mind.SUPP_AMOUNTS.TryGetValue(ECaliber.Default, out result)) {
+            if (GlobalSettings.Mind.SUPP_AMOUNTS.TryGetValue(ECaliber.Default, out result))
+            {
                 return result;
             }
-            if (SAINPlugin.DebugMode) {
+            if (SAINPlugin.DebugMode)
+            {
                 Logger.LogWarning($"Could not find Default Caliber Value to check suppression amount!");
             }
             return defaultNum;
@@ -126,18 +140,22 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void checkState()
         {
-            if (_tickTime < Time.time) {
+            if (_tickTime < Time.time)
+            {
                 _tickTime = Time.time + _settings.SUP_CHECK_FREQ;
 
-                if (SuppressionNumber <= 0) {
-                    if (CurrentState != ESuppressionState.None) {
+                if (SuppressionNumber <= 0)
+                {
+                    if (CurrentState != ESuppressionState.None)
+                    {
                         applyNewState(ESuppressionState.None, null);
                     }
                     return;
                 }
 
                 ESuppressionState newState = SuppressionHelpers.FindActiveState(SuppressionNumber, out SuppressionConfig config);
-                if (CurrentState == newState) {
+                if (CurrentState == newState)
+                {
                     return;
                 }
                 applyNewState(newState, config);
@@ -147,7 +165,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
         private void decaySuppression()
         {
             if (SuppressionNumber > 0 &&
-                _decayTime < Time.time) {
+                _decayTime < Time.time)
+            {
                 _decayTime = Time.time + _settings.SUP_DECAY_FREQ;
                 clampAndUpdateSuppression(-_settings.SUP_DECAY_AMOUNT);
             }
@@ -164,7 +183,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
             CurrentState = newState;
             clearModifiers();
 
-            if (newState == ESuppressionState.None || config == null) {
+            if (newState == ESuppressionState.None || config == null)
+            {
                 return;
             }
 
@@ -175,8 +195,10 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void clearModifiers()
         {
-            if (_temporaryStatModifiers != null) {
-                if (_temporaryStatModifiers.Modifiers.IsApplyed) {
+            if (_temporaryStatModifiers != null)
+            {
+                if (_temporaryStatModifiers.Modifiers.IsApplyed)
+                {
                     BotOwner.Settings.Current.Dismiss(_temporaryStatModifiers.Modifiers);
                 }
                 _temporaryStatModifiers = null;
@@ -198,7 +220,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private static float calcResistance(float value, float resistance)
         {
-            if (value == 1f) {
+            if (value == 1f)
+            {
                 return 1f;
             }
             resistance = Mathf.Clamp01(resistance);
@@ -207,7 +230,8 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
         private void clearLastSuppEnemy(string profileId, Enemy enemy)
         {
-            if (LastSuppressByEnemy != null && LastSuppressByEnemy.IsSame(enemy)) {
+            if (LastSuppressByEnemy != null && LastSuppressByEnemy.IsSame(enemy))
+            {
                 LastSuppressByEnemy = null;
             }
         }

@@ -1,22 +1,14 @@
 ﻿using EFT;
 using Newtonsoft.Json;
-using SPT.Reflection.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using EFTCore = GClass583;
-using EFTStatModifiersClass = GClass580;
+using EFTCore = GClass598;
+using EFTStatModifiersClass = GClass595;
 
 namespace SAIN.Helpers
 {
     internal class HelpersGClass
     {
-        static HelpersGClass()
-        {
-            AimDataType = PatchConstants.EftTypes.Single(x => x.GetProperty("LastSpreadCount") != null && x.GetProperty("LastAimTime") != null);
-        }
-
-        public static readonly Type AimDataType;
         public static float LAY_DOWN_ANG_SHOOT => EFTCore.Core.LAY_DOWN_ANG_SHOOT;
         public static float Gravity => EFTCore.Core.G;
         public static float SMOKE_GRENADE_RADIUS_COEF => EFTCore.Core.SMOKE_GRENADE_RADIUS_COEF;
@@ -26,7 +18,8 @@ namespace SAIN.Helpers
     {
         public TemporaryStatModifiers(float precision = 1f, float accuracySpeed = 1f, float gainSight = 1f, float scatter = 1f, float priorityScatter = 1f, float visibleDistance = 1f, float hearingDistance = 1f)
         {
-            Modifiers = new EFTStatModifiersClass {
+            Modifiers = new EFTStatModifiersClass
+            {
                 PrecicingSpeedCoef = precision,
                 AccuratySpeedCoef = accuracySpeed,
                 GainSightCoef = gainSight,
@@ -53,7 +46,7 @@ namespace SAIN.Helpers
         public int GRENADE_PRECISION = 10;
         public float PRONE_POSE = 1f;
         public float MOVE_COEF = 1f;
-        public float LOWER_POSE = 0f;
+        public float LOWER_POSE = 1f;
         public float MAX_POSE = 1f;
         public float FLARE_POWER = 1.75f;
         public float FLARE_TIME = 2.5f;
@@ -64,7 +57,8 @@ namespace SAIN.Helpers
     {
         static EFTCoreSettings()
         {
-            if (!JsonUtility.Load.LoadObject<CoreOverrides>(out _overrides, nameof(CoreOverrides))) {
+            if (!JsonUtility.Load.LoadObject<CoreOverrides>(out _overrides, nameof(CoreOverrides)))
+            {
                 _overrides = new CoreOverrides();
                 JsonUtility.SaveObjectToJson(_overrides, nameof(CoreOverrides));
             }
@@ -74,9 +68,11 @@ namespace SAIN.Helpers
 
         public static void UpdateCoreSettings()
         {
-            try {
+            try
+            {
                 var core = EFTCore.Core;
-                if (_overrides == null) {
+                if (_overrides == null)
+                {
                     _overrides = new CoreOverrides();
                 }
 
@@ -99,7 +95,8 @@ namespace SAIN.Helpers
 
                 ModDetection.UpdateArmorClassCoef();
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Logger.LogError(e);
             }
         }
@@ -122,7 +119,8 @@ namespace SAIN.Helpers
         {
             Name = name;
             WildSpawnType = type;
-            foreach (BotDifficulty diff in difficulties) {
+            foreach (BotDifficulty diff in difficulties)
+            {
                 Settings.Add(diff, EFTCore.GetSettings(diff, type));
             }
         }
@@ -134,6 +132,6 @@ namespace SAIN.Helpers
         public WildSpawnType WildSpawnType;
 
         [JsonProperty]
-        public Dictionary<BotDifficulty, BotSettingsComponents> Settings = new Dictionary<BotDifficulty, BotSettingsComponents>();
+        public Dictionary<BotDifficulty, BotSettingsComponents> Settings = new();
     }
 }

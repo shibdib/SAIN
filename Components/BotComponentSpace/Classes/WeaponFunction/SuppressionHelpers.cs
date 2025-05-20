@@ -1,4 +1,5 @@
-﻿using SAIN.Preset.GlobalSettings;
+﻿using SAIN.Models.Enums;
+using SAIN.Preset.GlobalSettings;
 using System.Collections.Generic;
 
 namespace SAIN.SAINComponent.Classes.WeaponFunction
@@ -11,25 +12,29 @@ namespace SAIN.SAINComponent.Classes.WeaponFunction
 
             ESuppressionState state = ESuppressionState.Extreme;
             if (configDict.TryGetValue(state, out suppressionConfig) &&
-                suppressionConfig.IsActive(suppNum)) {
+                suppressionConfig.IsActive(suppNum))
+            {
                 return state;
             }
 
             state = ESuppressionState.Heavy;
             if (configDict.TryGetValue(state, out suppressionConfig) &&
-                suppressionConfig.IsActive(suppNum)) {
+                suppressionConfig.IsActive(suppNum))
+            {
                 return state;
             }
 
             state = ESuppressionState.Medium;
             if (configDict.TryGetValue(state, out suppressionConfig) &&
-                suppressionConfig.IsActive(suppNum)) {
+                suppressionConfig.IsActive(suppNum))
+            {
                 return state;
             }
 
             state = ESuppressionState.Light;
             if (configDict.TryGetValue(state, out suppressionConfig) &&
-                suppressionConfig.IsActive(suppNum)) {
+                suppressionConfig.IsActive(suppNum))
+            {
                 return state;
             }
 

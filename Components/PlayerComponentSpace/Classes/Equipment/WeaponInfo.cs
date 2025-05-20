@@ -20,17 +20,20 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private void updateSettings(SAINPresetClass preset)
         {
-            if (preset.GlobalSettings.Shoot.EngagementDistance.TryGetValue(WeaponClass, out float distance)) {
+            if (preset.GlobalSettings.Shoot.EngagementDistance.TryGetValue(WeaponClass, out float distance))
+            {
                 EngagementDistance = distance;
             }
-            if (preset.GlobalSettings.Hearing.HearingDistances.TryGetValue(AmmoCaliber, out float range)) {
+            if (preset.GlobalSettings.Hearing.HearingDistances.TryGetValue(AmmoCaliber, out float range))
+            {
                 BaseAudibleRange = range;
             }
         }
 
         public bool Update()
         {
-            if (_nextUpdateTime > Time.time) {
+            if (_nextUpdateTime > Time.time)
+            {
                 return false;
             }
             _nextUpdateTime = Time.time + 10f;
@@ -55,7 +58,8 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public Weapon Weapon { get; private set; }
 
-        public float Durability {
+        public float Durability
+        {
             get
             {
                 return Weapon.Repairable.Durability / (float)Weapon.Repairable.TemplateDurability;
@@ -73,16 +77,19 @@ namespace SAIN.SAINComponent.Classes.Info
         public float MuzzleLoudness { get; private set; }
         public float MuzzleLoudnessRealism { get; private set; }
 
-        public float SuppressorModifier {
+        public float SuppressorModifier
+        {
             get
             {
                 float supmod = 1f;
                 bool suppressed = HasSuppressor;
 
-                if (suppressed && Subsonic) {
+                if (suppressed && Subsonic)
+                {
                     supmod *= SAINPlugin.LoadedPreset.GlobalSettings.Hearing.SubsonicModifier;
                 }
-                else if (suppressed) {
+                else if (suppressed)
+                {
                     supmod *= SAINPlugin.LoadedPreset.GlobalSettings.Hearing.SuppressorModifier;
                 }
                 return supmod;
@@ -91,10 +98,12 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public float SpeedFactor => 2f - Weapon.SpeedFactor;
 
-        public bool Subsonic {
+        public bool Subsonic
+        {
             get
             {
-                if (Weapon == null) {
+                if (Weapon == null)
+                {
                     return false;
                 }
                 return BulletSpeed < SuperSonicSpeed;
@@ -108,7 +117,8 @@ namespace SAIN.SAINComponent.Classes.Info
         private void checkAllMods()
         {
             var mods = Weapon?.Mods;
-            if (mods == null) {
+            if (mods == null)
+            {
                 return;
             }
 
@@ -119,24 +129,29 @@ namespace SAIN.SAINComponent.Classes.Info
             HasRedDot = false;
             HasOptic = false;
 
-            foreach (var item in mods) {
+            foreach (var item in mods)
+            {
                 checkItemType(item.GetType());
                 calcLoudness(item, ref loudness, ref realismLoudness);
 
-                foreach (var slot in item.Slots) {
+                foreach (var slot in item.Slots)
+                {
                     if (slot.ContainedItem != null &&
-                        slot.ContainedItem is Mod mod) {
+                        slot.ContainedItem is Mod mod)
+                    {
                         checkItemType(mod.GetType());
                         calcLoudness(mod, ref loudness, ref realismLoudness);
                     }
                 }
             }
 
-            if (ModDetection.RealismLoaded) {
+            if (ModDetection.RealismLoaded)
+            {
                 MuzzleLoudnessRealism = (realismLoudness / 200) + 1f;
                 CalculatedAudibleRange = BaseAudibleRange * SuppressorModifier * MuzzleLoudnessRealism;
             }
-            else {
+            else
+            {
                 MuzzleLoudness = loudness / 4f;
                 CalculatedAudibleRange = BaseAudibleRange * SuppressorModifier + MuzzleLoudness;
             }
@@ -145,17 +160,21 @@ namespace SAIN.SAINComponent.Classes.Info
         private static void calcLoudness(Mod mod, ref float loudness, ref float realismLoudness)
         {
             // Calculate loudness
-            if (!ModDetection.RealismLoaded) {
+            if (!ModDetection.RealismLoaded)
+            {
                 loudness += mod.Template.Loudness;
             }
-            else {
+            else
+            {
                 // For RealismMod: if the muzzle device has a silencer attached to it then it shouldn't contribute to the loudness stat.
                 Item containedItem = null;
-                if (mod.Slots.Length > 0) {
+                if (mod.Slots.Length > 0)
+                {
                     containedItem = mod.Slots[0].ContainedItem;
                 }
                 if (containedItem == null
-                    || (containedItem is Mod modItem && IsModSuppressor(modItem, out var suppressor))) {
+                    || (containedItem is Mod modItem && IsModSuppressor(modItem, out var suppressor)))
+                {
                     realismLoudness += mod.Template.Loudness;
                 }
             }
@@ -164,9 +183,11 @@ namespace SAIN.SAINComponent.Classes.Info
         private static bool IsModSuppressor(Mod mod, out Item suppressor)
         {
             suppressor = null;
-            if (mod.Slots.Length > 0) {
+            if (mod.Slots.Length > 0)
+            {
                 Item item = mod.Slots[0].ContainedItem;
-                if (item != null && mod.GetType() == TemplateIdToObjectMappingsClass.TypeTable[SuppressorTypeId]) {
+                if (item != null && mod.GetType() == TemplateIdToObjectMappingsClass.TypeTable[SuppressorTypeId])
+                {
                     suppressor = item;
                 }
             }
@@ -175,7 +196,8 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private void CheckModForSuppresorAndSights(Mod mod)
         {
-            if (mod != null) {
+            if (mod != null)
+            {
                 Type modType = mod.GetType();
                 checkItemType(modType);
             }
@@ -184,15 +206,18 @@ namespace SAIN.SAINComponent.Classes.Info
         private void checkItemType(Type type)
         {
             if (!HasSuppressor &&
-                isSuppressor(type)) {
+                isSuppressor(type))
+            {
                 HasSuppressor = true;
             }
             else if (!HasOptic &&
-                IsOptic(type)) {
+                IsOptic(type))
+            {
                 HasOptic = true;
             }
             else if (!HasRedDot &&
-                IsRedDot(type)) {
+                IsRedDot(type))
+            {
                 HasRedDot = true;
             }
         }
@@ -214,8 +239,10 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private static bool CheckTemplates(Type modType, params string[] templateIDs)
         {
-            for (int i = 0; i < templateIDs.Length; i++) {
-                if (CheckTemplateType(modType, templateIDs[i])) {
+            for (int i = 0; i < templateIDs.Length; i++)
+            {
+                if (CheckTemplateType(modType, templateIDs[i]))
+                {
                     return true;
                 }
             }
@@ -224,13 +251,17 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private static bool CheckTemplateType(Type modType, string id)
         {
-            if (TemplateIdToObjectMappingsClass.TypeTable.TryGetValue(id, out Type result)) {
-                if (result == modType) {
+            if (TemplateIdToObjectMappingsClass.TypeTable.TryGetValue(id, out Type result))
+            {
+                if (result == modType)
+                {
                     return true;
                 }
             }
-            if (TemplateIdToObjectMappingsClass.TemplateTypeTable.TryGetValue(id, out result)) {
-                if (result == modType) {
+            if (TemplateIdToObjectMappingsClass.TemplateTypeTable.TryGetValue(id, out result))
+            {
+                if (result == modType)
+                {
                     return true;
                 }
             }
@@ -240,7 +271,8 @@ namespace SAIN.SAINComponent.Classes.Info
         private static EWeaponClass TryGetWeaponClass(Weapon weapon)
         {
             EWeaponClass WeaponClass = EnumValues.TryParse<EWeaponClass>(weapon.Template.weapClass);
-            if (WeaponClass == default) {
+            if (WeaponClass == default)
+            {
                 WeaponClass = EnumValues.TryParse<EWeaponClass>(weapon.WeapClass);
             }
             return WeaponClass;
@@ -249,7 +281,8 @@ namespace SAIN.SAINComponent.Classes.Info
         private static ECaliber TryGetAmmoCaliber(Weapon weapon)
         {
             ECaliber caliber = EnumValues.TryParse<ECaliber>(weapon.Template.ammoCaliber);
-            if (caliber == default) {
+            if (caliber == default)
+            {
                 caliber = EnumValues.TryParse<ECaliber>(weapon.AmmoCaliber);
             }
             return caliber;
@@ -257,7 +290,8 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private void Log()
         {
-            if (SAINPlugin.DebugMode) {
+            if (SAINPlugin.DebugMode)
+            {
                 Logger.LogWarning(
                     $"Found Weapon Info: " +
                     $"Weapon: [{Weapon.ShortName}] " +

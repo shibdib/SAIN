@@ -1,10 +1,6 @@
 ﻿using EFT;
 using SAIN.Components;
-using SAIN.Helpers;
-using SAIN.Plugin;
-using SAIN.Preset.GlobalSettings;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace SAIN.SAINComponent.Classes.EnemyClasses
 {
@@ -14,10 +10,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
         {
         }
 
-        public float Value {
+        public float Value
+        {
             get
             {
-                if (_nextCalcTime < Time.time) {
+                if (_nextCalcTime < Time.time)
+                {
                     _nextCalcTime = Time.time + _calcFreq;
                     _visionDist = CalcVisionDistance();
                 }
@@ -25,11 +23,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             }
         }
 
-        private bool isEnemyAlwaysInVisibleDistance()
+        private bool IsEnemyAlwaysInVisibleDistance()
         {
             if (Enemy.Vision.Angles.AngleToEnemy < 30f &&
                 Enemy.KnownPlaces.EnemyDistanceFromLastKnown < 3 &&
-                SAINBotController.Instance.TimeVision.VisibilityRatio > 0.5f) {
+                SAINBotController.Instance.TimeVision.VisibilityRatio > 0.5f)
+            {
                 return true;
             }
             return false;
@@ -37,15 +36,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private float CalcVisionDistance()
         {
-            if (isEnemyAlwaysInVisibleDistance()) {
+            if (IsEnemyAlwaysInVisibleDistance())
+            {
                 return 1000f;
             }
 
-            float angleMod = calcAngleMod();
+            float angleMod = CalcAngleMod();
 
-            float moveMod = calcMovementMod();
-            float gearMod = calcGearStealthMod();
-            float flareMod = getFlare();
+            float moveMod = CalcMovementMod();
+            float gearMod = CalcGearStealthMod();
+            float flareMod = GetFlare();
 
             SAINEnemyStatus status = Enemy.Status;
             bool posFlare = status.PositionalFlareEnabled;
@@ -68,7 +68,7 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return result;
         }
 
-        private float calcMovementMod()
+        private float CalcMovementMod()
         {
             float velocity = Enemy.Vision.EnemyVelocity;
             float result = Mathf.Lerp(0.9f, _sprintMod, velocity);
@@ -84,23 +84,27 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
 
         private static float _sprintMod => SAINPlugin.LoadedPreset.GlobalSettings.Look.VisionDistance.MovementDistanceModifier;
 
-        private float calcAngleMod()
+        private float CalcAngleMod()
         {
             // Reduce Bot Periph Vision
             float angleToEnemy = Enemy.Vision.Angles.AngleToEnemy;
             float maxAngle = Enemy.Vision.Angles.MaxVisionAngle;
-            if (angleToEnemy > maxAngle) {
+            if (angleToEnemy > maxAngle)
+            {
                 return 0f;
             }
 
             float minAngle = 15f;
-            if (angleToEnemy <= minAngle) {
-                if (Bot.PlayerComponent.Equipment.CurrentWeapon?.HasOptic == true) {
+            if (angleToEnemy <= minAngle)
+            {
+                if (Bot.PlayerComponent.Equipment.CurrentWeapon?.HasOptic == true)
+                {
                     return 3f;
                 }
                 return 1.5f;
             }
-            if (Enemy.RealDistance < 10f) {
+            if (Enemy.RealDistance < 10f)
+            {
                 return 1f;
             }
 
@@ -113,12 +117,12 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             return result;
         }
 
-        private float calcGearStealthMod()
+        private float CalcGearStealthMod()
         {
             return Enemy.EnemyPlayerComponent.AIData.AIGearModifier.StealthModifier(Enemy.RealDistance);
         }
 
-        private float getFlare()
+        private float GetFlare()
         {
             // if player shot a weapon recently
             // if player is using suppressed weapon, and has shot recently, don't increase vis distance as much.
@@ -126,13 +130,16 @@ namespace SAIN.SAINComponent.Classes.EnemyClasses
             bool usingSuppressor = Enemy.EnemyPlayerComponent?.Equipment.CurrentWeapon?.HasSuppressor == true;
 
             float flareMod;
-            if (flareEnabled && !usingSuppressor) {
+            if (flareEnabled && !usingSuppressor)
+            {
                 flareMod = 1.25f;
             }
-            else if (flareEnabled && usingSuppressor) {
+            else if (flareEnabled && usingSuppressor)
+            {
                 flareMod = 1.1f;
             }
-            else {
+            else
+            {
                 flareMod = 1f;
             }
             return flareMod;
